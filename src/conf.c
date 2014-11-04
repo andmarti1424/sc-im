@@ -13,9 +13,8 @@ void store_default_config_values() {
 
 char * get_conf_values(char * salida) {
 
-   if (user_conf_d == NULL) return;
+   if (user_conf_d == NULL) return NULL;
    struct nlist * nl;
-   struct nlist * n_next;
 
    nl = user_conf_d->list;
    salida[0]='\0';

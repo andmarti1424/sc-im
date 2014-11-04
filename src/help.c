@@ -273,7 +273,6 @@ void help() {
     curs_set(0);
 
     int option;
-    char **ns = long_help;
     int max = (sizeof(long_help) / sizeof(char *));
 
     while( (option = pscreen(long_help)) != 'q' && option != 'Q' && option != OKEY_ESC ) {
