@@ -266,7 +266,7 @@ format(char *fmt, int lprecision, double val, char *buf, int buflen)
 	fraction = cp + 1;
 	*cp = EOS;
 	cp = fraction + strlen(fraction) - 1;
-	for (; zero_pad > 0; zero_pad--, cp--) {
+	for (; zero_pad > 0 && *cp != EOS; zero_pad--, cp--) {
 	    if (*cp == '0')
 		*cp = EOS;
 	    else
@@ -297,7 +297,7 @@ format(char *fmt, int lprecision, double val, char *buf, int buflen)
     len_cf = strlen(cf);
     if (len_cf >= cflen) {
     	cflen = len_cf + 40;
-	cftmp = scxrealloc(cftmp, cilen);
+	cftmp = scxrealloc(cftmp, cflen);
     }
     cf = strcpy(cftmp, cf);
 
