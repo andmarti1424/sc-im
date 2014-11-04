@@ -105,14 +105,14 @@ void del_item_from_history(struct history * h, int pos) {
 
     if (pos == 0) {
         h->list = nl->pnext;
-        nl->pnext->pant = NULL;
+        if (nl->pnext != NULL) nl->pnext->pant = NULL;
     } else {
         for (i=0; i<-pos; i++) {
             n_ant = nl;
             nl = nl->pnext;
         }
         n_ant->pnext = nl->pnext;
-        nl->pnext->pant = n_ant;
+        if (nl->pnext != NULL) nl->pnext->pant = n_ant;
     }
     free(nl->line);
     free(nl);
@@ -122,7 +122,7 @@ void del_item_from_history(struct history * h, int pos) {
 }
 
 // funcion que busca un elemento en un historial a partir del texto
-// y lo elimina. comienza la busqueda a partir de la posicion pasada como parametro
+// y lo mueve. comienza la busqueda a partir de la posicion pasada como parametro
 // pos=0 first element, pos=-1 second element
 // returns 1 if moved, 0 otherwise.
 int move_item_from_history_by_str(struct history * h, char * item, int pos) {
@@ -142,7 +142,7 @@ int move_item_from_history_by_str(struct history * h, char * item, int pos) {
     }
     if (i >= h->len) return 0;
     n_ant->pnext = nl->pnext;
-    nl->pnext->pant = n_ant;
+    if (nl->pnext != NULL) nl->pnext->pant = n_ant;
 
     nl->pant = NULL;
     nl->pnext = h->list;
