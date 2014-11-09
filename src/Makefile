@@ -20,19 +20,19 @@ NAME=SCIM
 # packaging this with an O/S, for example, you'll probably want to change
 # this to /usr.  Otherwise, /usr/local is probably more appropriate, unless
 # you're replacing the vendor-supplied version.
-PREFIX=/usr
+prefix=/usr
 
 # This is where the install step puts it.
-EXDIR=$(PREFIX)/bin
+EXDIR=$(prefix)/bin
 
 # This is where the man page goes.
-MANDIR=$(PREFIX)/man/man1
+MANDIR=$(prefix)/man/man1
 MANEXT=1
 MANMODE=644
 
 # This is where the library file (tutorial) goes.
 #LIBDIR=/usr/local/share/$(name) # reno
-LIBDIR=$(PREFIX)/share/doc/$(name)
+LIBDIR=$(prefix)/share/doc/$(name)
 LIBRARY=-DLIBDIR=\"$(LIBDIR)\"
 
 # Set SIMPLE for lex.c if you don't want arrow keys or lex.c blows up
@@ -168,7 +168,10 @@ OBJS := $(patsubst %.c, %.o, $(wildcard *.c) $(wildcard utils/*.c)) gram.o
 all : $(name)
 
 install :
-	install scim $(PREFIX)/scim
+	install scim $(prefix)/bin/scim
+
+uninstall :
+	-rm $(prefix)/bin/scim
 
 $(name) : $(OBJS)
 	$(CC) $(LDFLAGS) $^ -o $@ $(LDLIBS)
