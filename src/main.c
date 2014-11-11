@@ -113,10 +113,6 @@ int main (int argc, char **argv) {
     // setup the spreadsheet arrays
     if (!growtbl(GROWNEW, 0, 0)) return exit_app(1);
 
-
-
-
-
     // start configuration dictionaries
     user_conf_d = (struct dictionary *) create_dictionary();
     predefined_conf_d = (struct dictionary *) create_dictionary();
@@ -134,10 +130,6 @@ int main (int argc, char **argv) {
     // create command line history structure
     commandline_history = (struct history *) create_history(':');
     load_history(commandline_history);
-
-
-
-
 
     // cargo la planilla pasada como parametro
     char * revi;
@@ -183,6 +175,7 @@ int exit_app(int status) {
     if (save_history(commandline_history) != 0) {
         error("Cannot save command line history");
     }
+
     if (commandline_history != NULL) destroy_history(commandline_history);
 
     // Free mappings

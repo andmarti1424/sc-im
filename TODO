@@ -1,6 +1,8 @@
 TODO
 ----
-
-1. Most voted feature of USER_REQUEST file.
-2. Mapping: special caracters should be mapped.
-3. Export to delimited text formats
+1. Export to delimited text formats
+2. Most voted feature of USER_REQUEST file.
+3. Mapping: special caracters should be mapped.
+4. Chain cells with equations into a DOUBLE linked list or dependency tree
+Have a top level eval, eval and UPDATE all lower nodes
+This is also neccesary for UNDO mods of cells that has equations on them!!!

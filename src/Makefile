@@ -1,4 +1,4 @@
-# Makefile $Revision: 7.16 $
+# Makefile $Revision: 0.1
 #
 # 1) Select the proper EXDIR (path), MANDIR, MANEXT, LIBDIR, SIGVOID,
 #	REGEX, DFLT_PAGER, and FMOD. Most of the other things aren't
