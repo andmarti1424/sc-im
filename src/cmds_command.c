@@ -88,6 +88,9 @@ void do_commandmode(struct block * sb) {
             get_conf_values(valores);
             show_text(valores);
 
+        } else if ( str_in_str(inputline, "e csv") != -1 || str_in_str(inputline, "e tab") != -1 ) {
+            do_export();
+
         } else if ( str_in_str(inputline, "version") != -1 ) {
             show_text(rev);
 

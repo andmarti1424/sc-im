@@ -491,9 +491,7 @@ reverse(register char *buf)
 #define REFMTLDATE	4
 #endif
 
-bool
-engformat(int fmt, int width, int lprecision, double val, char *buf, int buflen)
-{
+bool engformat(int fmt, int width, int lprecision, double val, char *buf, int buflen) {
 
     static char *engmult[] = {
 	"-18", "-15", "-12", "-09", "-06", "-03",
