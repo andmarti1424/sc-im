@@ -131,15 +131,14 @@ void update(void) {
     int mxcol = offscr_sc_cols + calc_offscr_sc_cols() - 1;
     int mxrow = offscr_sc_rows + calc_offscr_sc_rows() - 1;
 
-    /* You can't hide the last row or col
+    /* You can't hide the last row or col */
     while (row_hidden[currow])
         currow++;
     while (col_hidden[curcol])
         curcol++;
-    */
 
     // Muestro cursor
-    show_cursor(main_win);
+    //show_cursor(main_win);
 
     // Muestro en pantalla el contenido de las celdas
     // Valores numericos, strings justificados, centrados y expresiones.
@@ -152,6 +151,7 @@ void update(void) {
     show_sc_row_headings(main_win, mxrow);
 
     // Limpio desde la ultima sc_row hacia to bottom
+    // REALLY NEEDED?
     /*int c = mxrow - offscr_sc_rows + 1;
     if ( c + RESROW < LINES ) {
         wmove(main_win, c + RESROW, 0);
@@ -330,8 +330,8 @@ void print_mode(WINDOW * win) {
 // dejando offscr_sc_cols columnas a la izquierda sin mostrar
 int calc_cols_show() {
     int k, width = 0, c = 0;
-    for (k = offscr_sc_cols; width < COLS; k++, c+=1) {
-        if (!col_hidden[k]) width += fwidth[k];
+    for (k = offscr_sc_cols; width < COLS; k++, c += 1) {
+        if (! col_hidden[k]) width += fwidth[k];
     }
     return c-1;
 }
@@ -378,8 +378,8 @@ void show_sc_col_headings(WINDOW * win, int mxcol, int mxrow) {
     wclrtoeol(win);
 
     for (i = offscr_sc_cols; i <= mxcol; i++) {
-        int k;
-        k = fwidth[i] / 2;
+        if (col_hidden[i]) continue;
+        int k = fwidth[i] / 2;
 
         srange * s = get_selected_range();
         if ( (s != NULL && i >= s->tlcol && i <= s->brcol) || i == curcol ) {
@@ -406,11 +406,11 @@ void show_cursor(WINDOW * win) {
     int col=0, row=0;
     int cursor_row = RESROW+1;
     for (row = offscr_sc_rows; row < currow; row++) {
-        if (!row_hidden[row]) cursor_row++;
+        if ( ! row_hidden[row] ) cursor_row++;
     }
     int cursor_col = rescol;
     for (col = offscr_sc_cols; col < curcol; col++) {
-        if (!col_hidden[col]) cursor_col += fwidth[col];
+        if ( ! col_hidden[col] ) cursor_col += fwidth[col];
     } 
     #ifdef USECOLORS
     if (has_colors())
@@ -430,9 +430,14 @@ void show_numeric_content_of_cell(WINDOW * win, struct ent ** p, int col, int r,
 void show_content(WINDOW * win, int mxrow, int mxcol) {
 
     register struct ent **p;
-    int row, r, col;
+    int row, r, col, q_row_hidden = 0;
 
     for (row = offscr_sc_rows, r = RESROW; row < mxrow; row++) {
+        if (row_hidden[row]) {
+            q_row_hidden++;
+            continue;
+        }
+
         register c = rescol;
         int nextcol;
         int fieldlen;
@@ -443,6 +448,10 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
 
             nextcol = col + 1;
             fieldlen = fwidth[col];
+            if (col_hidden[col]) {
+                c -= fieldlen;
+                continue;
+            }
 
             if ( (*p) == NULL) *p = lookat(row, col);
 
@@ -501,11 +510,11 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
             
             // si hay valor numerico
             if ( (*p)->flags & is_valid) {
-                show_numeric_content_of_cell(win, p, col, row + RESROW + 1 - offscr_sc_rows, c);
+                show_numeric_content_of_cell(win, p, col, row + RESROW + 1 - offscr_sc_rows - q_row_hidden, c);
 
             // si hay solo valor de texto
             } else if ((*p) -> label) { 
-                show_text_content_of_cell(win, p, row, col, row + RESROW + 1 - offscr_sc_rows, c);
+                show_text_content_of_cell(win, p, row, col, row + RESROW + 1 - offscr_sc_rows - q_row_hidden, c);
             }
 
             /* repaint a blank cell. this fixes KI1 */
@@ -529,10 +538,10 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
                 chtype cht[fieldlen];
                 int i;
 
-                mvwinchnstr(win, row + RESROW + 1 - offscr_sc_rows, c, cht, fieldlen);
+                mvwinchnstr(win, row + RESROW + 1 - offscr_sc_rows - q_row_hidden, c, cht, fieldlen);
                 for (i=0; i < fieldlen; i++) {
                     caracter = cht[i] & A_CHARTEXT;
-                    mvwprintw(win, row + RESROW + 1 - offscr_sc_rows, c + i, "%c", caracter);
+                    mvwprintw(win, row + RESROW + 1 - offscr_sc_rows - q_row_hidden, c + i, "%c", caracter);
                 }
             }
 
@@ -625,7 +634,7 @@ void show_celldetails(WINDOW * win) {
     wrefresh(win);
 }
 
-// Calculo la cantidad de filas que quedan ocultas 
+// Calculo la cantidad de filas que quedan ocultas en la parte superior de la pantalla
 int calc_offscr_sc_rows() {
     // pick up row counts
     int i, rows = 0, row = 0;
@@ -659,7 +668,7 @@ int calc_offscr_sc_rows() {
     return rows;
 }
 
-// Calculo la cantidad de columnas que quedan ocultas 
+// Calculo la cantidad de columnas que quedan ocultas a la izquierda de la pantalla
 int calc_offscr_sc_cols() {
     int i, cols = 0, col = 0;
     // pick up col counts

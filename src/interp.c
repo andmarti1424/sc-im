@@ -2222,7 +2222,7 @@ void format_cell(struct ent *v1, struct ent *v2, char *s) {
 	    n->flags |= is_changed;
 	}
 }
-
+/*
 void hide_row(int arg) {
     if (arg < 0) {
 	error("Invalid Range");
@@ -2250,6 +2250,9 @@ void hide_col(int arg) {
     }
     col_hidden[arg] = TRUE;
 }
+*/
+
+
 
 /*
  * Say if an expression is a constant (return 1) or not.

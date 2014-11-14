@@ -149,25 +149,6 @@ void do_normalmode(struct block * buf) {
             break;
             }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         // GOTO goto
         case 'g':
             if (buf->pnext->value == '0') {                               // g0
@@ -190,26 +171,12 @@ void do_normalmode(struct block * buf) {
                 curcol = horiz_middle()->col;
 
             } else {                                                      // gA4 (goto cell)
-                char celda[8];
-                celda[0]='\0';
-                struct block * b = buf->pnext;
-                while( b != NULL) {
-                    add_char(celda, (char) b->value, strlen(celda));
-                    b = b->pnext;
-                }
-                (void) sprintf(line, "goto %s", celda);
+                (void) sprintf(line, "goto %s", parse_cell_name(1, buf));
                 send_to_interp(line); 
-                line[0] = '\0';
             }
             unselect_ranges();
             update();
             break;
-
-
-
-
-
-
 
         // repeat last command
         case '.':
@@ -306,6 +273,43 @@ void do_normalmode(struct block * buf) {
                 update();
             }
             break;
+
+        case 'S': // Show col or row
+            // anulo el efecto multiplicador
+            if (cmd_multiplier > 0) cmd_multiplier = 0;
+            if (bs > 2 && buf->pnext->value == 'c' || buf->pnext->value == 'r') {
+                (void) sprintf(line, "show %s", parse_cell_name(2, buf));
+                send_to_interp(line); 
+                line[0] = '\0';
+                update();
+            }
+            break;
+
+        // Zr Zc Zr4 ZcF
+        case 'Z': // Zap col or row
+             // limpio el efecto multiplicador del buffer.
+             if (cmd_multiplier > 0) {
+                 int i, cm = cmd_multiplier + 1;
+                 for (i = bs / cm; i < bs; i++) {
+                     del_buf(buf, bs/cm);
+                 }
+                 bs = get_bufsize(buf);
+             }
+             
+             if (bs > 2) {
+                 (void) sprintf(line, "hide %s %d", parse_cell_name(2, buf), 1);
+             } else if (bs == 2 ) {
+                 if (buf->pnext->value == 'r') {
+                     (void) sprintf(line, "hide %d %d", currow, cmd_multiplier + 1);
+                 } else if (buf->pnext->value == 'c') {
+                     (void) sprintf(line, "hide %s %d", coltoa(curcol), cmd_multiplier + 1);
+                 }
+             }
+             send_to_interp(line); 
+             line[0] = '\0';
+             cmd_multiplier = 0;
+             update();
+             break;
 
         // shift range or cell
         case 's':

@@ -118,7 +118,7 @@ char ** split(char *string, const char delimiter, int lastnull) {
         j = 0;
         while(string[j] != delimiter) j++;
         j++;
-        *array = (char *)malloc(sizeof(char) * j);
+        * array = (char *) malloc(sizeof(char) * j);
         memcpy(*array, string, (j-1));
         (*array)[j-1] = '\0';
         string += j;
@@ -132,14 +132,14 @@ char ** split(char *string, const char delimiter, int lastnull) {
     return base;  
 }
 
-char * rtrim(char* string, char junk) {
+char * rtrim(char * string, char junk) {
     char * original = string + strlen(string);
     while(*--original == junk);
     *(original + 1) = '\0';
     return string;
 }
 
-char * ltrim(char *string, char junk) {
+char * ltrim(char * string, char junk) {
     char * original = string;
     char * p = original;
     int trimmed = 0;

@@ -29,3 +29,17 @@ char * v_name(int row, int col) {
     }
 }
 
+// funcion que parsea de un buf el nombre de una celda
+// ignora los primeros bloques en caso de especificarse
+char * parse_cell_name(int ignore_first_blocks, struct block * buf_in) {
+    struct block * b = buf_in;
+    static char cell_name[3]; //length of max col is 3 (ZZZ)
+    cell_name[0] = '\0';
+
+    while (ignore_first_blocks--) b = b->pnext;
+    while( b != NULL) {
+          (void) sprintf(cell_name, "%s%c", cell_name, b->value);
+          b = b->pnext;
+    }
+    return cell_name;
+}

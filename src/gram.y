@@ -319,6 +319,42 @@ command:	S_LET var_or_range '=' e // var_or_range depende de e // 2 depende de 4
 	|	S_FORMAT COL NUMBER NUMBER NUMBER
 				{ doformat($2,$2,$3,$4,$5); }
 
+
+	|       S_SHOW COL              { show_col($2, 1); }
+	|       S_SHOW NUMBER           { show_row($2, 1); }
+	|	S_HIDE COL	NUMBER	{ hide_col($2, $3); }
+ 	|	S_HIDE NUMBER	NUMBER	{ hide_row($2, $3); }
+/*	|	S_HIDE COL ':' COL	{ int c = curcol, arg;
+					  if ($2 < $4) {
+					    curcol = $2;
+					    arg = $4 - $2 + 1;
+					  } else {
+					      curcol = $4;
+					      arg = $2 - $4 + 1;
+					  }
+					  hidecol(arg);
+					  curcol = c < curcol ? c :
+					      c < curcol + arg ? curcol :
+					      c - arg;
+					}
+*/
+/*
+	|	S_HIDE NUMBER ':' NUMBER
+					{ int r = currow, arg;
+					  if ($2 < $4) {
+					    currow = $2;
+					    arg = $4 - $2 + 1;
+					  } else {
+					      currow = $4;
+					      arg = $2 - $4 + 1;
+					  }
+					  hiderow(arg);
+					  currow = r < currow ? r :
+					      r < currow + arg ? currow :
+					      r - arg;
+					}
+*/					
+
 /*
 	|	S_GET strarg	{  /* This tmp hack is because readfile
 				    * recurses back through yyparse.

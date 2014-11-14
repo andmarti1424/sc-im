@@ -219,83 +219,6 @@ void rowshow_op() {
 }
 */
 
-/* mark a row as hidden
-void hiderow(int arg) {
-    register int r1;
-    register int r2;
-
-    r1 = currow;
-    r2 = r1 + arg - 1;
-    if (r1 < 0 || r1 > r2) {
-	error("Invalid range");
-	return;
-    }
-    if (r2 >= maxrows-1) {
-    	if (!growtbl(GROWROW, arg+1, 0)) {
-	    info("You can't hide the last row");
-	    return;
-	}
-    }
-    FullUpdate++;
-    modflg++;
-    while (r1 <= r2)
-	row_hidden[r1++] = 1;
-}
-
-// mark a column as hidden
-void hidecol(int arg) {
-    int c1;
-    int c2;
-
-    c1 = curcol;
-    c2 = c1 + arg - 1;
-    if (c1 < 0 || c1 > c2) {
-	error ("Invalid range");
-	return;
-    }
-    if (c2 >= maxcols-1) {
-    	if ((arg >= ABSMAXCOLS-1) || !growtbl(GROWCOL, 0, arg+1)) {
-	    info("You can't hide the last col");
-	    return;
-	}
-    }
-    FullUpdate++;
-    modflg++;
-    while (c1 <= c2)
-	col_hidden[c1++] = TRUE;
-}
-
-// mark a row as not-hidden
-void showrow(int r1, int r2) {
-    if (r1 < 0 || r1 > r2) {
-	error ("Invalid range");
-	return;
-    }
-    if (r2 > maxrows-1) {
-	r2 = maxrows-1;
-    }
-    FullUpdate++;
-    modflg++;
-    while (r1 <= r2)
-	row_hidden[r1++] = 0;
-}
-
-// mark a column as not-hidden
-void showcol(int c1, int c2) {
-    if (c1 < 0 || c1 > c2) {
-	error ("Invalid range");
-	return;
-    }
-    if (c2 > maxcols-1) {
-	c2 = maxcols-1;
-    }
-    FullUpdate++;
-    modflg++;
-    while (c1 <= c2)
-	col_hidden[c1++] = FALSE;
-}
-*/
-
 // Copy a cell (struct ent).  "special" indicates special treatment when
 // merging two cells for the "pm" command, merging formats only for the
 // "pf" command, or for adjusting cell references when transposing with
@@ -1605,11 +1528,6 @@ struct ent * horiz_middle() {
     }
 }
 
-
-
-
-
-
 // Funcion que indica si el contenido completo de un buffer
 // forma un comando valido.
 // res = 0 or NO_CMD : buf has no command
@@ -1692,10 +1610,14 @@ int is_single_command (struct block * buf, long timeout) {
              buf->pnext->value == 'G' ||
              buf->pnext->value == '0' || buf->pnext->value == '$')) res = MOVEMENT_CMD;
         
-
         else if (buf->value == 'g' && bs > 2 && timeout >= COMPLETECMDTIMEOUT) res = MOVEMENT_CMD; // goto cell
-                                                 // TODO add validation: buf->pnext->value debe ser letra
+                                                       // TODO add validation: buf->pnext->value debe ser letra
+                                                       //
+        else if (buf->value == 'S' && bs > 2 && timeout >= COMPLETECMDTIMEOUT &&                  // Show col or row
+            ( buf->pnext->value == 'c' || buf->pnext->value == 'r')) res = EDITION_CMD;
 
+        else if (buf->value == 'Z' && bs >= 2 && timeout >= COMPLETECMDTIMEOUT &&                  // Zap (or hide) col or row
+            ( buf->pnext->value == 'c' || buf->pnext->value == 'r')) res = EDITION_CMD;
 
         else if (buf->value == 'y' && bs == 2 &&    // yank cell
             ( buf->pnext->value == 'y' || buf->pnext->value == 'r' ||
