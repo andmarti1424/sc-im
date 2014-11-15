@@ -162,14 +162,14 @@ void deletecol() {
         fwidth[i] = fwidth[i+1];
         precision[i] = precision[i+1];
         realfmt[i] = realfmt[i+1];
-        //col_hidden[i] = col_hidden[i+1];
+        col_hidden[i] = col_hidden[i+1];
     }
 
     for (; i < maxcols - 1; i++) {
         fwidth[i] = DEFWIDTH;
         precision[i] = DEFPREC;
         realfmt[i] = DEFREFMT;
-        //col_hidden[i] = FALSE;
+        col_hidden[i] = FALSE;
     }
 
     maxcol--;
@@ -1270,10 +1270,6 @@ struct ent * back_row(int arg) {
     return lookat(r, curcol);
 }
 
-struct ent * go_home() {
-    return lookat(0, 0);
-}
-
 struct ent * go_end() {
     int r = currow, c = curcol;
     int raux = r, caux = c;
@@ -1287,9 +1283,15 @@ struct ent * go_end() {
                 c = 0;
             } else break;
         }
-        if  (VALID_CELL(p, r, c) ) { raux = r; caux = c; }
+        if (VALID_CELL(p, r, c) && ! col_hidden[c] && ! row_hidden[r]) { raux = r; caux = c; }
     } while ( r < maxrows || c < maxcols );
-    if ( ! VALID_CELL(p, r, c) ) return lookat(raux, caux);
+    if ( ! VALID_CELL(p, r, c) && ! col_hidden[c] && ! row_hidden[r] )
+        return lookat(raux, caux);
+}
+
+// Row hidden? Col hidden?
+struct ent * go_home() {
+    return lookat(0, 0);
 }
 
 // if ticks a cell, returns struct ent *

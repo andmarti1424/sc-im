@@ -12,6 +12,7 @@ void hide_row(int from_row, int arg) {
         return;
     }
     if (r2 >= maxrows - 1) {
+        // error: tried to hide a row higher than maxrow.
         lookat(from_row + arg + 1, curcol); //FIXME
         if (! growtbl(GROWROW, arg + 1, 0)) {
             error("You can't hide the last row");
@@ -21,7 +22,6 @@ void hide_row(int from_row, int arg) {
     modflg++;
     while ( from_row <= r2)
         row_hidden[ from_row++ ] = TRUE;
-
 }
 
 /* mark a column as hidden */
@@ -32,7 +32,8 @@ void hide_col(int from_col, int arg) {
         return;
     }
     if (c2 >= maxcols - 1) {
-        lookat(currow, from_col + arg + 1); //FIXME
+        // error: tried to hide a column higher than maxcol.
+        lookat(currow, from_col + arg + 1); //FIXME 
         if ((arg >= ABSMAXCOLS - 1) || ! growtbl(GROWCOL, 0, arg + 1)) {
             error("You can't hide the last col");
             return;
@@ -40,7 +41,7 @@ void hide_col(int from_col, int arg) {
     }
     modflg++;
     while (from_col <= c2)
-        col_hidden[from_col ++] = TRUE;
+        col_hidden[ from_col++ ] = TRUE;
 }
 
 /* mark a row as not-hidden */
@@ -55,7 +56,7 @@ void show_row(int from_row, int arg) {
     }
     modflg++;
     while (from_row <= r2)
-        row_hidden[from_row++] = 0;
+        row_hidden[ from_row++ ] = 0;
 }
 
 /* mark a column as not-hidden */

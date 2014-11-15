@@ -642,7 +642,8 @@ int calc_offscr_sc_rows() {
         for (i = offscr_sc_rows, rows = 0, row=RESROW;
         (row < LINES) && (i <= maxrows); i++) {
             rows++;
-            row++;
+            if (! row_hidden[i])
+                row++;
         }
     }
     // get off screen rows
@@ -655,14 +656,16 @@ int calc_offscr_sc_rows() {
             offscr_sc_rows = currow;
             for (i=currow-1; (i >= 0) && (row - 1 > RESROW); i--) {
                 offscr_sc_rows--;
-                row--;
+                if (! row_hidden[i])
+                    row--;
             }
         }
         // Now pick up the counts again
         for (i = offscr_sc_rows, rows = 0, row = RESROW;
             (row < LINES) && (i <= maxrows); i++) {
             rows++;
-            row++;
+            if (! row_hidden[i])
+                row++;
         }
     }
     return rows;
@@ -676,7 +679,8 @@ int calc_offscr_sc_cols() {
     for (i = offscr_sc_cols, cols = 0, col = rescol;
             (col + fwidth[i] < COLS - 1) && (i < maxcols); i++) {
             cols++;
-            col += fwidth[i];
+            if (! col_hidden[i])
+                col += fwidth[i];
     }
     // get off screen cols
     while (offscr_sc_cols + cols - 1 < curcol || curcol < offscr_sc_cols ) {
@@ -688,7 +692,8 @@ int calc_offscr_sc_cols() {
             offscr_sc_cols = curcol;
             for (i=curcol-1; i >= 0 && col-fwidth[i] > rescol; i--) {
                 offscr_sc_cols--;
-                col -= fwidth[i];
+                if (! col_hidden[i])
+                    col -= fwidth[i];
             } 
         }
 
@@ -696,7 +701,8 @@ int calc_offscr_sc_cols() {
         for (i = offscr_sc_cols, cols = 0, col = rescol;
             (col + fwidth[i] < COLS - 1) && (i < maxcols); i++) {
             cols++;
-            col += fwidth[i];
+            if (! col_hidden[i])
+                col += fwidth[i];
         }
     }
     return cols;
