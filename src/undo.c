@@ -75,8 +75,6 @@ static int undo_list_len = 0;
 static struct undo undo_item;
 
 
-
-
 // setea en blanco el undo_item
 void create_undo_action() {
     undo_item.added       = NULL;
@@ -85,6 +83,11 @@ void create_undo_action() {
     undo_item.p_sig       = NULL;
     undo_item.p_sig       = NULL;
     undo_item.range_shift = NULL;
+
+    undo_item.row_hidded  = NULL;
+    undo_item.row_showed  = NULL;
+    undo_item.col_hidded  = NULL;
+    undo_item.col_showed  = NULL;
     return;
 }
 
@@ -112,6 +115,10 @@ void add_to_undolist(struct undo u) {
         ul->added = u.added;
         ul->removed = u.removed;
         ul->range_shift = u.range_shift;
+        ul->row_hidded = u.row_hidded;
+        ul->col_hidded = u.col_hidded;
+        ul->row_showed = u.row_showed;
+        ul->col_showed = u.col_showed;
 
         if (undo_list == NULL) {
             ul->p_ant = NULL;
@@ -155,7 +162,13 @@ void free_undo_node(struct undo * ul) {
             en = de;
         }
         e = ul->p_sig;
+
         if (ul->range_shift != NULL) free(ul->range_shift); // libero memoria de undo_range_shift 
+        if (ul->row_hidded  != NULL) free(ul->row_hidded);  // libero memoria de row hidded
+        if (ul->col_hidded  != NULL) free(ul->col_hidded);  // libero memoria de col hidded
+        if (ul->row_showed  != NULL) free(ul->row_showed);  // libero memoria de row showed
+        if (ul->col_showed  != NULL) free(ul->col_showed);  // libero memoria de col hidded
+
         free(ul);
         undo_list_len--;
         ul = e;
@@ -203,24 +216,6 @@ void clear_undo_list () {
 
 int len_undo_list() {
     return undo_list_len;
-/*
-    struct undo * ul = undo_list;
-    int c = 0;
-    if (ul == NULL) return c;
-
-    // Voy al comienzo de lista
-    while (ul != NULL &&
-    ul->p_ant != NULL ) {
-        ul = ul->p_ant;
-    }
-
-    while (ul != NULL) {
-        ul = ul->p_sig;
-        c++;
-    }
-
-    return c;
-*/
 }
 
 // esta función toma un rango de ents,
@@ -249,7 +244,7 @@ void copy_to_undostruct (int row_desde, int col_desde, int row_hasta, int col_ha
 }
 
 // esta funcion toma un rango y un delta de filas y columnas y lo guarda en la struct de undo
-// se utiliza para cuando se hace UNDO o REDO se desplace un rango sin necesidad de duplicar
+// se utiliza para que cuando se hace UNDO o REDO, se desplace un rango sin necesidad de duplicar
 // todos los ents de ese rango cuando solo se modifica su ubicación.
 void save_undo_range_shift(int delta_rows, int delta_cols, int tlrow, int tlcol, int brrow, int brcol) {
     struct undo_range_shift * urs = (struct undo_range_shift *) malloc( (unsigned) sizeof(struct undo_range_shift ) );
@@ -261,7 +256,44 @@ void save_undo_range_shift(int delta_rows, int delta_cols, int tlrow, int tlcol,
     urs->brcol = brcol;
     undo_item.range_shift = urs;
     return;
-}   
+}    
+
+// esta funcion se utiliza para guardar en una lista de enteros (int *)
+// filas y columnas que se ocultan o se muestran en pantalla.
+// se utiliza para hacer undo y redo de esos cambios.
+// en la primera posición de la lista se guarda la (cantidad de elementos - 1) que tiene la lista
+void undo_hide_show(int row, int col, char type, int arg) {
+    int i;
+    if (type == 'h') {
+        if (row > -1) {        // hide row 
+            undo_item.row_hidded = (int *) malloc(sizeof(int) * (arg + 1));
+            undo_item.row_hidded[0] = arg; // guardo en la primera posicion la cantidad de elementos (rows)
+            for (i=0; i < arg; i++)
+                undo_item.row_hidded[i+1] = row + i;
+
+        } else if (col > -1) { // hide col
+            undo_item.col_hidded = (int *) malloc(sizeof(int) * (arg + 1));
+            undo_item.col_hidded[0] = arg; // guardo en la primera posicion la cantidad de elementos (cols)
+            for (i=0; i < arg; i++)
+                undo_item.col_hidded[i+1] = col + i;
+        }
+    } else if (type == 's') {
+        if (row > -1) {        // show row
+            undo_item.row_showed = (int *) malloc(sizeof(int) * (arg + 1));
+            undo_item.row_showed[0] = arg; // guardo en la primera posicion la cantidad de elementos (rows)
+            for (i=0; i < arg; i++)
+                undo_item.row_showed[i+1] = row + i;
+
+        } else if (col > -1) { // show col
+            undo_item.col_showed = (int *) malloc(sizeof(int) * (arg + 1));
+            undo_item.col_showed[0] = arg; // guardo en la primera posicion la cantidad de elementos (cols)
+            for (i=0; i < arg; i++)
+                undo_item.col_showed[i+1] = col + i;
+        }
+
+    }
+    return;
+}
 
 // Funcion que realiza un UNDO
 // En esta función se desplaza un rango de undo shift range a la posición original, en caso de existir,
@@ -303,7 +335,7 @@ void do_undo() {
         i = i->next;
     }
   
-    // Cambio foco
+    // Cambio posición del cursor
     //if (ul->removed != NULL) {
     //    currow = ul->removed->row;
     //    curcol = ul->removed->col;
@@ -317,6 +349,38 @@ void do_undo() {
         j = j->next;
     }
     
+    // muestro cols y rows que habian sido ocultadas
+    // oculto cols y rows que habian sido mostradas
+    if (ul->col_hidded != NULL) {
+        int * pd = ul->col_hidded;
+        int left = *(pd++);
+        while (left--) {
+            col_hidden[*(pd++)] = FALSE;
+        }
+    }
+    else if (ul->col_showed  != NULL) {
+        int * pd = ul->col_showed;
+        int left = *(pd++);
+        while (left--) {
+            col_hidden[*(pd++)] = TRUE;
+        }
+    }
+    else if (ul->row_hidded  != NULL) {
+        int * pd = ul->row_hidded;
+        int left = *(pd++);
+        while (left--) {
+            row_hidden[*(pd++)] = FALSE;
+        }
+    }
+    else if (ul->row_showed  != NULL) {
+        int * pd = ul->row_showed;
+        int left = *(pd++);
+        while (left--) {
+            row_hidden[*(pd++)] = TRUE;
+        }
+    }
+
+    // Muevo el cursor a posición original
     currow = ori_currow;
     curcol = ori_curcol;
 
@@ -371,7 +435,7 @@ void do_redo() {
         i = i->next;
     }
 
-    // Cambio foco
+    // Cambio posición del cursor
     //if (ul->p_sig != NULL && ul->p_sig->removed != NULL) {
     //    currow = ul->p_sig->removed->row;
     //    curcol = ul->p_sig->removed->col;
@@ -383,6 +447,37 @@ void do_redo() {
         struct ent * e_now = lookat(j->row, j->col);
         (void) copyent(e_now, j, 0, 0, 0, 0, j->row, j->col, 0);
         j = j->next;
+    }
+
+    // oculto cols y rows que habian sido ocultadas originalmente
+    // muestro cols y rows que habian sido mostradas originalmente
+    if (ul->col_hidded != NULL) {
+        int * pd = ul->col_hidded;
+        int left = *(pd++);
+        while (left--) {
+            col_hidden[*(pd++)] = TRUE;
+        }
+    }
+    else if (ul->col_showed  != NULL) {
+        int * pd = ul->col_showed;
+        int left = *(pd++);
+        while (left--) {
+            col_hidden[*(pd++)] = FALSE;
+        }
+    }
+    else if (ul->row_hidded  != NULL) {
+        int * pd = ul->row_hidded;
+        int left = *(pd++);
+        while (left--) {
+            row_hidden[*(pd++)] = TRUE;
+        }
+    }
+    else if (ul->row_showed  != NULL) {
+        int * pd = ul->row_showed;
+        int left = *(pd++);
+        while (left--) {
+            row_hidden[*(pd++)] = FALSE;
+        }
     }
 
     currow = ori_currow;
