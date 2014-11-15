@@ -71,6 +71,14 @@ void do_normalmode(struct block * buf) {
             if (bs == 2) {
                 unselect_ranges();
                 struct ent * e = tick(buf->pnext->value);
+	        if (row_hidden[e->row]) {
+                    error("Cell row is hidden");
+                    break;
+                }
+	        if (col_hidden[e->col]) {
+                    error("Cell column is hidden");
+                    break;
+                }
                 currow = e->row;
                 curcol = e->col;
                 update();

@@ -1,4 +1,5 @@
 #include "sc.h"
+#include "macros.h"
 extern int cmd_multiplier;
 
 /* mark a row as hidden */
@@ -11,16 +12,15 @@ void hide_row(int from_row, int arg) {
         return;
     }
     if (r2 >= maxrows - 1) {
+        lookat(from_row + arg + 1, curcol); //FIXME
         if (! growtbl(GROWROW, arg + 1, 0)) {
             error("You can't hide the last row");
             return;
         }
     }
     modflg++;
-
-    // zap here tantas veces como dígito de efecto multiplicador.
     while ( from_row <= r2)
-        row_hidden[ from_row++ ] = 1;
+        row_hidden[ from_row++ ] = TRUE;
 
 }
 
@@ -32,6 +32,7 @@ void hide_col(int from_col, int arg) {
         return;
     }
     if (c2 >= maxcols - 1) {
+        lookat(currow, from_col + arg + 1); //FIXME
         if ((arg >= ABSMAXCOLS - 1) || ! growtbl(GROWCOL, 0, arg + 1)) {
             error("You can't hide the last col");
             return;

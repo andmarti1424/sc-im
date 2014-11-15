@@ -1,14 +1,33 @@
 #include "stdlib.h"
 #include "marks.h"
+#include "macros.h"
 #include <curses.h>
 
 srange * ranges = NULL;
 
 extern int currow;
 extern int curcol;
+extern	char *col_hidden;
+extern	char *row_hidden;
 
 // Funcion que crea un rango a partir de dos marcas
 void create_range(char c, char d) {
+
+    // Guardo los valores sobre el nuevo rango o el reutilizado
+    mark * mc = get_mark(c);
+    mark * md = get_mark(d);
+
+    if ( row_hidden[mc->row] || row_hidden[md->row] ) {
+         error("Row of a marked cell is hidden");
+         return;
+    }
+
+    if ( col_hidden[mc->col] || col_hidden[md->col] ) {
+         error("Column of a marked cell is hidden");
+         return;
+    }
+
+
     // Si el rango ya existe, lo utilizo
     srange * exists_range = get_range_by_marks (c, d);
 
@@ -17,9 +36,6 @@ void create_range(char c, char d) {
     if (exists_range == NULL) r = (srange *) malloc (sizeof(srange));
     else r = exists_range;
 
-    // Guardo los valores sobre el nuevo rango o el reutilizado
-    mark * mc = get_mark(c);
-    mark * md = get_mark(d);
 
     r->tlrow = mc->row < md->row ? mc->row : md->row;
     r->tlcol = mc->col < md->col ? mc->col : md->col;

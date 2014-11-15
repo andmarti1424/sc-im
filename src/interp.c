@@ -1742,14 +1742,20 @@ void moveto(int row, int col, int lastrow, int lastcol, int cornerrow, int corne
 	gs.stflag = 1;
     } else
 	gs.stflag = 0;
+
     for (rowsinrange = 0, i = row; i <= lastrow; i++) {
-	if (row_hidden[i])
+	if (row_hidden[i]) {
+	    info("Cell's row is hidden");
 	    continue;
+        }
 	rowsinrange++;
     }
     for (colsinrange = 0, i = col; i <= lastcol; i++) {
-	if (col_hidden[i])
+	if (col_hidden[i]) {
+	    colsinrange = 0;
+	    info("Cell's row is hidden");
 	    continue;
+        }
 	colsinrange += fwidth[i];
     }
     if (loading) {
@@ -2222,37 +2228,6 @@ void format_cell(struct ent *v1, struct ent *v2, char *s) {
 	    n->flags |= is_changed;
 	}
 }
-/*
-void hide_row(int arg) {
-    if (arg < 0) {
-	error("Invalid Range");
-	return;
-    }
-    if (arg >= maxrows-1) {
-	if (!growtbl(GROWROW, arg+1, 0)) {
-	    error("You can't hide the last row");
-	    return;
-	}
-    }
-    row_hidden[arg] = TRUE;
-}
-
-void hide_col(int arg) {
-    if (arg < 0) {
-	error("Invalid Range");
-	return;
-    }
-    if (arg >= maxcols-1) {
-    	if ((arg >= ABSMAXCOLS-1) || !growtbl(GROWCOL, 0, arg+1)) {
-	    error("You can't hide the last col");
-	    return;
-	}
-    }
-    col_hidden[arg] = TRUE;
-}
-*/
-
-
 
 /*
  * Say if an expression is a constant (return 1) or not.

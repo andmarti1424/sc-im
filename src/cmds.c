@@ -269,33 +269,6 @@ void copyent(register struct ent *n, register struct ent *p, int dr, int dc,
     return;
 }
 
-/* add a plugin/mapping pair to the end of the filter list. type is r(ead) or w(rite)
-void addplugin(char *ext, char *plugin, char type) {
-    struct impexfilt *fp;
-    char mesg[PATHLEN];
-
-    if (!plugin_exists(plugin, strlen(plugin), mesg)) {
-	error("Cannot find plugin %s", plugin);
-	return;
-    }
-    if (filt == NULL) {
-	filt = (struct impexfilt *) scxmalloc((unsigned)sizeof(struct impexfilt));
-	fp = filt;
-    } else {
-	fp = filt;
-	while (fp->next != NULL)
-	    fp = fp->next;
-	fp->next = (struct impexfilt *)scxmalloc((unsigned)sizeof(struct impexfilt));
-	fp = fp->next;
-    }
-    strcpy(fp->plugin, plugin);
-    strcpy(fp->ext, ext);
-    fp->type = type;
-    fp->next = NULL;
-    return;
-}
-*/
-
 int etype(register struct enode *e) {
     if (e == (struct enode *)0)
 	return NUM;
@@ -367,25 +340,6 @@ void erase_area(int sr, int sc, int er, int ec, int ignorelock) {
     }
     return;
 }
-
-/*
-char * findplugin(char *ext, char type) {
-    struct impexfilt *fp;
-
-    fp = filt;
-    if (fp == NULL)
-	return (NULL);
-    if ((!strcmp(fp->ext, ext)) && (fp->type == type))
-	return (fp->plugin);
-    while (fp->next != NULL) {
-	fp = fp->next;
-	if ((!strcmp(fp->ext, ext)) && (fp->type == type))
-	    return (fp->plugin);
-    }
-
-    return (NULL);
-}
-*/
 
 struct enode * copye(register struct enode *e, int Rdelta, int Cdelta, int r1, int c1, int r2, int c2, int transpose) {
     register struct enode *ret;
@@ -519,90 +473,6 @@ struct enode * copye(register struct enode *e, int Rdelta, int Cdelta, int r1, i
     }
     return ret;
 }
-
-/*
-void doend(int rowinc, int colinc) {
-    register struct ent *p;
-    int r, c;
-
-    if (!loading)
-	//remember(0);
-
-    lastrow = currow;
-    lastcol = curcol;
-
-    if (VALID_CELL(p, currow, curcol)) {
-	r = currow + rowinc;
-	c = curcol + colinc;
-	if (r >= 0 && r < maxrows && 
-	    c >= 0 && c < maxcols &&
-	    !VALID_CELL(p, r, c)) {
-		currow = r;
-		curcol = c;
-	}
-    }
-
-    if (!VALID_CELL(p, currow, curcol)) {
-        switch (rowinc) {
-        case -1:
-	    while (!VALID_CELL(p, currow, curcol) && currow > 0)
-		currow--;
-	    break;
-        case  1:
-	    while (!VALID_CELL(p, currow, curcol) && currow < maxrows-1)
-		currow++;
-	    break;
-        case  0:
-            switch (colinc) {
- 	    case -1:
-	        while (!VALID_CELL(p, currow, curcol) && curcol > 0)
-		    curcol--;
-	        break;
- 	    case  1:
-	        while (!VALID_CELL(p, currow, curcol) && curcol < maxcols-1)
-		    curcol++;
-	        break;
-	    }
-            break;
-        }
-	//rowsinrange = 1;
-	//colsinrange = fwidth[curcol];
-	//if (!loading) remember(1);
-
-	info ("");	// clear line
-	return;
-    }
-
-    switch (rowinc) {
-    case -1:
-	while (VALID_CELL(p, currow, curcol) && currow > 0)
-	    currow--;
-	break;
-    case  1:
-	while (VALID_CELL(p, currow, curcol) && currow < maxrows-1)
-	    currow++;
-	break;
-    case  0:
-	switch (colinc) {
-	case -1:
-	    while (VALID_CELL(p, currow, curcol) && curcol > 0)
-		curcol--;
-	    break;
-	case  1:
-	    while (VALID_CELL(p, currow, curcol) && curcol < maxcols-1)
-		curcol++;
-	    break;
-	}
-	break;
-    }
-    if (!VALID_CELL(p, currow, curcol)) {
-        currow -= rowinc;
-        curcol -= colinc;
-    }
-    //rowsinrange = 1;
-    //colsinrange = fwidth[curcol];
-}
-*/
 
 /* Modified 9/17/90 THA to handle more formats */
 void doformat(int c1, int c2, int w, int p, int r) {
@@ -774,30 +644,6 @@ void formatcol(int c) {
     }
 */
     return;
-}
-
-struct ent * left_limit() {
-    return lookat(currow, 0);
-}
-
-struct ent * right_limit() {
-    register struct ent *p;
-    int c = maxcols - 1;
-    while (!VALID_CELL(p, currow, c) && c > 0)
-        c--;
-    return lookat(currow, c);
-}
-
-struct ent * goto_top() {
-    return lookat(0, curcol);
-}
-
-struct ent * goto_bottom() {
-    register struct ent *p;
-    int r = maxrows - 1;
-    while (!VALID_CELL(p, r, curcol) && r > 0)
-        r--;
-    return lookat(r, curcol);
 }
 
 // Insert a single row.  It will be inserted before currow
@@ -1326,17 +1172,31 @@ void scroll_up(int n) {
     return;
 }
 
+struct ent * left_limit() {
+    int c = 0;
+    while ( col_hidden[c] && c < curcol ) c++; 
+    return lookat(currow, c);
+}
 
+struct ent * right_limit() {
+    register struct ent *p;
+    int c = maxcols - 1;
+    while ( (! VALID_CELL(p, currow, c) && c > 0) || col_hidden[c]) c--;
+    return lookat(currow, c);
+}
 
+struct ent * goto_top() {
+    int r = 0;
+    while ( row_hidden[r] && r < currow ) r++; 
+    return lookat(r, curcol);
+}
 
-
-
-
-
-
-
-
-
+struct ent * goto_bottom() {
+    register struct ent *p;
+    int r = maxrows - 1;
+    while ( (! VALID_CELL(p, r, curcol) && r > 0) || row_hidden[r]) r--;
+    return lookat(r, curcol);
+}
 
 // moves curcol back one displayed column
 struct ent * back_col(int arg) {
@@ -1461,12 +1321,11 @@ struct ent * go_forward() {
                 c = 0;
             } else break;
         }
-        if (VALID_CELL(p, r, c) ) {
+        if (VALID_CELL(p, r, c) && ! col_hidden[c] && ! row_hidden[r] )
             return lookat(r, c);
-        }
     } while (r < maxrows || c < maxcols);
 
-    if ( ! VALID_CELL(p, r, c) )
+    if ( ! VALID_CELL(p, r, c) && ! col_hidden[c] && ! row_hidden[r] )
         return lookat(r_ori, c_ori);
 
 }
@@ -1484,11 +1343,11 @@ struct ent * go_backward() {
                 c = maxcols - 1;
             } else break;
         }
-        if  (VALID_CELL(p, r, c) )
+        if ( VALID_CELL(p, r, c) && ! col_hidden[c] && ! row_hidden[r] )
             return lookat(r, c);
     } while ( currow || curcol );
 
-    if ( ! VALID_CELL(p, r, c) )
+    if ( ! VALID_CELL(p, r, c) && ! col_hidden[c] && ! row_hidden[r] )
         return lookat(r_ori, c_ori);
 }
 
