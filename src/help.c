@@ -7,12 +7,17 @@
 #include "string.h"
 #include "color.h"
 
+void find_help(char * word, char order);
+
 char * long_help[] = {
-" This is a simple HELP page. Just press «q» to go back to spreadsheet.",
+" ----------------------------------------------------------------------------------------------",
+" This is a simple HELP page. Press «:q<Enter>» to go back to spreadsheet.",
+"",
 " You can use <UP> <DOWN> arrows keys, or «j» «k» keys to move throw text.",
 " <SPACE> key moves forward an entire page, while <C-f> and <C-b> moves half page down or up.   ",
 " «G» moves to bottom, and <C-a> to the begining of the text.                                   ",
 " <ENTER> key scrolls one line down, while <DEL> key scrolls one line up, just like in less.    ",
+" You can use the «/» command to search for a pattern in the help.",
 " ----------------------------------------------------------------------------------------------",
 " SCIM modes:",
 "        NORMAL_MODE:    For navigation and common commands",
@@ -92,8 +97,9 @@ char * long_help[] = {
 "            dc          deletes column under the cursor",
 "            .           repeats last command",
 "",
-"            u           undo last change",
-"            c-f         redo last change",
+"",
+"            u           UNDO last change",
+"            c-f         REDO last change",
 "                        NOTE: Events implemented for undo / redo:", 
 "                        1. delete of cell or range content",
 "                        2. cell input",
@@ -104,11 +110,11 @@ char * long_help[] = {
 "                        7. insert row or column",
 "                        8. delete of a row or column",
 "                        9. paste of a row or column",
+"                        10. zap(hide) / show a row or column",
 "",
 "",
 "        Other commands: ",
-"            ^L          Redraw the screen (en modo normal)",
-
+"            ^L          Redraw the screen",
 "            Zr          zap (hide) current row",
 "            Zc          zap (hide) current column",
 "            Zr8  , where '8' is a row number:",
@@ -296,50 +302,130 @@ char * long_help[] = {
 "            set variable 'newline_action' to 'j' to move cursor down after an entry.",
 "            set it to 'l' to move it right, or set it to '0' to expect no action.",
 "",
+"",
+"",
 
 (char *)0
 };
 
 static int pscreen(char *screen[]);
-
 static int delta = 0;
+static int max = (sizeof(long_help) / sizeof(char *));
+static int look_result = -1;
+static char word_looked[50] = "";
 
 void help() {
+    delta = 0;
+
+    wmove(input_win, 0,0);
+    wclrtobot(input_win);
+    wrefresh(input_win);
+
     set_ucolor(main_win, NORMAL);
     wtimeout(input_win, -1);
     noecho();
     curs_set(0);
+    int quit_help_now = 0;
 
     int option;
-    int max = (sizeof(long_help) / sizeof(char *));
 
-    while( (option = pscreen(long_help)) != 'q' && option != 'Q' && option != OKEY_ESC ) {
+    //while( (option = pscreen(long_help)) != 'q' && option != 'Q' && option != OKEY_ESC ) {
+    while( ! quit_help_now ) {
+        option = pscreen(long_help);
+        look_result = -1;
         switch (option) {
+
         case OKEY_ENTER:
         case OKEY_DOWN:
         case 'j':
             if (max > delta + LINES + 1) delta++;
             break;
+
         case OKEY_DEL:
         case OKEY_UP:
         case 'k':
             if (delta) delta--;
             break;
+
         case ' ':
             if (max > delta + LINES + LINES) delta += LINES;
             else if (max > delta + LINES) delta = max - 1 - LINES;
             break;
+
         case ctl('b'):
             if (delta - LINES/2 > 0) delta -= LINES/2;
             else if (delta) delta = 0;
             break;
+
         case ctl('f'):
             if (delta + LINES + LINES/2 < max) delta += LINES/2;
             else if (max > delta + LINES) delta = max - 1 - LINES;
             break;
+
+        case 'n':
+            if (strlen(word_looked)) find_help(word_looked, 'f');
+            break;
+
+        case 'N':
+            if (strlen(word_looked)) find_help(word_looked, 'b');
+            break;
+
+        case ':':
+            curs_set(1);
+            char hline [100];
+            hline[0]='\0';
+            mvwprintw(input_win, 0, rescol, ":%s", hline);
+            wclrtoeol(input_win);
+            wrefresh(input_win);
+
+            int d = wgetch(input_win);
+            while (d != OKEY_ENTER && d != OKEY_ESC) {
+                if (d == OKEY_BS) {
+                    del_char(hline, strlen(hline) - 1);
+                } else {
+                    sprintf(hline, "%s%c", hline, d);
+                }
+                mvwprintw(input_win, 0, rescol, ":%s", hline);
+                wclrtoeol(input_win);
+                wrefresh(input_win);
+                d = wgetch(input_win);
+            }
+            if (d == OKEY_ENTER && ( strcmp(hline, "q") == 0 || strcmp(hline, "quit") == 0 )) {
+                quit_help_now = TRUE;
+            }
+            break;
+
+        case '/':
+            curs_set(1);
+            word_looked[0]='\0';
+            mvwprintw(input_win, 0, rescol, "/%s", word_looked);
+            wrefresh(input_win);
+            d = wgetch(input_win);
+            while (d != OKEY_ENTER && d != OKEY_ESC) {
+                if (d == OKEY_BS) {
+                    del_char(word_looked, strlen(word_looked) - 1);
+                } else {
+                    sprintf(word_looked, "%s%c", word_looked, d);
+                }
+                mvwprintw(input_win, 0, rescol, "/%s", word_looked);
+                wclrtoeol(input_win);
+                wrefresh(input_win);
+                d = wgetch(input_win);
+            }
+
+            if (d == OKEY_ENTER && strlen(word_looked)) {
+                find_help(word_looked, 'f');
+            }
+            mvwprintw(input_win, 0, rescol, "");
+            wclrtoeol(input_win);
+            wrefresh(input_win);
+            curs_set(0);
+            break;
+
         case 'G':
             delta = max - 1 - LINES;
             break;
+
         case ctl('a'):
             delta = 0;
             break;
@@ -350,22 +436,56 @@ void help() {
     wclrtobot(input_win);
     wmove(main_win, 0,0);
     wclrtobot(main_win);
-    //wrefresh(main_win);
-    //refresh(input_win);
-    show_header(input_win);
-    update();
+    wrefresh(main_win);
+    //wrefresh(input_win);
+    //show_header(input_win);
+    //update();
 }
 
-static int pscreen(char *screen[]) {
+void find_help(char * word, char order) {
+    int i;
+    if (order == 'f') {        // forward
+        for (i = delta + 1; i < max - 1; i++) {
+            if ((look_result = str_in_str(long_help[i], word)) >= 0) {
+                delta = i;
+                info("FOUND !!!");
+                break;
+            }
+        }
+    } else if (order == 'b') { // backwards
+        for (i = delta - 1; i > 0; i--) {
+            if ((look_result = str_in_str(long_help[i], word)) >= 0) {
+                delta = i;
+                info("FOUND !!!");
+                break;
+            }
+        }
+    }
+
+    if (look_result == -1) {
+        info("Pattern not found.");
+    }
+    set_ucolor(input_win, NORMAL);
+    return;
+}
+static int pscreen(char * screen[]) {
     int lineno;
-    //(void) wmove(input_win, 0,0);
-    //wclrtobot(input_win);
-    //(void) wrefresh(input_win);
 
     for (lineno = 0; screen[lineno + delta] && lineno < LINES; lineno++) {
-        mvwprintw(main_win, lineno, 0, screen[lineno + delta]);
+        if (word_looked) look_result = str_in_str(screen[lineno + delta], word_looked);
+        if (lineno == 0 && look_result != -1 ) {
+            set_ucolor(main_win, CELL_SELECTION_SC);
+        } else {
+            set_ucolor(main_win, NORMAL);
+        }   
+        mvwprintw(main_win, lineno+2, 0, screen[lineno + delta]);
         wclrtoeol(main_win);
     }
+    if (lineno < LINES) {
+        wmove(main_win, lineno+3, 0);
+        wclrtobot(main_win);
+    }
+     
     (void) wrefresh(main_win);
     return wgetch(input_win);
 }

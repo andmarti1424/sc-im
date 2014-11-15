@@ -159,7 +159,7 @@ void break_waitcmd_loop(struct block * buffer) {
         //clr_header(input_win, 0); // comentado el 22/06/2014
         //show_header(input_win);   // comentado el 22/06/2014
         print_mult_pend(input_win); // agregado  el 22/06/2014 refresco solo el ef. multiplicador y cmd pending
-        update();                 // comentado el 22/06/2014
+        update();                   // comentado el 22/06/2014
         return; 
 }
 
@@ -237,7 +237,8 @@ void handle_mult(int * cmd_multiplier, struct block * buf, long timeout) {
         }
     }
 
-    if (is_single_command(buf, timeout) == 1) copybuffer(buf, lastcmd_buffer); // save stdin buffer content in lastcmd buffer
+    //if (is_single_command(buf, timeout) == EDITION_CMD)
+    //    copybuffer(buf, lastcmd_buffer); // save stdin buffer content in lastcmd buffer
     exec_mult(buf, timeout);
     *cmd_multiplier = 0;
     
@@ -250,10 +251,11 @@ void handle_mult(int * cmd_multiplier, struct block * buf, long timeout) {
 void exec_mult (struct block * buf, long timeout) {
     int len = get_bufsize(buf);
     if ( !len ) return;
-    int k;  
+    int k, res;  
 
     // Primero intento ejecutar todo el contenido del buffer
-    if (is_single_command(buf, timeout)) {
+    if (res = is_single_command(buf, timeout)) {
+        if (res == EDITION_CMD) copybuffer(buf, lastcmd_buffer); // save stdin buffer content in lastcmd buffer
         cmd_multiplier--;
         exec_single_cmd(buf); 
 
@@ -263,7 +265,8 @@ void exec_mult (struct block * buf, long timeout) {
         for (k = 0; k < len; k++) {
             addto_buf(auxb, get_bufval(buf, k));
 
-            if (is_single_command(auxb, timeout)) {
+            if (res = is_single_command(auxb, timeout)) {
+                if (res == EDITION_CMD) copybuffer(buf, lastcmd_buffer); // save stdin buffer content in lastcmd buffer
                 cmd_multiplier--;
                 exec_single_cmd(auxb);
                 flush_buf(auxb);

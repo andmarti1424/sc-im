@@ -188,7 +188,8 @@ void do_normalmode(struct block * buf) {
 
         // repeat last command
         case '.':
-            copybuffer(lastcmd_buffer, buf);
+            copybuffer(lastcmd_buffer, buf); // nose graba en lastcmd_buffer!!
+            cmd_multiplier = 1;
             exec_mult(buf, COMPLETECMDTIMEOUT);
             break;
 
@@ -454,75 +455,75 @@ void do_normalmode(struct block * buf) {
 
         // paste cell below or left
         case 'p':
-               paste_yanked_ents(0);
-               update();
-               break;
+            paste_yanked_ents(0);
+            update();
+            break;
 
         // paste cell above or right
         case 'P':
-               paste_yanked_ents(1);
-               update();
-               break;
+            paste_yanked_ents(1);
+            update();
+            break;
 
         // scroll
         case 'z':
-           {
-           if ( bs == 2 && buf->pnext->value == 'l') {
-               scroll_right(1);
-               //unselect_ranges();
+            {
+            if ( bs == 2 && buf->pnext->value == 'l') {
+                scroll_right(1);
+                //unselect_ranges();
 
-           } else if ( bs == 2 && buf->pnext->value == 'h') {
-               scroll_left(1);
-               //unselect_ranges();
+            } else if ( bs == 2 && buf->pnext->value == 'h') {
+                scroll_left(1);
+                //unselect_ranges();
 
-           } else if ( bs == 2 && buf->pnext->value == 'H') {
-               int z = calc_offscr_sc_cols();
-               if (atoi(get_conf_value("half_page_scroll"))) z /= 2;
-               scroll_left(z);
-               //unselect_ranges();
+            } else if ( bs == 2 && buf->pnext->value == 'H') {
+                int z = calc_offscr_sc_cols();
+                if (atoi(get_conf_value("half_page_scroll"))) z /= 2;
+                scroll_left(z);
+                //unselect_ranges();
 
-           } else if ( bs == 2 && buf->pnext->value == 'L') {
-               int z = calc_offscr_sc_cols();
-               if (atoi(get_conf_value("half_page_scroll"))) z /= 2;
-               scroll_right(z);
-               //unselect_ranges();
+            } else if ( bs == 2 && buf->pnext->value == 'L') {
+                int z = calc_offscr_sc_cols();
+                if (atoi(get_conf_value("half_page_scroll"))) z /= 2;
+                scroll_right(z);
+                //unselect_ranges();
            
-           } else if ( bs == 2 && buf->pnext->value == 'z') {
-               int bottom = offscr_sc_rows + LINES - RESROW - 2;
-               //if (bottom > maxrow) bottom = maxrow;
-               int m = bottom - (LINES - RESROW - 2)/2;
-               int scroll = currow - m;
+            } else if ( bs == 2 && buf->pnext->value == 'z') {
+                int bottom = offscr_sc_rows + LINES - RESROW - 2;
+                //if (bottom > maxrow) bottom = maxrow;
+                int m = bottom - (LINES - RESROW - 2)/2;
+                int scroll = currow - m;
 
-               if (scroll > 0) {
-                   scroll_down(scroll);
-               } else if (-scroll < offscr_sc_rows) {
-                   scroll_up(-scroll);
-               } else if (offscr_sc_rows > 0) {
-                   scroll_up(offscr_sc_rows);
-               }
-
-           } else if ( bs == 2 && buf->pnext->value == 'm') {
-                int centro = (COLS - rescol)/ 2;
-                int ancho = rescol;
-                offscr_sc_cols = 0;
-                int i = 0, c = 0;
-
-                for (i = 0; i < curcol; i++) {
-                    for (c = i; c < curcol; c++) {
-                        ancho += fwidth[c];
-                        if (ancho >= centro) {
-                            ancho = rescol;
-                            break;
-                        } 
-                    }
-                    if (c == curcol) break;
+                if (scroll > 0) {
+                    scroll_down(scroll);
+                } else if (-scroll < offscr_sc_rows) {
+                    scroll_up(-scroll);
+                } else if (offscr_sc_rows > 0) {
+                    scroll_up(offscr_sc_rows);
                 }
-                offscr_sc_cols = i;
-                //info("%d %d %d %d", ancho, c, offscr_sc_cols, centro);
-           }
-           update();
-           break;
-           }
+
+            } else if ( bs == 2 && buf->pnext->value == 'm') {
+                 int centro = (COLS - rescol)/ 2;
+                 int ancho = rescol;
+                 offscr_sc_cols = 0;
+                 int i = 0, c = 0;
+ 
+                 for (i = 0; i < curcol; i++) {
+                     for (c = i; c < curcol; c++) {
+                         ancho += fwidth[c];
+                         if (ancho >= centro) {
+                             ancho = rescol;
+                             break;
+                         } 
+                     }
+                     if (c == curcol) break;
+                 }
+                 offscr_sc_cols = i;
+                 //info("%d %d %d %d", ancho, c, offscr_sc_cols, centro);
+            }
+            update();
+            break;
+            }
  
         // scroll up a line
         case ctl('y'):
@@ -601,10 +602,6 @@ void do_normalmode(struct block * buf) {
         case '@':
             EvalAll();
             update();
-            break;
-
-        case 't':
-            show_text("PRUEBA");
             break;
 
         default:
