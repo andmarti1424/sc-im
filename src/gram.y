@@ -324,6 +324,8 @@ command:	S_LET var_or_range '=' e // var_or_range depende de e // 2 depende de 4
 	|       S_SHOW NUMBER           { show_row($2, 1); }
 	|	S_HIDE COL	NUMBER	{ hide_col($2, $3); }
  	|	S_HIDE NUMBER	NUMBER	{ hide_row($2, $3); }
+	|	S_HIDE COL	        { hide_col($2, 1); }
+ 	|	S_HIDE NUMBER	        { hide_row($2, 1); }
 /*	|	S_HIDE COL ':' COL	{ int c = curcol, arg;
 					  if ($2 < $4) {
 					    curcol = $2;
