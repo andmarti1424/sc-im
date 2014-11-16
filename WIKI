@@ -1,0 +1,9 @@
+For import of csv files in LibreOffice
+--------------------------------------
+Choose this configuration options:
+
+Separator: comma
+Text delimiter: "
+Quoted field as text: yes
+detect special numbers: no
+Column types: US-english

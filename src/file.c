@@ -669,19 +669,7 @@ void print_options(FILE *f) {
 
 // Exportación a CSV y TAB
 
-/* unspecial (backquote -> ") things that are special chars in a table */
-void unspecial(FILE *f, char *str, int delim) {
-    //if (*str == '\\') str++; /* delete wheeling string operator, OK? */
-    while (*str) {
-        //if (((tbl_style == LATEX) || (tbl_style == SLATEX) || (tbl_style == TEX)) &&
-        //((*str == delim) || (*str == '$') || (*str == '#') || (*str == '%') || (*str == '{') || (*str == '}') || (*str == '&')))
-        //    putc('\\', f);
-        if (*str == delim) putc('\"', f);
-        putc(*str, f);
-        if (*str == delim) putc('\"', f);
-        str++;
-    }
-}
+void unspecial(FILE *f, char *str, int delim);
 
 void do_export() {
     char type_export[4] = "";
@@ -778,6 +766,22 @@ void export_delim(char * fname, char coldelim, int r0, int c0, int rn, int cn) {
     }
 }
 
+/* unspecial (backquote -> ") things that are special chars in a table */
+void unspecial(FILE *f, char *str, int delim) {
+    int backquote = 0;     
+    if (str_in_str(str, ",") != -1) backquote = 1;
+    if (backquote) putc('\"', f);
+
+    //if (*str == '\\') str++; /* delete wheeling string operator, OK? */
+    while (*str) {
+        //if (((tbl_style == LATEX) || (tbl_style == SLATEX) || (tbl_style == TEX)) &&
+        //((*str == delim) || (*str == '$') || (*str == '#') || (*str == '%') || (*str == '{') || (*str == '}') || (*str == '&')))
+        //    putc('\\', f);
+        putc(*str, f);
+        str++;
+    }
+    if (backquote) putc('\"', f);
+}
 
 /*
 void printfile(char *fname, int r0, int c0, int rn, int cn) {
