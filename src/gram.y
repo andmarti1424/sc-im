@@ -16,6 +16,8 @@
 #include <curses.h>
 #include <stdlib.h>
 #include "sc.h"
+#include "macros.h"
+#include "range.h"
 
 #ifdef USELOCALE
 #include <locale.h>
@@ -32,28 +34,32 @@
     int ival;
     double fval;
     struct ent_ptr ent;
-    struct enode *enode;
-    char *sval;
+    struct enode * enode;
+    char * sval;
+    char cval;
     struct range_s rval; // no debiera usarse en futuro
 }
 
 %type <ent> var
 /*
-%type <fval> num
 %type <sval> strarg
+%type <fval> num
 */
 %type <rval> range
 %type <rval> var_or_range
 %type <enode> e term expr_list
+
 %token <sval> STRING
 %token <ival> NUMBER
+%token <ival> CARACTER
+%token <ival> COL
 %token <fval> FNUMBER
 %token <rval> RANGE
 %token <rval> VAR
 %token <sval> WORD
 %token <sval> MAPWORD
 %token <sval> PLUGIN
-%token <ival> COL
+
 /*
  *  When adding new commands, make sure that any commands that may take
  *  COL as an argument precede S_FORMAT in the %token list.  All other
@@ -64,6 +70,7 @@
 
 %token S_SHOW
 %token S_HIDE
+%token S_MARK
 %token S_INSERTCOL
 %token S_OPENCOL
 %token S_DELETECOL
@@ -286,7 +293,7 @@
 %left '^'
 
 %%
-command:	S_LET var_or_range '=' e // var_or_range depende de e // 2 depende de 4 // mvprintw(1, 0, "%d %d
+command:	S_LET var_or_range '=' e
 				{ let($2.left.vp, $4); }
         |       S_LET var_or_range '='
                                 { $2.left.vp->v = (double) 0.0;
@@ -326,6 +333,25 @@ command:	S_LET var_or_range '=' e // var_or_range depende de e // 2 depende de 4
  	|	S_HIDE NUMBER	NUMBER	{ hide_row($2, $3); }
 	|	S_HIDE COL	        { hide_col($2, 1); }
  	|	S_HIDE NUMBER	        { hide_row($2, 1); }
+ 	|	S_MARK COL var_or_range { set_cell_mark($2 + 97, $3.left.vp->row, $3.left.vp->col); }
+ 	|	S_MARK COL var_or_range var_or_range { 
+                                          set_cell_mark('0', $3.left.vp->row, $3.left.vp->col);
+                                          set_cell_mark('1', $4.left.vp->row, $4.left.vp->col);
+                                          create_range('0', '1');
+                                          unselect_ranges();
+                                          srange * sr = (srange *) get_range_by_marks('0', '1');
+                                          set_range_mark($2 + 97, sr); }
+        |       S_SORT range STRING { sortrange($2.left.vp, $2.right.vp, $3); }
+
+
+/*
+                                          //para debug wtimeout(input_win, -1);
+                                          //para debug info("  ********* %d %c %c ", $2, $2, $2 + 97);
+                                          //para debug int d = wgetch(input_win);
+                                          //para debug wtimeout(input_win, TIMEOUT_CURSES);
+                                          
+*/
+
 /*	|	S_HIDE COL ':' COL	{ int c = curcol, arg;
 					  if ($2 < $4) {
 					    curcol = $2;
@@ -339,8 +365,6 @@ command:	S_LET var_or_range '=' e // var_or_range depende de e // 2 depende de 4
 					      c < curcol + arg ? curcol :
 					      c - arg;
 					}
-*/
-/*
 	|	S_HIDE NUMBER ':' NUMBER
 					{ int r = currow, arg;
 					  if ($2 < $4) {
@@ -355,9 +379,6 @@ command:	S_LET var_or_range '=' e // var_or_range depende de e // 2 depende de 4
 					      r < currow + arg ? currow :
 					      r - arg;
 					}
-*/					
-
-/*
 	|	S_GET strarg	{  /* This tmp hack is because readfile
 				    * recurses back through yyparse.
 				    char *tmp;

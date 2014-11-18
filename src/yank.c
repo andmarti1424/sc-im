@@ -162,6 +162,7 @@ void paste_yanked_ents(int above) {
 
     // por cada ent en yanklist
     while (yl != NULL) {
+        //diffr = 0; //this is for sorting
 
         copy_to_undostruct(yl->row + diffr, yl->col + diffc, yl->row + diffr, yl->col + diffc, 'd');
 

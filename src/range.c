@@ -193,7 +193,7 @@ static	struct range * rng_base;
 //void	sync_enode(struct enode * e);
 //void	fix_enode(struct enode * e, int row1, int col1, int row2, int col2, int delta1, int delta2);
 
-void    clean_range() { // usado en erasedb
+void clean_range() { // usado en erasedb
     register struct range *r;
     register struct range *nextr;
 
