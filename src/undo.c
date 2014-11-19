@@ -46,6 +46,8 @@ Acciones cuyo UNDO/REDO se encuentra implementado:
 7. insert de row o columna
 8. delete de row o columna
 9. paste de row o columna
+10. hide / show of rows and columns
+11. order of a range
 
 NOT implemented:
 1. cambio de formato de columna (en un futuro de celdas)

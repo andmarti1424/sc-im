@@ -13,6 +13,7 @@ extern char * rev;
 extern struct dictionary * user_conf_d;
 
 void do_commandmode(struct block * sb) {
+    char lin[100];
 
     if (sb->value == OKEY_BS) {            // BS
         if (! strlen(inputline) || ! inputline_pos) {
@@ -67,15 +68,23 @@ void do_commandmode(struct block * sb) {
         } else if ( strcmp(inputline, "help") == 0 || strcmp(inputline, "h") == 0 ) {
             help();
 
+        } else if ( strcmp(inputline, "sort ") > 0 ) {
+            strcat(line, inputline);
+            send_to_interp(line); 
+            line[0] = '\0';
+
+        } else if ( strcmp(inputline, "int ") > 0 ) { // send cmd to interpreter
+            strcpy(line, inputline);
+            del_range_chars(line, 0, 3);
+            send_to_interp(line);
+            line[0] = '\0';
+
         } else if ( str_in_str(inputline, "color ") != -1 ) {
-            char lin[100];
             strcpy(lin, inputline);
-            del_range_chars(lin, 0, 5); 
-            //info("%s", lin);
+            del_range_chars(lin, 0, 5);
             chg_color(lin);
 
         } else if ( str_in_str(inputline, "set ") != -1 ) {
-            char lin[80];
             strcpy(lin, inputline);
             del_range_chars(lin, 0, 3); 
             parse_str(user_conf_d, lin);

@@ -24,6 +24,3 @@ srange * get_selected_range();
 
 srange * create_custom_range(int tlrow, int tlcol, int brrow, int brcol);
 void free_custom_range(srange * sr);
-
-
-

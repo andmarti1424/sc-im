@@ -181,6 +181,7 @@ void do_normalmode(struct block * buf) {
             } else {                                                      // gA4 (goto cell)
                 (void) sprintf(line, "goto %s", parse_cell_name(1, buf));
                 send_to_interp(line); 
+                line[0] = '\0';
             }
             unselect_ranges();
             update();
@@ -305,8 +306,8 @@ void do_normalmode(struct block * buf) {
                  bs = get_bufsize(buf);
              }
              
-             if (bs > 2) {
-                 (void) sprintf(line, "hide %s %d", parse_cell_name(2, buf), 1);
+             if (bs > 2) { // sacar?
+                 (void) sprintf(line, "hide %s %d", parse_cell_name(2, buf), 1); //sacar?
              } else if (bs == 2 ) {
                  if (buf->pnext->value == 'r') {
                      (void) sprintf(line, "hide %d %d", currow, cmd_multiplier + 1);
