@@ -90,7 +90,7 @@ void do_commandmode(struct block * sb) {
             parse_str(user_conf_d, lin);
             info("Config value changed: %s", lin);
 
-        } else if ( str_in_str(inputline, "set") != -1 ) {
+        } else if ( strcmp(inputline, "set") == 0 ) {
             int d = user_conf_d->len;
             char valores[20 * d];
             valores[0]='\0';
@@ -143,7 +143,7 @@ void do_commandmode(struct block * sb) {
         }
 
     }
-    //show_header(input_win);       //Hace falta??? OJO // COMENTADO el día 22/06
+    show_header(input_win);
     return;
 }
 
