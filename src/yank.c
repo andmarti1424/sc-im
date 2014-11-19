@@ -11,17 +11,17 @@ extern struct ent * back_row(int arg);
 extern struct ent * forw_col(int arg);
 extern struct ent * back_col(int arg);
 
-int yank_arg;         // cantidad de filas o columnas copiadas. usado por ej en '4yr'
-char type_of_yank;    // tipo de copia. c = col, r = row, a = range, e = cell, '\0' = no se ha realizado yank.
+int yank_arg;                 // cantidad de filas o columnas copiadas. usado por ej en '4yr'
+char type_of_yank;            // tipo de copia. c = col, r = row, a = range, e = cell, '\0' = no se ha realizado yank.
 static struct ent * yanklist; // variable estatica
-
-struct ent * get_yanklist() {
-    return yanklist;
-}
 
 void init_yanklist() {
     type_of_yank = '\0';
     yanklist = NULL;
+}
+
+struct ent * get_yanklist() {
+    return yanklist;
 }
 
 // Funcion que elimina todos los yank ents guardados y libera la memoria asignada
@@ -121,38 +121,47 @@ void yank_area(int tlrow, int tlcol, int brrow, int brcol, char type, int arg) {
     return;
 }
 
-// paste yanked ents
-// if above == 1 then paste above current row or to the right of current col.
-// this is used for pasted ents that were yanked with yr yc dr dc..
-// ents that were yanked using yy or yanked ents of a range, are
-// always pasted in currow and curcol positions.
+// paste yanked ents:
+// this function is used for paste ents that were yanked with yr yc dr dc..
+// it is also used for sorting.
+// if above == 1, paste is done above current row or to the right of current col.
+// ents that were yanked using yy or yanked ents of a range, are always pasted in currow and curcol positions.
+// diffr es la diferencia de filas entre la posicion actual y el ent copiado.
+// diffc es la diferencia de columnas entre la posicion actual y el ent copiado.
+// cuando se hace sort, los valores de row y col pueden variar desde el momento de copia al momento de pegado.
+// por tal razón, para el sort, el valor de diffr debe ser cero.
+// Cuando se implemente el ordenamiento de columnas, en vez de por filas, diffc también deberá ser cero!
 void paste_yanked_ents(int above) {
     if (! count_yank_ents()) return;
 
     struct ent * yl = yanklist;
-    int diffr;
-    int diffc;
+    int diffr, diffc, ignorelock = 0;
 
     create_undo_action();
 
-    if (type_of_yank == 'a' || type_of_yank == 'e') { // paste cell or range
+    if (type_of_yank == 's') {                               // paste a range that was yanked in the sort function
+        diffr = 0;
+        diffc = curcol - yl->col;
+        ignorelock = 1;
+
+    } else if (type_of_yank == 'a' || type_of_yank == 'e') { // paste cell or range
         diffr = currow - yl->row;
         diffc = curcol - yl->col;
 
-    } else if (type_of_yank == 'r') { // paste row
+    } else if (type_of_yank == 'r') {                        // paste row
         int c = yank_arg;
         copy_to_undostruct(currow + ! above, 0, currow + ! above - 1 + yank_arg, maxcol, 'd');
         while (c--) above ? insert_row(0) : insert_row(1);
-        if (! above) currow = forw_row(1)->row; // paste below
+        if (! above) currow = forw_row(1)->row;              // paste below
         diffr = currow - yl->row;
         diffc = yl->col;
         fix_marks(yank_arg, 0, currow, maxrow, 0, maxcol);
         save_undo_range_shift(yank_arg, 0, currow, 0, currow - 1 + yank_arg, maxcol);
 
-    } else if (type_of_yank == 'c') { // paste col
+    } else if (type_of_yank == 'c') {                        // paste col
         int c = yank_arg;
         copy_to_undostruct(0, curcol + above, maxrow, curcol + above - 1 + yank_arg, 'd');
-        while (c--) above ? insert_col(1) : insert_col(0); // insert cols to the right if above or to the left
+        while (c--) above ? insert_col(1) : insert_col(0);   // insert cols to the right if above or to the left
         if (above) curcol = back_col(1)->col;
         diffr = yl->row;
         diffc = curcol - yl->col;
@@ -162,17 +171,15 @@ void paste_yanked_ents(int above) {
 
     // por cada ent en yanklist
     while (yl != NULL) {
-        //diffr = 0; //this is for sorting
-
         copy_to_undostruct(yl->row + diffr, yl->col + diffc, yl->row + diffr, yl->col + diffc, 'd');
 
-        // here we delete content of destino ent
-        // otra posibilidad a la de debajo: erase_area(yl->row + diffr, yl->col + diffc, yl->row + diffr, yl->col + diffc, 0);
-        struct ent **pp = ATBL(tbl, yl->row + diffr, yl->col + diffc);
+        // here we delete current content of "destino" ent
+        erase_area(yl->row + diffr, yl->col + diffc, yl->row + diffr, yl->col + diffc, ignorelock);
+        /*struct ent **pp = ATBL(tbl, yl->row + diffr, yl->col + diffc);
         if (*pp && (!((*pp)->flags & is_locked) )) {
             mark_ent_as_deleted(*pp);
             *pp = NULL;
-        }
+        }*/
 
         struct ent * destino = lookat(yl->row + diffr, yl->col + diffc);
 
