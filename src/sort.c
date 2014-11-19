@@ -1,5 +1,5 @@
 /*
-Most of the code by Chuck Martin <nrocinu@myrealbox.com>
+Adaptation of Chuck Martin's code - <nrocinu@myrealbox.com>
  */
  
 #include <sys/types.h>
@@ -94,12 +94,12 @@ void sortrange(struct ent * left, struct ent * right, char * criteria) {
     //currow = minr;
     //curcol = minc;
  
-    yank_area(minr, minc, maxr, maxc, 'a', 1); // guardo en la yanklist todo el rango original
+    yank_area(minr, minc, maxr, maxc, 's', 1); // guardo en la yanklist todo el rango original
     
-    erase_area(minr, minc, maxr, maxc, 1); // borro el rango original
+    //erase_area(minr, minc, maxr, maxc, 1); // borro el rango original. no es necesario porque se lo borra en paste_yanked_ents..
 
     //sync_ranges();
-    
+
     // acomodo los rows de cada ent que se encontraba en el rango ordenado
     // a partir de los que dejó qsort en la estructura rows
     int i, d, move;
@@ -128,8 +128,8 @@ void sortrange(struct ent * left, struct ent * right, char * criteria) {
 
     //r = currow;
     //c = curcol;
-    //pullcells('m'); FIXME ?
-    //flush_saved(); FIXME ?
+    //pullcells('m'); ?
+    //flush_saved();  ?
     //currow = r;
     //curcol = c;
 }
@@ -166,8 +166,7 @@ int compare(const void * row1, const void * row2) {
         result *= sort[i].direction;
     }
 
-    if (! result)
-        result = (*((int *) row1) - *((int *) row2));
+    if (! result) result = (*((int *) row1) - *((int *) row2));
 
     return (result);
 }
