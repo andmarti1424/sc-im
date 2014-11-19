@@ -69,6 +69,7 @@ void do_commandmode(struct block * sb) {
             help();
 
         } else if ( strcmp(inputline, "sort ") > 0 ) {
+            line[0] = '\0';
             strcat(line, inputline);
             send_to_interp(line); 
             line[0] = '\0';
