@@ -144,7 +144,7 @@ void break_waitcmd_loop(struct block * buffer) {
             exit_visualmode();
         }
 
-	curmode = NORMAL_MODE;
+        curmode = NORMAL_MODE;
 
         // Ya no espero por un comando. Saco flag de pantalla si estaba.
         cmd_pending = 0;

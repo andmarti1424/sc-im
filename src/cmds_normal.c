@@ -5,6 +5,7 @@
 #include "stdout.h"
 
 extern int cmd_multiplier;
+char interp_line[100];
 
 void do_normalmode(struct block * buf) {
     int bs = get_bufsize(buf);
@@ -68,22 +69,20 @@ void do_normalmode(struct block * buf) {
 
         // Tick
         case '\'':
-            if (bs == 2) {
-                unselect_ranges();
-                struct ent * e = tick(buf->pnext->value);
-	        if (row_hidden[e->row]) {
-                    error("Cell row is hidden");
-                    break;
-                }
-	        if (col_hidden[e->col]) {
-                    error("Cell column is hidden");
-                    break;
-                }
-                currow = e->row;
-                curcol = e->col;
-                update();
+            if (bs != 2) break;
+            unselect_ranges();
+            struct ent * e = tick(buf->pnext->value);
+            if (row_hidden[e->row]) {
+                error("Cell row is hidden");
+                break;
             }
-            break;
+            if (col_hidden[e->col]) {
+                error("Cell column is hidden");
+                break;
+            }
+            currow = e->row;
+            curcol = e->col;
+            update();
 
         // CTRL f
         case ctl('f'):
@@ -179,9 +178,8 @@ void do_normalmode(struct block * buf) {
                 curcol = horiz_middle()->col;
 
             } else {                                                      // gA4 (goto cell)
-                (void) sprintf(line, "goto %s", parse_cell_name(1, buf));
-                send_to_interp(line); 
-                line[0] = '\0';
+                (void) sprintf(interp_line, "goto %s", parse_cell_name(1, buf));
+                send_to_interp(interp_line);
             }
             unselect_ranges();
             update();
@@ -248,7 +246,6 @@ void do_normalmode(struct block * buf) {
             inputline_pos = 0;
             break;
 
-
         // del current cell or range
         case 'x': 
             del_selected_cells();
@@ -263,18 +260,13 @@ void do_normalmode(struct block * buf) {
 
         // mark cell or range
         case 'm': 
-            if (bs == 2) {
-                // mark range
-                int p = is_range_selected();
-                if (p != -1) {
-                   struct srange * sr = get_range_by_pos(p); 
-                   set_range_mark(buf->pnext->value, sr);
-                   
-                }
-                // mark cell 
-                else set_cell_mark(buf->pnext->value, currow, curcol); 
-            }
-            break;
+            if (bs != 2) break;                
+            int p = is_range_selected();
+            if (p != -1) { // mark range
+                struct srange * sr = get_range_by_pos(p); 
+                set_range_mark(buf->pnext->value, sr);                   
+            } else         // mark cell 
+                set_cell_mark(buf->pnext->value, currow, curcol);
 
         // create range with two marks
         case 'r':  
@@ -287,10 +279,9 @@ void do_normalmode(struct block * buf) {
         case 'S': // Show col or row
             // anulo el efecto multiplicador
             if (cmd_multiplier > 0) cmd_multiplier = 0;
-            if (bs > 2 && buf->pnext->value == 'c' || buf->pnext->value == 'r') {
-                (void) sprintf(line, "show %s", parse_cell_name(2, buf));
-                send_to_interp(line); 
-                line[0] = '\0';
+            if (bs > 2 && buf->pnext->value == 'c' || buf->pnext->value == 'r') {                
+                (void) sprintf(interp_line, "show %s", parse_cell_name(2, buf));
+                send_to_interp(interp_line);
                 update();
             }
             break;
@@ -305,18 +296,16 @@ void do_normalmode(struct block * buf) {
                  }
                  bs = get_bufsize(buf);
              }
-             
              if (bs > 2) { // sacar?
-                 (void) sprintf(line, "hide %s %d", parse_cell_name(2, buf), 1); //sacar?
+                 (void) sprintf(interp_line, "hide %s %d", parse_cell_name(2, buf), 1); //sacar?
              } else if (bs == 2 ) {
                  if (buf->pnext->value == 'r') {
-                     (void) sprintf(line, "hide %d %d", currow, cmd_multiplier + 1);
+                     (void) sprintf(interp_line, "hide %d %d", currow, cmd_multiplier + 1);
                  } else if (buf->pnext->value == 'c') {
-                     (void) sprintf(line, "hide %s %d", coltoa(curcol), cmd_multiplier + 1);
+                     (void) sprintf(interp_line, "hide %s %d", coltoa(curcol), cmd_multiplier + 1);
                  }
              }
-             send_to_interp(line); 
-             line[0] = '\0';
+             send_to_interp(interp_line);
              cmd_multiplier = 0;
              update();
              break;
@@ -378,10 +367,8 @@ void do_normalmode(struct block * buf) {
 
             if (buf->pnext->value == 'r') {
                 create_undo_action();
-
                 copy_to_undostruct(currow, 0, currow - 1 + ic, maxcol, 'd');
                 save_undo_range_shift(-ic, 0, currow, 0, currow -1 + ic, maxcol);
-
                 fix_marks(-ic, 0, currow - 1 + ic, maxrow, 0, maxcol);
                 yank_area(currow, 0, currow + cmd_multiplier, maxcol, 'r', ic);
                 while (ic--) deleterow();
@@ -390,11 +377,9 @@ void do_normalmode(struct block * buf) {
                 end_undo_action();
 
             } else if (buf->pnext->value == 'c') {
-
                 create_undo_action();
                 copy_to_undostruct(0, curcol, maxrow, curcol - 1 + ic, 'd');
                 save_undo_range_shift(0, -ic, 0, curcol, maxrow, curcol - 1 + ic);
-
                 fix_marks(0, -ic, 0, maxrow,  curcol - 1 + ic, maxcol);
                 yank_area(0, curcol, maxrow, curcol + cmd_multiplier, 'c', ic);
                 while (ic--) deletecol();
@@ -415,17 +400,15 @@ void do_normalmode(struct block * buf) {
             if (bs != 2) return;
             create_undo_action();
             if (buf->pnext->value == 'r') {
-
                 save_undo_range_shift(1, 0, currow, 0, currow, maxcol);
                 fix_marks(1, 0, currow, maxrow, 0, maxcol);
                 insert_row(0);
 
             } else if (buf->pnext->value == 'c') {
-                
                 save_undo_range_shift(0, 1, 0, curcol, maxrow, curcol);
-		fix_marks(0, 1, 0, maxrow, curcol, maxcol);
-		insert_col(0);
-	    }
+                fix_marks(0, 1, 0, maxrow, curcol, maxcol);
+                insert_col(0);
+            }
             end_undo_action();
             update();
             break;
@@ -433,8 +416,7 @@ void do_normalmode(struct block * buf) {
  
         case 'y':
             // yank row
-            if ( bs == 2 && buf->pnext->value == 'r') {
-        
+            if ( bs == 2 && buf->pnext->value == 'r') {        
                 yank_area(currow, 0, currow + cmd_multiplier, maxcol, 'r', cmd_multiplier + 1);
                 if (cmd_multiplier > 0) cmd_multiplier = 0;
 
@@ -489,22 +471,18 @@ void do_normalmode(struct block * buf) {
                 scroll_right(z);
                 //unselect_ranges();
            
-            } else if ( bs == 2 && buf->pnext->value == 'z') {
-                int bottom = offscr_sc_rows + LINES - RESROW - 2;
-                //if (bottom > maxrow) bottom = maxrow;
-                int m = bottom - (LINES - RESROW - 2)/2;
-                int scroll = currow - m;
+            } else if ( bs == 2 && buf->pnext->value == 'z') {            
+                int scroll = currow - offscr_sc_rows + LINES - RESROW - 2 - (LINES - RESROW - 2)/2;
 
                 if (scroll > 0) {
                     scroll_down(scroll);
-                } else if (-scroll < offscr_sc_rows) {
+                } else if (scroll > offscr_sc_rows) {
                     scroll_up(-scroll);
                 } else if (offscr_sc_rows > 0) {
                     scroll_up(offscr_sc_rows);
                 }
 
-            } else if ( bs == 2 && buf->pnext->value == 'm') {
-                 int centro = (COLS - rescol)/ 2;
+            } else if ( bs == 2 && buf->pnext->value == 'm') {                 
                  int ancho = rescol;
                  offscr_sc_cols = 0;
                  int i = 0, c = 0;
@@ -512,7 +490,7 @@ void do_normalmode(struct block * buf) {
                  for (i = 0; i < curcol; i++) {
                      for (c = i; c < curcol; c++) {
                          ancho += fwidth[c];
-                         if (ancho >= centro) {
+                         if (ancho >= (COLS - rescol)/ 2) {
                              ancho = rescol;
                              break;
                          } 
@@ -520,7 +498,6 @@ void do_normalmode(struct block * buf) {
                      if (c == curcol) break;
                  }
                  offscr_sc_cols = i;
-                 //info("%d %d %d %d", ancho, c, offscr_sc_cols, centro);
             }
             update();
             break;
@@ -556,11 +533,10 @@ void do_normalmode(struct block * buf) {
         case '{':
             create_undo_action();
             copy_to_undostruct(currow, curcol, currow, curcol, 'd');
-            sprintf(line, "leftjustify %s", v_name(currow, curcol));
-            send_to_interp(line); 
+            sprintf(interp_line, "leftjustify %s", v_name(currow, curcol));
+            send_to_interp(interp_line);
             copy_to_undostruct(currow, curcol, currow, curcol, 'a');
             end_undo_action();
-            line[0]='\0';
             update();
             break;
 
@@ -568,11 +544,10 @@ void do_normalmode(struct block * buf) {
         case '}':
             create_undo_action();
             copy_to_undostruct(currow, curcol, currow, curcol, 'd');
-            sprintf(line, "rightjustify %s", v_name(currow, curcol));
-            send_to_interp(line); 
+            sprintf(interp_line, "rightjustify %s", v_name(currow, curcol));
+            send_to_interp(interp_line);
             copy_to_undostruct(currow, curcol, currow, curcol, 'a');
             end_undo_action();
-            line[0]='\0';
             update();
             break;
 
@@ -580,11 +555,10 @@ void do_normalmode(struct block * buf) {
         case '|':
             create_undo_action();
             copy_to_undostruct(currow, curcol, currow, curcol, 'd');
-            sprintf(line, "center %s", v_name(currow, curcol));
-            send_to_interp(line); 
+            sprintf(interp_line, "center %s", v_name(currow, curcol));
+            send_to_interp(interp_line);
             copy_to_undostruct(currow, curcol, currow, curcol, 'a');
             end_undo_action();
-            line[0]='\0';
             update();
             break;
 
@@ -613,8 +587,6 @@ void do_normalmode(struct block * buf) {
                 ins_in_line(buf->value);
                 show_header(input_win);
             }
-
-
     }
     return;
 }

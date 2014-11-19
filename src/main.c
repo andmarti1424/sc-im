@@ -39,56 +39,20 @@ char *latexext;
 char *slatexext;
 char *texext;
 int scrc = 0;
-//int showsc, showsr;	/* Starting cell for highlighted range */
-int usecurses = TRUE;	/* Use curses unless piping/redirection or using -q */
-int brokenpipe = FALSE;	/* Set to true if SIGPIPE is received */
+int usecurses = TRUE;    /* Use curses unless piping/redirection or using -q */
+int brokenpipe = FALSE;    /* Set to true if SIGPIPE is received */
 char curfile[PATHLEN];
-char dpoint = '.';	/* decimal point */
-char thsep = ',';	/* thousands separator */
+char dpoint = '.';    /* decimal point */
+char thsep = ',';    /* thousands separator */
 int  linelim = -1;
 int  calc_order = BYROWS;
-int  optimize  = 0;	/* Causes numeric expressions to be optimized */
-int  tbl_style = 0;	/* headers for T command output */
+int  optimize  = 0;    /* Causes numeric expressions to be optimized */
+int  tbl_style = 0;    /* headers for T command output */
 int  rndtoeven = 0;
-//FIXME THIS
-//int  showtop   = 1;	/* Causes current cell value display in top line  */
-//int  showcell  = 1;	/* Causes current cell to be highlighted	  */
-//int  showrange = 0;	/* Causes ranges to be highlighted		  */
-//int  showneed  = 0;	/* Causes cells needing values to be highlighted  */
-//int  showexpr  = 0;	/* Causes cell exprs to be displayed, highlighted */
-//int  shownote  = 0;	/* Causes cells with attached notes to be highlighted					  */
-//int  braille   = 0;	/* Be nice to users of braille displays		  */
-//int  braillealt = 0;	/* Alternate mode for braille users		  */
-//int  autocalc  = 1;	/* 1 to calculate after each update */
-//int  autolabel = 1;     /* If room, causes label to be created after a define */
-//int  autoinsert = 0;    /* Causes rows to be inserted if craction is non-zero
-//                           and the last cell in a row/column of the scrolling
-//                           portion of a framed range has been filled	  */
-//int  autowrap = 0;      /* Causes cursor to move to next row/column if craction
-//                           is non-zero and the last cell in a row/column of
-//                           the scrolling portion of a framed range has been
-//                           filled
-//int  color     = 0;	/* Use color */
-//int  colorneg  = 0;	/* Increment color number for cells with negative numbers */
-//int  colorerr  = 0;	/* Color cells with errors with color 3 */
-//int  numeric_field = 0; /* Started the line editing with a number */
-//int  craction = 0;	/* 1 for down, 2 for right */
-//int  pagesize = 0;	/* If nonzero, use instead of 1/2 screen height */
-//int  rowlimit = -1;
-//int  collimit = -1;
 int  rowsinrange = 1;
 int  colsinrange = DEFWIDTH;
-//extern	int lastmx, lastmy;	/* Screen address of the cursor */
-//extern	int lastcol, lcols;	/* Spreadsheet Column the cursor was in last */
-//extern	int lastendrow;		/* Last bottom row of screen */
-//extern	int framerows;		/* Rows in current frame */
-//extern	int framecols;		/* Columns in current frame */
-//extern	char mode_ind;		/* Mode indicator */
-/* a linked list of free [struct ent]'s, uses .next as the pointer */
-//struct ent *freeents = NULL;
-//extern	int	seenerr;
 struct ent ***tbl;
-char	*progname;
+char *progname;
 unsigned int shall_quit = 0;
 unsigned int curmode = NORMAL_MODE;
 int maxrow, maxcol;
@@ -108,7 +72,7 @@ int main (int argc, char **argv) {
 
     // inicializo NCURSES
     start_stdout();        
-    //esto habilitarlo para debug de mensajes:        wtimeout(input_win, 1000);
+    //esto habilitarlo para debug de mensajes:    wtimeout(input_win, 1000);
 
     // setup the spreadsheet arrays
     if (!growtbl(GROWNEW, 0, 0)) return exit_app(1);
@@ -140,7 +104,7 @@ int main (int argc, char **argv) {
     }
     load_sc(argc, argv);      
 
-    // doy la bienvenida en caso de no haber pasado ninguna planilla como param
+    // doy la bienvenida en caso de no haber pasado ninguna planilla como parámetro
     if (argv[1] == NULL) {
         do_welcome();
         // muestro modo y detalle de celda en barra de estado
@@ -154,7 +118,7 @@ int main (int argc, char **argv) {
     // manejo stdin
     shall_quit = 0;
     buffer = (struct block *) create_buf();
-    //Esto habilitarlo para debug:     wtimeout(input_win, TIMEOUT_CURSES);
+    //Esto habilitarlo para debug:  wtimeout(input_win, TIMEOUT_CURSES);
     while (! shall_quit) {
           handle_input(buffer);
           // shall_quit=1 implica :q
@@ -213,23 +177,23 @@ int exit_app(int status) {
 
 void load_sc(int argc, char **argv) {
     if (optind < argc && !strcmp(argv[optind], "--"))
-	optind++;
+    optind++;
     if (optind < argc && argv[optind][0] != '|' && strcmp(argv[optind], "-"))
-	(void) strcpy(curfile, argv[optind]);
+    (void) strcpy(curfile, argv[optind]);
 
     if (optind < argc) {
-	if (! readfile(argv[optind], 1) && (optind == argc - 1)) {
-	    info("New file: \"%s\"", curfile);
-	}
+    if (! readfile(argv[optind], 1) && (optind == argc - 1)) {
+        info("New file: \"%s\"", curfile);
+    }
         EvalAll(); // TODO. es necesario???
-	optind++;
+    optind++;
     } else {
         erasedb();
     }
 
     while (optind < argc) {
-	(void) readfile(argv[optind], 0);
-	optind++;
+    (void) readfile(argv[optind], 0);
+    optind++;
     }
 } 
 
@@ -237,8 +201,8 @@ void load_sc(int argc, char **argv) {
 int locked_cell(int r, int c) {
     struct ent *p = *ATBL(tbl, r, c);
     if (p && (p->flags & is_locked)) {
-	info("Cell %s%d is locked", coltoa(c), r) ;
-	return(1);
+    info("Cell %s%d is locked", coltoa(c), r) ;
+    return(1);
     }
     return(0);
 }
@@ -249,11 +213,11 @@ int any_locked_cells(int r1, int c1, int r2, int c2) {
     struct ent *p ;
 
     for (r = r1; r <= r2; r++)
-	for (c = c1; c <= c2; c++) {
-	    p = *ATBL(tbl, r, c);
-	    if (p && (p->flags & is_locked))
-		return(1);
-	}
+    for (c = c1; c <= c2; c++) {
+        p = *ATBL(tbl, r, c);
+        if (p && (p->flags & is_locked))
+        return(1);
+    }
     return(0);
 }
 // set the calculation order 
@@ -264,8 +228,6 @@ void setorder(int i) {
 void nopipe() {
     brokenpipe = TRUE;
 }
-
-
 
 void signals() {
 #ifdef SIGVOID
@@ -282,7 +244,7 @@ void signals() {
     int winchg();
 #endif
 
-    // FIXME esto anda pero es molesto para probar. 
+    // FIXME - sig. linea se comenta porque es molesto para probar. 
     //signal(SIGINT, sig_int);
 
     //signal(SIGTERM, sig_int); // kill

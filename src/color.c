@@ -216,106 +216,106 @@ void chg_color(char * str) {
 
 /*
 // Implementación anterior
-struct colorpair	*cpairs[8];
-static struct crange	*color_base;
+struct colorpair    *cpairs[8];
+static struct crange    *color_base;
 
 void initcolor(int colornum) {
     use_default_colors();
 
     if ( ! colornum ) {
-	int i;
-	for (i = 0; i < 8; i++)
+    int i;
+    for (i = 0; i < 8; i++)
             cpairs[i] = (struct colorpair *) scxmalloc((unsigned)sizeof(struct colorpair));
     }
 
 // default colors (filas y columnas)
     if ( ! colornum || colornum == 1 ) {
-	cpairs[0]->fg = COLOR_YELLOW;
-	cpairs[0]->bg = COLOR_BLACK;
-	cpairs[0]->expr = NULL;
-	init_pair(1, cpairs[0]->fg, cpairs[0]->bg);
+    cpairs[0]->fg = COLOR_YELLOW;
+    cpairs[0]->bg = COLOR_BLACK;
+    cpairs[0]->expr = NULL;
+    init_pair(1, cpairs[0]->fg, cpairs[0]->bg);
     }
 
 // PANTALLA DE BIENVENIDA
     if ( ! colornum || colornum == 5 ) {
-	cpairs[4]->fg = COLOR_YELLOW;
-	cpairs[4]->bg = COLOR_BLACK;
-	cpairs[4]->expr = NULL;
-	init_pair(5, cpairs[4]->fg, cpairs[4]->bg);
+    cpairs[4]->fg = COLOR_YELLOW;
+    cpairs[4]->bg = COLOR_BLACK;
+    cpairs[4]->expr = NULL;
+    init_pair(5, cpairs[4]->fg, cpairs[4]->bg);
     }
 
 // Expresiones
     if ( ! colornum || colornum == 3 ) {
-	cpairs[2]->fg = COLOR_RED;
-	cpairs[2]->bg = COLOR_BLACK;
-	cpairs[2]->expr = NULL;
-	init_pair(3, cpairs[2]->fg, cpairs[2]->bg);
+    cpairs[2]->fg = COLOR_RED;
+    cpairs[2]->bg = COLOR_BLACK;
+    cpairs[2]->expr = NULL;
+    init_pair(3, cpairs[2]->fg, cpairs[2]->bg);
     }
 
 // string value y
 // MODO en parte superior derecha
     if ( ! colornum || colornum == 6 ) {
-	cpairs[5]->fg = COLOR_CYAN;
-	cpairs[5]->bg = COLOR_BLACK;
-	cpairs[5]->expr = NULL;
-	init_pair(6, cpairs[5]->fg, cpairs[5]->bg);
+    cpairs[5]->fg = COLOR_CYAN;
+    cpairs[5]->bg = COLOR_BLACK;
+    cpairs[5]->expr = NULL;
+    init_pair(6, cpairs[5]->fg, cpairs[5]->bg);
     }
 
 // numeric value
     if ( ! colornum || colornum == 7 ) {
-	cpairs[6]->fg = COLOR_BLUE;
-	cpairs[6]->bg = COLOR_BLACK;
-	cpairs[6]->expr = NULL;
-	init_pair(7, cpairs[6]->fg, cpairs[6]->bg);
+    cpairs[6]->fg = COLOR_BLUE;
+    cpairs[6]->bg = COLOR_BLACK;
+    cpairs[6]->expr = NULL;
+    init_pair(7, cpairs[6]->fg, cpairs[6]->bg);
     }
 
 // default for cells with errors and error messages
     if ( ! colornum || colornum == 8 ) {
-	cpairs[7]->fg = COLOR_GREEN;
-	cpairs[7]->bg = COLOR_BLACK;
-	cpairs[7]->expr = NULL;
-	init_pair(8, cpairs[7]->fg, cpairs[7]->bg);
+    cpairs[7]->fg = COLOR_GREEN;
+    cpairs[7]->bg = COLOR_BLACK;
+    cpairs[7]->expr = NULL;
+    init_pair(8, cpairs[7]->fg, cpairs[7]->bg);
     }
 
     if ( ! colornum || colornum == 4 ) {
-	cpairs[3]->fg = COLOR_YELLOW;
-	cpairs[3]->bg = COLOR_BLACK;
-	cpairs[3]->expr = NULL;
-	init_pair(4, cpairs[3]->fg, cpairs[3]->bg);
+    cpairs[3]->fg = COLOR_YELLOW;
+    cpairs[3]->bg = COLOR_BLACK;
+    cpairs[3]->expr = NULL;
+    init_pair(4, cpairs[3]->fg, cpairs[3]->bg);
     }
 
 // default for negative numbers ???
     if ( ! colornum || colornum == 2 ) {
-	cpairs[1]->fg = COLOR_CYAN;
-	cpairs[1]->bg = COLOR_BLUE;
-	cpairs[1]->expr = NULL;
-	init_pair(2, cpairs[1]->fg, cpairs[1]->bg);
+    cpairs[1]->fg = COLOR_CYAN;
+    cpairs[1]->bg = COLOR_BLUE;
+    cpairs[1]->expr = NULL;
+    init_pair(2, cpairs[1]->fg, cpairs[1]->bg);
     }
 
 
 // default for '*' marking cells with attached notes ???
 
     if ( color && has_colors() )
-	color_set(1, NULL);
+    color_set(1, NULL);
 }
 
 void change_color(int pair, struct enode *e) {
     int v;
 
     if ((--pair) < 0 || pair > 7) {
-	error("Invalid color number");
-	return;
+    error("Invalid color number");
+    return;
     }
 
     v = (int) eval(e);
 
     if (!cpairs[pair])
-	cpairs[pair] = (struct colorpair *)scxmalloc((unsigned)sizeof(struct colorpair));
+    cpairs[pair] = (struct colorpair *)scxmalloc((unsigned)sizeof(struct colorpair));
     cpairs[pair]->fg = v & 7;
     cpairs[pair]->bg = (v >> 3) & 7;
     cpairs[pair]->expr = e;
     if (color && has_colors())
-	init_pair(pair + 1, cpairs[pair]->fg, cpairs[pair]->bg);
+    init_pair(pair + 1, cpairs[pair]->fg, cpairs[pair]->bg);
 
     //modflg++;
 }
@@ -330,25 +330,25 @@ void add_crange(struct ent *r_left, struct ent *r_right, int pair) {
     maxc = r_left->col > r_right->col ? r_left->col : r_right->col;
 
     if (!pair) {
-	if (color_base)
-	    for (r = color_base; r; r = r->r_next)
-		if (    (r->r_left->row == r_left->row) &&
-			(r->r_left->col == r_left->col) &&
-			(r->r_right->row == r_right->row) &&
-			(r->r_right->col == r_right->col)) {
-		    if (r->r_next)
-			r->r_next->r_prev = r->r_prev;
-		    if (r->r_prev)
-			r->r_prev->r_next = r->r_next;
-		    else
-			color_base = r->r_next;
-		    scxfree((char *)r);
-		    modflg++;
-		    FullUpdate++;
-		    return;
-		}
-	error("Color range not defined");
-	return;
+    if (color_base)
+        for (r = color_base; r; r = r->r_next)
+        if (    (r->r_left->row == r_left->row) &&
+            (r->r_left->col == r_left->col) &&
+            (r->r_right->row == r_right->row) &&
+            (r->r_right->col == r_right->col)) {
+            if (r->r_next)
+            r->r_next->r_prev = r->r_prev;
+            if (r->r_prev)
+            r->r_prev->r_next = r->r_next;
+            else
+            color_base = r->r_next;
+            scxfree((char *)r);
+            modflg++;
+            FullUpdate++;
+            return;
+        }
+    error("Color range not defined");
+    return;
     }
 
     r = (struct crange *)scxmalloc((unsigned)sizeof(struct crange));
@@ -359,7 +359,7 @@ void add_crange(struct ent *r_left, struct ent *r_right, int pair) {
     r->r_next = color_base;
     r->r_prev = (struct crange *)0;
     if (color_base)
-	color_base->r_prev = r;
+    color_base->r_prev = r;
     color_base = r;
 
     modflg++;
@@ -376,9 +376,9 @@ void clean_crange() {
     color_base = (struct crange *)0;
 
     while (cr) {
-	nextcr = cr->r_next;
-	scxfree((char *)cr);
-	cr = nextcr;
+    nextcr = cr->r_next;
+    scxfree((char *)cr);
+    cr = nextcr;
     }
 }
 
@@ -388,11 +388,11 @@ void write_cranges(FILE *f) {
 
     for (r = nextr = color_base; nextr; r = nextr, nextr = r->r_next) ;
     while (r) {
-	fprintf(f, "color %s", v_name(r->r_left->row, r->r_left->col));
-	fprintf(f, ":%s", v_name(r->r_right->row, r->r_right->col));
-	fprintf(f, " %d\n", r->r_color);
+    fprintf(f, "color %s", v_name(r->r_left->row, r->r_left->col));
+    fprintf(f, ":%s", v_name(r->r_right->row, r->r_right->col));
+    fprintf(f, " %d\n", r->r_color);
 
-	r = r->r_prev;
+    r = r->r_prev;
     }
 }
 
@@ -400,15 +400,15 @@ void write_colors(FILE *f, int indent) {
     int i, c = 0;
 
     for (i = 0; i < 8; i++) {
-	if (cpairs[i] && cpairs[i]->expr) {
-	    sprintf(line, "color %d = ", i + 1);
-	    linelim = strlen(line);
-	    decompile(cpairs[i]->expr, 0);
-	    line[linelim] = '\0';
-	    fprintf(f, "%*s%s\n", indent, "", line);
-	    if (brokenpipe) return;
-	    c++;
-	}
+    if (cpairs[i] && cpairs[i]->expr) {
+        sprintf(line, "color %d = ", i + 1);
+        linelim = strlen(line);
+        decompile(cpairs[i]->expr, 0);
+        line[linelim] = '\0';
+        fprintf(f, "%*s%s\n", indent, "", line);
+        if (brokenpipe) return;
+        c++;
+    }
     }
     if (indent && c) fprintf(f, "\n");
 }
@@ -422,12 +422,12 @@ void fix_colors(int row1, int col1, int row2, int col2, int delta1, int delta2) 
     struct crange *cr;
 
     if (color_base)
-	for (cr = color_base; cr; cr = cr->r_next) {
-	    r1 = cr->r_left->row;
-	    c1 = cr->r_left->col;
-	    r2 = cr->r_right->row;
-	    c2 = cr->r_right->col;
+    for (cr = color_base; cr; cr = cr->r_next) {
+        r1 = cr->r_left->row;
+        c1 = cr->r_left->col;
+        r2 = cr->r_right->row;
+        c2 = cr->r_right->col;
 
-	}
+    }
 }
 */

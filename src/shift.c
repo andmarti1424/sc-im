@@ -64,12 +64,12 @@ void shift_cells_down(int deltarows, int deltacols) {
 
     lim = maxrow - lim;
     if ((maxrow >= maxrows) && !growtbl(GROWROW, maxrow, 0))
-	return;
+        return;
 
     for (r = maxrow; r > lim; r--) {
         for (c = curcol; c < curcol + deltacols; c++) {
             register struct ent *p = *ATBL(tbl, r - deltarows, c);
-	    if (p) {
+            if (p) {
                 register struct ent *n;
                 n = lookat(r, c);
                 (void) copyent(n, p, 1, 0, 0, 0, r - deltarows, c, 0);

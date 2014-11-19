@@ -9,7 +9,7 @@ extern void free();
 extern void exit();
 #endif
 
-#define	MAGIC	(double)1234567890.12344
+#define    MAGIC    (double)1234567890.12344
 
 char * scxmalloc(unsigned n) {
     register char *ptr;

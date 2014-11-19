@@ -4,10 +4,10 @@
 #include <string.h>
 #include <curses.h>
 #include "buffer.h"
-#include "sc.h"            // for rescol
+#include "sc.h"  // for rescol
 
-// this macro is used to determinate word over WORD
-#define istext(a)	(isalnum(a) || ((a) == '_'))
+// this macro is used to determinate a word over a WORD
+#define istext(a)    (isalnum(a) || ((a) == '_'))
 
 int get_key() {
      wtimeout(input_win, -1);
@@ -251,7 +251,7 @@ int start_edit_mode(struct block * buf, char type) {
     struct ent * p1 = lookat(currow, curcol);
 
     if (type == 'v') { // && p1->flags & is_valid) {   // numeric value
-        if (( ! (p1->expr) ) ) {                    // || (p1->flags & is_strexpr)) {
+        if (( ! (p1->expr) ) ) {                       // || (p1->flags & is_strexpr)) {
             (void) sprintf(inputline, "%s%.15g", inputline, p1->v);
         } else {                   // expression
             linelim = 0;

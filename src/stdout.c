@@ -21,7 +21,7 @@ extern int cmd_multiplier;
 extern char insert_edit_submode;
 
 unsigned int curmode;
-int rescol = RESCOL;	       // Columns reserved for row numbers
+int rescol = RESCOL;           // Columns reserved for row numbers
 
 WINDOW * main_win;
 WINDOW * input_win;
@@ -759,26 +759,26 @@ void show_text_content_of_cell(WINDOW * win, struct ent ** p, int row, int col, 
     } else if ( (*p)->label && (*p)->flags & is_leftflush ) {
         strcpy(field, (*p)->label);
         left = col_width - str_len;
-	left = left < 0 ? 0 : left;
+    left = left < 0 ? 0 : left;
         flen = str_len;
         while (left-- && flen++) add_char(field, ' ', flen-1);
 
     // centrado
     } else if ( (*p)->label && (*p)->flags & is_label) {
         left = (col_width - str_len )/2;
-	left = left < 0 ? 0 : left;
+    left = left < 0 ? 0 : left;
         flen = 0;
         while (left-- && ++flen) add_char(field, ' ', flen-1);
         strcat(field, (*p)->label);
         flen += str_len;
         left = (col_width - flen);
-	left = left < 0 ? 0 : left;
+    left = left < 0 ? 0 : left;
         while (left-- && ++flen) add_char(field, ' ', flen-1);
 
     // derecha
     } else if ( (*p)->label) {
         left = col_width - str_len;
-	left = left < 0 ? 0 : left;
+    left = left < 0 ? 0 : left;
         flen = 0;
         while (left-- && ++flen) add_char(field, ' ', flen-1);
         strcat(field, (*p)->label);
@@ -870,7 +870,7 @@ void show_text(char * val) {
     //fprintf(f, "Frames:\n=======\n\n");
     //fprintf(f, "Colors:\n=======\n\n");
     fprintf(f, "%s\n", val);
-    fprintf(f, "Press ENTER to return.");
+    fprintf(f, "Press 'q' and then ENTER to return.");
     closefile(f, pid, 0);
     getchar();
     reset_prog_mode();

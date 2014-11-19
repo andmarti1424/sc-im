@@ -9,24 +9,12 @@
 #include "conf.h" // for conf parameters
 #include <stdlib.h>
 
-void	syncref(register struct enode *e);
-//void	unspecial(FILE *f, char *str, int delim);
-//extern	char *scext;
-//extern	char *ascext;
-//extern	char *tbl0ext;
-//extern	char *tblext;
-//extern	char *latexext;
-//extern	char *slatexext;
-//extern	char *texext;
-//extern	struct go_save gs;
-//int macrofd;
-//int cslop;
-//int curcol;
-//struct impexfilt *filt = NULL; /* root of list of impex filters */
+void    syncref(register struct enode *e);
 
 extern unsigned int shall_quit;
 char insert_edit_submode;
 struct ent * freeents = NULL; // keep deleted ents around before sync_refs
+char interp_line[100];
 
 // mark_ent_as_deleted (free_ents en sc original):
 // This structure is used to keep ent structs around before they
@@ -74,8 +62,8 @@ void sync_refs() {
     register struct ent *p;
     // sync_ranges();
     for (i=0; i <= maxrow; i++)
-	for (j=0; j <= maxcol; j++)
-	    if ( (p = *ATBL(tbl, i, j)) && p->expr ) {
+    for (j=0; j <= maxcol; j++)
+        if ( (p = *ATBL(tbl, i, j)) && p->expr ) {
                syncref(p->expr);
                //info("%d %d %d", i, j, ++k);
             }
@@ -85,31 +73,31 @@ void sync_refs() {
 void syncref(register struct enode *e) {
     if ( e == (struct enode *) 0 ) {
     //if ( e == NULL || e->op == ERR_ ) {
-	return;
+    return;
     } else if (e->op & REDUCE) {
- 	e->e.r.right.vp = lookat(e->e.r.right.vp->row, e->e.r.right.vp->col);
- 	e->e.r.left.vp = lookat(e->e.r.left.vp->row, e->e.r.left.vp->col);
+     e->e.r.right.vp = lookat(e->e.r.right.vp->row, e->e.r.right.vp->col);
+     e->e.r.left.vp = lookat(e->e.r.left.vp->row, e->e.r.left.vp->col);
     } else {
-	switch (e->op) {
-	    case 'v':
-		//if (e->e.v.vp->flags & iscleared) {
-		if (e->e.v.vp->flags & is_deleted) {
-		    e->op = ERR_;
+    switch (e->op) {
+        case 'v':
+        //if (e->e.v.vp->flags & iscleared) {
+        if (e->e.v.vp->flags & is_deleted) {
+            e->op = ERR_;
                     //info("%d %d", e->e.v.vp->row, e->e.v.vp->col);
-		    e->e.o.left = NULL;
-		    e->e.o.right = NULL;
-		} else if (e->e.v.vp->flags & may_sync)
-		    e->e.v.vp = lookat(e->e.v.vp->row, e->e.v.vp->col);
-		break;
-	    case 'k':
-		break;
-	    case '$':
-		break;
-	    default:
-		syncref(e->e.o.right);
-		syncref(e->e.o.left);
-		break;
-	}
+            e->e.o.left = NULL;
+            e->e.o.right = NULL;
+        } else if (e->e.v.vp->flags & may_sync)
+            e->e.v.vp = lookat(e->e.v.vp->row, e->e.v.vp->col);
+        break;
+        case 'k':
+        break;
+        case '$':
+        break;
+        default:
+        syncref(e->e.o.right);
+        syncref(e->e.o.left);
+        break;
+    }
     }
     return;
 }
@@ -126,8 +114,8 @@ void deletecol() {
     char buf[50];
  
     if (any_locked_cells(0, curcol, maxrow, curcol)) {
-	info("Locked cells encountered. Nothing changed");
-	return;
+    info("Locked cells encountered. Nothing changed");
+    return;
     }
 
     // mark ent of column to erase with isdeleted flag
@@ -184,36 +172,36 @@ void deletecol() {
 void colshow_op() {
     register int i,j;
     for (i = 0; i < maxcols; i++)
-	if (col_hidden[i]) 
-	    break;
+    if (col_hidden[i]) 
+        break;
     for(j = i; j < maxcols; j++)
-	if (!col_hidden[j])
-	    break;
+    if (!col_hidden[j])
+        break;
     j--;
     if (i >= maxcols) {
-	info("No hidden columns to show");
+    info("No hidden columns to show");
     } else {
-	(void) sprintf(line,"show %s:", coltoa(i));
-	(void) sprintf(line + strlen(line),"%s",coltoa(j));
-	linelim = strlen(line);
+    (void) sprintf(line,"show %s:", coltoa(i));
+    (void) sprintf(line + strlen(line),"%s",coltoa(j));
+    linelim = strlen(line);
     }
 }
 
 void rowshow_op() {
     register int i,j;
     for (i = 0; i < maxrows; i++)
-	if (row_hidden[i]) 
-	    break;
+    if (row_hidden[i]) 
+        break;
     for(j = i; j < maxrows; j++)
-	if (!row_hidden[j]) {
-	    break;
-	}
+    if (!row_hidden[j]) {
+        break;
+    }
     j--;
 
     if (i >= maxrows) {
-	info("No hidden rows to show");
+    info("No hidden rows to show");
     } else {
-	(void) sprintf(line,"show %d:%d", i, j);
+    (void) sprintf(line,"show %d:%d", i, j);
         linelim = strlen(line);
     }
 }
@@ -227,42 +215,42 @@ void rowshow_op() {
 void copyent(register struct ent *n, register struct ent *p, int dr, int dc,
              int r1, int c1, int r2, int c2, int special) {
     if (!n || !p) {
-	error("internal error");
-	return;
+    error("internal error");
+    return;
     }
 
     //n->flags = may_sync;
 
     if (special != 'f') {
-	if (special != 'm' || p->flags & is_valid) {
-	    n->v = p->v;
-	    n->flags |= p->flags & is_valid;
-	}
-	if (special != 'm' || p->expr) {
-	    n->expr = copye(p->expr, dr, dc, r1, c1, r2, c2, special == 't');
-	    if (p->flags & is_strexpr)
-		n->flags |= is_strexpr;
-	    else
-		n->flags &= ~is_strexpr;
-	}
-	if (p->label) {
-	    if (n->label) scxfree(n->label);
-	    n->label = scxmalloc((unsigned) (strlen(p->label) + 1));
-	    (void) strcpy(n->label, p->label);
-	    n->flags &= ~is_leftflush;
-	    n->flags |= ((p->flags & is_label) | (p->flags & is_leftflush));
-	} else if (special != 'm') {
-	    n->label = NULL;
-	    n->flags &= ~(is_label | is_leftflush);
-	}
-	n->flags |= p->flags & is_locked;
+        if (special != 'm' || p->flags & is_valid) {
+            n->v = p->v;
+            n->flags |= p->flags & is_valid;
+        }
+        if (special != 'm' || p->expr) {
+            n->expr = copye(p->expr, dr, dc, r1, c1, r2, c2, special == 't');
+            if (p->flags & is_strexpr)
+                n->flags |= is_strexpr;
+            else
+                n->flags &= ~is_strexpr;
+        }
+        if (p->label) {
+            if (n->label) scxfree(n->label);
+                n->label = scxmalloc((unsigned) (strlen(p->label) + 1));
+            (void) strcpy(n->label, p->label);
+            n->flags &= ~is_leftflush;
+            n->flags |= ((p->flags & is_label) | (p->flags & is_leftflush));
+        } else if (special != 'm') {
+            n->label = NULL;
+            n->flags &= ~(is_label | is_leftflush);
+        }
+        n->flags |= p->flags & is_locked;
     }
     if (p->format) {
-	if (n->format) scxfree(n->format);
-        n->format = scxmalloc((unsigned) (strlen(p->format) + 1));
-	(void) strcpy(n->format, p->format);
+        if (n->format) scxfree(n->format);
+            n->format = scxmalloc((unsigned) (strlen(p->format) + 1));
+        (void) strcpy(n->format, p->format);
     } else if (special != 'm' && special != 'f')
-	n->format = NULL;
+        n->format = NULL;
     n->flags |= is_changed;
     n->row = p->row;
     n->col = p->col;
@@ -271,33 +259,33 @@ void copyent(register struct ent *n, register struct ent *p, int dr, int dc,
 
 int etype(register struct enode *e) {
     if (e == (struct enode *)0)
-	return NUM;
+        return NUM;
     switch (e->op) {
-	case UPPER: case LOWER: case CAPITAL:
-	case O_SCONST: case '#': case DATE: case FMT: case STINDEX:
-	case EXT: case SVAL: case SUBSTR:
-	    return (STR);
+        case UPPER: case LOWER: case CAPITAL:
+        case O_SCONST: case '#': case DATE: case FMT: case STINDEX:
+        case EXT: case SVAL: case SUBSTR:
+            return (STR);
 
-	case '?':
-	case IF:
-	    return (etype(e->e.o.right->e.o.left));
+        case '?':
+        case IF:
+            return (etype(e->e.o.right->e.o.left));
 
-	case 'f':
-	    return (etype(e->e.o.right));
+        case 'f':
+            return (etype(e->e.o.right));
 
-	case O_VAR: {
-	    register struct ent *p;
-	    p = e->e.v.vp;
-	    if (p->expr) 
-		return (p->flags & is_strexpr ? STR : NUM);
-	    else if (p->label)
-		return (STR);
-	    else
-		return (NUM);
-	    }
+        case O_VAR: {
+            register struct ent *p;
+            p = e->e.v.vp;
+            if (p->expr) 
+                return (p->flags & is_strexpr ? STR : NUM);
+            else if (p->label)
+                return (STR);
+            else
+                return (NUM);
+        }
 
-	default:
-	    return (NUM);
+        default:
+            return (NUM);
     }
     return;
 }
@@ -308,17 +296,17 @@ void erase_area(int sr, int sc, int er, int ec, int ignorelock) {
     struct ent **pp;
 
     if (sr > er) {
-	r = sr; sr = er; er = r;	
+        r = sr; sr = er; er = r;    
     }
 
     if (sc > ec) {
-	c = sc; sc = ec; ec = c;	
+        c = sc; sc = ec; ec = c;    
     }
 
     if (sr < 0)
-	sr = 0; 
+        sr = 0; 
     if (sc < 0)
-	sc = 0;
+        sc = 0;
     checkbounds(&er, &ec);
 
     // Do a lookat() for the upper left and lower right cells of the range
@@ -330,13 +318,13 @@ void erase_area(int sr, int sc, int er, int ec, int ignorelock) {
     (void) lookat(er, ec);
 
     for (r = sr; r <= er; r++) {
-	for (c = sc; c <= ec; c++) {
-	    pp = ATBL(tbl, r, c);
-	    if (*pp && (!((*pp)->flags & is_locked) || ignorelock)) {
-                mark_ent_as_deleted(*pp);
-		*pp = NULL;
-	    }
-	}
+    for (c = sc; c <= ec; c++) {
+        pp = ATBL(tbl, r, c);
+        if (*pp && (!((*pp)->flags & is_locked) || ignorelock)) {
+            mark_ent_as_deleted(*pp);
+            *pp = NULL;
+        }
+    }
     }
     return;
 }
@@ -346,130 +334,124 @@ struct enode * copye(register struct enode *e, int Rdelta, int Cdelta, int r1, i
     static struct enode *range = NULL;
 
     if (e == (struct enode *)0) {
-	ret = (struct enode *)0;
+        ret = (struct enode *)0;
 
     } else if (e->op & REDUCE) {
-	int newrow, newcol;
-	//if (freeenodes) {
-	//    ret = freeenodes;
-	//    freeenodes = ret->e.o.left;
-	//} else
-	    ret = (struct enode *) scxmalloc((unsigned) sizeof (struct enode));
-	ret->op = e->op;
-	newrow = e->e.r.left.vf & FIX_ROW ||
-		 e->e.r.left.vp->row < r1 || e->e.r.left.vp->row > r2 ||
-		 e->e.r.left.vp->col < c1 || e->e.r.left.vp->col > c2 ?
-		 e->e.r.left.vp->row :
-		 transpose ? r1 + Rdelta + e->e.r.left.vp->col - c1 :
-		 e->e.r.left.vp->row + Rdelta;
-	newcol = e->e.r.left.vf & FIX_COL ||
-		 e->e.r.left.vp->row < r1 || e->e.r.left.vp->row > r2 ||
-		 e->e.r.left.vp->col < c1 || e->e.r.left.vp->col > c2 ?
-		 e->e.r.left.vp->col :
-		 transpose ? c1 + Cdelta + e->e.r.left.vp->row - r1 :
-		 e->e.r.left.vp->col + Cdelta;
-	ret->e.r.left.vp = lookat(newrow, newcol);
-	ret->e.r.left.vf = e->e.r.left.vf;
-	newrow = e->e.r.right.vf & FIX_ROW ||
-		 e->e.r.right.vp->row < r1 || e->e.r.right.vp->row > r2 ||
-		 e->e.r.right.vp->col < c1 || e->e.r.right.vp->col > c2 ?
-		 e->e.r.right.vp->row :
-		 transpose ? r1 + Rdelta + e->e.r.right.vp->col - c1 :
-		 e->e.r.right.vp->row + Rdelta;
-	newcol = e->e.r.right.vf & FIX_COL ||
-		 e->e.r.right.vp->row < r1 || e->e.r.right.vp->row > r2 ||
-		 e->e.r.right.vp->col < c1 || e->e.r.right.vp->col > c2 ?
-		 e->e.r.right.vp->col :
-		 transpose ? c1 + Cdelta + e->e.r.right.vp->row - r1 :
-		 e->e.r.right.vp->col + Cdelta;
-	ret->e.r.right.vp = lookat(newrow, newcol);
-	ret->e.r.right.vf = e->e.r.right.vf;
-
+        int newrow, newcol;
+        //if (freeenodes) {
+        //    ret = freeenodes;
+        //    freeenodes = ret->e.o.left;
+        //} else
+        ret = (struct enode *) scxmalloc((unsigned) sizeof (struct enode));
+        ret->op = e->op;
+        newrow = e->e.r.left.vf & FIX_ROW ||
+        e->e.r.left.vp->row < r1 || e->e.r.left.vp->row > r2 ||
+        e->e.r.left.vp->col < c1 || e->e.r.left.vp->col > c2 ?
+        e->e.r.left.vp->row :
+        transpose ? r1 + Rdelta + e->e.r.left.vp->col - c1 :
+        e->e.r.left.vp->row + Rdelta;
+        newcol = e->e.r.left.vf & FIX_COL ||
+        e->e.r.left.vp->row < r1 || e->e.r.left.vp->row > r2 ||
+        e->e.r.left.vp->col < c1 || e->e.r.left.vp->col > c2 ?
+        e->e.r.left.vp->col :
+        transpose ? c1 + Cdelta + e->e.r.left.vp->row - r1 :
+        e->e.r.left.vp->col + Cdelta;
+        ret->e.r.left.vp = lookat(newrow, newcol);
+        ret->e.r.left.vf = e->e.r.left.vf;
+        newrow = e->e.r.right.vf & FIX_ROW ||
+        e->e.r.right.vp->row < r1 || e->e.r.right.vp->row > r2 ||
+        e->e.r.right.vp->col < c1 || e->e.r.right.vp->col > c2 ?
+        e->e.r.right.vp->row :
+        transpose ? r1 + Rdelta + e->e.r.right.vp->col - c1 :
+        e->e.r.right.vp->row + Rdelta;
+        newcol = e->e.r.right.vf & FIX_COL ||
+        e->e.r.right.vp->row < r1 || e->e.r.right.vp->row > r2 ||
+        e->e.r.right.vp->col < c1 || e->e.r.right.vp->col > c2 ?
+        e->e.r.right.vp->col :
+        transpose ? c1 + Cdelta + e->e.r.right.vp->row - r1 :
+        e->e.r.right.vp->col + Cdelta;
+        ret->e.r.right.vp = lookat(newrow, newcol);
+        ret->e.r.right.vf = e->e.r.right.vf;
     } else {
-	struct enode *temprange=0;
-
-	//if (freeenodes) {
-	//    ret = freeenodes;
-	//    freeenodes = ret->e.o.left;
-	//} else
-	    ret = (struct enode *) scxmalloc((unsigned) sizeof (struct enode));
-	ret->op = e->op;
-	switch (ret->op) {
-	    case SUM:
-	    case PROD:
-	    case AVG:
-	    case COUNT:
-	    case STDDEV:
-	    case MAX:
-	    case MIN:
-		temprange = range;
-		range = e->e.o.left;
-		r1 = 0;
-		c1 = 0;
-		r2 = maxrow;
-		c2 = maxcol;
-	}
-	switch (ret->op) {
-	    case 'v':
-		{
-		    int newrow, newcol;
-		    if (range && e->e.v.vp->row >= range->e.r.left.vp->row &&
-				 e->e.v.vp->row <= range->e.r.right.vp->row &&
-				 e->e.v.vp->col >= range->e.r.left.vp->col &&
-				 e->e.v.vp->col <= range->e.r.right.vp->col) {
-			newrow = range->e.r.left.vf & FIX_ROW ?
-				e->e.v.vp->row : e->e.v.vp->row + Rdelta;
-			newcol = range->e.r.left.vf & FIX_COL ?
-				e->e.v.vp->col : e->e.v.vp->col + Cdelta;
-		    } else {
-			newrow = e->e.v.vf & FIX_ROW ||
-				 e->e.v.vp->row < r1 || e->e.v.vp->row > r2 ||
-				 e->e.v.vp->col < c1 || e->e.v.vp->col > c2 ?
-				 e->e.v.vp->row :
-				 transpose ? r1 + Rdelta + e->e.v.vp->col - c1 :
-				 e->e.v.vp->row + Rdelta;
-			newcol = e->e.v.vf & FIX_COL ||
-				 e->e.v.vp->row < r1 || e->e.v.vp->row > r2 ||
-				 e->e.v.vp->col < c1 || e->e.v.vp->col > c2 ?
-				 e->e.v.vp->col :
-				 transpose ? c1 + Cdelta + e->e.v.vp->row - r1 :
-				 e->e.v.vp->col + Cdelta;
-		    }
-		    ret->e.v.vp = lookat(newrow, newcol);
-		    ret->e.v.vf = e->e.v.vf;
-		    break;
-		}
-	    case 'k':
-		ret->e.k = e->e.k;
-		break;
-	    case 'f':
-	    case 'F':
-		if ((range && ret->op == 'F') || (!range && ret->op == 'f'))
-		    Rdelta = Cdelta = 0;
-		ret->e.o.left = copye(e->e.o.left, Rdelta, Cdelta, r1, c1, r2, c2, transpose);
-		ret->e.o.right = (struct enode *)0;
- 		break;
-	    case '$':
-	    case EXT:
-		ret->e.s = scxmalloc((unsigned) strlen(e->e.s)+1);
-		(void) strcpy(ret->e.s, e->e.s);
-		if (e->op == '$')	/* Drop through if ret->op is EXT */
-		    break;
-	    default:
-		ret->e.o.left = copye(e->e.o.left, Rdelta, Cdelta, r1, c1, r2, c2, transpose);
-		ret->e.o.right = copye(e->e.o.right, Rdelta, Cdelta, r1, c1, r2, c2, transpose);
-		break;
-	}
-	switch (ret->op) {
-	    case SUM:
-	    case PROD:
-	    case AVG:
-	    case COUNT:
-	    case STDDEV:
-	    case MAX:
-	    case MIN:
-		range = temprange;
-	}
+        struct enode *temprange=0;
+        //if (freeenodes) {
+        //    ret = freeenodes;
+        //    freeenodes = ret->e.o.left;
+        //} else
+        ret = (struct enode *) scxmalloc((unsigned) sizeof (struct enode));
+        ret->op = e->op;
+        switch (ret->op) {
+            case SUM:
+            case PROD:
+            case AVG:
+            case COUNT:
+            case STDDEV:
+            case MAX:
+            case MIN:
+                temprange = range;
+                range = e->e.o.left;
+                r1 = 0;
+                c1 = 0;
+                r2 = maxrow;
+                c2 = maxcol;
+        }
+        switch (ret->op) {
+            case 'v':
+                {
+                    int newrow, newcol;
+                    if (range && e->e.v.vp->row >= range->e.r.left.vp->row &&
+                        e->e.v.vp->row <= range->e.r.right.vp->row &&
+                        e->e.v.vp->col >= range->e.r.left.vp->col &&
+                        e->e.v.vp->col <= range->e.r.right.vp->col) {
+                            newrow = range->e.r.left.vf & FIX_ROW ? e->e.v.vp->row : e->e.v.vp->row + Rdelta;
+                            newcol = range->e.r.left.vf & FIX_COL ? e->e.v.vp->col : e->e.v.vp->col + Cdelta;
+                    } else {
+                        newrow = e->e.v.vf & FIX_ROW ||
+                        e->e.v.vp->row < r1 || e->e.v.vp->row > r2 ||
+                        e->e.v.vp->col < c1 || e->e.v.vp->col > c2 ?
+                        e->e.v.vp->row : transpose ? r1 + Rdelta + e->e.v.vp->col - c1 :
+                        e->e.v.vp->row + Rdelta;
+                        newcol = e->e.v.vf & FIX_COL ||
+                        e->e.v.vp->row < r1 || e->e.v.vp->row > r2 ||
+                        e->e.v.vp->col < c1 || e->e.v.vp->col > c2 ?
+                        e->e.v.vp->col : transpose ? c1 + Cdelta + e->e.v.vp->row - r1 :
+                        e->e.v.vp->col + Cdelta;
+                    }
+                    ret->e.v.vp = lookat(newrow, newcol);
+                    ret->e.v.vf = e->e.v.vf;
+                    break;
+                }
+            case 'k':
+                ret->e.k = e->e.k;
+                break;
+            case 'f':
+            case 'F':
+                if ((range && ret->op == 'F') || (!range && ret->op == 'f'))
+                    Rdelta = Cdelta = 0;
+                ret->e.o.left = copye(e->e.o.left, Rdelta, Cdelta, r1, c1, r2, c2, transpose);
+                ret->e.o.right = (struct enode *)0;
+                 break;
+            case '$':
+            case EXT:
+                ret->e.s = scxmalloc((unsigned) strlen(e->e.s)+1);
+                (void) strcpy(ret->e.s, e->e.s);
+                if (e->op == '$')    /* Drop through if ret->op is EXT */
+                    break;
+            default:
+                ret->e.o.left = copye(e->e.o.left, Rdelta, Cdelta, r1, c1, r2, c2, transpose);
+                ret->e.o.right = copye(e->e.o.right, Rdelta, Cdelta, r1, c1, r2, c2, transpose);
+                break;
+        }
+        switch (ret->op) {
+            case SUM:
+            case PROD:
+            case AVG:
+            case COUNT:
+            case STDDEV:
+            case MAX:
+            case MIN:
+                range = temprange;
+        }
     }
     return ret;
 }
@@ -484,28 +466,28 @@ void doformat(int c1, int c2, int w, int p, int r) {
     if (c2 >= maxcols && !growtbl(GROWCOL, 0, c2)) c2 = maxcols-1 ;
     
     if (w == 0) {
-	info("Width too small - setting to 1");
-	w = 1;
+        info("Width too small - setting to 1");
+        w = 1;
     }
 
     if (usecurses && w > COLS - rescol - 2) {
-	info("Width too large - Maximum = %d", COLS - rescol - 2);
-	w = COLS - rescol - 2;
+        info("Width too large - Maximum = %d", COLS - rescol - 2);
+        w = COLS - rescol - 2;
     }
 
     if (p > w) {
-	info("Precision too large");
-	p = w;
+        info("Precision too large");
+        p = w;
     }
 
     checkbounds(&crows, &ccols);
     if (ccols < c2) {
-	error("Format statement failed to create implied column %d", c2);
-	return;
+        error("Format statement failed to create implied column %d", c2);
+        return;
     }
 
     for (i = c1; i <= c2; i++)
-	fwidth[i] = w, precision[i] = p, realfmt[i] = r;
+        fwidth[i] = w, precision[i] = p, realfmt[i] = r;
 
     //rowsinrange = 1;
     //colsinrange = fwidth[curcol];
@@ -525,17 +507,17 @@ void formatcol(int c) {
     refresh();
     oldformat = (int *)scxmalloc(arg*3*sizeof(int));
     for (i = 0; i < arg; i++) {
-	oldformat[i * 3 + 0] = fwidth[i + curcol];
-	oldformat[i * 3 + 1] = precision[i + curcol];
-	oldformat[i * 3 + 2] = realfmt[i + curcol];
+    oldformat[i * 3 + 0] = fwidth[i + curcol];
+    oldformat[i * 3 + 1] = precision[i + curcol];
+    oldformat[i * 3 + 2] = realfmt[i + curcol];
     }
     c = nmgetch();
     while (c >= 0 && c != ctl('m') && c != 'q' && c != OKEY_ESC &&
-	    c != ctl('g') && linelim < 0) {
-	if (c >= '0' && c <= '9')
-	    for (i = curcol; i < curcol + arg; i++)
-		realfmt[i] = c - '0';
-	else
+        c != ctl('g') && linelim < 0) {
+    if (c >= '0' && c <= '9')
+        for (i = curcol; i < curcol + arg; i++)
+        realfmt[i] = c - '0';
+    else
     */
     int arg = 1;
     int i;
@@ -543,83 +525,78 @@ void formatcol(int c) {
     switch (c) {
         case '<':
         case 'h':
-	case OKEY_LEFT:
-	    for (i = curcol; i < curcol + arg; i++) {
-		fwidth[i]--;
-		if (fwidth[i] < 1)
-		    fwidth[i] = 1;
-	    }
-	    //rowsinrange = 1;
-	    //colsinrange = fwidth[curcol];
-	    modflg++;
-	    break;
-	case '>':
-	case 'l':
-	case OKEY_RIGHT:
-	    for (i = curcol; i < curcol + arg; i++) {
-		fwidth[i]++;
-		if (fwidth[i] > COLS - rescol - 2)
-		    fwidth[i] = COLS - rescol - 2;
-	    }
-	    //rowsinrange = 1;
-	    //colsinrange = fwidth[curcol];
-	    modflg++;
-	    break;
-	case '-':
-	    for (i = curcol; i < curcol + arg; i++) {
-		precision[i]--;
-		if (precision[i] < 0)
-		    precision[i] = 0;
-	    }
-	    modflg++;
-	    break;
-	case '+':
-	    for (i = curcol; i < curcol + arg; i++)
-		precision[i]++;
-	    modflg++;
-	    break;
+        case OKEY_LEFT:
+            for (i = curcol; i < curcol + arg; i++) {
+                fwidth[i]--;
+                if (fwidth[i] < 1)
+                    fwidth[i] = 1;
+            }
+            //rowsinrange = 1;
+            //colsinrange = fwidth[curcol];
+            modflg++;
+            break;
+        case '>':
+        case 'l':
+        case OKEY_RIGHT:
+            for (i = curcol; i < curcol + arg; i++) {
+                fwidth[i]++;
+                if (fwidth[i] > COLS - rescol - 2)
+                    fwidth[i] = COLS - rescol - 2;
+            }
+            //rowsinrange = 1;
+            //colsinrange = fwidth[curcol];
+            modflg++;
+            break;
+        case '-':
+            for (i = curcol; i < curcol + arg; i++) {
+                precision[i]--;
+                if (precision[i] < 0)
+                    precision[i] = 0;
+            }
+            modflg++;
+            break;
+        case '+':
+            for (i = curcol; i < curcol + arg; i++)
+                precision[i]++;
+            modflg++;
+            break;
 /*
-	case ' ':
-	    if (arg == 1)
-		(void) sprintf(line,
-			"format [for column] %s ",
-			coltoa(curcol));
-	    else {
-		(void) sprintf(line,
-			"format [for columns] %s:",
-			coltoa(curcol));
-		(void) sprintf(line+strlen(line), "%s ",
-			coltoa(curcol+arg-1));
-	    }
-	    linelim = strlen(line);
-	    //insert_mode();
-	    info("Current format is %d %d %d", fwidth[curcol], precision[curcol], realfmt[curcol]);
-	    continue;
-	case '=':
-	    info("Define format type (0-9):");
-	    refresh();
-	    if ((c = nmgetch()) >= '0' && c <= '9') {
-		if (colformat[c-'0']) {
-		    (void) sprintf(line, "format %c = \"%s\"", c, colformat[c-'0']);
-		    //edit_mode();
-		    linelim = strlen(line) - 1;
-		} else {
-		    (void) sprintf(line, "format %c = \"", c);
-		    //insert_mode();
-		    linelim = strlen(line);
-		}
-		info("");
-	    } else {
-		error("Invalid format type");
-		c = -1;
-	    }
-	    continue;
-	case ctl('l'):
-	    FullUpdate++;
-	    clearok(stdscr, 1);
-	    break;
-	default:
-	    break;
+        case ' ':
+            if (arg == 1)
+                (void) sprintf(line, "format [for column] %s ", coltoa(curcol));
+            else {
+                (void) sprintf(line, "format [for columns] %s:", coltoa(curcol));
+                (void) sprintf(line+strlen(line), "%s ", coltoa(curcol+arg-1));
+            }
+            linelim = strlen(line);
+            //insert_mode();
+            info("Current format is %d %d %d", fwidth[curcol], precision[curcol], realfmt[curcol]);
+            continue;
+        case '=':
+            info("Define format type (0-9):");
+            refresh();
+            if ((c = nmgetch()) >= '0' && c <= '9') {
+                if (colformat[c-'0']) {
+                    (void) sprintf(line, "format %c = \"%s\"", c, colformat[c-'0']);
+                    //edit_mode();
+                    linelim = strlen(line) - 1;
+                } else {
+                    (void) sprintf(line, "format %c = \"", c);
+                    //insert_mode();
+                    linelim = strlen(line);
+                }
+                info("");
+            } else {
+                error("Invalid format type");
+                c = -1;
+            }
+            continue;
+        case ctl('l'):
+            FullUpdate++;
+            clearok(stdscr, 1);
+            break;
+        default:
+            break;
 */
     }
     info("Current format is %d %d %d", fwidth[curcol], precision[curcol], realfmt[curcol]);
@@ -627,20 +604,20 @@ void formatcol(int c) {
     update();
 /*  refresh();
     if (linelim < 0)
-	    if ((c = nmgetch()) == OKEY_ESC || c == ctl('g') || c == 'q') {
-		for (i = 0; i < arg; i++) {
-		    fwidth[i + curcol] = oldformat[i * 3 + 0];
-		    precision[i + curcol] = oldformat[i * 3 + 1];
-		    realfmt[i + curcol] = oldformat[i * 3 + 2];
-		}
-		modflg = mf;
-		FullUpdate++;
-		update();
-	    }
+        if ((c = nmgetch()) == OKEY_ESC || c == ctl('g') || c == 'q') {
+            for (i = 0; i < arg; i++) {
+                fwidth[i + curcol] = oldformat[i * 3 + 0];
+                precision[i + curcol] = oldformat[i * 3 + 1];
+                realfmt[i + curcol] = oldformat[i * 3 + 2];
+            }
+            modflg = mf;
+            FullUpdate++;
+            update();
+        }
     }
     scxfree((char *)oldformat);
     if (c >= 0) {
-	info("");
+        info("");
     }
 */
     return;
@@ -649,8 +626,8 @@ void formatcol(int c) {
 // Insert a single row.  It will be inserted before currow
 // if after is 0; after if it is 1.
 void insert_row(int after) {
-    int	r, c;
-    struct ent	**tmprow, **pp;
+    int    r, c;
+    struct ent    **tmprow, **pp;
     int lim = maxrow - currow + 1;
 
     if (currow > maxrow) maxrow = currow;
@@ -665,7 +642,7 @@ void insert_row(int after) {
         for (c = 0, pp = ATBL(tbl, r, 0); c < maxcols; c++, pp++)
             if (*pp) (*pp)->row = r;
     }
-    tbl[r] = tmprow;		// the last row is never used
+    tbl[r] = tmprow;        // the last row is never used
 
     modflg++;
     return;
@@ -681,33 +658,33 @@ void insert_col(int after) {
     struct frange *fr;
 
     if (curcol + after > maxcol)
-	maxcol = curcol + after;
+        maxcol = curcol + after;
     maxcol++;
 
     if ((maxcol >= maxcols) && !growtbl(GROWCOL, 0, maxcol))
-	return;
+        return;
 
     for (c = maxcol; c >= curcol + after + 1; c--) {
-	fwidth[c] = fwidth[c-1];
-	precision[c] = precision[c-1];
-	realfmt[c] = realfmt[c-1];
-	//col_hidden[c] = col_hidden[c-1];
+        fwidth[c] = fwidth[c-1];
+        precision[c] = precision[c-1];
+        realfmt[c] = realfmt[c-1];
+        //col_hidden[c] = col_hidden[c-1];
     }
     for (c = curcol + after; c - curcol - after < 1; c++) {
-    	fwidth[c] = DEFWIDTH;
-	precision[c] =  DEFPREC;
-	realfmt[c] = DEFREFMT;
-	//col_hidden[c] = FALSE;
+        fwidth[c] = DEFWIDTH;
+        precision[c] =  DEFPREC;
+        realfmt[c] = DEFREFMT;
+        //col_hidden[c] = FALSE;
     }
-	
+    
     for (r=0; r <= maxrow; r++) {
-	pp = ATBL(tbl, r, maxcol);
-	for (c = lim; --c >= 0; pp--)
-	    if ((pp[0] = pp[-1])) pp[0]->col++;
+        pp = ATBL(tbl, r, maxcol);
+        for (c = lim; --c >= 0; pp--)
+            if ((pp[0] = pp[-1])) pp[0]->col++;
 
-	pp = ATBL(tbl, r, curcol + after);
-	for (c = curcol + after; c - curcol - after < 1; c++, pp++)
-	    *pp = (struct ent *) 0;
+        pp = ATBL(tbl, r, curcol + after);
+        for (c = curcol + after; c - curcol - after < 1; c++, pp++)
+            *pp = (struct ent *) 0;
     }
 
     curcol += after;
@@ -721,8 +698,8 @@ void deleterow() {
     struct ent *p;
     struct ent *obuf = NULL;
     register struct ent **pp;
-    int			r, c, i;
-    struct ent		**tmprow;
+    int            r, c, i;
+    struct ent        **tmprow;
 
 
     if (any_locked_cells(currow, 0, currow, maxcol)) {
@@ -753,7 +730,7 @@ void deleterow() {
             tbl[r] = tbl[r + 1];
             pp = ATBL(tbl, r, 0);
             for (c = 0; c < maxcols; c++, pp++)
-        	if (*pp) (*pp)->row = r;
+                if (*pp) (*pp)->row = r;
         }
         tbl[r] = tmprow;
         
@@ -771,25 +748,25 @@ void ljustify(sr, sc, er, ec) {
     int i, j;
 
     if (sr > er) {
-	i = sr;
-	sr = er;
-	er = i;
+        i = sr;
+        sr = er;
+        er = i;
     }
     if (sc > ec) {
-	i = sc;
-	sc = ec;
-	ec = i;
+        i = sc;
+        sc = ec;
+        ec = i;
     }
     for (i = sr; i <= er; i++) {
-	for (j = sc; j <= ec; j++) {
-	    p = *ATBL(tbl, i, j);
-	    if (p && p->label) {
-		p->flags &= ~is_label;
-		p->flags |= is_leftflush | is_changed;
-		changed++;
-		modflg++;
-	    }
-	}
+        for (j = sc; j <= ec; j++) {
+            p = *ATBL(tbl, i, j);
+            if (p && p->label) {
+                p->flags &= ~is_label;
+                p->flags |= is_leftflush | is_changed;
+                changed++;
+                modflg++;
+            }
+        }
     }
     return;
 }
@@ -799,25 +776,25 @@ void rjustify(sr, sc, er, ec) {
     int i, j;
 
     if (sr > er) {
-	i = sr;
-	sr = er;
-	er = i;
+        i = sr;
+        sr = er;
+        er = i;
     }
     if (sc > ec) {
-	i = sc;
-	sc = ec;
-	ec = i;
+        i = sc;
+        sc = ec;
+        ec = i;
     }
     for (i = sr; i <= er; i++) {
-	for (j = sc; j <= ec; j++) {
-	    p = *ATBL(tbl, i, j);
-	    if (p && p->label) {
-		p->flags &= ~(is_label | is_leftflush);
-		p->flags |= is_changed;
-		changed++;
-		modflg++;
-	    }
-	}
+        for (j = sc; j <= ec; j++) {
+            p = *ATBL(tbl, i, j);
+            if (p && p->label) {
+                p->flags &= ~(is_label | is_leftflush);
+                p->flags |= is_changed;
+                changed++;
+                modflg++;
+            }
+        }
     }
     return;
 }
@@ -827,25 +804,25 @@ void center(sr, sc, er, ec) {
     int i, j;
 
     if (sr > er) {
-	i = sr;
-	sr = er;
-	er = i;
+        i = sr;
+        sr = er;
+        er = i;
     }
     if (sc > ec) {
-	i = sc;
-	sc = ec;
-	ec = i;
+        i = sc;
+        sc = ec;
+        ec = i;
     }
     for (i = sr; i <= er; i++) {
-	for (j = sc; j <= ec; j++) {
-	    p = *ATBL(tbl, i, j);
-	    if (p && p->label) {
-		p->flags &= ~is_leftflush;
-		p->flags |= is_label | is_changed;
-		changed++;
-		modflg++;
-	    }
-	}
+        for (j = sc; j <= ec; j++) {
+            p = *ATBL(tbl, i, j);
+            if (p && p->label) {
+                p->flags &= ~is_leftflush;
+                p->flags |= is_label | is_changed;
+                changed++;
+                modflg++;
+            }
+        }
     }
     return;
 }
@@ -857,8 +834,13 @@ void move_area(int dr, int dc, int sr, int sc, int er, int ec) {
     int deltar, deltac;
     int r, c;
 
-    if (sr > er) r = sr; sr = er; er = r;
-    if (sc > ec) c = sc; sc = ec; ec = c;
+    if (sr > er) r = sr;
+    sr = er;
+    er = r;
+    if (sc > ec)
+    c = sc;
+    sc = ec;
+    ec = c;
     if (sr < 0) sr = 0;
     if (sc < 0) sc = 0;
     checkbounds(&er, &ec);
@@ -1022,12 +1004,11 @@ void insert_or_edit_cell() {
 
     create_undo_action();
     copy_to_undostruct(currow, curcol, currow, curcol, 'd');
-    (void) sprintf(line, "%s %s = %s", ope, v_name(currow, curcol), inputline);
-    send_to_interp(line); 
+    (void) sprintf(interp_line, "%s %s = %s", ope, v_name(currow, curcol), inputline);
+    send_to_interp(interp_line); 
     copy_to_undostruct(currow, curcol, currow, curcol, 'a');
     end_undo_action();
 
-    line[0]='\0';
     inputline[0]='\0';
     inputline_pos = 0;
     chg_mode('.');
@@ -1048,10 +1029,14 @@ void insert_or_edit_cell() {
 
 // Send command to interpreter
 void send_to_interp(char * oper) {
-    //info(oper);
+    //line[0]='\0';
+    strcpy(line, oper);
+    //info("enviado a intérprete: %s, line);
+
     linelim = 0;
     (void) yyparse();
     if (atoi(get_conf_value("autocalc"))) EvalAll();
+    //line[0]='\0';
     return;
 }
 
@@ -1062,19 +1047,19 @@ struct ent * lookat(int row, int col) {
     checkbounds(&row, &col);
     pp = ATBL(tbl, row, col);
     if ( *pp == NULL ) {
-	//*pp = (struct ent *) scxmalloc( (unsigned) sizeof(struct ent) );
-	*pp = (struct ent *) malloc( (unsigned) sizeof(struct ent) );
-	if (row > maxrow) maxrow = row;
-	if (col > maxcol) maxcol = col;
-	(*pp)->label = (char *) 0;
-	(*pp)->row = row;
-	(*pp)->col = col;
-	(*pp)->flags = may_sync;
-	(*pp)->expr = (struct enode *) 0;
-	(*pp)->v = (double) 0.0;
-	(*pp)->format = (char *) 0;
-	(*pp)->cellerror = CELLOK;
-	(*pp)->next = NULL;
+    //*pp = (struct ent *) scxmalloc( (unsigned) sizeof(struct ent) );
+    *pp = (struct ent *) malloc( (unsigned) sizeof(struct ent) );
+    if (row > maxrow) maxrow = row;
+    if (col > maxcol) maxcol = col;
+    (*pp)->label = (char *) 0;
+    (*pp)->row = row;
+    (*pp)->col = col;
+    (*pp)->flags = may_sync;
+    (*pp)->expr = (struct enode *) 0;
+    (*pp)->v = (double) 0.0;
+    (*pp)->format = (char *) 0;
+    (*pp)->cellerror = CELLOK;
+    (*pp)->next = NULL;
     }
     return (*pp);
 }
@@ -1202,14 +1187,14 @@ struct ent * goto_bottom() {
 struct ent * back_col(int arg) {
     int c = curcol;
     while (--arg >= 0) {
-	if (c)
-	    c--;
-	else {
-            info ("At column A");
-            break; 
-       }
-	while( col_hidden[c] && c )
-	    c--;
+    if (c)
+        c--;
+    else {
+        info ("At column A");
+        break; 
+    }
+    while( col_hidden[c] && c )
+        c--;
     }
     //rowsinrange = 1;
     //colsinrange = fwidth[curcol];
@@ -1220,14 +1205,14 @@ struct ent * back_col(int arg) {
 struct ent * forw_col(int arg) {
     int c = curcol;
     while (--arg >= 0) {
-	if (c < maxcols - 1)
-	    c++;
-	else
-        if (! growtbl(GROWCOL, 0, arg))	/* get as much as needed */
-            break;
-	else
+        if (c < maxcols - 1)
             c++;
-	while (col_hidden[c] && (c < maxcols - 1))
+        else
+            if (! growtbl(GROWCOL, 0, arg))    /* get as much as needed */
+                break;
+            else
+                c++;
+        while (col_hidden[c] && (c < maxcols - 1))
             c++;
     }
     //rowsinrange = 1;
@@ -1239,18 +1224,18 @@ struct ent * forw_col(int arg) {
 struct ent * forw_row(int arg) {
     int r = currow;
     while (arg--) {
-	if (r < maxrows - 1)
-	    r++;
-	else {
+        if (r < maxrows - 1)
+            r++;
+        else {
             if (!growtbl(GROWROW, arg, 0)) {
                 error("cant grow");
                 break;
-	    } else
+            } else
                 r++;
-            }
-	    while (row_hidden[r] && (r < maxrows - 1)) {
-	        r++;
-            }
+        }
+        while (row_hidden[r] && (r < maxrows - 1)) {
+            r++;
+        }
     }
     return lookat(r, curcol);
 }
@@ -1259,13 +1244,13 @@ struct ent * forw_row(int arg) {
 struct ent * back_row(int arg) {
     int r = currow;
     while (arg--) {
-	if (r) r--;
-	else { 
+        if (r) r--;
+        else { 
             info("At row zero");
             break;
         }
-	while (row_hidden[r] && r)
-	    r--;
+        while (row_hidden[r] && r)
+            r--;
     }
     return lookat(r, curcol);
 }
@@ -1329,7 +1314,6 @@ struct ent * go_forward() {
 
     if ( ! VALID_CELL(p, r, c) && ! col_hidden[c] && ! row_hidden[r] )
         return lookat(r_ori, c_ori);
-
 }
 
 struct ent * go_backward() {
@@ -1411,72 +1395,74 @@ int is_single_command (struct block * buf, long timeout) {
 
     } else if (curmode == NORMAL_MODE && bs == 1) {
         // commands for changing mode
-        if (buf->value == ':') res = MOVEMENT_CMD;
-        else if (buf->value == '\\') res = MOVEMENT_CMD;
-        else if (buf->value == '<') res = MOVEMENT_CMD;
-        else if (buf->value == '>') res = MOVEMENT_CMD;
-        else if (buf->value == '=') res = MOVEMENT_CMD;
-        else if (buf->value == 'e') res = MOVEMENT_CMD;
-        else if (buf->value == 'E') res = MOVEMENT_CMD;
-        else if (buf->value == 'v') res = MOVEMENT_CMD;
+        if (buf->value == ':')             res = MOVEMENT_CMD;
+        else if (buf->value == '\\')       res = MOVEMENT_CMD;
+        else if (buf->value == '<')        res = MOVEMENT_CMD;
+        else if (buf->value == '>')        res = MOVEMENT_CMD;
+        else if (buf->value == '=')        res = MOVEMENT_CMD;
+        else if (buf->value == 'e')        res = MOVEMENT_CMD;
+        else if (buf->value == 'E')        res = MOVEMENT_CMD;
+        else if (buf->value == 'v')        res = MOVEMENT_CMD;
 
         // movement commands
-        else if (buf->value == 'j') res = MOVEMENT_CMD;
-        else if (buf->value == 'k') res = MOVEMENT_CMD;
-        else if (buf->value == 'h') res = MOVEMENT_CMD;
-        else if (buf->value == 'l') res = MOVEMENT_CMD;
-        else if (buf->value == '0') res = MOVEMENT_CMD;
-        else if (buf->value == '$') res = MOVEMENT_CMD;
-        else if (buf->value == OKEY_HOME) res = MOVEMENT_CMD;
-        else if (buf->value == OKEY_END) res = MOVEMENT_CMD;
-        else if (buf->value == '#') res = MOVEMENT_CMD;
-        else if (buf->value == '^') res = MOVEMENT_CMD;
-        else if (buf->value == OKEY_LEFT) res = MOVEMENT_CMD;
+        else if (buf->value == 'j')        res = MOVEMENT_CMD;
+        else if (buf->value == 'k')        res = MOVEMENT_CMD;
+        else if (buf->value == 'h')        res = MOVEMENT_CMD;
+        else if (buf->value == 'l')        res = MOVEMENT_CMD;
+        else if (buf->value == '0')        res = MOVEMENT_CMD;
+        else if (buf->value == '$')        res = MOVEMENT_CMD;
+        else if (buf->value == OKEY_HOME)  res = MOVEMENT_CMD;
+        else if (buf->value == OKEY_END)   res = MOVEMENT_CMD;
+        else if (buf->value == '#')        res = MOVEMENT_CMD;
+        else if (buf->value == '^')        res = MOVEMENT_CMD;
+        else if (buf->value == OKEY_LEFT)  res = MOVEMENT_CMD;
         else if (buf->value == OKEY_RIGHT) res = MOVEMENT_CMD;
-        else if (buf->value == OKEY_DOWN) res = MOVEMENT_CMD;
-        else if (buf->value == OKEY_UP) res = MOVEMENT_CMD;
-        else if (buf->value == ctl('f')) res = MOVEMENT_CMD;
-        else if (buf->value == ctl('b')) res = MOVEMENT_CMD;
-        else if (buf->value == ctl('a')) res = MOVEMENT_CMD;
-        else if (buf->value == 'G') res = MOVEMENT_CMD;
-        else if (buf->value == 'H') res = MOVEMENT_CMD;
-        else if (buf->value == 'M') res = MOVEMENT_CMD;
-        else if (buf->value == 'L') res = MOVEMENT_CMD;
-        else if (buf->value == ctl('y')) res = MOVEMENT_CMD;
-        else if (buf->value == ctl('e')) res = MOVEMENT_CMD;
-        else if (buf->value == ctl('l')) res = MOVEMENT_CMD;
-        else if (buf->value == 'w') res = MOVEMENT_CMD;
-        else if (buf->value == 'b') res = MOVEMENT_CMD;
+        else if (buf->value == OKEY_DOWN)  res = MOVEMENT_CMD;
+        else if (buf->value == OKEY_UP)    res = MOVEMENT_CMD;
+        else if (buf->value == ctl('f'))   res = MOVEMENT_CMD;
+        else if (buf->value == ctl('b'))   res = MOVEMENT_CMD;
+        else if (buf->value == ctl('a'))   res = MOVEMENT_CMD;
+        else if (buf->value == 'G')        res = MOVEMENT_CMD;
+        else if (buf->value == 'H')        res = MOVEMENT_CMD;
+        else if (buf->value == 'M')        res = MOVEMENT_CMD;
+        else if (buf->value == 'L')        res = MOVEMENT_CMD;
+        else if (buf->value == ctl('y'))   res = MOVEMENT_CMD;
+        else if (buf->value == ctl('e'))   res = MOVEMENT_CMD;
+        else if (buf->value == ctl('l'))   res = MOVEMENT_CMD;
+        else if (buf->value == 'w')        res = MOVEMENT_CMD;
+        else if (buf->value == 'b')        res = MOVEMENT_CMD;
 
-        else if (buf->value == 'x') res = EDITION_CMD;  // cuts a cell
-        else if (buf->value == 'u') res = EDITION_CMD;  // undo
-        else if (buf->value == ctl('r')) res = EDITION_CMD; // redo
-        else if (buf->value == '@') res = EDITION_CMD; // EvallAll 
-        else if (buf->value == '{') res = EDITION_CMD;
-        else if (buf->value == '}') res = EDITION_CMD;
-        else if (buf->value == '|') res = EDITION_CMD;
-        else if (buf->value == 'p') res = EDITION_CMD; // paste yanked cells below or right
-        else if (buf->value == 'P') res = EDITION_CMD; // paste yanked cells above or left
+        else if (buf->value == 'x')        res = EDITION_CMD;  // cuts a cell
+        else if (buf->value == 'u')        res = EDITION_CMD;  // undo
+        else if (buf->value == ctl('r'))   res = EDITION_CMD;  // redo
+        else if (buf->value == '@')        res = EDITION_CMD;  // EvallAll 
+        else if (buf->value == '{')        res = EDITION_CMD;
+        else if (buf->value == '}')        res = EDITION_CMD;
+        else if (buf->value == '|')        res = EDITION_CMD;
+        else if (buf->value == 'p')        res = EDITION_CMD;  // paste yanked cells below or right
+        else if (buf->value == 'P')        res = EDITION_CMD;  // paste yanked cells above or left
 
-        else if (isdigit(buf->value) && atoi(get_conf_value("numeric")) ) res = MOVEMENT_CMD; // repeat last command
+        else if (isdigit(buf->value) && atoi(get_conf_value("numeric")) )
+                                           res = MOVEMENT_CMD; // repeat last command
 
-        else if (buf->value == '.') res = MOVEMENT_CMD; // repeat last command
-        else if (buf->value == 'y' && is_range_selected() != -1) res = EDITION_CMD; // yank range
+        else if (buf->value == '.')        res = MOVEMENT_CMD; // repeat last command
+        else if (buf->value == 'y' && is_range_selected() != -1) 
+                                           res = EDITION_CMD;  // yank range
 
     } else if (curmode == NORMAL_MODE) {
 
         if (buf->value == 'g' && bs == 2 && (
-             buf->pnext->value == 'M' || buf->pnext->value == 'g' ||
-             buf->pnext->value == 'G' ||
-             buf->pnext->value == '0' || buf->pnext->value == '$')) res = MOVEMENT_CMD;
+              buf->pnext->value == 'M' || buf->pnext->value == 'g' ||
+              buf->pnext->value == 'G' ||
+              buf->pnext->value == '0' || buf->pnext->value == '$')) res = MOVEMENT_CMD;
         
         else if (buf->value == 'g' && bs > 2 && timeout >= COMPLETECMDTIMEOUT) res = MOVEMENT_CMD; // goto cell
                                                        // TODO add validation: buf->pnext->value debe ser letra
                                                    
-        else if (buf->value == 'S' && bs > 2 && timeout >= COMPLETECMDTIMEOUT &&                   // Show col or row
+        else if (buf->value == 'S' && bs > 2 && timeout >= COMPLETECMDTIMEOUT &&   // Show col or row
             ( buf->pnext->value == 'c' || buf->pnext->value == 'r')) res = EDITION_CMD;
 
-        else if (buf->value == 'Z' && bs >= 2 && timeout >= COMPLETECMDTIMEOUT &&                  // Zap (or hide) col or row
+        else if (buf->value == 'Z' && bs >= 2 && timeout >= COMPLETECMDTIMEOUT &&  // Zap (or hide) col or row
             ( buf->pnext->value == 'c' || buf->pnext->value == 'r')) res = EDITION_CMD;
 
         else if (buf->value == 'y' && bs == 2 &&    // yank cell
@@ -1493,7 +1479,7 @@ int is_single_command (struct block * buf, long timeout) {
             ) res = MOVEMENT_CMD;
 
         else if (buf->value == 'd' && bs == 2 &&    // cuts a cell
-            buf->pnext->value == 'd') res = EDITION_CMD;
+              buf->pnext->value == 'd') res = EDITION_CMD;
 
         else if (buf->value == '\'' && bs == 2 &&   // tick 
             ((buf->pnext->value - ('a' - 1)) < 1 || buf->pnext->value > 26)) res = MOVEMENT_CMD;
@@ -1515,26 +1501,25 @@ int is_single_command (struct block * buf, long timeout) {
 
         else if (buf->value == 'f' && bs == 2 &&    // Format col
             ( buf->pnext->value == '>' || buf->pnext->value == '<'              ||
-            buf->pnext->value == 'h'   || buf->pnext->value == OKEY_LEFT        ||
-            buf->pnext->value == 'l'   || buf->pnext->value == OKEY_RIGHT       ||
-            buf->pnext->value == '-'   || buf->pnext->value == '+' )) res = EDITION_CMD;
+              buf->pnext->value == 'h' || buf->pnext->value == OKEY_LEFT        ||
+              buf->pnext->value == 'l' || buf->pnext->value == OKEY_RIGHT       ||
+              buf->pnext->value == '-' || buf->pnext->value == '+' )) res = EDITION_CMD;
 
     } else if (curmode == VISUAL_MODE && bs == 1) {
         if (buf->value == 'j'          || buf->value == OKEY_DOWN || buf->value == 'k'      || buf->value == OKEY_UP    ||
-            buf->value == 'h'          || buf->value == OKEY_LEFT || buf->value == 'l'      || buf->value == OKEY_RIGHT ||
-            buf->value == '$'          || buf->value == '0'       || buf->value == '#'      || buf->value == '^'        ||
-            buf->value == 'y'          || buf->value == 'x'       || buf->value == 'w'      || buf->value == 'b'        ||
-            buf->value == 'H'          || buf->value == 'M'       || buf->value == 'L'      || buf->value == 'G'        ||
-            buf->value == ctl('f')     || buf->value == ctl('b')  || buf->value == ctl('a')
+              buf->value == 'h'        || buf->value == OKEY_LEFT || buf->value == 'l'      || buf->value == OKEY_RIGHT ||
+              buf->value == '$'        || buf->value == '0'       || buf->value == '#'      || buf->value == '^'        ||
+              buf->value == 'y'        || buf->value == 'x'       || buf->value == 'w'      || buf->value == 'b'        ||
+              buf->value == 'H'        || buf->value == 'M'       || buf->value == 'L'      || buf->value == 'G'        ||
+              buf->value == ctl('f')   || buf->value == ctl('b')  || buf->value == ctl('a')
         )
                 res = MOVEMENT_CMD;
 
     } else if (curmode == VISUAL_MODE && bs == 2) {
-            if ((buf->value == '\'')   ||
-                (buf->value == 'd' && buf->pnext->value == 'd')  ||
-                (buf->value == 's' && ( buf->pnext->value == 'h' || buf->pnext->value == 'j' || buf->pnext->value == 'k' || buf->pnext->value == 'l' ))
-               )
-                res = MOVEMENT_CMD;
+        if ((buf->value == '\'') || (buf->value == 'd' && buf->pnext->value == 'd')  ||
+             (buf->value == 's' && ( buf->pnext->value == 'h' || buf->pnext->value == 'j' || buf->pnext->value == 'k' || buf->pnext->value == 'l' ))
+        )
+        res = MOVEMENT_CMD;
     }
 
     return res;

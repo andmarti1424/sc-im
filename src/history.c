@@ -37,11 +37,11 @@ void load_history(struct history * h) {
     FILE *f;
 
     if ((home = getenv("HOME"))) {
-	strcpy(infofile, home);
-	strcat(infofile, "/.sciminfo");
-	if ((c = open(infofile, O_RDONLY)) > -1) {
-	    close(c);
-	    f = fopen(infofile, "r");
+    strcpy(infofile, home);
+    strcat(infofile, "/.sciminfo");
+    if ((c = open(infofile, O_RDONLY)) > -1) {
+        close(c);
+        f = fopen(infofile, "r");
             if (f == NULL) return;
             while ( feof(f) == 0 ) {
 
@@ -55,7 +55,7 @@ void load_history(struct history * h) {
                 }
             }
             fclose(f);
-	} 
+    } 
     }
 
     return;
@@ -72,9 +72,9 @@ int save_history(struct history * h) {
     struct hlist * nl = h->list;
 
     if ((home = getenv("HOME"))) {
-	strcpy(infofile, home);
-	strcat(infofile, "/.sciminfo");
-	f = fopen(infofile, "w");
+    strcpy(infofile, home);
+    strcat(infofile, "/.sciminfo");
+    f = fopen(infofile, "w");
         if (f == NULL) return -1;
 
         // voy hasta el final

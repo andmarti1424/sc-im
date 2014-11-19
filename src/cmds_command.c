@@ -12,8 +12,12 @@
 extern char * rev;
 extern struct dictionary * user_conf_d;
 
+char inputline[BUFFERSIZE];
+int inputline_pos;
+char interp_line[100];
+
 void do_commandmode(struct block * sb) {
-    char lin[100];
+    
 
     if (sb->value == OKEY_BS) {            // BS
         if (! strlen(inputline) || ! inputline_pos) {
@@ -68,28 +72,24 @@ void do_commandmode(struct block * sb) {
         } else if ( strcmp(inputline, "help") == 0 || strcmp(inputline, "h") == 0 ) {
             help();
 
-        } else if ( strcmp(inputline, "sort ") > 0 ) {
-            line[0] = '\0';
-            strcat(line, inputline);
-            send_to_interp(line); 
-            line[0] = '\0';
+        } else if ( strncmp(inputline, "sort ", 5) == 0 ) {
+            send_to_interp(inputline); 
 
-        } else if ( strcmp(inputline, "int ") > 0 ) { // send cmd to interpreter
-            strcpy(line, inputline);
-            del_range_chars(line, 0, 3);
-            send_to_interp(line);
-            line[0] = '\0';
+        } else if ( strncmp(inputline, "int ", 4) == 0 ) { // send cmd to interpreter
+            strcpy(interp_line, inputline);
+            del_range_chars(interp_line, 0, 3);
+            send_to_interp(interp_line);
 
-        } else if ( str_in_str(inputline, "color ") != -1 ) {
-            strcpy(lin, inputline);
-            del_range_chars(lin, 0, 5);
-            chg_color(lin);
+        } else if ( strncmp(inputline, "color ", 6) == 0 ) {
+            strcpy(interp_line, inputline);
+            del_range_chars(interp_line, 0, 5);
+            chg_color(interp_line);
 
-        } else if ( str_in_str(inputline, "set ") != -1 ) {
-            strcpy(lin, inputline);
-            del_range_chars(lin, 0, 3); 
-            parse_str(user_conf_d, lin);
-            info("Config value changed: %s", lin);
+        } else if ( strncmp(inputline, "set ", 4) == 0 ) {
+            strcpy(interp_line, inputline);
+            del_range_chars(interp_line, 0, 3); 
+            parse_str(user_conf_d, interp_line);
+            info("Config value changed: %s", interp_line);
 
         } else if ( strcmp(inputline, "set") == 0 ) {
             int d = user_conf_d->len;
@@ -98,13 +98,13 @@ void do_commandmode(struct block * sb) {
             get_conf_values(valores);
             show_text(valores);
 
-        } else if ( str_in_str(inputline, "e csv") != -1 || str_in_str(inputline, "e tab") != -1 ) {
+        } else if ( strncmp(inputline, "e csv", 5) == 0 || strncmp(inputline, "e tab", 5) == 0 ) {
             do_export();
 
-        } else if ( str_in_str(inputline, "version") != -1 ) {
+        } else if ( strcmp(inputline, "version") == 0 ) {
             show_text(rev);
 
-        } else if ( str_in_str(inputline, "!") != -1 ) {
+        } else if ( strncmp(inputline, "!", 1) == 0 ) {
             del_range_chars(inputline, 0, 0); 
             exec_cmd(inputline);
 
@@ -122,8 +122,7 @@ void do_commandmode(struct block * sb) {
         // si hay en historial algun item con texto igual al del comando que se ejecuta
         // a partir de la posicion 2, se lo coloca al comiendo de la lista (indica que es lo mas reciente ejecutado).
         int moved = move_item_from_history_by_str(commandline_history, inputline, -1);
-        if (!moved)
-            add(commandline_history, inputline);
+        if (!moved) add(commandline_history, inputline);
         commandline_history->pos = 0;
 
         chg_mode('.');
@@ -134,6 +133,7 @@ void do_commandmode(struct block * sb) {
     } else if (isprint(sb->value)) {        //  ESCRIBO UN NUEVO CHAR
         ins_in_line(sb->value);
         mvwprintw(input_win, 0, 0 + rescol, ":%s", inputline);
+        wmove(input_win, 0, inputline_pos + 1 + rescol);
         wrefresh(input_win);
         
         //if (sb->value < 256 && sb->value > 31 && commandline_history->pos == 0) { // solo si edito el nuevo comando
@@ -144,12 +144,9 @@ void do_commandmode(struct block * sb) {
         }
 
     }
-    show_header(input_win);
+    //show_header(input_win); // NO DESCOMENTAR.
     return;
 }
-
-char inputline[BUFFERSIZE];
-int inputline_pos;
 
 void ins_in_line(int d) {
     //error(">>%d             ", d);
