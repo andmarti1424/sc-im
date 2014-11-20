@@ -276,18 +276,8 @@ void do_normalmode(struct block * buf) {
             }
             break;
 
-        case 'S': // Show col or row
-            // anulo el efecto multiplicador
-            if (cmd_multiplier > 0) cmd_multiplier = 0;
-            if (bs > 2 && buf->pnext->value == 'c' || buf->pnext->value == 'r') {                
-                (void) sprintf(interp_line, "show %s", parse_cell_name(2, buf));
-                send_to_interp(interp_line);
-                update();
-            }
-            break;
-
-        // Zr Zc Zr4 ZcF
-        case 'Z': // Zap col or row
+        // Zr Zc - Zap col or row
+        case 'Z': 
              // limpio el efecto multiplicador del buffer.
              if (cmd_multiplier > 0) {
                  int i, cm = cmd_multiplier + 1;
@@ -296,14 +286,10 @@ void do_normalmode(struct block * buf) {
                  }
                  bs = get_bufsize(buf);
              }
-             if (bs > 2) { // sacar?
-                 (void) sprintf(interp_line, "hide %s %d", parse_cell_name(2, buf), 1); //sacar?
-             } else if (bs == 2 ) {
-                 if (buf->pnext->value == 'r') {
-                     (void) sprintf(interp_line, "hide %d %d", currow, cmd_multiplier + 1);
-                 } else if (buf->pnext->value == 'c') {
-                     (void) sprintf(interp_line, "hide %s %d", coltoa(curcol), cmd_multiplier + 1);
-                 }
+             if (buf->pnext->value == 'r') {
+                hide_row(currow, cmd_multiplier + 1);
+             } else if (buf->pnext->value == 'c') {
+                hide_col(curcol, cmd_multiplier + 1);
              }
              send_to_interp(interp_line);
              cmd_multiplier = 0;

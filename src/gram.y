@@ -22,7 +22,6 @@
     struct ent_ptr ent;
     struct enode * enode;
     char * sval;
-    char cval;
     struct range_s rval; // no debiera usarse en futuro
 }
 
@@ -282,8 +281,7 @@
 command: S_LET var_or_range '=' e { let($2.left.vp, $4); }
         |       S_LET var_or_range '='
                                 { $2.left.vp->v = (double) 0.0;
-                                  if ($2.left.vp->expr &&
-                                        !($2.left.vp->flags & is_strexpr)) {
+                                  if ($2.left.vp->expr && !($2.left.vp->flags & is_strexpr)) {
                                     efree($2.left.vp->expr);
                                     $2.left.vp->expr = NULL;
                                   }
@@ -301,44 +299,38 @@ command: S_LET var_or_range '=' e { let($2.left.vp, $4); }
     |    S_CENTER var_or_range       { center($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col); }
     |    S_FORMAT COL NUMBER NUMBER NUMBER { doformat($2,$2,$3,$4,$5); }
 
-    |    S_SHOW COL              { show_col($2, 1); }
-    |    S_SHOW NUMBER           { show_row($2, 1); }
-    |    S_HIDE COL              { hide_col($2, 1); }
-    |    S_HIDE NUMBER           { hide_row($2, 1); }
-    |    S_HIDE COL NUMBER       { hide_col($2, $3); } /* para comandos ZcA . sacar ?*/
-    |    S_HIDE NUMBER NUMBER    { hide_row($2, $3); } /* para comandos Zr8 . sacar ?*/
+    |    S_HIDE COL               { hide_col($2, 1); }        // hide de una unica columna
+    |    S_HIDE NUMBER            { hide_row($2, 1); }        // hide de una unica fila
+    |    S_SHOW COL               { show_col($2, 1); }        // show de una unica columna
+    |    S_SHOW NUMBER            { show_row($2, 1); }        // show de una unica fila
 
-/* para agregar 
-    |    S_SHOW COL ':' COL      { showcol($2, $4); }
-    |    S_SHOW NUMBER ':' NUMBER { showrow($2, $4); }
-    |    S_HIDE COL ':' COL    { int c = curcol, arg;
-                      if ($2 < $4) {
-                        curcol = $2;
-                        arg = $4 - $2 + 1;
-                      } else {
-                          curcol = $4;
-                          arg = $2 - $4 + 1;
-                      }
-                      hidecol(arg);
-                      curcol = c < curcol ? c :
-                          c < curcol + arg ? curcol :
-                          c - arg;
-                    }
-    |    S_HIDE NUMBER ':' NUMBER
-                    { int r = currow, arg;
-                      if ($2 < $4) {
-                        currow = $2;
-                        arg = $4 - $2 + 1;
-                      } else {
-                          currow = $4;
-                          arg = $2 - $4 + 1;
-                      }
-                      hiderow(arg);
-                      currow = r < currow ? r :
-                          r < currow + arg ? currow :
-                          r - arg;
-                    }
-*/
+    |    S_SHOW COL ':' COL       { show_col($2, $4-$2+1); }  // show de un rango de columnas
+    |    S_SHOW NUMBER ':' NUMBER { show_row($2, $4-$2+1); }  // show de un rango de filas
+    |    S_HIDE COL ':' COL       {                           // hide de un rango de columnas
+             int c = curcol, arg;
+             if ($2 < $4) {
+                  curcol = $2;
+                  arg = $4 - $2 + 1;
+             } else {
+                  curcol = $4;
+                  arg = $2 - $4 + 1;
+             }
+             hide_col($2, arg);
+             curcol = c < curcol ? c : c < curcol + arg ? curcol : c - arg;
+         }
+    |    S_HIDE NUMBER ':' NUMBER { int r = currow, arg;      // hide de un rango de filas
+             if ($2 < $4) {
+                  currow = $2;
+                  arg = $4 - $2 + 1;
+             } else {
+                  currow = $4;
+                  arg = $2 - $4 + 1;
+             }
+             hide_row($2, arg);
+             currow = r < currow ? r : r < currow + arg ? currow : r - arg;
+         }
+
+
     |    S_MARK COL var_or_range { set_cell_mark($2 + 97, $3.left.vp->row, $3.left.vp->col); }
     |    S_MARK COL var_or_range var_or_range { 
                                           set_cell_mark('0', $3.left.vp->row, $3.left.vp->col);

@@ -75,6 +75,12 @@ void do_commandmode(struct block * sb) {
         } else if ( strncmp(inputline, "sort ", 5) == 0 ) {
             send_to_interp(inputline); 
 
+        } else if ( strncmp(inputline, "hide ", 5) == 0 ) {
+            send_to_interp(inputline); 
+
+        } else if ( strncmp(inputline, "show ", 5) == 0 ) {
+            send_to_interp(inputline); 
+
         } else if ( strncmp(inputline, "int ", 4) == 0 ) { // send cmd to interpreter
             strcpy(interp_line, inputline);
             del_range_chars(interp_line, 0, 3);

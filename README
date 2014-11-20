@@ -5,7 +5,6 @@ A spreadsheet is an interactive computer application program for organization an
 The user of the spreadsheet can make changes in any stored value and observe the effects on calculated values. This makes the spreadsheet useful for "what-if" analysis since many cases can be rapidly investigated without tedious manual recalculation. Modern spreadsheet software can have multiple interacting sheets, and can display data either as text and numerals, or in graphical form.
 SCIM uses ncurses for visual interface and has vim-like keybindings and some functional similarities with vim text editor.
 
-	
 Some of the features of SCIM:
 
     Key-mappings

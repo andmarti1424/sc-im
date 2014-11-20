@@ -1459,9 +1459,6 @@ int is_single_command (struct block * buf, long timeout) {
         else if (buf->value == 'g' && bs > 2 && timeout >= COMPLETECMDTIMEOUT) res = MOVEMENT_CMD; // goto cell
                                                        // TODO add validation: buf->pnext->value debe ser letra
                                                    
-        else if (buf->value == 'S' && bs > 2 && timeout >= COMPLETECMDTIMEOUT &&   // Show col or row
-            ( buf->pnext->value == 'c' || buf->pnext->value == 'r')) res = EDITION_CMD;
-
         else if (buf->value == 'Z' && bs >= 2 && timeout >= COMPLETECMDTIMEOUT &&  // Zap (or hide) col or row
             ( buf->pnext->value == 'c' || buf->pnext->value == 'r')) res = EDITION_CMD;
 

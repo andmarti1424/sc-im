@@ -6,7 +6,7 @@
 #include "../sc.h"
 #include "../macros.h"
 
-#define freen(x)	nofreeNULL(x)
+#define freen(x) nofreeNULL(x)
 void nofreeNULL(void *x) {
     if (x != NULL)
         free(x);
