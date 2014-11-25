@@ -157,6 +157,14 @@ void do_normalmode(struct block * buf) {
             }
 
         // GOTO goto
+        case ctl('a'):
+            struct ent * e = go_home(); 
+            curcol = e->col;
+            currow = e->row;
+            unselect_ranges();
+            update();
+            break;
+
         case 'g':
             if (buf->pnext->value == '0') {                               // g0
                 curcol = go_bol()->col;
