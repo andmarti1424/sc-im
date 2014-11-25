@@ -47,7 +47,7 @@ char * long_help[] = {
 "            H           Go to first row seen on screen.",
 "            L           Go to last row seen on screen.",
 "            M           Go to middle row seen on screen.",
-"            gg          Go to home (first cell of spreadsheet).",
+"            gg  , c-a:  Go to home (first cell of spreadsheet).",
 "            G           Go to last valid cell of spreadsheet.",
 "            gG          Go to last valid cell of spreadsheet.",
 "            c-f , c-b:  Scrolls down and up full screen.",
