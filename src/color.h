@@ -36,7 +36,7 @@ struct ucolor {
     int bold;
     int dim;
     int reverse;
-    int stdout;
+    int standout;
     int underline;
     int blink;
 };

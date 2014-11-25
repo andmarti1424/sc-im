@@ -24,7 +24,7 @@ void start_default_ucolors() {
         ucolors[ i ].bold = 0;
         ucolors[ i ].dim = 0;
         ucolors[ i ].reverse = 0;
-        ucolors[ i ].stdout = 0;
+        ucolors[ i ].standout = 0;
         ucolors[ i ].underline = 0;
         ucolors[ i ].blink = 0;
     }
@@ -103,7 +103,7 @@ void set_ucolor(WINDOW * w, int uc) {
     if (ucolors[uc].bold)      attr |= A_BOLD;
     if (ucolors[uc].dim)       attr |= A_DIM;
     if (ucolors[uc].reverse)   attr |= A_REVERSE;
-    if (ucolors[uc].stdout)    attr |= A_STANDOUT;
+    if (ucolors[uc].standout)  attr |= A_STANDOUT;
     if (ucolors[uc].blink)     attr |= A_BLINK;
     if (ucolors[uc].underline) attr |= A_UNDERLINE;
     wattrset (w, attr | COLOR_PAIR(uc) );
@@ -203,7 +203,7 @@ void chg_color(char * str) {
     if (get(d, "bold")      != '\0')     ucolors[ type ].bold      = atoi(get(d, "bold"));
     if (get(d, "dim")       != '\0')     ucolors[ type ].dim       = atoi(get(d, "dim"));
     if (get(d, "reverse")   != '\0')     ucolors[ type ].reverse   = atoi(get(d, "reverse"));
-    if (get(d, "stdout")    != '\0')     ucolors[ type ].stdout    = atoi(get(d, "stdout"));
+    if (get(d, "standout")    != '\0')   ucolors[ type ].standout  = atoi(get(d, "standout"));
     if (get(d, "blink")     != '\0')     ucolors[ type ].blink     = atoi(get(d, "blink"));
     if (get(d, "underline") != '\0')     ucolors[ type ].underline = atoi(get(d, "underline"));
 

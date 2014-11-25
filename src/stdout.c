@@ -541,6 +541,7 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
                 mvwinchnstr(win, row + RESROW + 1 - offscr_sc_rows - q_row_hidden, c, cht, fieldlen);
                 for (i=0; i < fieldlen; i++) {
                     caracter = cht[i] & A_CHARTEXT;
+                    if ( ! caracter ) caracter = ' '; // this is for NetBSD compatibility
                     mvwprintw(win, row + RESROW + 1 - offscr_sc_rows - q_row_hidden, c + i, "%c", caracter);
                 }
             }

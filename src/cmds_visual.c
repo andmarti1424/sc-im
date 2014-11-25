@@ -1,6 +1,7 @@
 #include "buffer.h"
 #include "marks.h"
 #include <curses.h>
+#include <stdlib.h>
 #include "macros.h"
 #include "cmds.h"
 #include "sc.h"

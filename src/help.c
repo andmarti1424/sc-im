@@ -241,7 +241,7 @@ char * long_help[] = {
 "                         changes a color definition.",
 "                         example of use:  :color type=HEADINGS bold=0 fg=BLACK bg=YELLOW",
 "                         color parameters have to be one of the following:",
-"                              type, fg, bg, bold, dim, reverse, stdout, underline, blink.",
+"                              type, fg, bg, bold, dim, reverse, standout, underline, blink.",
 "                         the first three are mandatory",
 "                         type has to be one of the following:",
 "                              HEADINGS, MODE, NUMBER, STRING, EXPRESSION, CELL_ERROR,",
