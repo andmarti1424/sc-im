@@ -9,6 +9,7 @@ char interp_line[100];
 
 void do_normalmode(struct block * buf) {
     int bs = get_bufsize(buf);
+    struct ent * e;
 
     switch (buf->value) {
 
@@ -71,7 +72,7 @@ void do_normalmode(struct block * buf) {
         case '\'':
             if (bs != 2) break;
             unselect_ranges();
-            struct ent * e = tick(buf->pnext->value);
+            e = tick(buf->pnext->value);
             if (row_hidden[e->row]) {
                 error("Cell row is hidden");
                 break;
@@ -110,9 +111,9 @@ void do_normalmode(struct block * buf) {
 
         case 'w':
             {
-            struct ent * ent = go_forward();  
-            currow = ent->row;
-            curcol = ent->col;
+            e = go_forward();  
+            currow = e->row;
+            curcol = e->col;
             unselect_ranges();
             update();
             break;
@@ -120,9 +121,9 @@ void do_normalmode(struct block * buf) {
 
         case 'b':
             {
-            struct ent * ent = go_backward();  
-            currow = ent->row;
-            curcol = ent->col;
+            e = go_backward();  
+            currow = e->row;
+            curcol = e->col;
             unselect_ranges();
             update();
             break;
@@ -148,9 +149,9 @@ void do_normalmode(struct block * buf) {
 
         case 'G': // goto end
             {
-            struct ent * ent = go_end();  
-            currow = ent->row;
-            curcol = ent->col;
+            e = go_end();  
+            currow = e->row;
+            curcol = e->col;
             unselect_ranges();
             update();
             break;
@@ -158,7 +159,7 @@ void do_normalmode(struct block * buf) {
 
         // GOTO goto
         case ctl('a'):
-            struct ent * e = go_home(); 
+            e = go_home(); 
             curcol = e->col;
             currow = e->row;
             unselect_ranges();
@@ -173,14 +174,14 @@ void do_normalmode(struct block * buf) {
                 curcol = go_eol()->col;
 
             } else if (buf->pnext->value == 'g') {                        // gg
-                struct ent * e = go_home(); 
+                e = go_home(); 
                 curcol = e->col;
                 currow = e->row;
 
             } else if (buf->pnext->value == 'G') {                        // gG
-                struct ent * ent = go_end();  
-                currow = ent->row;
-                curcol = ent->col;
+                e = go_end();  
+                currow = e->row;
+                curcol = e->col;
 
             } else if (buf->pnext->value == 'M') {                        // gM
                 curcol = horiz_middle()->col;
