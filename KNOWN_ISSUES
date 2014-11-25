@@ -1,4 +1,4 @@
-Problem: Edit mode doesn't show cursor with TMUX
-Cause: Tmux incompatibily with ncurses cursor mode number 2 (very visible mode).
+Problem: Edit mode doesn't show cursor with TMUX, nor NetBSD
+Cause: Tmux / NetBSD incompatibily with ncurses cursor mode number 2 (very visible mode).
 Solution: Replace the number '2' by the number '1' in line 182 of stdout.c, and
 build scim again.

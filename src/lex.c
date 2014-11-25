@@ -66,6 +66,8 @@ struct key statres[] = {
     { 0, 0 }
 };
 
+#include "macros.h"
+
 static k = 10;
 
 int yylex() {
