@@ -51,7 +51,7 @@ void do_visualmode(struct block * sb) {
         int n, i;
         if (sb->value == ctl('b')) { 
             n = LINES - RESROW - 1;
-            if (atoi(get_conf_value("half_page_scroll"))) n = n / 2;
+            if (get_conf_value("half_page_scroll")) n = n / 2;
         } else n = 1;
 
         for (i=0; i < n; i++)
@@ -68,7 +68,7 @@ void do_visualmode(struct block * sb) {
         int n, i;
         if (sb->value == ctl('f')) { 
             n = LINES - RESROW - 1;
-            if (atoi(get_conf_value("half_page_scroll"))) n = n / 2;
+            if (get_conf_value("half_page_scroll")) n = n / 2;
         } else n = 1;
 
         for (i=0; i < n; i++)
