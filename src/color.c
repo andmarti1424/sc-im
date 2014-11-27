@@ -51,8 +51,11 @@ void start_default_ucolors() {
 
     ucolors[ INFO_MSG        ].fg = CYAN;
     ucolors[ INFO_MSG        ].bg = BLACK;
+    ucolors[ INFO_MSG        ].bold = 1;
     ucolors[ ERROR_MSG       ].fg = RED;
-    ucolors[ ERROR_MSG       ].bg = BLACK;
+    ucolors[ ERROR_MSG       ].bg = WHITE;
+    ucolors[ ERROR_MSG       ].reverse = 1;
+    ucolors[ ERROR_MSG       ].bold = 1;
 
     ucolors[ MODE            ].fg = WHITE;
     ucolors[ MODE            ].bg = BLACK;

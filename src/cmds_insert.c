@@ -6,6 +6,7 @@
 #include "sc.h"            // for rescol
 
 void do_insertmode(struct block * sb) {
+
     if (sb->value == OKEY_LEFT) {          // LEFT
         if (inputline_pos) inputline_pos--;
         show_header(input_win);
@@ -34,9 +35,11 @@ void do_insertmode(struct block * sb) {
     } else if ( strlen(inputline) < (COLS - 14) && isprint(sb->value)) { //  ESCRIBO UN NUEVO CHAR
         ins_in_line(sb->value);
         show_header(input_win);
+
     } else {
         move(0, rescol + inputline_pos + 1);
         show_header(input_win);
     }
+
     return;
 }

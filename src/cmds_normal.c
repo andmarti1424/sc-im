@@ -110,24 +110,20 @@ void do_normalmode(struct block * buf) {
             }
 
         case 'w':
-            {
             e = go_forward();  
             currow = e->row;
             curcol = e->col;
             unselect_ranges();
             update();
             break;
-            }
 
         case 'b':
-            {
             e = go_backward();  
             currow = e->row;
             curcol = e->col;
             unselect_ranges();
             update();
             break;
-            }
 
         case 'H':
             currow = vert_top()->row;
@@ -148,14 +144,12 @@ void do_normalmode(struct block * buf) {
             break;
 
         case 'G': // goto end
-            {
             e = go_end();  
             currow = e->row;
             curcol = e->col;
             unselect_ranges();
             update();
             break;
-            }
 
         // GOTO goto
         case ctl('a'):
@@ -291,7 +285,7 @@ void do_normalmode(struct block * buf) {
              if (cmd_multiplier > 0) {
                  int i, cm = cmd_multiplier + 1;
                  for (i = bs / cm; i < bs; i++) {
-                     del_buf(buf, bs/cm);
+                     del_buf(buf, bs / cm);
                  }
                  bs = get_bufsize(buf);
              }

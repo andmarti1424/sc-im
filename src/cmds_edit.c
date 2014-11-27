@@ -20,6 +20,7 @@ int get_key() {
 }
 
 void do_editmode(struct block * sb) {
+
     if (sb->value == 'h') {                // LEFT
         inputline_pos = back_char();
 
@@ -116,6 +117,7 @@ void do_editmode(struct block * sb) {
              }
              if (sb->value == 'c') chg_mode(insert_edit_submode);
         }
+
     } else if (find_val(sb, OKEY_ENTER)) { // ENTER
         insert_or_edit_cell(); 
         return;
@@ -260,6 +262,7 @@ int start_edit_mode(struct block * buf, char type) {
             (void) sprintf(inputline, "%s", line);
         }
         insert_edit_submode='=';
+
     } else if (type == 's') { // string value
         if (! ((p1)->label || (p1)->flags & is_strexpr)) {
             return 0;
@@ -276,5 +279,6 @@ int start_edit_mode(struct block * buf, char type) {
         linelim = -1;
         (void) sprintf(inputline, "%s", line);
     }
+
     return 1;
 }

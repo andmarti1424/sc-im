@@ -55,6 +55,10 @@
 
 %token S_SHOW
 %token S_HIDE
+%token S_SHOWROW
+%token S_HIDEROW
+%token S_SHOWCOL
+%token S_HIDECOL
 %token S_MARK
 %token S_INSERTCOL
 %token S_OPENCOL
@@ -299,14 +303,20 @@ command: S_LET var_or_range '=' e { let($2.left.vp, $4); }
     |    S_CENTER var_or_range       { center($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col); }
     |    S_FORMAT COL NUMBER NUMBER NUMBER { doformat($2,$2,$3,$4,$5); }
 
-    |    S_HIDE COL               { hide_col($2, 1); }        // hide de una unica columna
-    |    S_HIDE NUMBER            { hide_row($2, 1); }        // hide de una unica fila
-    |    S_SHOW COL               { show_col($2, 1); }        // show de una unica columna
-    |    S_SHOW NUMBER            { show_row($2, 1); }        // show de una unica fila
+/* para compatibilidad con sc */
+    |    S_HIDE COL                  { hide_col($2, 1); }        // hide de una unica columna
+    |    S_HIDE NUMBER               { hide_row($2, 1); }        // hide de una unica fila
+    |    S_SHOW COL                  { show_col($2, 1); }        // show de una unica columna
+    |    S_SHOW NUMBER               { show_row($2, 1); }        // show de una unica fila
 
-    |    S_SHOW COL ':' COL       { show_col($2, $4-$2+1); }  // show de un rango de columnas
-    |    S_SHOW NUMBER ':' NUMBER { show_row($2, $4-$2+1); }  // show de un rango de filas
-    |    S_HIDE COL ':' COL       {                           // hide de un rango de columnas
+/* agregados para sicm */
+    |    S_HIDECOL COL               { hide_col($2, 1); }        // hide de una unica columna
+    |    S_SHOWCOL COL               { show_col($2, 1); }        // show de una unica columna
+    |    S_HIDEROW NUMBER            { hide_row($2, 1); }        // hide de una unica fila
+    |    S_SHOWROW NUMBER            { show_row($2, 1); }        // show de una unica fila
+    |    S_SHOWCOL COL ':' COL       { show_col($2, $4-$2+1); }  // show de un rango de columnas
+    |    S_SHOWROW NUMBER ':' NUMBER { show_row($2, $4-$2+1); }  // show de un rango de filas
+    |    S_HIDECOL COL ':' COL       {                           // hide de un rango de columnas
              int c = curcol, arg;
              if ($2 < $4) {
                   curcol = $2;
@@ -318,7 +328,7 @@ command: S_LET var_or_range '=' e { let($2.left.vp, $4); }
              hide_col($2, arg);
              curcol = c < curcol ? c : c < curcol + arg ? curcol : c - arg;
          }
-    |    S_HIDE NUMBER ':' NUMBER { int r = currow, arg;      // hide de un rango de filas
+    |    S_HIDEROW NUMBER ':' NUMBER { int r = currow, arg;      // hide de un rango de filas
              if ($2 < $4) {
                   currow = $2;
                   arg = $4 - $2 + 1;

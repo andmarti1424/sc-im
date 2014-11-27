@@ -72,13 +72,11 @@ void do_commandmode(struct block * sb) {
         } else if ( strcmp(inputline, "help") == 0 || strcmp(inputline, "h") == 0 ) {
             help();
 
-        } else if ( strncmp(inputline, "sort ", 5) == 0 ) {
-            send_to_interp(inputline); 
-
-        } else if ( strncmp(inputline, "hide ", 5) == 0 ) {
-            send_to_interp(inputline); 
-
-        } else if ( strncmp(inputline, "show ", 5) == 0 ) {
+        } else if ( strncmp(inputline, "hiderow", 7) == 0 ||
+        strncmp(inputline, "showrow", 7) == 0 ||
+        strncmp(inputline, "showcol", 7) == 0 ||
+        strncmp(inputline, "hidecol", 7) == 0 ||
+        strncmp(inputline, "sort ", 5) == 0 ) {
             send_to_interp(inputline); 
 
         } else if ( strncmp(inputline, "int ", 4) == 0 ) { // send cmd to interpreter

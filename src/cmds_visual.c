@@ -228,7 +228,6 @@ void do_visualmode(struct block * sb) {
 
     // shift range
     } else if (sb->value == 's') {
-        ;
         struct srange * sr;
         struct srange * srn = NULL;
         int p = is_range_selected();
