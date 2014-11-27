@@ -79,6 +79,12 @@ void do_commandmode(struct block * sb) {
         strncmp(inputline, "sort ", 5) == 0 ) {
             send_to_interp(inputline); 
 
+        } else if ( strncmp(inputline, "hiddenrows", 10) == 0 ) {
+            show_hiddenrows();
+                    
+        } else if ( strncmp(inputline, "hiddencols", 10) == 0 ) {
+            show_hiddencols();
+
         } else if ( strncmp(inputline, "int ", 4) == 0 ) { // send cmd to interpreter
             strcpy(interp_line, inputline);
             del_range_chars(interp_line, 0, 3);

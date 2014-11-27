@@ -1,6 +1,7 @@
 #include "sc.h"
 #include "macros.h"
 #include "undo.h"
+#include "hide_show.h"
 extern struct undo undo_item;
 
 /* mark a row as hidden */
@@ -92,5 +93,37 @@ void show_col(int from_col, int arg) {
     while (from_col <= c2)
         col_hidden[ from_col++ ] = FALSE;
     end_undo_action();
+    return;
+}
+
+void show_hiddenrows() {
+    int r, c = 0;
+    for (r = 0; r < maxrow; r++) {
+        if (row_hidden[r]) c++; 
+    }
+    char valores[12 * c + 20];
+    valores[0]='\0';
+    strcpy(valores, "Hidden rows:\n");
+    for (r = 0; r < maxrow; r++) {
+       if (row_hidden[r]) sprintf(valores, "%s- %d\n", valores, r);
+    }
+    show_text(valores);
+
+    return;
+}
+
+void show_hiddencols() {
+    int c, count = 0;
+    for (c = 0; c < maxcol; c++) {
+        if (col_hidden[c]) count++; 
+    }
+    char valores[8 * c + 20];
+    valores[0]='\0';
+    strcpy(valores, "Hidden cols:\n");
+    for (c = 0; c < maxcol; c++) {
+       if (col_hidden[c]) sprintf(valores, "%s- %s\n", valores, coltoa(c));
+    }
+    show_text(valores);
+
     return;
 }
