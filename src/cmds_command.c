@@ -18,7 +18,6 @@ char interp_line[100];
 
 void do_commandmode(struct block * sb) {
     
-
     if (sb->value == OKEY_BS) {            // BS
         if (! strlen(inputline) || ! inputline_pos) {
             show_header(input_win);
@@ -108,27 +107,6 @@ void do_commandmode(struct block * sb) {
             get_conf_values(valores);
             show_text(valores);
 
-        } else if ( strncmp(inputline, "i csv ", 6) == 0 || strncmp(inputline, "i tab ", 6) == 0 ) {
-            char delim;
-            if ( strncmp(inputline, "i csv ", 6) == 0) delim = ',';
-            else delim = '\t';
-
-            strcpy(interp_line, inputline);
-            del_range_chars(interp_line, 0, 5);
-            if ( ! strlen(interp_line) ) {
-                error("Path to file to import is missing !");
-            } else if (modcheck()) {
-                error("Please save current file before loading a new one.");
-            } else {
-                delete_structures();
-                create_structures();
-                import_csv(interp_line, delim);
-                update(); 
-            }
-
-        } else if ( strncmp(inputline, "e csv", 5) == 0 || strncmp(inputline, "e tab", 5) == 0 ) {
-            do_export();
-
         } else if ( strcmp(inputline, "version") == 0 ) {
             show_text(rev);
 
@@ -141,6 +119,48 @@ void do_commandmode(struct block * sb) {
 
         } else if ( inputline[0] == 'x' ) {
             if ( savefile() == 0 ) shall_quit = 1;
+
+        } else if ( strncmp(inputline, "e csv", 5)  == 0 ||
+                    strncmp(inputline, "e! tab", 6) == 0 ||
+                    strncmp(inputline, "e! csv", 6) == 0 ||
+                    strncmp(inputline, "e tab", 5)  == 0 ) {
+            do_export();
+
+        } else if (
+                    strncmp(inputline, "i csv ", 6)  == 0 ||
+                    strncmp(inputline, "i! csv ", 7) == 0 ||
+                    strncmp(inputline, "i tab ", 6)  == 0 ||
+                    strncmp(inputline, "i! tab ", 7) == 0 
+                  ) {
+            
+            int force_rewrite = 0;
+            char delim;
+            char cline [BUFFERSIZE];
+            strcpy(cline, inputline);
+
+            if (inputline[1] == '!') {
+                force_rewrite = 1;
+                del_range_chars(cline, 1, 1);
+            }
+
+            if ( strncmp(cline, "i csv ", 6) == 0) delim = ',';
+            else delim = '\t';
+
+            //strcpy(cline, inputline);
+            del_range_chars(cline, 0, 5);
+            if ( ! strlen(cline) ) {
+                error("Path to file to import is missing !");
+            } else if ( modflg && ! force_rewrite ) {
+                error("Changes were made since last save. Save current file or use '!' to force the import.");
+            } else {
+                delete_structures();
+                create_structures();
+                //info("%s", cline);
+                //return;
+                import_csv(cline, delim);
+                modflg = 0;
+                update(); 
+            }
 
         } else {
             error("COMMAND NOT FOUND !");

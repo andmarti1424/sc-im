@@ -109,10 +109,10 @@ void erasedb() {
     *curfile = '\0';
 }
 
-// Funcion que verifica si un archivo sufrio modificaciones.
+// This function checks if a file suffered mods since it was open
 int modcheck() {
     if (modflg) {
-    error("File not saved since last change. Add '!' to force");
+        error("File not saved since last change. Add '!' to force");
         return(1);
     }
     return 0;
@@ -122,26 +122,37 @@ int modcheck() {
 // returns 0 if OK
 // return -1 on error
 int savefile() {
-    if (! curfile[0] && strlen(inputline) < 3) {
+    int force_rewrite = 0;
+    char name[BUFFERSIZE];
+
+    if (! curfile[0] && strlen(inputline) < 3) { // casos ":w" ":w!" ":x" ":x!"
         error("There is no filename");
         return -1;
-
-    } else if (strlen(inputline) > 2) {
-        // hacer una nueva funcion que elimine un rango DONE 
-        // del_char(inputline, 0);
-        // del_char(inputline, 0);
-        del_range_chars(inputline, 0, 1);
-        strcpy(curfile, inputline);
     }
 
-    if (writefile(curfile, 0, 0, maxrow, maxcol) < 0) {
+    if (inputline[1] == '!') force_rewrite = 1;
+
+    strcpy(name, inputline);
+
+    del_range_chars(name, 0, 1 + force_rewrite);
+
+    if (! force_rewrite && file_exists(name)) {
+        error("File already exists. Use \"!\" to force rewrite.");
+        return -1;
+    }
+
+    if (strlen(inputline) > 2) {
+        strcpy(curfile, name);
+    }
+
+    if (writefile(curfile, 0, 0, maxrow, maxcol) < 0) { //TODO FILEEXISTS
         error("File could not be saved");
         return -1;
     }
     return 0;
 }
 
-// Funcion que graba un archivo  TODO reescribir
+// Funcion que graba un archivo
 int writefile(char *fname, int r0, int c0, int rn, int cn) {
     register FILE *f;
     char save[PATHLEN];
@@ -399,12 +410,14 @@ int readfile(char *fname, int eraseflg) {
     }
     }*/
 
-    if (eraseflg && strcmp(fname, curfile) && modcheck(" first")) return 0;
+    if (eraseflg && strcmp(fname, curfile) && modcheck(" first"))
+        return 0;
 
     if (fname[0] == '-' && fname[1] == '\0') {
-    f = stdin;
-    *save = '\0';
+        f = stdin;
+        *save = '\0';
     } else {
+
     if ((f = openfile(save, &pid, &rfd)) == NULL) {
         error("Can't read file \"%s\"", save);
         //autolabel = tempautolabel;
@@ -423,11 +436,11 @@ int readfile(char *fname, int eraseflg) {
     //savefd = macrofd;
     //macrofd = rfd;
     while (!brokenpipe && fgets(line, sizeof(line), f)) {
-    if (line[0] == '|' && pid != 0) {
-        line[0] = ' ';
-    }
-    linelim = 0;
-    if (line[0] != '#') (void) yyparse();
+        if (line[0] == '|' && pid != 0) {
+            line[0] = ' ';
+        }
+        linelim = 0;
+        if (line[0] != '#') (void) yyparse();
     }
     //macrofd = savefd;
     --loading;
@@ -437,12 +450,13 @@ int readfile(char *fname, int eraseflg) {
     }
     linelim = -1;
     if (eraseflg) {
-    (void) strcpy(curfile, save);
-    modflg = 0;
-    cellassign = 0;
-    if (autorun && !skipautorun) (void) readfile(autorun, 0);
-    skipautorun = 0;
-    EvalAll();
+        (void) strcpy(curfile, save);
+        modflg = 0;
+        cellassign = 0;
+        if (autorun && !skipautorun)
+            (void) readfile(autorun, 0);
+        skipautorun = 0;
+        EvalAll();
     }
     //autolabel = tempautolabel;
     return 1;
@@ -744,38 +758,47 @@ int import_csv(char * fname, char d) {
 void unspecial(FILE *f, char *str, int delim);
 
 void do_export() {
+    int force_rewrite = 0;
     char type_export[4] = "";
     char ruta[PATHLEN];
+    char linea[BUFFERSIZE];
 
-    del_range_chars(inputline, 0, 1); // elimino 'e ' del inputline
+    if (inputline[1] == '!') force_rewrite = 1;
+    strcpy(linea, inputline); // copio a una nueva variable para no afectar el historial de comandos
+    del_range_chars(linea, 0, 1 + force_rewrite); // elimino 'e ' o 'e! ' del inputline
 
-    // primero obtengo el tipo de formato al cual se exportará la planilla
-    if (str_in_str(inputline, "csv") == 0) {
+    // obtengo el tipo de formato al cual se exportará la planilla
+    if (str_in_str(linea, "csv") == 0) {
         strcpy(type_export, "csv");
-    } else if (str_in_str(inputline, "tab") == 0) {
+    } else if (str_in_str(linea, "tab") == 0) {
         strcpy(type_export, "tab");
     } 
 
     // luego obtengo la ruta y denominación del archivo a grabar.
     // si se ingresa una como parametro, se la toma.
+    if (strlen(linea) > 4) {   // 'csv '
+        del_range_chars(linea, 0, 3); // elimino 'csv '
+        strcpy(ruta, linea);
+
     // si no se ingresa una, se toma el nombre de curfile y se le agrega el tipo de extensión (csv o tab)
     // se verifica si el nombre actual termina con ".sc" y se lo quita si es necesario.
-    if (strlen(inputline) > 4) {   // 'csv '
-        del_range_chars(inputline, 0, 3); // elimino 'csv '
-        strcpy(ruta, inputline);
     } else if (curfile[0]) {
-        char * ext;
         strcpy(ruta, curfile);
-    if ((ext = strrchr(curfile, '.')) != NULL)
-            del_range_chars(ruta, strlen(ruta)-strlen(ext), strlen(ext));
-        add_char(ruta, '.', strlen(ruta));
-        strcat(ruta, type_export);
-        info(ruta);
+        char * ext = strrchr(ruta, '.');
+        if (ext != NULL) del_range_chars(ruta, strlen(ruta) - strlen(ext), strlen(ruta)-1);
+        sprintf(ruta, "%s.%s", ruta, type_export);
+
     } else {
         error("No filename specified !");
         return;
     }
 
+    if (! force_rewrite && file_exists(ruta) && strlen(ruta) > 0) {
+        error("File %s already exists. Use \"!\" to force rewrite.", ruta);
+        return;
+    }
+
+    // llamo a las rutinas de exportacion
     if (strcmp(type_export, "csv") == 0) {
         export_delim(ruta, ',', 0, 0, maxrow, maxcol);
     } if (strcmp(type_export, "tab") == 0) {
@@ -1070,3 +1093,14 @@ void printfile(char *fname, int r0, int c0, int rn, int cn) {
 
 
 */
+
+// function that checks if a file exists.
+// returns 1 if so. returns 0 otherwise.
+int file_exists(const char * fname) {
+    FILE * file;
+    if (file = fopen(fname, "r")) {
+        fclose(file);
+        return 1;
+    }
+    return 0;
+}
