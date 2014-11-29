@@ -686,6 +686,57 @@ void print_options(FILE *f) {
 }
 
 
+// Importación de CSV a SC
+int import_csv(char * fname, char d) {
+
+    register FILE * f;
+    //int pid = 0;
+    //int rfd = STDOUT_FILENO;
+    int r = 0, c = 0;
+    char line_in[FBUFLEN];
+    char line_interp[FBUFLEN] = "";    
+    char * token;
+
+    char delim[2] = "";
+    add_char(delim, d, 0);
+
+    //if ((f = openfile(fname, & pid, & rfd)) == NULL) {
+    if ((f = fopen(fname , "r")) == NULL) {
+        error("Can't read file \"%s\"", fname);
+        return -1;
+    }
+
+    // recorro archivo csv
+    while ( ! feof(f) && (fgets(line_in, sizeof(line_in), f) != NULL) ) {        
+
+        // rompo la cadena por delimitador
+        token = strtok(line_in, delim);
+        c = 0;
+        while( token != NULL ) {
+            clean_carrier(token);
+            if (isnumeric(token)) {
+                sprintf(line_interp, "let %s%d=%s", coltoa(c), r, token);
+            //} else if (token[0] == '"') {
+            //    sprintf(line_interp, "label %s%d=\"%s\"", coltoa(c), r, token);
+            } else {
+                sprintf(line_interp, "label %s%d=\"%s\"", coltoa(c), r, token);
+            }
+            send_to_interp(line_interp);
+            c++;
+            token = strtok(NULL, ",");
+        }     
+        
+        r++;
+    }
+
+    //closefile(f, pid, rfd);
+    fclose(f);
+
+    EvalAll();
+
+    return 0;
+}
+
 
 
 // Exportación a CSV y TAB

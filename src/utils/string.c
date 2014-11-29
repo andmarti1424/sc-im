@@ -8,6 +8,7 @@
 
 // Funcion que elimina un caracter de una cadena.
 // La posicion del caracter a eliminar es indicada como parametro.
+// 0 es la primera posición
 // retorna 0 si OK, -1 en caso negativo.
 int del_char(char * str, int posicion) {
     int i, slen = strlen(str);
@@ -150,4 +151,32 @@ char * ltrim(char * string, char junk) {
         }
     } while (*original++ != '\0');
     return string;
+}
+
+// this function tells is a string represents a numeric value
+// returns 1 if that is the case. 0 otherwise
+int isnumeric(char * string) {
+    int i, len = strlen(string);
+    int res = 1;
+    for (i=0; i<len; i++) {
+        if ( string[i] != '.' && string[i] != '-' && ! isdigit(string[i]) ) {
+            res = 0;
+            break;
+        }
+    }
+    return res;
+}
+
+// clean \r and \n from a string
+// returns 1 if changes were made
+int clean_carrier(char * string) {
+    int i, changes = 0, len = strlen(string);
+    for (i=0; i<len; i++) {
+        if ( string[i] == '\r' || string[i] == '\n' ) {
+            del_char(string, i);
+            len--;
+            changes = 1;
+        }
+    }
+    return changes;
 }

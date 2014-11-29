@@ -108,6 +108,24 @@ void do_commandmode(struct block * sb) {
             get_conf_values(valores);
             show_text(valores);
 
+        } else if ( strncmp(inputline, "i csv ", 6) == 0 || strncmp(inputline, "i tab ", 6) == 0 ) {
+            char delim;
+            if ( strncmp(inputline, "i csv ", 6) == 0) delim = ',';
+            else delim = '\t';
+
+            strcpy(interp_line, inputline);
+            del_range_chars(interp_line, 0, 5);
+            if ( ! strlen(interp_line) ) {
+                error("Path to file to import is missing !");
+            } else if (modcheck()) {
+                error("Please save current file before loading a new one.");
+            } else {
+                delete_structures();
+                create_structures();
+                import_csv(interp_line, delim);
+                update(); 
+            }
+
         } else if ( strncmp(inputline, "e csv", 5) == 0 || strncmp(inputline, "e tab", 5) == 0 ) {
             do_export();
 
