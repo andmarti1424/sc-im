@@ -84,6 +84,7 @@ void do_normalmode(struct block * buf) {
             currow = e->row;
             curcol = e->col;
             update();
+            break;
 
         // CTRL f
         case ctl('f'):

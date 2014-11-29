@@ -12,6 +12,7 @@
 #include "yank.h"
 #include "cmds.h"
 #include "file.h"
+#include "marks.h"
 
 #define DEFCOLDELIM ':'
 
@@ -240,42 +241,45 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
     (void) fprintf(f, "# You almost certainly shouldn't edit it.\n\n");
     print_options(f);
     for (c = 0; c < COLFORMATS; c++)
-    if (colformat[c])
+        if (colformat[c])
         (void) fprintf (f, "format %d = \"%s\"\n", c, colformat[c]);
     for (c = c0; c <= cn; c++)
-    if (fwidth[c] != DEFWIDTH || precision[c] != DEFPREC || realfmt[c] != DEFREFMT)
-        (void) fprintf (f, "format %s %d %d %d\n", coltoa(c), fwidth[c], precision[c], realfmt[c]);
+        if (fwidth[c] != DEFWIDTH || precision[c] != DEFPREC || realfmt[c] != DEFREFMT)
+            (void) fprintf (f, "format %s %d %d %d\n", coltoa(c), fwidth[c], precision[c], realfmt[c]);
     for (c = c0; c <= cn; c++)
         if (col_hidden[c])
             (void) fprintf(f, "hide %s\n", coltoa(c));
     for (r = r0; r <= rn; r++)
-    if (row_hidden[r])
-        (void) fprintf(f, "hide %d\n", r);
+        if (row_hidden[r])
+            (void) fprintf(f, "hide %d\n", r);
 
     //write_ranges(f);
     //write_franges(f);
     //write_colors(f, 0);
     //write_cranges(f);
+    write_marks(f);
 
     if (mdir) 
-    (void) fprintf(f, "mdir \"%s\"\n", mdir);
+        (void) fprintf(f, "mdir \"%s\"\n", mdir);
     if (autorun) 
-    (void) fprintf(f, "autorun \"%s\"\n", autorun);
+        (void) fprintf(f, "autorun \"%s\"\n", autorun);
+
     for (c = 0; c < FKEYS; c++)
-    if (fkey[c]) (void) fprintf(f, "fkey %d = \"%s\"\n", c + 1, fkey[c]);
+        if (fkey[c]) (void) fprintf(f, "fkey %d = \"%s\"\n", c + 1, fkey[c]);
 
     write_cells(f, r0, c0, rn, cn, r0, c0);
+
     for (r = r0; r <= rn; r++) {
-    pp = ATBL(tbl, r, c0);
-    for (c = c0; c <= cn; c++, pp++)
-        if (*pp) {
-        if ((*pp)->flags & is_locked)
-            (void) fprintf(f, "lock %s%d\n", coltoa((*pp)->col), (*pp)->row);
-        /*if ((*pp)->nrow >= 0) {
-            (void) fprintf(f, "addnote %s ", v_name((*pp)->row, (*pp)->col));
-            (void) fprintf(f, "%s\n", r_name((*pp)->nrow, (*pp)->ncol, (*pp)->nlastrow, (*pp)->nlastcol));
-        }*/
-        }
+        pp = ATBL(tbl, r, c0);
+        for (c = c0; c <= cn; c++, pp++)
+            if (*pp) {
+                if ((*pp)->flags & is_locked)
+                    (void) fprintf(f, "lock %s%d\n", coltoa((*pp)->col), (*pp)->row);
+                /*if ((*pp)->nrow >= 0) {
+                    (void) fprintf(f, "addnote %s ", v_name((*pp)->row, (*pp)->col));
+                    (void) fprintf(f, "%s\n", r_name((*pp)->nrow, (*pp)->ncol, (*pp)->nlastrow, (*pp)->nlastcol));
+                }*/
+            }
     }
     /*
      * Don't try to combine these into a single fprintf().  v_name() has
@@ -285,6 +289,23 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
     fprintf(f, "goto %s", v_name(currow, curcol));
     //fprintf(f, " %s\n", v_name(strow, stcol));
     fprintf(f, "\n");
+}
+
+void write_marks(register FILE *f) {
+    int i;
+    struct mark * m;
+
+    for ( i='a'; i<='z'; i++ ) {
+        m = get_mark((char) i);
+    
+        if ( m->row == -1 && m->row == -1) {        
+            fprintf(f, "mark %c %s%d %s%d\n", i, coltoa(m->rng->tlcol), m->rng->tlrow, coltoa(m->rng->brcol), m->rng->brrow);
+        } else if ( m->row != 0 && m->row != 0 ) {
+            fprintf(f, "mark %c %s%d\n", i, coltoa(m->col), m->row);
+        }
+    }
+
+    return;
 }
 
 void write_cells(register FILE *f, int r0, int c0, int rn, int cn, int dr, int dc) {
