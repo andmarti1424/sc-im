@@ -55,11 +55,11 @@ void do_visualmode(struct block * sb) {
         } else n = 1;
 
         for (i=0; i < n; i++)
-            if (r->orig_row < r->brrow) {
-                if (r->tlrow <  r->brrow) r->brrow--;
+            if (r->orig_row < r->brrow && r->tlrow < r->brrow) {
+                while (row_hidden[-- r->brrow]);
                 currow = r->brrow;
-            } else {
-                if (r->tlrow <= r->brrow && r->tlrow-1 >= 0) r->tlrow--;
+            } else if (r->tlrow <= r->brrow && r->tlrow-1 >= 0) {
+                while (row_hidden[-- r->tlrow]);
                 currow = r->tlrow;
             }
 
@@ -72,33 +72,31 @@ void do_visualmode(struct block * sb) {
         } else n = 1;
 
         for (i=0; i < n; i++)
-            if (r->orig_row <= r->tlrow) {
-                if (r->tlrow <= r->brrow && r->brrow+1 < maxrows) r->brrow++;
+            if (r->orig_row <= r->tlrow && r->tlrow <= r->brrow && r->brrow+1 < maxrows) {
+                while (row_hidden[++ r->brrow]);
                 currow = r->brrow;
-            } else {
-                if (r->tlrow <  r->brrow) r->tlrow++;
+            } else if (r->tlrow <  r->brrow) {
+                while (row_hidden[++ r->tlrow]);
                 currow = r->tlrow;
             }
 
     // LEFT
     } else if (sb->value == OKEY_LEFT || sb->value == 'h') {
-        if (r->orig_col < r->brcol) {
-            if (r->tlcol < r->brcol) r->brcol--;
+        if (r->orig_col < r->brcol && r->tlcol < r->brcol) {
+            while (col_hidden[-- r->brcol]);
             curcol = r->brcol;
-        } else {
-            if (r->tlcol <= r->brcol && r->tlcol-1 >= 0) r->tlcol--;
+        } else if (r->tlcol <= r->brcol && r->tlcol-1 >= 0) {
+            while (col_hidden[-- r->tlcol]);
             curcol = r->tlcol;
         }
 
     // RIGHT
     } else if (sb->value == OKEY_RIGHT || sb->value == 'l') {
-        if (r->orig_col <= r->tlcol) {
-            if (r->tlcol <= r->brcol && r->brcol+2 < maxcols) {
-                r->brcol++;
-                curcol = r->brcol;
-            }
-        } else {
-            if (r->tlcol <= r->brcol) r->tlcol++;
+        if (r->orig_col <= r->tlcol && r->tlcol <= r->brcol && r->brcol+2 < maxcols) {
+            while (col_hidden[++ r->brcol]);
+            curcol = r->brcol;
+        } else if (r->tlcol <= r->brcol) {
+            while (col_hidden[++ r->tlcol]);
             curcol = r->tlcol;
         }
 
@@ -155,6 +153,13 @@ void do_visualmode(struct block * sb) {
         if (get_mark(sb->pnext->value)->row == -1) return;
 
         struct ent * e = tick(sb->pnext->value);
+        if (row_hidden[e->row]) {
+            error("Cell row is hidden");
+            return;
+        } else if (col_hidden[e->col]) {
+            error("Cell column is hidden");
+            return;
+        }
         r->tlrow = r->tlrow < e->row ? r->tlrow : e->row;
         r->tlcol = r->tlcol < e->col ? r->tlcol : e->col;
         r->brrow = r->brrow > e->row ? r->brrow : e->row;
