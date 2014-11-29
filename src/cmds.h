@@ -29,6 +29,9 @@ void del_selected_cells();
 struct ent * lookat(int row, int col); // devuelvo puntero a un ent de una celda. se crea si no existe.
 void cleanent(struct ent * p);         // pongo en cero contenido de ent. no libera memoria.
 void clearent(struct ent * v);         // libero memoria de ent.
+int locked_cell(int r, int c);
+int any_locked_cells(int r1, int c1, int r2, int c2);
+
 void scroll_left (int n);
 void scroll_right (int n);
 void scroll_down(int n);

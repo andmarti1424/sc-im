@@ -64,6 +64,7 @@ struct dictionary * predefined_conf_d;
 struct history * commandline_history;
 
 void signals();
+void create_structures();
 
 int main (int argc, char **argv) {
 
@@ -82,20 +83,14 @@ int main (int argc, char **argv) {
     predefined_conf_d = (struct dictionary *) create_dictionary();
     store_default_config_values();
     
-    // inicializo array de marcas
-    create_mark_array();
-
-    // create last command buffer
-    lastcmd_buffer = (struct block *) create_buf();
-
-    // create yank list structure
-    init_yanklist();
-    
     // create command line history structure
     commandline_history = (struct history *) create_history(':');
     load_history(commandline_history);
 
-    // cargo la planilla pasada como parametro
+    // create basic structures that will depend on the loaded file
+    create_structures();
+
+    // load spreasdsheet pass as argv
     char * revi;
     if ((revi = strrchr(argv[0], '/')) != NULL)
         progname = revi + 1;
@@ -129,6 +124,42 @@ int main (int argc, char **argv) {
     return exit_app(0);
 }
 
+void create_structures() {
+    // inicializo array de marcas
+    create_mark_array();
+
+    // create last command buffer
+    lastcmd_buffer = (struct block *) create_buf();
+
+    // create yank list structure
+    init_yanklist();
+}    
+
+// delete basic structures that depend on the loaded file
+void delete_structures() {
+
+    // Free marks array
+    free_marks_array();
+    
+    // Free yanklist
+    free_yanklist();
+
+    // Erase last_command buffer
+    erase_buf(lastcmd_buffer);
+
+    // Free ranges
+    free_ranges();
+
+    // Free undo list - from start of list
+    clear_undo_list();
+
+    // free deleted ents
+    flush_saved();
+
+    // Free ents of tbl
+    erasedb();
+}
+
 int exit_app(int status) {
 
     // delete user and predefined config dictionaries
@@ -142,30 +173,13 @@ int exit_app(int status) {
 
     if (commandline_history != NULL) destroy_history(commandline_history);
 
+    delete_structures();
+
     // Free mappings
     del_maps();
 
-    // Free ranges
-    free_ranges();
-
-    // Free marks array
-    free_marks_array();
-  
-    // Free yanklist
-    free_yanklist();
-
-    // Free undo list - from start of list
-    clear_undo_list();
-
-    // free deleted ents
-    flush_saved();
-
-    // Erase stdin and last_command buffer
+    // Erase stdin
     erase_buf(buffer);
-    erase_buf(lastcmd_buffer);
-
-    // Free ents of tbl
-    erasedb();
 
     //timeout(-1);
 
@@ -197,29 +211,6 @@ void load_sc(int argc, char **argv) {
     }
 } 
 
-// Returns 1 if cell is locked, 0 otherwise
-int locked_cell(int r, int c) {
-    struct ent *p = *ATBL(tbl, r, c);
-    if (p && (p->flags & is_locked)) {
-    info("Cell %s%d is locked", coltoa(c), r) ;
-    return(1);
-    }
-    return(0);
-}
-
-// Check if area contains locked cells
-int any_locked_cells(int r1, int c1, int r2, int c2) {
-    int r, c;
-    struct ent *p ;
-
-    for (r = r1; r <= r2; r++)
-    for (c = c1; c <= c2; c++) {
-        p = *ATBL(tbl, r, c);
-        if (p && (p->flags & is_locked))
-        return(1);
-    }
-    return(0);
-}
 // set the calculation order 
 void setorder(int i) {
     if ((i == BYROWS) || (i == BYCOLS)) calc_order = i;

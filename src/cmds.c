@@ -1274,7 +1274,6 @@ struct ent * go_end() {
         return lookat(raux, caux);
 }
 
-// Row hidden? Col hidden?
 struct ent * go_home() {
     return lookat(0, 0);
 }
@@ -1371,6 +1370,30 @@ struct ent * horiz_middle() {
             return lookat(currow, i);
         }
     }
+}
+
+// Returns 1 if cell is locked, 0 otherwise
+int locked_cell(int r, int c) {
+    struct ent *p = *ATBL(tbl, r, c);
+    if (p && (p->flags & is_locked)) {
+    info("Cell %s%d is locked", coltoa(c), r) ;
+    return(1);
+    }
+    return(0);
+}
+
+// Check if area contains locked cells
+int any_locked_cells(int r1, int c1, int r2, int c2) {
+    int r, c;
+    struct ent *p ;
+
+    for (r = r1; r <= r2; r++)
+    for (c = c1; c <= c2; c++) {
+        p = *ATBL(tbl, r, c);
+        if (p && (p->flags & is_locked))
+        return(1);
+    }
+    return(0);
 }
 
 // Funcion que indica si el contenido completo de un buffer

@@ -310,38 +310,45 @@ command: S_LET var_or_range '=' e { let($2.left.vp, $4); }
     |    S_SHOW NUMBER               { show_row($2, 1); }        // show de una unica fila
 
 /* agregados para sicm */
-    |    S_HIDECOL COL               { hide_col($2, 1); }        // hide de una unica columna
-    |    S_SHOWCOL COL               { show_col($2, 1); }        // show de una unica columna
-    |    S_HIDEROW NUMBER            { hide_row($2, 1); }        // hide de una unica fila
-    |    S_SHOWROW NUMBER            { show_row($2, 1); }        // show de una unica fila
-    |    S_SHOWCOL COL ':' COL       { show_col($2, $4-$2+1); }  // show de un rango de columnas
-    |    S_SHOWROW NUMBER ':' NUMBER { show_row($2, $4-$2+1); }  // show de un rango de filas
-    |    S_HIDECOL COL ':' COL       {                           // hide de un rango de columnas
-             int c = curcol, arg;
-             if ($2 < $4) {
-                  curcol = $2;
-                  arg = $4 - $2 + 1;
-             } else {
-                  curcol = $4;
-                  arg = $2 - $4 + 1;
-             }
-             hide_col($2, arg);
-             curcol = c < curcol ? c : c < curcol + arg ? curcol : c - arg;
-         }
-    |    S_HIDEROW NUMBER ':' NUMBER { int r = currow, arg;      // hide de un rango de filas
-             if ($2 < $4) {
-                  currow = $2;
-                  arg = $4 - $2 + 1;
-             } else {
-                  currow = $4;
-                  arg = $2 - $4 + 1;
-             }
-             hide_row($2, arg);
-             currow = r < currow ? r : r < currow + arg ? currow : r - arg;
-         }
+    |    S_HIDECOL COL               {
+                                       hide_col($2, 1); }        // hide de una unica columna
+    |    S_SHOWCOL COL               {
+                                       show_col($2, 1); }        // show de una unica columna
+    |    S_HIDEROW NUMBER            {
+                                       hide_row($2, 1); }        // hide de una unica fila
+    |    S_SHOWROW NUMBER            {
+                                       show_row($2, 1); }        // show de una unica fila
+    |    S_SHOWCOL COL ':' COL       {
+                                       show_col($2, $4-$2+1); }  // show de un rango de columnas
+    |    S_SHOWROW NUMBER ':' NUMBER {
+                                       show_row($2, $4-$2+1); }  // show de un rango de filas
+    |    S_HIDECOL COL ':' COL       { 
+                                       int c = curcol, arg;
+                                       if ($2 < $4) {
+                                            curcol = $2;
+                                            arg = $4 - $2 + 1;
+                                       } else {
+                                            curcol = $4;
+                                            arg = $2 - $4 + 1;
+                                       }
+                                       hide_col($2, arg);        // hide de un rango de columnas
+                                       curcol = c < curcol ? c : c < curcol + arg ? curcol : c - arg;
+                                     }
+    |    S_HIDEROW NUMBER ':' NUMBER {
+                                       int r = currow, arg;      // hide de un rango de filas
+                                       if ($2 < $4) {
+                                           currow = $2;
+                                           arg = $4 - $2 + 1;
+                                       } else {
+                                           currow = $4;
+                                           arg = $2 - $4 + 1;
+                                       }
+                                       hide_row($2, arg);
+                                       currow = r < currow ? r : r < currow + arg ? currow : r - arg;
+                                     }
 
+    |    S_MARK COL var_or_range     { set_cell_mark($2 + 97, $3.left.vp->row, $3.left.vp->col); }
 
-    |    S_MARK COL var_or_range { set_cell_mark($2 + 97, $3.left.vp->row, $3.left.vp->col); }
     |    S_MARK COL var_or_range var_or_range { 
                                           set_cell_mark('0', $3.left.vp->row, $3.left.vp->col);
                                           set_cell_mark('1', $4.left.vp->row, $4.left.vp->col);
@@ -350,7 +357,8 @@ command: S_LET var_or_range '=' e { let($2.left.vp, $4); }
                                           srange * sr = (srange *) get_range_by_marks('0', '1');
                                           set_range_mark($2 + 97, sr); }
 
-    |    S_SORT range STRING {            sortrange($2.left.vp, $2.right.vp, $3); }
+    |    S_SORT range STRING {            sortrange($2.left.vp, $2.right.vp, $3);
+                             }
                                           
                                           /* para debug
                                           wtimeout(input_win, -1);
@@ -369,6 +377,28 @@ command: S_LET var_or_range '=' e { let($2.left.vp, $4); }
 */
 
     |    S_GOTO var_or_range     { moveto($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col, -1, -1); }
+
+
+    |    S_NMAP STRING STRING           {
+                                          add_map($2, $3, 'n');
+                                          scxfree($2);
+                                          scxfree($3);
+                                        }
+
+    |    S_IMAP STRING STRING 
+                                        {
+                                          add_map($2, $3, 'i');
+                                          scxfree($2);
+                                          scxfree($3);
+                                        }
+
+    |    S_COLOR STRING                 {  
+#ifdef USECOLORS
+                                          chg_color($2);
+#endif
+                                          scxfree($2);
+                                        }
+
 
 /*
     |    S_DEFINE strarg { struct ent_ptr arg1, arg2;
@@ -514,27 +544,6 @@ command: S_LET var_or_range '=' e { let($2.left.vp, $4); }
                       scxfree($1); }
 
 */
-    |    S_NMAP STRING STRING
-                    {
-                                          add_map($2, $3, 'n');
-                      scxfree($2);
-                      scxfree($3);
-                                        }
-
-        |    S_IMAP STRING STRING 
-                                        {
-                                          add_map($2, $3, 'i');
-                      scxfree($2);
-                      scxfree($3);
-                                        }
-
-        |    S_COLOR STRING          {  
-#ifdef USECOLORS
-                          chg_color($2);
-#endif
-                                          scxfree($2);
-                        }
-
     |    // nothing
     |    error;
 term:           var                     { $$ = new_var(O_VAR, $1); }
