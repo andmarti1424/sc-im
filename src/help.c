@@ -285,7 +285,7 @@ char * long_help[] = {
 "                         The format is similar:",
 "                         Ex.: color \"type=HEADINGS fg=BLACK bg=YELLOW bold=0\"",
 "",
-",
+"",
 "            :! cmd       executes command 'cmd' in shell",
 "",
 "",
