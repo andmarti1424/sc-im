@@ -10,26 +10,25 @@ void getnum(int r0, int c0, int rn, int cn, int fd) {
     struct ent    *p;
     int        r, c;
 
-    for (r = r0; r <= rn; r++) {
-    for (c = c0, pp = ATBL(tbl, r, c); c <= cn; pp++, c++) {
-        *line = '\0';
-        p = *pp;
-        if (p)
-        if (p->cellerror)
-            sprintf(line, "%s", (*pp)->cellerror == CELLERROR ?  "ERROR" : "INVALID");
-        else if (p->flags & is_valid)
-            sprintf(line, "%.15g", p->v);
-        if (c < cn)
-        strcat(line, "\t");
-        else
-        strcat(line, "\n");
-        write(fd, line, strlen(line));
-        if (brokenpipe) {
-        linelim = -1;
-        return;
+    for (r = r0; r <= rn; r++)
+        for (c = c0, pp = ATBL(tbl, r, c); c <= cn; pp++, c++) {
+            *line = '\0';
+            p = *pp;
+            if (p)
+                if (p->cellerror)
+                    sprintf(line, "%s", (*pp)->cellerror == CELLERROR ?  "ERROR" : "INVALID");
+                else if (p->flags & is_valid)
+                    sprintf(line, "%.15g", p->v);
+            if (c < cn)
+                strcat(line, "\t");
+            else
+                strcat(line, "\n");
+            write(fd, line, strlen(line));
+            if (brokenpipe) {
+                linelim = -1;
+                return;
+            }
         }
-    }
-    }
     linelim = -1;
 }
 
@@ -38,35 +37,34 @@ void fgetnum(int r0, int c0, int rn, int cn, int fd) {
     struct ent    *p;
     int        r, c;
 
-    for (r = r0; r <= rn; r++) {
-    for (c = c0, pp = ATBL(tbl, r, c); c <= cn; pp++, c++) {
-        *line = '\0';
-        p = *pp;
-        if (p) {
-        if (p->cellerror)
-            sprintf(line, "%s", p->cellerror == CELLERROR ?  "ERROR" : "INVALID");
-        else if (p->flags & is_valid) {
-            if (p->format) {
-            if (*(p->format) == ctl('d')) {
-                time_t i = (time_t) (p->v);
-                strftime(line, sizeof(line), (p->format)+1, localtime(&i));
-            } else
-                format(p->format, precision[c], p->v, line, sizeof(line));
-            } else
-            engformat(realfmt[c], fwidth[c], precision[c], p->v, line, sizeof(line));
+    for (r = r0; r <= rn; r++)
+        for (c = c0, pp = ATBL(tbl, r, c); c <= cn; pp++, c++) {
+            *line = '\0';
+            p = *pp;
+            if (p) {
+                if (p->cellerror)
+                    sprintf(line, "%s", p->cellerror == CELLERROR ?  "ERROR" : "INVALID");
+                else if (p->flags & is_valid) {
+                    if (p->format) {
+                        if (*(p->format) == ctl('d')) {
+                            time_t i = (time_t) (p->v);
+                            strftime(line, sizeof(line), (p->format)+1, localtime(&i));
+                        } else
+                            format(p->format, precision[c], p->v, line, sizeof(line));
+                    } else
+                        engformat(realfmt[c], fwidth[c], precision[c], p->v, line, sizeof(line));
+                }
+            }
+            if (c < cn)
+                strcat(line, "\t");
+            else
+                strcat(line, "\n");
+            write(fd, line, strlen(line));
+            if (brokenpipe) {
+                linelim = -1;
+                return;
+            }
         }
-        }
-        if (c < cn)
-        strcat(line, "\t");
-        else
-        strcat(line, "\n");
-        write(fd, line, strlen(line));
-        if (brokenpipe) {
-        linelim = -1;
-        return;
-        }
-    }
-    }
     linelim = -1;
 }
 
@@ -74,21 +72,20 @@ void getstring(int r0, int c0, int rn, int cn, int fd) {
     struct ent    **pp;
     int        r, c;
 
-    for (r = r0; r <= rn; r++) {
-    for (c = c0, pp = ATBL(tbl, r, c); c <= cn; pp++, c++) {
-        *line = '\0';
-        if (*pp && (*pp)->label)
-        sprintf(line, "%s", (*pp)->label);
-        if (c < cn)
-        strcat(line, "\t");
-        else
-        strcat(line, "\n");
-        write(fd, line, strlen(line));
-        if (brokenpipe) {
-        linelim = -1;
-        return;
-        }
-    }
+    for (r = r0; r <= rn; r++)
+        for (c = c0, pp = ATBL(tbl, r, c); c <= cn; pp++, c++) {
+            *line = '\0';
+            if (*pp && (*pp)->label)
+                sprintf(line, "%s", (*pp)->label);
+            if (c < cn)
+                strcat(line, "\t");
+            else
+                strcat(line, "\n");
+            write(fd, line, strlen(line));
+            if (brokenpipe) {
+                linelim = -1;
+                return;
+            }
     }
     linelim = -1;
 }
@@ -98,27 +95,26 @@ void getexp(int r0, int c0, int rn, int cn, int fd) {
     struct ent    *p;
     int        r, c;
 
-    for (r = r0; r <= rn; r++) {
-    for (c = c0, pp = ATBL(tbl, r, c); c <= cn; pp++, c++) {
-        *line = '\0';
-        p = *pp;
-        if (p && p->expr) {
-        linelim = 0;
-        decompile(p->expr, 0);    /* set line to expr */
-        line[linelim] = '\0';
-        if (*line == '?')
+    for (r = r0; r <= rn; r++)
+        for (c = c0, pp = ATBL(tbl, r, c); c <= cn; pp++, c++) {
             *line = '\0';
-        }
-        if (c < cn)
-        strcat(line, "\t");
-        else
-        strcat(line, "\n");
-        write(fd, line, strlen(line));
-        if (brokenpipe) {
-        linelim = -1;
-        return;
-        }
-    }
+            p = *pp;
+            if (p && p->expr) {
+                linelim = 0;
+                decompile(p->expr, 0);    /* set line to expr */
+                line[linelim] = '\0';
+                if (*line == '?')
+                    *line = '\0';
+            }
+            if (c < cn)
+                strcat(line, "\t");
+            else
+                strcat(line, "\n");
+            write(fd, line, strlen(line));
+            if (brokenpipe) {
+                linelim = -1;
+                return;
+            }
     }
     linelim = -1;
 }
@@ -133,21 +129,20 @@ void getfmt(int r0, int c0, int rn, int cn, int fd) {
     struct ent    **pp;
     int        r, c;
 
-    for (r = r0; r <= rn; r++) {
+    for (r = r0; r <= rn; r++)
     for (c = c0, pp = ATBL(tbl, r, c); c <= cn; pp++, c++) {
         *line = '\0';
         if (*pp && (*pp)->format)
-        sprintf(line, "%s", (*pp)->format);
+            sprintf(line, "%s", (*pp)->format);
         if (c < cn)
-        strcat(line, "\t");
+            strcat(line, "\t");
         else
-        strcat(line, "\n");
+            strcat(line, "\n");
         write(fd, line, strlen(line));
         if (brokenpipe) {
-        linelim = -1;
-        return;
+            linelim = -1;
+            return;
         }
-    }
     }
     linelim = -1;
 }
@@ -215,17 +210,16 @@ void doeval(struct enode *e, char *fmt, int row, int col, int fd) {
 
     v = eval(e);
     if (fmt) {
-    if (*fmt == ctl('d')) {
-        time_t tv = v;
-        strftime(line, FBUFLEN, fmt + 1, localtime(&tv));
+        if (*fmt == ctl('d')) {
+            time_t tv = v;
+            strftime(line, FBUFLEN, fmt + 1, localtime(&tv));
+        } else
+            format(fmt, precision[col], v, line, FBUFLEN);
     } else
-        format(fmt, precision[col], v, line, FBUFLEN);
-    } else
-    sprintf(line, "%.15g", v);
+        sprintf(line, "%.15g", v);
     strcat(line, "\n");
     write(fd, line, strlen(line));
     linelim = -1;
-
     efree(e);
     if (fmt) scxfree(fmt);
 }
@@ -245,14 +239,13 @@ void doseval(struct enode *e, int row, int col, int fd) {
     if (s) scxfree(s);
 }
 
-
 void doquery(char *s, char *data, int fd) {
     //goraw();
     //query(s, data);
     //deraw(0);
     if (linelim >= 0) {
-    write(fd, line, strlen(line));
-    write(fd, "\n", 1);
+        write(fd, line, strlen(line));
+        write(fd, "\n", 1);
     }
 
     line[0] = '\0';
@@ -296,9 +289,9 @@ void dogetkey() {
 
 void dostat(int fd) {
     *line = '\0';
-    if (modflg)            sprintf(line, "m");
-    if (isatty(STDIN_FILENO))    strcat(line, "i");
-    if (isatty(STDOUT_FILENO))    strcat(line, "o");
+    if (modflg) sprintf(line, "m");
+    if (isatty(STDIN_FILENO)) strcat(line, "i");
+    if (isatty(STDOUT_FILENO)) strcat(line, "o");
     strcat(line, "\n");
     write(fd, line, strlen(line));
     linelim = -1;

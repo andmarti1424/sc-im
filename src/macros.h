@@ -32,16 +32,16 @@
 #define OKEY_PGDOWN      0x152
 //#define metak(x) ((x) | 0x80)
 #define LEFT             0
-#define RIGHT             1
+#define RIGHT            1
 
 // used for is_single_command function
-#define NO_CMD             0
+#define NO_CMD           0
 #define EDITION_CMD      1
 #define MOVEMENT_CMD     2
 
 #ifndef INFO_MSG
-    #define INFO_MSG          8
-    #define ERROR_MSG         9
+    #define INFO_MSG     8
+    #define ERROR_MSG    9
 #endif
 
 #include <ncurses.h>

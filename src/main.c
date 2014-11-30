@@ -39,15 +39,15 @@ char *latexext;
 char *slatexext;
 char *texext;
 int scrc = 0;
-int usecurses = TRUE;    /* Use curses unless piping/redirection or using -q */
-int brokenpipe = FALSE;    /* Set to true if SIGPIPE is received */
+int usecurses = TRUE;   /* Use curses unless piping/redirection or using -q */
+int brokenpipe = FALSE; /* Set to true if SIGPIPE is received */
 char curfile[PATHLEN];
-char dpoint = '.';    /* decimal point */
-char thsep = ',';    /* thousands separator */
+char dpoint = '.';      /* decimal point */
+char thsep = ',';       /* thousands separator */
 int  linelim = -1;
 int  calc_order = BYROWS;
-int  optimize  = 0;    /* Causes numeric expressions to be optimized */
-int  tbl_style = 0;    /* headers for T command output */
+int  optimize  = 0;     /* Causes numeric expressions to be optimized */
+int  tbl_style = 0;     /* headers for T command output */
 int  rndtoeven = 0;
 int  rowsinrange = 1;
 int  colsinrange = DEFWIDTH;

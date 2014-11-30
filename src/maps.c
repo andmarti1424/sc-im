@@ -37,12 +37,10 @@ int replace_maps (struct block * b) {
     return r;
 }
 
-
 #define MAXSC 25
 /* ************************************* 
 create list of blocks from map strings
 MAXSC is max length of special key word
-FIXME mejorar
    ************************************* */
 struct block * get_mapbuf_str (char * str) {
     struct block * buffer = create_buf();
@@ -100,7 +98,7 @@ map * get_last_map() {
 // recibe un comando in, un out, y un caracter 'type' que indica el modo
 // en donde tiene efecto el mapeo
 void add_map(char * in, char * out, char mode) {
-    //error(">>%c,%s,%s<<", mode, in, out);
+    //info(">>%c,%s,%s<<", mode, in, out);
     map * m = (map *) malloc (sizeof(map));
     m->out = (struct block *) get_mapbuf_str(out);
     m->in = (struct block *) get_mapbuf_str(in);

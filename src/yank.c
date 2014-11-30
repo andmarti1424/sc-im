@@ -112,7 +112,6 @@ void yank_area(int tlrow, int tlcol, int brrow, int brcol, char type, int arg) {
 
     for (r = tlrow; r <= brrow; r++)
         for (c = tlcol; c <= brcol; c++) {
-             
             struct ent * elm = *ATBL(tbl, r, c);
 
             // Importante: Cada ent guarda dentro suyo su correspondiente row y col

@@ -26,10 +26,6 @@ void shift_range(int delta_rows, int delta_cols, int tlrow, int tlcol, int brrow
     return;
 }
 
-
-
-
-
 /* Shift cells up / down
  * type 8: Shift cells up
  * type 2: Shift cells down
@@ -142,25 +138,25 @@ void shift_cells_up(int deltarows, int deltacols) {
 
     // Delete cell content
     for (i = 0; i < deltarows; i++)
-    for (r = currow; r < maxrow; r++) 
-        for (c = curcol; c < curcol + deltacols; c++) {
+        for (r = currow; r < maxrow; r++) 
+            for (c = curcol; c < curcol + deltacols; c++) {
 
-            // libero memoria de ent donde estoy parado
-            pp = ATBL(tbl, r, c);
-            clearent(*pp);
-
-            register struct ent *p = *ATBL(tbl, r+1, c);
-            if (p && ( (p->flags & is_valid) || (p->expr && (p->flags & is_strexpr)) || p->label )  ) {
-                // Copio celda inferior hacia arriba
-                register struct ent *n;
-                n = lookat(r, c);
-                (void) copyent(n, p, 1, 0, 0, 0, r, c, 0);
-                n->row--;
-                pp = ATBL(tbl, r+1, c);
-            } else {
+                // libero memoria de ent donde estoy parado
                 pp = ATBL(tbl, r, c);
+                clearent(*pp);
+
+                register struct ent *p = *ATBL(tbl, r+1, c);
+                if (p && ( (p->flags & is_valid) || (p->expr && (p->flags & is_strexpr)) || p->label )  ) {
+                    // Copio celda inferior hacia arriba
+                    register struct ent *n;
+                    n = lookat(r, c);
+                    (void) copyent(n, p, 1, 0, 0, 0, r, c, 0);
+                    n->row--;
+                    pp = ATBL(tbl, r+1, c);
+                } else {
+                    pp = ATBL(tbl, r, c);
+                }
+                clearent(*pp);
             }
-            clearent(*pp);
-    }
     return;
 }

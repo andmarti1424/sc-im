@@ -18,15 +18,14 @@ void create_range(char c, char d) {
     mark * md = get_mark(d);
 
     if ( row_hidden[mc->row] || row_hidden[md->row] ) {
-         error("Row of a marked cell is hidden");
-         return;
+        error("Row of a marked cell is hidden");
+        return;
     }
 
     if ( col_hidden[mc->col] || col_hidden[md->col] ) {
-         error("Column of a marked cell is hidden");
-         return;
+        error("Column of a marked cell is hidden");
+        return;
     }
-
 
     // Si el rango ya existe, lo utilizo
     srange * exists_range = get_range_by_marks (c, d);
@@ -35,7 +34,6 @@ void create_range(char c, char d) {
     srange * r;
     if (exists_range == NULL) r = (srange *) malloc (sizeof(srange));
     else r = exists_range;
-
 
     r->tlrow = mc->row < md->row ? mc->row : md->row;
     r->tlcol = mc->col < md->col ? mc->col : md->col;
@@ -135,9 +133,9 @@ void del_ranges_by_mark (char c) {
 
     // Si el nodo a eliminar es el primero
     if ( ( r->marks[0] == c || r->marks[1] == c ) ) {
-            ranges = r->pnext;
-            free(r);
-            return;
+        ranges = r->pnext;
+        free(r);
+        return;
     }
 
     // Si el nodo a eliminar está entremedio en la lista
@@ -145,8 +143,8 @@ void del_ranges_by_mark (char c) {
     r = r->pnext;
     while (r != NULL) {
         if ( ( r->marks[0] == c || r->marks[1] == c ) ) {
-               ant->pnext = r->pnext;
-               free(r);
+            ant->pnext = r->pnext;
+            free(r);
         }
         ant = r;
         r = r->pnext;
@@ -161,8 +159,8 @@ srange * get_range_by_marks (char c, char d) {
 
     while (r != NULL) {
         if ( ( r->marks[0] == c || r->marks[1] == c ) && 
-             ( r->marks[0] == d || r->marks[1] == d ) ) {
-             return r;
+            ( r->marks[0] == d || r->marks[1] == d ) ) {
+            return r;
         }
         r = r->pnext;
     }
@@ -186,9 +184,9 @@ void free_custom_range(srange * sr) {
 
 #include "sc.h"
 
-static    struct range * rng_base;
-//void    sync_enode(struct enode * e);
-//void    fix_enode(struct enode * e, int row1, int col1, int row2, int col2, int delta1, int delta2);
+static struct range * rng_base;
+//void sync_enode(struct enode * e);
+//void fix_enode(struct enode * e, int row1, int col1, int row2, int col2, int delta1, int delta2);
 
 void clean_range() { // usado en erasedb
     register struct range *r;
@@ -228,12 +226,11 @@ int find_range(char *name, int len, struct ent *lmatch, struct ent *rmatch, stru
     return (-1);
     }
 */
-    for (r = rng_base; r; r = r->r_next) {
-    if ((lmatch == r->r_left.vp) && (rmatch == r->r_right.vp)) {
-        *rng = r;
-        return (0);
-    }
-    }
+    for (r = rng_base; r; r = r->r_next)
+        if ((lmatch == r->r_left.vp) && (rmatch == r->r_right.vp)) {
+            *rng = r;
+            return (0);
+        }
     return (-1);
 }
 

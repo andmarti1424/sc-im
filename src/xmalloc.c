@@ -34,7 +34,7 @@ char * scxrealloc(char *ptr, unsigned n) {
     //return(ptr + sizeof(double));
 
     ptr = (char *) realloc(ptr, n);
-        if (ptr == NULL) fatal("scxmalloc: no memory");
+    if (ptr == NULL) fatal("scxmalloc: no memory");
     return(ptr);
 }
 

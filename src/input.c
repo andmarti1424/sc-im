@@ -136,31 +136,30 @@ void handle_input(struct block * buffer) {
 
 // Break waiting command loop
 void break_waitcmd_loop(struct block * buffer) {
-        if (curmode == COMMAND_MODE) {
-            del_item_from_history(commandline_history, 0);
-            commandline_history->pos = 0;
-        }
-        else if (curmode == VISUAL_MODE) {
-            exit_visualmode();
-        }
+    if (curmode == COMMAND_MODE) {
+        del_item_from_history(commandline_history, 0);
+        commandline_history->pos = 0;
+    } else if (curmode == VISUAL_MODE) {
+        exit_visualmode();
+    }
 
-        curmode = NORMAL_MODE;
+    curmode = NORMAL_MODE;
 
-        // Ya no espero por un comando. Saco flag de pantalla si estaba.
-        cmd_pending = 0;
+    // Ya no espero por un comando. Saco flag de pantalla si estaba.
+    cmd_pending = 0;
 
-        // Reseteo el efecto multiplicador
-        cmd_multiplier = 0;
+    // Reseteo el efecto multiplicador
+    cmd_multiplier = 0;
 
-        // limpio la inputline de modo insert y edit
-        inputline[0] = '\0';
+    // limpio la inputline de modo insert y edit
+    inputline[0] = '\0';
 
-        flush_buf(buffer); 
-        //clr_header(input_win, 0); // comentado el 22/06/2014
-        //show_header(input_win);   // comentado el 22/06/2014
-        print_mult_pend(input_win); // agregado  el 22/06/2014 refresco solo el ef. multiplicador y cmd pending
-        update();                   // comentado el 22/06/2014
-        return; 
+    flush_buf(buffer); 
+    //clr_header(input_win, 0); // comentado el 22/06/2014
+    //show_header(input_win);   // comentado el 22/06/2014
+    print_mult_pend(input_win); // agregado  el 22/06/2014 refresco solo el ef. multiplicador y cmd pending
+    update();                   // comentado el 22/06/2014
+    return; 
 }
 
 // Funcion que maneja el timeout de espera de comando dependiendo del modo actual

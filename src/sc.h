@@ -113,7 +113,6 @@ struct range {
     int r_is_range;
 };
 
-
 // holds the beginning/ending cells of a range
 struct range_s {
     struct ent_ptr left, right;
@@ -275,8 +274,8 @@ struct go_save {
 #define    CELLERROR     1
 #define    CELLINVALID   2
 /* calculation order */
-#define BYCOLS        1
-#define BYROWS        2
+#define    BYCOLS     1
+#define    BYROWS     2
 /* values for showrange for ranges of rows or columns */
 //#define SHOWROWS    2
 //#define SHOWCOLS    3 comentado el dia 24/06/2014
@@ -287,103 +286,104 @@ struct go_save {
 #define    SLATEX     4        /* 'SLaTeX' (Scandinavian LaTeX) */
 #define    FRAME      5        /* tblprint style output for FrameMaker */
 /* Types for etype() */
-#define NUM           1
-#define STR           2
+#define    NUM        1
+#define    STR        2
 #define    GROWAMT    30   /* default minimum amount to grow */
 #define    GROWNEW    1    /* first time table */
 #define    GROWROW    2    /* add rows */
 #define    GROWCOL    3    /* add columns */
 #define    GROWBOTH   4    /* grow both */
 
-extern    struct ent ***tbl;    /* data table ref. in vmtbl.c and ATBL() */
-extern    char curfile[];
-extern    int arg;
-extern    int currow, curcol;
-extern    int lastrow, lastcol;
-extern    int gmyrow, gmycol;    /* globals used for @myrow, @mycol cmds */
-extern    int rescol;        /* columns reserved for row numbers */
-extern    int maxrow, maxcol;
-extern    int maxrows, maxcols;    /* # cells currently allocated */
-extern    int rowsinrange;    /* Number of rows in target range of a goto */
-extern    int colsinrange;    /* Number of cols in target range of a goto */
-extern    int *fwidth;
-extern    int *precision;
-extern    int *realfmt;
-extern    char *colformat[10];
-extern    char *col_hidden;
-extern    char *row_hidden;
-extern    char line[FBUFLEN];
-extern    int linelim;
-extern    int changed;
-extern    int dbidx;
-extern    int qbuf;        /* buffer no. specified by `"' command */
-extern    int showsc, showsr;
-extern    int cellassign;
-extern    int macrofd;
-extern    int cslop;
-extern    int usecurses;
-extern    int brokenpipe;        /* Set to true if SIGPIPE is received */
-extern    char dpoint;    /* country-dependent decimal point from locale */
-extern    char thsep;    /* country-dependent thousands separator from locale */
-extern    char *coltoa(int col);
-extern    char *findplugin(char *ext, char type);
-extern    char *findhome(char *path);
-extern    char *r_name(int r1, int c1, int r2, int c2);
-extern    char *scxmalloc(unsigned n);
-extern    char *scxrealloc(char *ptr, unsigned n);
-extern    char *seval(register struct enode *se);
-extern    char *v_name(int row, int col);
-extern    double eval(register struct enode *e);
-extern    struct enode *copye(register struct enode *e, int Rdelta, int Cdelta, int r1, int c1, int r2, int c2, int transpose);
+extern     struct ent ***tbl;    /* data table ref. in vmtbl.c and ATBL() */
+extern     char curfile[];
+extern     int arg;
+extern     int currow, curcol;
+extern     int lastrow, lastcol;
+extern     int gmyrow, gmycol;    /* globals used for @myrow, @mycol cmds */
+extern     int rescol;        /* columns reserved for row numbers */
+extern     int maxrow, maxcol;
+extern     int maxrows, maxcols;    /* # cells currently allocated */
+extern     int rowsinrange;    /* Number of rows in target range of a goto */
+extern     int colsinrange;    /* Number of cols in target range of a goto */
+extern     int *fwidth;
+extern     int *precision;
+extern     int *realfmt;
+extern     char *colformat[10];
+extern     char *col_hidden;
+extern     char *row_hidden;
+extern     char line[FBUFLEN];
+extern     int linelim;
+extern     int changed;
+extern     int dbidx;
+extern     int qbuf;        /* buffer no. specified by `"' command */
+extern     int showsc, showsr;
+extern     int cellassign;
+extern     int macrofd;
+extern     int cslop;
+extern     int usecurses;
+extern     int brokenpipe;        /* Set to true if SIGPIPE is received */
+extern     char dpoint;    /* country-dependent decimal point from locale */
+extern     char thsep;    /* country-dependent thousands separator from locale */
+extern     char *coltoa(int col);
+extern     char *findplugin(char *ext, char type);
+extern     char *findhome(char *path);
+extern     char *r_name(int r1, int c1, int r2, int c2);
+extern     char *scxmalloc(unsigned n);
+extern     char *scxrealloc(char *ptr, unsigned n);
+extern     char *seval(register struct enode *se);
+extern     char *v_name(int row, int col);
+extern     double eval(register struct enode *e);
+extern     struct enode *copye(register struct enode *e, int Rdelta, int Cdelta, int r1, int c1, int r2, int c2, int transpose);
 
-extern    struct enode *new(int op, struct enode *a1, struct enode *a2);
-extern    struct enode *new_const(int op, double a1);
-extern    struct enode *new_range(int op, struct range_s a1);
-extern    struct enode *new_str(char *s);
-extern    struct enode *new_var(int op, struct ent_ptr a1);
+extern     struct enode *new(int op, struct enode *a1, struct enode *a2);
+extern     struct enode *new_const(int op, double a1);
+extern     struct enode *new_range(int op, struct range_s a1);
+extern     struct enode *new_str(char *s);
+extern     struct enode *new_var(int op, struct ent_ptr a1);
 
-extern    struct ent *lookat(int row, int col);
-extern    void EvalAll();
-extern    void checkbounds(int *rowp, int *colp);
-extern    void clearent(struct ent *v);
-extern    void closefile(FILE *f, int pid, int rfd);
-extern    void colshow_op();
+extern     struct ent *lookat(int row, int col);
+extern     void EvalAll();
+extern     void checkbounds(int *rowp, int *colp);
+extern     void clearent(struct ent *v);
+extern     void closefile(FILE *f, int pid, int rfd);
+extern     void colshow_op();
 
 // no comentar de aqui en mas:
-extern    struct colorpair *cpairs[8];
-extern    void editexp(int row, int col);
-extern    void efree(struct enode *e);
-extern    void label(register struct ent *v, register char *s, int flushdir);
-extern    void num_search(double n, int firstrow, int firstcol, int lastrow, int lastcol, int errsearch);
-extern    void str_search(char *s, int firstrow, int firstcol, int lastrow, int lastcol, int num);
-extern    int modflg;
-extern    char *mdir;
-extern    char *autorun;
-extern    int skipautorun;
-extern    char *fkey[FKEYS];
-extern    char *scext;
-extern    int repct;
-extern    int calc_order;
-extern    double prescale;
-extern    int extfunc;
-extern    int propagation;
-//extern    int autocalc;
-//extern    int autolabel;
-//extern    int autoinsert;
-//extern    int autowrap;
-//extern    int showcell;
-//extern    int showtop;
-//extern    int craction;
-extern    int optimize;
-extern    int color;
-extern    int numeric;
-extern    int colorneg;
-extern    int colorerr;
-extern    int rndtoeven;
-extern    int tbl_style;
-//extern    int  pagesize;    /* If nonzero, use instead of 1/2 screen height */
-//extern    int rowlimit;
-//extern    int collimit;
-extern    int loading;
-void load_sc(int argc, char **argv);
+extern     struct colorpair *cpairs[8];
+extern     void editexp(int row, int col);
+extern     void efree(struct enode *e);
+extern     void label(register struct ent *v, register char *s, int flushdir);
+extern     void num_search(double n, int firstrow, int firstcol, int lastrow, int lastcol, int errsearch);
+extern     void str_search(char *s, int firstrow, int firstcol, int lastrow, int lastcol, int num);
+extern     int modflg;
+extern     char *mdir;
+extern     char *autorun;
+extern     int skipautorun;
+extern     char *fkey[FKEYS];
+extern     char *scext;
+extern     int repct;
+extern     int calc_order;
+extern     double prescale;
+extern     int extfunc;
+extern     int propagation;
+//extern     int autocalc;
+//extern     int autolabel;
+//extern     int autoinsert;
+//extern     int autowrap;
+//extern     int showcell;
+//extern     int showtop;
+//extern     int craction;
+extern     int optimize;
+extern     int color;
+extern     int numeric;
+extern     int colorneg;
+extern     int colorerr;
+extern     int rndtoeven;
+extern     int tbl_style;
+//extern     int  pagesize;    /* If nonzero, use instead of 1/2 screen height */
+//extern     int rowlimit;
+//extern     int collimit;
+extern     int loading;
+
+void load_sc(int argc, char ** argv);
 #include <memory.h>
