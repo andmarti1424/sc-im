@@ -1,6 +1,6 @@
 #include <sys/time.h>
 #include <string.h>
-#include "stdout.h"
+#include "screen.h"
 #include "input.h"
 #include "cmds.h"
 #include "history.h"

@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include "sc.h"
 #include "macros.h"
-#include "stdout.h"
+#include "screen.h"
 #include "string.h"
 #include "color.h"
 

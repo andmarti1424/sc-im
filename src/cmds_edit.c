@@ -1,6 +1,6 @@
 #include "cmds_edit.h"
 #include "cmds.h"
-#include "stdout.h"
+#include "screen.h"
 #include <string.h>
 #include <curses.h>
 #include "buffer.h"

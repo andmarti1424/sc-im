@@ -5,7 +5,7 @@
 #include "cmds.h"
 #include "undo.h"
 #include "buffer.h"
-#include "stdout.h"
+#include "screen.h"
 #include "conf.h" // for conf parameters
 #include <stdlib.h>
 

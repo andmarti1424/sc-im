@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include "shift.h"
 #include "macros.h"
-#include "stdout.h"
+#include "screen.h"
 #include "input.h"
 #include "marks.h"
 #include "yank.h"

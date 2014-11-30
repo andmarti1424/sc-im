@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include "input.h"
-#include "stdout.h"
+#include "screen.h"
 #include "range.h"
 #include "sc.h"
 #include "cmds.h"
