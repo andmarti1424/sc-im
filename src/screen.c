@@ -37,7 +37,7 @@ int offscr_sc_rows = 0, offscr_sc_cols = 0;
 
 srange * ranges;
 
-void start_stdout() {
+void start_screen() {
     initscr();
 
     main_win = newwin(0, 0, 0, 0);
@@ -72,7 +72,7 @@ void start_stdout() {
     keypad(input_win, 1); 
 }
 
-void stop_stdout() {
+void stop_screen() {
     #ifdef USECOLORS
         //if (get_d_colors_param() != NULL)
         free_colors_param_dict();

@@ -72,7 +72,7 @@ int main (int argc, char **argv) {
     signals();
 
     // inicializo NCURSES
-    start_stdout();        
+    start_screen();        
     //esto habilitarlo para debug de mensajes:    wtimeout(input_win, 1000);
 
     // setup the spreadsheet arrays
@@ -184,7 +184,7 @@ int exit_app(int status) {
     //timeout(-1);
 
     // stop CURSES stdout
-    stop_stdout();
+    stop_screen();
 
     return status;
 }
@@ -264,7 +264,7 @@ int
 #endif
 winchg() {
     endwin();
-    start_stdout();
+    start_screen();
     clearok(stdscr, TRUE);
     update(); 
     flushinp();

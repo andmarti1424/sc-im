@@ -554,7 +554,7 @@ void do_normalmode(struct block * buf) {
 
         case ctl('l'):
             endwin();
-            start_stdout();
+            start_screen();
             clearok(stdscr, TRUE);
             update();
             flushinp();

@@ -2,8 +2,8 @@
 extern WINDOW * main_win;
 extern WINDOW * input_win;
 
-void start_stdout();
-void stop_stdout();
+void start_screen();
+void stop_screen();
 void show_sc_row_headings(WINDOW * win, int mxrow);
 void show_sc_col_headings(WINDOW * win, int mxcol, int mxrow);
 extern int offscr_sc_rows, offscr_sc_cols;
