@@ -189,25 +189,26 @@ int exit_app(int status) {
     return status;
 }
 
-void load_sc(int argc, char **argv) {
-    if (optind < argc && !strcmp(argv[optind], "--"))
-    optind++;
+void load_sc(int argc, char ** argv) {
+    if (optind < argc && ! strcmp(argv[optind], "--"))
+        optind++;
     if (optind < argc && argv[optind][0] != '|' && strcmp(argv[optind], "-"))
-    (void) strcpy(curfile, argv[optind]);
+        (void) strcpy(curfile, argv[optind]);
 
     if (optind < argc) {
-    if (! readfile(argv[optind], 1) && (optind == argc - 1)) {
-        info("New file: \"%s\"", curfile);
-    }
+        if (! readfile(argv[optind], 1) && (optind == argc - 1)) {
+            info("New file: \"%s\"", curfile);
+        }
         EvalAll(); // TODO. es necesario???
-    optind++;
+        optind++;
     } else {
         erasedb();
     }
 
     while (optind < argc) {
-    (void) readfile(argv[optind], 0);
-    optind++;
+        
+        (void) readfile(argv[optind], 0);
+        optind++;
     }
 } 
 

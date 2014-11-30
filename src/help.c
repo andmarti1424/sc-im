@@ -210,8 +210,8 @@ char * long_help[] = {
 "            :e tab name  export current spreadsheet to tab delimited file. 'name' is the name of the file to be generated",
 "            :e! tab name same as previous, but forcing the rewrite of file 'name' if it exists",
 "",
-"            :i csv name  import a csv formated file called 'name' to SCIM.",
-"            :i tab name  import a tab formated file called 'name' to SCIM.",
+"            :i csv name  import a csv delimited file called 'name' to SCIM.",
+"            :i tab name  import a tab delimited file called 'name' to SCIM.",
 "            :i! tab name same as previous, but ignoring changes since last save.",
 
 "            :version     shows SCIM version number",

@@ -36,7 +36,6 @@ void do_commandmode(struct block * sb) {
         show_header(input_win);
 
     } else if (sb->value == OKEY_UP || sb->value == ctl('p')) {     // UP
-
         if (commandline_history->len > - commandline_history->pos + 1) {
             commandline_history->pos--;
             strcpy(inputline, get_line_from_history(commandline_history, commandline_history->pos));
@@ -70,6 +69,30 @@ void do_commandmode(struct block * sb) {
 
         } else if ( strcmp(inputline, "help") == 0 || strcmp(inputline, "h") == 0 ) {
             help();
+
+        } else if ( strncmp(inputline, "load", 4) == 0 ) {
+            char cline [BUFFERSIZE];
+            int force_rewrite = 0;
+            strcpy(cline, inputline);
+
+            if ( strncmp(inputline, "load! ", 6) == 0 ) {
+                force_rewrite = 1;
+                del_range_chars(cline, 4, 4);
+            }
+
+            del_range_chars(cline, 0, 4);
+            if ( ! strlen(cline) ) {
+                error("Path to file to import is missing !");
+            } else if ( modflg && ! force_rewrite ) {
+                error("Changes were made since last save. Use '!' to force the load");
+            } else {
+                delete_structures();
+                create_structures();
+                readfile(cline, 0);
+                modflg = 0;
+                //EvalAll(); // es necesario???
+                update(); 
+            }
 
         } else if ( strncmp(inputline, "hiderow", 7) == 0 ||
         strncmp(inputline, "showrow", 7) == 0 ||
@@ -120,18 +143,18 @@ void do_commandmode(struct block * sb) {
         } else if ( inputline[0] == 'x' ) {
             if ( savefile() == 0 ) shall_quit = 1;
 
-        } else if ( strncmp(inputline, "e csv", 5)  == 0 ||
-                    strncmp(inputline, "e! tab", 6) == 0 ||
-                    strncmp(inputline, "e! csv", 6) == 0 ||
-                    strncmp(inputline, "e tab", 5)  == 0 ) {
-            do_export();
+        } else if (
+            strncmp(inputline, "e csv"  , 5) == 0 ||
+            strncmp(inputline, "e! tab" , 6) == 0 ||
+            strncmp(inputline, "e! csv" , 6) == 0 ||
+            strncmp(inputline, "e tab"  , 5) == 0 ) {
+                do_export();
 
         } else if (
-                    strncmp(inputline, "i csv ", 6)  == 0 ||
-                    strncmp(inputline, "i! csv ", 7) == 0 ||
-                    strncmp(inputline, "i tab ", 6)  == 0 ||
-                    strncmp(inputline, "i! tab ", 7) == 0 
-                  ) {
+            strncmp(inputline, "i csv " , 6) == 0 ||
+            strncmp(inputline, "i! csv ", 7) == 0 ||
+            strncmp(inputline, "i tab " , 6) == 0 ||
+            strncmp(inputline, "i! tab ", 7) == 0 ) {
             
             int force_rewrite = 0;
             char delim;
@@ -146,7 +169,6 @@ void do_commandmode(struct block * sb) {
             if ( strncmp(cline, "i csv ", 6) == 0) delim = ',';
             else delim = '\t';
 
-            //strcpy(cline, inputline);
             del_range_chars(cline, 0, 5);
             if ( ! strlen(cline) ) {
                 error("Path to file to import is missing !");
@@ -155,8 +177,6 @@ void do_commandmode(struct block * sb) {
             } else {
                 delete_structures();
                 create_structures();
-                //info("%s", cline);
-                //return;
                 import_csv(cline, delim);
                 modflg = 0;
                 update(); 
@@ -174,7 +194,7 @@ void do_commandmode(struct block * sb) {
         commandline_history->pos = 0;
 
         chg_mode('.');
-        //clr_header(input_win); // COMENTADO el dia 22/06
+        // clr_header(input_win); // COMENTADO el dia 22/06
         inputline[0]='\0';
         update();
 

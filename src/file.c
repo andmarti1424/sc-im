@@ -16,37 +16,38 @@
 
 #define DEFCOLDELIM ':'
 
-extern struct ent *freeents;
+extern struct ent * freeents;
 
 /* erase the database (tbl, etc.) */
 void erasedb() {
     int  r, c;
-    char *home;
+    char * home;
 
     for (c = 0; c <= maxcol; c++) {
-    fwidth[c] = DEFWIDTH;
-    precision[c] = DEFPREC;
-    realfmt[c] = DEFREFMT;
+        fwidth[c] = DEFWIDTH;
+        precision[c] = DEFPREC;
+        realfmt[c] = DEFREFMT;
     }
 
     for (r = 0; r <= maxrow; r++) {
-    register struct ent **pp = ATBL(tbl, r, 0);
-    for (c = 0; c++ <= maxcol; pp++)
-        if (*pp != NULL) {
-        //if ((*pp)->expr) 
+        register struct ent ** pp = ATBL(tbl, r, 0);
+        for (c = 0; c++ <= maxcol; pp++)
+            if (*pp != NULL) {
+                //if ((*pp)->expr) 
                 //    efree((*pp) -> expr);
-        //if ((*pp)->label) scxfree((char *)((*pp) -> label));
-        //(*pp)->next = freeents;    /* save [struct ent] for reuse */
-        //freeents = *pp;
+                //if ((*pp)->label)
+                //      scxfree((char *)((*pp) -> label));
+                    //(*pp)->next = freeents;    /* save [struct ent] for reuse */
+                //freeents = *pp;
                 clearent(*pp);
         }
     }
 
     for (c = 0; c < COLFORMATS; c++)
-    if (colformat[c]) {
-        scxfree(colformat[c]);
-        colformat[c] = NULL;
-    }
+        if (colformat[c]) {
+            scxfree(colformat[c]);
+            colformat[c] = NULL;
+        }
 
     maxrow = 0;
     maxcol = 0;
@@ -71,30 +72,30 @@ void erasedb() {
     currow=curcol=0;
 
     if (usecurses && has_colors())
-    color_set(0, NULL);
+        color_set(0, NULL);
 
     if (mdir) {
-    scxfree(mdir);
-    mdir = NULL;
+        scxfree(mdir);
+        mdir = NULL;
     }
     if (autorun) {
-    scxfree(autorun);
-    autorun = NULL;
+        scxfree(autorun);
+        autorun = NULL;
     }
     for (c = 0; c < FKEYS; c++)
-    if (fkey[c]) {
-        scxfree(fkey[c]);
-        fkey[c] = NULL;
-    }
+        if (fkey[c]) {
+            scxfree(fkey[c]);
+            fkey[c] = NULL;
+        }
 
     // Load $HOME/.scrc if present.
     if ((home = getenv("HOME"))) {
-    strcpy(curfile, home);
-    strcat(curfile, "/.scimrc");
-    if ((c = open(curfile, O_RDONLY)) > -1) {
-        close(c);
-        (void) readfile(curfile, 0);
-    }
+        strcpy(curfile, home);
+        strcat(curfile, "/.scimrc");
+        if ((c = open(curfile, O_RDONLY)) > -1) {
+            close(c);
+            (void) readfile(curfile, 0);
+        }
     }
 
     /*
@@ -106,7 +107,7 @@ void erasedb() {
     }
      */
 
-    *curfile = '\0';
+    * curfile = '\0';
 }
 
 // This function checks if a file suffered mods since it was open
@@ -145,7 +146,7 @@ int savefile() {
         strcpy(curfile, name);
     }
 
-    if (writefile(curfile, 0, 0, maxrow, maxcol) < 0) { //TODO FILEEXISTS
+    if (writefile(curfile, 0, 0, maxrow, maxcol) < 0) {
         error("File could not be saved");
         return -1;
     }
@@ -153,7 +154,8 @@ int savefile() {
 }
 
 // Funcion que graba un archivo
-int writefile(char *fname, int r0, int c0, int rn, int cn) {
+// recibe un rango como parametros y un nombre de archivo a generar
+int writefile(char * fname, int r0, int c0, int rn, int cn) {
     register FILE *f;
     char save[PATHLEN];
     char tfname[PATHLEN];
@@ -364,8 +366,8 @@ void write_cells(register FILE *f, int r0, int c0, int rn, int cn, int dr, int d
     modflg = mf;
 }
 
-int readfile(char *fname, int eraseflg) {
-    register FILE *f;
+int readfile(char * fname, int eraseflg) {
+    register FILE * f;
     char save[PATHLEN];
     //int tempautolabel;
     char *p;
@@ -410,8 +412,9 @@ int readfile(char *fname, int eraseflg) {
     }
     }*/
 
-    if (eraseflg && strcmp(fname, curfile) && modcheck(" first"))
-        return 0;
+    // what is this?
+    //if (eraseflg && strcmp(fname, curfile) && modcheck(" first"))
+    //    return 0;
 
     if (fname[0] == '-' && fname[1] == '\0') {
         f = stdin;
@@ -423,8 +426,8 @@ int readfile(char *fname, int eraseflg) {
         //autolabel = tempautolabel;
         return 0;
     } else if (eraseflg) {
-            info("Reading file \"%s\"", save);
-            //refresh();
+        info("Reading file \"%s\"", save);
+        //refresh();
     }
     }
     if (*fname == '|')
@@ -827,7 +830,7 @@ void export_delim(char * fname, char coldelim, int r0, int c0, int rn, int cn) {
     for (row = r0; row <= rn; row++) {        
         for (pp = ATBL(tbl, row, col = c0); col <= cn; col++, pp++) {
             if (*pp) {
-                char *s;
+                char * s;
                 if ((*pp)->flags & is_valid) {
                     if ((*pp)->cellerror) {
                         (void) fprintf (f, "%*s", fwidth[col], ((*pp)->cellerror == CELLERROR ? "ERROR" : "INVALID"));
@@ -836,11 +839,12 @@ void export_delim(char * fname, char coldelim, int r0, int c0, int rn, int cn) {
                         if (*((*pp)->format) == ctl('d')) {  // formato fecha
                             time_t v = (time_t) ((*pp)->v);
                             strftime(field, sizeof(field), ((*pp)->format)+1, localtime(&v));
-                        } else                                // formato numerico
+                        } else {                              // formato numerico
                             format((*pp)->format, precision[col], (*pp)->v, field, sizeof(field));
+                        }
                         unspecial(f, field, coldelim);
-                    } else {
-                        char field[FBUFLEN];
+                    } else { //eng number format
+                        char field[FBUFLEN] = "";
                         (void) engformat(realfmt[col], fwidth[col], precision[col], (*pp) -> v, field, sizeof(field));
                         unspecial(f, field, coldelim);
                     }
@@ -857,7 +861,7 @@ void export_delim(char * fname, char coldelim, int r0, int c0, int rn, int cn) {
     closefile(f, pid, 0);
 
     if (! pid) {
-    info("File \"%s\" written", fname);
+        info("File \"%s\" written", fname);
     }
 }
 
@@ -869,10 +873,10 @@ void unspecial(FILE *f, char *str, int delim) {
 
     //if (*str == '\\') str++; /* delete wheeling string operator, OK? */
     while (*str) {
+        if (*str != ' ') putc(*str, f);
         //if (((tbl_style == LATEX) || (tbl_style == SLATEX) || (tbl_style == TEX)) &&
         //((*str == delim) || (*str == '$') || (*str == '#') || (*str == '%') || (*str == '{') || (*str == '}') || (*str == '&')))
         //    putc('\\', f);
-        putc(*str, f);
         str++;
     }
     if (backquote) putc('\"', f);

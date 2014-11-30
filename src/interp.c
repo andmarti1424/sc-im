@@ -1912,8 +1912,7 @@ void str_search(char *s, int firstrow, int firstcol, int lastrow, int lastcol, i
                 format(p->format, precision[c], p->v, line,
                     sizeof(line));
             } else
-            engformat(realfmt[c], fwidth[c], precision[c],
-                p->v, line, sizeof(line));
+            engformat(realfmt[c], fwidth[c], precision[c], p->v, line, sizeof(line));
         }
         }
     } else if (gs.g_type == G_XSTR) {

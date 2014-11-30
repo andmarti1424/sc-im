@@ -1078,7 +1078,7 @@ void cleanent(struct ent * p) {
     return;
 }
 
-// clearent: free memory of an ent (its contents)
+// clearent: free memory of an ent and its contents
 void clearent(struct ent *v) {
     if (!v) return;
 
