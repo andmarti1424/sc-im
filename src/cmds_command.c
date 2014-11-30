@@ -89,8 +89,8 @@ void do_commandmode(struct block * sb) {
                 delete_structures();
                 create_structures();
                 readfile(cline, 0);
-                modflg = 0;
                 //EvalAll(); // es necesario???
+                modflg = 0;
                 update(); 
             }
 

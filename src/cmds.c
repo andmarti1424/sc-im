@@ -114,13 +114,12 @@ void deletecol() {
     char buf[50];
  
     if (any_locked_cells(0, curcol, maxrow, curcol)) {
-    info("Locked cells encountered. Nothing changed");
-    return;
+        info("Locked cells encountered. Nothing changed");
+        return;
     }
 
     // mark ent of column to erase with isdeleted flag
     for (r = 0; r <= maxrow; r++) {
-
         pp = ATBL(tbl, r, curcol);
         if ( *pp != NULL ) {
             mark_ent_as_deleted(*pp);
@@ -1047,20 +1046,20 @@ struct ent * lookat(int row, int col) {
     checkbounds(&row, &col);
     pp = ATBL(tbl, row, col);
     if ( *pp == NULL ) {
-    //*pp = (struct ent *) scxmalloc( (unsigned) sizeof(struct ent) );
-    *pp = (struct ent *) malloc( (unsigned) sizeof(struct ent) );
+        //*pp = (struct ent *) scxmalloc( (unsigned) sizeof(struct ent) );
+        *pp = (struct ent *) malloc( (unsigned) sizeof(struct ent) );
+        (*pp)->label = (char *) 0;
+        (*pp)->row = row;
+        (*pp)->col = col;
+        (*pp)->flags = may_sync;
+        (*pp)->expr = (struct enode *) 0;
+        (*pp)->v = (double) 0.0;
+        (*pp)->format = (char *) 0;
+        (*pp)->cellerror = CELLOK;
+        (*pp)->next = NULL;
+    }
     if (row > maxrow) maxrow = row;
     if (col > maxcol) maxcol = col;
-    (*pp)->label = (char *) 0;
-    (*pp)->row = row;
-    (*pp)->col = col;
-    (*pp)->flags = may_sync;
-    (*pp)->expr = (struct enode *) 0;
-    (*pp)->v = (double) 0.0;
-    (*pp)->format = (char *) 0;
-    (*pp)->cellerror = CELLOK;
-    (*pp)->next = NULL;
-    }
     return (*pp);
 }
 

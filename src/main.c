@@ -199,14 +199,13 @@ void load_sc(int argc, char ** argv) {
         if (! readfile(argv[optind], 1) && (optind == argc - 1)) {
             info("New file: \"%s\"", curfile);
         }
-        EvalAll(); // TODO. es necesario???
+        EvalAll(); // evaluo fórmulas
         optind++;
     } else {
         erasedb();
     }
 
     while (optind < argc) {
-        
         (void) readfile(argv[optind], 0);
         optind++;
     }

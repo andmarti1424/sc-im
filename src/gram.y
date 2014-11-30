@@ -745,18 +745,31 @@ range:        var ':' var    { $$.left = $1; $$.right = $3; }
     |     RANGE        { $$ = $1; }
     ;
 
-var:        COL NUMBER    { $$.vp = lookat($2, $1); $$.vf = 0; }
-    |    '$' COL NUMBER    { $$.vp = lookat($3, $2);
-                                  $$.vf = FIX_COL; }
-    |    COL '$' NUMBER    { $$.vp = lookat($3, $1);
-                                  $$.vf = FIX_ROW; }
-    |    '$' COL '$' NUMBER { $$.vp = lookat($4, $2);
-                                  $$.vf = FIX_ROW | FIX_COL; }
-    |    VAR        { $$ = $1.left; }
+var:        COL NUMBER    { $$.vp = lookat($2, $1);
+                            $$.vf = 0;
+                          }
+    |    '$' COL NUMBER   { $$.vp = lookat($3, $2);
+                            $$.vf = FIX_COL;
+                          }
+    |    COL '$' NUMBER   { $$.vp = lookat($3, $1);
+                            $$.vf = FIX_ROW;
+                          }
+    |    '$' COL '$' NUMBER {
+                            $$.vp = lookat($4, $2);
+                            $$.vf = FIX_ROW | FIX_COL;
+                          }
+    |    VAR              {
+                            $$ = $1.left;
+                          }
     ;
 
-var_or_range:   range        { $$ = $1; }
-    |    var        { $$.left = $1; $$.right = $1; }
+var_or_range:   range     {
+                            $$ = $1;
+                          }
+    |    var              {
+                            $$.left = $1;
+                            $$.right = $1;
+                          }
     ;
 
 /*num:        NUMBER        { $$ = (double) $1; }

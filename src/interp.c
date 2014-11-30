@@ -2088,56 +2088,57 @@ void let(struct ent *v, struct enode *e) {
     unsigned isconstant = constant(e);
 
     if (locked_cell(v->row, v->col))
-    return;
-    if (v->row == currow && v->col == curcol)
-    cellassign = 1;
-    if (loading && !isconstant)
-    val = (double)0.0;
-    else {
-    exprerr = 0;
-    (void) signal(SIGFPE, eval_fpe);
-    if (setjmp(fpe_save)) {
-        error("Floating point exception in cell %s", v_name(v->row, v->col));
-        val = (double)0.0;
-        cellerror = CELLERROR;
-    } else {
-        cellerror = CELLOK;
-        val = eval(e);
-    }
-    if (v->cellerror != cellerror) {
-        v->flags |= is_changed;
-        changed++;
-        modflg++;
-        v->cellerror = cellerror;
-    }
-    (void) signal(SIGFPE, exit_app);
-    if (exprerr) {
-        efree(e);
         return;
-    }
+    if (v->row == currow && v->col == curcol)
+        cellassign = 1;
+    if (loading && ! isconstant)
+        val = (double) 0.0;
+    else {
+        exprerr = 0;
+        (void) signal(SIGFPE, eval_fpe);
+        if (setjmp(fpe_save)) {
+            error("Floating point exception in cell %s", v_name(v->row, v->col));
+            val = (double)0.0;
+            cellerror = CELLERROR;
+        } else {
+            cellerror = CELLOK;
+            val = eval(e);
+        }
+        if (v->cellerror != cellerror) {
+            v->flags |= is_changed;
+            changed++;
+            modflg++;
+            v->cellerror = cellerror;
+        }
+        (void) signal(SIGFPE, exit_app);
+        if (exprerr) {
+            efree(e);
+            return;
+        }
     }
 
     if (isconstant) {
-    /* prescale input unless it has a decimal */
-    if (!loading && !decimal && (prescale < (double) 0.9999999))
-        val *= prescale;
-    decimal = FALSE;
+        /* prescale input unless it has a decimal */
+        if (!loading && !decimal && (prescale < (double) 0.9999999))
+            val *= prescale;
+        decimal = FALSE;
 
-    v->v = val;
+        v->v = val;
 
-    if (!(v->flags & is_strexpr)) {
+        if (!(v->flags & is_strexpr)) {
             efree(v->expr);
-        v->expr = (struct enode *)0;
-    }
-    efree(e);
+            v->expr = (struct enode *)0;
+        }
+        efree(e);
     } else {
-    efree(v->expr);
+        efree(v->expr);
 
-    v->expr = e;
-    v->flags &= ~is_strexpr;
+        v->expr = e;
+        v->flags &= ~is_strexpr;
     }
 
-    changed++; modflg++;
+    changed++;
+    modflg++;
     v->flags |= ( is_changed | is_valid );
 }
 
@@ -2145,40 +2146,40 @@ void slet(struct ent *v, struct enode *se, int flushdir) {
     char *p;
 
     if (locked_cell(v->row, v->col))
-    return;
+        return;
     if (v->row == currow && v->col == curcol)
-    cellassign = 1;
+        cellassign = 1;
     exprerr = 0;
     (void) signal(SIGFPE, eval_fpe);
     if (setjmp(fpe_save)) {
-    error ("Floating point exception in cell %s", v_name(v->row, v->col));
-    cellerror = CELLERROR;
-    p = "";
+        error ("Floating point exception in cell %s", v_name(v->row, v->col));
+        cellerror = CELLERROR;
+        p = "";
     } else {
-    cellerror = CELLOK;
-    p = seval(se);
+        cellerror = CELLOK;
+        p = seval(se);
     }
     if (v->cellerror != cellerror) {
         v->flags |= is_changed;
-    changed++;    modflg++;
-    v->cellerror = cellerror;
+        changed++;    modflg++;
+        v->cellerror = cellerror;
     }
     (void) signal(SIGFPE, exit_app);
     if (exprerr) {
-    efree(se);
-    return;
+        efree(se);
+        return;
     }
     if (constant(se)) {
-    label(v, p, flushdir);
-    if (p)
-        scxfree(p);
-    efree(se);
-    if (v->flags & is_strexpr) {
+        label(v, p, flushdir);
+        if (p)
+            scxfree(p);
+        efree(se);
+        if (v->flags & is_strexpr) {
             efree(v->expr);
-        v->expr = (struct enode *) 0;
-        v->flags &= ~is_strexpr;
-    }
-    return;
+            v->expr = (struct enode *) 0;
+            v->flags &= ~is_strexpr;
+        }
+        return;
     }
     efree(v->expr);
     v->expr = se;
@@ -2186,8 +2187,9 @@ void slet(struct ent *v, struct enode *se, int flushdir) {
     if (flushdir < 0) v->flags |= is_leftflush;
 
     if (flushdir == 0)
-    v->flags |= is_label;
-    else v->flags &= ~is_label;
+        v->flags |= is_label;
+    else
+        v->flags &= ~is_label;
 
     changed++;
     modflg++;

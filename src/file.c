@@ -35,12 +35,16 @@ void erasedb() {
             if (*pp != NULL) {
                 //if ((*pp)->expr) 
                 //    efree((*pp) -> expr);
-                //if ((*pp)->label)
-                //      scxfree((char *)((*pp) -> label));
+                /*
+                if ((*pp)->label != NULL) {
+                      scxfree((char *)((*pp) -> label));
+                }*/
+
                     //(*pp)->next = freeents;    /* save [struct ent] for reuse */
-                //freeents = *pp;
+                    //freeents = *pp;
+                
                 clearent(*pp);
-        }
+            }
     }
 
     for (c = 0; c < COLFORMATS; c++)
@@ -110,6 +114,17 @@ void erasedb() {
     * curfile = '\0';
 }
 
+// function that checks if a file exists.
+// returns 1 if so. returns 0 otherwise.
+int file_exists(const char * fname) {
+    FILE * file;
+    if (file = fopen(fname, "r")) {
+        fclose(file);
+        return 1;
+    }
+    return 0;
+}
+
 // This function checks if a file suffered mods since it was open
 int modcheck() {
     if (modflg) {
@@ -119,7 +134,7 @@ int modcheck() {
     return 0;
 }
 
-// Funcion que maneja la grabacion de un archivo
+// This function handles the save file process in formato SC
 // returns 0 if OK
 // return -1 on error
 int savefile() {
@@ -186,38 +201,38 @@ int writefile(char * fname, int r0, int c0, int rn, int cn) {
     }*/
 
     if (*fname == '\0') {
-    if (isatty(STDOUT_FILENO) || *curfile != '\0')
-        fname = curfile;
-    else {
-        write_fd(stdout, r0, c0, rn, cn);
-        return 0;
-    }
+        if (isatty(STDOUT_FILENO) || *curfile != '\0')
+            fname = curfile;
+        else {
+            write_fd(stdout, r0, c0, rn, cn);
+            return 0;
+        }
     }
 
     if ((tpp = strrchr(fname, '/')) == NULL)
-    namelen = pathconf(".", _PC_NAME_MAX);
+        namelen = pathconf(".", _PC_NAME_MAX);
     else {
-    *tpp = '\0';
-    namelen = pathconf(fname, _PC_NAME_MAX);
-    *tpp = '/';
+        *tpp = '\0';
+        namelen = pathconf(fname, _PC_NAME_MAX);
+        *tpp = '/';
     }
 
     (void) strcpy(tfname, fname);
     for (tpp = tfname; *tpp != '\0'; tpp++)
-    if (*tpp == '\\' && *(tpp + 1) == '"')
-        (void) memmove(tpp, tpp + 1, strlen(tpp));
+        if (*tpp == '\\' && *(tpp + 1) == '"')
+            (void) memmove(tpp, tpp + 1, strlen(tpp));
 
-    if (scext != NULL) {
-    if (strlen(tfname) > 3 && !strcmp(tfname + strlen(tfname) - 3, ".sc"))
-        tfname[strlen(tfname) - 3] = '\0';
-    else if (strlen(tfname) > strlen(scext) + 1 &&
-        tfname[strlen(tfname) - strlen(scext) - 1] == '.' &&
-        !strcmp(tfname + strlen(tfname) - strlen(scext), scext))
-        tfname[strlen(tfname) - strlen(scext) - 1] = '\0';
-    tfname[namelen - strlen(scext) - 1] = '\0';
-    strcat(tfname, ".");
-    strcat(tfname, scext);
-    }
+        if (scext != NULL) {
+            if (strlen(tfname) > 3 && !strcmp(tfname + strlen(tfname) - 3, ".sc"))
+                tfname[strlen(tfname) - 3] = '\0';
+            else if (strlen(tfname) > strlen(scext) + 1 &&
+            tfname[strlen(tfname) - strlen(scext) - 1] == '.' &&
+            ! strcmp(tfname + strlen(tfname) - strlen(scext), scext))
+                tfname[strlen(tfname) - strlen(scext) - 1] = '\0';
+            tfname[namelen - strlen(scext) - 1] = '\0';
+            strcat(tfname, ".");
+            strcat(tfname, scext);
+        }
 
     (void) strcpy(save, tfname);
     for (tpp = save; *tpp != '\0'; tpp++)
@@ -227,8 +242,8 @@ int writefile(char * fname, int r0, int c0, int rn, int cn) {
     }
 
     if ((f = openfile(tfname, &pid, NULL)) == NULL) {
-    error("Can't create file \"%s\"", save);
-    return -1;
+        error("Can't create file \"%s\"", save);
+        return -1;
     }
 
     info("Writing file \"%s\"...", save);
@@ -239,12 +254,11 @@ int writefile(char * fname, int r0, int c0, int rn, int cn) {
     if (!pid) {
         (void) strcpy(curfile, save);
         modflg = 0;
-    info("File \"%s\" written", curfile);
+        info("File \"%s\" written", curfile);
     }
 
     return 0;
 }
-
 
 void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
     register struct ent **pp;
@@ -255,7 +269,7 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
     print_options(f);
     for (c = 0; c < COLFORMATS; c++)
         if (colformat[c])
-        (void) fprintf (f, "format %d = \"%s\"\n", c, colformat[c]);
+            (void) fprintf (f, "format %d = \"%s\"\n", c, colformat[c]);
     for (c = c0; c <= cn; c++)
         if (fwidth[c] != DEFWIDTH || precision[c] != DEFPREC || realfmt[c] != DEFREFMT)
             (void) fprintf (f, "format %s %d %d %d\n", coltoa(c), fwidth[c], precision[c], realfmt[c]);
@@ -338,30 +352,30 @@ void write_cells(register FILE *f, int r0, int c0, int rn, int cn, int dr, int d
     }
     //if (Vopt) valueize_area(dr, dc, rn, cn);
     for (r = dr; r <= rn; r++) {
-    pp = ATBL(tbl, r, dc);
-    for (c = dc; c <= cn; c++, pp++)
-        if (*pp) {
-        if ((*pp)->label || (*pp)->flags & is_strexpr) {
-            edits(r, c, 1);
-            (void) fprintf(f, "%s\n", line);
-        }
-        if ((*pp)->flags & is_valid) {
-            editv(r, c);
-            dpointptr = strchr(line, dpoint);
-            if (dpointptr != NULL)
-            *dpointptr = '.';
-            (void) fprintf(f, "%s\n", line);
-        }
-        if ((*pp)->format) {
-            editfmt(r, c);
-            (void) fprintf(f, "%s\n",line);
-        }
-        }
+        pp = ATBL(tbl, r, dc);
+        for (c = dc; c <= cn; c++, pp++)
+            if (*pp) {
+                if ((*pp)->label || (*pp)->flags & is_strexpr) {
+                    edits(r, c, 1);
+                    (void) fprintf(f, "%s\n", line);
+                }
+                if ((*pp)->flags & is_valid) {
+                    editv(r, c);
+                    dpointptr = strchr(line, dpoint);
+                    if (dpointptr != NULL)
+                        *dpointptr = '.';
+                    (void) fprintf(f, "%s\n", line);
+                }
+                if ((*pp)->format) {
+                    editfmt(r, c);
+                    (void) fprintf(f, "%s\n",line);
+                }
+            }
     }
     /*if (dr != r0 || dc != c0) {
-    currow = rs;
-    curcol = cs;
-    flush_saved();
+        currow = rs;
+        curcol = cs;
+        flush_saved();
     }*/
     modflg = mf;
 }
@@ -383,8 +397,8 @@ int readfile(char * fname, int eraseflg) {
        (void) strcat(save, fname);
     } else {
         if (*fname == '\0')
-        fname = curfile;
-    (void) strcpy(save, fname);
+            fname = curfile;
+        (void) strcpy(save, fname);
     }
 
     /*if ((p = strrchr(fname, '.')) && (fname[0] != '|')) {  // exclude macros
@@ -420,36 +434,36 @@ int readfile(char * fname, int eraseflg) {
         f = stdin;
         *save = '\0';
     } else {
-
-    if ((f = openfile(save, &pid, &rfd)) == NULL) {
-        error("Can't read file \"%s\"", save);
-        //autolabel = tempautolabel;
-        return 0;
-    } else if (eraseflg) {
-        info("Reading file \"%s\"", save);
-        //refresh();
-    }
+        if ((f = openfile(save, &pid, &rfd)) == NULL) {
+            error("Can't read file \"%s\"", save);
+            //autolabel = tempautolabel;
+            return 0;
+        } else if (eraseflg) {
+            info("Reading file \"%s\"", save);
+            //refresh();
+        }
     }
     if (*fname == '|')
-    *save = '\0';
+        *save = '\0';
 
     if (eraseflg) erasedb();
 
     loading++;
     //savefd = macrofd;
     //macrofd = rfd;
-    while (!brokenpipe && fgets(line, sizeof(line), f)) {
+    while (! brokenpipe && fgets(line, sizeof(line), f)) {
         if (line[0] == '|' && pid != 0) {
             line[0] = ' ';
         }
         linelim = 0;
         if (line[0] != '#') (void) yyparse();
     }
+
     //macrofd = savefd;
     --loading;
     closefile(f, pid, rfd);
     if (f == stdin) {
-    freopen("/dev/tty", "r", stdin);
+        freopen("/dev/tty", "r", stdin);
     }
     linelim = -1;
     if (eraseflg) {
@@ -471,33 +485,33 @@ char * findhome(char *path) {
 
     if (*path == '~') {
         char    *pathptr;
-    char    tmppath[PATHLEN];
+        char    tmppath[PATHLEN];
 
-    if (HomeDir == NULL) {
-        HomeDir = getenv("HOME");
-        if (HomeDir == NULL)
-        HomeDir = "/";
-    }
-    pathptr = path + 1;
-    if ((*pathptr == '/') || (*pathptr == '\0'))
-        strcpy(tmppath, HomeDir);
-    else {
-        struct    passwd *pwent;
-        char    *namep;
-        char    name[50];
-
-        namep = name;
-        while ((*pathptr != '\0') && (*pathptr != '/'))
-            *(namep++) = *(pathptr++);
-        *namep = '\0';
-        if ((pwent = getpwnam(name)) == NULL) {
-            (void) sprintf(path, "Can't find user %s", name);
-        return (NULL);
+        if (HomeDir == NULL) {
+            HomeDir = getenv("HOME");
+            if (HomeDir == NULL)
+                HomeDir = "/";
         }
-        strcpy(tmppath, pwent->pw_dir);
-    }
-    strcat(tmppath, pathptr);
-    strcpy(path, tmppath);
+        pathptr = path + 1;
+        if ((*pathptr == '/') || (*pathptr == '\0'))
+            strcpy(tmppath, HomeDir);
+        else {
+            struct    passwd *pwent;
+            char    *namep;
+            char    name[50];
+
+            namep = name;
+            while ((*pathptr != '\0') && (*pathptr != '/'))
+                *(namep++) = *(pathptr++);
+            *namep = '\0';
+            if ((pwent = getpwnam(name)) == NULL) {
+                (void) sprintf(path, "Can't find user %s", name);
+                return (NULL);
+            }
+            strcpy(tmppath, pwent->pw_dir);
+        }
+        strcat(tmppath, pathptr);
+        strcpy(path, tmppath);
     }
     return (path);
 }
@@ -506,53 +520,53 @@ char * findhome(char *path) {
 //[path/]file~
 // return 1 if we were successful, 0 otherwise
 int backup_file(char *path) {
-    struct    stat    statbuf;
-    struct    utimbuf    timebuf;
-    char    fname[PATHLEN];
-    char    tpath[PATHLEN];
-    char    buf[BUFSIZ];
-    char    *tpp;
-    int        infd, outfd;
-    int        count;
-    mode_t    oldumask;
+    struct stat statbuf;
+    struct utimbuf timebuf;
+    char fname[PATHLEN];
+    char tpath[PATHLEN];
+    char buf[BUFSIZ];
+    char *tpp;
+    int infd, outfd;
+    int count;
+    mode_t oldumask;
 
     // tpath will be the [path/]file ---> [path/]file~
     strcpy(tpath, path);
     if ((tpp = strrchr(tpath, '/')) == NULL)
-    tpp = tpath;
+        tpp = tpath;
     else
-    tpp++;
+        tpp++;
     strcpy(fname, tpp);
     (void) sprintf(tpp, "%s~", fname);
 
     if (stat(path, &statbuf) == 0) {
-    if ((infd = open(path, O_RDONLY, 0)) < 0)
-        return (0);
+        if ((infd = open(path, O_RDONLY, 0)) < 0)
+            return (0);
 
-    oldumask = umask(0);
-    outfd = open(tpath, O_TRUNC|O_WRONLY|O_CREAT, statbuf.st_mode);
-    umask(oldumask);
-    if (outfd < 0)
-        return (0);
-    chown(tpath, statbuf.st_uid, statbuf.st_gid);
+        oldumask = umask(0);
+        outfd = open(tpath, O_TRUNC|O_WRONLY|O_CREAT, statbuf.st_mode);
+        umask(oldumask);
+        if (outfd < 0)
+            return (0);
+        chown(tpath, statbuf.st_uid, statbuf.st_gid);
 
-    while ((count = read(infd, buf, sizeof(buf))) > 0) {
-        if (write(outfd, buf, count) != count) {
-        count = -1;
-        break;
+        while ((count = read(infd, buf, sizeof(buf))) > 0) {
+            if (write(outfd, buf, count) != count) {
+                count = -1;
+                break;
+            }
         }
-    }
-    close(infd);
-    close(outfd);
+        close(infd);
+        close(outfd);
 
-    // copy access and modification times from original file
-    timebuf.actime = statbuf.st_atime;
-    timebuf.modtime = statbuf.st_mtime;
-    utime(tpath, &timebuf);
+        // copy access and modification times from original file
+        timebuf.actime = statbuf.st_atime;
+        timebuf.modtime = statbuf.st_mtime;
+        utime(tpath, &timebuf);
 
-    return ((count < 0) ? 0 : 1);
+        return ((count < 0) ? 0 : 1);
     } else if (errno == ENOENT)
-    return (1);
+        return (1);
     return (0);
 }
 
@@ -564,60 +578,60 @@ FILE * openfile(char *fname, int *rpid, int *rfd) {
     char *efname;
 
     while (*fname && (*fname == ' '))    // Skip leading blanks
-    fname++;
+        fname++;
 
-    if (*fname != '|') {        // Open file if not pipe
-    *rpid = 0;
-    if (rfd != NULL)
-        *rfd = 1;            // Set to stdout just in case
+    if (*fname != '|') {                 // Open file if not pipe
+        *rpid = 0;
+        if (rfd != NULL)
+            *rfd = 1;                    // Set to stdout just in case
     
-    efname = findhome(fname);
+        efname = findhome(fname);
 #ifdef DOBACKUPS
-    if (rfd == NULL && ! backup_file(efname) )
-        //(yn_ask("Could not create backup copy.  Save anyway?: (y,n)") != 1))
-        return (0);
+        if (rfd == NULL && ! backup_file(efname) )
+            //(yn_ask("Could not create backup copy.  Save anyway?: (y,n)") != 1))
+            return (0);
 #endif
-    return (fopen(efname, rfd == NULL ? "w" : "r"));
+        return (fopen(efname, rfd == NULL ? "w" : "r"));
     }
 
-    fname++;                // Skip | 
+    fname++;                             // Skip | 
     efname = findhome(fname);
     if (pipe(pipefd) < 0 || (rfd != NULL && pipe(pipefd+2) < 0)) {
-    error("Can't make pipe to child");
-    *rpid = 0;
-    return (0);
+        error("Can't make pipe to child");
+        *rpid = 0;
+        return (0);
     }
 
     //deraw(rfd==NULL);
 
-    if ((pid=fork()) == 0) {        // if child 
-    (void) close(0);        // close stdin 
-    (void) close(pipefd[1]);
-    (void) dup(pipefd[0]);        // connect to first pipe 
-    if (rfd != NULL) {        // if opening for read 
-        (void) close(1);        // close stdout 
-        (void) close(pipefd[2]);
-        (void) dup(pipefd[3]);    // connect to second pipe 
-    }
-    (void) signal(SIGINT, SIG_DFL);    // reset 
-    (void) execl("/bin/sh", "sh", "-c", efname, 0);
-    exit (-127);
-    } else {                // else parent
-    *rpid = pid;
-    if ((f = fdopen(pipefd[(rfd==NULL?1:2)], rfd==NULL?"w":"r")) == NULL) {
-        (void) kill(pid, 9);
-        error("Can't fdopen %sput", rfd==NULL?"out":"in");
+    if ((pid=fork()) == 0) {             // if child 
+        (void) close(0);                 // close stdin 
         (void) close(pipefd[1]);
-        if (rfd != NULL)
-        (void) close(pipefd[3]);
-        *rpid = 0;
-        return (0);
-    }
+        (void) dup(pipefd[0]);           // connect to first pipe 
+        if (rfd != NULL) {               // if opening for read 
+            (void) close(1);             // close stdout 
+            (void) close(pipefd[2]);
+            (void) dup(pipefd[3]);       // connect to second pipe 
+        }
+        (void) signal(SIGINT, SIG_DFL);  // reset 
+        (void) execl("/bin/sh", "sh", "-c", efname, 0);
+        exit (-127);
+    } else {                             // else parent
+        *rpid = pid;
+        if ((f = fdopen(pipefd[(rfd==NULL?1:2)], rfd==NULL?"w":"r")) == NULL) {
+            (void) kill(pid, 9);
+            error("Can't fdopen %sput", rfd==NULL?"out":"in");
+            (void) close(pipefd[1]);
+            if (rfd != NULL)
+                (void) close(pipefd[3]);
+            *rpid = 0;
+            return (0);
+        }
     }
     (void) close(pipefd[0]);
     if (rfd != NULL) {
-    (void) close(pipefd[3]);
-    *rfd = pipefd[1];
+        (void) close(pipefd[3]);
+        *rfd = pipefd[1];
     }
     return (f);
 }
@@ -656,25 +670,25 @@ void closefile(FILE *f, int pid, int rfd) {
 
 void print_options(FILE *f) {
     if (
-    //autocalc &&
-    //!autoinsert &&
-    //!autowrap &&
-    //!cslop &&
-    !optimize &&
-    !rndtoeven &&
-    propagation == 10 &&
-    calc_order == BYROWS &&
-    //!numeric &&
-    prescale == 1.0 &&
-    !extfunc && //showtop &&
-    tbl_style == 0 //&&
-    //craction == 0 &&
-    //pagesize == 0 &&
-    //rowlimit == -1 &&
-    //collimit == -1 //&&
-    //!color &&
-    //!colorneg &&
-    //!colorerr
+        // autocalc &&
+        //! autoinsert &&
+        //! autowrap &&
+        //! cslop &&
+        ! optimize &&
+        ! rndtoeven &&
+        propagation == 10 &&
+        calc_order == BYROWS &&
+        //! numeric &&
+        prescale == 1.0 &&
+        ! extfunc && //showtop &&
+        tbl_style == 0 //&&
+        //craction == 0 &&
+        //pagesize == 0 &&
+        //rowlimit == -1 &&
+        //collimit == -1 //&&
+        //!color &&
+        //!colorneg &&
+        //!colorerr
        )
     return;        // No reason to do this
 
@@ -701,7 +715,6 @@ void print_options(FILE *f) {
     //if (colorerr)              (void) fprintf(f," colorerr");
     (void) fprintf(f, "\n");
 }
-
 
 // Importación de CSV a SC
 int import_csv(char * fname, char d) {
@@ -745,6 +758,9 @@ int import_csv(char * fname, char d) {
         
         r++;
     }
+    
+    maxrow = r-1;
+    maxcol = c-1;
 
     //closefile(f, pid, rfd);
     fclose(f);
@@ -753,8 +769,6 @@ int import_csv(char * fname, char d) {
 
     return 0;
 }
-
-
 
 // Exportación a CSV y TAB
 
@@ -1098,13 +1112,3 @@ void printfile(char *fname, int r0, int c0, int rn, int cn) {
 
 */
 
-// function that checks if a file exists.
-// returns 1 if so. returns 0 otherwise.
-int file_exists(const char * fname) {
-    FILE * file;
-    if (file = fopen(fname, "r")) {
-        fclose(file);
-        return 1;
-    }
-    return 0;
-}
