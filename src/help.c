@@ -500,7 +500,7 @@ void find_help(char * word, char order) {
         for (i = delta + 1; i < max - 1; i++) {
             if ((look_result = str_in_str(long_help[i], word)) >= 0) {
                 delta = i;
-                info("FOUND !!!");
+                //info("FOUND !!!");
                 break;
             }
         }
@@ -508,7 +508,7 @@ void find_help(char * word, char order) {
         for (i = delta - 1; i > 0; i--) {
             if ((look_result = str_in_str(long_help[i], word)) >= 0) {
                 delta = i;
-                info("FOUND !!!");
+                //info("FOUND !!!");
                 break;
             }
         }

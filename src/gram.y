@@ -60,13 +60,16 @@
 %token S_SHOWCOL
 %token S_HIDECOL
 %token S_MARK
-%token S_INSERTCOL
-%token S_OPENCOL
-%token S_DELETECOL
-%token S_YANKCOL
-%token S_GETFORMAT
-%token S_FORMAT
 
+/*
+token S_INSERTCOL
+token S_OPENCOL
+token S_DELETECOL
+token S_YANKCOL
+token S_GETFORMAT
+*/
+
+%token S_FORMAT
 %token S_FMT
 %token S_LET
 %token S_LABEL
@@ -76,85 +79,88 @@
 %token S_RIGHTJUSTIFY
 %token S_CENTER
 %token S_SORT
-
-%token S_ADDNOTE
-%token S_DELNOTE
-%token S_GET
-%token S_PUT
-%token S_MERGE
-%token S_WRITE
-%token S_TBL
-%token S_COPY
-%token S_MOVE
-%token S_ERASE
-%token S_YANK
-%token S_FILL
-%token S_LOCK
-%token S_UNLOCK
 %token S_GOTO
-%token S_DEFINE
-%token S_UNDEFINE
-%token S_ABBREV
-%token S_UNABBREV
-%token S_FRAME
-%token S_FRAMETOP
-%token S_FRAMEBOTTOM
-%token S_FRAMELEFT
-%token S_FRAMERIGHT
-%token S_UNFRAME
-%token S_VALUE
-%token S_MDIR
-%token S_AUTORUN
-%token S_FKEY
-%token S_SCEXT
-%token S_ASCEXT
-%token S_TBL0EXT
-%token S_TBLEXT
-%token S_LATEXEXT
-%token S_SLATEXEXT
-%token S_TEXEXT
 %token S_SET
-%token S_UP
-%token S_DOWN
-%token S_LEFT
-%token S_RIGHT
-%token S_ENDUP
-%token S_ENDDOWN
-%token S_ENDLEFT
-%token S_ENDRIGHT
-%token S_SELECT
-%token S_INSERTROW
-%token S_OPENROW
-%token S_DELETEROW
-%token S_YANKROW
-%token S_PULL
-%token S_PULLMERGE
-%token S_PULLROWS
-%token S_PULLCOLS
-%token S_PULLXCHG
-%token S_PULLTP
-%token S_PULLFMT
-%token S_PULLCOPY
-%token S_WHEREAMI
-%token S_GETNUM
-%token S_FGETNUM
-%token S_GETSTRING
-%token S_GETEXP
-%token S_GETFMT
-%token S_GETFRAME
-%token S_GETRANGE
-%token S_EVAL
-%token S_SEVAL
-%token S_QUERY
-%token S_GETKEY
-%token S_ERROR
-%token S_RECALC
-%token S_REDRAW
-%token S_QUIT
-%token S_STATUS
-%token S_RUN
-%token S_PLUGIN
-%token S_PLUGOUT
+
+/*
+ token S_ADDNOTE
+ token S_DELNOTE
+ token S_GET
+ token S_PUT
+ token S_MERGE
+ token S_WRITE
+ token S_TBL
+ token S_COPY
+ token S_MOVE
+ token S_ERASE
+ token S_YANK
+ token S_FILL
+ token S_LOCK
+ token S_UNLOCK
+ token S_DEFINE
+ token S_UNDEFINE
+ token S_ABBREV
+ token S_UNABBREV
+ token S_FRAME
+ token S_FRAMETOP
+ token S_FRAMEBOTTOM
+ token S_FRAMELEFT
+ token S_FRAMERIGHT
+ token S_UNFRAME
+ token S_VALUE
+ token S_MDIR
+ token S_AUTORUN
+ token S_FKEY
+ token S_SCEXT
+ token S_ASCEXT
+ token S_TBL0EXT
+ token S_TBLEXT
+ token S_LATEXEXT
+ token S_SLATEXEXT
+ token S_TEXEXT
+ token S_UP
+ token S_DOWN
+ token S_LEFT
+ token S_RIGHT
+ token S_ENDUP
+ token S_ENDDOWN
+ token S_ENDLEFT
+ token S_ENDRIGHT
+ token S_SELECT
+ token S_INSERTROW
+ token S_OPENROW
+ token S_DELETEROW
+ token S_YANKROW
+ token S_PULL
+ token S_PULLMERGE
+ token S_PULLROWS
+ token S_PULLCOLS
+ token S_PULLXCHG
+ token S_PULLTP
+ token S_PULLFMT
+ token S_PULLCOPY
+ token S_WHEREAMI
+ token S_GETNUM
+ token S_FGETNUM
+ token S_GETSTRING
+ token S_GETEXP
+ token S_GETFMT
+ token S_GETFRAME
+ token S_GETRANGE
+ token S_EVAL
+ token S_SEVAL
+ token S_QUERY
+ token S_GETKEY
+ token S_ERROR
+ token S_RECALC
+ token S_REDRAW
+ token S_QUIT
+ token S_STATUS
+ token S_RUN
+ token S_PLUGIN
+ token S_PLUGOUT
+*/
+
 %token S_IMAP
 %token S_NMAP
 %token S_COLOR
@@ -302,6 +308,9 @@ command: S_LET var_or_range '=' e { let($2.left.vp, $4); }
     |    S_RIGHTJUSTIFY var_or_range { rjustify($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col); }
     |    S_CENTER var_or_range       { center($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col); }
     |    S_FORMAT COL NUMBER NUMBER NUMBER { doformat($2,$2,$3,$4,$5); }
+    |    S_FMT var_or_range STRING   { format_cell($2.left.vp, $2.right.vp, $3);
+                                       scxfree($3); 
+                                     }
 
 /* para compatibilidad con sc */
     |    S_HIDE COL                  { hide_col($2, 1); }        // hide de una unica columna
@@ -358,6 +367,7 @@ command: S_LET var_or_range '=' e { let($2.left.vp, $4); }
                                           set_range_mark($2 + 97, sr); }
 
     |    S_SORT range STRING {            sortrange($2.left.vp, $2.right.vp, $3);
+                                          scxfree($3); 
                              }
                                           
                                           /* para debug
@@ -538,7 +548,7 @@ command: S_LET var_or_range '=' e { let($2.left.vp, $4); }
                     { addplugin($2, $4, 'r'); } 
     |    S_PLUGOUT STRING '=' STRING
                     { addplugin($2, $4, 'w'); } 
-    |       PLUGIN            { *line = '|';
+    |    PLUGIN            { *line = '|';
                       sprintf(line + 1, $1);
                       readfile(line, 0);
                       scxfree($1); }

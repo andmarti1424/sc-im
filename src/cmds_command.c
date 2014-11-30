@@ -112,6 +112,13 @@ void do_commandmode(struct block * sb) {
             del_range_chars(interp_line, 0, 3);
             send_to_interp(interp_line);
 
+        } else if ( strncmp(inputline, "format ", 7) == 0 ) {
+            sprintf(interp_line, "fmt %s%d", coltoa(curcol), currow);
+            int l = strlen(interp_line);
+            sprintf(interp_line, "%s %s", interp_line, inputline);
+            del_range_chars(interp_line, l, l + 6);
+            send_to_interp(interp_line);
+
         } else if ( strncmp(inputline, "color ", 6) == 0 ) {
             strcpy(interp_line, inputline);
             del_range_chars(interp_line, 0, 5);

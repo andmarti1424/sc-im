@@ -7,6 +7,7 @@
 #include <curses.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include "input.h"
 #include "stdout.h"
 #include "range.h"
@@ -14,6 +15,7 @@
 #include "cmds.h"
 #include "color.h"
 #include "version.h"
+#include "file.h"
 
 extern struct dictionary * d_colors_param;
 extern int cmd_pending;
@@ -54,8 +56,7 @@ void start_stdout() {
             // de las claves que se definen en los archivos .sc
             set_colors_param_dict();
         }
-
-            //initcolor(0);                                // Creo los colores initpair
+        //initcolor(0);                                // Creo los colores initpair
     }   
     #endif
 
@@ -566,7 +567,7 @@ void add_cell_detail(char * d, struct ent * p1) {
         else
             strcat(d, (p1->flags & is_leftflush) ? "<{" : ">{");
         //strcat(d, line); FIXME
-        strcat(d, "????? } ");        /* and this '}' is for vi % */
+        strcat(d, "??? } ");        /* and this '}' is for vi % */
 
     } else if (p1->label) {
         /* has constant label only */
@@ -760,26 +761,26 @@ void show_text_content_of_cell(WINDOW * win, struct ent ** p, int row, int col, 
     } else if ( (*p)->label && (*p)->flags & is_leftflush ) {
         strcpy(field, (*p)->label);
         left = col_width - str_len;
-    left = left < 0 ? 0 : left;
+        left = left < 0 ? 0 : left;
         flen = str_len;
         while (left-- && flen++) add_char(field, ' ', flen-1);
 
     // centrado
     } else if ( (*p)->label && (*p)->flags & is_label) {
         left = (col_width - str_len )/2;
-    left = left < 0 ? 0 : left;
+        left = left < 0 ? 0 : left;
         flen = 0;
         while (left-- && ++flen) add_char(field, ' ', flen-1);
         strcat(field, (*p)->label);
         flen += str_len;
         left = (col_width - flen);
-    left = left < 0 ? 0 : left;
+        left = left < 0 ? 0 : left;
         while (left-- && ++flen) add_char(field, ' ', flen-1);
 
     // derecha
     } else if ( (*p)->label) {
         left = col_width - str_len;
-    left = left < 0 ? 0 : left;
+        left = left < 0 ? 0 : left;
         flen = 0;
         while (left-- && ++flen) add_char(field, ' ', flen-1);
         strcat(field, (*p)->label);
@@ -792,25 +793,45 @@ void show_text_content_of_cell(WINDOW * win, struct ent ** p, int row, int col, 
 }
 
 void show_numeric_content_of_cell(WINDOW * win, struct ent ** p, int col, int r, int c) {
-    char field[1024];
-    field[0]='\0';
-    sprintf(field,"%.*f", precision[col], (*p)->v);
-    int nlen = strlen(field);
+    char field[1024]="";
+    //field[0]='\0';
+    //sprintf(field,"%.*f", precision[col], (*p)->v);
     int col_width = fwidth[col];
-    sprintf(field,"%*.*f", col_width, precision[col], (*p)->v);
 
-    //(void) sprintf(field,"%*.*f", col_width, precision[col], (*p)->v);
-    // si no entra contenido en celda
+    // format of cell
+    char * cfmt = (*p)->format ? (*p)->format :
+        (realfmt[col] >= 0 && realfmt[col] < COLFORMATS &&
+        colformat[realfmt[col]]) ? colformat[realfmt[col]] : NULL;
+    if (cfmt) {
+        if (*cfmt == ctl('d')) {
+            time_t v = (time_t) ((*p)->v);
+            strftime(field, sizeof(field), cfmt + 1, localtime(&v));
+        } else
+            (void) format(cfmt, precision[col], (*p)->v, field, sizeof(field));
+
+        // rellenarse a la izq
+        int left = col_width - strlen(field) + 1;
+        while (left-- && left > 0) add_char(field, ' ', 0);
+
+    //TODO engformat?
+    //(void) engformat(realfmt[col], fwidth[col] - note, precision[col], (*p)->v, field, sizeof(field));
+        
+    // if there is no format in cell, we use the default of precision
+    } else {
+        sprintf(field,"%*.*f", col_width, precision[col], (*p)->v);
+    }
+ 
+    // if content is larger than column width
+    int nlen = strlen(field);
     if (nlen > col_width) {
         sprintf(field, "%0*d", col_width, 0);
         subst(field, '0', '*');
     }
-
     // si hay valor numerico y (texto centrado o just. izq).
     else if ( (*p)->label && (*p)->flags & (is_leftflush | is_label ) ) {
         int tlen = strlen((*p)->label);
 
-        if ( nlen + tlen > col_width) { // no entra contenido
+        if ( nlen + tlen > col_width) {            // no entra contenido
             sprintf(field, "%0*d", col_width, 0);
             subst(field, '0', '*');
         } else if ((*p)->flags & (is_leftflush)) { // label izq
@@ -818,7 +839,7 @@ void show_numeric_content_of_cell(WINDOW * win, struct ent ** p, int col, int r,
             strcpy(field, (*p)->label);
             while (left--) add_char(field, ' ', strlen(field));
             sprintf(field,"%s%.*f", field, precision[col], (*p)->v);
-        } else { // label centrado
+        } else {                                   // label centrado
             field[0]='\0';
             int left = (col_width - tlen) / 2;
             while (left--) add_char(field, ' ', strlen(field));
@@ -838,19 +859,6 @@ void show_numeric_content_of_cell(WINDOW * win, struct ent ** p, int col, int r,
     return;
 }
 
-
-/*
-#include <pwd.h>
-#include <sys/stat.h>
-#include <time.h>
-#include <utime.h>
-#include <fcntl.h>
-#include <signal.h>
-#include <errno.h>
-#include <unistd.h>
-*/
-#include "file.h"
-
 void show_text(char * val) {
     int pid;
     char px[MAXCMD];
@@ -867,9 +875,6 @@ void show_text(char * val) {
     }
     def_prog_mode();
     endwin();
-    //fprintf(f, "Named Ranges:\n=============\n\n");
-    //fprintf(f, "Frames:\n=======\n\n");
-    //fprintf(f, "Colors:\n=======\n\n");
     fprintf(f, "%s\n", val);
     fprintf(f, "Press 'q' and then ENTER to return.");
     closefile(f, pid, 0);

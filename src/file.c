@@ -33,15 +33,8 @@ void erasedb() {
         register struct ent ** pp = ATBL(tbl, r, 0);
         for (c = 0; c++ <= maxcol; pp++)
             if (*pp != NULL) {
-                //if ((*pp)->expr) 
-                //    efree((*pp) -> expr);
-                /*
-                if ((*pp)->label != NULL) {
-                      scxfree((char *)((*pp) -> label));
-                }*/
-
-                    //(*pp)->next = freeents;    /* save [struct ent] for reuse */
-                    //freeents = *pp;
+                //(*pp)->next = freeents;    /* save [struct ent] for reuse */
+                //freeents = *pp;
                 
                 clearent(*pp);
             }
