@@ -1,13 +1,10 @@
 TODO
 ----
-1. IMPORT FROM DELIMITED TEXT FORMATS
 
-2. Most voted feature of USER_REQUEST file.
+1. Mapping: special caracters should be mapped.
 
-3. Mapping: special caracters should be mapped.
-
-4. Chain cells with equations into a DOUBLE linked list or dependency tree
+2. Chain cells with equations into a DOUBLE linked list or dependency tree
 Have a top level eval, eval and UPDATE all lower nodes
 This is also neccesary for UNDO mods of cells that has equations on them!!!
 
-5. Multiplier with '.' command ?
+3. Multiplier with '.' command ?

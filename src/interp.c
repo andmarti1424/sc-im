@@ -1725,7 +1725,7 @@ void moveto(int row, int col, int lastrow, int lastcol, int cornerrow, int corne
 }
 
 /*
- * 'goto' either a given number,'error', or 'invalid' starting at currow,curcol
+ * 'goto' either a given number,'error', or 'invalid' starting at (currow,curcol)
  */
 void num_search(double n, int firstrow, int firstcol, int lastrow, int lastcol, int errsearch) {
     register struct ent *p;
