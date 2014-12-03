@@ -168,10 +168,11 @@ OBJS := $(patsubst %.c, %.o, $(wildcard *.c) $(wildcard utils/*.c)) gram.o
 all : $(name)
 
 install :
-	install scim $(prefix)/bin/scim
+	install -d $(DESTDIR)$(prefix)/bin
+	install scim $(DESTDIR)$(prefix)/bin/scim
 
 uninstall :
-	-rm $(prefix)/bin/scim
+	-rm $(DESTDIR)$(prefix)/bin/scim
 
 $(name) : $(OBJS)
 	$(CC) $(LDFLAGS) $^ -o $@ $(LDLIBS)

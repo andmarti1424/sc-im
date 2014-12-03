@@ -13,19 +13,25 @@
 #include "history.h"
 #include "buffer.h"
 
-int arg = 1;
 int currow = 0, curcol = 0;
 int maxrows, maxcols;
-//int FullUpdate = 0;
 int * fwidth;
 int * precision;
 int * realfmt;
 char * col_hidden;
 char * row_hidden;
 char line[FBUFLEN];
-int changed;
 int modflg;
+struct ent ***tbl;
+char *progname;
+unsigned int shall_quit = 0;
+unsigned int curmode = NORMAL_MODE;
+int maxrow, maxcol;
+
+int changed;
 int cellassign;
+//int FullUpdate = 0;
+int arg = 1;
 //int numeric;
 char *mdir;
 char *autorun;
@@ -51,11 +57,6 @@ int  tbl_style = 0;     /* headers for T command output */
 int  rndtoeven = 0;
 int  rowsinrange = 1;
 int  colsinrange = DEFWIDTH;
-struct ent ***tbl;
-char *progname;
-unsigned int shall_quit = 0;
-unsigned int curmode = NORMAL_MODE;
-int maxrow, maxcol;
 
 struct block * buffer;
 struct block * lastcmd_buffer;
@@ -66,7 +67,7 @@ struct history * commandline_history;
 void signals();
 void create_structures();
 
-int main (int argc, char **argv) {
+int main (int argc, char ** argv) {
 
     // catch up signals
     signals();
@@ -76,7 +77,7 @@ int main (int argc, char **argv) {
     //esto habilitarlo para debug de mensajes:    wtimeout(input_win, 1000);
 
     // setup the spreadsheet arrays
-    if (!growtbl(GROWNEW, 0, 0)) return exit_app(1);
+    if (! growtbl(GROWNEW, 0, 0)) return exit_app(1);
 
     // start configuration dictionaries
     user_conf_d = (struct dictionary *) create_dictionary();
@@ -114,17 +115,18 @@ int main (int argc, char **argv) {
     shall_quit = 0;
     buffer = (struct block *) create_buf();
     //Esto habilitarlo para debug:  wtimeout(input_win, TIMEOUT_CURSES);
-    while (! shall_quit) {
-          handle_input(buffer);
-          // shall_quit=1 implica :q
-          // shall_quit=2 implica :q!
-          if (shall_quit == 1 && modcheck()) shall_quit = 0;
+    while ( ! shall_quit ) {
+        handle_input(buffer);
+        // shall_quit=1 implica :q
+        // shall_quit=2 implica :q!
+        if (shall_quit == 1 && modcheck()) shall_quit = 0;
     }
 
     return exit_app(0);
 }
 
 void create_structures() {
+
     // inicializo array de marcas
     create_mark_array();
 
@@ -220,6 +222,7 @@ void nopipe() {
     brokenpipe = TRUE;
 }
 
+// setup signals catched by Scim
 void signals() {
 #ifdef SIGVOID
     //void doquit();
@@ -246,7 +249,7 @@ void signals() {
     //(void) signal(SIGFPE, doquit);
 }
 
-// sig_int
+// SIGINT signal
 #ifdef SIGVOID
 void
 #else
@@ -256,7 +259,7 @@ sig_int() {
     error("Got SIGINT. Press «:q<Enter>» to quit Scim");
 }
 
-// resize of terminal
+// SIGWINCH signal - resize of terminal
 #ifdef SIGVOID
 void
 #else

@@ -318,7 +318,7 @@ void write_marks(register FILE *f) {
     for ( i='a'; i<='z'; i++ ) {
         m = get_mark((char) i);
     
-        if ( m->row == -1 && m->row == -1) {        
+        if ( m->row == -1 && m->row == -1 && m->rng != NULL ) {        
             fprintf(f, "mark %c %s%d %s%d\n", i, coltoa(m->rng->tlcol), m->rng->tlrow, coltoa(m->rng->brcol), m->rng->brrow);
         } else if ( m->row != 0 && m->row != 0 ) {
             fprintf(f, "mark %c %s%d\n", i, coltoa(m->col), m->row);
