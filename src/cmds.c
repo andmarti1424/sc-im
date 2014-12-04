@@ -1530,7 +1530,8 @@ int is_single_command (struct block * buf, long timeout) {
               buf->value == '$'        || buf->value == '0'       || buf->value == '#'      || buf->value == '^'        ||
               buf->value == 'y'        || buf->value == 'x'       || buf->value == 'w'      || buf->value == 'b'        ||
               buf->value == 'H'        || buf->value == 'M'       || buf->value == 'L'      || buf->value == 'G'        ||
-              buf->value == ctl('f')   || buf->value == ctl('b')  || buf->value == ctl('a')
+              buf->value == ctl('f')   || buf->value == ctl('b')  || buf->value == ctl('a') ||
+              buf->value == ':'
         )
                 res = MOVEMENT_CMD;
 

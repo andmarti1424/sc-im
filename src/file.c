@@ -319,7 +319,8 @@ void write_marks(register FILE *f) {
         m = get_mark((char) i);
     
         if ( m->row == -1 && m->row == -1 && m->rng != NULL ) {        
-            fprintf(f, "mark %c %s%d %s%d\n", i, coltoa(m->rng->tlcol), m->rng->tlrow, coltoa(m->rng->brcol), m->rng->brrow);
+            fprintf(f, "mark %c %s%d ", i, coltoa(m->rng->tlcol), m->rng->tlrow);
+            fprintf(f, "%s%d\n", i, coltoa(m->rng->brcol), m->rng->brrow);
         } else if ( m->row != 0 && m->row != 0 ) {
             fprintf(f, "mark %c %s%d\n", i, coltoa(m->col), m->row);
         }
@@ -767,7 +768,7 @@ int import_csv(char * fname, char d) {
 
 void unspecial(FILE *f, char *str, int delim);
 
-void do_export() {
+void do_export(int r0, int c0, int rn, int cn) {
     int force_rewrite = 0;
     char type_export[4] = "";
     char ruta[PATHLEN];
@@ -810,9 +811,9 @@ void do_export() {
 
     // llamo a las rutinas de exportacion
     if (strcmp(type_export, "csv") == 0) {
-        export_delim(ruta, ',', 0, 0, maxrow, maxcol);
+        export_delim(ruta, ',', r0, c0, rn, cn);
     } if (strcmp(type_export, "tab") == 0) {
-        export_delim(ruta, '\t', 0, 0, maxrow, maxcol);
+        export_delim(ruta, '\t', r0, c0, rn, cn);
     }
 }
 
@@ -843,7 +844,7 @@ void export_delim(char * fname, char coldelim, int r0, int c0, int rn, int cn) {
                         (void) fprintf (f, "%*s", fwidth[col], ((*pp)->cellerror == CELLERROR ? "ERROR" : "INVALID"));
                     } else if ((*pp)->format) {
                         char field[FBUFLEN];
-                        if (*((*pp)->format) == ctl('d')) {  // formato fecha
+                        if (*((*pp)->format) == 'd') {  // formato fecha
                             time_t v = (time_t) ((*pp)->v);
                             strftime(field, sizeof(field), ((*pp)->format)+1, localtime(&v));
                         } else {                              // formato numerico
@@ -852,7 +853,7 @@ void export_delim(char * fname, char coldelim, int r0, int c0, int rn, int cn) {
                         unspecial(f, field, coldelim);
                     } else { //eng number format
                         char field[FBUFLEN] = "";
-                        (void) engformat(realfmt[col], fwidth[col], precision[col], (*pp) -> v, field, sizeof(field));
+                        (void) engformat(realfmt[col], fwidth[col], precision[col], (*pp)->v, field, sizeof(field));
                         unspecial(f, field, coldelim);
                     }
                 }

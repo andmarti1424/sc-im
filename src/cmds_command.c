@@ -8,6 +8,7 @@
 #include <ctype.h>         // for isprint()
 #include "sc.h"            // for rescol
 #include "utils/dictionary.h"
+#include "range.h"
 
 extern char * rev;
 extern struct dictionary * user_conf_d;
@@ -17,6 +18,10 @@ int inputline_pos;
 char interp_line[100];
 
 void do_commandmode(struct block * sb) {
+    // si hay un rango seleccionado en modo visual
+    int p = is_range_selected();
+    struct srange * sr;
+    if (p != -1) sr = get_range_by_pos(p);
     
     if (sb->value == OKEY_BS) {            // BS
         if (! strlen(inputline) || ! inputline_pos) {
@@ -95,11 +100,24 @@ void do_commandmode(struct block * sb) {
             }
 
         } else if ( strncmp(inputline, "hiderow", 7) == 0 ||
-        strncmp(inputline, "showrow", 7) == 0 ||
-        strncmp(inputline, "showcol", 7) == 0 ||
-        strncmp(inputline, "hidecol", 7) == 0 ||
-        strncmp(inputline, "sort ", 5) == 0 ) {
+                    strncmp(inputline, "showrow", 7) == 0 ||
+                    strncmp(inputline, "showcol", 7) == 0 ||
+                    strncmp(inputline, "hidecol", 7) == 0
+                  ) {
             send_to_interp(inputline); 
+
+        } else if ( strncmp(inputline, "sort ", 5) == 0 ) {
+            strcpy(interp_line, inputline);
+            if (p != -1) { // si hay un rango seleccionado
+                char cline [BUFFERSIZE];
+                strcpy(cline, interp_line);
+                int found = str_in_str(interp_line, "\"");
+                if (found == -1) return;
+                del_range_chars(cline, 0, found-1);
+                sprintf(interp_line, "sort %s%d:", coltoa(sr->tlcol), sr->tlrow);
+                sprintf(interp_line, "%s%s%d %s", interp_line, coltoa(sr->brcol), sr->brrow, cline);
+            }
+            send_to_interp(interp_line); 
 
         } else if ( strncmp(inputline, "hiddenrows", 10) == 0 ) {
             show_hiddenrows();
@@ -113,7 +131,11 @@ void do_commandmode(struct block * sb) {
             send_to_interp(interp_line);
 
         } else if ( strncmp(inputline, "format ", 7) == 0 ) {
-            sprintf(interp_line, "fmt %s%d", coltoa(curcol), currow);
+            if (p != -1) {
+                sprintf(interp_line, "fmt %s%d:", coltoa(sr->tlcol), sr->tlrow);
+                sprintf(interp_line, "%s%s%d", interp_line, coltoa(sr->brcol), sr->brrow);
+            } else
+                sprintf(interp_line, "fmt %s%d", coltoa(curcol), currow);
             int l = strlen(interp_line);
             sprintf(interp_line, "%s %s", interp_line, inputline);
             del_range_chars(interp_line, l, l + 6);
@@ -155,7 +177,8 @@ void do_commandmode(struct block * sb) {
             strncmp(inputline, "e! tab" , 6) == 0 ||
             strncmp(inputline, "e! csv" , 6) == 0 ||
             strncmp(inputline, "e tab"  , 5) == 0 ) {
-                do_export();
+                do_export( p == -1 ? 0 : sr->tlrow, p == -1 ? 0 : sr->tlcol,
+                p == -1 ? maxrow : sr->brrow, p == -1 ? maxcol : sr->brcol);
 
         } else if (
             strncmp(inputline, "i csv " , 6) == 0 ||

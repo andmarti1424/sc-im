@@ -367,7 +367,7 @@ command: S_LET var_or_range '=' e { let($2.left.vp, $4); }
                                           set_range_mark($2 + 97, sr); }
 
     |    S_SORT range STRING {            sortrange($2.left.vp, $2.right.vp, $3);
-                                          scxfree($3); 
+                                          //scxfree($3); 
                              }
                                           
                                           /* para debug

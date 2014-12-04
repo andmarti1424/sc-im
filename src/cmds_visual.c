@@ -6,13 +6,18 @@
 #include "cmds.h"
 #include "sc.h"
 
-srange * r;
+srange * r; // SELECTED RANGE!
+
 extern int offscr_sc_rows, offscr_sc_cols;
 extern int curmode;
 extern int cmd_multiplier;
+extern struct history * commandline_history;
 
 void start_visualmode() {
     unselect_ranges();
+
+    struct srange * sr = get_range_by_marks('\0', '\0');
+    if (sr != NULL) del_ranges_by_mark('\0');
 
     r = (srange *) malloc (sizeof(srange));
     r->tlrow = currow;
@@ -278,6 +283,17 @@ void do_visualmode(struct block * sb) {
         curmode = NORMAL_MODE;
         clr_header(input_win, 0);
         show_header(input_win);
+
+    } else if (sb->value == ':') {
+        clr_header(input_win, 0);
+        wrefresh(input_win);
+        chg_mode(':');
+        add(commandline_history, "");
+        print_mode(input_win);
+        wrefresh(input_win);
+        handle_cursor();
+        inputline_pos = 0;
+        return;
     }
     update();
 }

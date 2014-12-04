@@ -52,7 +52,8 @@ Acciones cuyo UNDO/REDO se encuentra implementado:
 NOT implemented:
 1. cambio de formato de columna (en un futuro de celdas)
 2. cambio de justificado de celdas
-3. Recover equations after redo of changes over ents that have equations on them.
+3. cambio de formato de una celda
+4. Recover equations after redo of changes over ents that have equations on them.
 
 ----------------------------------------------------------------------------------------
 */
