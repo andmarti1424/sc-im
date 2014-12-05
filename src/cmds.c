@@ -547,6 +547,8 @@ void formatcol(int c) {
             modflg++;
             break;
         case '-':
+        case 'j':
+        case OKEY_DOWN:
             for (i = curcol; i < curcol + arg; i++) {
                 precision[i]--;
                 if (precision[i] < 0)
@@ -555,6 +557,8 @@ void formatcol(int c) {
             modflg++;
             break;
         case '+':
+        case 'k':
+        case OKEY_UP:
             for (i = curcol; i < curcol + arg; i++)
                 precision[i]++;
             modflg++;
@@ -1522,6 +1526,8 @@ int is_single_command (struct block * buf, long timeout) {
             ( buf->pnext->value == '>' || buf->pnext->value == '<'              ||
               buf->pnext->value == 'h' || buf->pnext->value == OKEY_LEFT        ||
               buf->pnext->value == 'l' || buf->pnext->value == OKEY_RIGHT       ||
+              buf->pnext->value == 'j' || buf->pnext->value == OKEY_DOWN        ||
+              buf->pnext->value == 'k' || buf->pnext->value == OKEY_UP          ||
               buf->pnext->value == '-' || buf->pnext->value == '+' )) res = EDITION_CMD;
 
     } else if (curmode == VISUAL_MODE && bs == 1) {

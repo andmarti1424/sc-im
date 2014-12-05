@@ -13,6 +13,7 @@
 #include "cmds.h"
 #include "file.h"
 #include "marks.h"
+#include "utils/string.h"
 
 #define DEFCOLDELIM ':'
 
@@ -710,6 +711,7 @@ void print_options(FILE *f) {
     (void) fprintf(f, "\n");
 }
 
+
 // Importación de CSV a SC
 int import_csv(char * fname, char d) {
 
@@ -719,9 +721,11 @@ int import_csv(char * fname, char d) {
     int r = 0, c = 0;
     char line_in[FBUFLEN];
     char line_interp[FBUFLEN] = "";    
+
     char * token;
 
-    char delim[2] = "";
+    int quote = 0; // if value has '"'. ex: 12,"1234,450.00",56
+    char delim[2] = ""; //strtok receives a char *, not a char
     add_char(delim, d, 0);
 
     //if ((f = openfile(fname, & pid, & rfd)) == NULL) {
@@ -734,20 +738,33 @@ int import_csv(char * fname, char d) {
     while ( ! feof(f) && (fgets(line_in, sizeof(line_in), f) != NULL) ) {        
 
         // rompo la cadena por delimitador
-        token = strtok(line_in, delim);
+        token = xstrtok(line_in, delim);
         c = 0;
+
         while( token != NULL ) {
             clean_carrier(token);
+            if ( (token[0] == '\"' || quote) && (token[strlen(token)-1] != '\"' || strlen(token) == 1) ) {
+                quote = 1;
+                sprintf(token, "%s%s", token, xstrtok(NULL, ","));
+                continue;
+            }
+            if (quote) { // elimino comillas si vengo de quote
+                del_char(token, 0);
+                del_char(token, strlen(token)-1);
+            }
             if (isnumeric(token)) {
                 sprintf(line_interp, "let %s%d=%s", coltoa(c), r, token);
             //} else if (token[0] == '"') {
             //    sprintf(line_interp, "label %s%d=\"%s\"", coltoa(c), r, token);
             } else {
                 sprintf(line_interp, "label %s%d=\"%s\"", coltoa(c), r, token);
+                //info("label %s%d=\"%s\"", coltoa(c), r, token);
+                //get_key();
             }
             send_to_interp(line_interp);
             c++;
-            token = strtok(NULL, ",");
+            quote = 0;
+            token = xstrtok(NULL, ",");            
         }     
         
         r++;
@@ -765,8 +782,6 @@ int import_csv(char * fname, char d) {
 }
 
 // Exportación a CSV y TAB
-
-void unspecial(FILE *f, char *str, int delim);
 
 void do_export(int r0, int c0, int rn, int cn) {
     int force_rewrite = 0;
@@ -833,7 +848,7 @@ void export_delim(char * fname, char coldelim, int r0, int c0, int rn, int cn) {
 
     struct ent * ent = go_end();
     if (rn > ent->row) rn = ent->row;
-    if (cn > ent->col) cn = ent->col;
+    //if (cn > ent->col) cn = ent->col;
 
     for (row = r0; row <= rn; row++) {        
         for (pp = ATBL(tbl, row, col = c0); col <= cn; col++, pp++) {
@@ -847,17 +862,20 @@ void export_delim(char * fname, char coldelim, int r0, int c0, int rn, int cn) {
                         if (*((*pp)->format) == 'd') {  // formato fecha
                             time_t v = (time_t) ((*pp)->v);
                             strftime(field, sizeof(field), ((*pp)->format)+1, localtime(&v));
-                        } else {                              // formato numerico
+                        } else {                        // formato numerico
                             format((*pp)->format, precision[col], (*pp)->v, field, sizeof(field));
                         }
+                        ltrim(field, ' ');
                         unspecial(f, field, coldelim);
                     } else { //eng number format
                         char field[FBUFLEN] = "";
                         (void) engformat(realfmt[col], fwidth[col], precision[col], (*pp)->v, field, sizeof(field));
+                        ltrim(field, ' ');
                         unspecial(f, field, coldelim);
                     }
                 }
                 if ((s = (*pp)->label)) {
+                    ltrim(s, ' ');
                     unspecial(f, s, coldelim);
                 }
             }
@@ -881,7 +899,8 @@ void unspecial(FILE *f, char *str, int delim) {
 
     //if (*str == '\\') str++; /* delete wheeling string operator, OK? */
     while (*str) {
-        if (*str != ' ') putc(*str, f);
+        //if (*str != ' ') //elimino los espacios???
+        putc(*str, f); 
         //if (((tbl_style == LATEX) || (tbl_style == SLATEX) || (tbl_style == TEX)) &&
         //((*str == delim) || (*str == '$') || (*str == '#') || (*str == '%') || (*str == '{') || (*str == '}') || (*str == '&')))
         //    putc('\\', f);
@@ -1102,7 +1121,5 @@ void printfile(char *fname, int r0, int c0, int rn, int cn) {
 
     if (fname) closefile(f, pid, 0);
 }
-
-
 */
 

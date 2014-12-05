@@ -6,3 +6,4 @@ char ** split(char *string, const char delimiter, int lastnull);
 char * ltrim(char *string, char junk);
 char * rtrim(char * string, char junk);
 int isnumeric(char * string);
+char * xstrtok(char * line, char * delims);
