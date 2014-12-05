@@ -1495,6 +1495,9 @@ int is_single_command (struct block * buf, long timeout) {
         else if (buf->value == 'm' && bs == 2 &&    // mark
             ((buf->pnext->value - ('a' - 1)) < 1 || buf->pnext->value > 26)) res = MOVEMENT_CMD;
 
+        else if (buf->value == 'c' && bs == 2 &&    // mark
+            ((buf->pnext->value - ('a' - 1)) < 1 || buf->pnext->value > 26)) res = EDITION_CMD;
+
         else if (buf->value == 'z' && bs == 2 &&    // scrolling
             ( buf->pnext->value == 'h' || buf->pnext->value == 'l' ||
               buf->pnext->value == 'z' || buf->pnext->value == 'm' ||

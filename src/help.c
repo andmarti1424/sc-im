@@ -20,16 +20,16 @@ char * long_help[] = {
 " You can use the «/» command to search for a pattern in the help.",
 " ----------------------------------------------------------------------------------------------",
 " SCIM modes:",
-"        NORMAL_MODE:    For navigation and common commands",
-"        INSERT_MODE:    For entering new cell content (values and expressions)",
+"       NORMAL_MODE      For navigation and common commands",
+"       INSERT_MODE      For entering new cell content (values and expressions)",
 "                        Submodes: = < > \\",
-"        EDIT_MODE:      For single line -Vi-like- edition of cell content and expressions",
-"        COMMAND_MODE:   For entering special commands and for quiting app and saving files",
-"        VISUAL_MODE:    For selecting a range of cells",
+"       EDIT_MODE        For single line -Vi-like- edition of cell content and expressions",
+"       COMMAND_MODE     For entering special commands and for quiting app and saving files",
+"       VISUAL_MODE      For selecting a range of cells",
 "        ----------------  ",
 "",
 "",
-"        NORMAL MODE: ",
+"       *NORMAL MODE*",
 "",
 "        Navigation commands: ",
 "            j k l h     Move cursor down, up, right or left",
@@ -69,6 +69,8 @@ char * long_help[] = {
 "            m           Followed by any lowercase letter, marks the current cell or the selected range",
 "                        with that letter.",
 "                        NOTE: When a mark is changed, all ranges that use that mark are deleted.",
+"            c           Copy a marked cell to the current cell, adjusting row and column references in its numeric",
+"                        or string expression, if any.",
 "            r           Followed by two lowercase letters that represent marks of cell,",
 "                        creates a range using those marks and selects it.",
 "                        NOTE: If a range already exists, its replaced with new values.",
@@ -121,7 +123,7 @@ char * long_help[] = {
 "",
 "",
 "",
-"        INSERT MODE",
+"        *INSERT MODE*",
 "            =               Enter a numeric constant or expression.",
 "            <               Enter a left justified string or string expression.",
 "            \\               Enter a centered label.",
@@ -132,7 +134,7 @@ char * long_help[] = {
 "            Input of numbers, letters and operators",
 "",
 "",
-"        EDIT MODE",
+"        *EDIT MODE*",
 "            e           in normal mode, enters edit mode for editing numeric value of a cell",
 "            E           in normal mode, enters edit mode for editing text value of a cell",
 "            h           moves a char left",
@@ -185,7 +187,7 @@ char * long_help[] = {
 "            <ENTER>     confirm changes",
 "",
 "",
-"        COMMAND MODE",
+"        *COMMAND MODE*",
 "            :w           saves current spreadsheet",
 "            :w foo       save current spreadsheet with 'foo' filename",
 "            :w! foo      save current spreadsheet with 'foo' filename, forcing rewrite if 'foo' file already exists",
@@ -343,7 +345,7 @@ char * long_help[] = {
 "",
 "",
 "",
-"        VISUAL MODE",
+"        *VISUAL MODE*",
 "            This mode is used for selecting a range of cells to do an operation",
 "            At entering to this mode, top left limit of the selected range, and the bottom right limit is set to current row and column.",
 "            The following movements commands helps to complete a selection in different ways.",
@@ -369,7 +371,7 @@ char * long_help[] = {
 "            G           Moves to last valid cell of spreadsheet.",
 "",
 "",
-"        MAPPING",
+"        *MAPPING*",
 "            mapping can be done in any SCIM file or in .scimrc file in current home directory.",
 "            ex.: ",
 "                imap \"d\" \"j\"     ->   d maps to 'j' letter in insert mode",
@@ -381,7 +383,7 @@ char * long_help[] = {
 "            <ESC> cannot be mapped.",
 "",
 "",
-"        COMMAND MULTIPLIER",
+"        *COMMAND MULTIPLIER*",
 "            Commands in NORMAL MODE, VISUAL MODE or EDIT MODE can be multiplied if a number is previously typed.",
 "            Ex. '4j' in NORMAL MODE, translates to 4 times 'j'.",
 "            Ex. '4yr' in NORMAL MODE, yanks current row and the 3 rows below it.",
@@ -403,7 +405,7 @@ char * long_help[] = {
 "",
 "",
 
-(char *)0
+(char *) 0
 };
 
 static int pscreen(char *screen[]);
@@ -546,7 +548,7 @@ void find_help(char * word, char order) {
         for (i = delta + 1; i < max - 1; i++) {
             if ((look_result = str_in_str(long_help[i], word)) >= 0) {
                 delta = i;
-                //info("FOUND !!!");
+                info("");
                 break;
             }
         }
@@ -554,7 +556,7 @@ void find_help(char * word, char order) {
         for (i = delta - 1; i > 0; i--) {
             if ((look_result = str_in_str(long_help[i], word)) >= 0) {
                 delta = i;
-                //info("FOUND !!!");
+                info("");
                 break;
             }
         }
@@ -568,6 +570,8 @@ void find_help(char * word, char order) {
 }
 static int pscreen(char * screen[]) {
     int lineno;
+    int c = 0, j = 0;
+    int bold = 0;
 
     for (lineno = 0; screen[lineno + delta] && lineno < LINES; lineno++) {
         if (word_looked) look_result = str_in_str(screen[lineno + delta], word_looked);
@@ -576,7 +580,19 @@ static int pscreen(char * screen[]) {
         } else {
             set_ucolor(main_win, NORMAL);
         }   
-        mvwprintw(main_win, lineno+2, 0, screen[lineno + delta]);
+
+        wmove(main_win, lineno+2, 0);
+
+        for (c=0; c < strlen(screen[lineno + delta]); c++)  {
+            if (screen[lineno + delta][c] == '*') bold = ! bold;
+            bold ? set_ucolor(main_win, CELL_SELECTION_SC) : set_ucolor(main_win, NORMAL);
+
+            if (screen[lineno + delta][c] == '*') {
+                set_ucolor(main_win, NORMAL);
+                //mvwprintw(main_win, lineno+2, 0+c, " ");
+            } else
+                mvwprintw(main_win, lineno+2, 0+c, "%c", (screen[lineno + delta][c]));
+        }
         wclrtoeol(main_win);
     }
     if (lineno < LINES) {

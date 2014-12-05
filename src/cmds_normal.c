@@ -271,6 +271,38 @@ void do_normalmode(struct block * buf) {
                 set_range_mark(buf->pnext->value, sr);                   
             } else         // mark cell 
                 set_cell_mark(buf->pnext->value, currow, curcol);
+            break;
+
+        case 'c': 
+            {
+            if (bs != 2) break;
+            struct ent * p = *ATBL(tbl, get_mark(buf->pnext->value)->row, get_mark(buf->pnext->value)->col);
+            int c1;
+            struct ent * n;
+            cmd_multiplier++;
+
+            for (c1 = curcol; cmd_multiplier-- && c1 < maxcols; c1++) {
+                if ((n = * ATBL(tbl, currow, c1))) {
+                    if (n->flags & is_locked)
+                        continue;
+                    if (!p) {
+                        clearent(n); //fixme?
+                        continue;
+                    }
+                } else {
+                    if (!p) break;
+                    n = lookat(currow, c1);
+                }
+                copyent(n, p, currow - get_mark(buf->pnext->value)->row, c1 - get_mark(buf->pnext->value)->col, 0, 0, maxrow, maxcol, 0);
+
+                n->row += currow - get_mark(buf->pnext->value)->row;
+                n->col += c1 - get_mark(buf->pnext->value)->col;
+
+                n->flags |= is_changed;
+            }
+            update();
+            break;
+            }
 
         // create range with two marks
         case 'r':  
@@ -519,7 +551,7 @@ void do_normalmode(struct block * buf) {
             update();
             break;
 
-        // left justify
+        // left align
         case '{':
             create_undo_action();
             copy_to_undostruct(currow, curcol, currow, curcol, 'd');
@@ -530,7 +562,7 @@ void do_normalmode(struct block * buf) {
             update();
             break;
 
-        // right justify
+        // right align
         case '}':
             create_undo_action();
             copy_to_undostruct(currow, curcol, currow, curcol, 'd');
@@ -541,7 +573,7 @@ void do_normalmode(struct block * buf) {
             update();
             break;
 
-        // center justify
+        // center align
         case '|':
             create_undo_action();
             copy_to_undostruct(currow, curcol, currow, curcol, 'd');
