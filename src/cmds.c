@@ -1392,7 +1392,7 @@ void select_inner_range(int * vir_tlrow, int * vir_tlcol, int * vir_brrow, int *
                         if (r == 0 && c == 0) continue;
                         else if (rr + r < 0 || cc + c < 0 || rr + r > maxrow || cc + c > maxcol) continue;
                         p = *ATBL(tbl, rr + r, cc + c);
-                        if ( p != NULL && (p->flags & is_label || p->flags & is_valid) ) {
+                        if ( p != NULL && (p->label || p->flags & is_valid) ) {
                             if (*vir_brcol < cc + c) {
                                 *vir_brcol = cc + c;
                                 mf=1;
