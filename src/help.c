@@ -573,6 +573,7 @@ void find_help(char * word, char order) {
     set_ucolor(input_win, NORMAL);
     return;
 }
+
 static int pscreen(char * screen[]) {
     int lineno;
     int c = 0, j = 0;
@@ -580,13 +581,9 @@ static int pscreen(char * screen[]) {
 
     for (lineno = 0; screen[lineno + delta] && lineno < LINES; lineno++) {
         if (word_looked) look_result = str_in_str(screen[lineno + delta], word_looked);
-        if (lineno == 0 && look_result != -1 ) {
-            set_ucolor(main_win, CELL_SELECTION_SC);
-        } else {
-            set_ucolor(main_win, NORMAL);
-        }   
 
         wmove(main_win, lineno+2, 0);
+        wclrtoeol(main_win);
 
         for (c=0; c < strlen(screen[lineno + delta]); c++)  {
             if (screen[lineno + delta][c] == '*') bold = ! bold;
@@ -595,10 +592,12 @@ static int pscreen(char * screen[]) {
             if (screen[lineno + delta][c] == '*') {
                 set_ucolor(main_win, NORMAL);
                 //mvwprintw(main_win, lineno+2, 0+c, " ");
-            } else
-                mvwprintw(main_win, lineno+2, 0+c, "%c", (screen[lineno + delta][c]));
+                continue;
+            } else if (lineno == 0 && look_result != -1 ) {
+                set_ucolor(main_win, CELL_SELECTION_SC);
+            }
+            mvwprintw(main_win, lineno+2, 0+c, "%c", (screen[lineno + delta][c]));
         }
-        wclrtoeol(main_win);
     }
     if (lineno < LINES) {
         wmove(main_win, lineno+3, 0);
