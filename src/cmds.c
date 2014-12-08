@@ -140,8 +140,9 @@ void deletecol() {
         }
 
         // libero memoria de última columna (pudiera tmb blanquear ent con "cleanent").
-        //pp = ATBL(tbl, r, maxcol);
-        //*pp = (struct ent *) 0;
+        pp = ATBL(tbl, r, maxcol);
+        *pp = (struct ent *) 0;
+        // agregado el 06/12/2014
     }
 
     // corrijo precision y ancho de columnas
@@ -729,7 +730,7 @@ void deleterow() {
 
         // move the rows, put the deleted, but now empty, row at the end
         for (; r + 1 < maxrows - 1; r++) {
-            //row_hidden[r] = row_hidden[r+1];
+            row_hidden[r] = row_hidden[r+1];
             tbl[r] = tbl[r + 1];
             pp = ATBL(tbl, r, 0);
             for (c = 0; c < maxcols; c++, pp++)
@@ -1053,8 +1054,6 @@ struct ent * lookat(int row, int col) {
         //*pp = (struct ent *) scxmalloc( (unsigned) sizeof(struct ent) );
         *pp = (struct ent *) malloc( (unsigned) sizeof(struct ent) );
         (*pp)->label = (char *) 0;
-        (*pp)->row = row;
-        (*pp)->col = col;
         (*pp)->flags = may_sync;
         (*pp)->expr = (struct enode *) 0;
         (*pp)->v = (double) 0.0;
@@ -1062,6 +1061,8 @@ struct ent * lookat(int row, int col) {
         (*pp)->cellerror = CELLOK;
         (*pp)->next = NULL;
     }
+    (*pp)->row = row;
+    (*pp)->col = col;
     if (row > maxrow) maxrow = row;
     if (col > maxcol) maxcol = col;
     return (*pp);
@@ -1211,9 +1212,11 @@ struct ent * forw_col(int arg) {
         if (c < maxcols - 1)
             c++;
         else
-            if (! growtbl(GROWCOL, 0, arg))    /* get as much as needed */
-                break;
-            else
+            if (! growtbl(GROWCOL, 0, arg)) {    /* get as much as needed */
+                //error("cannot grow");
+                return lookat(currow, curcol);
+                //break;
+            } else
                 c++;
         while (col_hidden[c] && (c < maxcols - 1))
             c++;
@@ -1230,10 +1233,10 @@ struct ent * forw_row(int arg) {
         if (r < maxrows - 1)
             r++;
         else {
-            if (!growtbl(GROWROW, arg, 0)) {
-                error("cant grow");
-                break;
-            } else
+            if (! growtbl(GROWROW, arg, 0)) {
+                //error("cannot grow");
+                return lookat(currow, curcol);
+            } else 
                 r++;
         }
         while (row_hidden[r] && (r < maxrows - 1)) {
@@ -1375,6 +1378,46 @@ struct ent * horiz_middle() {
     }
 }
 
+void select_inner_range(int * vir_tlrow, int * vir_tlcol, int * vir_brrow, int * vir_brcol) {
+
+    struct ent * p;
+    int rr, cc, r, c, mf = 1;
+   
+    while (mf != 0) {
+        mf = 0;
+        for (rr = *vir_tlrow; rr <= *vir_brrow; rr++) {
+            for (cc = *vir_tlcol; cc <= *vir_brcol; cc++)
+                for (r=-1; r<=1; r++)
+                    for (c=-1; c<=1; c++) {
+                        if (r == 0 && c == 0) continue;
+                        else if (rr + r < 0 || cc + c < 0 || rr + r > maxrow || cc + c > maxcol) continue;
+                        p = *ATBL(tbl, rr + r, cc + c);
+                        if ( p != NULL && (p->flags & is_label || p->flags & is_valid) ) {
+                            if (*vir_brcol < cc + c) {
+                                *vir_brcol = cc + c;
+                                mf=1;
+                            }
+                            if (*vir_brrow < rr + r) {
+                                *vir_brrow = rr + r;
+                                mf=1;
+                            }
+                            if (*vir_tlcol > cc + c) {
+                                *vir_tlcol = cc + c;
+                                mf=1;
+                            }
+                            if (*vir_tlrow > rr + r) {
+                                *vir_tlrow = rr + r;
+                                mf=1;
+                            }
+                        }
+                    }
+            if (mf) break;
+        } // rr
+    }
+
+    return;
+}
+
 // Returns 1 if cell is locked, 0 otherwise
 int locked_cell(int r, int c) {
     struct ent *p = *ATBL(tbl, r, c);
@@ -1503,6 +1546,10 @@ int is_single_command (struct block * buf, long timeout) {
               buf->pnext->value == 'z' || buf->pnext->value == 'm' ||
               buf->pnext->value == 'H' || buf->pnext->value == 'L')
             ) res = MOVEMENT_CMD;
+
+        else if (buf->value == 'V' && bs == 3 &&    // Vir
+              buf->pnext->value == 'i' && buf->pnext->pnext->value == 'r')
+              res = MOVEMENT_CMD;
 
         else if (buf->value == 'd' && bs == 2 &&    // cuts a cell
               buf->pnext->value == 'd') res = EDITION_CMD;

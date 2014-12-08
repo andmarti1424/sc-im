@@ -91,7 +91,8 @@ void do_normalmode(struct block * buf) {
             {
             int n = LINES - RESROW - 1;
             if (atoi(get_conf_value("half_page_scroll"))) n = n / 2;
-            currow = forw_row(n)->row; 
+            struct ent * e = forw_row(n);
+            currow = e->row;
             unselect_ranges();
             scroll_down(n);
             update();
@@ -214,7 +215,7 @@ void do_normalmode(struct block * buf) {
             clr_header(input_win, 0);
             print_mode(input_win);
             wrefresh(input_win);
-            start_visualmode();
+            start_visualmode(currow, curcol, currow, curcol);
             break;
 
         // edit cell (v)
@@ -286,7 +287,7 @@ void do_normalmode(struct block * buf) {
                     if (n->flags & is_locked)
                         continue;
                     if (!p) {
-                        clearent(n); //fixme?
+                        clearent(n);
                         continue;
                     }
                 } else {
@@ -300,6 +301,7 @@ void do_normalmode(struct block * buf) {
 
                 n->flags |= is_changed;
             }
+            if (atoi(get_conf_value("autocalc"))) EvalAll();
             update();
             break;
             }
@@ -470,6 +472,23 @@ void do_normalmode(struct block * buf) {
             update();
             break;
 
+        // select inner range - Vir
+        case 'V':
+            if (buf->value == 'V' && bs == 3 &&
+            buf->pnext->value == 'i' && buf->pnext->pnext->value == 'r') {
+                int tlrow = currow;
+                int brrow = currow;
+                int tlcol = curcol;
+                int brcol = curcol;
+                int * tlr = &tlrow;
+                int * brr = &brrow;
+                int * tlc = &tlcol;
+                int * brc = &brcol;
+                select_inner_range(tlr, tlc, brr, brc);
+                start_visualmode(*tlr, *tlc, *brr, *brc);
+            }
+            break;
+          
         // scroll
         case 'z':
             {

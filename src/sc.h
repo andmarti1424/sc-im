@@ -2,27 +2,29 @@
 
 #define ATBL(tbl, row, col)    (*(tbl + row) + (col))
 #define MINROWS      100     /* minimum size at startup */
+//#define MAXROWS 1048576 /* MAX rows size of sheet */
+#define MAXROWS    65536   /* MAX rows size of sheet */
 #define MINCOLS       30 
-#define ABSMAXCOLS   702 /* MAX cols. (ZZ in base 26) */
-#define CRROWS       1
-#define CRCOLS       2
+#define ABSMAXCOLS   702     /* MAX cols. (ZZ in base 26) */
+#define CRROWS         1
+#define CRCOLS         2
 /* formats for engformat() */
-#define REFMTFIX     0
-#define REFMTFLT     1
-#define REFMTENG     2
-#define REFMTDATE    3
-#define REFMTLDATE   4
-#define DEFWIDTH    10    /* Default column width and precision */
-#define DEFPREC      2
-#define DEFREFMT    REFMTFIX /* Make default format fixed point  THA 10/14/90 */
-#define FKEYS       24    /* Number of function keys available */
-//#define HISTLEN       100    /* Number of history entries for vi emulation */
-//#define CPAIRS          8    /* Number of color pairs available */
-#define COLFORMATS       10    /* Number of custom column formats */
-//#define DELBUFSIZE     40    /* Number of named buffers + 4 */
-#define    FBUFLEN     1024    /* buffer size for a single field */
-#define    PATHLEN     1024    /* maximum path length */
-#define MAXCMD          160    /* for ! command and commands that use the pager */
+#define REFMTFIX       0
+#define REFMTFLT       1
+#define REFMTENG       2
+#define REFMTDATE      3
+#define REFMTLDATE     4
+#define DEFWIDTH      10    /* Default column width and precision */
+#define DEFPREC        2
+#define DEFREFMT      REFMTFIX /* Make default format fixed point  THA 10/14/90 */
+#define FKEYS         24    /* Number of function keys available */
+//#define HISTLEN      100    /* Number of history entries for vi emulation */
+//#define CPAIRS         8    /* Number of color pairs available */
+#define COLFORMATS    10    /* Number of custom column formats */
+//#define DELBUFSIZE    40    /* Number of named buffers + 4 */
+#define FBUFLEN     1024    /* buffer size for a single field */
+#define PATHLEN     1024    /* maximum path length */
+#define MAXCMD       160    /* for ! command and commands that use the pager */
 
 #ifndef DFLT_PAGER
     #define    DFLT_PAGER "more"    /* more is probably more widespread than less */
@@ -82,7 +84,8 @@ struct ent {
     char *label;
     struct enode * expr;  /* cell's contents */
     short flags;    
-    short row, col;
+    int row, col;
+    //short row, col;
     //short nlastrow, nlastcol;
     struct ent * next;    // used for yanklist, freeents list, undo..
     char * format;        /* printf format for this cell */
@@ -163,8 +166,8 @@ struct impexfilt {
 /* Use this structure to save the last 'g' command */
 struct go_save {
     int        g_type;
-    double    g_n;
-    char    *g_s;
+    double     g_n;
+    char       *g_s;
     int        g_row;
     int        g_col;
     int        g_lastrow;

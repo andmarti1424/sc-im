@@ -56,3 +56,4 @@ struct ent * vert_bottom();
 struct ent * go_bol();
 struct ent * go_eol();
 struct ent * horiz_middle();
+void select_inner_range(int * vir_tlrow, int * vir_tlcol, int * vir_brrow, int * vir_brcol);

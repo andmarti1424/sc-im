@@ -106,7 +106,7 @@ void do_welcome() {
 
 // function that refreshs grid of screen
 void update(void) {
-    //if (cmd_multiplier > 0) return;
+
     if (cmd_multiplier > 1) return;
 
     // Limpio desde comienzo hacia to bottom
@@ -122,7 +122,7 @@ void update(void) {
        mxcol-1 es el numero de la ultima sc_col que se ve en pantalla
        mxrow-1 es el numero de la ultima sc_row que se ve en pantalla
     */
-
+    //info("%d %d", currow, curcol); //FIXME
     int mxcol = offscr_sc_cols + calc_offscr_sc_cols() - 1;
     int mxrow = offscr_sc_rows + calc_offscr_sc_rows() - 1;
 
@@ -132,7 +132,7 @@ void update(void) {
     while (col_hidden[curcol])
         curcol++;
 
-    // Muestro cursor
+    // Muestro cursor - NEEDED?
     //show_cursor(main_win);
 
     // Muestro en pantalla el contenido de las celdas
@@ -146,7 +146,7 @@ void update(void) {
     show_sc_row_headings(main_win, mxrow);
 
     // Limpio desde la ultima sc_row hacia to bottom
-    // REALLY NEEDED?
+    // NEEDED?
     /*int c = mxrow - offscr_sc_rows + 1;
     if ( c + RESROW < LINES ) {
         wmove(main_win, c + RESROW, 0);
@@ -162,6 +162,8 @@ void update(void) {
     // print mode
     (void) print_mode(input_win);
     wrefresh(input_win);
+    
+    return;
 }
 
 // Habilito cursor y el echo dependiendo del MODO actual
@@ -632,32 +634,31 @@ void show_celldetails(WINDOW * win) {
 int calc_offscr_sc_rows() {
     // pick up row counts
     int i, rows = 0, row = 0;
-    if (offscr_sc_rows <= currow) {
-        for (i = offscr_sc_rows, rows = 0, row=RESROW;
-        (row < LINES) && (i <= maxrows); i++) {
+    if (offscr_sc_rows <= currow)
+        for (i = offscr_sc_rows, rows = 0, row=RESROW; i < maxrows && row < LINES; i++) { //i <= maxrows
             rows++;
+            if (i == maxrows - 1) return rows+1;
             if (! row_hidden[i])
                 row++;
         }
-    }
     // get off screen rows
-    while (offscr_sc_rows + rows - 2 < currow || currow < offscr_sc_rows ) {
+    while ( offscr_sc_rows + rows - 2 < currow || currow < offscr_sc_rows ) {
         if (offscr_sc_rows - 1 == currow) offscr_sc_rows--;
         else if (offscr_sc_rows + rows - 1 == currow) offscr_sc_rows++;
         else  {
             // Try to put the cursor in the center of the screen
             row = (LINES - RESROW) / 2 + RESROW;
             offscr_sc_rows = currow;
-            for (i=currow-1; (i >= 0) && (row - 1 > RESROW); i--) {
+            for (i=currow-1; i >= 0 && row - 1 > RESROW && i < maxrows; i--) {
                 offscr_sc_rows--;
                 if (! row_hidden[i])
                     row--;
             }
         }
         // Now pick up the counts again
-        for (i = offscr_sc_rows, rows = 0, row = RESROW;
-            (row < LINES) && (i <= maxrows); i++) {
+        for (i = offscr_sc_rows, rows = 0, row = RESROW; i < maxrows && row < LINES; i++) { //i <= maxrows
             rows++;
+            if (i == maxrows - 1) return rows+1;
             if (! row_hidden[i])
                 row++;
         }
@@ -670,14 +671,13 @@ int calc_offscr_sc_cols() {
     int i, cols = 0, col = 0;
     // pick up col counts
     if (offscr_sc_cols <= curcol)
-    for (i = offscr_sc_cols, cols = 0, col = rescol;
-            (col + fwidth[i] < COLS - 1) && (i < maxcols); i++) {
+        for (i = offscr_sc_cols, cols = 0, col = rescol; i < maxcols && col + fwidth[i] < COLS - 1; i++) {
             cols++;
             if (! col_hidden[i])
                 col += fwidth[i];
-    }
+        }
     // get off screen cols
-    while (offscr_sc_cols + cols - 1 < curcol || curcol < offscr_sc_cols ) {
+    while ( offscr_sc_cols + cols - 1 < curcol || curcol < offscr_sc_cols ) {
         if (offscr_sc_cols - 1 == curcol) offscr_sc_cols--;
         else if (offscr_sc_cols + cols == curcol) offscr_sc_cols++;
         else {
@@ -692,8 +692,7 @@ int calc_offscr_sc_cols() {
         }
 
         // Now pick up the counts again
-        for (i = offscr_sc_cols, cols = 0, col = rescol;
-            (col + fwidth[i] < COLS - 1) && (i < maxcols); i++) {
+        for (i = offscr_sc_cols, cols = 0, col = rescol; i < maxcols && col + fwidth[i] < COLS - 1; i++) {
             cols++;
             if (! col_hidden[i])
                 col += fwidth[i];

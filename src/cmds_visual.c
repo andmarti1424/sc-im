@@ -13,17 +13,17 @@ extern int curmode;
 extern int cmd_multiplier;
 extern struct history * commandline_history;
 
-void start_visualmode() {
+void start_visualmode(int tlrow, int tlcol, int brrow, int brcol) {
     unselect_ranges();
 
     struct srange * sr = get_range_by_marks('\0', '\0');
     if (sr != NULL) del_ranges_by_mark('\0');
 
     r = (srange *) malloc (sizeof(srange));
-    r->tlrow = currow;
-    r->tlcol = curcol;
-    r->brrow = currow;
-    r->brcol = curcol;
+    r->tlrow = tlrow;
+    r->tlcol = tlcol;
+    r->brrow = brrow;
+    r->brcol = brcol;
     r->orig_row = currow;
     r->orig_col = curcol;
     r->marks[0] = '\0';

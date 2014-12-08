@@ -12,6 +12,7 @@
 #include <ctype.h>
 #include <unistd.h>
 #include <math.h>
+#include <limits.h>
 #include "sc.h"
 
 #ifdef NONOTIMEOUT
@@ -283,7 +284,9 @@ int yylex() {
         } else {
         /* A NUMBER must hold at least MAXROW and MAXCOL */
         /* This is consistent with a short row and col in struct ent */
-        if (v > (double)32767 || v < (double)-32768) {
+        //if (v > (double)32767 || v < (double)-32768) {
+        //if (v > (double) INT_MAX || v < (double) INT_MIN) {
+        if (v > (double) MAXROWS || v < (double) -MAXROWS) {
             ret = FNUMBER;
             yylval.fval = v;
         } else {

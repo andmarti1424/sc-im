@@ -47,7 +47,7 @@
 #include <ncurses.h>
 //#include "color.h"
 extern WINDOW * input_win;
-#define error(...)    set_ucolor(input_win, ERROR_MSG); wmove(input_win, RESROW-1, 0); wprintw(input_win, __VA_ARGS__); wclrtoeol(input_win); wrefresh(input_win);
+#define error(...)   set_ucolor(input_win, ERROR_MSG); wmove(input_win, RESROW-1, 0); wprintw(input_win, __VA_ARGS__); wclrtoeol(input_win); wrefresh(input_win);
 // wgetch(input_win);
 #define info(...)    set_ucolor(input_win, INFO_MSG); mvwprintw(input_win, RESROW-1, 0, __VA_ARGS__); wclrtoeol(input_win); wrefresh(input_win);
 // wgetch(input_win);

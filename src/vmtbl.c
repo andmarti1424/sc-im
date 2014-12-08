@@ -12,25 +12,25 @@
 #ifndef PSC
 void checkbounds(int *rowp, int *colp) {
     if (*rowp < 0)
-    *rowp = 0;
+        *rowp = 0;
     else if (*rowp >= maxrows) {
-    if (*colp >= maxcols) {
-        if (!growtbl(GROWBOTH, *rowp, *colp)) {
-        *rowp = maxrows - 1;
-        *colp = maxcols - 1;
+        if (*colp >= maxcols) {
+            if (!growtbl(GROWBOTH, *rowp, *colp)) {
+                *rowp = maxrows - 1;
+                *colp = maxcols - 1;
+            }
+            return;
+        } else {
+            if (!growtbl(GROWROW, *rowp, 0))
+                *rowp = maxrows - 1;
+            return;
         }
-        return;
-    } else {
-        if (!growtbl(GROWROW, *rowp, 0))
-        *rowp = maxrows - 1;
-        return;
-    }
     }
     if (*colp < 0) 
-    *colp = 0;
+        *colp = 0;
     else if (*colp >= maxcols) {
-    if (!growtbl(GROWCOL, 0, *colp))
-        *colp = maxcols - 1;
+        if (!growtbl(GROWCOL, 0, *colp))
+            *colp = maxcols - 1;
     }
 }
 #endif /* !PSC */
@@ -62,11 +62,11 @@ int growtbl(int rowcol, int toprow, int topcol) {
     int        *realfmt2;
     int        newcols;
 #ifndef PSC
-    struct ent    ***tbl2;
-    struct ent    ** nullit;
+    struct ent ***tbl2;
+    struct ent ** nullit;
     int        cnt;
-    char    *col_hidden2;
-    char    *row_hidden2;
+    char       *col_hidden2;
+    char       *row_hidden2;
     int        newrows;
     int        i;
 
@@ -111,6 +111,11 @@ int growtbl(int rowcol, int toprow, int topcol) {
 
     if (newcols > ABSMAXCOLS)
         newcols = ABSMAXCOLS;
+    }
+
+    if (newrows > MAXROWS) { // 08/12/2014
+        error(nolonger);
+        return (FALSE);
     }
 
 #ifndef PSC
@@ -185,6 +190,8 @@ int growtbl(int rowcol, int toprow, int topcol) {
 
     if (maxrows > 1000) rescol = 5;
     if (maxrows > 10000) rescol = 6;
+    if (maxrows > 100000) rescol = 7;
+    if (maxrows > 1000000) rescol = 8;
 #endif /* PSC */
 
     maxcols = newcols;
