@@ -128,8 +128,8 @@ void yank_area(int tlrow, int tlcol, int brrow, int brcol, char type, int arg) {
 // diffr es la diferencia de filas entre la posicion actual y el ent copiado.
 // diffc es la diferencia de columnas entre la posicion actual y el ent copiado.
 // cuando se hace sort, los valores de row y col pueden variar desde el momento de copia al momento de pegado.
-// por tal razÛn, para el sort, el valor de diffr debe ser cero.
-// Cuando se implemente el ordenamiento de columnas, en vez de por filas, diffc tambiÈn deber· ser cero!
+// por tal raz√≥n, para el sort, el valor de diffr debe ser cero.
+// Cuando se implemente el ordenamiento de columnas, en vez de por filas, diffc tambi√©n deber√° ser cero!
 void paste_yanked_ents(int above) {
     if (! count_yank_ents()) return;
 

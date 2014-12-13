@@ -101,7 +101,7 @@ void sortrange(struct ent * left, struct ent * right, char * criteria) {
     //sync_ranges();
 
     // acomodo los rows de cada ent que se encontraba en el rango ordenado
-    // a partir de los que dejó qsort en la estructura rows
+    // a partir de los que dejÃ³ qsort en la estructura rows
     int i, d, move;
     struct ent * p_aux, * yl = get_yanklist();
 

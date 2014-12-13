@@ -14,9 +14,9 @@ char * long_help[] = {
 " This is a simple HELP page. Press «:q<Enter>» to go back to spreadsheet.",
 "",
 " You can use <UP> <DOWN> arrows keys, or «j» «k» keys to move throw text.",
-" <SPACE> key moves forward an entire page, while <C-f> and <C-b> moves half page down or up.   ",
-" «G» moves to bottom, and <C-a> to the beginning of the text.                                   ",
-" <ENTER> key scrolls one line down, while <DEL> key scrolls one line up, just like in less.    ",
+" <SPACE> key moves forward an entire page, while <C-f> and <C-b> moves half page down or up.",
+" «G» moves to bottom, and <C-a> to the beginning of the text.",
+" <ENTER> key scrolls one line down, while <DEL> key scrolls one line up, just like in less.",
 " You can use the «/» command to search for a pattern in the help.",
 " ----------------------------------------------------------------------------------------------",
 " SCIM modes:",
@@ -66,7 +66,7 @@ char * long_help[] = {
 "            zm          Scrolls left or right, until the selected cell shows up in center of screen.",
 "",
 "",
-"        Commands for handling cell content: ",
+"        Commands for handling cell content:",
 "            x , dd      Deletes the current selected cell or range and save its content in yankbuffer",
 "            m           Followed by any lowercase letter, marks the current cell or the selected range",
 "                        with that letter.",
@@ -119,7 +119,7 @@ char * long_help[] = {
 "                        10. zap(hide) / show a row or column",
 "",
 "",
-"        Other commands: ",
+"        Other commands:",
 "            ^L          Redraw the screen",
 "            Zr          zap (hide) current row",
 "            Zc          zap (hide) current column",
@@ -597,14 +597,18 @@ static int pscreen(char * screen[]) {
             bold ? set_ucolor(main_win, CELL_SELECTION_SC) : set_ucolor(main_win, NORMAL);
 
             if (screen[lineno + delta][c] == '*') {
-                set_ucolor(main_win, NORMAL);
-                //mvwprintw(main_win, lineno+2, 0+c, " ");
+                  set_ucolor(main_win, NORMAL);
+            //    //mvwprintw(main_win, lineno+2, c, " ");
                 continue;
-            } else if (lineno == 0 && look_result != -1 && c >= look_result && c <= look_result + strlen(word_looked) - 1 ) {
-                set_ucolor(main_win, CELL_SELECTION_SC);
+            } else if (lineno == 0 && look_result != -1 && c >= look_result &&
+                c < look_result + strlen(word_looked) ) {
+                  set_ucolor(main_win, CELL_SELECTION_SC);
             }
-            mvwprintw(main_win, lineno+2, 0+c, "%c", (screen[lineno + delta][c]));
+            mvwprintw(main_win, lineno+2, c, "%c", screen[lineno + delta][c]);
         }
+        
+        //mvwprintw(main_win, lineno+2, 0, "%s", (screen[lineno + delta]));
+        wclrtoeol(main_win);
     }
     if (lineno < LINES) {
         wmove(main_win, lineno+3, 0);

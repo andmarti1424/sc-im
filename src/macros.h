@@ -2,7 +2,7 @@
 #define MAX_MULTIPLIER   100   // efecto multiplicador
 #define TIMEOUT_CURSES   300   // ms  Timeout para esperar una tecla en curses
 #define CMDTIMEOUT       3000  // ms  Timeout para esperar un comando valido
-#define COMPLETECMDTIMEOUT     (CMDTIMEOUT/8) // ms. Tiempo para completar un comando autom·ticamente
+#define COMPLETECMDTIMEOUT     (CMDTIMEOUT/8) // ms. Tiempo para completar un comando autom√°ticamente
 #define ESC_DELAY        25    // tiempo de espera de curses para caracteres de escape
 #define RESCOL           4     // columns reserved for row numbers
 #define RESROW           2     // rows reserved for prompt, error, and column numbers
