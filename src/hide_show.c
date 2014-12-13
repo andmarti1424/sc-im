@@ -69,9 +69,10 @@ void show_row(int from_row, int arg) {
 
     modflg++;
     create_undo_action();
-    undo_hide_show(from_row, -1, 's', arg);
-    while (from_row <= r2)
+    while (from_row <= r2) {
+        if ( row_hidden[from_row] ) undo_hide_show(from_row, -1, 's', 1);
         row_hidden[ from_row++ ] = FALSE;
+    }
     end_undo_action();
     return;
 }
@@ -89,9 +90,10 @@ void show_col(int from_col, int arg) {
 
     modflg++;
     create_undo_action();
-    undo_hide_show(-1, from_col, 's', arg);
-    while (from_col <= c2)
+    while (from_col <= c2) {
+        if ( col_hidden[from_col] ) undo_hide_show(-1, from_col, 's', 1);
         col_hidden[ from_col++ ] = FALSE;
+    }
     end_undo_action();
     return;
 }

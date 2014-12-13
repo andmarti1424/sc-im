@@ -7,7 +7,6 @@
 #include "sc.h"
 
 srange * r; // SELECTED RANGE!
-
 extern int offscr_sc_rows, offscr_sc_cols;
 extern int curmode;
 extern int cmd_multiplier;
@@ -227,6 +226,51 @@ void do_visualmode(struct block * sb) {
         curmode = NORMAL_MODE;
         clr_header(input_win, 0);
         show_header(input_win);
+
+    // left / right / center align
+    } else if (sb->value == '{' || sb->value == '}' || sb->value == '|') {
+        char interp_line[100];
+        int p, r = currow, c = curcol, rf = currow, cf = curcol;
+        struct srange * sr;
+        if ( (p = is_range_selected()) != -1) {
+            sr = get_range_by_pos(p);
+            r = sr->tlrow;
+            c = sr->tlcol;
+            rf = sr->brrow;
+            cf = sr->brcol;
+        }
+        create_undo_action();
+        if (sb->value == '{')      sprintf(interp_line, "leftjustify %s", v_name(r, c));
+        else if (sb->value == '}') sprintf(interp_line, "rightjustify %s", v_name(r, c));
+        else if (sb->value == '|') sprintf(interp_line, "center %s", v_name(r, c));
+        if (p != -1) sprintf(interp_line, "%s:%s", interp_line, v_name(rf, cf));
+        copy_to_undostruct(r, c, rf, cf, 'd');
+        send_to_interp(interp_line);
+        copy_to_undostruct(r, c, rf, cf, 'a');
+        end_undo_action();            
+        cmd_multiplier = 0;
+
+    // Zr Zc - Zap col or row
+    } else if ( (sb->value == 'Z' || sb->value == 'S') && (sb->pnext->value == 'c' || sb->pnext->value == 'r')) {
+        int rs, r = currow, c = curcol, arg = cmd_multiplier + 1;
+        struct srange * sr;
+        if ( (rs = is_range_selected()) != -1) {
+            sr = get_range_by_pos(rs);
+            cmd_multiplier = 1;
+            r = sr->tlrow;
+            c = sr->tlcol;
+            arg = sb->pnext->value == 'r' ? sr->brrow - sr->tlrow + 1 : sr->brcol - sr->tlcol + 1;
+        }
+        if (sb->value == 'Z' && sb->pnext->value == 'r') {
+            hide_row(r, arg);
+        } else if (sb->value == 'Z' && sb->pnext->value == 'c') {
+            hide_col(c, arg);
+        } else if (sb->value == 'S' && sb->pnext->value == 'r') {
+            show_row(r, arg);
+        } else if (sb->value == 'S' && sb->pnext->value == 'c') {
+            show_col(c, arg);
+        }
+        cmd_multiplier = 0;
 
     // delete selected range
     } else if (sb->value == 'x' || (sb->value == 'd' && sb->pnext->value == 'd') ) {

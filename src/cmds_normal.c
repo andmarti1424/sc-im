@@ -315,24 +315,29 @@ void do_normalmode(struct block * buf) {
             break;
 
         // Zr Zc - Zap col or row
-        case 'Z': 
-             // limpio el efecto multiplicador del buffer.
-             if (cmd_multiplier > 0) {
-                 int i, cm = cmd_multiplier + 1;
-                 for (i = bs / cm; i < bs; i++) {
-                     del_buf(buf, bs / cm);
-                 }
-                 bs = get_bufsize(buf);
-             }
-             if (buf->pnext->value == 'r') {
-                hide_row(currow, cmd_multiplier + 1);
-             } else if (buf->pnext->value == 'c') {
-                hide_col(curcol, cmd_multiplier + 1);
-             }
-             send_to_interp(interp_line);
-             cmd_multiplier = 0;
-             update();
-             break;
+        case 'Z':    // Zr Zc - Zap col or row
+        case 'S':    // Sr Sc - Show col or row
+            ; int rs, r = currow, c = curcol, arg = cmd_multiplier + 1;
+            struct srange * sr;
+            if ( (rs = is_range_selected()) != -1) {
+                sr = get_range_by_pos(rs);
+                cmd_multiplier = 1;
+                r = sr->tlrow;
+                c = sr->tlcol;
+                arg = buf->pnext->value == 'r' ? sr->brrow - sr->tlrow + 1 : sr->brcol - sr->tlcol + 1;
+            }
+            if (buf->value == 'Z' && buf->pnext->value == 'r') {
+                hide_row(r, arg);
+            } else if (buf->value == 'Z' && buf->pnext->value == 'c') {
+                hide_col(c, arg);
+            } else if (buf->value == 'S' && buf->pnext->value == 'r') {
+                show_row(r, arg);
+            } else if (buf->value == 'S' && buf->pnext->value == 'c') {
+                show_col(c, arg);
+            }
+            cmd_multiplier = 0;
+            update();
+            break;
 
         // shift range or cell
         case 's':
@@ -530,7 +535,7 @@ void do_normalmode(struct block * buf) {
  
                  for (i = 0; i < curcol; i++) {
                      for (c = i; c < curcol; c++) {
-                         ancho += fwidth[c];
+                         if (!col_hidden[c]) ancho += fwidth[c];
                          if (ancho >= (COLS - rescol)/ 2) {
                              ancho = rescol;
                              break;
@@ -570,38 +575,32 @@ void do_normalmode(struct block * buf) {
             update();
             break;
 
-        // left align
-        case '{':
+        case '{': // left align
+        case '}': // right align
+        case '|': // center align
+            {
+            int p, r = currow, c = curcol, rf = currow, cf = curcol;
+            struct srange * sr;
+            if ( (p = is_range_selected()) != -1) {
+                sr = get_range_by_pos(p);
+                r = sr->tlrow;
+                c = sr->tlcol;
+                rf = sr->brrow;
+                cf = sr->brcol;
+            }
             create_undo_action();
-            copy_to_undostruct(currow, curcol, currow, curcol, 'd');
-            sprintf(interp_line, "leftjustify %s", v_name(currow, curcol));
+            if (buf->value == '{')      sprintf(interp_line, "leftjustify %s", v_name(r, c));
+            else if (buf->value == '}') sprintf(interp_line, "rightjustify %s", v_name(r, c));
+            else if (buf->value == '|') sprintf(interp_line, "center %s", v_name(r, c));
+            if (p != -1) sprintf(interp_line, "%s:%s", interp_line, v_name(rf, cf));
+            copy_to_undostruct(r, c, rf, cf, 'd');
             send_to_interp(interp_line);
-            copy_to_undostruct(currow, curcol, currow, curcol, 'a');
-            end_undo_action();
+            copy_to_undostruct(r, c, rf, cf, 'a');
+            end_undo_action();            
+            cmd_multiplier = 0;
             update();
             break;
-
-        // right align
-        case '}':
-            create_undo_action();
-            copy_to_undostruct(currow, curcol, currow, curcol, 'd');
-            sprintf(interp_line, "rightjustify %s", v_name(currow, curcol));
-            send_to_interp(interp_line);
-            copy_to_undostruct(currow, curcol, currow, curcol, 'a');
-            end_undo_action();
-            update();
-            break;
-
-        // center align
-        case '|':
-            create_undo_action();
-            copy_to_undostruct(currow, curcol, currow, curcol, 'd');
-            sprintf(interp_line, "center %s", v_name(currow, curcol));
-            send_to_interp(interp_line);
-            copy_to_undostruct(currow, curcol, currow, curcol, 'a');
-            end_undo_action();
-            update();
-            break;
+            }
 
         case ctl('l'):
             endwin();

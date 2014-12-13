@@ -48,12 +48,12 @@ Acciones cuyo UNDO/REDO se encuentra implementado:
 9. paste de row o columna
 10. hide / show of rows and columns
 11. order of a range
+12. change in the alignment of a range or cell
+23. change in the format of a range or cell
 
 NOT implemented:
-1. cambio de formato de columna (en un futuro de celdas)
-2. cambio de justificado de celdas
-3. cambio de formato de una celda
-4. Recover equations after redo of changes over ents that have equations on them.
+1. cambio de formato de columna completa
+2. Recover equations after redo of changes over ents that have equations on them.
 
 ----------------------------------------------------------------------------------------
 */
@@ -83,7 +83,6 @@ void create_undo_action() {
     undo_item.added       = NULL;
     undo_item.removed     = NULL;
     undo_item.p_ant       = NULL;
-    undo_item.p_sig       = NULL;
     undo_item.p_sig       = NULL;
     undo_item.range_shift = NULL;
 

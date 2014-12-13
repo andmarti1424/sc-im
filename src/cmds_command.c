@@ -99,10 +99,10 @@ void do_commandmode(struct block * sb) {
                 update(); 
             }
 
-        } else if ( strncmp(inputline, "hiderow", 7) == 0 ||
-                    strncmp(inputline, "showrow", 7) == 0 ||
-                    strncmp(inputline, "showcol", 7) == 0 ||
-                    strncmp(inputline, "hidecol", 7) == 0
+        } else if ( strncmp(inputline, "hiderow ", 8) == 0 ||
+                    strncmp(inputline, "showrow ", 8) == 0 ||
+                    strncmp(inputline, "showcol ", 8) == 0 ||
+                    strncmp(inputline, "hidecol ", 8) == 0
                   ) {
             send_to_interp(inputline); 
 
@@ -131,15 +131,24 @@ void do_commandmode(struct block * sb) {
             send_to_interp(interp_line);
 
         } else if ( strncmp(inputline, "format ", 7) == 0 ) {
+            create_undo_action();
+            int r = currow, c = curcol, rf = currow, cf = curcol;
             if (p != -1) {
-                sprintf(interp_line, "fmt %s%d:", coltoa(sr->tlcol), sr->tlrow);
-                sprintf(interp_line, "%s%s%d", interp_line, coltoa(sr->brcol), sr->brrow);
+                c = sr->tlcol;
+                r = sr->tlrow;
+                rf = sr->brrow;
+                cf = sr->brcol;
+                sprintf(interp_line, "fmt %s%d:", coltoa(c), r);
+                sprintf(interp_line, "%s%s%d", interp_line, coltoa(cf), rf);
             } else
-                sprintf(interp_line, "fmt %s%d", coltoa(curcol), currow);
+                sprintf(interp_line, "fmt %s%d", coltoa(c), r);
             int l = strlen(interp_line);
             sprintf(interp_line, "%s %s", interp_line, inputline);
             del_range_chars(interp_line, l, l + 6);
+            copy_to_undostruct(r, c, rf, cf, 'd');
             send_to_interp(interp_line);
+            copy_to_undostruct(r, c, rf, cf, 'a');
+            end_undo_action();
 
         } else if ( strncmp(inputline, "color ", 6) == 0 ) {
             strcpy(interp_line, inputline);
