@@ -1547,6 +1547,8 @@ int is_single_command (struct block * buf, long timeout) {
         else if (buf->value == 'z' && bs == 2 &&    // scrolling
             ( buf->pnext->value == 'h' || buf->pnext->value == 'l' ||
               buf->pnext->value == 'z' || buf->pnext->value == 'm' ||
+              buf->pnext->value == '.' || buf->pnext->value == 't' ||
+              buf->pnext->value == 'b' ||
               buf->pnext->value == 'H' || buf->pnext->value == 'L')
             ) res = MOVEMENT_CMD;
 

@@ -496,58 +496,76 @@ void do_normalmode(struct block * buf) {
           
         // scroll
         case 'z':
-            {
-            if ( bs == 2 && buf->pnext->value == 'l') {
-                scroll_right(1);
-                //unselect_ranges();
+            if ( bs != 2 ) break;
+            int scroll;
 
-            } else if ( bs == 2 && buf->pnext->value == 'h') {
-                scroll_left(1);
-                //unselect_ranges();
+            switch (buf->pnext->value) {
+                case 'l':
+                    scroll_right(1);
+                    //unselect_ranges();
+                    break;
 
-            } else if ( bs == 2 && buf->pnext->value == 'H') {
-                int z = calc_offscr_sc_cols();
-                if (atoi(get_conf_value("half_page_scroll"))) z /= 2;
-                scroll_left(z);
-                //unselect_ranges();
+                case 'h':
+                    scroll_left(1);
+                    //unselect_ranges();
+                    break;
 
-            } else if ( bs == 2 && buf->pnext->value == 'L') {
-                int z = calc_offscr_sc_cols();
-                if (atoi(get_conf_value("half_page_scroll"))) z /= 2;
-                scroll_right(z);
-                //unselect_ranges();
-           
-            } else if ( bs == 2 && buf->pnext->value == 'z') {            
-                int scroll = currow - offscr_sc_rows + LINES - RESROW - 2 - (LINES - RESROW - 2)/2;
+                case 'H':
+                    scroll = calc_offscr_sc_cols();
+                    if (atoi(get_conf_value("half_page_scroll"))) scroll /= 2;
+                    scroll_left(scroll);
+                    //unselect_ranges();
+                    break;
 
-                if (scroll > 0) {
-                    scroll_down(scroll);
-                } else if (scroll > offscr_sc_rows) {
-                    scroll_up(-scroll);
-                } else if (offscr_sc_rows > 0) {
-                    scroll_up(offscr_sc_rows);
-                }
+                case 'L':
+                    scroll = calc_offscr_sc_cols();
+                    if (atoi(get_conf_value("half_page_scroll"))) scroll /= 2;
+                    scroll_right(scroll);
+                    //unselect_ranges();
+                    break;
 
-            } else if ( bs == 2 && buf->pnext->value == 'm') {                 
-                 int ancho = rescol;
-                 offscr_sc_cols = 0;
-                 int i = 0, c = 0;
+                case 'm':
+                    ;
+                    int i = 0, c = 0, ancho = rescol;
+                    offscr_sc_cols = 0;
  
-                 for (i = 0; i < curcol; i++) {
-                     for (c = i; c < curcol; c++) {
-                         if (!col_hidden[c]) ancho += fwidth[c];
-                         if (ancho >= (COLS - rescol)/ 2) {
-                             ancho = rescol;
-                             break;
-                         } 
-                     }
-                     if (c == curcol) break;
-                 }
-                 offscr_sc_cols = i;
+                    for (i = 0; i < curcol; i++) {
+                        for (c = i; c < curcol; c++) {
+                            if (!col_hidden[c]) ancho += fwidth[c];
+                            if (ancho >= (COLS - rescol)/ 2) {
+                                ancho = rescol;
+                                break;
+                            } 
+                        }
+                        if (c == curcol) break;
+                    }
+                    offscr_sc_cols = i;
+                    break;
+
+                case 'z':
+                case '.':
+                case 't':
+                case 'b':
+                    if (buf->pnext->value == 'z' || buf->pnext->value == '.')
+                        scroll = currow - offscr_sc_rows + LINES - RESROW - 2 - (LINES - RESROW - 2)/2; // zz
+                    else if (buf->pnext->value == 't')
+                        scroll = currow - offscr_sc_rows + 1;
+                    else if (buf->pnext->value == 'b') {
+                        scroll = currow - offscr_sc_rows - LINES + RESROW + 2;
+
+                    if (scroll > 0)
+                        scroll_down(scroll);
+//                    else if (scroll > offscr_sc_rows)
+//                        scroll_up(-scroll);
+                    else if (scroll < 0)
+                        scroll_up(-scroll);
+//                    else if (offscr_sc_rows > 0)
+//                        scroll_up(offscr_sc_rows);
+                    break;
+
             }
             update();
             break;
-            }
  
         // scroll up a line
         case ctl('y'):

@@ -63,6 +63,8 @@ char * long_help[] = {
 "            zL          Scrolls right half page.",
 "                        set variable half_page_scroll to '1' to scroll half a page, and set it to '0' to scroll a full page",
 "            zz          Scrolls up or down, until the selected cell shows up vertically in the center of screen.",
+"            zt          Scrolls up or down, until the selected cell shows up vertically in the top of screen.",
+"            zb          Scrolls up or down, until the selected cell shows up vertically in the bottom of screen.",
 "            zm          Scrolls left or right, until the selected cell shows up in center of screen.",
 "",
 "",
