@@ -199,7 +199,7 @@ int back_word(int big_word) {
 // big_word looks for ' ', else looks for istext.
 // delete 1 is used when typing dw command
 int for_word(int end_of_word, int delete, int big_word) {
-    int c, d, cpos = inputline_pos;
+    int cpos = inputline_pos;
 
     if (! end_of_word) { // w or W
         while ( ++cpos < strlen(inputline) ) 

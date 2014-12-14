@@ -205,7 +205,6 @@ void clear_undo_list () {
     }
 
     struct undo * ul = undo_list;
-    struct undo * e;
 
     free_undo_node(ul); 
 

@@ -105,13 +105,7 @@ void syncref(register struct enode *e) {
 // Delete a column
 void deletecol() {
     int r, c, i;
-    int cs;
     struct ent **pp;
-    struct ent **qq;
-    struct ent * p;
-    struct ent * q;
-    struct ent * obuf = NULL;
-    char buf[50];
  
     if (any_locked_cells(0, curcol, maxrow, curcol)) {
         info("Locked cells encountered. Nothing changed");
@@ -659,7 +653,6 @@ void insert_col(int after) {
     int r, c;
     register struct ent **pp;
     int lim = maxcol - curcol - after + 1;
-    struct frange *fr;
 
     if (curcol + after > maxcol)
         maxcol = curcol + after;
@@ -698,11 +691,8 @@ void insert_col(int after) {
 
 // delete a row
 void deleterow() {
-    int rs = maxrow - currow + 1;
-    struct ent *p;
-    struct ent *obuf = NULL;
     register struct ent **pp;
-    int            r, c, i;
+    int r, c;
     struct ent        **tmprow;
 
 

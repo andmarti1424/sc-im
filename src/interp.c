@@ -1271,7 +1271,7 @@ void setiterations(int i) {
 }
 
 void EvalAll() {
-    int lastcnt, pair, v;
+    int lastcnt;//, pair, v;
   
     repct = 1;
     (void) signal(SIGFPE, eval_fpe);

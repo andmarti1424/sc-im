@@ -497,7 +497,7 @@ void do_normalmode(struct block * buf) {
         // scroll
         case 'z':
             if ( bs != 2 ) break;
-            int scroll;
+            int scroll = 0;
 
             switch (buf->pnext->value) {
                 case 'l':

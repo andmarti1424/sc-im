@@ -112,7 +112,7 @@ void erasedb() {
 // returns 1 if so. returns 0 otherwise.
 int file_exists(const char * fname) {
     FILE * file;
-    if (file = fopen(fname, "r")) {
+    if ((file = fopen(fname, "r"))) {
         fclose(file);
         return 1;
     }
@@ -170,8 +170,6 @@ int writefile(char * fname, int r0, int c0, int rn, int cn) {
     char tfname[PATHLEN];
     long namelen;
     char *tpp;
-    char *p;
-    char *plugin;
     int pid;
 
     /* find the extension and mapped plugin if exists
@@ -321,7 +319,7 @@ void write_marks(register FILE *f) {
     
         if ( m->row == -1 && m->row == -1 && m->rng != NULL ) {        
             fprintf(f, "mark %c %s%d ", i, coltoa(m->rng->tlcol), m->rng->tlrow);
-            fprintf(f, "%s%d\n", i, coltoa(m->rng->brcol), m->rng->brrow);
+            fprintf(f, "%s%d\n", coltoa(m->rng->brcol), m->rng->brrow);
         } else if ( m->row != 0 && m->row != 0 ) {
             fprintf(f, "mark %c %s%d\n", i, coltoa(m->col), m->row);
         }
@@ -379,10 +377,10 @@ int readfile(char * fname, int eraseflg) {
     register FILE * f;
     char save[PATHLEN];
     //int tempautolabel;
-    char *p;
-    char *plugin;
+    //char *p;
+    //char *plugin;
     int pid = 0;
-    int rfd = STDOUT_FILENO, savefd;
+    int rfd = STDOUT_FILENO;//, savefd;
 
     //tempautolabel = autolabel;    /* turn off auto label when */
     //autolabel = 0;            /* reading a file */

@@ -20,7 +20,7 @@ char interp_line[100];
 void do_commandmode(struct block * sb) {
     // si hay un rango seleccionado en modo visual
     int p = is_range_selected();
-    struct srange * sr;
+    struct srange * sr = NULL;
     if (p != -1) sr = get_range_by_pos(p);
     
     if (sb->value == OKEY_BS) {            // BS

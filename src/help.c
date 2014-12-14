@@ -11,13 +11,13 @@ void find_help(char * word, char order);
 
 char * long_help[] = {
 " ----------------------------------------------------------------------------------------------",
-" This is a simple HELP page. Press «:q<Enter>» to go back to spreadsheet.",
-"",
-" You can use <UP> <DOWN> arrows keys, or «j» «k» keys to move throw text.",
-" <SPACE> key moves forward an entire page, while <C-f> and <C-b> moves half page down or up.",
-" «G» moves to bottom, and <C-a> to the beginning of the text.",
-" <ENTER> key scrolls one line down, while <DEL> key scrolls one line up, just like in less.",
-" You can use the «/» command to search for a pattern in the help.",
+" This is a simple HELP page. Press «:q<Enter>» to go back to spreadsheet.                      ",
+"                                                                                               ",
+" You can use <UP> <DOWN> arrows keys, or «j» «k» keys to move throw text.                      ",
+" <SPACE> key moves forward an entire page, while <C-f> and <C-b> moves half page down or up.   ",
+" «G» moves to bottom, and <C-a> to the beginning of the text.                                  ",
+" <ENTER> key scrolls one line down, while <DEL> key scrolls one line up, just like in less.    ",
+" You can use the «/» command to search for a pattern in the help.                              ",
 " ----------------------------------------------------------------------------------------------",
 " SCIM modes:",
 "       NORMAL_MODE      For navigation and common commands",
@@ -592,12 +592,10 @@ void find_help(char * word, char order) {
 }
 
 static int pscreen(char * screen[]) {
-    int lineno;
-    int c = 0, j = 0;
-    int bold = 0;
+    int lineno, c = 0, bold = 0;
 
     for (lineno = 0; screen[lineno + delta] && lineno < LINES; lineno++) {
-        if (word_looked) look_result = str_in_str(screen[lineno + delta], word_looked);
+        if (strlen(word_looked)) look_result = str_in_str(screen[lineno + delta], word_looked);
 
         wmove(main_win, lineno+2, 0);
         wclrtoeol(main_win);

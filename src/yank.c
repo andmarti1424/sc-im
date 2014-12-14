@@ -134,7 +134,7 @@ void paste_yanked_ents(int above) {
     if (! count_yank_ents()) return;
 
     struct ent * yl = yanklist;
-    int diffr, diffc, ignorelock = 0;
+    int diffr = 0, diffc = 0, ignorelock = 0;
 
     create_undo_action();
 

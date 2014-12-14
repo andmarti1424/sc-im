@@ -128,7 +128,7 @@ void del_item_from_history(struct history * h, int pos) {
 int move_item_from_history_by_str(struct history * h, char * item, int pos) {
     if (h->len - 1 < -pos || ! pos || ! strlen(item)) return 0; // mover primer elemento no permitido
     struct hlist * nl = h->list;
-    struct hlist * n_ant;
+    struct hlist * n_ant = NULL;
     int i;
  
     for (i=0; i<-pos; i++) {
@@ -183,13 +183,13 @@ char * get_line_from_history(struct history * h, int pos) {
 }
 
 struct hlist * get_hlist_from_history(struct history * h, int pos) {
-    if (h->len <= - pos) return;
+    if (h->len <= - pos) return NULL;
     int i;
     struct hlist * nl = h->list;
 
     for (i=0; i<-pos; i++) {
         nl = nl->pnext;
     }
-    if (nl == NULL) return '\0';
+    if (nl == NULL) return NULL; // return '\0';
     return nl;
 }
