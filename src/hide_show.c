@@ -22,12 +22,14 @@ void hide_row(int from_row, int arg) {
         }
     }
 
-    modflg++;
-    create_undo_action();
-    undo_hide_show(from_row, -1, 'h', arg);
+    if (! loading) {
+        modflg++;
+        create_undo_action();
+        undo_hide_show(from_row, -1, 'h', arg);
+        end_undo_action();
+    }
     while ( from_row <= r2)
         row_hidden[ from_row++ ] = TRUE;
-    end_undo_action();
     return;
 }
 
@@ -47,12 +49,14 @@ void hide_col(int from_col, int arg) {
         }
     }
 
-    modflg++;
-    create_undo_action();
-    undo_hide_show(-1, from_col, 'h', arg);
+    if (! loading) {
+        modflg++;
+        create_undo_action();
+        undo_hide_show(-1, from_col, 'h', arg);
+        end_undo_action();
+    }
     while (from_col <= c2)
         col_hidden[ from_col++ ] = TRUE;
-    end_undo_action();
     return;
 }
 

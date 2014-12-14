@@ -318,7 +318,7 @@ command: S_LET var_or_range '=' e { let($2.left.vp, $4); }
     |    S_SHOW COL                  { show_col($2, 1); }        // show de una unica columna
     |    S_SHOW NUMBER               { show_row($2, 1); }        // show de una unica fila
 
-/* agregados para sicm */
+/* agregados para scim */
     |    S_HIDECOL COL               {
                                        hide_col($2, 1); }        // hide de una unica columna
     |    S_SHOWCOL COL               {

@@ -7,9 +7,9 @@ SCIM uses ncurses for visual interface and has vim-like keybindings and some fun
 
 Some of the features of SCIM:
 
-    Key-mappings
     UNDO / REDO
     Cell shifting
+    Key-mappings
     More movements commands implemented!
     Input and Output was completely rewritten
     Colors can be customized by user, even at runtime
