@@ -550,7 +550,7 @@ void do_normalmode(struct block * buf) {
                         scroll = currow - offscr_sc_rows + LINES - RESROW - 2 - (LINES - RESROW - 2)/2; // zz
                     else if (buf->pnext->value == 't')
                         scroll = currow - offscr_sc_rows + 1;
-                    else if (buf->pnext->value == 'b') {
+                    else if (buf->pnext->value == 'b')
                         scroll = currow - offscr_sc_rows - LINES + RESROW + 2;
 
                     if (scroll > 0)
