@@ -4,8 +4,8 @@
 #define CELL_SELECTION    3
 #define CELL_SELECTION_SC 4
 
-#define NUMBER            5
-#define STRING            6
+#define NUMB              5
+#define STRG              6
 #define EXPRESSION        7
 
 #define INFO_MSG          8

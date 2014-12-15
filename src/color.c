@@ -39,12 +39,12 @@ void start_default_ucolors() {
     ucolors[ CELL_SELECTION_SC ].fg = BLACK;      // cell selection in spreadsheet
     ucolors[ CELL_SELECTION_SC ].bg = WHITE;
 
-    ucolors[ NUMBER          ].fg = CYAN;
-    ucolors[ NUMBER          ].bg = BLACK;
+    ucolors[ NUMB            ].fg = CYAN;
+    ucolors[ NUMB            ].bg = BLACK;
 
-    ucolors[ STRING          ].fg = RED;
-    ucolors[ STRING          ].bg = BLACK;
-    ucolors[ STRING          ].bold = 1;
+    ucolors[ STRG            ].fg = RED;
+    ucolors[ STRG            ].bg = BLACK;
+    ucolors[ STRG            ].bold = 1;
 
     ucolors[ EXPRESSION      ].fg = YELLOW;
     ucolors[ EXPRESSION      ].bg = BLACK;
@@ -82,8 +82,8 @@ void start_default_ucolors() {
 
     init_pair(HEADINGS,          ucolors[HEADINGS].fg,            ucolors[HEADINGS].bg);
     init_pair(MODE,              ucolors[MODE].fg,                ucolors[MODE].bg);
-    init_pair(NUMBER,            ucolors[NUMBER].fg,              ucolors[NUMBER].bg);
-    init_pair(STRING,            ucolors[STRING].fg,              ucolors[STRING].bg);
+    init_pair(NUMB,              ucolors[NUMB].fg,                ucolors[NUMB].bg);
+    init_pair(STRG,              ucolors[STRG].fg,                ucolors[STRG].bg);
     init_pair(EXPRESSION,        ucolors[EXPRESSION].fg,          ucolors[EXPRESSION].bg);
     init_pair(CELL_ERROR,        ucolors[CELL_ERROR].fg,          ucolors[CELL_ERROR].bg);
     init_pair(CELL_NEGATIVE,     ucolors[CELL_NEGATIVE].fg,       ucolors[CELL_NEGATIVE].bg);
@@ -147,9 +147,9 @@ void set_colors_param_dict() {
     put(d_colors_param, "CELL_SELECTION", str);
     sprintf(str, "%d", CELL_SELECTION_SC);
     put(d_colors_param, "CELL_SELECTION_SC", str);
-    sprintf(str, "%d", NUMBER);
+    sprintf(str, "%d", NUMB);
     put(d_colors_param, "NUMBER", str);
-    sprintf(str, "%d", STRING);
+    sprintf(str, "%d", STRG);
     put(d_colors_param, "STRING", str);
     sprintf(str, "%d", EXPRESSION);
     put(d_colors_param, "EXPRESSION", str);
