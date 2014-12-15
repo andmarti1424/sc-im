@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "shift.h"
 #include "sc.h"
+#include "vmtbl.h"   // for growtbl
 
 // ESTA FUNCION DESPLAZA UN RANGO DE ENTS, un deltar y deltac.
 // TODO: reescribir shift_range (sin hacer uso de copyent), manera tal que no dependa

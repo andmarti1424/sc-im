@@ -2,6 +2,8 @@
 #include <curses.h>
 #include <unistd.h>
 #include <stdlib.h>
+
+#include "main.h"
 #include "shift.h"
 #include "macros.h"
 #include "screen.h"
@@ -12,7 +14,8 @@
 #include "utils/dictionary.h"
 #include "history.h"
 #include "buffer.h"
-#include "color.h" // for set_ucolor
+#include "color.h"   // for set_ucolor
+#include "vmtbl.h"   // for growtbl
 
 int currow = 0, curcol = 0;
 int maxrows, maxcols;
@@ -64,9 +67,6 @@ struct block * lastcmd_buffer;
 struct dictionary * user_conf_d;
 struct dictionary * predefined_conf_d;
 struct history * commandline_history;
-
-void signals();
-void create_structures();
 
 int main (int argc, char ** argv) {
 

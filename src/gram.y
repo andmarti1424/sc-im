@@ -5,6 +5,7 @@
 #include "macros.h"
 #include "range.h"
 #include "xmalloc.h" // for scxfree
+#include "hide_show.h"
 
 #ifdef USELOCALE
 #include <locale.h>

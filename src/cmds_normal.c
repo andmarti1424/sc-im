@@ -5,6 +5,7 @@
 #include "cmds.h"
 #include "screen.h"
 #include "color.h" // for set_ucolor
+#include "hide_show.h"
 
 extern int cmd_multiplier;
 char interp_line[100];

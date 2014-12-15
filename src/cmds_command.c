@@ -108,7 +108,7 @@ void do_commandmode(struct block * sb) {
             send_to_interp(inputline); 
 
         } else if ( strncmp(inputline, "showrows", 8) == 0 ) {
-            int rs, r = currow, c = curcol, arg = 1;
+            int r, c, arg;
             if (p == -1) return; // si no hay un rango seleccionado, regreso.
             sr = get_range_by_pos(p);
             r = sr->tlrow;

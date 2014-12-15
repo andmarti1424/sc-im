@@ -1,4 +1,5 @@
 #include <curses.h>
+#include <stdlib.h>
 #include "maps.h"
 #include "yank.h"
 #include "marks.h"
@@ -9,7 +10,7 @@
 #include "conf.h"    // for conf parameters
 #include "color.h"   // for set_ucolor
 #include "xmalloc.h" // for scxfree
-#include <stdlib.h>
+#include "vmtbl.h"   // for growtbl
 
 void    syncref(register struct enode *e);
 
@@ -1270,6 +1271,7 @@ struct ent * go_end() {
     } while ( r < maxrows || c < maxcols );
     if ( ! VALID_CELL(p, r, c) && ! col_hidden[c] && ! row_hidden[r] )
         return lookat(raux, caux);
+    return NULL;
 }
 
 struct ent * go_home() {
@@ -1311,6 +1313,7 @@ struct ent * go_forward() {
 
     if ( ! VALID_CELL(p, r, c) && ! col_hidden[c] && ! row_hidden[r] )
         return lookat(r_ori, c_ori);
+    return NULL;
 }
 
 struct ent * go_backward() {
@@ -1332,6 +1335,7 @@ struct ent * go_backward() {
 
     if ( ! VALID_CELL(p, r, c) && ! col_hidden[c] && ! row_hidden[r] )
         return lookat(r_ori, c_ori);
+    return NULL;
 }
 
 struct ent * vert_top() {
@@ -1368,6 +1372,7 @@ struct ent * horiz_middle() {
             return lookat(currow, i);
         }
     }
+    return NULL;
 }
 
 void select_inner_range(int * vir_tlrow, int * vir_tlcol, int * vir_brrow, int * vir_brcol) {

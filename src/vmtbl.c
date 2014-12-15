@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <curses.h>
-
 #include <unistd.h>
+#include "vmtbl.h"
 #include "sc.h"
 #include "macros.h"
 #include "color.h" // for set_ucolor
