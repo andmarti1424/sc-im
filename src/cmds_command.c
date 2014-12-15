@@ -106,6 +106,15 @@ void do_commandmode(struct block * sb) {
                   ) {
             send_to_interp(inputline); 
 
+        } else if ( strncmp(inputline, "showrows", 8) == 0 ) {
+            int rs, r = currow, c = curcol, arg = 1;
+            if (p == -1) return; // si no hay un rango seleccionado, regreso.
+            sr = get_range_by_pos(p);
+            r = sr->tlrow;
+            c = sr->tlcol;
+            arg = sr->brcol - sr->tlcol + 1;
+            show_row(r, arg);
+
         } else if ( strncmp(inputline, "sort ", 5) == 0 ) {
             strcpy(interp_line, inputline);
             if (p != -1) { // si hay un rango seleccionado
