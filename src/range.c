@@ -2,6 +2,8 @@
 #include "marks.h"
 #include "macros.h"
 #include <curses.h>
+#include "color.h"   // for set_ucolor
+#include "xmalloc.h" // for scxfree
 
 srange * ranges = NULL;
 

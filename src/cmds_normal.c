@@ -1,8 +1,10 @@
 #include "cmds_normal.h"
+#include "cmds_visual.h"
 #include "yank.h"
 #include "marks.h"
 #include "cmds.h"
 #include "screen.h"
+#include "color.h" // for set_ucolor
 
 extern int cmd_multiplier;
 char interp_line[100];

@@ -5,6 +5,7 @@
 
 #include "sc.h"
 #include "stdlib.h"
+#include "xmalloc.h" // for scxfree
 
 extern struct ent * forw_row(int arg);
 extern struct ent * back_row(int arg);

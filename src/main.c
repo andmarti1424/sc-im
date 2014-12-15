@@ -12,6 +12,7 @@
 #include "utils/dictionary.h"
 #include "history.h"
 #include "buffer.h"
+#include "color.h" // for set_ucolor
 
 int currow = 0, curcol = 0;
 int maxrows, maxcols;

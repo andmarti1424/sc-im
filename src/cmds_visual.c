@@ -5,6 +5,7 @@
 #include "macros.h"
 #include "cmds.h"
 #include "sc.h"
+#include "color.h" // for set_ucolor
 
 srange * r; // SELECTED RANGE!
 extern int offscr_sc_rows, offscr_sc_cols;

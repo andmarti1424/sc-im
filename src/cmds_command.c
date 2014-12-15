@@ -7,6 +7,7 @@
 #include "utils/string.h"
 #include <ctype.h>         // for isprint()
 #include "sc.h"            // for rescol
+#include "color.h"         // for set_ucolor
 #include "utils/dictionary.h"
 #include "range.h"
 

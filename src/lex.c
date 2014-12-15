@@ -68,6 +68,7 @@ struct key statres[] = {
 };
 
 #include "macros.h"
+#include "color.h" // for set_ucolor
 
 static k = 10;
 

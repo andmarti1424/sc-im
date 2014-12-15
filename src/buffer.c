@@ -1,6 +1,7 @@
 #include "buffer.h"
 #include <stdlib.h>
 #include "macros.h"
+#include "utils/string.h"
 
 // Create buffer as list of blocks
 struct block * create_buf() {

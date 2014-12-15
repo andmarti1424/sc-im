@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include "sc.h"
 #include "macros.h"
+#include "color.h" // for set_ucolor
 
 /*
  * check to see if *rowp && *colp are currently allocated, if not expand the

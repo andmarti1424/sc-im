@@ -5,6 +5,7 @@
 #include <string.h>
 #include "macros.h"
 #include "utils/string.h"
+#include "color.h" // for set_ucolor
 
 extern WINDOW * main_win;
 extern WINDOW * input_win;

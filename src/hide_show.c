@@ -2,6 +2,7 @@
 #include "macros.h"
 #include "undo.h"
 #include "hide_show.h"
+#include "color.h" // for set_ucolor
 extern struct undo undo_item;
 
 /* mark a row as hidden */

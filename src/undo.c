@@ -63,6 +63,7 @@ NOT implemented:
 #include "curses.h"
 #include "sc.h"
 #include <stdlib.h>
+#include "color.h" // for set_ucolor
 
 
 // undolist

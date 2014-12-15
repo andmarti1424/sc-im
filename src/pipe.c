@@ -4,6 +4,8 @@
 #include "macros.h"
 #include <time.h>
 #include <string.h>
+#include "color.h"   // for set_ucolor
+#include "xmalloc.h" // for scxfree
 
 void getnum(int r0, int c0, int rn, int cn, int fd) {
     struct ent    **pp;

@@ -11,6 +11,8 @@ Adaptation of Chuck Martin's code - <nrocinu@myrealbox.com>
 #include <curses.h>
 #include "macros.h"
 #include "yank.h"
+#include "color.h"   // for set_ucolor
+#include "xmalloc.h" // for scxfree
 
 int compare(const void * row1, const void * row2);
 

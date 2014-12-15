@@ -5,6 +5,7 @@
 #include "macros.h"
 #include "buffer.h"
 #include <string.h>
+#include "color.h" // for set_ucolor
 
 static map * maps;
 //unsigned int curmode;

@@ -1,8 +1,9 @@
 #include <curses.h>
 #include <stdlib.h>
 #include "sc.h"
+#include "xmalloc.h"
 
-void fatal();
+//void fatal();
 
 #ifdef SYSV3
 extern void free();

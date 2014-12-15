@@ -40,6 +40,7 @@
 #include "sc.h"
 #include "macros.h"
 #include "color.h"
+#include "xmalloc.h" // for scxfree
 
 #ifndef MSDOS
 #include <unistd.h>

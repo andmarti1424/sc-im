@@ -14,6 +14,8 @@
 #include "file.h"
 #include "marks.h"
 #include "utils/string.h"
+#include "color.h"   // for set_ucolor
+#include "xmalloc.h" // for scxfree
 
 #define DEFCOLDELIM ':'
 

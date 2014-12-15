@@ -6,7 +6,9 @@
 #include "undo.h"
 #include "buffer.h"
 #include "screen.h"
-#include "conf.h" // for conf parameters
+#include "conf.h"    // for conf parameters
+#include "color.h"   // for set_ucolor
+#include "xmalloc.h" // for scxfree
 #include <stdlib.h>
 
 void    syncref(register struct enode *e);
