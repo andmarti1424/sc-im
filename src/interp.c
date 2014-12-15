@@ -1713,7 +1713,7 @@ void moveto(int row, int col, int lastrow, int lastcol, int cornerrow, int corne
     for (colsinrange = 0, i = col; i <= lastcol; i++) {
         if (col_hidden[i]) {
             colsinrange = 0;
-            info("Cell's row is hidden");
+            info("Cell's col is hidden");
             continue;
         }
         colsinrange += fwidth[i];
