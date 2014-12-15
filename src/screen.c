@@ -456,9 +456,9 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
             if ((*p)->expr) {
                 set_ucolor(win, EXPRESSION);
             } else if ((*p)->label) {             // string
-                set_ucolor(win, STRING);
+                set_ucolor(win, STRG);
             } else if ((*p)->flags & is_valid) {  // numeric value
-                set_ucolor(win, NUMBER);
+                set_ucolor(win, NUMB);
             } else if ((*p)->cellerror) {         // cellerror
             } else {
                 set_ucolor(win, NORMAL);
@@ -525,7 +525,7 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
                     #endif
                 } else  {
                     #ifdef USECOLORS
-                    set_ucolor(win, STRING); // FIXME when no colors
+                    set_ucolor(win, STRG); // FIXME when no colors
                     #endif
                 }
                 char field[1024];
@@ -771,7 +771,7 @@ void show_text_content_of_cell(WINDOW * win, struct ent ** p, int row, int col, 
         strcpy(ex, value);
         del_range_chars(ex, 0, col_width-1);
             #ifdef USECOLORS
-                if (has_colors()) set_ucolor(win, STRING);
+                if (has_colors()) set_ucolor(win, STRG);
             #else
                 wattroff(win, A_REVERSE);
             #endif
