@@ -190,12 +190,17 @@ void chg_color(char * str) {
     // creo un diccionario para guardar las claves y valores que figuran en el string
     struct dictionary * d = create_dictionary();
 
+    // elimino commilas de str
+    if (str[0]=='"') del_char(str, 0);
+    if (str[strlen(str)]=='"') del_char(str, strlen(str));
+
     parse_str(d, str);
 
     // valido que existan las minimas claves necesarias para cambiar un color
     // TODO validar tambien que los valores que tengan esas claves sean correctos
     if (get(d, "fg") == '\0' || get(d, "bg") == '\0' || get(d, "type") == '\0') {
         error("Color definition incomplete");
+        destroy_dictionary(d);
         return;
     }
 
