@@ -211,7 +211,7 @@ void chg_color(char * str) {
     if (get(d, "bold")      != '\0')     ucolors[ type ].bold      = atoi(get(d, "bold"));
     if (get(d, "dim")       != '\0')     ucolors[ type ].dim       = atoi(get(d, "dim"));
     if (get(d, "reverse")   != '\0')     ucolors[ type ].reverse   = atoi(get(d, "reverse"));
-    if (get(d, "standout")    != '\0')   ucolors[ type ].standout  = atoi(get(d, "standout"));
+    if (get(d, "standout")  != '\0')     ucolors[ type ].standout  = atoi(get(d, "standout"));
     if (get(d, "blink")     != '\0')     ucolors[ type ].blink     = atoi(get(d, "blink"));
     if (get(d, "underline") != '\0')     ucolors[ type ].underline = atoi(get(d, "underline"));
 
