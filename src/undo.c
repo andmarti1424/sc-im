@@ -309,6 +309,7 @@ void do_undo() {
 
     int ori_currow = currow;
     int ori_curcol = curcol;
+    int mf = modflg; // save modflag status
 
     struct undo * ul = undo_list;
 
@@ -386,6 +387,9 @@ void do_undo() {
     currow = ori_currow;
     curcol = ori_curcol;
 
+    // decrease modflg
+    modflg= mf - 1;
+
     if (undo_list->p_ant != NULL) undo_list = undo_list->p_ant;
     undo_list_pos--;
     info("Change: %d of %d", undo_list_pos, len_undo_list());
@@ -405,6 +409,7 @@ void do_redo() {
 
     int ori_currow = currow;
     int ori_curcol = curcol;
+    int mf = modflg; // save modflag status
 
     if (undo_list->p_ant == NULL && undo_list_pos == 0) ;
     else if (undo_list->p_sig != NULL) undo_list = undo_list->p_sig;
@@ -482,8 +487,12 @@ void do_redo() {
         }
     }
 
+    // Muevo el cursor a posición original
     currow = ori_currow;
     curcol = ori_curcol;
+
+    // increase modflg
+    modflg= mf + 1;
 
     info("Change: %d of %d", undo_list_pos + 1, len_undo_list());
     undo_list_pos++;
