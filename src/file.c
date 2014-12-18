@@ -8,14 +8,20 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <curses.h>
+#include <sys/wait.h> // for wait
+
 #include "maps.h"
 #include "yank.h"
 #include "cmds.h"
 #include "file.h"
 #include "marks.h"
+#include "lex.h"
+#include "format.h"
+#include "interp.h"
 #include "utils/string.h"
 #include "color.h"   // for set_ucolor
 #include "xmalloc.h" // for scxfree
+#include "y.tab.h"
 
 #define DEFCOLDELIM ':'
 
@@ -332,18 +338,18 @@ void write_marks(register FILE *f) {
 
 void write_cells(register FILE *f, int r0, int c0, int rn, int cn, int dr, int dc) {
     register struct ent **pp;
-    int r, c, rs=0, cs=0, mf;
+    int r, c, mf;
     char *dpointptr;
 
     mf = modflg;
     if (dr != r0 || dc != c0) {
-    //yank_area(r0, c0, rn, cn);
-    rn += dr - r0;
-    cn += dc - c0;
-    rs = currow;
-    cs = curcol;
-    currow = dr;
-    curcol = dc;
+        //yank_area(r0, c0, rn, cn);
+        rn += dr - r0;
+        cn += dc - c0;
+        //rs = currow;
+        //cs = curcol;
+        currow = dr;
+        curcol = dc;
     }
     //if (Vopt) valueize_area(dr, dc, rn, cn);
     for (r = dr; r <= rn; r++) {
@@ -609,7 +615,7 @@ FILE * openfile(char *fname, int *rpid, int *rfd) {
             (void) dup(pipefd[3]);       // connect to second pipe 
         }
         (void) signal(SIGINT, SIG_DFL);  // reset 
-        (void) execl("/bin/sh", "sh", "-c", efname, 0);
+        execl("/bin/sh", "sh", "-c", efname, 0, (char *) NULL);
         exit (-127);
     } else {                             // else parent
         *rpid = pid;

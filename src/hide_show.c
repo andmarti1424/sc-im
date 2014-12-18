@@ -1,6 +1,7 @@
 #include "sc.h"
 #include "macros.h"
 #include "undo.h"
+#include "screen.h"
 #include "hide_show.h"
 #include "color.h"   // for set_ucolor
 #include "vmtbl.h"   // for growtbl

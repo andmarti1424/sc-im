@@ -3,14 +3,18 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <string.h>
+#include <sys/wait.h> // for wait
+
 #include "macros.h"
 #include "utils/string.h"
 #include "color.h" // for set_ucolor
+#include "screen.h"
 
 extern WINDOW * main_win;
 extern WINDOW * input_win;
 
 int exec_cmd (char * line) {
+    int waitres;
 
     def_prog_mode();
     endwin();
@@ -55,7 +59,7 @@ int exec_cmd (char * line) {
               write(1, reading_buf, 1);
         
         close(my_pipe[0]);
-        wait();
+        wait(&waitres);
         system("echo -n 'Press ENTER to return.'");
 
         getchar();

@@ -5,6 +5,9 @@
 
 #include "sc.h"
 #include "stdlib.h"
+#include "undo.h"
+#include "marks.h"
+#include "cmds.h"
 #include "xmalloc.h" // for scxfree
 
 extern struct ent * forw_row(int arg);

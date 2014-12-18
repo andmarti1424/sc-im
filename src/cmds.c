@@ -1,5 +1,6 @@
 #include <curses.h>
 #include <stdlib.h>
+#include <ctype.h>   // for isdigit
 #include "maps.h"
 #include "yank.h"
 #include "marks.h"
@@ -11,6 +12,8 @@
 #include "color.h"   // for set_ucolor
 #include "xmalloc.h" // for scxfree
 #include "vmtbl.h"   // for growtbl
+#include "utils/string.h" // for add_char
+#include "y.tab.h"   // for yyparse
 
 void    syncref(register struct enode *e);
 
@@ -284,7 +287,7 @@ int etype(register struct enode *e) {
         default:
             return (NUM);
     }
-    return;
+    return -1;
 }
 
 // ignorelock is used when sorting so that locked cells can still be sorted
@@ -740,7 +743,7 @@ void deleterow() {
     return;
 }
 
-void ljustify(sr, sc, er, ec) {
+void ljustify(int sr, int sc, int er, int ec) {
     struct ent *p;
     int i, j;
 
@@ -768,7 +771,7 @@ void ljustify(sr, sc, er, ec) {
     return;
 }
 
-void rjustify(sr, sc, er, ec) {
+void rjustify(int sr, int sc, int er, int ec) {
     struct ent *p;
     int i, j;
 
@@ -796,7 +799,7 @@ void rjustify(sr, sc, er, ec) {
     return;
 }
 
-void center(sr, sc, er, ec) {
+void center(int sr, int sc, int er, int ec) {
     struct ent *p;
     int i, j;
 
@@ -1497,6 +1500,8 @@ int is_single_command (struct block * buf, long timeout) {
         else if (buf->value == ctl('l'))   res = MOVEMENT_CMD;
         else if (buf->value == 'w')        res = MOVEMENT_CMD;
         else if (buf->value == 'b')        res = MOVEMENT_CMD;
+        else if (buf->value == '/')        res = MOVEMENT_CMD; // search
+        else if (buf->value == 'n')        res = MOVEMENT_CMD; // repeat last goto cmd
 
         else if (buf->value == 'x')        res = EDITION_CMD;  // cuts a cell
         else if (buf->value == 'u')        res = EDITION_CMD;  // undo

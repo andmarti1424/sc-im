@@ -1,5 +1,5 @@
-#include "buffer.h"
 #include <stdlib.h>
+#include "buffer.h"
 #include "macros.h"
 #include "utils/string.h"
 

@@ -1,13 +1,22 @@
-#include "cmds_normal.h"
-#include "cmds_visual.h"
+#include <ctype.h>   // for isdigit
+#include <stdlib.h>  // for atoi
 #include "yank.h"
 #include "marks.h"
 #include "cmds.h"
+#include "conf.h"
 #include "screen.h"
-#include "color.h" // for set_ucolor
+#include "color.h"   // for set_ucolor
+#include "cmds_edit.h"
+#include "history.h"
 #include "hide_show.h"
+#include "undo.h"
+#include "shift.h"
+#include "interp.h"
+#include "utils/extra.h"
 
 extern int cmd_multiplier;
+extern struct history * commandline_history;
+extern void start_visualmode(int tlrow, int tlcol, int brrow, int brcol);
 char interp_line[100];
 
 void do_normalmode(struct block * buf) {
@@ -129,6 +138,18 @@ void do_normalmode(struct block * buf) {
             unselect_ranges();
             update();
             break;
+
+        case '/':
+            {
+            char cadena[] = ":int goto ";
+            int i;
+            for (i=0; i<strlen(cadena); i++) {
+                flush_buf(buf);
+                addto_buf(buf, cadena[i]);
+                exec_single_cmd(buf);
+            }
+            break;
+            }
 
         case 'H':
             currow = vert_top()->row;
@@ -308,6 +329,12 @@ void do_normalmode(struct block * buf) {
             update();
             break;
             }
+
+        // repeat last goto command
+        case 'n':
+            go_last();
+            update();
+            break;
 
         // create range with two marks
         case 'r':  

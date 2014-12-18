@@ -15,6 +15,8 @@
 #include "color.h"
 #include "version.h"
 #include "file.h"
+#include "format.h"
+#include "utils/string.h"
 
 extern struct dictionary * d_colors_param;
 extern int cmd_pending;
@@ -113,12 +115,11 @@ void update(void) {
     wmove(main_win, RESROW, rescol);
     wclrtobot(main_win);
     
-    // visible spreadsheet rows and cols in screen
+    /* visible spreadsheet rows and cols in screen
     int vis_sc_cols = calc_cols_show();       // Cantidad de columnas a dibujar en pantalla: A, B, C, D
     int vis_sc_rows = LINES - RESROW - 1;     // Cantidad de filas a dibujar en pantalla: 0, 1, 2, 3, 4..
 
-    /*
-       calculo las filas y columnas que quedan ocultas
+    // calculo las filas y columnas que quedan ocultas
        mxcol-1 es el numero de la ultima sc_col que se ve en pantalla
        mxrow-1 es el numero de la ultima sc_row que se ve en pantalla
     */
@@ -217,7 +218,7 @@ void print_mult_pend(WINDOW * win) {
 
     char field[rescol+1];
     field[0]='\0';
-    sprintf(field, "%0*d", rescol - strlen(strm), 0);
+    sprintf(field, "%0*d", rescol - (int) strlen(strm), 0);
     subst(field, '0', ' ');
     strcat(strm, field);
 
@@ -426,15 +427,16 @@ void show_text_content_of_cell(WINDOW * win, struct ent ** p, int row, int col, 
 void show_content(WINDOW * win, int mxrow, int mxcol) {
 
     register struct ent **p;
-    int row, r, col, q_row_hidden = 0;
+    int row, col;
+    int q_row_hidden = 0;
 
-    for (row = offscr_sc_rows, r = RESROW; row < mxrow; row++) {
+    for (row = offscr_sc_rows; row < mxrow; row++) {
         if (row_hidden[row]) {
             q_row_hidden++;
             continue;
         }
 
-        register c = rescol;
+        register int c = rescol;
         int nextcol;
         int fieldlen;
         col = offscr_sc_cols;
@@ -528,7 +530,6 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
                     set_ucolor(win, STRG); // FIXME when no colors
                     #endif
                 }
-                char field[1024];
                 char caracter;
                 chtype cht[fieldlen];
                 int i;
@@ -820,7 +821,6 @@ void show_text_content_of_cell(WINDOW * win, struct ent ** p, int row, int col, 
 void show_numeric_content_of_cell(WINDOW * win, struct ent ** p, int col, int r, int c) {
     char field[1024]="";
     char fieldaux[1024]="";
-    char value[1024]="";
     int col_width = fwidth[col];
     int tlen = 0, nlen = 0;
 

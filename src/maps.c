@@ -1,11 +1,12 @@
 #include <stdlib.h>
 #include <curses.h>
+#include <string.h>
 #include "maps.h"
 #include "string.h"
 #include "macros.h"
-#include "buffer.h"
-#include <string.h>
+//#include "buffer.h"
 #include "color.h" // for set_ucolor
+#include "utils/block.h"
 
 static map * maps;
 //unsigned int curmode;

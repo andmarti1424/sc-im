@@ -8,6 +8,7 @@ extern struct ent ** p;
 
 void start_screen();
 void stop_screen();
+void do_welcome();
 void update(void);
 
 void show_content(WINDOW * win, int mxrow, int mxcol);
@@ -27,6 +28,8 @@ void clr_header(WINDOW * win, int row);
 void print_mode(WINDOW * win);
 void print_mult_pend(WINDOW * win);
 void show_cursor(WINDOW * win);
+void show_header(WINDOW * win);
+void handle_cursor();
 
 void add_cell_detail(char * d, struct ent * p1);
 void write_j(WINDOW * win, const char * word, const unsigned int row, const unsigned int justif);

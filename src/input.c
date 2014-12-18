@@ -1,13 +1,16 @@
 #include <sys/time.h>
 #include <string.h>
+#include <ctype.h>   // for isdigit
+#include <curses.h>
+#include <stdlib.h> // for free
+
 #include "screen.h"
-#include "input.h"
+#include "maps.h"
 #include "cmds.h"
 #include "history.h"
-#include <curses.h>
-#include "buffer.h"
-#include <stdlib.h> // for free
 #include "conf.h"   // for config values
+#include "utils/string.h"
+#include "cmds_visual.h"
 
 static int d;              // char read from stdin
 int cmd_multiplier = 0;    // Multiplier
@@ -197,6 +200,12 @@ int has_cmd (struct block * buf, long timeout) {
     return found;
 }
 
+void do_commandmode(struct block * sb);
+void do_normalmode (struct block * buf);
+void do_insertmode(struct block * sb);
+void do_editmode(struct block * sb);
+void do_visualmode(struct block * sb);
+
 // Funcion que delega un comando para ser tratado por una funcion especifica para cada modo
 void exec_single_cmd (struct block * sb) {
     switch (curmode) {
@@ -253,7 +262,7 @@ void exec_mult (struct block * buf, long timeout) {
     int k, res;  
 
     // Primero intento ejecutar todo el contenido del buffer
-    if (res = is_single_command(buf, timeout)) {
+    if ((res = is_single_command(buf, timeout))) {
         if (res == EDITION_CMD) copybuffer(buf, lastcmd_buffer); // save stdin buffer content in lastcmd buffer
         cmd_multiplier--;
         exec_single_cmd(buf); 
@@ -264,7 +273,7 @@ void exec_mult (struct block * buf, long timeout) {
         for (k = 0; k < len; k++) {
             addto_buf(auxb, get_bufval(buf, k));
 
-            if (res = is_single_command(auxb, timeout)) {
+            if ((res = is_single_command(auxb, timeout))) {
                 if (res == EDITION_CMD) copybuffer(buf, lastcmd_buffer); // save stdin buffer content in lastcmd buffer
                 cmd_multiplier--;
                 exec_single_cmd(auxb);

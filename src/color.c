@@ -1,11 +1,13 @@
 #include <sys/types.h>
 #include <string.h>
+#include <stdlib.h> // for atoi
 #include <curses.h>
 #include <ctype.h>
 #include <unistd.h>
 #include "sc.h"
 #include "macros.h"
 #include "utils/dictionary.h"
+#include "utils/string.h"
 #include "color.h"
 
 static struct ucolor ucolors[N_INIT_PAIRS];

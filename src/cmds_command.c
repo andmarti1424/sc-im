@@ -1,15 +1,22 @@
-#include "cmds_command.h"
-#include "cmds.h"
 #include <string.h>
 #include <curses.h>
-#include "buffer.h"
 #include <stdlib.h>
-#include "utils/string.h"
 #include <ctype.h>         // for isprint()
 #include "sc.h"            // for rescol
 #include "color.h"         // for set_ucolor
+#include "conf.h"
+#include "cmds_command.h"
+#include "cmds.h"
+#include "utils/string.h"
 #include "utils/dictionary.h"
 #include "range.h"
+#include "screen.h"
+#include "file.h"
+#include "main.h"
+#include "undo.h"
+#include "hide_show.h"
+#include "exec.h"
+#include "help.h"
 
 extern char * rev;
 extern struct dictionary * user_conf_d;
@@ -108,11 +115,10 @@ void do_commandmode(struct block * sb) {
             send_to_interp(inputline); 
 
         } else if ( strncmp(inputline, "showrows", 8) == 0 ) {
-            int r, c, arg;
             if (p == -1) return; // si no hay un rango seleccionado, regreso.
+            int r, arg;
             sr = get_range_by_pos(p);
             r = sr->tlrow;
-            c = sr->tlcol;
             arg = sr->brcol - sr->tlcol + 1;
             show_row(r, arg);
 

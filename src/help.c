@@ -6,6 +6,7 @@
 #include "screen.h"
 #include "string.h"
 #include "color.h"
+#include "utils/string.h"
 
 void find_help(char * word, char order);
 

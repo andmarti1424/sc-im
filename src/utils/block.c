@@ -1,6 +1,7 @@
 #include "block.h"
 #include <string.h>
-#include "../buffer.h"
+#include "string.h"
+
 
 // Funcion que determina si dentro de la lista ori
 // se encuentran los int que figuran en la lista bus

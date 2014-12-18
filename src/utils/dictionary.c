@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include "string.h"
 #include "dictionary.h"
 
 struct dictionary * create_dictionary() {
@@ -105,7 +106,7 @@ char * get(struct dictionary * d, char * key) {
    if (d == NULL || d->list == NULL) return NULL;
 
    struct nlist * nl = d->list;
-   while ( i++ < d->len && strcmp(key, nl->key) >= 0 ) {
+   while ( i++ < d->len ) { // && strcmp(key, nl->key) >= 0 ) {
        if (strcmp(nl->key, key) == 0)
            return nl->val;
        nl = nl->next;

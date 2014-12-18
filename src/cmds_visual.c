@@ -1,16 +1,21 @@
-#include "buffer.h"
-#include "marks.h"
 #include <curses.h>
 #include <stdlib.h>
+#include "screen.h"
+#include "buffer.h"
+#include "marks.h"
 #include "macros.h"
 #include "cmds.h"
-#include "sc.h"
+#include "conf.h"
 #include "color.h" // for set_ucolor
 #include "hide_show.h"
+#include "undo.h"
+#include "shift.h"
+#include "yank.h"
+#include "history.h"
 
 srange * r; // SELECTED RANGE!
 extern int offscr_sc_rows, offscr_sc_cols;
-extern int curmode;
+extern unsigned int curmode;
 extern int cmd_multiplier;
 extern struct history * commandline_history;
 
@@ -223,7 +228,7 @@ void do_visualmode(struct block * sb) {
 
     // yank
     } else if (sb->value == 'y') {
-        yank_area(r->tlrow, r->tlcol, r->brrow, r->brcol, 'a');
+        yank_area(r->tlrow, r->tlcol, r->brrow, r->brcol, 'a', 1);
         exit_visualmode();
         curmode = NORMAL_MODE;
         clr_header(input_win, 0);

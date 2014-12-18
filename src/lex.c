@@ -13,6 +13,7 @@
 #include <unistd.h>
 #include <math.h>
 #include <limits.h>
+#include "lex.h"
 #include "sc.h"
 
 #ifdef NONOTIMEOUT
@@ -68,9 +69,10 @@ struct key statres[] = {
 };
 
 #include "macros.h"
+#include "screen.h"
 #include "color.h" // for set_ucolor
 
-static k = 10;
+//static int k = 10;
 
 int yylex() {
     char *p = line + linelim;
@@ -181,8 +183,8 @@ int yylex() {
                           && *(p+1) != '\n'
                           && *(p+1) != '\r'
                           )       ) ) *ptr++ = *p++;
-                    if (*p && *p == ' ') *ptr--; // agregado por and
-                *ptr--; // agregado por and
+                    if (*p && *p == ' ') (*ptr)--; // agregado por and
+                (*ptr)--; // agregado por and
                 if (*ptr) *ptr = '\0';
 
                 //if (*p) p++;

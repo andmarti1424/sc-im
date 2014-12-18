@@ -2,10 +2,20 @@
 #include <curses.h>
 #include <stdlib.h>
 #include "sc.h"
+#include "cmds.h"
+#include "color.h"
+#include "interp.h"
 #include "macros.h"
-#include "range.h"
+#include "sort.h"
+#include "maps.h"
+#include "marks.h"
 #include "xmalloc.h" // for scxfree
 #include "hide_show.h"
+//#include "lex.h"
+
+void yyerror(char *err);               // error routine for yacc (gram.y)
+int yylex();
+
 
 #ifdef USELOCALE
 #include <locale.h>
@@ -30,8 +40,8 @@
 %type <ent> var
 /*
 %type <sval> strarg
-%type <fval> num
 */
+%type <fval> num
 %type <rval> range
 %type <rval> var_or_range
 %type <enode> e term expr_list
@@ -389,6 +399,8 @@ command: S_LET var_or_range '=' e { let($2.left.vp, $4); }
 */
 
     |    S_GOTO var_or_range     { moveto($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col, -1, -1); }
+    |    S_GOTO num              { num_search($2, 0, 0, maxrow, maxcol, 0); }
+    |    S_GOTO STRING           { str_search($2, 0, 0, maxrow, maxcol, 0); }
 
 
     |    S_NMAP STRING STRING           {
@@ -784,12 +796,12 @@ var_or_range:   range     {
                           }
     ;
 
-/*num:        NUMBER        { $$ = (double) $1; }
+num:     NUMBER         { $$ = (double) $1; }
     |    FNUMBER        { $$ = $1; }
     |    '-' num        { $$ = -$2; }
     |    '+' num        { $$ = $2; }
     ;
-
+/*
 strarg:        STRING        { $$ = $1; }
     |    var        {
                     char *s, *s1;

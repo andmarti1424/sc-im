@@ -24,3 +24,7 @@ srange * get_selected_range();
 
 srange * create_custom_range(int tlrow, int tlcol, int brrow, int brcol);
 void free_custom_range(srange * sr);
+void clean_range();
+
+//#include "sc.h"
+//int find_range(char * name, int len, struct ent * lmatch, struct ent * rmatch, struct range ** rng);

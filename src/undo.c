@@ -58,12 +58,15 @@ NOT implemented:
 ----------------------------------------------------------------------------------------
 */
 
+#include <stdlib.h>
 #include "undo.h"
 #include "macros.h"
 #include "curses.h"
 #include "sc.h"
-#include <stdlib.h>
+#include "cmds.h"
 #include "color.h" // for set_ucolor
+#include "marks.h"
+#include "shift.h"
 
 
 // undolist

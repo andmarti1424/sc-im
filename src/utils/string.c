@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>   // for isdigit
 #include <stdio.h>
 #include "string.h"
 #include <curses.h>
@@ -47,7 +48,8 @@ int add_char(char * str, char c, int posicion) {
     int len = slen - posicion;
     if (posicion > slen) return -1;
     while (len) {
-        str[posicion + len] = str[posicion + len-- -1];
+        str[posicion + len] = str[posicion + len -1];
+        len--;
     }
     str[++slen] = '\0';
     str[posicion] = c;

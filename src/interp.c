@@ -40,7 +40,11 @@
 #include "sc.h"
 #include "macros.h"
 #include "color.h"
+#include "cmds.h"
+#include "format.h"
+#include "range.h"
 #include "xmalloc.h" // for scxfree
+#include "lex.h"     // for atocol
 
 #ifndef MSDOS
 #include <unistd.h>
@@ -114,6 +118,9 @@ int    cellerror = CELLOK;    /* is there an error in this cell */
 #endif
 #define dtr(x) ((x)*(M_PI/(double)180.0))
 #define rtd(x) ((x)*(180.0/(double)M_PI))
+
+extern int find_range(char * name, int len, struct ent * lmatch, struct ent * rmatch, struct range ** rng);
+
 
 double finfunc(int fun, double v1, double v2, double v3) {
     double answer,p;
@@ -1656,7 +1663,8 @@ void go_last() {
 
     switch (gs.g_type) {
     case G_NONE:
-        error("Nothing to repeat"); break;
+        error("Nothing to repeat");
+        break;
     case G_NUM:
         num_search(gs.g_n, gs.g_row, gs.g_col,
         gs.g_lastrow, gs.g_lastcol, gs.errsearch);
@@ -1665,7 +1673,6 @@ void go_last() {
 //      moveto(gs.g_row, gs.g_col, gs.g_lastrow, gs.g_lastcol, gs.strow, gs.stcol);
 //      break;
     case G_XSTR: 
-        num++;
     case G_NSTR: 
         num++;
     case G_STR: 
@@ -1785,7 +1792,7 @@ void num_search(double n, int firstrow, int firstcol, int lastrow, int lastcol, 
     rowsinrange = 1;
     colsinrange = fwidth[curcol];
     if (loading) {
-        update(1);
+        //update(1);
         changed = 0;
     } //else remember(1);
 }
@@ -1943,7 +1950,7 @@ void str_search(char *s, int firstrow, int firstcol, int lastrow, int lastcol, i
     free(tmp);
 #endif
     if (loading) {
-        update(1);
+        //update(1);
         changed = 0;
     } //else remember(1);
 }

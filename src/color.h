@@ -1,4 +1,4 @@
-#define N_INIT_PAIRS      17
+#define N_INIT_PAIRS      18
 #define HEADINGS          1
 #define WELCOME           2
 #define CELL_SELECTION    3
@@ -43,8 +43,8 @@ struct ucolor {
 
 void start_default_ucolors();
 void set_ucolor(WINDOW * w, int uc);
+void chg_color(char * str);
 
 void set_colors_param_dict();
 void free_colors_param_dict();
-
 struct dictionary * get_d_colors_param();

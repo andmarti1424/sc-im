@@ -1,10 +1,13 @@
-#include "cmds_edit.h"
-#include "cmds.h"
-#include "screen.h"
 #include <string.h>
 #include <curses.h>
+#include <ctype.h> // for isalnum isprint
+#include "cmds.h"
+#include "screen.h"
 #include "buffer.h"
 #include "sc.h"  // for rescol
+#include "cmds_edit.h"
+#include "utils/string.h"
+#include "interp.h"
 
 // this macro is used to determinate a word over a WORD
 #define istext(a)    (isalnum(a) || ((a) == '_'))
@@ -181,6 +184,7 @@ int look_for(char cb) {
     while (++cpos < strlen(inputline))
         if ((c = inputline[cpos]) && c == cb) return cpos;
     if (cpos > 0 && cpos == strlen(inputline)) return inputline_pos;
+    return -1;
 }
 
 // move backwards a word

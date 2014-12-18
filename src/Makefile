@@ -1,13 +1,13 @@
 # Makefile $Revision: 0.1
 #
 # 1) Select the proper EXDIR (path), MANDIR, MANEXT, LIBDIR, SIGVOID,
-#	REGEX, DFLT_PAGER, and FMOD. Most of the other things aren't
-#	normally changed (see the comments with each)
+# REGEX, DFLT_PAGER, and FMOD. Most of the other things aren't
+# normally changed (see the comments with each)
 # 2) Select the proper machine/compiler/OS section of code
-#	for MS-DOS look for the pattern 'MS-DOS'
+# for MS-DOS look for the pattern 'MS-DOS'
 # 3) make install
 # 4) If you have the command 'file' that uses /etc/magic add the line:
-#	38	string		Spreadsheet	sc file
+# 38 string Spreadsheet sc file
 
 
 # Specify the name of the program.
@@ -56,8 +56,8 @@ DOBACKUPS := -DDOBACKUPS
 
 # Set SIGVOID if signal routines are type void.
 # use: SIGVOID=-DSIGVOID for:
-#	System 5.3, SunOS 4.X, VMS, BSD4.4 (reno), and ANSI C Compliant systems
-# use: SIGVOID=		for:
+# System 5.3, SunOS 4.X, VMS, BSD4.4 (reno), and ANSI C Compliant systems
+# use: SIGVOID= for:
 #  BSD systems (excluding reno, BSD4.4), and the UNIXPC 'cc'
 SIGVOID := -DSIGVOID
 
@@ -73,9 +73,9 @@ SIGVOID := -DSIGVOID
 FLOAT_STORE := -ffloat-store
 
 # Set RINT=-DRINT if you do not have rint() in math.h
-# Set RINT=	on/with (they have rint):
-#	SunOS 4.0.3c compiler
-#	BSD4.4 (reno)
+# Set RINT= on/with (they have rint):
+# SunOS 4.0.3c compiler
+# BSD4.4 (reno)
 #RINT := -DRINT
 
 # If your system supports POSIX.2 regular expressions, REGEX should be
@@ -116,24 +116,24 @@ HISTORY_FILE := -DHISTORY_FILE=\"~/.sc_history\"
 
 # *** SPECIAL NOTES ***
 # For ULTRIX: define the BSD4.2 section and SIGVOID above
-#	tdw@cl.cam.ac.uk tested on Ultrix 3.1C-0
+# tdw@cl.cam.ac.uk tested on Ultrix 3.1C-0
 # HP-UX 7.0: Do NOT use -O
-#	(known broken, try sc's boolean operators if you wish)
+# (known broken, try sc's boolean operators if you wish)
 #
 # **** SYSV curses bugs... ****
 # Try setting IDLOKBAD to fix (with an empty spreadsheet):
-#	a) Redrawing the bottom half of the screen when you
-#		move between row 9 <-> 10
-#	b) the highlighted row labels being trash when you
-#		move between row 9 <-> 10
-#	c) On an xterm on Esix Rev. D+ from eating lines
-#		 -goto (or move) a few lines (or more) past the bottom
-#		 of the screen, goto (or move) to the top line on the
-#		 screen, move upward and the current line is deleted, the
-#		 others move up even when they should not, check by
-#		 noticing the rows become 2, 3, 40, 41, 42... (etc).
-#	Known systems/terminfos w/ curses problems:
-#	{Esix Rev. D+, AT&T SysV3.2.1}:at386-m,xterm, HP-UX7.0:(not sure)
+# a) Redrawing the bottom half of the screen when you
+#  move between row 9 <-> 10
+# b) the highlighted row labels being trash when you
+#  move between row 9 <-> 10
+# c) On an xterm on Esix Rev. D+ from eating lines
+#   -goto (or move) a few lines (or more) past the bottom
+#   of the screen, goto (or move) to the top line on the
+#   screen, move upward and the current line is deleted, the
+#   others move up even when they should not, check by
+#   noticing the rows become 2, 3, 40, 41, 42... (etc).
+# Known systems/terminfos w/ curses problems:
+# {Esix Rev. D+, AT&T SysV3.2.1}:at386-m,xterm, HP-UX7.0:(not sure)
 #IDLOKISBAD := -DIDLOKBAD
 
 # If you don't have idlok() in your curses define NOIDLOK
@@ -151,7 +151,8 @@ YTAB := y.tab
 #YACC := bison -y
 SED := sed
 
-CFLAGS := -DSYSV3 -O2 -pipe -g $(DOBACKUPS)
+#CFLAGS := -DSYSV3 -O2 -pipe -g $(DOBACKUPS)
+CFLAGS := -DSYSV3 -O2 -Wall -pipe -g $(DOBACKUPS)
 CFLAGS := $(CFLAGS) $(USECOLORS) $(USELOCALE) $(SIGVOID) $(DFLT_PAGER)
 CFLAGS := $(CFLAGS) $(IEEE_MATH) $(RINT) $(REGEX) $(FMOD) $(LIBRARY)
 CFLAGS := $(CFLAGS) $(NO_NOTIMEOUT) $(SIMPLE)

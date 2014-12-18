@@ -2,8 +2,10 @@
 #include "cmds.h"
 #include "screen.h"
 #include <string.h>
+#include <ctype.h>         // for isprint()
 #include "buffer.h"
 #include "sc.h"            // for rescol
+#include "utils/string.h"
 
 void do_insertmode(struct block * sb) {
 

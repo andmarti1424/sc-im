@@ -3,6 +3,7 @@
 #include "shift.h"
 #include "sc.h"
 #include "vmtbl.h"   // for growtbl
+#include "cmds.h"
 
 // ESTA FUNCION DESPLAZA UN RANGO DE ENTS, un deltar y deltac.
 // TODO: reescribir shift_range (sin hacer uso de copyent), manera tal que no dependa
@@ -51,8 +52,9 @@ void shift_cells(int type, int deltarows, int deltacols) {
 
 // Shift cells down 
 void shift_cells_down(int deltarows, int deltacols) {
-    int r, c, i;
+    int r, c;
     struct ent **pp;
+    register struct ent * p;
     int lim = maxrow - currow + 1;
 
     // Move cell content
@@ -65,11 +67,11 @@ void shift_cells_down(int deltarows, int deltacols) {
 
     for (r = maxrow; r > lim; r--) {
         for (c = curcol; c < curcol + deltacols; c++) {
-            register struct ent *p = *ATBL(tbl, r - deltarows, c);
+            p = *ATBL(tbl, r - deltarows, c);
             if (p) {
                 register struct ent *n;
                 n = lookat(r, c);
-                (void) copyent(n, p, 1, 0, 0, 0, r - deltarows, c, 0);
+                copyent(n, p, 1, 0, 0, 0, r - deltarows, c, 0);
                 n->row += deltarows;
                 p = (struct ent *)0; 
                 
@@ -84,7 +86,8 @@ void shift_cells_down(int deltarows, int deltacols) {
 // Shift cells left
 void shift_cells_left(int deltarows, int deltacols) {
     int r, j, c;
-    struct ent *p;
+    register struct ent *p;
+    register struct ent *n;
     struct ent **pp;
     for (j = 0; j < deltacols; j++)
         for (r = currow; r < currow + deltarows; r++)
@@ -96,7 +99,6 @@ void shift_cells_left(int deltarows, int deltacols) {
 
                 p = *ATBL(tbl, r, c + 1);
                 if (p && ( (p->flags & is_valid) || (p->expr && (p->flags & is_strexpr)) || p->label )  ) {
-                    register struct ent *n;
                     n = lookat(r, c);
                     (void) copyent(n, p, 1, 0, 0, 0, r, c, 0); // copio p a n
                     n->col--;
@@ -112,14 +114,13 @@ void shift_cells_left(int deltarows, int deltacols) {
 // Shift cells right
 void shift_cells_right(int deltarows, int deltacols) {
     int r, j, c;
-    struct ent *p;
+    register struct ent *p;
+    register struct ent *n;
     struct ent **pp;
     for (j = 0; j < deltacols; j++)
     for (r = currow; r < currow + deltarows; r++)
         for (c = maxcol; c >= curcol; c--) {
-            register struct ent *p = *ATBL(tbl, r, c);
-            if (p) {
-                register struct ent *n;
+            if ((p = *ATBL(tbl, r, c))) {
                 n = lookat(r, c + 1);
                 (void) copyent(n, p, 1, 0, 0, 0, r, c, 0);
                 n->col++;
@@ -132,7 +133,9 @@ void shift_cells_right(int deltarows, int deltacols) {
 
 // Shift cells up 
 void shift_cells_up(int deltarows, int deltacols) {
-    register struct ent **pp;
+    register struct ent ** pp;
+    register struct ent * n;
+    register struct ent * p;
     int r, c, i;
 
     //if (currow + deltarows - 1 > maxrow) return;
@@ -146,10 +149,9 @@ void shift_cells_up(int deltarows, int deltacols) {
                 pp = ATBL(tbl, r, c);
                 clearent(*pp);
 
-                register struct ent *p = *ATBL(tbl, r+1, c);
+                p = *ATBL(tbl, r+1, c);
                 if (p && ( (p->flags & is_valid) || (p->expr && (p->flags & is_strexpr)) || p->label )  ) {
                     // Copio celda inferior hacia arriba
-                    register struct ent *n;
                     n = lookat(r, c);
                     (void) copyent(n, p, 1, 0, 0, 0, r, c, 0);
                     n->row--;

@@ -1,11 +1,14 @@
 #include <curses.h>
 #include <unistd.h>
-#include "sc.h"
-#include "macros.h"
 #include <time.h>
 #include <string.h>
+#include "sc.h"
+#include "screen.h"
+#include "macros.h"
+#include "format.h"
 #include "color.h"   // for set_ucolor
 #include "xmalloc.h" // for scxfree
+#include "interp.h"
 
 void getnum(int r0, int c0, int rn, int cn, int fd) {
     struct ent    **pp;
@@ -16,11 +19,12 @@ void getnum(int r0, int c0, int rn, int cn, int fd) {
         for (c = c0, pp = ATBL(tbl, r, c); c <= cn; pp++, c++) {
             *line = '\0';
             p = *pp;
-            if (p)
-                if (p->cellerror)
+            if (p) {
+                if (p->cellerror) 
                     sprintf(line, "%s", (*pp)->cellerror == CELLERROR ?  "ERROR" : "INVALID");
                 else if (p->flags & is_valid)
                     sprintf(line, "%.15g", p->v);
+            }
             if (c < cn)
                 strcat(line, "\t");
             else
@@ -253,7 +257,8 @@ void doquery(char *s, char *data, int fd) {
     line[0] = '\0';
     linelim = -1;
     error("");
-    update(0);
+    //update(0);
+    update();
 
     if (s) scxfree(s);
 }

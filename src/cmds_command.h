@@ -1,5 +1,5 @@
-#include "input.h"
 #include "history.h"
+#include "buffer.h"
 
 extern int shall_quit;
 void do_commandmode(struct block * sb);

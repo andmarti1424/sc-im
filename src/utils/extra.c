@@ -1,10 +1,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include "extra.h"
 #include <curses.h>
+#include "extra.h"
 #include "../sc.h"
 #include "../macros.h"
+//#include "../range.h"
+
+extern int find_range(char * name, int len, struct ent * lmatch, struct ent * rmatch, struct range ** rng);
 
 #define freen(x) nofreeNULL(x)
 void nofreeNULL(void *x) {
@@ -21,7 +24,7 @@ char * v_name(int row, int col) {
     static char buf[20];
 
     v = lookat(row, col);
-    if (!find_range((char *)0, 0, v, v, &r)) {
+    if ( ! find_range((char *) 0, 0, v, v, &r) ) {
         return (r->r_name);
     } else {
         (void) sprintf(buf, "%s%d", coltoa(col), row);

@@ -1,10 +1,12 @@
 #include <curses.h>
-#include "history.h"
-#include "sc.h"
-#include "macros.h"
 #include <string.h>
 #include <stdlib.h>
 #include <fcntl.h>
+#include <unistd.h>
+#include "macros.h"
+#include "history.h"
+#include "sc.h"
+#include "utils/string.h"
 
 struct history * create_history(char mode) {
    struct history * h = (struct history *) malloc (sizeof (struct history));
@@ -100,7 +102,7 @@ void del_item_from_history(struct history * h, int pos) {
     if (h->len - 1 < -pos) return;
 
     struct hlist * nl = h->list;
-    struct hlist * n_ant;
+    struct hlist * n_ant = NULL;
     int i;
 
     if (pos == 0) {

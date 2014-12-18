@@ -1,5 +1,6 @@
 #include <ncurses.h>
 #include <sys/time.h>
+//#include "buffer.h"
 
 extern int multiplier;                                                // Multiplier 
 extern int command_pending;                                           // Command pending
