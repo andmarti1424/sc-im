@@ -1,23 +1,25 @@
 #include <curses.h>
 #include <stdlib.h>
+
 #include "screen.h"
 #include "buffer.h"
 #include "marks.h"
 #include "macros.h"
 #include "cmds.h"
 #include "conf.h"
-#include "color.h" // for set_ucolor
+#include "color.h"       // for set_ucolor
 #include "hide_show.h"
 #include "undo.h"
 #include "shift.h"
 #include "yank.h"
 #include "history.h"
 
-srange * r; // SELECTED RANGE!
 extern int offscr_sc_rows, offscr_sc_cols;
 extern unsigned int curmode;
 extern int cmd_multiplier;
 extern struct history * commandline_history;
+
+srange * r; // SELECTED RANGE!
 
 void start_visualmode(int tlrow, int tlcol, int brrow, int brcol) {
     unselect_ranges();

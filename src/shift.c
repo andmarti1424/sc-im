@@ -55,6 +55,7 @@ void shift_cells_down(int deltarows, int deltacols) {
     int r, c;
     struct ent **pp;
     register struct ent * p;
+    register struct ent *n;
     int lim = maxrow - currow + 1;
 
     // Move cell content
@@ -69,7 +70,6 @@ void shift_cells_down(int deltarows, int deltacols) {
         for (c = curcol; c < curcol + deltacols; c++) {
             p = *ATBL(tbl, r - deltarows, c);
             if (p) {
-                register struct ent *n;
                 n = lookat(r, c);
                 copyent(n, p, 1, 0, 0, 0, r - deltarows, c, 0);
                 n->row += deltarows;
@@ -117,6 +117,7 @@ void shift_cells_right(int deltarows, int deltacols) {
     register struct ent *p;
     register struct ent *n;
     struct ent **pp;
+
     for (j = 0; j < deltacols; j++)
     for (r = currow; r < currow + deltarows; r++)
         for (c = maxcol; c >= curcol; c--) {

@@ -7,6 +7,11 @@ Las mismas contienen
       struct ent * added: lista de ents agregados por el cambio
       struct ent * removed: lista de ents eliminados por el cambio
       struct undo_range_shift * range_shift: un rango que sufre un desplazamiento por el cambio
+      row_hidded: lista de enteros (int *) que representan filas que se ocultan en pantalla
+      row_showed: lista de enteros (int *) que representan filas que se muestran en pantalla
+      col_hidded: lista de enteros (int *) que representan columnas que se ocultan en pantalla
+      col_showed: lista de enteros (int *) que representan columnas que se muestran en pantalla
+             NOTE: en la primera posición de las listas se guarda la (cantidad de elementos - 1) que tiene la lista
       p_sig: puntero a otra estructura de tipo 'struct undo'. Si es NULL, indica que este nodo
              representa el último cambio, y no hay ningun cambio posterior.
 
@@ -40,7 +45,7 @@ Acciones cuyo UNDO/REDO se encuentra implementado:
 1. eliminación de contenido de celda o un rango
 2. ingreso de contenido en una celda en puntual
 3. edición de una celda en puntual
-4. justificado de una celda en puntual
+4. change in the alignment of a range or cell
 5. paste de rango o celda
 6. shift de rango o celda con sh sj sk sl
 7. insert de row o columna
@@ -48,8 +53,7 @@ Acciones cuyo UNDO/REDO se encuentra implementado:
 9. paste de row o columna
 10. hide / show of rows and columns
 11. order of a range
-12. change in the alignment of a range or cell
-23. change in the format of a range or cell
+12. change in the format of a range or cell
 
 NOT implemented:
 1. cambio de formato de columna completa
@@ -80,7 +84,6 @@ static int undo_list_len = 0;
 
 // variable temporal
 static struct undo undo_item;
-
 
 // setea en blanco el undo_item
 void create_undo_action() {

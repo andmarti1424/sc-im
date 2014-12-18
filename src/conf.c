@@ -1,8 +1,7 @@
-#include "conf.h"
-#include "utils/dictionary.h"
 #include <stdlib.h>
 #include <stdio.h>
-
+#include "conf.h"
+#include "utils/dictionary.h"
 
 void store_default_config_values() {
     put(user_conf_d, "half_page_scroll", "0");
@@ -24,7 +23,6 @@ char * get_conf_values(char * salida) {
    }
    return salida;
 }
-
 
 char * get_conf_value(char * key) {
 

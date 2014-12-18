@@ -4,13 +4,15 @@
 #include "maps.h"
 #include "string.h"
 #include "macros.h"
-//#include "buffer.h"
 #include "color.h" // for set_ucolor
 #include "utils/block.h"
 
+#define MAXSC 25 // MAXSC is max length of special key word
+
 static map * maps;
-//unsigned int curmode;
 static int mapdepth = 0;
+
+//unsigned int curmode;
 
 int replace_maps (struct block * b) {
     int r = 0;
@@ -39,11 +41,7 @@ int replace_maps (struct block * b) {
     return r;
 }
 
-#define MAXSC 25
-/* ************************************* 
-create list of blocks from map strings
-MAXSC is max length of special key word
-   ************************************* */
+// create list of blocks based on map strings
 struct block * get_mapbuf_str (char * str) {
     struct block * buffer = create_buf();
     unsigned short l = strlen(str);

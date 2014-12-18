@@ -1,9 +1,10 @@
 #include <sys/types.h>
 #include <string.h>
-#include <stdlib.h> // for atoi
+#include <stdlib.h>      // for atoi
 #include <curses.h>
 #include <ctype.h>
 #include <unistd.h>
+
 #include "sc.h"
 #include "macros.h"
 #include "utils/dictionary.h"
@@ -226,8 +227,8 @@ void chg_color(char * str) {
 
 /*
 // Implementación anterior
-struct colorpair    *cpairs[8];
-static struct crange    *color_base;
+struct colorpair * cpairs[8];
+static struct crange * color_base;
 
 void initcolor(int colornum) {
     use_default_colors();

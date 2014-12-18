@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include <unistd.h>
+
 #include "macros.h"
 #include "history.h"
 #include "sc.h"
@@ -178,8 +179,8 @@ void add(struct history * h, char * line) {
     return;
 }
 
-// leer linea de historial
-// pos 0 es linea actual
+// funcion que devuelve una linea del historial del modo COMMAND_MODE
+// pos 0 es linea mas reciente
 char * get_line_from_history(struct history * h, int pos) {
     return get_hlist_from_history(h, pos)->line;
 }
@@ -192,6 +193,6 @@ struct hlist * get_hlist_from_history(struct history * h, int pos) {
     for (i=0; i<-pos; i++) {
         nl = nl->pnext;
     }
-    if (nl == NULL) return NULL; // return '\0';
+    if (nl == NULL) return NULL;
     return nl;
 }

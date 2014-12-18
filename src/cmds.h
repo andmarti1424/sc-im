@@ -9,10 +9,10 @@ extern struct block * lastcmd_buffer;
 void ins_in_line(int d);
 int is_single_command (struct block * buf, long timeout);
 void insert_or_edit_cell();
-void send_to_interp(char * oper); // Envio comando a interprete
-void chg_mode(char strcmd);       // Funcion para cambio de modo
-int modcheck();                   // Chequeo si el archivo abierto sufrio modificaciones
-int savefile();                   // Grabo archivo abierto
+void send_to_interp(char * oper);      // Envio comando a interprete
+void chg_mode(char strcmd);            // Funcion para cambio de modo
+int modcheck();                        // Chequeo si el archivo abierto sufrio modificaciones
+int savefile();                        // Grabo archivo abierto
 struct ent;
 void copyent(struct ent * n, struct ent * p, int dr, int dc, int r1, int c1, int r2, int c2, int special);
 void flush_saved();
@@ -35,7 +35,7 @@ struct ent * left_limit();
 struct ent * right_limit();
 struct ent * goto_top();
 struct ent * goto_bottom();
-struct ent * tick(char c);         // Comando '
+struct ent * tick(char c);             // Comando '
 struct ent * forw_row(int arg);
 struct ent * back_row(int arg);
 struct ent * forw_col(int arg);
