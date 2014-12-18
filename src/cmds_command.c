@@ -6,6 +6,7 @@
 #include "color.h"         // for set_ucolor
 #include "conf.h"
 #include "cmds_command.h"
+#include "cmds_edit.h"
 #include "cmds.h"
 #include "utils/string.h"
 #include "utils/dictionary.h"
@@ -265,7 +266,23 @@ void do_commandmode(struct block * sb) {
             char * sl = get_line_from_history(commandline_history, 0);
             add_char(sl, sb->value, inputline_pos-1); // Inserto en el historial
         }
-
+    } else {
+        switch (sb->value) {
+        case ctl('w'):
+            inputline_pos = for_word(1, 0, 1) + 1;   // E
+            break;
+        case ctl('b'):
+            inputline_pos = back_word(1);            // B
+            break;
+        case OKEY_HOME:
+            inputline_pos = 0;                       // 0
+            break;
+        case OKEY_END:
+            inputline_pos = strlen(inputline);       // $
+            break;
+        }
+        wmove(input_win, 0, inputline_pos + 1 + rescol);
+        wrefresh(input_win);
     }
     //show_header(input_win); // NO DESCOMENTAR.
     return;
