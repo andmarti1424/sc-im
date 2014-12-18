@@ -275,6 +275,7 @@ void do_normalmode(struct block * buf) {
             inputline_pos = 0;
             break;
 
+        // EDITION COMMANDS
         // del current cell or range
         case 'x': 
             del_selected_cells();
@@ -298,6 +299,7 @@ void do_normalmode(struct block * buf) {
                 set_cell_mark(buf->pnext->value, currow, curcol);
             break;
 
+        // copy
         case 'c': 
             {
             if (bs != 2) break;
@@ -344,9 +346,9 @@ void do_normalmode(struct block * buf) {
             }
             break;
 
-        // Zr Zc - Zap col or row
-        case 'Z':    // Zr Zc - Zap col or row
-        case 'S':    // Sr Sc - Show col or row
+        // Zr Zc - Zap col or row - Show col or row - Sr Sc
+        case 'Z':
+        case 'S':
             ; int rs, r = currow, c = curcol, arg = cmd_multiplier + 1;
             struct srange * sr;
             if ( (rs = is_range_selected()) != -1) {
@@ -492,6 +494,49 @@ void do_normalmode(struct block * buf) {
             } else if ( bs == 1 && is_range_selected() != -1) {
                 srange * r = get_selected_range();
                 yank_area(r->tlrow, r->tlcol, r->brrow, r->brcol, 'a', cmd_multiplier + 1);
+            }
+            break;
+        
+        // increase or decrease numeric value of cell
+        case '-':
+        case '+':
+            {
+            struct ent * p;
+            int r, c, tlrow = currow, tlcol = curcol, brrow = currow, brcol = curcol;
+            if ( is_range_selected() != -1 ) {
+                struct srange * sr = get_selected_range();
+                tlrow = sr->tlrow;
+                tlcol = sr->tlcol;
+                brrow = sr->brrow;
+                brcol = sr->brcol;
+            }
+            if (any_locked_cells(tlrow, tlcol, brrow, brcol)) {
+                error("Locked cells encountered. Nothing changed");           
+                return;
+            }
+            create_undo_action();
+            int arg = cmd_multiplier + 1;
+            int mf = modflg; // keep original modflg
+            for (r = tlrow; r <= brrow; r++) {
+                for (c = tlcol; c <= brcol; c++) {
+                    p = *ATBL(tbl, r, c);
+                    if ( ! p )  {
+                        continue;
+                    } else if (p->expr && !(p->flags & is_strexpr)) {
+                        //error("Can't increment / decrement a formula");
+                        continue;
+                    } else if (p->flags & is_valid) {
+                        copy_to_undostruct(r, c, r, c, 'd');
+                        p->v += buf->value == '+' ? (double) arg : - 1 * (double) arg;
+                        copy_to_undostruct(r, c, r, c, 'a');
+                        if (mf == modflg) modflg++; // increase just one time
+                    }
+                }
+            }
+            end_undo_action();
+            if (atoi(get_conf_value("autocalc"))) EvalAll();
+            cmd_multiplier = 0;
+            update();
             }
             break;
 

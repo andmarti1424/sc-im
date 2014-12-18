@@ -1503,6 +1503,7 @@ int is_single_command (struct block * buf, long timeout) {
         else if (buf->value == '/')        res = MOVEMENT_CMD; // search
         else if (buf->value == 'n')        res = MOVEMENT_CMD; // repeat last goto cmd
 
+        // edition commands
         else if (buf->value == 'x')        res = EDITION_CMD;  // cuts a cell
         else if (buf->value == 'u')        res = EDITION_CMD;  // undo
         else if (buf->value == ctl('r'))   res = EDITION_CMD;  // redo
@@ -1512,6 +1513,8 @@ int is_single_command (struct block * buf, long timeout) {
         else if (buf->value == '|')        res = EDITION_CMD;
         else if (buf->value == 'p')        res = EDITION_CMD;  // paste yanked cells below or right
         else if (buf->value == 'P')        res = EDITION_CMD;  // paste yanked cells above or left
+        else if (buf->value == '-')        res = EDITION_CMD;
+        else if (buf->value == '+')        res = EDITION_CMD;
 
         else if (isdigit(buf->value) && atoi(get_conf_value("numeric")) )
                                            res = MOVEMENT_CMD; // repeat last command

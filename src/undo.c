@@ -54,6 +54,7 @@ Acciones cuyo UNDO/REDO se encuentra implementado:
 10. hide / show of rows and columns
 11. order of a range
 12. change in the format of a range or cell
+13. '-' and '+' commands in normal mode
 
 NOT implemented:
 1. cambio de formato de columna completa
