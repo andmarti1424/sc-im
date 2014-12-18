@@ -104,6 +104,10 @@ void create_undo_action() {
 // undo_item con los datos de ents agregados o quitados
 // y de undo range shift struct
 void end_undo_action() {
+    if (undo_item.added       == NULL &&
+        undo_item.removed     == NULL && undo_item.range_shift == NULL &&
+        undo_item.row_hidded  == NULL && undo_item.row_showed  == NULL &&
+        undo_item.col_hidded  == NULL && undo_item.col_showed  == NULL) return; // dismissed this undo_item!
     add_to_undolist(undo_item);
     return;
 }
