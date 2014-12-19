@@ -127,7 +127,7 @@ int main (int argc, char ** argv) {
         if (shall_quit == 1 && modcheck()) shall_quit = 0;
     }
 
-    return exit_app(0);
+    return shall_quit == -1 ? exit_app(-1) : exit_app(0);
 }
 
 void create_structures() {
@@ -227,26 +227,26 @@ void nopipe() {
     brokenpipe = TRUE;
 }
 
-// setup signals catched by Scim
+// setup signals catched by SCIM
 void signals() {
 #ifdef SIGVOID
-    //void doquit();
-    //void time_out();
     void sig_int();
+    void sig_abrt();
+    void sig_term();
     //void nopipe();
     void winchg();
 #else
-    //int doquit();
-    //int time_out();
     int sig_int();
+    int sig_abrt();
+    int sig_term();
     //int nopipe();
     int winchg();
 #endif
 
-    // FIXME - sig. linea se comenta porque es molesto para probar. 
-    //signal(SIGINT, sig_int);
-
-    //signal(SIGTERM, sig_int); // kill
+    
+    //signal(SIGINT, sig_int); // FIXME - sig. linea se comenta porque es molesto para probar. 
+    signal(SIGABRT, sig_abrt);
+    signal(SIGTERM, sig_term); // kill
     //(void) signal(SIGPIPE, nopipe);
     //(void) signal(SIGALRM, time_out);
     signal(SIGWINCH, winchg);
@@ -254,7 +254,6 @@ void signals() {
     //(void) signal(SIGFPE, doquit);
 }
 
-// SIGINT signal
 #ifdef SIGVOID
 void
 #else
@@ -262,6 +261,26 @@ int
 #endif
 sig_int() {
     error("Got SIGINT. Press «:q<Enter>» to quit Scim");
+}
+
+#ifdef SIGVOID
+void
+#else
+int
+#endif
+sig_abrt() {
+    error("Error !!! Quitting SCIM.");
+    shall_quit = -1; // error !
+}
+
+#ifdef SIGVOID
+void
+#else
+int
+#endif
+sig_term() {
+    error("Got SIGTERM signal. Quitting SCIM.");
+    shall_quit = 2;
 }
 
 // SIGWINCH signal - resize of terminal
