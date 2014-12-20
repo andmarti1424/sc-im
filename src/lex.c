@@ -17,7 +17,7 @@
 #include "sc.h"
 
 #ifdef NONOTIMEOUT
-#define    notimeout(a1, a2)
+#define notimeout(a1, a2)
 #endif
 
 typedef int bool;
@@ -54,7 +54,7 @@ fpe_trap(int signo)
 }
 
 struct key {
-    char *key;
+    char * key;
     int val;
 };
 
@@ -72,11 +72,9 @@ struct key statres[] = {
 #include "screen.h"
 #include "color.h" // for set_ucolor
 
-//static int k = 10;
-
 int yylex() {
-    char *p = line + linelim;
-    int ret=0;
+    char * p = line + linelim;
+    int ret = 0;
     static int isfunc = 0;
     static bool isgoto = 0;
     static bool colstate = 0;
@@ -86,83 +84,66 @@ int yylex() {
 
     while (isspace(*p)) p++;
     if (*p == '\0') {
-    isfunc = isgoto = 0;
-    ret = -1;
+        isfunc = isgoto = 0;
+        ret = -1;
     } else if (isalpha(*p) || (*p == '_')) {
-    register char *la;    /* lookahead pointer */
-    register struct key *tblp;
+        register char *la;    /* lookahead pointer */
+        register struct key *tblp;
 
-    if ( !tokenst ) {
-        tokenst = p;
-        tokenl = 0;
-    }
-    /*
-     *  This picks up either 1 or 2 alpha characters (a column) or
-     *  tokens made up of alphanumeric chars and '_' (a function or
-     *  token or command or a range name)
-     */
-    while (isalpha(*p) && isascii(*p)) {
-        p++;
-        tokenl++;
-    }
-    la = p;
-    while (isdigit(*la) || (*la == '$'))
-        la++;
-    /*
-     * A COL is 1 or 2 char alpha with nothing but digits following
-     * (no alpha or '_')
-     */
-    if (!isdigit(*tokenst) && tokenl && tokenl <= 2 && (colstate ||
-        (isdigit(*(la-1)) && !(isalpha(*la) || (*la == '_'))))) {
-        ret = COL;
-        yylval.ival = atocol(tokenst, tokenl);
-    } else {
-        while (isalpha(*p) || (*p == '_') || isdigit(*p)) {
-        p++;
-        tokenl++;
+        if ( !tokenst ) {
+            tokenst = p;
+            tokenl = 0;
         }
-        ret = WORD;
-        if (!linelim || isfunc) {
-        if (isfunc) isfunc--;
-        for (tblp = linelim ? experres : statres; tblp->key; tblp++)
-            if (((tblp->key[0]^tokenst[0])&0137)==0
-                && tblp->key[tokenl]==0) {
-            int i = 1;
-            while (i<tokenl && ((tokenst[i]^tblp->key[i])&0137)==0)
-                i++;
-            if (i >= tokenl) {
-                ret = tblp->val;
-                colstate = (ret <= S_FORMAT);
-                if (isgoto) {
-                isfunc = isgoto = 0;
-                if (ret != K_ERROR && ret != K_INVALID)
-                    ret = WORD;
-                }
-                break;
-            }
-            }
+        /*
+         *  This picks up either 1 or 2 alpha characters (a column) or
+         *  tokens made up of alphanumeric chars and '_' (a function or
+         *  token or command or a range name)
+         */
+        while (isalpha(*p) && isascii(*p)) {
+            p++;
+            tokenl++;
         }
+        la = p;
+        while (isdigit(*la) || (*la == '$'))
+            la++;
+        /*
+         * A COL is 1 or 2 char alpha with nothing but digits following
+         * (no alpha or '_')
+         */
+        if (!isdigit(*tokenst) && tokenl && tokenl <= 2 && (colstate ||
+            (isdigit(*(la-1)) && !(isalpha(*la) || (*la == '_'))))) {
+            ret = COL;
+            yylval.ival = atocol(tokenst, tokenl);
+        } else {
+            while (isalpha(*p) || (*p == '_') || isdigit(*p)) {
+                p++;
+                tokenl++;
+            }
+            ret = WORD;
+            if (!linelim || isfunc) {
+                if (isfunc) isfunc--;
+                for (tblp = linelim ? experres : statres; tblp->key; tblp++)
+                    if (((tblp->key[0]^tokenst[0])&0137)==0
+                        && tblp->key[tokenl]==0) {
+                    int i = 1;
+                    while (i<tokenl && ((tokenst[i]^tblp->key[i])&0137)==0)
+                        i++;
+                    if (i >= tokenl) {
+                        ret = tblp->val;
+                        colstate = (ret <= S_FORMAT);
+                        if (isgoto) {
+                            isfunc = isgoto = 0;
+                            if (ret != K_ERROR && ret != K_INVALID)
+                                ret = WORD;
+                            }
+                            break;
+                        }
+                    }
+            }
             
-        if (ret == WORD) {
-/*
-        struct range *r;
-        if (!find_range(tokenst, tokenl, (struct ent *)0, (struct ent *)0, &r)) {
-            yylval.rval.left = r->r_left;
-            yylval.rval.right = r->r_right;
-            if (r->r_is_range)
-                ret = RANGE;
-            else
-            ret = VAR;
-        } else
-        char *path;
-                if ((path = scxmalloc((unsigned)PATHLEN)) && plugin_exists(tokenst, tokenl, path)) {
-            strcat(path, p);
-            yylval.sval = path;
-            ret = PLUGIN;
-*/
+            if (ret == WORD) {
                 // NMAP
-        if ( tokenst && (strcmp(line, "nmap") > 0 || strcmp(line, "imap") > 0) ) {
-
+                if ( tokenst && (strcmp(line, "nmap") > 0 || strcmp(line, "imap") > 0) ) {
                     char * p = tokenst;
                     char * ptr = p;
                     while (*ptr && (
@@ -170,165 +151,141 @@ int yylex() {
                           //|| (*ptr != '\t')
                           || (*(ptr-1) == '\\'))) ptr++;
                     ptr = malloc((unsigned) (ptr - p));
-                yylval.sval = ptr;
+                    yylval.sval = ptr;
                 //p++; // quitado por and
        
-                while ( *p && (
-                                  (*p != ' ') || 
-                                  (*p != '\t') || 
-                          ( *(p+1) 
-                          && *(p-1)
-                          && *(p-1) == '\\' 
-                          && *(p+1) != '\0'
-                          && *(p+1) != '\n'
-                          && *(p+1) != '\r'
-                          )       ) ) *ptr++ = *p++;
+                    while ( *p && (
+                      (*p != ' ') || 
+                      (*p != '\t') || 
+                      ( *(p+1) 
+                      && *(p-1)
+                      && *(p-1) == '\\' 
+                      && *(p+1) != '\0'
+                      && *(p+1) != '\n'
+                      && *(p+1) != '\r'
+                      )       ) ) *ptr++ = *p++;
                     if (*p && *p == ' ') (*ptr)--; // agregado por and
-                (*ptr)--; // agregado por and
-                if (*ptr) *ptr = '\0';
+                    (*ptr)--; // agregado por and
+                    if (*ptr) *ptr = '\0';
 
-                //if (*p) p++;
-                ret = MAPWORD;
+                    //if (*p) p++;
+                    ret = MAPWORD;
 
-/*   
-        char * p = tokenst;
-        char *ptr;
-        ptr = p;
-        while (*ptr && ((*ptr != ' ') || (*(ptr-1) == '\\')))
-        ptr++;
-        ptr = scxmalloc((unsigned) (ptr-p));
-    yylval.sval = ptr;
-    //p++; // quitado por and
-        
-    while ( *p && ((*p != ' ') ||
-              ( *(p+1) 
-              && *(p-1) == '\\' 
-              && *(p+1) != '\0'
-              && *(p+1) != '\n'
-              )       ) ) *ptr++ = *p++;
-        if (*p && *p == ' ') *ptr--; // agregado por and
-    *ptr--; // agregado por and
-    if (*ptr) *ptr = '\0';
-    if (*p) p++;
-    ret = MAPWORD;
-
- */               
                 } else {
-            linelim = p-line;
-            yyerror("Unintelligible word");
-        }
-
-        }
-    }
-    } else if ((*p == '.') || isdigit(*p)) {
+                    linelim = p-line;
+                    yyerror("Unintelligible word");
+                }
+            }
+        } // 117
+    } else if ((*p == '.') || isdigit(*p)) { // 89
 #ifdef SIGVOID
-    void (*sig_save)();
+        void (*sig_save)();
 #else
-    int (*sig_save)();
+        int (*sig_save)();
 #endif
-    double v = 0.0;
-    int temp;
-    char *nstart = p;
+        double v = 0.0;
+        int temp;
+        char *nstart = p;
 
-    sig_save = signal(SIGFPE, fpe_trap);
-    if (setjmp(fpe_buf)) {
-        (void) signal(SIGFPE, sig_save);
-        yylval.fval = v;
-        error("Floating point exception\n");
-        isfunc = isgoto = 0;
-        tokenst = NULL;
-        return FNUMBER;
-    }
+        sig_save = signal(SIGFPE, fpe_trap);
+        if (setjmp(fpe_buf)) {
+            (void) signal(SIGFPE, sig_save);
+            yylval.fval = v;
+            error("Floating point exception\n");
+            isfunc = isgoto = 0;
+            tokenst = NULL;
+            return FNUMBER;
+        }
 
-    if (*p=='.' && dateflag) {  /* .'s in dates are returned as tokens. */
-        ret = *p++;
-        dateflag--;
-    } else {
-        if (*p != '.') {
-        tokenst = p;
-        tokenl = 0;
-        do {
-            v = v*10.0 + (double) ((unsigned) *p - '0');
-            tokenl++;
-        } while (isdigit(*++p));
-        if (dateflag) {
-            ret = NUMBER;
-            yylval.ival = (int)v;
-        /*
-         *  If a string of digits is followed by two .'s separated by
-         *  one or two digits, assume this is a date and return the
-         *  .'s as tokens instead of interpreting them as decimal
-         *  points.  dateflag counts the .'s as they're returned.
-         */
-        } else if (*p=='.' && isdigit(*(p+1)) && (*(p+2)=='.' ||
-            (isdigit(*(p+2)) && *(p+3)=='.'))) {
-            ret = NUMBER;
-            yylval.ival = (int)v;
-            dateflag = 2;
-        } else if (*p == 'e' || *p == 'E') {
-            while (isdigit(*++p)) /* */;
-            if (isalpha(*p) || *p == '_') {
-            linelim = p - line;
-            return (yylex());
-            } else
-            ret = FNUMBER;
-        } else if (isalpha(*p) || *p == '_') {
-            linelim = p - line;
-            return (yylex());
-        }
-        }
-        if ((!dateflag && *p=='.') || ret == FNUMBER) {
-        ret = FNUMBER;
-        yylval.fval = strtod(nstart, &p);
-        if (!finite(yylval.fval))
-            ret = K_ERR;
-        else
-            decimal = TRUE;
+        if (*p=='.' && dateflag) {  /* .'s in dates are returned as tokens. */
+            ret = *p++;
+            dateflag--;
         } else {
-        /* A NUMBER must hold at least MAXROW and MAXCOL */
-        /* This is consistent with a short row and col in struct ent */
-        //if (v > (double)32767 || v < (double)-32768) {
-        //if (v > (double) INT_MAX || v < (double) INT_MIN) {
-        if (v > (double) MAXROWS || v < (double) -MAXROWS) {
-            ret = FNUMBER;
-            yylval.fval = v;
-        } else {
-            temp = (int)v;
-            if((double)temp != v) {
-            ret = FNUMBER;
-            yylval.fval = v;
+            if (*p != '.') {
+                tokenst = p;
+                tokenl = 0;
+                do {
+                    v = v*10.0 + (double) ((unsigned) *p - '0');
+                    tokenl++;
+                } while (isdigit(*++p));
+                if (dateflag) {
+                    ret = NUMBER;
+                    yylval.ival = (int)v;
+                /*
+                 *  If a string of digits is followed by two .'s separated by
+                 *  one or two digits, assume this is a date and return the
+                 *  .'s as tokens instead of interpreting them as decimal
+                 *  points.  dateflag counts the .'s as they're returned.
+                 */
+                } else if (*p=='.' && isdigit(*(p+1)) && (*(p+2)=='.' ||
+                    (isdigit(*(p+2)) && *(p+3)=='.'))) {
+                    ret = NUMBER;
+                    yylval.ival = (int)v;
+                    dateflag = 2;
+                } else if (*p == 'e' || *p == 'E') {
+                    while (isdigit(*++p)) /* */;
+                        if (isalpha(*p) || *p == '_') {
+                            linelim = p - line;
+                            return (yylex());
+                        } else
+                            ret = FNUMBER;
+                } else if (isalpha(*p) || *p == '_') {
+                    linelim = p - line;
+                    return (yylex());
+                }
+            }
+            if ((!dateflag && *p=='.') || ret == FNUMBER) {
+                ret = FNUMBER;
+                yylval.fval = strtod(nstart, &p);
+                if (!finite(yylval.fval))
+                    ret = K_ERR;
+                else
+                    decimal = TRUE;
             } else {
-            ret = NUMBER;
-            yylval.ival = temp;
+                /* A NUMBER must hold at least MAXROW and MAXCOL */
+                /* This is consistent with a short row and col in struct ent */
+                //if (v > (double)32767 || v < (double)-32768) {
+                //if (v > (double) INT_MAX || v < (double) INT_MIN) {
+                if (v > (double) MAXROWS || v < (double) -MAXROWS) {
+                    ret = FNUMBER;
+                    yylval.fval = v;
+                } else {
+                    temp = (int)v;
+                    if((double)temp != v) {
+                        ret = FNUMBER;
+                        yylval.fval = v;
+                    } else {
+                        ret = NUMBER;
+                        yylval.ival = temp;
+                    }
+                }
             }
         }
-        }
-    }
-    (void) signal(SIGFPE, sig_save);
+        (void) signal(SIGFPE, sig_save);
     } else if (*p=='"') {
-    char *ptr;
+        char *ptr;
         ptr = p+1;    /* "string" or "string\"quoted\"" */
         while (*ptr && ((*ptr != '"') || (*(ptr-1) == '\\')))
-        ptr++;
+            ptr++;
         ptr = scxmalloc((unsigned)(ptr-p));
-    yylval.sval = ptr;
-    p++;
-    while (*p && ((*p != '"') || (*(p-1) == '\\' && *(p+1) != '\0' && *(p+1) != '\n')))
-        *ptr++ = *p++;
-    *ptr = '\0';
-    if (*p)
+        yylval.sval = ptr;
         p++;
-    ret = STRING;
-
+        while (*p && ((*p != '"') || (*(p-1) == '\\' && *(p+1) != '\0' && *(p+1) != '\n')))
+            *ptr++ = *p++;
+        *ptr = '\0';
+        if (*p)
+            p++;
+        ret = STRING;
+ 
     } else if (*p=='[') {
-    while (*p && *p!=']')
-        p++;
-    if (*p)
-        p++;
-    linelim = p-line;
-    tokenst = NULL;
-    return yylex();
-
+        while (*p && *p!=']')
+            p++;
+        if (*p)
+            p++;
+        linelim = p-line;
+        tokenst = NULL;
+        return yylex();
+ 
 /*
     } else if (tokenl ==  3) {
                     //k++;
@@ -362,20 +319,20 @@ int plugin_exists(char *name, int len, char *path) {
     static char *HomeDir;
 
     if ((HomeDir = getenv("HOME"))) {
-    strcpy((char *)path, HomeDir);
-    strcat((char *)path, "/.sc/plugins/");
-    strncat((char *)path, name, len);
-    if ((fp = fopen((char *)path, "r"))) {
-        fclose(fp);
-        return 1;
-    }
+        strcpy((char *)path, HomeDir);
+        strcat((char *)path, "/.sc/plugins/");
+        strncat((char *)path, name, len);
+        if ((fp = fopen((char *)path, "r"))) {
+            fclose(fp);
+            return 1;
+        }
     }
     strcpy((char *)path, LIBDIR);
     strcat((char *)path, "/plugins/");
     strncat((char *)path, name, len);
     if ((fp = fopen((char *)path, "r"))) {
-    fclose(fp);
-    return 1;
+        fclose(fp);
+        return 1;
     }
     return 0;
 }
@@ -436,16 +393,16 @@ int nmgetch()
 #define VMScheck(a) {if (~(status = (a)) & 1) VMS_MSG (status);}
 
     if (VMS_read_raw) {
-      VMScheck(smg$read_keystroke (&stdkb->_id, &c, 0, 0, 0));
+        VMScheck(smg$read_keystroke (&stdkb->_id, &c, 0, 0, 0));
     } else
-       c = getchar();
+        c = getchar();
 
     switch (c) {
-    case SMG$K_TRM_LEFT:  c = KEY_LEFT;  break;
-    case SMG$K_TRM_RIGHT: c = KEY_RIGHT; break;
-    case SMG$K_TRM_UP:    c = ctl('p');  break;
-    case SMG$K_TRM_DOWN:  c = ctl('n');  break;
-    default:   c = c & A_CHARTEXT;
+        case SMG$K_TRM_LEFT:  c = KEY_LEFT;  break;
+        case SMG$K_TRM_RIGHT: c = KEY_RIGHT; break;
+        case SMG$K_TRM_UP:    c = ctl('p');  break;
+        case SMG$K_TRM_DOWN:  c = ctl('n');  break;
+        default:   c = c & A_CHARTEXT;
     }
     return (c);
 }
@@ -464,13 +421,13 @@ VMS_MSG (int status)
 /* Check for no error or standard error */
 
     if (~status & 1) {
-    status = status & 0x8000 ? status & 0xFFFFFFF : status & 0xFFFF;
-    if (SYS$GETMSG(status, &length, &errdesc, 1, 0) == SS$_NORMAL) {
-        errstr[length] = '\0';
-        (void) sprintf(buf, "<0x%x> %s", status, errdesc.dsc$a_pointer);
-        err_out(buf);
-    } else
-        err_out("System error");
+        status = status & 0x8000 ? status & 0xFFFFFFF : status & 0xFFFF;
+        if (SYS$GETMSG(status, &length, &errdesc, 1, 0) == SS$_NORMAL) {
+            errstr[length] = '\0';
+            (void) sprintf(buf, "<0x%x> %s", status, errdesc.dsc$a_pointer);
+            err_out(buf);
+        } else
+            err_out("System error");
     }
 }
 #endif /* VMS */
@@ -521,11 +478,11 @@ void initkbd() {
     static char buf[1024]; /* Why do I have to do this again? */
 
     if (!(ktmp = getenv("TERM"))) {
-    (void) fprintf(stderr, "TERM environment variable not set\n");
-    exit (1);
+        (void) fprintf(stderr, "TERM environment variable not set\n");
+        exit (1);
     }
     if (tgetent(buf, ktmp) <= 0)
-    return;
+        return;
 
     km[0].k_str = tgetstr("kl", &p); km[0].k_val = KEY_LEFT;
     km[1].k_str = tgetstr("kr", &p); km[1].k_val = KEY_RIGHT;
@@ -534,43 +491,43 @@ void initkbd() {
 
     ktmp = tgetstr("ks",&p);
     if (ktmp)  {
-    (void) strcpy(ks_buf, ktmp);
-    ks = ks_buf;
-    tputs(ks, 1, charout);
+        (void) strcpy(ks_buf, ktmp);
+        ks = ks_buf;
+        tputs(ks, 1, charout);
     }
     ktmp = tgetstr("ke",&p);
     if (ktmp)  {
-    (void) strcpy(ke_buf, ktmp);
-    ke = ke_buf;
+        (void) strcpy(ke_buf, ktmp);
+        ke = ke_buf;
     }
 
     /* Unmap arrow keys which conflict with our ctl keys   */
     /* Ignore unset, longer than length 1, and 1-1 mapped keys */
 
     for (i = 0; i < N_KEY; i++) {
-    kp = &km[i];
-    if (kp->k_str && (kp->k_str[1] == 0) && (kp->k_str[0] != kp->k_val))
-        for (j = 0; dont_use[j] != 0; j++)
-            if (kp->k_str[0] == dont_use[j]) {
-             kp->k_str = (char *)0;
-             break;
-        }
+        kp = &km[i];
+        if (kp->k_str && (kp->k_str[1] == 0) && (kp->k_str[0] != kp->k_val))
+            for (j = 0; dont_use[j] != 0; j++)
+                if (kp->k_str[0] == dont_use[j]) {
+                    kp->k_str = (char *)0;
+                    break;
+                }
     }
 
 #ifdef TIOCSLTC
     (void)ioctl(fileno(stdin), TIOCGLTC, (char *)&old_chars);
     new_chars = old_chars;
     if (old_chars.t_lnextc == ctl('v'))
-    new_chars.t_lnextc = -1;
+        new_chars.t_lnextc = -1;
     if (old_chars.t_rprntc == ctl('r'))
-    new_chars.t_rprntc = -1;
+        new_chars.t_rprntc = -1;
     (void)ioctl(fileno(stdin), TIOCSLTC, (char *)&new_chars);
 #endif
 }
 
 void kbd_again() {
     if (ks) 
-    tputs(ks, 1, charout);
+        tputs(ks, 1, charout);
 
 #ifdef TIOCSLTC
     (void)ioctl(fileno(stdin), TIOCSLTC, (char *)&new_chars);
@@ -579,7 +536,7 @@ void kbd_again() {
 
 void resetkbd() {
     if (ke) 
-    tputs(ke, 1, charout);
+        tputs(ke, 1, charout);
 
 #ifdef TIOCSLTC
     (void)ioctl(fileno(stdin), TIOCSLTC, (char *)&old_chars);
@@ -604,52 +561,52 @@ int nmgetch() {
 #endif
 
     if (dumpindex && *dumpindex)
-    return (*dumpindex++);
+        return (*dumpindex++);
 
     c = getchar();
     biggest = 0;
     almost = 0;
 
     for (kp = &km[0]; kp < &km[N_KEY]; kp++) {
-    if (!kp->k_str)
-        continue;
-    if (c == kp->k_str[kp->k_index]) {
-        almost = 1;
-        kp->k_index++;
-        if (kp->k_str[kp->k_index] == 0) {
-        c = kp->k_val;
-        for (kp = &km[0]; kp < &km[N_KEY]; kp++)
-            kp->k_index = 0;
-        return (c);
+        if (!kp->k_str)
+            continue;
+        if (c == kp->k_str[kp->k_index]) {
+            almost = 1;
+            kp->k_index++;
+            if (kp->k_str[kp->k_index] == 0) {
+                c = kp->k_val;
+                for (kp = &km[0]; kp < &km[N_KEY]; kp++)
+                    kp->k_index = 0;
+                return (c);
+            }
         }
-    }
-    if (!biggest && kp->k_index)
-        biggest = kp;
+        if (!biggest && kp->k_index)
+            biggest = kp;
         else if (kp->k_index && biggest->k_index < kp->k_index)
-        biggest = kp;
+            biggest = kp;
     }
 
     if (almost) { 
         (void) signal(SIGALRM, time_out);
         (void) alarm(1);
 
-    if (setjmp(wakeup) == 0) { 
-        maybe = nmgetch();
-        (void) alarm(0);
-        return (maybe);
-    }
+        if (setjmp(wakeup) == 0) { 
+            maybe = nmgetch();
+            (void) alarm(0);
+            return (maybe);
+        }
     }
     
     if (biggest) {
-    for (i = 0; i<biggest->k_index; i++) 
-        dumpbuf[i] = biggest->k_str[i];
-    if (!almost)
-        dumpbuf[i++] = c;
-    dumpbuf[i] = '\0';
-    dumpindex = &dumpbuf[1];
-    for (kp = &km[0]; kp < &km[N_KEY]; kp++)
-        kp->k_index = 0;
-    return (dumpbuf[0]);
+        for (i = 0; i<biggest->k_index; i++) 
+            dumpbuf[i] = biggest->k_str[i];
+        if (!almost)
+            dumpbuf[i++] = c;
+        dumpbuf[i] = '\0';
+        dumpindex = &dumpbuf[1];
+        for (kp = &km[0]; kp < &km[N_KEY]; kp++)
+            kp->k_index = 0;
+        return (dumpbuf[0]);
     }
 
     return(c);
