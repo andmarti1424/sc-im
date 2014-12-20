@@ -742,6 +742,13 @@ int import_csv(char * fname, char d) {
 
     // recorro archivo csv
     while ( ! feof(f) && (fgets(line_in, sizeof(line_in), f) != NULL) ) {        
+        // this hack is for importing file that have DOS eol
+        int l = strlen(line_in);
+        while (l--)
+            if (line_in[l] == 0x0d) {
+                line_in[l] = '\0';
+                break;
+            }
 
         // rompo la cadena por delimitador
         token = xstrtok(line_in, delim);

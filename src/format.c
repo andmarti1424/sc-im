@@ -120,10 +120,10 @@ bool format(char *fmt, int lprecision, double val, char *buf, int buflen) {
     int exp_val = 0;
     int width;
     char prtfmt[32];
-    static char        *mantissa = NULL;
-    static char        *tmpfmt1 = NULL, *tmpfmt2 = NULL, *exptmp = NULL;
-    static unsigned    mantlen = 0, fmtlen = 0;
-    char *fraction = NULL;
+    static char * mantissa = NULL;
+    static char * tmpfmt1 = NULL, * tmpfmt2 = NULL, * exptmp = NULL;
+    static unsigned mantlen = 0, fmtlen = 0;
+    char * fraction = NULL;
     int zero_pad = 0;
 
     if (fmt == NULL)
@@ -204,25 +204,24 @@ bool format(char *fmt, int lprecision, double val, char *buf, int buflen) {
  * extract the exponent from the format if present
  */
     for (cp = fmt; *cp != EOS; cp++) {
-    if (*cp == '\\')
-        cp++;
-    else if (*cp == 'e' || *cp == 'E') {
-        if (cp[1] == '+' || cp[1] == '-') {
-        exponent = strcpy(exptmp, cp);
-        *cp = EOS;
-        if (val != 0.0) {
-            while (val < 1.0) {
-            val *= 10.0;
-            exp_val--;
+        if (*cp == '\\')
+            cp++;
+        else if ((*cp == 'e' || *cp == 'E') && 
+            (cp[1] == '+' || cp[1] == '-') ) {
+            exponent = strcpy(exptmp, cp);
+            *cp = EOS;
+            if (val != 0.0) {
+                while (val < 1.0) {
+                    val *= 10.0;
+                    exp_val--;
+                }
+                while (val >= 10.0) {
+                    val /= 10.0;
+                    exp_val++;
+                }
             }
-            while (val >= 10.0) {
-            val /= 10.0;
-            exp_val++;
-            }
+            break;
         }
-        break;
-        }
-    }
     }
 
 /*
@@ -277,9 +276,9 @@ bool format(char *fmt, int lprecision, double val, char *buf, int buflen) {
  * format the puppy
  */
     {
-    static    char *citmp = NULL, *cftmp = NULL;
-    static    unsigned cilen = 0, cflen = 0;
-    char *ci, *cf, *ce;
+    static char * citmp = NULL, * cftmp = NULL;
+    static unsigned cilen = 0, cflen = 0;
+    char * ci, * cf, * ce;
     int len_ci, len_cf, len_ce;
     bool ret = false;
     
@@ -323,9 +322,9 @@ static char * fmt_int(char *val,  /* integer part of the value to be formatted *
 
     int digit, f, v;
     int thousands = 0;
-    char *cp;
+    char * cp;
     static char buf[MAXBUF];
-    char *bufptr = buf;
+    char * bufptr = buf;
 
 /*
  * locate the leftmost digit placeholder
@@ -346,13 +345,11 @@ static char * fmt_int(char *val,  /* integer part of the value to be formatted *
     while (f >= 0 || v >= 0) {
         if (f > 0 && fmt[f-1] == '\\') {
             *bufptr++ = fmt[f--];
-        } else if (f >= 0 && (fmt[f] == '#' || fmt[f] == '0')) {
-            if (v >= 0 || fmt[f] == '0') {
-                *bufptr++ = v < 0 ? '0' : val[v];
-                if (comma && (thousands = (thousands + 1) % 3) == 0 && v > 0 && thsep != '\0')
-                    *bufptr++ = thsep;
-                v--;
-            }
+        } else if (f >= 0 && (fmt[f] == '#' || fmt[f] == '0') && (v >= 0 || fmt[f] == '0')) {
+            *bufptr++ = v < 0 ? '0' : val[v];
+            if (comma && (thousands = (thousands + 1) % 3) == 0 && v > 0 && thsep != '\0')
+                *bufptr++ = thsep;
+            v--;
         } else if (f >= 0) {
             *bufptr++ = fmt[f];
         }
@@ -372,14 +369,14 @@ static char * fmt_int(char *val,  /* integer part of the value to be formatted *
 
 /*****************************************************************************/
 
-static char *
-fmt_frac(char *val,   /* fractional part of the value to be formatted */
+static char * fmt_frac(
+    char *val,   /* fractional part of the value to be formatted */
     char *fmt,        /* fractional portion of format */
     int lprecision) { /* precision, for interpreting the "&" */
 
     static char buf[MAXBUF];
-    register char *bufptr = buf;
-    register char *fmtptr = fmt, *valptr = val;
+    register char * bufptr = buf;
+    register char * fmtptr = fmt, *valptr = val;
 
     *bufptr++ = dpoint;
     while (*fmtptr != EOS) {
@@ -407,8 +404,7 @@ fmt_frac(char *val,   /* fractional part of the value to be formatted */
 /*****************************************************************************/
 
 static char * fmt_exp(int val, /* value of the exponent */
-    char *fmt)                 /* exponent part of the format */
-{
+    char *fmt) {               /* exponent part of the format */
     static char buf[MAXBUF];
     register char *bufptr = buf;
     char valbuf[64];
