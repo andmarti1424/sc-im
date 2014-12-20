@@ -177,7 +177,7 @@ void handle_cursor() {
         case INSERT_MODE:
         case EDIT_MODE:
             noecho();
-            curs_set(2);
+            curs_set(1); // changes for NETBSD compatibility
             break;
         default:
             noecho();

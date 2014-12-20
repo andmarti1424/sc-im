@@ -5,15 +5,17 @@ TODO
 
 2. filters rows (multiple criteria)
 
-3. isolate UI code (CURSES) from the rest of the code for future implementation in other gui's.
+3. Import of XLSX format spreadsheets
 
-4. status bar format customized by user.
+4. isolate UI code (CURSES) from the rest of the code for future implementation in other gui's.
+
+5. status bar format customized by user.
    can show count of cells and sum of values, when a range is selected..
 
-1. mapping: special caracters should be mapped.
+6. mapping: special caracters should be mapped.
 
-2. chain cells with equations into a DOUBLE linked list or dependency tree
+7. chain cells with equations into a DOUBLE linked list or dependency tree
 Have a top level eval, eval and UPDATE all lower nodes
 This is also neccesary for UNDO mods of cells that has equations on them!!!
 
-3. multiplier with '.' command ?
+8. multiplier with '.' command ?
