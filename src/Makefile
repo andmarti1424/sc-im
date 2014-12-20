@@ -35,6 +35,10 @@ MANMODE=644
 LIBDIR=$(prefix)/share/doc/$(name)
 LIBRARY=-DLIBDIR=\"$(LIBDIR)\"
 
+# For Building SCIM in FREEBSD, set BSD42
+#BSD42 := -DBSD42
+BSD42 :=
+
 # Set SIMPLE for lex.c if you don't want arrow keys or lex.c blows up
 #SIMPLE := -DSIMPLE
 
