@@ -93,6 +93,8 @@ token S_GETFORMAT
 %token S_SORT
 %token S_GOTO
 %token S_SET
+%token S_LOCK
+%token S_UNLOCK
 
 /*
  token S_ADDNOTE
@@ -107,8 +109,6 @@ token S_GETFORMAT
  token S_ERASE
  token S_YANK
  token S_FILL
- token S_LOCK
- token S_UNLOCK
  token S_DEFINE
  token S_UNDEFINE
  token S_ABBREV
@@ -405,6 +405,9 @@ command: S_LET var_or_range '=' e { let($2.left.vp, $4); }
     |    S_GOTO '%' STRING       { str_search($3, 0, 0, maxrow, maxcol, 2); }
     |    S_GOTO WORD             { /* don't repeat last goto on "unintelligible word" */ ; }
 
+
+    |    S_LOCK var_or_range     { lock_cells($2.left.vp, $2.right.vp); }
+    |    S_UNLOCK var_or_range   { unlock_cells($2.left.vp, $2.right.vp); }
 
     |    S_NMAP STRING STRING           {
                                           add_map($2, $3, 'n');
