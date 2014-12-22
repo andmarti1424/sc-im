@@ -496,51 +496,8 @@ void do_normalmode(struct block * buf) {
                 yank_area(r->tlrow, r->tlcol, r->brrow, r->brcol, 'a', cmd_multiplier + 1);
             }
             break;
-        
-        // increase or decrease numeric value of cell
-        case '-':
-        case '+':
-            {
-            struct ent * p;
-            int r, c, tlrow = currow, tlcol = curcol, brrow = currow, brcol = curcol;
-            if ( is_range_selected() != -1 ) {
-                struct srange * sr = get_selected_range();
-                tlrow = sr->tlrow;
-                tlcol = sr->tlcol;
-                brrow = sr->brrow;
-                brcol = sr->brcol;
-            }
-            if (any_locked_cells(tlrow, tlcol, brrow, brcol)) {
-                error("Locked cells encountered. Nothing changed");           
-                return;
-            }
-            create_undo_action();
-            int arg = cmd_multiplier + 1;
-            int mf = modflg; // keep original modflg
-            for (r = tlrow; r <= brrow; r++) {
-                for (c = tlcol; c <= brcol; c++) {
-                    p = *ATBL(tbl, r, c);
-                    if ( ! p )  {
-                        continue;
-                    } else if (p->expr && !(p->flags & is_strexpr)) {
-                        //error("Can't increment / decrement a formula");
-                        continue;
-                    } else if (p->flags & is_valid) {
-                        copy_to_undostruct(r, c, r, c, 'd');
-                        p->v += buf->value == '+' ? (double) arg : - 1 * (double) arg;
-                        copy_to_undostruct(r, c, r, c, 'a');
-                        if (mf == modflg) modflg++; // increase just one time
-                    }
-                }
-            }
-            end_undo_action();
-            if (atoi(get_conf_value("autocalc"))) EvalAll();
-            cmd_multiplier = 0;
-            update();
-            }
-            break;
-
-        // paste cell below or left
+               // paste cell below or left
+               
         case 'p':
             paste_yanked_ents(0);
             update();
@@ -711,9 +668,56 @@ void do_normalmode(struct block * buf) {
             EvalAll();
             update();
             break;
+ 
+        // increase or decrease numeric value of cell
+        case '-':
+        case '+':
+            {
+            if (atoi(get_conf_value("numeric")) == 1) goto numeric;
+            struct ent * p;
+            int r, c, tlrow = currow, tlcol = curcol, brrow = currow, brcol = curcol;
+            if ( is_range_selected() != -1 ) {
+                struct srange * sr = get_selected_range();
+                tlrow = sr->tlrow;
+                tlcol = sr->tlcol;
+                brrow = sr->brrow;
+                brcol = sr->brcol;
+            }
+            if (any_locked_cells(tlrow, tlcol, brrow, brcol)) {
+                error("Locked cells encountered. Nothing changed");           
+                return;
+            }
+            create_undo_action();
+            int arg = cmd_multiplier + 1;
+            int mf = modflg; // keep original modflg
+            for (r = tlrow; r <= brrow; r++) {
+                for (c = tlcol; c <= brcol; c++) {
+                    p = *ATBL(tbl, r, c);
+                    if ( ! p )  {
+                        continue;
+                    } else if (p->expr && !(p->flags & is_strexpr)) {
+                        //error("Can't increment / decrement a formula");
+                        continue;
+                    } else if (p->flags & is_valid) {
+                        copy_to_undostruct(r, c, r, c, 'd');
+                        p->v += buf->value == '+' ? (double) arg : - 1 * (double) arg;
+                        copy_to_undostruct(r, c, r, c, 'a');
+                        if (mf == modflg) modflg++; // increase just one time
+                    }
+                }
+            }
+            end_undo_action();
+            if (atoi(get_conf_value("autocalc"))) EvalAll();
+            cmd_multiplier = 0;
+            update();
+            }
+            break;
 
+        // input of numbers
         default:
-            if (isdigit(buf->value) && atoi(get_conf_value("numeric")) ) { // input of numbers
+        numeric:
+            if ( (isdigit(buf->value) || buf->value == '-' || buf->value == '+') &&
+                atoi(get_conf_value("numeric")) ) {
                 insert_edit_submode='=';
                 chg_mode(insert_edit_submode);
                 inputline_pos = 0;
