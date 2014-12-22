@@ -401,6 +401,9 @@ command: S_LET var_or_range '=' e { let($2.left.vp, $4); }
     |    S_GOTO var_or_range     { moveto($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col, -1, -1); }
     |    S_GOTO num              { num_search($2, 0, 0, maxrow, maxcol, 0); }
     |    S_GOTO STRING           { str_search($2, 0, 0, maxrow, maxcol, 0); }
+    |    S_GOTO '#' STRING       { str_search($3, 0, 0, maxrow, maxcol, 1); }
+    |    S_GOTO '%' STRING       { str_search($3, 0, 0, maxrow, maxcol, 2); }
+    |    S_GOTO WORD             { /* don't repeat last goto on "unintelligible word" */ ; }
 
 
     |    S_NMAP STRING STRING           {
