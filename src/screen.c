@@ -574,6 +574,10 @@ void add_cell_detail(char * d, struct ent * p1) {
         strcat(d, "\" ");
     }
 
+    /* Display if cell is locked */
+    if (p1 && p1->flags & is_locked)
+         strcat(d, "[locked] ");
+
     // value part of cell:
     if (p1->flags & is_valid) {
         /* has value or num expr */
