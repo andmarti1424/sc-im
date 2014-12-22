@@ -1418,14 +1418,14 @@ void select_inner_range(int * vir_tlrow, int * vir_tlcol, int * vir_brrow, int *
     return;
 }
 
-// Returns 1 if cell is locked, 0 otherwise
+/* Returns 1 if cell is locked, 0 otherwise */
 int locked_cell(int r, int c) {
     struct ent *p = *ATBL(tbl, r, c);
     if (p && (p->flags & is_locked)) {
-    info("Cell %s%d is locked", coltoa(c), r) ;
-    return(1);
+        error("Cell %s%d is locked", coltoa(c), r) ;
+        return 1;
     }
-    return(0);
+    return 0;
 }
 
 // Check if area contains locked cells
@@ -1437,9 +1437,9 @@ int any_locked_cells(int r1, int c1, int r2, int c2) {
     for (c = c1; c <= c2; c++) {
         p = *ATBL(tbl, r, c);
         if (p && (p->flags & is_locked))
-        return(1);
+        return 1;
     }
-    return(0);
+    return 0;
 }
 
 // Funcion que indica si el contenido completo de un buffer
