@@ -26,7 +26,46 @@ char inputline[BUFFERSIZE];
 int inputline_pos;
 char interp_line[100];
 
+static char * valid_commands[] = {
+"!",
+"color",
+"e csv",
+"e tab",
+"e! csv",
+"e! tab",
+"format",
+"h",
+"help",
+"hiddencols",
+"hiddenrows",
+"hidecol",
+"hiderow",
+"i csv",
+"i tab",
+"i! csv",
+"i! tab",
+"int",
+"load",
+"load!",
+"q",
+"q!",
+"quit!",
+"quit",
+"set",
+"showcol",
+"showrow",
+"showrows",
+"sort",
+"version",
+"w",
+"x",
+(char *) 0
+};
+
+static int tab_comp = -1; // tab_comp != -1 indicates tab_completation
+
 void do_commandmode(struct block * sb) {
+
     // si hay un rango seleccionado en modo visual
     int p = is_range_selected();
     struct srange * sr = NULL;
@@ -34,7 +73,7 @@ void do_commandmode(struct block * sb) {
     
     if (sb->value == OKEY_BS) {            // BS
         if (! strlen(inputline) || ! inputline_pos) {
-            show_header(input_win);
+            //show_header(input_win);
             return;
         }
         del_char(inputline, --inputline_pos);
@@ -73,7 +112,64 @@ void do_commandmode(struct block * sb) {
         if (inputline_pos < strlen(inputline)) inputline_pos++;
         show_header(input_win);
 
-    } else if (find_val(sb, OKEY_ENTER)) { // ENTER
+    } else if (isprint(sb->value)) {       //  ESCRIBO UN NUEVO CHAR
+        ins_in_line(sb->value);
+        mvwprintw(input_win, 0, 0 + rescol, ":%s", inputline);
+        wmove(input_win, 0, inputline_pos + 1 + rescol);
+        wrefresh(input_win);
+        
+        //if (sb->value < 256 && sb->value > 31 && commandline_history->pos == 0) { // solo si edito el nuevo comando
+        if (commandline_history->pos == 0) { // solo si edito el nuevo comando
+            ;
+            char * sl = get_line_from_history(commandline_history, 0);
+            add_char(sl, sb->value, inputline_pos-1); // Inserto en el historial
+        }
+
+    } else if ( sb->value == ctl('w') || sb->value == ctl('b') ||
+                sb->value == OKEY_HOME || sb->value == OKEY_END) {
+        switch (sb->value) {
+        case ctl('w'):
+            inputline_pos = for_word(1, 0, 1) + 1;   // E
+            break;
+        case ctl('b'):
+            inputline_pos = back_word(1);            // B
+            break;
+        case OKEY_HOME:
+            inputline_pos = 0;                       // 0
+            break;
+        case OKEY_END:
+            inputline_pos = strlen(inputline);       // $
+            break;
+        }
+        wmove(input_win, 0, inputline_pos + 1 + rescol);
+        wrefresh(input_win);
+
+    } else if (sb->value == '\t') {                  // TAB
+        int i, clen = (sizeof(valid_commands) / sizeof(char *)) - 1;
+    
+        for (i = tab_comp + 1; i < clen; i++) {
+            if (strncmp(get_line_from_history(commandline_history, 0), valid_commands[i],
+            strlen(get_line_from_history(commandline_history, 0))) == 0) {
+                strcpy(inputline, valid_commands[i]);
+                inputline_pos = strlen(inputline);
+                tab_comp = i;
+                break;
+            }
+        }
+
+        // restauro contenido de inputline
+        if (i == clen) {
+            strcpy(inputline, get_line_from_history(commandline_history, 0));
+            inputline_pos = strlen(inputline);
+            tab_comp = -1;
+        }
+
+        show_header(input_win);
+ 
+
+
+    // CONFIRM A COMMAND PRESSING ENTER
+    } else if (find_val(sb, OKEY_ENTER)) {
 
         if ( strcmp(inputline, "q") == 0 || strcmp(inputline, "quit") == 0 ) {
             shall_quit = 1;
@@ -96,7 +192,7 @@ void do_commandmode(struct block * sb) {
 
             del_range_chars(cline, 0, 4);
             if ( ! strlen(cline) ) {
-                error("Path to file to import is missing !");
+                error("Path to file to load is missing !");
             } else if ( modflg && ! force_rewrite ) {
                 error("Changes were made since last save. Use '!' to force the load");
             } else {
@@ -254,35 +350,6 @@ void do_commandmode(struct block * sb) {
         inputline[0]='\0';
         update();
 
-    } else if (isprint(sb->value)) {        //  ESCRIBO UN NUEVO CHAR
-        ins_in_line(sb->value);
-        mvwprintw(input_win, 0, 0 + rescol, ":%s", inputline);
-        wmove(input_win, 0, inputline_pos + 1 + rescol);
-        wrefresh(input_win);
-        
-        //if (sb->value < 256 && sb->value > 31 && commandline_history->pos == 0) { // solo si edito el nuevo comando
-        if (commandline_history->pos == 0) { // solo si edito el nuevo comando
-            ;
-            char * sl = get_line_from_history(commandline_history, 0);
-            add_char(sl, sb->value, inputline_pos-1); // Inserto en el historial
-        }
-    } else {
-        switch (sb->value) {
-        case ctl('w'):
-            inputline_pos = for_word(1, 0, 1) + 1;   // E
-            break;
-        case ctl('b'):
-            inputline_pos = back_word(1);            // B
-            break;
-        case OKEY_HOME:
-            inputline_pos = 0;                       // 0
-            break;
-        case OKEY_END:
-            inputline_pos = strlen(inputline);       // $
-            break;
-        }
-        wmove(input_win, 0, inputline_pos + 1 + rescol);
-        wrefresh(input_win);
     }
     //show_header(input_win); // NO DESCOMENTAR.
     return;
