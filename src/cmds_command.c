@@ -79,14 +79,18 @@ void do_commandmode(struct block * sb) {
         del_char(inputline, --inputline_pos);
         if (commandline_history->pos == 0)
             del_char(get_line_from_history(commandline_history, commandline_history->pos), inputline_pos); // borro en el historial
+        tab_comp = -1;
         show_header(input_win);
+        return;
 
     } else if (sb->value == OKEY_DEL) {    // DEL
         if (inputline_pos > strlen(inputline)) return;
         del_char(inputline, inputline_pos);
         if (commandline_history->pos == 0)
             del_char(get_line_from_history(commandline_history, commandline_history->pos), inputline_pos); // borro en el historial
+        tab_comp = -1;
         show_header(input_win);
+        return;
 
     } else if (sb->value == OKEY_UP || sb->value == ctl('p')) {     // UP
         if (commandline_history->len > - commandline_history->pos + 1) {
@@ -94,7 +98,9 @@ void do_commandmode(struct block * sb) {
             strcpy(inputline, get_line_from_history(commandline_history, commandline_history->pos));
             inputline_pos = strlen(inputline);
         }
+        tab_comp = -1;
         show_header(input_win);
+        return;
             
     } else if (sb->value == OKEY_DOWN || sb->value == ctl('n')) {   // DOWN
         if ( - commandline_history->pos) {
@@ -102,15 +108,19 @@ void do_commandmode(struct block * sb) {
             strcpy(inputline, get_line_from_history(commandline_history, commandline_history->pos));
             inputline_pos = strlen(inputline);
         }
+        tab_comp = -1;
         show_header(input_win);
+        return;
 
     } else if (sb->value == OKEY_LEFT) {   // LEFT
         if (inputline_pos) inputline_pos--;
         show_header(input_win);
+        return;
 
     } else if (sb->value == OKEY_RIGHT) {  // RIGHT
         if (inputline_pos < strlen(inputline)) inputline_pos++;
         show_header(input_win);
+        return;
 
     } else if (isprint(sb->value)) {       //  ESCRIBO UN NUEVO CHAR
         ins_in_line(sb->value);
@@ -124,6 +134,8 @@ void do_commandmode(struct block * sb) {
             char * sl = get_line_from_history(commandline_history, 0);
             add_char(sl, sb->value, inputline_pos-1); // Inserto en el historial
         }
+        tab_comp = -1;
+        return;
 
     } else if ( sb->value == ctl('w') || sb->value == ctl('b') ||
                 sb->value == OKEY_HOME || sb->value == OKEY_END) {
@@ -143,6 +155,7 @@ void do_commandmode(struct block * sb) {
         }
         wmove(input_win, 0, inputline_pos + 1 + rescol);
         wrefresh(input_win);
+        return;
 
     } else if (sb->value == '\t') {                  // TAB
         int i, clen = (sizeof(valid_commands) / sizeof(char *)) - 1;
@@ -165,6 +178,7 @@ void do_commandmode(struct block * sb) {
         }
 
         show_header(input_win);
+        return;
  
 
 
