@@ -1,4 +1,16 @@
-For import of csv files in LibreOffice
+Build instructions for NetBSD
+-----------------------------
+Use gmake and bison.
+Make sure to have ncurses library or a symlink to it in the library directory.
+Setup Makefile acording to the previous comments.
+Replace -lncurses with -lcurses in Makefile.
+Line 69 in screen.c shall be commented for the build to complete.
+
+Build instructions for FreeBSD
+------------------------------
+Use gmake and bison for building.
+Setup BSD42 in Makefile.
+
 --------------------------------------
 Choose this configuration options:
 
@@ -8,11 +20,3 @@ Quoted field as text: yes
 detect special numbers: no
 Column types: US-english
 
-Build instructions for NetBSD
------------------------------
-Use gmake and bison.
-Make sure to have ncurses library or a symlink to it in the library directory.
-Setup Makefile acording to the previous comments.
-Replace -lncurses with -lcurses in Makefile.
-Line 69 in stdout.c shall be commented for the build to complete.
-Checkout KNOWN_ISSUES file because of an issue with cursor visibility

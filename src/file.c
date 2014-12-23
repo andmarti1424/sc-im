@@ -296,6 +296,7 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
 
     write_cells(f, r0, c0, rn, cn, r0, c0);
 
+    // write blocked cells
     for (r = r0; r <= rn; r++) {
         pp = ATBL(tbl, r, c0);
         for (c = c0; c <= cn; c++, pp++)
@@ -308,6 +309,7 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
                 }*/
             }
     }
+
     /*
      * Don't try to combine these into a single fprintf().  v_name() has
      * a single buffer that is overwritten on each call, so the first part

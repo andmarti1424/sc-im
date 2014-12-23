@@ -11,7 +11,6 @@
 #include "marks.h"
 #include "xmalloc.h" // for scxfree
 #include "hide_show.h"
-//#include "lex.h"
 
 void yyerror(char *err);               // error routine for yacc (gram.y)
 int yylex();
@@ -300,8 +299,9 @@ token S_GETFORMAT
 %left '^'
 
 %%
-command: S_LET var_or_range '=' e { let($2.left.vp, $4); }
-        |       S_LET var_or_range '='
+command:
+         S_LET var_or_range '=' e { let($2.left.vp, $4); }
+    |    S_LET var_or_range '='
                                 { $2.left.vp->v = (double) 0.0;
                                   if ($2.left.vp->expr && !($2.left.vp->flags & is_strexpr)) {
                                     efree($2.left.vp->expr);

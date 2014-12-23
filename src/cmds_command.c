@@ -92,26 +92,25 @@ void do_commandmode(struct block * sb) {
         show_header(input_win);
         return;
 
-    } else if (sb->value == OKEY_UP || sb->value == ctl('p')) {     // UP
-        if (commandline_history->len > - commandline_history->pos + 1) {
-            commandline_history->pos--;
-            strcpy(inputline, get_line_from_history(commandline_history, commandline_history->pos));
-            inputline_pos = strlen(inputline);
+    } else if (sb->value == OKEY_UP || sb->value == ctl('p') ||         // UP
+               sb->value == OKEY_DOWN || sb->value == ctl('n')) {       // DOWN
+
+        int delta = 0;
+        if (sb->value == OKEY_UP || sb->value == ctl('p')) {            // up
+            if (commandline_history->len <= - commandline_history->pos + 1) return;
+            delta = -1;
         }
+        if (sb->value == OKEY_DOWN || sb->value == ctl('n')) {          // down
+            if ( - commandline_history->pos == 0) return;
+            delta = 1;
+        }
+        commandline_history->pos += delta;
+        strcpy(inputline, get_line_from_history(commandline_history, commandline_history->pos));
+        inputline_pos = strlen(inputline);
         tab_comp = -1;
         show_header(input_win);
         return;
             
-    } else if (sb->value == OKEY_DOWN || sb->value == ctl('n')) {   // DOWN
-        if ( - commandline_history->pos) {
-            commandline_history->pos++;
-            strcpy(inputline, get_line_from_history(commandline_history, commandline_history->pos));
-            inputline_pos = strlen(inputline);
-        }
-        tab_comp = -1;
-        show_header(input_win);
-        return;
-
     } else if (sb->value == OKEY_LEFT) {   // LEFT
         if (inputline_pos) inputline_pos--;
         show_header(input_win);
@@ -161,8 +160,10 @@ void do_commandmode(struct block * sb) {
         int i, clen = (sizeof(valid_commands) / sizeof(char *)) - 1;
     
         for (i = tab_comp + 1; i < clen; i++) {
-            if (strncmp(get_line_from_history(commandline_history, 0), valid_commands[i],
-            strlen(get_line_from_history(commandline_history, 0))) == 0) {
+            if ((strncmp(get_line_from_history(commandline_history, 0), valid_commands[i],
+            strlen(get_line_from_history(commandline_history, 0))) == 0)
+            || strlen(get_line_from_history(commandline_history, 0)) == 0)
+            {
                 strcpy(inputline, valid_commands[i]);
                 inputline_pos = strlen(inputline);
                 tab_comp = i;

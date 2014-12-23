@@ -2019,8 +2019,8 @@ void lock_cells(struct ent *v1, struct ent *v2) {
     if (minr < 0) minr = 0;
     if (minc < 0) minc = 0;
 
-    for (r = minr; r<=maxr; r++)
-        for (c = minc; c<=maxc; c++) {
+    for (r = minr; r <= maxr; r++)
+        for (c = minc; c <= maxc; c++) {
             n = lookat(r, c);
             n->flags |= is_locked;
         }
@@ -2043,8 +2043,8 @@ void unlock_cells(struct ent *v1, struct ent *v2) {
     if (minr < 0) minr = 0;
     if (minc < 0) minc = 0;
 
-    for (r = minr; r<=maxr; r++)
-        for (c = minc; c<=maxc; c++) {
+    for (r = minr; r <= maxr; r++)
+        for (c = minc; c <= maxc; c++) {
             n = lookat(r, c);
             n->flags &= ~is_locked;
         }

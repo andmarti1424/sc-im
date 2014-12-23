@@ -8,19 +8,20 @@ SCIM uses ncurses for visual interface and has vim-like keybindings and some fun
 Some of the features of SCIM:
 
     UNDO / REDO
-    Cell shifting
+    65.536 rows and 702 columns supported. (The number of rows can be expanded to 1.048.576 if wished).
     Key-mappings
+    Cell shifting
     More movements commands implemented!
     Input and Output was completely rewritten
     Colors can be customized by user, even at runtime
-    65.536 rows and 702 columns supported. (The number of rows can be expanded to 1.048.576 if wished).
 
 About the name, the idea is that the program can be identified as another vim-like app.
 SCIM stands for Spreadsheet Calculator Improvised. :-) 
 
 Run 'make' inside /src folder to build scim.
+You can install the binary 'scim' in your system by typing 'make install' with a privileged user.
 
 --
-Please make a DONATION with PayPal, so we can keep working on SCIM !!!
+Please. I mean, Please.. make a DONATION with PayPal, so we can keep working on SCIM !!!
 A lot of features are in the roadmap, such as multiple worksheets or filtering of rows!
 Thanks.
