@@ -242,8 +242,24 @@ void do_normalmode(struct block * buf) {
             start_visualmode(currow, curcol, currow, curcol);
             break;
 
+        // INPUT COMMANDS
+        case '=':
+        case '\\':
+        case '<':
+        case '>':
+            if (locked_cell(currow, curcol)) return;
+            insert_edit_submode = buf->value;
+            chg_mode(insert_edit_submode);
+            clr_header(input_win, 0);
+            print_mode(input_win);
+            wrefresh(input_win);
+            inputline_pos = 0;
+            break;
+
+        // EDITION COMMANDS
         // edit cell (v)
         case 'e':
+            if (locked_cell(currow, curcol)) return;
             clr_header(input_win, 0);
             inputline_pos = 0;
             if (start_edit_mode(buf, 'v')) show_header(input_win);
@@ -251,6 +267,7 @@ void do_normalmode(struct block * buf) {
 
         // edit cell (s)
         case 'E':
+            if (locked_cell(currow, curcol)) return;
             clr_header(input_win, 0);
             inputline_pos = 0;
             if (start_edit_mode(buf, 's')) show_header(input_win);
@@ -263,19 +280,6 @@ void do_normalmode(struct block * buf) {
             }
             break;
 
-        case '=':
-        case '\\':
-        case '<':
-        case '>':
-            insert_edit_submode = buf->value;
-            chg_mode(insert_edit_submode);
-            clr_header(input_win, 0);
-            print_mode(input_win);
-            wrefresh(input_win);
-            inputline_pos = 0;
-            break;
-
-        // EDITION COMMANDS
         // del current cell or range
         case 'x': 
             del_selected_cells();
@@ -374,47 +378,50 @@ void do_normalmode(struct block * buf) {
         // shift range or cell
         case 's':
             {
-            struct srange * sr;
-            struct srange * srn = NULL;
-            int p = is_range_selected();
-            if (p != -1) sr = get_range_by_pos(p);
-            else {
-                srn = create_custom_range(currow, curcol, currow, curcol);
-                sr = srn;
+            int p, r = currow, c = curcol, rf = currow, cf = curcol;
+            if ( (p = is_range_selected()) != -1) {
+                struct srange * sr = get_range_by_pos(p);
+                r = sr->tlrow;
+                c = sr->tlcol;
+                rf = sr->brrow;
+                cf = sr->brcol;
+            }
+            if ( any_locked_cells(r, c, rf, cf) && (buf->pnext->value == 'h' || buf->pnext->value == 'k') ) {
+                error("Locked cells encountered. Nothing changed");           
+                return;
             }
             create_undo_action();
             int ic = cmd_multiplier + 1;
             switch (buf->pnext->value) {
                 case 'j':
-                    fix_marks(  sr->brrow - sr->tlrow + 1  , 0, sr->tlrow, maxrow, sr->tlcol, sr->brcol);
-                    save_undo_range_shift(sr->brrow - sr->tlrow + 1, 0   , sr->tlrow, sr->tlcol, sr->brrow, sr->brcol);
-                    shift_range(sr->brrow - sr->tlrow + 1, 0             , sr->tlrow, sr->tlcol, sr->brrow, sr->brcol);
+                    fix_marks(  rf - r + 1  , 0, r, maxrow, c, cf);
+                    save_undo_range_shift(rf - r + 1, 0   , r, c, rf, cf);
+                    shift_range(rf - r + 1, 0             , r, c, rf, cf);
                     break;
                 case 'k':
-                    fix_marks( -(sr->brrow - sr->tlrow + 1), 0, sr->tlrow, maxrow, sr->tlcol, sr->brcol);
-                    yank_area(sr->tlrow, sr->tlcol, sr->brrow, sr->brcol, 'a', ic); // keep ents in yanklist for sk
-                    copy_to_undostruct(sr->tlrow, sr->tlcol, sr->brrow, sr->brcol, 'd');
-                    save_undo_range_shift(-(sr->brrow - sr->tlrow + 1), 0, sr->tlrow, sr->tlcol, sr->brrow, sr->brcol);
-                    shift_range(-(sr->brrow - sr->tlrow + 1), 0          , sr->tlrow, sr->tlcol, sr->brrow, sr->brcol);
-                    //copy_to_undostruct(sr->tlrow, sr->tlcol, sr->brrow, sr->brcol, 'a');
+                    fix_marks( -(rf - r + 1), 0, r, maxrow, c, cf);
+                    yank_area(r, c, rf, cf, 'a', ic); // keep ents in yanklist for sk
+                    copy_to_undostruct(r, c, rf, cf, 'd');
+                    save_undo_range_shift(-(rf - r + 1), 0, r, c, rf, cf);
+                    shift_range(-(rf - r + 1), 0          , r, c, rf, cf);
+                    //copy_to_undostruct(r, c, rf, cf, 'a');
                     break;
                 case 'h':
-                    fix_marks(0, -(sr->brcol - sr->tlcol + 1), sr->tlrow, sr->brrow, sr->tlcol, maxcol);
-                    yank_area(sr->tlrow, sr->tlcol, sr->brrow, sr->brcol, 'a', ic); // keep ents in yanklist for sh
-                    copy_to_undostruct(sr->tlrow, sr->tlcol, sr->brrow   , sr->brcol, 'd');
-                    save_undo_range_shift(0, -(sr->brcol - sr->tlcol + 1), sr->tlrow, sr->tlcol, sr->brrow, sr->brcol);
-                    shift_range(0, - (sr->brcol - sr->tlcol + 1)         , sr->tlrow, sr->tlcol, sr->brrow, sr->brcol);
-                    //copy_to_undostruct(sr->tlrow, sr->tlcol, sr->brrow   , sr->brcol, 'a');
+                    fix_marks(0, -(cf - c + 1), r, rf, c, maxcol);
+                    yank_area(r, c, rf, cf, 'a', ic); // keep ents in yanklist for sh
+                    copy_to_undostruct(r, c, rf, cf, 'd');
+                    save_undo_range_shift(0, -(cf - c + 1), r, c, rf, cf);
+                    shift_range(0, - (cf - c + 1)         , r, c, rf, cf);
+                    //copy_to_undostruct(r, c, rf   , cf, 'a');
                     break;
                 case 'l':
-                    fix_marks(0, sr->brcol - sr->tlcol + 1, sr->tlrow, sr->brrow, sr->tlcol, maxcol);
-                    save_undo_range_shift(0, sr->brcol - sr->tlcol + 1   , sr->tlrow, sr->tlcol, sr->brrow, sr->brcol);
-                    shift_range(0, sr->brcol - sr->tlcol + 1             , sr->tlrow, sr->tlcol, sr->brrow, sr->brcol);
+                    fix_marks(0, cf - c + 1, r, rf, c, maxcol);
+                    save_undo_range_shift(0, cf - c + 1   , r, c, rf, cf);
+                    shift_range(0, cf - c + 1             , r, c, rf, cf);
                     break;
             }
-            if (cmd_multiplier > 0) cmd_multiplier = 0;
             end_undo_action();
-            if (srn != NULL) free_custom_range(srn);
+            cmd_multiplier = 0;
             unselect_ranges();
             update();
             break;
@@ -427,6 +434,10 @@ void do_normalmode(struct block * buf) {
             int ic = cmd_multiplier + 1;
 
             if (buf->pnext->value == 'r') {
+                if (any_locked_cells(currow, 0, currow + cmd_multiplier, maxcol)) {
+                    error("Locked cells encountered. Nothing changed");           
+                    return;
+                }
                 create_undo_action();
                 copy_to_undostruct(currow, 0, currow - 1 + ic, maxcol, 'd');
                 save_undo_range_shift(-ic, 0, currow, 0, currow -1 + ic, maxcol);
@@ -438,6 +449,10 @@ void do_normalmode(struct block * buf) {
                 end_undo_action();
 
             } else if (buf->pnext->value == 'c') {
+                if (any_locked_cells(0, curcol, maxrow, curcol + cmd_multiplier)) {
+                    error("Locked cells encountered. Nothing changed");           
+                    return;
+                }
                 create_undo_action();
                 copy_to_undostruct(0, curcol, maxrow, curcol - 1 + ic, 'd');
                 save_undo_range_shift(0, -ic, 0, curcol, maxrow, curcol - 1 + ic);
@@ -638,6 +653,10 @@ void do_normalmode(struct block * buf) {
                 rf = sr->brrow;
                 cf = sr->brcol;
             }
+            if (any_locked_cells(r, c, rf, cf)) {
+                error("Locked cells encountered. Nothing changed");           
+                return;
+            }
             create_undo_action();
             if (buf->value == '{')      sprintf(interp_line, "leftjustify %s", v_name(r, c));
             else if (buf->value == '}') sprintf(interp_line, "rightjustify %s", v_name(r, c));
@@ -669,12 +688,10 @@ void do_normalmode(struct block * buf) {
             update();
             break;
  
-        // increase or decrease numeric value of cell
+        // increase or decrease numeric value of cell or range
         case '-':
         case '+':
             {
-            if (atoi(get_conf_value("numeric")) == 1) goto numeric;
-            struct ent * p;
             int r, c, tlrow = currow, tlcol = curcol, brrow = currow, brcol = curcol;
             if ( is_range_selected() != -1 ) {
                 struct srange * sr = get_selected_range();
@@ -687,6 +704,8 @@ void do_normalmode(struct block * buf) {
                 error("Locked cells encountered. Nothing changed");           
                 return;
             }
+            if (atoi(get_conf_value("numeric")) == 1) goto numeric;
+            struct ent * p;
             create_undo_action();
             int arg = cmd_multiplier + 1;
             int mf = modflg; // keep original modflg

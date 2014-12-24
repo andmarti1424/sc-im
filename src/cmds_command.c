@@ -259,7 +259,6 @@ void do_commandmode(struct block * sb) {
             send_to_interp(interp_line);
 
         } else if ( strncmp(inputline, "format ", 7) == 0 ) {
-            create_undo_action();
             int r = currow, c = curcol, rf = currow, cf = curcol;
             if (p != -1) {
                 c = sr->tlcol;
@@ -270,9 +269,15 @@ void do_commandmode(struct block * sb) {
                 sprintf(interp_line, "%s%s%d", interp_line, coltoa(cf), rf);
             } else
                 sprintf(interp_line, "fmt %s%d", coltoa(c), r);
+
+            if (any_locked_cells(r, c, rf, cf)) {
+                error("Locked cells encountered. Nothing changed");           
+                return;
+            }
             int l = strlen(interp_line);
             sprintf(interp_line, "%s %s", interp_line, inputline);
             del_range_chars(interp_line, l, l + 6);
+            create_undo_action();
             copy_to_undostruct(r, c, rf, cf, 'd');
             send_to_interp(interp_line);
             copy_to_undostruct(r, c, rf, cf, 'a');

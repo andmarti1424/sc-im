@@ -915,6 +915,10 @@ void del_selected_cells() {
     // delete range
     if (is_range_selected() != -1) {
        srange * r = get_selected_range();
+       if (any_locked_cells(r->tlrow, r->tlcol, r->brrow, r->brcol)) {
+           error("Locked cells encountered. Nothing changed");           
+           return;
+       }
        yank_area(r->tlrow, r->tlcol, r->brrow, r->brcol, 'a', 1);
 
        create_undo_action();
@@ -930,6 +934,10 @@ void del_selected_cells() {
 
     // delete cell
     } else {
+       if (any_locked_cells(currow, curcol, currow, curcol)) {
+           error("Locked cells encountered. Nothing changed");           
+           return;
+       }
        yank_area(currow, curcol, currow, curcol, 'e', 1);
 
        create_undo_action();

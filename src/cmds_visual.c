@@ -240,6 +240,10 @@ void do_visualmode(struct block * sb) {
 
     // left / right / center align
     } else if (sb->value == '{' || sb->value == '}' || sb->value == '|') {
+        if (any_locked_cells(r->tlrow, r->tlcol, r->brrow, r->brcol)) {
+            error("Locked cells encountered. Nothing changed");           
+            return;
+        }
         char interp_line[100];
         if (sb->value == '{')      sprintf(interp_line, "leftjustify %s", v_name(r->tlrow, r->tlcol));
         else if (sb->value == '}') sprintf(interp_line, "rightjustify %s", v_name(r->tlrow, r->tlcol));
@@ -277,11 +281,16 @@ void do_visualmode(struct block * sb) {
 
     // shift range
     } else if (sb->value == 's') {
-        create_undo_action();
         int ic = cmd_multiplier + 1;
+        if ( any_locked_cells(r->tlrow, r->tlcol, r->brrow, r->brcol) &&
+           (buf->pnext->value == 'h' || buf->pnext->value == 'k') ) {
+            error("Locked cells encountered. Nothing changed");           
+            return;
+        }
+        create_undo_action();
         switch (sb->pnext->value) {
             case 'j':
-                fix_marks(  r->brrow - r->tlrow + 1  , 0           , r->tlrow, maxrow, r->tlcol, r->brcol);
+                fix_marks(  r->brrow - r->tlrow + 1  , 0           , r->tlrow, maxrow,   r->tlcol, r->brcol);
                 save_undo_range_shift(r->brrow - r->tlrow + 1, 0   , r->tlrow, r->tlcol, r->brrow, r->brcol);
                 shift_range(r->brrow - r->tlrow + 1, 0             , r->tlrow, r->tlcol, r->brrow, r->brcol);
                 break;
@@ -307,7 +316,7 @@ void do_visualmode(struct block * sb) {
                 shift_range(0, r->brcol - r->tlcol + 1             , r->tlrow, r->tlcol, r->brrow, r->brcol);
                 break;
         }
-        if (cmd_multiplier > 0) cmd_multiplier = 0;
+        cmd_multiplier = 0;
         end_undo_action();
         exit_visualmode();
         curmode = NORMAL_MODE;
