@@ -283,7 +283,7 @@ void do_visualmode(struct block * sb) {
     } else if (sb->value == 's') {
         int ic = cmd_multiplier + 1;
         if ( any_locked_cells(r->tlrow, r->tlcol, r->brrow, r->brcol) &&
-           (buf->pnext->value == 'h' || buf->pnext->value == 'k') ) {
+           (sb->pnext->value == 'h' || sb->pnext->value == 'k') ) {
             error("Locked cells encountered. Nothing changed");           
             return;
         }
