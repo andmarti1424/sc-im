@@ -45,6 +45,7 @@
 #include "range.h"
 #include "xmalloc.h" // for scxfree
 #include "lex.h"     // for atocol
+#include "undo.h"
 
 #ifndef MSDOS
 #include <unistd.h>
@@ -2019,11 +2020,15 @@ void lock_cells(struct ent *v1, struct ent *v2) {
     if (minr < 0) minr = 0;
     if (minc < 0) minc = 0;
 
+    create_undo_action();
     for (r = minr; r <= maxr; r++)
         for (c = minc; c <= maxc; c++) {
             n = lookat(r, c);
+            if (! loading) copy_to_undostruct(r, c, r, c, 'd');
             n->flags |= is_locked;
+            if (! loading) copy_to_undostruct(r, c, r, c, 'a');
         }
+    end_undo_action();            
 }
 
 /* unlock a range of cells */
@@ -2043,11 +2048,15 @@ void unlock_cells(struct ent *v1, struct ent *v2) {
     if (minr < 0) minr = 0;
     if (minc < 0) minc = 0;
 
+    create_undo_action();
     for (r = minr; r <= maxr; r++)
         for (c = minc; c <= maxc; c++) {
             n = lookat(r, c);
+            if (! loading) copy_to_undostruct(r, c, r, c, 'd');
             n->flags &= ~is_locked;
+            if (! loading) copy_to_undostruct(r, c, r, c, 'a');
         }
+    end_undo_action();            
 }
 
 /* set the numeric part of a cell */
