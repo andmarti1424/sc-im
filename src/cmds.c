@@ -1622,6 +1622,8 @@ int is_single_command (struct block * buf, long timeout) {
         } else if ((buf->value == 'Z' && ( buf->pnext->value == 'r' || buf->pnext->value == 'c' )) ||
              (buf->value == 'S' && ( buf->pnext->value == 'r' || buf->pnext->value == 'c' )) ) {
             res = EDITION_CMD;
+        } else if (buf->value == 'r' && ( buf->pnext->value == 'l' || buf->pnext->value == 'u' )) {
+            res = EDITION_CMD;
         }
     }
 

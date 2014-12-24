@@ -13,6 +13,7 @@
 #include "shift.h"
 #include "yank.h"
 #include "history.h"
+#include "interp.h"
 
 extern int offscr_sc_rows, offscr_sc_cols;
 extern unsigned int curmode;
@@ -57,13 +58,13 @@ void exit_visualmode() {
     return;
 }
 
-void do_visualmode(struct block * sb) {
+void do_visualmode(struct block * buf) {
     
     // MOVEMENT COMMANDS
     // UP - ctl(b)
-    if (sb->value == OKEY_UP || sb->value == 'k' || sb->value == ctl('b') ) {
+    if (buf->value == OKEY_UP || buf->value == 'k' || buf->value == ctl('b') ) {
         int n, i;
-        if (sb->value == ctl('b')) { 
+        if (buf->value == ctl('b')) { 
             n = LINES - RESROW - 1;
             if (get_conf_value("half_page_scroll")) n = n / 2;
         } else n = 1;
@@ -78,9 +79,9 @@ void do_visualmode(struct block * sb) {
             }
 
     // DOWN - ctl('f')
-    } else if (sb->value == OKEY_DOWN || sb->value == 'j' || sb->value == ctl('f')) {
+    } else if (buf->value == OKEY_DOWN || buf->value == 'j' || buf->value == ctl('f')) {
         int n, i;
-        if (sb->value == ctl('f')) { 
+        if (buf->value == ctl('f')) { 
             n = LINES - RESROW - 1;
             if (get_conf_value("half_page_scroll")) n = n / 2;
         } else n = 1;
@@ -95,7 +96,7 @@ void do_visualmode(struct block * sb) {
             }
 
     // LEFT
-    } else if (sb->value == OKEY_LEFT || sb->value == 'h') {
+    } else if (buf->value == OKEY_LEFT || buf->value == 'h') {
         if (r->orig_col < r->brcol && r->tlcol < r->brcol) {
             while (col_hidden[-- r->brcol]);
             curcol = r->brcol;
@@ -105,7 +106,7 @@ void do_visualmode(struct block * sb) {
         }
 
     // RIGHT
-    } else if (sb->value == OKEY_RIGHT || sb->value == 'l') {
+    } else if (buf->value == OKEY_RIGHT || buf->value == 'l') {
         if (r->orig_col <= r->tlcol && r->tlcol <= r->brcol && r->brcol+2 < maxcols) {
             while (col_hidden[++ r->brcol]);
             curcol = r->brcol;
@@ -115,33 +116,33 @@ void do_visualmode(struct block * sb) {
         }
 
     // 0
-    } else if (sb->value == '0') {
+    } else if (buf->value == '0') {
         r->brcol = r->tlcol;
         r->tlcol = left_limit()->col;
         curcol = r->tlcol;
 
     // $
-    } else if (sb->value == '$') {
+    } else if (buf->value == '$') {
         int s = right_limit()->col;
         r->tlcol = r->brcol;
         r->brcol = r->brcol > s ? r->brcol : s;
         curcol = r->brcol;
 
     // ^
-    } else if (sb->value == '^') {
+    } else if (buf->value == '^') {
         r->brrow = r->tlrow;
         r->tlrow = goto_top()->row;
         currow = r->tlrow;         
 
     // #
-    } else if (sb->value == '#') {
+    } else if (buf->value == '#') {
         int s = goto_bottom()->row;
         r->tlrow = r->brrow;
         r->brrow = r->brrow > s ? r->brrow : s;
         currow = r->brrow;         
 
     // ctl(a)
-    } else if (sb->value == ctl('a')) {
+    } else if (buf->value == ctl('a')) {
         if (r->tlrow == 0 && r->tlcol == 0) return;
         struct ent * e = go_home();
         r->tlrow = e->row;
@@ -152,7 +153,7 @@ void do_visualmode(struct block * sb) {
         curcol = r->tlcol;
 
     // G
-    } else if (sb->value == 'G') {
+    } else if (buf->value == 'G') {
         struct ent * e = go_end();
         r->tlrow = r->orig_row;
         r->tlcol = r->orig_col;
@@ -162,11 +163,11 @@ void do_visualmode(struct block * sb) {
         curcol = r->tlcol;
 
     // '
-    } else if (sb->value == '\'') {
+    } else if (buf->value == '\'') {
         // if we receive a mark of a range, just return.
-        if (get_mark(sb->pnext->value)->row == -1) return;
+        if (get_mark(buf->pnext->value)->row == -1) return;
 
-        struct ent * e = tick(sb->pnext->value);
+        struct ent * e = tick(buf->pnext->value);
         if (row_hidden[e->row]) {
             error("Cell row is hidden");
             return;
@@ -180,7 +181,7 @@ void do_visualmode(struct block * sb) {
         r->brcol = r->brcol > e->col ? r->brcol : e->col;
 
     // w
-    } else if (sb->value == 'w') {
+    } else if (buf->value == 'w') {
         struct ent * e = go_forward();  
         if (e->col > r->orig_col) {
             r->brcol = e->col;
@@ -195,7 +196,7 @@ void do_visualmode(struct block * sb) {
         currow = e->row;
 
     // b
-    } else if (sb->value == 'b') {
+    } else if (buf->value == 'b') {
         struct ent * e = go_backward();  
         if (e->col <= r->orig_col) {
             r->tlcol = e->col;
@@ -210,13 +211,13 @@ void do_visualmode(struct block * sb) {
         currow = e->row;
 
     // H
-    } else if (sb->value == 'H') {
+    } else if (buf->value == 'H') {
         r->brrow = r->tlrow;
         r->tlrow = vert_top()->row;
         currow = r->tlrow;
 
     // M
-    } else if (sb->value == 'M') {
+    } else if (buf->value == 'M') {
         r->tlrow = r->orig_row;
         int rm = vert_middle()->row;
         if (r->orig_row < rm) r->brrow = rm;
@@ -224,30 +225,31 @@ void do_visualmode(struct block * sb) {
         currow = r->tlrow;
 
     // L
-    } else if (sb->value == 'L') {
+    } else if (buf->value == 'L') {
         r->tlrow = r->orig_row;
         r->brrow = vert_bottom()->row;
         currow = r->brrow;         
 
     // EDITION COMMANDS
     // yank
-    } else if (sb->value == 'y') {
+    } else if (buf->value == 'y') {
         yank_area(r->tlrow, r->tlcol, r->brrow, r->brcol, 'a', 1);
+
         exit_visualmode();
         curmode = NORMAL_MODE;
         clr_header(input_win, 0);
         show_header(input_win);
 
     // left / right / center align
-    } else if (sb->value == '{' || sb->value == '}' || sb->value == '|') {
+    } else if (buf->value == '{' || buf->value == '}' || buf->value == '|') {
         if (any_locked_cells(r->tlrow, r->tlcol, r->brrow, r->brcol)) {
             error("Locked cells encountered. Nothing changed");           
             return;
         }
         char interp_line[100];
-        if (sb->value == '{')      sprintf(interp_line, "leftjustify %s", v_name(r->tlrow, r->tlcol));
-        else if (sb->value == '}') sprintf(interp_line, "rightjustify %s", v_name(r->tlrow, r->tlcol));
-        else if (sb->value == '|') sprintf(interp_line, "center %s", v_name(r->tlrow, r->tlcol));
+        if (buf->value == '{')      sprintf(interp_line, "leftjustify %s", v_name(r->tlrow, r->tlcol));
+        else if (buf->value == '}') sprintf(interp_line, "rightjustify %s", v_name(r->tlrow, r->tlcol));
+        else if (buf->value == '|') sprintf(interp_line, "center %s", v_name(r->tlrow, r->tlcol));
         sprintf(interp_line, "%s:%s", interp_line, v_name(r->brrow, r->brcol));
         create_undo_action();
         copy_to_undostruct(r->tlrow, r->tlcol, r->brrow, r->brcol, 'd');
@@ -256,39 +258,63 @@ void do_visualmode(struct block * sb) {
         end_undo_action();            
         cmd_multiplier = 0;
 
+        exit_visualmode();
+        curmode = NORMAL_MODE;
+        clr_header(input_win, 0);
+        show_header(input_win);
+
+    // range lock / unlock
+    } else if ( buf->value == 'r' && (buf->pnext->value == 'l' || buf->pnext->value == 'u')) {
+        if (buf->pnext->value == 'l') {
+            lock_cells(lookat(r->tlrow, r->tlcol), lookat(r->brrow, r->brcol));
+        } else if (buf->pnext->value == 'u') {
+            unlock_cells(lookat(r->tlrow, r->tlcol), lookat(r->brrow, r->brcol));
+        }
+        cmd_multiplier = 0;
+
+        exit_visualmode();
+        curmode = NORMAL_MODE;
+        clr_header(input_win, 0);
+        show_header(input_win);
+
     // Zr Zc - Zap col or row
-    } else if ( (sb->value == 'Z' || sb->value == 'S') && (sb->pnext->value == 'c' || sb->pnext->value == 'r')) {
-        int arg = sb->pnext->value == 'r' ? r->brrow - r->tlrow + 1 : r->brcol - r->tlcol + 1;
-        if (sb->value == 'Z' && sb->pnext->value == 'r') {
+    } else if ( (buf->value == 'Z' || buf->value == 'S') && (buf->pnext->value == 'c' || buf->pnext->value == 'r')) {
+        int arg = buf->pnext->value == 'r' ? r->brrow - r->tlrow + 1 : r->brcol - r->tlcol + 1;
+        if (buf->value == 'Z' && buf->pnext->value == 'r') {
             hide_row(r->tlrow, arg);
-        } else if (sb->value == 'Z' && sb->pnext->value == 'c') {
+        } else if (buf->value == 'Z' && buf->pnext->value == 'c') {
             hide_col(r->tlcol, arg);
-        } else if (sb->value == 'S' && sb->pnext->value == 'r') {
+        } else if (buf->value == 'S' && buf->pnext->value == 'r') {
             show_row(r->tlrow, arg);
-        } else if (sb->value == 'S' && sb->pnext->value == 'c') {
+        } else if (buf->value == 'S' && buf->pnext->value == 'c') {
             show_col(r->tlcol, arg);
         }
         cmd_multiplier = 0;
+
         exit_visualmode();
+        curmode = NORMAL_MODE;
+        clr_header(input_win, 0);
+        show_header(input_win);
 
     // delete selected range
-    } else if (sb->value == 'x' || (sb->value == 'd' && sb->pnext->value == 'd') ) {
+    } else if (buf->value == 'x' || (buf->value == 'd' && buf->pnext->value == 'd') ) {
         del_selected_cells();
+
         exit_visualmode();
         curmode = NORMAL_MODE;
         clr_header(input_win, 0);
         show_header(input_win);
 
     // shift range
-    } else if (sb->value == 's') {
+    } else if (buf->value == 's') {
         int ic = cmd_multiplier + 1;
         if ( any_locked_cells(r->tlrow, r->tlcol, r->brrow, r->brcol) &&
-           (sb->pnext->value == 'h' || sb->pnext->value == 'k') ) {
+           (buf->pnext->value == 'h' || buf->pnext->value == 'k') ) {
             error("Locked cells encountered. Nothing changed");           
             return;
         }
         create_undo_action();
-        switch (sb->pnext->value) {
+        switch (buf->pnext->value) {
             case 'j':
                 fix_marks(  r->brrow - r->tlrow + 1  , 0           , r->tlrow, maxrow,   r->tlcol, r->brcol);
                 save_undo_range_shift(r->brrow - r->tlrow + 1, 0   , r->tlrow, r->tlcol, r->brrow, r->brcol);
@@ -318,12 +344,13 @@ void do_visualmode(struct block * sb) {
         }
         cmd_multiplier = 0;
         end_undo_action();
+
         exit_visualmode();
         curmode = NORMAL_MODE;
         clr_header(input_win, 0);
         show_header(input_win);
 
-    } else if (sb->value == ':') {
+    } else if (buf->value == ':') {
         clr_header(input_win, 0);
         wrefresh(input_win);
         chg_mode(':');
