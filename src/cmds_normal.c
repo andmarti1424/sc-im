@@ -342,8 +342,28 @@ void do_normalmode(struct block * buf) {
             update();
             break;
 
+        // range lock / unlock
+        case 'r':
+            {
+            int p, r = currow, c = curcol, rf = currow, cf = curcol;
+            if ( (p = is_range_selected()) != -1) {
+                struct srange * sr = get_range_by_pos(p);
+                r = sr->tlrow;
+                c = sr->tlcol;
+                rf = sr->brrow;
+                cf = sr->brcol;
+            }
+            if (buf->pnext->value == 'l') {
+                lock_cells(lookat(r, c), lookat(rf, cf));
+            } else if (buf->pnext->value == 'u') {
+                unlock_cells(lookat(r, c), lookat(rf, cf));
+            }
+            update();
+            break;
+            }
+
         // create range with two marks
-        case 'r':  
+        case 'R':  
             if (bs == 3) {
                 create_range(buf->pnext->value, buf->pnext->pnext->value);
                 update();
@@ -353,7 +373,8 @@ void do_normalmode(struct block * buf) {
         // Zr Zc - Zap col or row - Show col or row - Sr Sc
         case 'Z':
         case 'S':
-            ; int rs, r = currow, c = curcol, arg = cmd_multiplier + 1;
+            {
+            int rs, r = currow, c = curcol, arg = cmd_multiplier + 1;
             struct srange * sr;
             if ( (rs = is_range_selected()) != -1) {
                 sr = get_range_by_pos(rs);
@@ -374,6 +395,7 @@ void do_normalmode(struct block * buf) {
             cmd_multiplier = 0;
             update();
             break;
+            }
 
         // shift range or cell
         case 's':

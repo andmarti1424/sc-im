@@ -83,36 +83,36 @@ struct go_save gs;
 #define ISVALID(r,c)    ((r)>=0 && (r)<maxrows && (c)>=0 && (c)<maxcols)
 
 jmp_buf fpe_save;
-int    exprerr;           /* Set by eval() and seval() if expression errors */
-double  prescale = 1.0;   /* Prescale for constants in let() */
-int    extfunc  = 0;      /* Enable/disable external functions */
-int     loading = 0;      /* Set when readfile() is active */
-int    gmyrow, gmycol;    /* globals used to implement @myrow, @mycol cmds */
-int    rowoffset = 0, coloffset = 0;    /* row & col offsets for range functions */
+int exprerr;           /* Set by eval() and seval() if expression errors */
+double prescale = 1.0;   /* Prescale for constants in let() */
+int extfunc  = 0;      /* Enable/disable external functions */
+int loading = 0;      /* Set when readfile() is active */
+int gmyrow, gmycol;    /* globals used to implement @myrow, @mycol cmds */
+int rowoffset = 0, coloffset = 0;    /* row & col offsets for range functions */
 
 extern bool decimal;      /* Set if there was a decimal point in the number */
 
 /* a linked list of free [struct enodes]'s, uses .e.o.left as the pointer */
 //struct enode *freeenodes = NULL;
 
-double    dolookup(struct enode * val, int minr, int minc, int maxr, int maxc, int offr, int offc);
-double    fn1_eval(double (*fn)(), double arg);
-double    fn2_eval(double (*fn)(), double arg1, double arg2);
-int    RealEvalAll();
-int    constant(register struct enode *e);
-void    RealEvalOne(register struct ent *p, int i, int j, int *chgct);
-void    copydbuf(int deltar, int deltac);
-void    decompile(register struct enode *e, int    priority);
-void    index_arg(char *s, struct enode *e);
-void    list_arg(char *s, struct enode *e);
-void    one_arg(char *s, struct enode *e);
-void    range_arg(char *s, struct enode *e);
-void    three_arg(char *s, struct enode *e);
-void    two_arg(char *s, struct enode *e);
-void    two_arg_index(char *s, struct enode *e);
+double dolookup(struct enode * val, int minr, int minc, int maxr, int maxc, int offr, int offc);
+double fn1_eval(double (*fn)(), double arg);
+double fn2_eval(double (*fn)(), double arg1, double arg2);
+int RealEvalAll();
+int constant(register struct enode *e);
+void RealEvalOne(register struct ent *p, int i, int j, int *chgct);
+void copydbuf(int deltar, int deltac);
+void decompile(register struct enode *e, int    priority);
+void index_arg(char *s, struct enode *e);
+void list_arg(char *s, struct enode *e);
+void one_arg(char *s, struct enode *e);
+void range_arg(char *s, struct enode *e);
+void three_arg(char *s, struct enode *e);
+void two_arg(char *s, struct enode *e);
+void two_arg_index(char *s, struct enode *e);
 
-double    rint(double d);
-int    cellerror = CELLOK;    /* is there an error in this cell */
+double rint(double d);
+int cellerror = CELLOK;    /* is there an error in this cell */
 
 #ifndef M_PI
 #define M_PI (double)3.14159265358979323846
@@ -2024,9 +2024,9 @@ void lock_cells(struct ent *v1, struct ent *v2) {
     for (r = minr; r <= maxr; r++)
         for (c = minc; c <= maxc; c++) {
             n = lookat(r, c);
-            if (! loading) copy_to_undostruct(r, c, r, c, 'd');
+            copy_to_undostruct(r, c, r, c, 'd');
             n->flags |= is_locked;
-            if (! loading) copy_to_undostruct(r, c, r, c, 'a');
+            copy_to_undostruct(r, c, r, c, 'a');
         }
     end_undo_action();            
 }
@@ -2052,9 +2052,9 @@ void unlock_cells(struct ent *v1, struct ent *v2) {
     for (r = minr; r <= maxr; r++)
         for (c = minc; c <= maxc; c++) {
             n = lookat(r, c);
-            if (! loading) copy_to_undostruct(r, c, r, c, 'd');
+            copy_to_undostruct(r, c, r, c, 'd');
             n->flags &= ~is_locked;
-            if (! loading) copy_to_undostruct(r, c, r, c, 'a');
+            copy_to_undostruct(r, c, r, c, 'a');
         }
     end_undo_action();            
 }

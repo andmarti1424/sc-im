@@ -32,3 +32,4 @@ void do_redo();
 void clear_undo_list ();
 void clear_from_here();
 int len_undo_list();
+void free_undo_node(struct undo * ul);

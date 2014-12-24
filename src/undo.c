@@ -55,6 +55,7 @@ Acciones cuyo UNDO/REDO se encuentra implementado:
 11. order of a range
 12. change in the format of a range or cell
 13. '-' and '+' commands in normal mode
+14. lock and unlock of cells
 
 NOT implemented:
 1. cambio de formato de columna completa
@@ -105,11 +106,18 @@ void create_undo_action() {
 // undo_item con los datos de ents agregados o quitados
 // y de undo range shift struct
 void end_undo_action() {
-    if (undo_item.added       == NULL &&
+    add_to_undolist(undo_item);
+
+    // in case we need to dismissed this undo_item!
+    if ((undo_item.added      == NULL &&
         undo_item.removed     == NULL && undo_item.range_shift == NULL &&
         undo_item.row_hidded  == NULL && undo_item.row_showed  == NULL &&
-        undo_item.col_hidded  == NULL && undo_item.col_showed  == NULL) return; // dismissed this undo_item!
-    add_to_undolist(undo_item);
+        undo_item.col_hidded  == NULL && undo_item.col_showed  == NULL) || loading) {
+        if (undo_list->p_ant != NULL) undo_list = undo_list->p_ant;
+        undo_list_pos--;
+        clear_from_here();
+    }
+
     return;
 }
 

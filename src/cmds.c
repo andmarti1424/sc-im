@@ -1585,7 +1585,10 @@ int is_single_command (struct block * buf, long timeout) {
         else if (buf->value == 'd' && bs == 2 &&    // Delete row or column
             ( buf->pnext->value == 'r' || buf->pnext->value == 'c' )) res = EDITION_CMD;
 
-        else if (buf->value == 'r' && bs == 3 &&    // Create range with two marks
+        else if (buf->value == 'r' && bs == 2 &&    // range lock / unlock
+            ( buf->pnext->value == 'l' || buf->pnext->value == 'u' )) res = EDITION_CMD;
+
+        else if (buf->value == 'R' && bs == 3 &&    // Create range with two marks
             //  FIXME add validation
             ((buf->pnext->value - ('a' - 1)) < 1 || buf->pnext->value > 26) &&
             ((buf->pnext->pnext->value - ('a' - 1)) < 1 || buf->pnext->pnext->value > 26)) res = EDITION_CMD;
