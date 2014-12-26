@@ -33,9 +33,7 @@ void create_range(char c, char d) {
     srange * exists_range = get_range_by_marks (c, d);
 
     // Si no existe, lo creo
-    srange * r;
-    if (exists_range == NULL) r = (srange *) malloc (sizeof(srange));
-    else r = exists_range;
+    srange * r = exists_range != NULL ? exists_range : (srange *) malloc (sizeof(srange));
 
     r->tlrow = mc->row < md->row ? mc->row : md->row;
     r->tlcol = mc->col < md->col ? mc->col : md->col;
@@ -51,12 +49,11 @@ void create_range(char c, char d) {
     r->selected = 1;
     currow = r->tlrow;
     curcol = r->tlcol;
-    //currow = r->brrow;
-    //curcol = r->brcol;
 
     // Only add to list if it was created a new range
-    if (exists_range == NULL && ranges == NULL) ranges = r;
-    else if (exists_range == NULL) {
+    if (exists_range == NULL && ranges == NULL) {
+        ranges = r;
+    } else if (exists_range == NULL) {
         // ADD new range at beginning of list
         r->pnext = ranges;
         ranges = r;
@@ -147,11 +144,12 @@ void del_ranges_by_mark (char c) {
         if ( ( r->marks[0] == c || r->marks[1] == c ) ) {
             ant->pnext = r->pnext;
             free(r);
+            r = ant->pnext;
+            continue;
         }
         ant = r;
         r = r->pnext;
     }
-
     return;
 }
 

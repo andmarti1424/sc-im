@@ -1501,7 +1501,13 @@ int is_single_command (struct block * buf, long timeout) {
     int res = NO_CMD;
     int bs = get_bufsize(buf);
 
-    if (curmode == COMMAND_MODE) {
+    if (curmode == COMMAND_MODE && bs == 1 &&
+    buf->value != ctl('r')) {
+        res = MOVEMENT_CMD;
+
+    } else if ( curmode == COMMAND_MODE && bs == 2 && buf->value == ctl('r') &&
+        (buf->pnext->value - ('a' - 1) < 1 || buf->pnext->value > 26)
+    ) {
         res = MOVEMENT_CMD;
 
     } else if (curmode == INSERT_MODE) {
@@ -1666,6 +1672,9 @@ int is_single_command (struct block * buf, long timeout) {
         } else if (buf->value == 'r' && ( buf->pnext->value == 'l' || buf->pnext->value == 'u' ||
               buf->pnext->value == 'v' )) {
             res = EDITION_CMD;
+        } else if (buf->value == 'm' && // mark
+            ((buf->pnext->value - ('a' - 1)) < 1 || buf->pnext->value > 26)) {
+            res = MOVEMENT_CMD;
         }
     }
     return res;

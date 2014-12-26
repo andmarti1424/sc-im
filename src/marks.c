@@ -4,9 +4,9 @@
 static struct mark * marks;
 
 // 'a' - 'z' = 26
-// TODO: deben poder marcarse 0-9 (para exportación)
+// '0' - '1' = 10
 void create_mark_array() {
-    marks = (struct mark *) calloc( 26, sizeof(struct mark) );
+    marks = (struct mark *) calloc( 128, sizeof(struct mark) );
     return;
 }
 
@@ -17,13 +17,13 @@ void free_marks_array() {
 
 // 'a' = 97
 struct mark * get_mark(char c) {
-    return (marks + c - 97);
+    return (marks + c);
 }
 
 void set_range_mark(char c, struct srange * s) {
-    (marks + c - 97)->rng = s;
-    (marks + c - 97)->row = -1;
-    (marks + c - 97)->col = -1;
+    (marks + c)->rng = s;
+    (marks + c)->row = -1;
+    (marks + c)->col = -1;
     return;
 }
 
@@ -31,8 +31,8 @@ void set_cell_mark(char c, int row, int col) {
     // Al grabar una marca borro los rangos que utilizaban esa marca !!
     del_ranges_by_mark(c);
 
-    (marks + c - 97)->row = row;
-    (marks + c - 97)->col = col;
+    (marks + c)->row = row;
+    (marks + c)->col = col;
 
     return;
 }

@@ -230,6 +230,20 @@ void do_visualmode(struct block * buf) {
         r->brrow = vert_bottom()->row;
         currow = r->brrow;         
 
+    // mark a range
+    } else if (buf->value == 'm' && get_bufsize(buf) == 2) {
+        set_cell_mark('0', r->tlrow, r->tlcol);
+        set_cell_mark('1', r->brrow, r->brcol);
+        create_range('0', '1');
+        unselect_ranges();
+        srange * sr = (srange *) get_range_by_marks('0', '1');
+        set_range_mark(buf->pnext->value, sr);
+
+        exit_visualmode();
+        curmode = NORMAL_MODE;
+        clr_header(input_win, 0);
+        show_header(input_win);
+
     // EDITION COMMANDS
     // yank
     } else if (buf->value == 'y') {
