@@ -342,7 +342,7 @@ void do_normalmode(struct block * buf) {
             update();
             break;
 
-        // range lock / unlock
+        // range lock / unlock / valueize
         case 'r':
             {
             int p, r = currow, c = curcol, rf = currow, cf = curcol;
@@ -357,6 +357,8 @@ void do_normalmode(struct block * buf) {
                 lock_cells(lookat(r, c), lookat(rf, cf));
             } else if (buf->pnext->value == 'u') {
                 unlock_cells(lookat(r, c), lookat(rf, cf));
+            } else if (buf->pnext->value == 'v') {
+                valueize_area(r, c, rf, cf);
             }
             update();
             break;

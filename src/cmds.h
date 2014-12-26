@@ -58,3 +58,4 @@ void doformat(int c1, int c2, int w, int p, int r);
 struct enode;
 int etype(register struct enode *e);
 void erase_area(int sr, int sc, int er, int ec, int ignorelock);
+void valueize_area(int sr, int sc, int er, int ec);

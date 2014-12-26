@@ -263,12 +263,15 @@ void do_visualmode(struct block * buf) {
         clr_header(input_win, 0);
         show_header(input_win);
 
-    // range lock / unlock
-    } else if ( buf->value == 'r' && (buf->pnext->value == 'l' || buf->pnext->value == 'u')) {
+    // range lock / unlock // valueize
+    } else if ( buf->value == 'r' && (buf->pnext->value == 'l' || buf->pnext->value == 'u' ||
+            buf->pnext->value == 'v' )) {
         if (buf->pnext->value == 'l') {
             lock_cells(lookat(r->tlrow, r->tlcol), lookat(r->brrow, r->brcol));
         } else if (buf->pnext->value == 'u') {
             unlock_cells(lookat(r->tlrow, r->tlcol), lookat(r->brrow, r->brcol));
+        } else if (buf->pnext->value == 'v') {
+            valueize_area(r->tlrow, r->tlcol, r->brrow, r->brcol);
         }
         cmd_multiplier = 0;
 

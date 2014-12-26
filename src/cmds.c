@@ -15,8 +15,7 @@
 #include "utils/string.h" // for add_char
 #include "y.tab.h"   // for yyparse
 
-void    syncref(register struct enode *e);
-
+void syncref(register struct enode *e);
 extern unsigned int shall_quit;
 char insert_edit_submode;
 struct ent * freeents = NULL; // keep deleted ents around before sync_refs
@@ -1386,8 +1385,50 @@ struct ent * horiz_middle() {
     return NULL;
 }
 
-void select_inner_range(int * vir_tlrow, int * vir_tlcol, int * vir_brrow, int * vir_brcol) {
+/*
+ * deletes the expression associated w/ a cell and turns it into a constant
+ * containing whatever was on the screen
+ */
+void valueize_area(int sr, int sc, int er, int ec) {
+    int r, c;
+    struct ent *p;
 
+    if (sr > er) {
+        r = sr; sr = er; er= r;
+    }
+
+    if (sc > ec) {
+        c = sc; sc = ec; ec= c;
+    }
+
+    if (sr < 0)
+        sr = 0; 
+    if (sc < 0)
+        sc = 0;
+    checkbounds(&er, &ec);
+
+    create_undo_action();
+    for (r = sr; r <= er; r++) {
+        for (c = sc; c <= ec; c++) {
+            p = *ATBL(tbl, r, c);
+            if (p && p->flags&is_locked) {
+                error(" Cell %s%d is locked", coltoa(c), r);
+                continue;
+            }
+            copy_to_undostruct(r, c, r, c, 'd');
+            if (p && p->expr) {
+                efree(p->expr);
+                p->expr = (struct enode *)0;
+                p->flags &= ~is_strexpr;
+            }
+            copy_to_undostruct(r, c, r, c, 'a');
+        }
+    }
+    end_undo_action();            
+    return;
+}
+
+void select_inner_range(int * vir_tlrow, int * vir_tlcol, int * vir_brrow, int * vir_brcol) {
     struct ent * p;
     int rr, cc, r, c, mf = 1;
    
@@ -1422,7 +1463,6 @@ void select_inner_range(int * vir_tlrow, int * vir_tlcol, int * vir_brrow, int *
             if (mf) break;
         } // rr
     }
-
     return;
 }
 
@@ -1585,8 +1625,9 @@ int is_single_command (struct block * buf, long timeout) {
         else if (buf->value == 'd' && bs == 2 &&    // Delete row or column
             ( buf->pnext->value == 'r' || buf->pnext->value == 'c' )) res = EDITION_CMD;
 
-        else if (buf->value == 'r' && bs == 2 &&    // range lock / unlock
-            ( buf->pnext->value == 'l' || buf->pnext->value == 'u' )) res = EDITION_CMD;
+        else if (buf->value == 'r' && bs == 2 &&    // range lock / unlock / valueize
+            ( buf->pnext->value == 'l' || buf->pnext->value == 'u' ||
+              buf->pnext->value == 'v' )) res = EDITION_CMD;
 
         else if (buf->value == 'R' && bs == 3 &&    // Create range with two marks
             //  FIXME add validation
@@ -1622,10 +1663,10 @@ int is_single_command (struct block * buf, long timeout) {
         } else if ((buf->value == 'Z' && ( buf->pnext->value == 'r' || buf->pnext->value == 'c' )) ||
              (buf->value == 'S' && ( buf->pnext->value == 'r' || buf->pnext->value == 'c' )) ) {
             res = EDITION_CMD;
-        } else if (buf->value == 'r' && ( buf->pnext->value == 'l' || buf->pnext->value == 'u' )) {
+        } else if (buf->value == 'r' && ( buf->pnext->value == 'l' || buf->pnext->value == 'u' ||
+              buf->pnext->value == 'v' )) {
             res = EDITION_CMD;
         }
     }
-
     return res;
 }

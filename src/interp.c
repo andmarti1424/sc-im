@@ -2003,7 +2003,6 @@ void fill(struct ent *v1, struct ent *v2, double start, double inc) {
 }
 
 /* lock a range of cells */
-
 void lock_cells(struct ent *v1, struct ent *v2) {
     int r, c;
     register struct ent *n;

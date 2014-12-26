@@ -236,7 +236,8 @@ void do_commandmode(struct block * sb) {
             show_row(r, arg);
 
         // range lock / unlock
-        } else if ( strncmp(inputline, "lock", 4) == 0 || strncmp(inputline, "unlock", 6) == 0 ) {
+        } else if ( strncmp(inputline, "lock", 4) == 0 || strncmp(inputline, "unlock", 6) == 0 ||
+                    strncmp(inputline, "valueize", 8) == 0 ) {
             int r = currow, c = curcol, rf = currow, cf = curcol;
             if (p != -1) {
                 c = sr->tlcol;
@@ -245,7 +246,8 @@ void do_commandmode(struct block * sb) {
                 cf = sr->brcol;
             }
             if (strncmp(inputline, "lock", 4) == 0) lock_cells(lookat(r, c), lookat(rf, cf));
-            else unlock_cells(lookat(r, c), lookat(rf, cf));      
+            else if (strncmp(inputline, "unlock", 6) == 0) unlock_cells(lookat(r, c), lookat(rf, cf));      
+            else if (strncmp(inputline, "valueize", 8) == 0) valueize_area(r, c, rf, cf);      
 
         } else if ( strncmp(inputline, "sort ", 5) == 0 ) {
             strcpy(interp_line, inputline);
