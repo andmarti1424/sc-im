@@ -15,7 +15,7 @@ Las mismas contienen
       p_sig: puntero a otra estructura de tipo 'struct undo'. Si es NULL, indica que este nodo
              representa el último cambio, y no hay ningun cambio posterior.
 
-Siguiendo un esquema de UNDO / REDO habitual, si se realiza algún cambio (C1), se hace UNDO
+Sigue un esquema de UNDO / REDO de un único nivel. Si se realiza algún cambio (C1), se hace UNDO
 y si luego se realiza otro cambio (C2) a partir de dicha posición, todas las acciones
 posteriores se eliminan.
 Esquema:
@@ -74,7 +74,6 @@ NOT implemented:
 #include "marks.h"
 #include "shift.h"
 
-
 // undolist
 static struct undo * undo_list = NULL;
 
@@ -115,7 +114,7 @@ void end_undo_action() {
         undo_item.col_hidded  == NULL && undo_item.col_showed  == NULL) || loading) {
         if (undo_list->p_ant != NULL) undo_list = undo_list->p_ant;
         undo_list_pos--;
-        clear_from_here();
+        clear_from_current_pos();
     }
 
     return;
@@ -128,7 +127,7 @@ void end_undo_action() {
 void add_to_undolist(struct undo u) {
         // Si no estamos al final de lista, borro desde la posicion al final.
         if ( undo_list != NULL && undo_list_pos != len_undo_list() )
-            clear_from_here();
+            clear_from_current_pos();
 
         struct undo * ul = (struct undo *) malloc (sizeof(struct undo));
         ul->p_sig = NULL;
@@ -200,7 +199,7 @@ void free_undo_node(struct undo * ul) {
 
 // Función que elimina de la lista undolist, los nodos que se encuentran
 // a partir de la posicion actual
-void clear_from_here() {
+void clear_from_current_pos() {
     if (undo_list == NULL) return;
 
     if (undo_list->p_ant == NULL) {
