@@ -145,7 +145,7 @@ char * long_help[] = {
 "                       \"value\" as label content.",
 "                        You can also quote a regular expression, and SCIM will search for",
 "                        a cell containing a string matching the regular expression.",
-"                        You can also search formatted numbers or expressions using regular"
+"                        You can also search formatted numbers or expressions using regular",
 "                        expressions by preceding the opening quotes",
 "                        of  the regular expression with a '#' (for formatted numbers) or",
 "                        a '%' (for expressions). These are handy",
