@@ -33,7 +33,6 @@ void set_cell_mark(char c, int row, int col) {
 
     (marks + c)->row = row;
     (marks + c)->col = col;
-
     return;
 }
 

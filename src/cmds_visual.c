@@ -235,7 +235,7 @@ void do_visualmode(struct block * buf) {
         set_cell_mark('0', r->tlrow, r->tlcol);
         set_cell_mark('1', r->brrow, r->brcol);
         create_range('0', '1');
-        unselect_ranges();
+        //unselect_ranges();
         srange * sr = (srange *) get_range_by_marks('0', '1');
         set_range_mark(buf->pnext->value, sr);
 

@@ -141,7 +141,8 @@ void del_ranges_by_mark (char c) {
     ant = r;
     r = r->pnext;
     while (r != NULL) {
-        if ( ( r->marks[0] == c || r->marks[1] == c ) ) {
+        if ( (r->marks[0] == c || r->marks[1] == c) &&
+              r->marks[0] != '0' && r->marks[1] != '1' ) {
             ant->pnext = r->pnext;
             free(r);
             r = ant->pnext;

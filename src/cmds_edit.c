@@ -8,6 +8,7 @@
 #include "cmds_edit.h"
 #include "utils/string.h"
 #include "interp.h"
+#include "marks.h"
 
 // this macro is used to determinate a word over a WORD
 #define istext(a)    (isalnum(a) || ((a) == '_'))

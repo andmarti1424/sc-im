@@ -126,20 +126,19 @@ void do_commandmode(struct block * sb) {
     } else if (sb->value == ctl('r') && get_bufsize(sb) == 2 && // C-r
         (sb->pnext->value - ('a' - 1) < 1 || sb->pnext->value > 26)) {
         char cline [BUFFERSIZE];
-        int r = get_mark(sb->pnext->value)->row;
+        int i, r = get_mark(sb->pnext->value)->row;
         if (r != -1) {
             sprintf(cline, "%s%d", coltoa(get_mark(sb->pnext->value)->col), r);
         } else {
             sprintf(cline, "%s%d:", coltoa(get_mark(sb->pnext->value)->rng->tlcol), get_mark(sb->pnext->value)->rng->tlrow);
             sprintf(cline, "%s%s%d", cline, coltoa(get_mark(sb->pnext->value)->rng->brcol), get_mark(sb->pnext->value)->rng->brrow);
         }
-        strcat(inputline, cline);
-        if (inputline_pos + strlen(cline) <= strlen(inputline)) inputline_pos += strlen(cline);
+        for(i = 0; i < strlen(cline); i++) ins_in_line(cline[i]);
 
-        /*if (commandline_history->pos == 0) { // solo si edito el nuevo comando
+        if (commandline_history->pos == 0) {          // solo si edito el nuevo comando
             char * sl = get_line_from_history(commandline_history, 0);
-            strcat(sl, cline); // Inserto en el historial
-        }*/
+            strcat(sl, cline);                        // Inserto en el historial
+        }
         tab_comp = -1;
         show_header(input_win);
         return;
@@ -150,7 +149,7 @@ void do_commandmode(struct block * sb) {
         wmove(input_win, 0, inputline_pos + 1 + rescol);
         wrefresh(input_win);
         
-        if (commandline_history->pos == 0) { // solo si edito el nuevo comando
+        if (commandline_history->pos == 0) {          // solo si edito el nuevo comando
             char * sl = get_line_from_history(commandline_history, 0);
             add_char(sl, sb->value, inputline_pos-1); // Inserto en el historial
         }
