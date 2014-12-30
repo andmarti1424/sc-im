@@ -119,6 +119,7 @@ void free_ranges () {
         free(r);
         r = e;
     }
+    ranges = NULL;
     return;
 }
 
