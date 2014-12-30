@@ -148,6 +148,12 @@ HISTORY_FILE := -DHISTORY_FILE=\"~/.sc_history\"
 # boxes, this forces screen redraws when going right off the screen
 #RIGHTBUG := -DRIGHT_CBUG
 
+# Uncomment below if you want basic XLS import support.
+# Requires libxlsreader.
+# Add -lxlsreader in LDLIBS as well.
+XLS := 
+#XLS := -DXLS
+
 # MS-DOS needs y_tab instead of the normal y.tab
 #YTAB := y_tab
 YTAB := y.tab
@@ -159,9 +165,9 @@ SED := sed
 CFLAGS := -DSYSV3 -O2 -Wall -pipe -g $(DOBACKUPS)
 CFLAGS := $(CFLAGS) $(USECOLORS) $(USELOCALE) $(SIGVOID) $(DFLT_PAGER)
 CFLAGS := $(CFLAGS) $(IEEE_MATH) $(RINT) $(REGEX) $(FMOD) $(LIBRARY)
-CFLAGS := $(CFLAGS) $(NO_NOTIMEOUT) $(SIMPLE)
+CFLAGS := $(CFLAGS) $(NO_NOTIMEOUT) $(SIMPLE) $(XLS)
 LDLIBS := -lm -lncurses
-
+#LDLIBS := -lm -lncurses -lxlsreader
 OBJS := $(patsubst %.c, %.o, $(wildcard *.c) $(wildcard utils/*.c)) gram.o
 
 # The documents in the Archive
