@@ -25,10 +25,10 @@ int get_key() {
 
 void do_editmode(struct block * sb) {
 
-    if (sb->value == 'h') {                // LEFT
+    if (sb->value == 'h' || sb->value == OKEY_LEFT) {  // LEFT
         inputline_pos = back_char();
 
-    } else if (sb->value == 'l') {         // RIGHT
+    } else if (sb->value == 'l' || sb->value == OKEY_RIGHT) { // RIGHT
         inputline_pos = for_char();
 
     } else if (sb->value == 'x') {         // x

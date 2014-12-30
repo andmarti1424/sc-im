@@ -19,6 +19,7 @@
 #include "exec.h"
 #include "help.h"
 #include "marks.h"
+#include "excel.h"
 
 extern char * rev;
 extern struct dictionary * user_conf_d;
@@ -43,8 +44,10 @@ static char * valid_commands[] = {
 "hiderow",
 "i csv",
 "i tab",
+"i xls",
 "i! csv",
 "i! tab",
+"i! xls",
 "int",
 "load",
 "load!",
@@ -356,11 +359,13 @@ void do_commandmode(struct block * sb) {
         } else if (
             strncmp(inputline, "i csv " , 6) == 0 ||
             strncmp(inputline, "i! csv ", 7) == 0 ||
+            strncmp(inputline, "i xls " , 6) == 0 ||
+            strncmp(inputline, "i! xls ", 7) == 0 ||
             strncmp(inputline, "i tab " , 6) == 0 ||
             strncmp(inputline, "i! tab ", 7) == 0 ) {
             
             int force_rewrite = 0;
-            char delim;
+            char delim = ',';
             char cline [BUFFERSIZE];
             strcpy(cline, inputline);
 
@@ -370,9 +375,16 @@ void do_commandmode(struct block * sb) {
             }
 
             if ( strncmp(cline, "i csv ", 6) == 0) delim = ',';
-            else delim = '\t';
-
+            else if ( strncmp(cline, "i tab ", 6) == 0) delim = '\t';
+            else {
+                #ifndef XLS
+                error("XLS import support not compiled in");
+                return;
+                #endif
+                delim = 'x';
+            }
             del_range_chars(cline, 0, 5);
+
             if ( ! strlen(cline) ) {
                 error("Path to file to import is missing !");
             } else if ( modflg && ! force_rewrite ) {
@@ -380,7 +392,11 @@ void do_commandmode(struct block * sb) {
             } else {
                 delete_structures();
                 create_structures();
-                import_csv(cline, delim);
+                if (delim == 'x') {           // xls import
+                    open_xls(cline, "UTF-8");
+                } else {
+                    import_csv(cline, delim); // csv or tab delim import
+                }
                 modflg = 0;
                 update(); 
             }

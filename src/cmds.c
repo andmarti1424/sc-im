@@ -1501,18 +1501,23 @@ int is_single_command (struct block * buf, long timeout) {
     int res = NO_CMD;
     int bs = get_bufsize(buf);
 
-    if (curmode == COMMAND_MODE && bs == 1 && buf->value != ctl('r')) {
+    if (curmode == COMMAND_MODE && bs == 1 &&
+        buf->value != ctl('r')) {
         res = MOVEMENT_CMD;
 
-    } else if ( curmode == COMMAND_MODE && bs == 2 && buf->value == ctl('r') &&
+    } else if ( curmode == COMMAND_MODE && bs == 2 &&
+        buf->value == ctl('r') &&
         (buf->pnext->value - ('a' - 1) < 1 || buf->pnext->value > 26)) {
         res = MOVEMENT_CMD;
 
-    } else if (curmode == INSERT_MODE && bs == 1 && buf->value != ctl('r')) {
+    } else if (curmode == INSERT_MODE && bs == 1 &&
+        buf->value != ctl('r')) {
         res = MOVEMENT_CMD;
 
-    } else if (curmode == INSERT_MODE && bs == 2 && buf->value == ctl('r') &&
-        (buf->pnext->value - ('a' - 1) < 1 || buf->pnext->value > 26)) {
+    } else if (curmode == INSERT_MODE && bs == 2 &&
+        buf->value == ctl('r') &&
+       (buf->pnext->value - ('a' - 1) < 1 ||
+        buf->pnext->value > 26)) {
         res = MOVEMENT_CMD;
 
     } else if (curmode == EDIT_MODE && bs == 1) {
@@ -1582,102 +1587,160 @@ int is_single_command (struct block * buf, long timeout) {
     } else if (curmode == NORMAL_MODE) {
 
         if (buf->value == 'g' && bs == 2 && (
-              buf->pnext->value == 'M' || buf->pnext->value == 'g' ||
-              buf->pnext->value == 'G' ||
-              buf->pnext->value == '0' || buf->pnext->value == '$')) res = MOVEMENT_CMD;
+                 buf->pnext->value == 'M' || 
+                 buf->pnext->value == 'g' ||
+                 buf->pnext->value == 'G' ||
+                 buf->pnext->value == '0' ||
+                 buf->pnext->value == '$')) res = MOVEMENT_CMD;
         
-        else if (buf->value == 'g' && bs > 2 && timeout >= COMPLETECMDTIMEOUT) res = MOVEMENT_CMD; // goto cell
-                                                       // TODO add validation: buf->pnext->value debe ser letra
+        else if (buf->value == 'g' && bs > 2 && timeout >= COMPLETECMDTIMEOUT)
+                 res = MOVEMENT_CMD; // goto cell
+                 // TODO add validation: buf->pnext->value debe ser letra
                                                    
         else if (buf->value == 'Z' && bs == 2 && timeout >= COMPLETECMDTIMEOUT &&  // Zap (or hide) col or row
-            ( buf->pnext->value == 'c' || buf->pnext->value == 'r')) res = EDITION_CMD;
+               ( buf->pnext->value == 'c' ||
+                 buf->pnext->value == 'r')) res = EDITION_CMD;
 
         else if (buf->value == 'S' && bs == 2 && timeout >= COMPLETECMDTIMEOUT &&  // Zap (or hide) col or row
-            ( buf->pnext->value == 'c' || buf->pnext->value == 'r')) res = EDITION_CMD;
+               ( buf->pnext->value == 'c' ||
+                 buf->pnext->value == 'r')) res = EDITION_CMD;
 
         else if (buf->value == 'y' && bs == 2 &&    // yank cell
-            ( buf->pnext->value == 'y' || buf->pnext->value == 'r' ||
-              buf->pnext->value == 'c') ) res = EDITION_CMD;
+               ( buf->pnext->value == 'y' ||
+                 buf->pnext->value == 'r' ||
+                 buf->pnext->value == 'c') ) res = EDITION_CMD;
 
         else if (buf->value == 'm' && bs == 2 &&    // mark
-            ((buf->pnext->value - ('a' - 1)) < 1 || buf->pnext->value > 26)) res = MOVEMENT_CMD;
+               ((buf->pnext->value - ('a' - 1)) < 1 ||
+                 buf->pnext->value > 26)) res = MOVEMENT_CMD;
 
         else if (buf->value == 'c' && bs == 2 &&    // mark
-            ((buf->pnext->value - ('a' - 1)) < 1 || buf->pnext->value > 26)) res = EDITION_CMD;
+               ((buf->pnext->value - ('a' - 1)) < 1 || buf->pnext->value > 26)) res = EDITION_CMD;
 
         else if (buf->value == 'z' && bs == 2 &&    // scrolling
-            ( buf->pnext->value == 'h' || buf->pnext->value == 'l' ||
-              buf->pnext->value == 'z' || buf->pnext->value == 'm' ||
-              buf->pnext->value == '.' || buf->pnext->value == 't' ||
-              buf->pnext->value == 'b' ||
-              buf->pnext->value == 'H' || buf->pnext->value == 'L')
-            ) res = MOVEMENT_CMD;
+               ( buf->pnext->value == 'h' ||
+                 buf->pnext->value == 'l' ||
+                 buf->pnext->value == 'z' ||
+                 buf->pnext->value == 'm' ||
+                 buf->pnext->value == '.' ||
+                 buf->pnext->value == 't' ||
+                 buf->pnext->value == 'b' ||
+                 buf->pnext->value == 'H' ||
+                 buf->pnext->value == 'L')
+               ) res = MOVEMENT_CMD;
 
         else if (buf->value == 'V' && bs == 3 &&    // Vir
-              buf->pnext->value == 'i' && buf->pnext->pnext->value == 'r')
-              res = MOVEMENT_CMD;
+                 buf->pnext->value == 'i' &&
+                 buf->pnext->pnext->value == 'r')
+                 res = MOVEMENT_CMD;
 
         else if (buf->value == 'd' && bs == 2 &&    // cuts a cell
-              buf->pnext->value == 'd') res = EDITION_CMD;
+                 buf->pnext->value == 'd') res = EDITION_CMD;
 
         else if (buf->value == '\'' && bs == 2 &&   // tick 
-            ((buf->pnext->value - ('a' - 1)) < 1 || buf->pnext->value > 26)) res = MOVEMENT_CMD;
+               ((buf->pnext->value - ('a' - 1)) < 1 ||
+                 buf->pnext->value > 26)) res = MOVEMENT_CMD;
 
         else if (buf->value == 's' && bs == 2 &&    // shift cell down or up
-            ( buf->pnext->value == 'j' || buf->pnext->value == 'k' ||
-              buf->pnext->value == 'h' || buf->pnext->value == 'l')) res = EDITION_CMD;
+               ( buf->pnext->value == 'j' ||
+                 buf->pnext->value == 'k' ||
+                 buf->pnext->value == 'h' ||
+                 buf->pnext->value == 'l')) res = EDITION_CMD;
 
         else if (buf->value == 'i' && bs == 2 &&    // Insert row or column
-            ( buf->pnext->value == 'r' || buf->pnext->value == 'c' )) res = EDITION_CMD;
+               ( buf->pnext->value == 'r' ||
+                 buf->pnext->value == 'c' )) res = EDITION_CMD;
 
         else if (buf->value == 'd' && bs == 2 &&    // Delete row or column
-            ( buf->pnext->value == 'r' || buf->pnext->value == 'c' )) res = EDITION_CMD;
+               ( buf->pnext->value == 'r' ||
+                 buf->pnext->value == 'c' )) res = EDITION_CMD;
 
         else if (buf->value == 'r' && bs == 2 &&    // range lock / unlock / valueize
-            ( buf->pnext->value == 'l' || buf->pnext->value == 'u' ||
-              buf->pnext->value == 'v' )) res = EDITION_CMD;
+               ( buf->pnext->value == 'l' ||
+                 buf->pnext->value == 'u' ||
+                 buf->pnext->value == 'v' )) res = EDITION_CMD;
 
         else if (buf->value == 'R' && bs == 3 &&    // Create range with two marks
             //  FIXME add validation
-            ((buf->pnext->value - ('a' - 1)) < 1 || buf->pnext->value > 26) &&
-            ((buf->pnext->pnext->value - ('a' - 1)) < 1 || buf->pnext->pnext->value > 26)) res = EDITION_CMD;
+               ((buf->pnext->value - ('a' - 1)) < 1 ||
+                 buf->pnext->value > 26) &&
+               ((buf->pnext->pnext->value - ('a' - 1)) < 1 ||
+                 buf->pnext->pnext->value > 26)) res = EDITION_CMD;
 
         else if (buf->value == 'f' && bs == 2 &&    // Format col
-            ( buf->pnext->value == '>' || buf->pnext->value == '<'              ||
-              buf->pnext->value == 'h' || buf->pnext->value == OKEY_LEFT        ||
-              buf->pnext->value == 'l' || buf->pnext->value == OKEY_RIGHT       ||
-              buf->pnext->value == 'j' || buf->pnext->value == OKEY_DOWN        ||
-              buf->pnext->value == 'k' || buf->pnext->value == OKEY_UP          ||
-              buf->pnext->value == '-' || buf->pnext->value == '+' )) res = EDITION_CMD;
+               ( buf->pnext->value == '>' ||
+                 buf->pnext->value == '<' ||
+                 buf->pnext->value == 'h' ||
+                 buf->pnext->value == OKEY_LEFT ||
+                 buf->pnext->value == 'l' ||
+                 buf->pnext->value == OKEY_RIGHT ||
+                 buf->pnext->value == 'j' ||
+                 buf->pnext->value == OKEY_DOWN ||
+                 buf->pnext->value == 'k' ||
+                 buf->pnext->value == OKEY_UP ||
+                 buf->pnext->value == '-' ||
+                 buf->pnext->value == '+' )) res = EDITION_CMD;
 
     } else if (curmode == VISUAL_MODE && bs == 1) {
-        if (buf->value == 'j'          || buf->value == OKEY_DOWN || buf->value == 'k'      || buf->value == OKEY_UP    ||
-              buf->value == 'h'        || buf->value == OKEY_LEFT || buf->value == 'l'      || buf->value == OKEY_RIGHT ||
-              buf->value == '$'        || buf->value == '0'       || buf->value == '#'      || buf->value == '^'        ||
-              buf->value == 'y'        || buf->value == 'x'       || buf->value == 'w'      || buf->value == 'b'        ||
-              buf->value == 'H'        || buf->value == 'M'       || buf->value == 'L'      || buf->value == 'G'        ||
-              buf->value == ctl('f')   || buf->value == ctl('b')  || buf->value == ctl('a') ||
-              buf->value == ':'
-        )
-            res = MOVEMENT_CMD;
-        else if ( buf->value == '{'    || buf->value == '}'       || buf->value == '|')
-            res = EDITION_CMD;
+             if (buf->value == 'j' ||
+                 buf->value == OKEY_DOWN ||
+                 buf->value == 'k' ||
+                 buf->value == OKEY_UP    ||
+                 buf->value == 'h' ||
+                 buf->value == OKEY_LEFT ||
+                 buf->value == 'l' ||
+                 buf->value == OKEY_RIGHT ||
+                 buf->value == '$' ||
+                 buf->value == '0' ||
+                 buf->value == '#' ||
+                 buf->value == '^' ||
+                 buf->value == 'y' ||
+                 buf->value == 'x' ||
+                 buf->value == 'w' ||
+                 buf->value == 'b' ||
+                 buf->value == 'H' ||
+                 buf->value == 'M' ||
+                 buf->value == 'L' ||
+                 buf->value == 'G' ||
+                 buf->value == ctl('f') ||
+                 buf->value == ctl('b') ||
+                 buf->value == ctl('a') ||
+                 buf->value == ':'
+             )
+                 res = MOVEMENT_CMD;
+        else if (buf->value == '{' ||
+                 buf->value == '}' ||
+                 buf->value == '|')
+                 res = EDITION_CMD;
 
     } else if (curmode == VISUAL_MODE && bs == 2) {
-        if ((buf->value == '\'') || (buf->value == 'd' && buf->pnext->value == 'd')  ||
-             (buf->value == 's' && ( buf->pnext->value == 'h' || buf->pnext->value == 'j' || buf->pnext->value == 'k' || buf->pnext->value == 'l' ))
-        ) {
-            res = MOVEMENT_CMD;
-        } else if ((buf->value == 'Z' && ( buf->pnext->value == 'r' || buf->pnext->value == 'c' )) ||
-             (buf->value == 'S' && ( buf->pnext->value == 'r' || buf->pnext->value == 'c' )) ) {
-            res = EDITION_CMD;
-        } else if (buf->value == 'r' && ( buf->pnext->value == 'l' || buf->pnext->value == 'u' ||
-              buf->pnext->value == 'v' )) {
-            res = EDITION_CMD;
-        } else if (buf->value == 'm' && // mark
-            ((buf->pnext->value - ('a' - 1)) < 1 || buf->pnext->value > 26)) {
-            res = MOVEMENT_CMD;
-        }
+            if ((buf->value == '\'') ||
+                (buf->value == 'd' &&
+                 buf->pnext->value == 'd')  ||
+                (buf->value == 's' && (
+                 buf->pnext->value == 'h' ||
+                 buf->pnext->value == 'j' ||
+                 buf->pnext->value == 'k' ||
+                 buf->pnext->value == 'l' ))
+            ) {
+                 res = MOVEMENT_CMD;
+            } else if ((buf->value == 'Z' && (
+                 buf->pnext->value == 'r' ||
+                 buf->pnext->value == 'c' )) ||
+                (buf->value == 'S' && (
+                 buf->pnext->value == 'r' ||
+                 buf->pnext->value == 'c' )) ) {
+                 res = EDITION_CMD;
+            } else if (buf->value == 'r' && (
+                 buf->pnext->value == 'l' ||
+                 buf->pnext->value == 'u' ||
+                 buf->pnext->value == 'v' )) {
+                 res = EDITION_CMD;
+            } else if (buf->value == 'm' && // mark
+               ((buf->pnext->value - ('a' - 1)) < 1 ||
+                 buf->pnext->value > 26)) {
+                 res = MOVEMENT_CMD;
+            }
     }
     return res;
 }
