@@ -22,12 +22,12 @@ SCIM stands for Spreadsheet Calculator Improvised. :-)
 
 ![demo image](https://raw.githubusercontent.com/andmarti1424/scim/dev/scim.png)
 
-# Build & Install
+## Build & Install
 
 Run 'make' inside /src folder to build scim.
 You can install the binary 'scim' in your system by typing 'make install' with a privileged user.
 
-# Donations
+### Donations
 
 Please. I mean, Please.. make a DONATION with PayPal, so we can keep working on SCIM !!!
 A lot of features are in the roadmap, such as multiple worksheets or filtering of rows!
