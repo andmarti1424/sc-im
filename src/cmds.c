@@ -1424,7 +1424,7 @@ void valueize_area(int sr, int sc, int er, int ec) {
             copy_to_undostruct(r, c, r, c, 'a');
         }
     }
-    end_undo_action();            
+    end_undo_action();
     return;
 }
 
