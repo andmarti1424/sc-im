@@ -35,6 +35,7 @@ static char * valid_commands[] = {
 "e tab",
 "e! csv",
 "e! tab",
+"datefmt",
 "format",
 "h",
 "help",
@@ -268,6 +269,17 @@ void do_commandmode(struct block * sb) {
             else if (strncmp(inputline, "unlock", 6) == 0) unlock_cells(lookat(r, c), lookat(rf, cf));      
             else if (strncmp(inputline, "valueize", 8) == 0) valueize_area(r, c, rf, cf);      
 
+        } else if ( strncmp(inputline, "datefmt", 7) == 0) {
+            strcpy(interp_line, inputline);
+            char cline [BUFFERSIZE];
+            strcpy(cline, interp_line);
+            int found = str_in_str(interp_line, "\"");
+            if (found == -1) return;
+            del_range_chars(cline, 0, found-1);
+            sprintf(interp_line, "datefmt %s%d:", coltoa(sr->tlcol), sr->tlrow);
+            sprintf(interp_line, "%s%s%d %s", interp_line, coltoa(sr->brcol), sr->brrow, cline);
+            send_to_interp(interp_line);
+ 
         } else if ( strncmp(inputline, "sort ", 5) == 0 ) {
             strcpy(interp_line, inputline);
             if (p != -1) { // si hay un rango seleccionado

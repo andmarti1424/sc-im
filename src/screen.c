@@ -421,7 +421,8 @@ void show_cursor(WINDOW * win) {
     }
 }
 
-void show_text_content_of_cell(WINDOW * win, struct ent ** p, int row, int col, int r, int c); void show_numeric_content_of_cell(WINDOW * win, struct ent ** p, int col, int r, int c);
+void show_text_content_of_cell(WINDOW * win, struct ent ** p, int row, int col, int r, int c);
+void show_numeric_content_of_cell(WINDOW * win, struct ent ** p, int col, int r, int c);
 
 // Muestra contenido de todas las celdas
 void show_content(WINDOW * win, int mxrow, int mxcol) {
@@ -717,7 +718,7 @@ void yyerror(char *err) {
 }
 
 // returns a string that represents the formated value of the cell, if a format exists
-// returns 0  format of label - datetime en label - format "d" - no hay cadena en label más que la fecha - no puede haber numero en p->v
+// returns 0  datetime format - number in p->v represents a date - format "d"
 // returns 1  format of number - (numbers with format) - puede haber label.
 // returns -1 if there is no format in the cell.
 int get_formated_value(struct ent ** p, int col, char * value) {
@@ -750,10 +751,10 @@ void show_text_content_of_cell(WINDOW * win, struct ent ** p, int row, int col, 
     // in case there is a format
     char s[FBUFLEN] = "";
     int res = get_formated_value(p, col, s);
-    if (res == 0) {           // datetime format
-        strcpy(value, s);
-        str_len  = strlen(value);
-    }
+    //if (res == 0) {           // datetime format
+    //    strcpy(value, s);
+    //    str_len  = strlen(value);
+    // }
 
     // si no entra en pantalla
     if (str_len > col_width) {
@@ -836,9 +837,9 @@ void show_numeric_content_of_cell(WINDOW * win, struct ent ** p, int col, int r,
     char s[FBUFLEN] = "";
     int res = get_formated_value(p, col, s);
     if (res == 0) {
-        //nlen = 0;
         strcpy(field, s);            
-        tlen = strlen(s); //format in label
+        nlen = strlen(s); //format in numeric value
+        tlen=0;
     } else if (res == 1) {
         strcpy(field, s);
         nlen = strlen(field);

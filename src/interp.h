@@ -79,4 +79,5 @@ void editfmt(int row, int col);
 void editv(int row, int col);
 void editexp(int row, int col);
 void edits(int row, int col, int saveinfile);
+int dateformat(struct ent *v1, struct ent *v2, char * fmt);
 double rint(double d);

@@ -22,6 +22,7 @@
 #include <ctype.h>
 #include <errno.h>
 
+
 #ifdef BSD42
 #include <strings.h>
 #include <sys/time.h>
@@ -29,6 +30,8 @@
 #define strchr index
 #endif
 #else
+#define __USE_XOPEN
+#define _GNU_SOURCE
 #include <time.h>
 #ifndef SYSIII
 #include <string.h>
@@ -1800,13 +1803,13 @@ void num_search(double n, int firstrow, int firstcol, int lastrow, int lastcol, 
 
 /* 'goto' a cell containing a matching string */
 void str_search(char *s, int firstrow, int firstcol, int lastrow, int lastcol, int num) {
-    struct ent    *p;
-    int        r, c;
-    int        endr, endc;
-    char    *tmp;
+    struct ent *p;
+    int r, c;
+    int endr, endc;
+    char * tmp;
 #if defined(REGCOMP)
-    regex_t    preg;
-    int        errcode;
+    regex_t preg;
+    int errcode;
 #endif
 
     //if (!loading) remember(0);
@@ -2138,7 +2141,8 @@ void slet(struct ent *v, struct enode *se, int flushdir) {
     }
     if (v->cellerror != cellerror) {
         v->flags |= is_changed;
-        changed++;    modflg++;
+        changed++;
+        modflg++;
         v->cellerror = cellerror;
     }
     (void) signal(SIGFPE, exit_app);
@@ -2262,7 +2266,7 @@ void label(register struct ent *v, register char *s, int flushdir) {
             v->label = scxmalloc((unsigned)(strlen(s)+1));
             (void) strcpy (v->label, s);
         } else
-            v->label = (char *)0;
+            v->label = (char *) 0;
         if (flushdir<0) v->flags |= is_leftflush;
         else v->flags &= ~is_leftflush;
         if (flushdir==0) v->flags |= is_label;
@@ -2617,6 +2621,59 @@ void edits(int row, int col, int saveinfile) {
         (void) sprintf(line+linelim, "\"");
         linelim += 1;
     }
+}
+
+int dateformat(struct ent *v1, struct ent *v2, char * fmt) {
+    if ( ! fmt || *fmt == '\0') return -1;
+
+    int r, c;
+    struct ent * n;
+    int maxr, maxc;
+    int minr, minc;
+    struct tm tm;
+
+    maxr = v2->row;
+    maxc = v2->col;
+    minr = v1->row;
+    minc = v1->col;
+    if (minr>maxr) r = maxr, maxr = minr, minr = r;
+    if (minc>maxc) c = maxc, maxc = minc, minc = c;
+    checkbounds(&maxr, &maxc);
+    if (minr < 0) minr = 0;
+    if (minc < 0) minc = 0;
+
+    create_undo_action();
+    for (r = minr; r <= maxr; r++) {
+        for (c = minc; c <= maxc; c++) {
+            n = lookat(r, c);            
+            copy_to_undostruct(r, c, r, c, 'd');
+            if ( locked_cell(n->row, n->col) || ! (n)->label ) continue;
+
+            // free all ent content but its label
+            n->v = (double) 0;
+            if (n->format) scxfree(n->format);
+            if (n->expr) efree(n->expr);
+            n->expr = NULL;
+
+            memset(&tm, 0, sizeof(struct tm));
+            strptime((n)->label, fmt, &tm);
+            n->v = (double) mktime(&tm);
+            n->flags |= ( is_changed | is_valid );
+            label(n, "", -1); // free label
+            
+            // agrego formato de fecha            
+            n->format = 0;
+            char * s = scxmalloc((unsigned)(strlen(fmt)+2));
+            sprintf(s, "%c", 'd');
+            strcat(s, fmt);
+            n->format = s;
+
+            copy_to_undostruct(r, c, r, c, 'a');
+        }
+    }
+    modflg++; // increase just one time
+    end_undo_action();
+    return 0;
 }
 
 #ifdef RINT

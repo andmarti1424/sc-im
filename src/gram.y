@@ -80,6 +80,7 @@ token S_YANKCOL
 token S_GETFORMAT
 */
 
+%token S_DATEFMT
 %token S_FORMAT
 %token S_FMT
 %token S_LET
@@ -324,6 +325,10 @@ command:
                                        scxfree($3); 
                                      }
 
+    |    S_DATEFMT var_or_range STRING { dateformat($2.left.vp, $2.right.vp, $3);
+                                       scxfree($3); }
+    |    S_DATEFMT STRING            { dateformat(lookat(currow, curcol), lookat(currow, curcol), $2);
+                                       scxfree($2); }
 /* para compatibilidad con sc */
     |    S_HIDE COL                  { hide_col($2, 1); }        // hide de una unica columna
     |    S_HIDE NUMBER               { hide_row($2, 1); }        // hide de una unica fila
