@@ -126,6 +126,7 @@ char * long_help[] = {
 "                        12. change in the format of a range or cell",
 "                        13. '-' and '+' commands in normal mode",
 "                        14. lock and unlock of cells",
+"                        15. datefmt command",
 "",
 "",
 "        Other commands:",

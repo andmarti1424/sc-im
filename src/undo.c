@@ -56,6 +56,7 @@ Acciones cuyo UNDO/REDO se encuentra implementado:
 12. change in the format of a range or cell
 13. '-' and '+' commands in normal mode
 14. lock and unlock of cells
+15. datefmt command
 
 NOT implemented:
 1. cambio de formato de columna completa
