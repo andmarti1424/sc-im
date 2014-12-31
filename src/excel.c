@@ -22,45 +22,57 @@ int open_xls(char * fname, char * encoding) {
     xlsWorkBook * pWB;
     xlsWorkSheet * pWS;
     char line_interp[FBUFLEN] = "";    
-    WORD cellRow, cellCol;
+    WORD r, c;
     pWB = xls_open(fname, encoding);
+    struct ent * n;
 
     if (pWB == NULL) return -1;
 
     pWS = xls_getWorkSheet(pWB, 0); //only the first sheet
     xls_parseWorkSheet(pWS);
 
-    for (cellRow = 0; cellRow <= pWS->rows.lastrow; cellRow++) { // rows
-        for (cellCol = 0; cellCol <= pWS->rows.lastcol; cellCol++) { // cols
-            xlsCell * cell = xls_cell(pWS, cellRow, cellCol);
+    for (r = 0; r <= pWS->rows.lastrow; r++) { // rows
+        for (c = 0; c <= pWS->rows.lastcol; c++) { // cols
+            xlsCell * cell = xls_cell(pWS, r, c);
             if ((! cell) || (cell->isHidden)) continue;
 
             // TODO rowspan
-            /* TODO date format
-                ID: 027E h RK (Cell Value, RK Number) - xf: 22
-            */
-            
+            struct st_xf_data * xf=&pWB->xfs.xf[cell->xf];
+
+            if (xf->format == 165) { // date
+            // if (cell->id == 0x27e && (cell->xf == 24 || cell->xf == 26
+            // || cell->xf == 28 || cell->xf == 30 || cell->xf == 32 )) {
+                sprintf(line_interp, "let %s%d=%.15g", coltoa(c), r, (cell->d - 25568) * 86400);
+                send_to_interp(line_interp);
+                n = lookat(r, c);
+                n->format = 0;
+                char * s = scxmalloc((unsigned)(strlen("%d/%m/%Y") + 2));
+                sprintf(s, "%c", 'd');
+                strcat(s, "%d/%m/%Y");
+                n->format = s;
+                continue;
+
             // display the value of the cell (either numeric or string)
-            if (cell->id == 0x27e || cell->id == 0x0BD || cell->id == 0x203) {
-                sprintf(line_interp, "let %s%d=%.15g", coltoa(cellCol), cellRow, cell->d);
+            } else if (cell->id == 0x27e || cell->id == 0x0BD || cell->id == 0x203) {
+                sprintf(line_interp, "let %s%d=%.15g", coltoa(c), r, cell->d);
 
             } else if (cell->id == 0x06) { // formula
                 if (cell->l == 0) {        // its a number
-                    sprintf(line_interp, "let %s%d=%.15g", coltoa(cellCol), cellRow, cell->d);
+                    sprintf(line_interp, "let %s%d=%.15g", coltoa(c), r, cell->d);
                 } else {
                     if (!strcmp((char *) cell->str, "bool")) {          // its boolean, and test cell->d
-                        sprintf(line_interp, "label %s%d=\"%s\"", coltoa(cellCol), cellRow, (int) cell->d ? "true" : "false");
+                        sprintf(line_interp, "label %s%d=\"%s\"", coltoa(c), r, (int) cell->d ? "true" : "false");
                     } else if (! strcmp((char *) cell->str, "error")) { // formula is in error
-                        sprintf(line_interp, "label %s%d=\"%s\"", coltoa(cellCol), cellRow, "error"); //FIXME
+                        sprintf(line_interp, "label %s%d=\"%s\"", coltoa(c), r, "error"); //FIXME
                     } else {
-                        sprintf(line_interp, "label %s%d=\"%s\"", coltoa(cellCol), cellRow, (char *) cell->str);
+                        sprintf(line_interp, "label %s%d=\"%s\"", coltoa(c), r, (char *) cell->str);
                     }
                 }
             
             } else if (cell->str != NULL) {
-                sprintf(line_interp, "label %s%d=\"%s\"", coltoa(cellCol), cellRow, (char *) cell->str);
+                sprintf(line_interp, "label %s%d=\"%s\"", coltoa(c), r, (char *) cell->str);
             } else {
-                sprintf(line_interp, "label %s%d=\"%s\"", coltoa(cellCol), cellRow, "");
+                sprintf(line_interp, "label %s%d=\"%s\"", coltoa(c), r, "");
             }
             send_to_interp(line_interp);
         }

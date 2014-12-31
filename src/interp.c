@@ -2645,7 +2645,7 @@ int dateformat(struct ent *v1, struct ent *v2, char * fmt) {
     create_undo_action();
     for (r = minr; r <= maxr; r++) {
         for (c = minc; c <= maxc; c++) {
-            n = lookat(r, c);            
+            n = lookat(r, c);
             copy_to_undostruct(r, c, r, c, 'd');
             if ( locked_cell(n->row, n->col) || ! (n)->label ) continue;
 
