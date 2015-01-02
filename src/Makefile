@@ -152,7 +152,7 @@ HISTORY_FILE := -DHISTORY_FILE=\"~/.sc_history\"
 # Requires libxlsreader.
 # Add -lxlsreader in LDLIBS as well.
 XLS := 
-XLS := -DXLS
+#XLS := -DXLS
 
 # MS-DOS needs y_tab instead of the normal y.tab
 #YTAB := y_tab
@@ -167,7 +167,7 @@ CFLAGS := $(CFLAGS) $(USECOLORS) $(USELOCALE) $(SIGVOID) $(DFLT_PAGER)
 CFLAGS := $(CFLAGS) $(IEEE_MATH) $(RINT) $(REGEX) $(FMOD) $(LIBRARY)
 CFLAGS := $(CFLAGS) $(NO_NOTIMEOUT) $(SIMPLE) $(XLS)
 LDLIBS := -lm -lncurses
-LDLIBS := -lm -lncurses -lxlsreader
+#LDLIBS := -lm -lncurses -lxlsreader
 OBJS := $(patsubst %.c, %.o, $(wildcard *.c) $(wildcard utils/*.c)) gram.o
 
 # The documents in the Archive
