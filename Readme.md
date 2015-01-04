@@ -11,12 +11,13 @@ SCIM uses ncurses for visual interface and has vim-like keybindings and some fun
 
 - UNDO / REDO.
 - 65.536 rows and 702 columns supported. (The number of rows can be expanded to 1.048.576 if wished).
+- CSV / TAB delimited file import and export.
+- XLS / XLSX file import.
 - Key-mappings.
 - Cell shifting.
 - More movements commands implemented!
 - Input and Output was completely rewritten.
 - Colors can be customized by user, even at runtime.
-- XLS file import.
 
 About the name, the idea is that the program can be identified as another vim-like app.
 SCIM stands for Spreadsheet Calculator Improvised. :-) 
