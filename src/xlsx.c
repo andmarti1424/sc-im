@@ -83,6 +83,7 @@ void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings) {
             }
             //printf("\n");
             child_node = child_node->next;
+            xmlFree(col);
             xmlFree(row);
         }
         cur_node = cur_node->next;
