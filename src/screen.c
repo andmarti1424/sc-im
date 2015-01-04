@@ -762,6 +762,7 @@ void show_text_content_of_cell(WINDOW * win, struct ent ** p, int row, int col, 
         strcat(field, value);
     }
 
+    //info("%s.%d", field, strlen(field)); get_key();
     mvwprintw(win, r, c, "%s", field);
     wclrtoeol(win);
 
