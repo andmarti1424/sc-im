@@ -160,25 +160,25 @@ SED := sed
 # Uncomment below if you want basic XLS import support.
 # Requires libxlsreader.
 # Add -lxlsreader in LDLIBS as well.
-#XLS := 
-XLS := -DXLS
+XLS := 
+#XLS := -DXLS
 
 # Uncomment below if you want basic XLSX import support.
 # Requires libzip-dev and libxml2-dev
 # Add -lzip -xml2 to LDLIBS as well.
 # and -I/usr/include/libxml2 or the acording path to the libxml headers, in CFLAGS
-#XLSX :=
-XLSX := -DXLSX
+XLSX :=
+#XLSX := -DXLSX
 
-#CFLAGS := -DSYSV3 -O2 -Wall -pipe -g $(DOBACKUPS)
-CFLAGS := -DSYSV3 -O2 -Wall -pipe -g -I/usr/include/libxml2 $(DOBACKUPS)
+CFLAGS := -DSYSV3 -O2 -Wall -pipe -g $(DOBACKUPS)
+#CFLAGS := -DSYSV3 -O2 -Wall -pipe -g -I/usr/include/libxml2 $(DOBACKUPS)
 CFLAGS := $(CFLAGS) $(USECOLORS) $(USELOCALE) $(SIGVOID) $(DFLT_PAGER)
 CFLAGS := $(CFLAGS) $(IEEE_MATH) $(RINT) $(REGEX) $(FMOD) $(LIBRARY)
 CFLAGS := $(CFLAGS) $(NO_NOTIMEOUT) $(SIMPLE) $(XLS) $(XLSX)
 
-#LDLIBS := -lm -lncurses
+LDLIBS := -lm -lncurses
 #LDLIBS := -lm -lncurses -lxlsreader
-LDLIBS := -lm -lncurses -lxlsreader -lzip -lxml2 
+#LDLIBS := -lm -lncurses -lxlsreader -lzip -lxml2 
 
 OBJS := $(patsubst %.c, %.o, $(wildcard *.c) $(wildcard utils/*.c)) gram.o
 

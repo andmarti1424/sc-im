@@ -14,9 +14,11 @@
 #include <libxml/tree.h>
 #include "xlsx.h"
 
-//requires libzip-dev
-//requires libxml2-dev
-//for building: gcc -lzip -lxml2 -I/usr/include/libxml2 t.c
+// ------------------------------------------------------------------
+// requires libzip-dev
+// requires libxml2-dev
+// for building: gcc -lzip -lxml2 -I/usr/include/libxml2 xlsx.c
+// ------------------------------------------------------------------
 
 
 // this functions takes the DOM of the sharedStrings file
@@ -66,8 +68,8 @@ void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) 
             char * col = (char *) xmlGetProp(child_node, (xmlChar *) "r");
             while (isdigit(col[strlen(col)-1])) col[strlen(col)-1]='\0';
             c = atocol(col, strlen(col));
-            if (xmlHasProp(child_node, (xmlChar *) "t")) {
 
+            if (xmlHasProp(child_node, (xmlChar *) "t")) {
                 char * s = (char *) xmlGetProp(child_node, (xmlChar *) "t");
                 char * style = (char *) xmlGetProp(child_node, (xmlChar *) "s");
                 char * fmtId = get_xlsx_styles(doc_styles, atoi(style));
@@ -76,8 +78,9 @@ void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) 
                 if ( ! strcmp(s, "n") ) {
                     // v - straight int value
                     if (! strcmp((char *) child_node->xmlChildrenNode->name, "v") && strcmp(fmtId, "165")) {
-                        long l = strtol((char *) child_node->xmlChildrenNode->xmlChildrenNode->content, (char **) NULL, 10);
-                        sprintf(line_interp, "let %s%d=%.15ld", coltoa(c), r, l);
+                        //double l = strtol((char *) child_node->xmlChildrenNode->xmlChildrenNode->content, (char **) NULL, 10);
+                        double l = atof((char *) child_node->xmlChildrenNode->xmlChildrenNode->content);
+                        sprintf(line_interp, "let %s%d=%.15f", coltoa(c), r, l);
                         send_to_interp(line_interp);
 
                     // date value in v
@@ -94,8 +97,9 @@ void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) 
 
                     // f - numeric value is result from formula
                     } else if (! strcmp((char *) child_node->xmlChildrenNode->name, "f")) {
-                        long l = strtol((char *) child_node->last->xmlChildrenNode->content, (char **) NULL, 10);
-                        sprintf(line_interp, "let %s%d=%.15ld", coltoa(c), r, l);
+                        //double l = strtol((char *) child_node->last->xmlChildrenNode->content, (char **) NULL, 10);
+                        double l = atof((char *) child_node->last->xmlChildrenNode->content);
+                        sprintf(line_interp, "let %s%d=%.15f", coltoa(c), r, l);
                         send_to_interp(line_interp);
                     } 
 
