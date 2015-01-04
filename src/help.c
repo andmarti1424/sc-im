@@ -14,7 +14,7 @@ char * long_help[] = {
 " ----------------------------------------------------------------------------------------------",
 " This is a simple HELP page. Press «:q<Enter>» to go back to spreadsheet.                      ",
 "                                                                                               ",
-" You can use <UP> <DOWN> arrows keys, or «j» «k» keys to move throw text.                      ",
+" You can use <UP> <DOWN> arrows keys, or 'j' 'k' keys to move throw text.                      ",
 " <SPACE> key moves forward an entire page, while <C-f> and <C-b> moves half page down or up.   ",
 " «G» moves to bottom, and <C-a> to the beginning of the text.                                  ",
 " <ENTER> key scrolls one line down, while <DEL> key scrolls one line up, just like in less.    ",
@@ -708,7 +708,7 @@ static int pscreen(char * screen[]) {
     for (lineno = 0; screen[lineno + delta] && lineno < LINES; lineno++) {
         if (strlen(word_looked)) look_result = str_in_str(screen[lineno + delta], word_looked);
 
-        wmove(main_win, lineno+2, 0);
+        wmove(main_win, lineno, 0);
         wclrtoeol(main_win);
 
         for (c=0; c < strlen(screen[lineno + delta]); c++)  {
@@ -723,14 +723,14 @@ static int pscreen(char * screen[]) {
                 c < look_result + strlen(word_looked) ) {
                   set_ucolor(main_win, CELL_SELECTION_SC);
             }
-            mvwprintw(main_win, lineno+2, c, "%c", screen[lineno + delta][c]);
+            mvwprintw(main_win, lineno, c, "%c", screen[lineno + delta][c]);
         }
         
-        //mvwprintw(main_win, lineno+2, 0, "%s", (screen[lineno + delta]));
+        //mvwprintw(main_win, lineno, 0, "%s", (screen[lineno + delta]));
         wclrtoeol(main_win);
     }
     if (lineno < LINES) {
-        wmove(main_win, lineno+3, 0);
+        wmove(main_win, lineno+1, 0);
         wclrtobot(main_win);
     }
      
