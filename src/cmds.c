@@ -1385,6 +1385,30 @@ struct ent * horiz_middle() {
     return NULL;
 }
 
+void auto_justify(int ci, int cf, int min) {
+    // column width is not set below the min value
+    int r, c, sum = 0;
+    char field[1024] = "";
+    struct ent * p;
+
+    for (c = ci; c <= cf; c++) {
+        fwidth[c] = min;
+        for (r = 0; r <= maxrow; r++) {
+            if ((p = *ATBL(tbl, r, c))) {
+                sum = 0;
+                if (p->label) sum += strlen(p->label);
+                if (p->flags & is_valid) {
+                    sprintf(field, "%.*f", precision[c], p->v);
+                    sum += strlen(field);
+                }
+                if (sum > fwidth[c])
+                    fwidth[c] = sum;
+            }
+        }
+    }
+    return;
+}
+
 /*
  * deletes the expression associated w/ a cell and turns it into a constant
  * containing whatever was on the screen

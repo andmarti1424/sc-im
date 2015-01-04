@@ -6,27 +6,32 @@
 #include "cmds.h"
 #include "color.h"
 #include "macros.h"
+#include "xls.h"
 
 // xls.h is part of libxls. make sure its installed and headers are in path.
 // build must be done with '-lxlsreader'
+#ifdef XLS
 #include <xls.h>
+#endif
 
 // this functions loads an excel file into tbl.
 // As SCIM still does not handle multiple sheets,
 // if the excel file has multiple sheets, only the first one is read.
 // this function returns -1 in case of error
 int open_xls(char * fname, char * encoding) {
-#ifndef XLS
-    return -1;
-#endif
+#ifdef XLS
     xlsWorkBook * pWB;
     xlsWorkSheet * pWS;
-    char line_interp[FBUFLEN] = "";    
     WORD r, c;
     pWB = xls_open(fname, encoding);
+    
+    char line_interp[FBUFLEN] = "";    
     struct ent * n;
 
-    if (pWB == NULL) return -1;
+    if (pWB == NULL) {
+        error("Error loading %s", fname);
+        return -1;
+    }
 
     pWS = xls_getWorkSheet(pWB, 0); //only the first sheet
     xls_parseWorkSheet(pWS);
@@ -79,5 +84,10 @@ int open_xls(char * fname, char * encoding) {
     }
     xls_close_WS(pWS);
     xls_close(pWB);
+    auto_justify(0, maxcol, DEFWIDTH);
     return 0;
+#else
+    return -1;
+#endif
+
 }

@@ -37,8 +37,8 @@ srange * ranges;
 void start_screen() {
     initscr();
 
-    main_win = newwin(0, 0, 0, 0);
-    input_win = newwin(2, COLS, 0, 0); // just 2 rows
+    main_win = newwin(LINES-RESROW, COLS, RESROW, 0);
+    input_win = newwin(RESROW, COLS, 0, 0); // just 2 rows (RESROW = 2)
 
     #ifdef USECOLORS
     if (has_colors()) {
@@ -56,8 +56,6 @@ void start_screen() {
         //initcolor(0);                                // Creo los colores initpair
     }   
     #endif
-    //scr_lines = LINES;
-    //scr_cols = COLS;
     
     wtimeout(input_win, TIMEOUT_CURSES);
     noecho();
@@ -108,22 +106,16 @@ void do_welcome() {
 
 // function that refreshs grid of screen
 void update(void) {
-
     if (cmd_multiplier > 1) return;
 
     // Limpio desde comienzo hacia to bottom
-    wmove(main_win, RESROW, rescol);
+    //wmove(main_win, RESROW, rescol);
+    wmove(main_win, 0, rescol);
     wclrtobot(main_win);
     
-    /* visible spreadsheet rows and cols in screen
-    int vis_sc_cols = calc_cols_show();       // Cantidad de columnas a dibujar en pantalla: A, B, C, D
-    int vis_sc_rows = LINES - RESROW - 1;     // Cantidad de filas a dibujar en pantalla: 0, 1, 2, 3, 4..
-
     // calculo las filas y columnas que quedan ocultas
-       mxcol-1 es el numero de la ultima sc_col que se ve en pantalla
-       mxrow-1 es el numero de la ultima sc_row que se ve en pantalla
-    */
-    //info("%d %d", currow, curcol); //FIXME
+    //   mxcol-1 es el numero de la ultima sc_col que se ve en pantalla
+    //   mxrow-1 es el numero de la ultima sc_row que se ve en pantalla
     int mxcol = offscr_sc_cols + calc_offscr_sc_cols() - 1;
     int mxrow = offscr_sc_rows + calc_offscr_sc_rows() - 1;
 
@@ -132,9 +124,6 @@ void update(void) {
         currow++;
     while (col_hidden[curcol])
         curcol++;
-
-    // Muestro cursor - NEEDED?
-    //show_cursor(main_win);
 
     // Muestro en pantalla el contenido de las celdas
     // Valores numericos, strings justificados, centrados y expresiones.
@@ -145,14 +134,6 @@ void update(void) {
     
     // Show sc_row headings: 0, 1, 2, 3..
     show_sc_row_headings(main_win, mxrow);
-
-    // Limpio desde la ultima sc_row hacia to bottom
-    // NEEDED?
-    /*int c = mxrow - offscr_sc_rows + 1;
-    if ( c + RESROW < LINES ) {
-        wmove(main_win, c + RESROW, 0);
-        wclrtobot(main_win);
-    }*/
 
     // Refresco ventanas de curses
     wrefresh(main_win);
@@ -171,7 +152,7 @@ void update(void) {
 void handle_cursor() {
     switch (curmode) {
         case COMMAND_MODE:
-            noecho(); //cambiado 04/06/2014
+            noecho();
             curs_set(1);
             break;
         case INSERT_MODE:
@@ -324,19 +305,9 @@ void print_mode(WINDOW * win) {
     return;
 }
 
-// Funcion que calcula la cantidad de columnas de planilla que entran en pantalla,
-// dejando offscr_sc_cols columnas a la izquierda sin mostrar
-int calc_cols_show() {
-    int k, width = 0, c = 0;
-    for (k = offscr_sc_cols; width < COLS; k++, c += 1) {
-        if (! col_hidden[k]) width += fwidth[k];
-    }
-    return c-1;
-}
-
 // Show sc_row headings: 0, 1, 2, 3, 4...
 void show_sc_row_headings(WINDOW * win, int mxrow) {
-    int row = RESROW;
+    int row = 0;
     #ifdef USECOLORS
     if (has_colors()) set_ucolor(win, HEADINGS);
     #endif
@@ -365,14 +336,13 @@ void show_sc_row_headings(WINDOW * win, int mxrow) {
 
 // Show sc_col headings: A, B, C, D...
 void show_sc_col_headings(WINDOW * win, int mxcol, int mxrow) {
-    int i;
-    int col = rescol;
+    int i, col = rescol;
 
     #ifdef USECOLORS
     if (has_colors()) set_ucolor(win, HEADINGS);
     #endif
 
-    wmove(win, RESROW, 0);
+    wmove(win, 0, 0);
     wclrtoeol(win);
 
     for (i = offscr_sc_cols; i <= mxcol; i++) {
@@ -387,7 +357,7 @@ void show_sc_col_headings(WINDOW * win, int mxcol, int mxrow) {
             wattron(win, A_REVERSE);
             #endif
         }
-        (void) mvwprintw(win, RESROW, col, "%*s%-*s", k-1, " ", fwidth[i] - k + 1, coltoa(i));
+        (void) mvwprintw(win, 0, col, "%*s%-*s", k-1, " ", fwidth[i] - k + 1, coltoa(i));
 
         wclrtoeol(win);
 
@@ -397,27 +367,6 @@ void show_sc_col_headings(WINDOW * win, int mxcol, int mxrow) {
         wattroff(win, A_REVERSE);
         #endif
         col += fwidth[i];
-    }
-}
-
-void show_cursor(WINDOW * win) {
-    int col=0, row=0;
-    int cursor_row = RESROW+1;
-    for (row = offscr_sc_rows; row < currow; row++) {
-        if ( ! row_hidden[row] ) cursor_row++;
-    }
-    int cursor_col = rescol;
-    for (col = offscr_sc_cols; col < curcol; col++) {
-        if ( ! col_hidden[col] ) cursor_col += fwidth[col];
-    } 
-    #ifdef USECOLORS
-    if (has_colors())
-        set_ucolor(win, CELL_SELECTION_SC);
-    #endif
-    wmove(win, cursor_row, cursor_col);
-    col = fwidth[curcol];
-    while (col-- > 0) {
-        wprintw(win, " ");
     }
 }
 
@@ -481,8 +430,6 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
             int in_range = 0; // this is for coloring empty cells within a range
             srange * s = get_selected_range();
             if (s != NULL && row >= s->tlrow && row <= s->brrow && col >= s->tlcol && col <= s->brcol ) {
-                //currow = s->tlrow; //FIXME comentado el dia 08/06/2014
-                //curcol = s->tlcol; //FIXME comentado el dia 08/06/2014
                 #ifdef USECOLORS
                     set_ucolor(win, CELL_SELECTION_SC);
                 #else
@@ -509,15 +456,14 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
             
             // si hay valor numerico
             if ( (*p)->flags & is_valid) {
-                show_numeric_content_of_cell(win, p, col, row + RESROW + 1 - offscr_sc_rows - q_row_hidden, c);
+                show_numeric_content_of_cell(win, p, col, row + 1 - offscr_sc_rows - q_row_hidden, c);
 
             // si hay solo valor de texto
             } else if ((*p) -> label) { 
-                show_text_content_of_cell(win, p, row, col, row + RESROW + 1 - offscr_sc_rows - q_row_hidden, c);
+                show_text_content_of_cell(win, p, row, col, row + 1 - offscr_sc_rows - q_row_hidden, c);
 
-            } /* repaint a blank cell. this fixes KI1 */
-            else if (!((*p)->flags & is_valid) && !(*p)->label   ) {
-                //if ( currow == row && curcol == col) 
+            /* repaint a blank cell. this fixes KI1 */
+            } else if (!((*p)->flags & is_valid) && !(*p)->label   ) {
                 if (( currow == row && curcol == col) ||
                 ( in_range && row >= ranges->tlrow && row <= ranges->brrow &&
                 col >= ranges->tlcol && col <= ranges->brcol ) ) {
@@ -535,11 +481,11 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
                 chtype cht[fieldlen];
                 int i;
 
-                mvwinchnstr(win, row + RESROW + 1 - offscr_sc_rows - q_row_hidden, c, cht, fieldlen);
+                mvwinchnstr(win, row + 1 - offscr_sc_rows - q_row_hidden, c, cht, fieldlen);
                 for (i=0; i < fieldlen; i++) {
                     caracter = cht[i] & A_CHARTEXT;
                     if ( ! caracter ) caracter = ' '; // this is for NetBSD compatibility
-                    mvwprintw(win, row + RESROW + 1 - offscr_sc_rows - q_row_hidden, c + i, "%c", caracter);
+                    mvwprintw(win, row + 1 - offscr_sc_rows - q_row_hidden, c + i, "%c", caracter);
                 }
             }
 
@@ -562,7 +508,6 @@ void add_cell_detail(char * d, struct ent * p1) {
             strcat(d, "|{");
         else
             strcat(d, (p1->flags & is_leftflush) ? "<{" : ">{");
-        //strcat(d, line); FIXME
         strcat(d, "??? } ");        /* and this '}' is for vi % */
 
     } else if (p1->label) {
@@ -601,7 +546,7 @@ void show_celldetails(WINDOW * win) {
         set_ucolor(win, CELL_ID);
     #endif
     sprintf(head, "%s%d ", coltoa(curcol), currow);
-    mvwprintw(win, 0, 0 + rescol, "%s", head); // agregado rescol el 08/06
+    mvwprintw(win, 0, 0 + rescol, "%s", head);
     inputline_pos += strlen(head) + rescol;  
 
     // show the current cell's format
@@ -654,8 +599,10 @@ int calc_offscr_sc_rows() {
         else  {
             // Try to put the cursor in the center of the screen
             row = (LINES - RESROW) / 2 + RESROW;
+            //row = (LINES - RESROW) / 2;
             offscr_sc_rows = currow;
             for (i=currow-1; i >= 0 && row - 1 > RESROW && i < maxrows; i--) {
+            //for (i=currow-1; i >= 0 && row - 1 > 0 && i < maxrows; i--) {
                 offscr_sc_rows--;
                 if (! row_hidden[i])
                     row--;
@@ -663,6 +610,7 @@ int calc_offscr_sc_rows() {
         }
         // Now pick up the counts again
         for (i = offscr_sc_rows, rows = 0, row = RESROW; i < maxrows && row < LINES; i++) { //i <= maxrows
+        //for (i = offscr_sc_rows, rows = 0, row = 0; i < maxrows && row < LINES; i++) { //i <= maxrows
             rows++;
             if (i == maxrows - 1) return rows+1;
             if (! row_hidden[i])

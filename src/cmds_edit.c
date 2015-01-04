@@ -247,20 +247,19 @@ void del_for_char() {
 }
 
 // return 1 OK
-// return 0 error
+// return 0 on error
 int start_edit_mode(struct block * buf, char type) {
     chg_mode(buf->value);
 
     line[0]='\0';
     inputline[0]='\0';
-    inputline_pos = 0;
 
     struct ent * p1 = lookat(currow, curcol);
 
     if (type == 'v') { // && p1->flags & is_valid) {   // numeric value
         if (( ! (p1->expr) ) ) {                       // || (p1->flags & is_strexpr)) {
             (void) sprintf(inputline, "%s%.15g", inputline, p1->v);
-        } else {                   // expression
+        } else {              // expression
             linelim = 0;
             editexp(currow, curcol);
             linelim = -1;
@@ -284,6 +283,7 @@ int start_edit_mode(struct block * buf, char type) {
         linelim = -1;
         (void) sprintf(inputline, "%s", line);
     }
+    inputline_pos = strlen(inputline) - 1;
 
     return 1;
 }

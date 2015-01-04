@@ -71,6 +71,7 @@ int yylex();
 %token S_SHOWCOL
 %token S_HIDECOL
 %token S_MARK
+%token S_AUTOJUS
 
 /*
 token S_INSERTCOL
@@ -402,6 +403,8 @@ command:
                     scxfree(tmp);
                 }
 */
+    |    S_AUTOJUS COL ':' COL       { auto_justify($2, $4, DEFWIDTH); }  // auto justificado de columnas
+    |    S_AUTOJUS COL               { auto_justify($2, $2, DEFWIDTH); }  // auto justificado de columna
 
     |    S_GOTO var_or_range     { moveto($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col, -1, -1); }
     |    S_GOTO num              { num_search($2, 0, 0, maxrow, maxcol, 0); }

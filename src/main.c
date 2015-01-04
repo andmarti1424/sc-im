@@ -2,6 +2,7 @@
 #include <curses.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <time.h>
 
 #include "main.h"
 #include "shift.h"
@@ -96,7 +97,7 @@ int main (int argc, char ** argv) {
     // create basic structures that will depend on the loaded file
     create_structures();
 
-    // load spreasdsheet pass as argv
+    // load spreasdsheet passed as argv
     char * revi;
     if ((revi = strrchr(argv[0], '/')) != NULL)
         progname = revi + 1;
@@ -204,7 +205,12 @@ void load_sc(int argc, char ** argv) {
 
     if (optind < argc) {
         if (! readfile(argv[optind], 1) && (optind == argc - 1)) {
+            //struct timespec ts;
+            //ts.tv_nsec=500000000;
+            //ts.tv_sec=0;
+            //nanosleep(&ts, &ts);
             info("New file: \"%s\"", curfile);
+            //nanosleep(&ts, &ts);
         }
         EvalAll(); // evaluo fórmulas
         optind++;

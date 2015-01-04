@@ -19,7 +19,8 @@
 #include "exec.h"
 #include "help.h"
 #include "marks.h"
-#include "excel.h"
+#include "xls.h"
+#include "xlsx.h"
 
 extern char * rev;
 extern struct dictionary * user_conf_d;
@@ -30,6 +31,7 @@ char interp_line[100];
 
 static char * valid_commands[] = {
 "!",
+"autojus",
 "color",
 "e csv",
 "e tab",
@@ -46,9 +48,11 @@ static char * valid_commands[] = {
 "i csv",
 "i tab",
 "i xls",
+"i xlsx",
 "i! csv",
 "i! tab",
 "i! xls",
+"i! xlsx",
 "int",
 "load",
 "load!",
@@ -216,6 +220,9 @@ void do_commandmode(struct block * sb) {
         } else if ( strcmp(inputline, "help") == 0 || strcmp(inputline, "h") == 0 ) {
             help();
 
+        } else if ( strncmp(inputline, "autojus", 7) == 0) {
+            send_to_interp(inputline); 
+
         } else if ( strncmp(inputline, "load", 4) == 0 ) {
             char cline [BUFFERSIZE];
             int force_rewrite = 0;
@@ -271,13 +278,21 @@ void do_commandmode(struct block * sb) {
 
         } else if ( strncmp(inputline, "datefmt", 7) == 0) {
             strcpy(interp_line, inputline);
-            char cline [BUFFERSIZE];
-            strcpy(cline, interp_line);
-            int found = str_in_str(interp_line, "\"");
-            if (found == -1) return;
-            del_range_chars(cline, 0, found-1);
-            sprintf(interp_line, "datefmt %s%d:", coltoa(sr->tlcol), sr->tlrow);
-            sprintf(interp_line, "%s%s%d %s", interp_line, coltoa(sr->brcol), sr->brrow, cline);
+
+            if (p != -1) { // in case there is a range selected
+                int r = currow, c = curcol, rf = currow, cf = curcol;
+                c = sr->tlcol;
+                r = sr->tlrow;
+                rf = sr->brrow;
+                cf = sr->brcol;
+                char cline [BUFFERSIZE];
+                strcpy(cline, interp_line);
+                int found = str_in_str(interp_line, "\"");
+                if (found == -1) return;
+                del_range_chars(cline, 0, found-1);
+                sprintf(interp_line, "datefmt %s%d:", coltoa(c), r);
+                sprintf(interp_line, "%s%s%d %s", interp_line, coltoa(cf), rf, cline);
+            }
             send_to_interp(interp_line);
  
         } else if ( strncmp(inputline, "sort ", 5) == 0 ) {
@@ -371,6 +386,8 @@ void do_commandmode(struct block * sb) {
         } else if (
             strncmp(inputline, "i csv " , 6) == 0 ||
             strncmp(inputline, "i! csv ", 7) == 0 ||
+            strncmp(inputline, "i xlsx" , 6) == 0 ||
+            strncmp(inputline, "i! xlsx", 7) == 0 ||
             strncmp(inputline, "i xls " , 6) == 0 ||
             strncmp(inputline, "i! xls ", 7) == 0 ||
             strncmp(inputline, "i tab " , 6) == 0 ||
@@ -386,15 +403,28 @@ void do_commandmode(struct block * sb) {
                 del_range_chars(cline, 1, 1);
             }
 
-            if ( strncmp(cline, "i csv ", 6) == 0) delim = ',';
-            else if ( strncmp(cline, "i tab ", 6) == 0) delim = '\t';
-            else {
+            if ( strncmp(cline, "i csv ", 6) == 0) { delim = ',';
+            } else if ( strncmp(cline, "i tab ", 6) == 0) { delim = '\t';
+            } else if ( strncmp(cline, "i xls ", 6) == 0) {
                 #ifndef XLS
                 error("XLS import support not compiled in");
+                chg_mode('.');
+                inputline[0]='\0';
+                update();
                 return;
                 #endif
                 delim = 'x';
+            } else if ( strncmp(cline, "i xlsx", 6) == 0) {
+                #ifndef XLSX
+                error("XLSX import support not compiled in");
+                chg_mode('.');
+                inputline[0]='\0';
+                update();
+                return;
+                #endif
+                delim = 'y';
             }
+
             del_range_chars(cline, 0, 5);
 
             if ( ! strlen(cline) ) {
@@ -406,6 +436,9 @@ void do_commandmode(struct block * sb) {
                 create_structures();
                 if (delim == 'x') {           // xls import
                     open_xls(cline, "UTF-8");
+                } else if (delim == 'y') {    // xlsx import
+                    del_range_chars(cline, 0, 0);
+                    open_xlsx(cline, "UTF-8");
                 } else {
                     import_csv(cline, delim); // csv or tab delim import
                 }

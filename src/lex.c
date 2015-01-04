@@ -352,7 +352,7 @@ int atocol(char *string, int len) {
     col = (toupper(string[0])) - 'A';
 
     if (len == 2)        /* has second char */
-    col = ((col + 1) * 26) + ((toupper(string[1])) - 'A');
+        col = ((col + 1) * 26) + ((toupper(string[1])) - 'A');
 
     return (col);
 }

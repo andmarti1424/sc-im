@@ -148,12 +148,6 @@ HISTORY_FILE := -DHISTORY_FILE=\"~/.sc_history\"
 # boxes, this forces screen redraws when going right off the screen
 #RIGHTBUG := -DRIGHT_CBUG
 
-# Uncomment below if you want basic XLS import support.
-# Requires libxlsreader.
-# Add -lxlsreader in LDLIBS as well.
-XLS := 
-#XLS := -DXLS
-
 # MS-DOS needs y_tab instead of the normal y.tab
 #YTAB := y_tab
 YTAB := y.tab
@@ -161,13 +155,32 @@ YTAB := y.tab
 #YACC := bison -y
 SED := sed
 
-#CFLAGS := -DSYSV3 -O2 -pipe -g $(DOBACKUPS)
+
+
+# Uncomment below if you want basic XLS import support.
+# Requires libxlsreader.
+# Add -lxlsreader in LDLIBS as well.
+XLS := 
+#XLS := -DXLS
+
+# Uncomment below if you want basic XLSX import support.
+# Requires libzip-dev and libxml2-dev
+# Add -lzip -xml2 to LDLIBS as well.
+# and -I/usr/include/libxml2 or the acording path to the libxml headers, in CFLAGS
+XLSX :=
+#XLSX := -DXLSX
+
+#CFLAGS := -DSYSV3 -O2 -Wall -pipe -g $(DOBACKUPS)
 CFLAGS := -DSYSV3 -O2 -Wall -pipe -g $(DOBACKUPS)
+#CFLAGS := -DSYSV3 -O2 -Wall -pipe -g -I/usr/include/libxml2 $(DOBACKUPS)
 CFLAGS := $(CFLAGS) $(USECOLORS) $(USELOCALE) $(SIGVOID) $(DFLT_PAGER)
 CFLAGS := $(CFLAGS) $(IEEE_MATH) $(RINT) $(REGEX) $(FMOD) $(LIBRARY)
-CFLAGS := $(CFLAGS) $(NO_NOTIMEOUT) $(SIMPLE) $(XLS)
+CFLAGS := $(CFLAGS) $(NO_NOTIMEOUT) $(SIMPLE) $(XLS) $(XLSX)
+
 LDLIBS := -lm -lncurses
 #LDLIBS := -lm -lncurses -lxlsreader
+#LDLIBS := -lm -lncurses -lxlsreader -lzip -lxml2 
+
 OBJS := $(patsubst %.c, %.o, $(wildcard *.c) $(wildcard utils/*.c)) gram.o
 
 # The documents in the Archive
@@ -186,7 +199,7 @@ uninstall :
 	-rm $(DESTDIR)$(prefix)/bin/scim
 
 $(name) : $(OBJS)
-	$(CC) $(LDFLAGS) $^ -o $@ $(LDLIBS)
+	$(CC) $(LDFLAGS) $^ -o $@ $(LDLIBS) 
 
 $(name)qref: sc.h
 	$(CC) $(CFLAGS) $(LDFLAGS) -DQREF $(QREF_FMT) -DSCNAME=\"$(NAME)\" -o $(name)qref help.c $(LDLIBS)
