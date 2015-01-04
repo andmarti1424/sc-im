@@ -788,6 +788,8 @@ int import_csv(char * fname, char d) {
     maxrow = r-1;
     maxcol = c-1;
 
+    auto_justify(0, maxcol, DEFWIDTH);
+
     //closefile(f, pid, rfd);
     fclose(f);
 

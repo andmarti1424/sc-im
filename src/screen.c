@@ -37,7 +37,7 @@ srange * ranges;
 void start_screen() {
     initscr();
 
-    main_win = newwin(LINES-RESROW, COLS, RESROW, 0);
+    main_win = newwin(LINES - RESROW, COLS, RESROW, 0);
     input_win = newwin(RESROW, COLS, 0, 0); // just 2 rows (RESROW = 2)
 
     #ifdef USECOLORS
@@ -665,7 +665,7 @@ void yyerror(char *err) {
     return;
 }
 
-// returns a string that represents the formated value of the cell, if a format exists
+// this function creates a string (value) that represents the formated value of the cell, if a format exists
 // returns 0  datetime format - number in p->v represents a date - format "d"
 // returns 1  format of number - (numbers with format) - puede haber label.
 // returns -1 if there is no format in the cell.
@@ -692,17 +692,13 @@ void show_text_content_of_cell(WINDOW * win, struct ent ** p, int row, int col, 
     int col_width = fwidth[col];    
     int flen;                 // current length of field
     int left;
-
     int str_len  = strlen((*p)->label);
+
     strcpy(value, (*p)->label);
 
     // in case there is a format
     char s[FBUFLEN] = "";
     int res = get_formated_value(p, col, s);
-    //if (res == 0) {           // datetime format
-    //    strcpy(value, s);
-    //    str_len  = strlen(value);
-    // }
 
     // si no entra en pantalla
     if (str_len > col_width) {
