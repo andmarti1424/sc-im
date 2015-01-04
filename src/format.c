@@ -206,18 +206,19 @@ bool format(char *fmt, int lprecision, double val, char *buf, int buflen) {
     for (cp = fmt; *cp != EOS; cp++) {
         if (*cp == '\\')
             cp++;
-        else if ((*cp == 'e' || *cp == 'E') && 
-            (cp[1] == '+' || cp[1] == '-') ) {
-            exponent = strcpy(exptmp, cp);
-            *cp = EOS;
-            if (val != 0.0) {
-                while (val < 1.0) {
-                    val *= 10.0;
-                    exp_val--;
-                }
-                while (val >= 10.0) {
-                    val /= 10.0;
-                    exp_val++;
+        else if (*cp == 'e' || *cp == 'E') {
+            if (cp[1] == '+' || cp[1] == '-') {
+                exponent = strcpy(exptmp, cp);
+                *cp = EOS;
+                if (val != 0.0) {
+                    while (val < 1.0) {
+                        val *= 10.0;
+                        exp_val--;
+                    }
+                    while (val >= 10.0) {
+                        val /= 10.0;
+                        exp_val++;
+                    }
                 }
             }
             break;
@@ -263,7 +264,8 @@ bool format(char *fmt, int lprecision, double val, char *buf, int buflen) {
         fraction = cp + 1;
         *cp = EOS;
         cp = fraction + strlen(fraction) - 1;
-        for (; zero_pad > 0 && *cp != EOS; zero_pad--, cp--) {
+        for (; zero_pad > 0 && *cp != EOS; zero_pad--, cp--) { // scim
+        //for (; zero_pad > 0; zero_pad--, cp--) { // sc
             if (*cp == '0')
                 *cp = EOS;
             else
@@ -294,7 +296,8 @@ bool format(char *fmt, int lprecision, double val, char *buf, int buflen) {
     len_cf = strlen(cf);
     if (len_cf >= cflen) {
         cflen = len_cf + 40;
-        cftmp = scxrealloc(cftmp, cflen);
+        cftmp = scxrealloc(cftmp, cflen); // scim
+        //cftmp = scxrealloc(cftmp, cilen); // sc
     }
     cf = strcpy(cftmp, cf);
 
@@ -345,11 +348,14 @@ static char * fmt_int(char *val,  /* integer part of the value to be formatted *
     while (f >= 0 || v >= 0) {
         if (f > 0 && fmt[f-1] == '\\') {
             *bufptr++ = fmt[f--];
-        } else if (f >= 0 && (fmt[f] == '#' || fmt[f] == '0') && (v >= 0 || fmt[f] == '0')) {
-            *bufptr++ = v < 0 ? '0' : val[v];
-            if (comma && (thousands = (thousands + 1) % 3) == 0 && v > 0 && thsep != '\0')
-                *bufptr++ = thsep;
-            v--;
+        } else if (f >= 0 && (fmt[f] == '#' || fmt[f] == '0')) {
+            if (v >= 0 || fmt[f] == '0') {
+                *bufptr++ = v < 0 ? '0' : val[v];
+                if (comma && (thousands = (thousands + 1) % 3) == 0 &&
+                        v > 0 && thsep != '\0')
+                    *bufptr++ = thsep;
+                v--;
+            }
         } else if (f >= 0) {
             *bufptr++ = fmt[f];
         }
@@ -409,7 +415,7 @@ static char * fmt_exp(int val, /* value of the exponent */
     register char *bufptr = buf;
     char valbuf[64];
     bool negative = false;
-  
+
     *bufptr++ = *fmt++;
     if (*fmt == '+')
         *bufptr++ = (val < 0) ? '-' : '+';
