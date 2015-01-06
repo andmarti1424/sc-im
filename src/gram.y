@@ -376,13 +376,11 @@ command:
 
     |    S_MARK COL var_or_range     { set_cell_mark($2 + 97, $3.left.vp->row, $3.left.vp->col); }
 
-    |    S_MARK COL var_or_range var_or_range { 
-                                          set_cell_mark('0', $3.left.vp->row, $3.left.vp->col);
-                                          set_cell_mark('1', $4.left.vp->row, $4.left.vp->col);
-                                          create_range('0', '1');
+    |    S_MARK COL var_or_range var_or_range { ; 
+                                          srange * sr = create_range('\0', '\0', $3.left.vp, $4.left.vp);
                                           unselect_ranges();
-                                          srange * sr = (srange *) get_range_by_marks('0', '1');
-                                          set_range_mark($2 + 97, sr); }
+                                          set_range_mark($2 + 97, sr);
+                                          }
 
     |    S_SORT range STRING {            sortrange($2.left.vp, $2.right.vp, $3);
                                           //scxfree($3); 

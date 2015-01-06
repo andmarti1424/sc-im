@@ -327,10 +327,11 @@ void write_marks(register FILE *f) {
     for ( i='a'; i<='z'; i++ ) {
         m = get_mark((char) i);
     
-        if ( m->row == -1 && m->row == -1) { // && m->rng != NULL ) {   // m->rng should not be NULL
+        // m->rng should never be NULL if both m->col and m->row are -1 !!
+        if ( m->row == -1 && m->col == -1) { // && m->rng != NULL ) {  
             fprintf(f, "mark %c %s%d ", i, coltoa(m->rng->tlcol), m->rng->tlrow);
             fprintf(f, "%s%d\n", coltoa(m->rng->brcol), m->rng->brrow);
-        } else if ( m->row != 0 && m->row != 0 ) {
+        } else if ( m->row != 0 && m->row != 0) { // && m->rng == NULL) {
             fprintf(f, "mark %c %s%d\n", i, coltoa(m->col), m->row);
         }
     }

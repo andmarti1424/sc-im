@@ -151,6 +151,25 @@ void do_commandmode(struct block * sb) {
         show_header(input_win);
         return;
 
+    } else if (sb->value == ctl('f')) { // C-f
+        char cline [BUFFERSIZE];
+        int i;
+        struct ent * p1 = *ATBL(tbl, currow, curcol);
+        if (! p1 || ! p1->format) {
+            error("cell has no format");
+            return;
+        }
+        sprintf(cline, "%s", p1->format);
+        for (i = 0; i < strlen(cline); i++) ins_in_line(cline[i]);
+
+        if (commandline_history->pos == 0) {          // solo si edito el nuevo comando
+            char * sl = get_line_from_history(commandline_history, 0);
+            strcat(sl, cline);                        // Inserto en el historial
+        }
+        tab_comp = -1;
+        show_header(input_win);
+        return;
+
     } else if (isprint(sb->value)) {       //  ESCRIBO UN NUEVO CHAR
         ins_in_line(sb->value);
         mvwprintw(input_win, 0, 0 + rescol, ":%s", inputline);

@@ -232,11 +232,7 @@ void do_visualmode(struct block * buf) {
 
     // mark a range
     } else if (buf->value == 'm' && get_bufsize(buf) == 2) {
-        set_cell_mark('0', r->tlrow, r->tlcol);
-        set_cell_mark('1', r->brrow, r->brcol);
-        create_range('0', '1');
-        //unselect_ranges();
-        srange * sr = (srange *) get_range_by_marks('0', '1');
+        srange * sr = create_range('\0', '\0', lookat(r->tlrow, r->tlcol), lookat(r->brrow, r->brcol));
         set_range_mark(buf->pnext->value, sr);
 
         exit_visualmode();

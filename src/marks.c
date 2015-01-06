@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include "marks.h"
+#include "macros.h"
 
 static struct mark * marks;
 
@@ -21,6 +22,9 @@ struct mark * get_mark(char c) {
 }
 
 void set_range_mark(char c, struct srange * s) {
+    // Al grabar una marca borro los rangos que utilizaban esa marca !!
+    del_ranges_by_mark(c);
+
     (marks + c)->rng = s;
     (marks + c)->row = -1;
     (marks + c)->col = -1;
@@ -31,6 +35,7 @@ void set_cell_mark(char c, int row, int col) {
     // Al grabar una marca borro los rangos que utilizaban esa marca !!
     del_ranges_by_mark(c);
 
+    (marks + c)->rng = NULL;
     (marks + c)->row = row;
     (marks + c)->col = col;
     return;

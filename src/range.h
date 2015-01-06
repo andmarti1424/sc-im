@@ -1,3 +1,5 @@
+#include "sc.h"
+
 struct srange {
     int tlrow;     // top left row
     int tlcol;     // top left col
@@ -13,7 +15,9 @@ typedef struct srange srange;
 
 extern srange * ranges;
 
-void create_range(char c, char d);
+srange * create_range(char c, char d, struct ent * tl, struct ent * br);
+int find_range(char * name, int len, struct ent * lmatch, struct ent * rmatch, struct range ** rng);
+
 void unselect_ranges();
 void free_ranges ();
 void del_ranges_by_mark (char c);
@@ -26,5 +30,3 @@ srange * create_custom_range(int tlrow, int tlcol, int brrow, int brcol);
 void free_custom_range(srange * sr);
 void clean_range();
 
-//#include "sc.h"
-//int find_range(char * name, int len, struct ent * lmatch, struct ent * rmatch, struct range ** rng);

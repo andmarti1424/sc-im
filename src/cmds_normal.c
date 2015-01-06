@@ -301,6 +301,7 @@ void do_normalmode(struct block * buf) {
                 set_range_mark(buf->pnext->value, sr);                   
             } else         // mark cell 
                 set_cell_mark(buf->pnext->value, currow, curcol);
+            modflg++;
             break;
 
         // copy
@@ -367,7 +368,7 @@ void do_normalmode(struct block * buf) {
         // create range with two marks
         case 'R':  
             if (bs == 3) {
-                create_range(buf->pnext->value, buf->pnext->pnext->value);
+                create_range(buf->pnext->value, buf->pnext->pnext->value, NULL, NULL);
                 update();
             }
             break;

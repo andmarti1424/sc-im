@@ -1,3 +1,6 @@
+#ifndef SC_H_
+#define SC_H_
+
 #include <stdio.h>
 #include <memory.h>
 
@@ -383,3 +386,5 @@ extern void efree(struct enode *e);
 extern void label(register struct ent *v, register char *s, int flushdir);
 extern void num_search(double n, int firstrow, int firstcol, int lastrow, int lastcol, int errsearch);
 extern void str_search(char *s, int firstrow, int firstcol, int lastrow, int lastcol, int num);
+
+#endif // SC_H_

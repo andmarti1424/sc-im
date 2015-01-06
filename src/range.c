@@ -1,7 +1,8 @@
-#include "stdlib.h"
+#include <curses.h>
+#include <stdlib.h>
+#include "sc.h"
 #include "marks.h"
 #include "macros.h"
-#include <curses.h>
 #include "color.h"   // for set_ucolor
 #include "xmalloc.h" // for scxfree
 
@@ -13,32 +14,46 @@ extern char * col_hidden;
 extern char * row_hidden;
 
 // Funcion que crea un rango a partir de dos marcas
-void create_range(char c, char d) {
+// o bien, a partir de dos celdas
+srange * create_range(char c, char d, struct ent * tl, struct ent * br) {
+    int tlrow, tlcol, brrow, brcol;
 
-    // Guardo los valores sobre el nuevo rango o el reutilizado
-    mark * mc = get_mark(c);
-    mark * md = get_mark(d);
+    if (c == '\0' && d == '\0') {
+        tlrow = tl->row;
+        tlcol = tl->col;
+        brrow = br->row;
+        brcol = br->col;
 
-    if ( row_hidden[mc->row] || row_hidden[md->row] ) {
-        error("Row of a marked cell is hidden");
-        return;
+    } else { 
+        // Guardo los valores sobre el nuevo rango o el reutilizado
+        mark * mc = get_mark(c);
+        mark * md = get_mark(d);
+        tlrow = mc->row < md->row ? mc->row : md->row;
+        tlcol = mc->col < md->col ? mc->col : md->col;
+        brrow = md->row > mc->row ? md->row : mc->row;
+        brcol = md->col > mc->col ? md->col : mc->col;
     }
 
-    if ( col_hidden[mc->col] || col_hidden[md->col] ) {
-        error("Column of a marked cell is hidden");
-        return;
+    if ( row_hidden[tlrow] || row_hidden[brrow] ) {
+        error("Row of cell is hidden");
+        return NULL;
     }
 
-    // Si el rango ya existe, lo utilizo
-    srange * exists_range = get_range_by_marks (c, d);
+    if ( col_hidden[tlcol] || col_hidden[brcol] ) {
+        error("Column of cell is hidden");
+        return NULL;
+    }
 
-    // Si no existe, lo creo
+    // Si el rango ya existe, y la creacion era por marca, lo utilizo
+    srange * exists_range = (c == '\0') && (d == '\0') ? NULL : get_range_by_marks (c, d);
+
+    // Si no existe el rango, lo creo
     srange * r = exists_range != NULL ? exists_range : (srange *) malloc (sizeof(srange));
 
-    r->tlrow = mc->row < md->row ? mc->row : md->row;
-    r->tlcol = mc->col < md->col ? mc->col : md->col;
-    r->brrow = md->row > mc->row ? md->row : mc->row;
-    r->brcol = md->col > mc->col ? md->col : mc->col;
+    r->tlrow = tlrow;
+    r->tlcol = tlcol;
+    r->brrow = brrow;
+    r->brcol = brcol;
     //r->orig_col = -1;
     //r->orig_row = -1;
     r->orig_row = currow;
@@ -50,7 +65,7 @@ void create_range(char c, char d) {
     currow = r->tlrow;
     curcol = r->tlcol;
 
-    // Only add to list if it was created a new range
+    // Only add to list if a range was created
     if (exists_range == NULL && ranges == NULL) {
         ranges = r;
     } else if (exists_range == NULL) {
@@ -59,7 +74,7 @@ void create_range(char c, char d) {
         ranges = r;
     }
 
-    return;
+    return r;
 }
 
 // Funcion que deselecciona todos los rangos grabados
@@ -142,8 +157,9 @@ void del_ranges_by_mark (char c) {
     ant = r;
     r = r->pnext;
     while (r != NULL) {
-        if ( (r->marks[0] == c || r->marks[1] == c) &&
-              r->marks[0] != '0' && r->marks[1] != '1' ) {
+        if ( (r->marks[0] == c || r->marks[1] == c)
+        ) {
+        //&& r->marks[0] != '0' && r->marks[1] != '1' ) {
             ant->pnext = r->pnext;
             free(r);
             r = ant->pnext;
@@ -183,8 +199,6 @@ void free_custom_range(srange * sr) {
     if (sr != NULL) free(sr);
     return;
 }
-
-#include "sc.h"
 
 static struct range * rng_base;
 //void sync_enode(struct enode * e);
