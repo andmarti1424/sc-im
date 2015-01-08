@@ -97,6 +97,7 @@ void handle_input(struct block * buffer) {
 
                 //Reemplazo mapeos del buffer
                 replace_maps(buffer);
+
             }
             
             gettimeofday(&m_tv, NULL);
@@ -257,14 +258,13 @@ void handle_mult(int * cmd_multiplier, struct block * buf, long timeout) {
 // que pudieran existir, uno a continuacion de otro, en un buffer
 // ej. yryr
 void exec_mult (struct block * buf, long timeout) {
-    int len = get_bufsize(buf);
-    if ( !len ) return;
-    int k, res;  
+    int k, res, len = get_bufsize(buf);
+    if ( ! len ) return;
 
     // Primero intento ejecutar todo el contenido del buffer
     if ((res = is_single_command(buf, timeout))) {
         if (res == EDITION_CMD) copybuffer(buf, lastcmd_buffer); // save stdin buffer content in lastcmd buffer
-        cmd_multiplier--;
+        //cmd_multiplier--;
         exec_single_cmd(buf); 
 
     // En caso de no poder, se recorre por bloques
@@ -275,7 +275,7 @@ void exec_mult (struct block * buf, long timeout) {
 
             if ((res = is_single_command(auxb, timeout))) {
                 if (res == EDITION_CMD) copybuffer(buf, lastcmd_buffer); // save stdin buffer content in lastcmd buffer
-                cmd_multiplier--;
+                //cmd_multiplier--;
                 exec_single_cmd(auxb);
                 flush_buf(auxb);
 
