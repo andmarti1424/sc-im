@@ -1,18 +1,18 @@
 #include <stdlib.h>
+#include <ctype.h>
 #include <curses.h>
 #include <string.h>
 #include "maps.h"
 #include "string.h"
 #include "macros.h"
-#include "color.h" // for set_ucolor
+#include "color.h"          // for set_ucolor
 #include "utils/block.h"
+#include "utils/string.h"
 
-#define MAXSC 25 // MAXSC is max length of special key word
+#define MAXSC 15            // MAXSC is max length of special key word
 
 static map * maps;
 static int mapdepth = 0;
-
-//unsigned int curmode;
 
 int replace_maps (struct block * b) {
     int r = 0;
@@ -30,14 +30,19 @@ int replace_maps (struct block * b) {
         // Verifico si algun mapeo existe en el buffer b
         int pos = block_in_block(b, m->in);
         if (pos != -1 && m->mode == curmode) {
+
             // se reemplaza contenido m->in por m->out en la lista b
-            replace_block_in_block (b, m->in, m->out);
+            if (replace_block_in_block(b, m->in, m->out) == -1) {
+                error("error replacing maps");
+                return -1;
+            }
             r = 1;
             break;
         }
         m = m->psig;
     }
-    if (r) replace_maps(b); 
+    
+    if (r) replace_maps(b);  // recursive mapping here!
     return r;
 }
 
@@ -45,25 +50,44 @@ int replace_maps (struct block * b) {
 struct block * get_mapbuf_str (char * str) {
     struct block * buffer = create_buf();
     unsigned short l = strlen(str);
-    unsigned short i;
-    unsigned short issk=0;
-    char sk[MAXSC];
-    sk[0]='\0';
+    unsigned short i, j;
+    unsigned short is_specialkey = 0;
+    char sk[MAXSC+1];
+    sk[0] = '\0';
 
     for (i=0; i<l; i++) {
+
+        // Agrego special keys
         if (str[i] == '<') {
-           issk = 1;
+           is_specialkey = 1;
+
         } else if (str[i] == '>') {
-           issk = 0;
-           // Agrego special keys
-           if (strcasecmp(sk, "cr") == 0)
-               addto_buf(buffer, 10);
+           is_specialkey = 0;
+           if (! strcmp(sk, "CR"))                            // CR - ENTER KEY
+               addto_buf(buffer, OKEY_ENTER);
+
+           else if (! strncmp(sk, "C-", 2) && strlen(sk) == 3 // C-x
+                    && ( (sk[2] > 64 && sk[2] < 91) || (sk[2] > 96 && sk[2] < 123)) )
+               addto_buf(buffer, ctl(sk[2]));
+
            sk[0]='\0';
-        } else if (issk) {
-           if (strlen(sk) < MAXSC-1) strcat(sk, &str[i]);
+
+        } else if (is_specialkey) {
+           if (strlen(sk) < MAXSC-1) {
+               str[i] = toupper(str[i]);
+               add_char(sk, str[i], strlen(sk));
+           }
+
+        // Agrego otros caracteres
         } else {
            addto_buf(buffer, (int) str[i]);
         }
+    }
+
+    // en caso de que se tenga en el buffer un string del tipo "<algo", sin la terminación ">", se inserta en el buffer
+    if (is_specialkey && i == l) {
+        j = strlen(sk);
+        for (i=0; i<j; i++) addto_buf(buffer, (int) str[l-j+i]);
     }
     return buffer;
 }
@@ -98,7 +122,8 @@ map * get_last_map() {
 // recibe un comando in, un out, y un caracter 'type' que indica el modo
 // en donde tiene efecto el mapeo
 void add_map(char * in, char * out, char mode) {
-    //info(">>%c,%s,%s<<", mode, in, out);
+
+    //info(">f>%c,in:%s,out:%s<<", mode, in, out); get_key();
     map * m = (map *) malloc (sizeof(map));
     m->out = (struct block *) get_mapbuf_str(out);
     m->in = (struct block *) get_mapbuf_str(in);
@@ -112,11 +137,17 @@ void add_map(char * in, char * out, char mode) {
         m->mode = INSERT_MODE;
         break;
     }
+
+// inserto al comienzo. comentar lo de abajo en caso de desear esta opción
+//    m->psig = maps == NULL ? NULL : maps;
+//    maps = m;
+
+    // inserto al final
     m->psig= NULL;
 
     if (maps == NULL) maps = m;
-    else {
+    else
         ((map *) get_last_map())->psig = m;
-    }
+ 
     return;
 }
