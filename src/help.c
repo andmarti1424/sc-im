@@ -538,8 +538,7 @@ char * long_help[] = {
 "                nmap \"a\" \"b\"",
 "                nnoremap \"b\" \"j\"",
 "                nmap \"j\" \":h<cr>\"",
-"            with this, 'a' maps to 'j', and only 'j' maps to ':h<cr>'
-"
+"            with this, 'a' maps to 'j', and only 'j' maps to ':h<cr>'",
 "",
 "",
 "        *COMMAND MULTIPLIER*",
