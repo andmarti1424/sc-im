@@ -176,6 +176,10 @@ token S_GETFORMAT
 
 %token S_IMAP
 %token S_NMAP
+%token S_INOREMAP
+%token S_NNOREMAP
+%token S_NUNMAP
+%token S_IUNMAP
 %token S_COLOR
 
 %token K_ERROR
@@ -416,16 +420,38 @@ command:
     |    S_UNLOCK var_or_range   { unlock_cells($2.left.vp, $2.right.vp); }
 
     |    S_NMAP STRING STRING           {
-                                          add_map($2, $3, 'n');
+                                          add_map($2, $3, NORMAL_MODE, 1);
                                           scxfree($2);
                                           scxfree($3);
                                         }
 
     |    S_IMAP STRING STRING 
                                         {
-                                          add_map($2, $3, 'i');
+                                          add_map($2, $3, INSERT_MODE, 1);
                                           scxfree($2);
                                           scxfree($3);
+                                        }
+    |    S_NNOREMAP STRING STRING       {
+                                          add_map($2, $3, NORMAL_MODE, 0);
+                                          scxfree($2);
+                                          scxfree($3);
+                                        }
+
+    |    S_INOREMAP STRING STRING       {
+                                          add_map($2, $3, INSERT_MODE, 0);
+                                          scxfree($2);
+                                          scxfree($3);
+                                        }
+
+
+    |    S_NUNMAP STRING                {
+                                          del_map($2, NORMAL_MODE);
+                                          scxfree($2);
+                                        }
+
+    |    S_IUNMAP STRING                {
+                                          del_map($2, INSERT_MODE);
+                                          scxfree($2);
                                         }
 
     |    S_COLOR STRING                 {  

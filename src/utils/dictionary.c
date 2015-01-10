@@ -26,7 +26,7 @@ void put(struct dictionary * d, char * k, char * v) {
 
        d->len++;
        char * key = (char *) malloc(sizeof(char) * strlen(k)+1);
-       key[0]='\0';
+       key[0] = '\0';
        strcpy(key, k);
        nl->key = key;
 
@@ -59,14 +59,14 @@ void put(struct dictionary * d, char * k, char * v) {
 
        d->len++;
        char * key = (char *) malloc(sizeof(char) * strlen(k)+1);
-       key[0]='\0';
+       key[0] = '\0';
        strcpy(key, k);
        nl->key = key;
    }
 
    // para todos los casos, guardo el valor
    char * val = (char *) malloc(sizeof(char) * strlen(v)+1);
-   val[0]='\0';
+   val[0] = '\0';
    strcpy(val, v);
    nl->val = val;
    return;

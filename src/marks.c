@@ -2,12 +2,13 @@
 #include "marks.h"
 #include "macros.h"
 
+#define NUM_MARKS 128
 static struct mark * marks;
 
 // 'a' - 'z' = 26
 // '0' - '1' = 10
 void create_mark_array() {
-    marks = (struct mark *) calloc( 128, sizeof(struct mark) );
+    marks = (struct mark *) calloc(NUM_MARKS, sizeof(struct mark) );
     return;
 }
 
@@ -43,7 +44,7 @@ void set_cell_mark(char c, int row, int col) {
 
 void fix_marks(int deltar, int deltac, int row_desde, int row_hasta, int col_desde, int col_hasta) {
     int i;
-    for (i = 0; i < 26; i++) {
+    for (i = 0; i < NUM_MARKS-1; i++) {
         struct mark * m = marks + i;
         if (m->row >= row_desde && m->row <= row_hasta &&
             m->col >= col_desde && m->col <= col_hasta ) {

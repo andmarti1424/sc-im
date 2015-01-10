@@ -311,7 +311,7 @@ void do_normalmode(struct block * buf) {
             struct ent * p = *ATBL(tbl, get_mark(buf->pnext->value)->row, get_mark(buf->pnext->value)->col);
             int c1;
             struct ent * n;
-            cmd_multiplier++;
+            //cmd_multiplier++;
 
             for (c1 = curcol; cmd_multiplier-- && c1 < maxcols; c1++) {
                 if ((n = * ATBL(tbl, currow, c1))) {
@@ -377,7 +377,7 @@ void do_normalmode(struct block * buf) {
         case 'Z':
         case 'S':
             {
-            int rs, r = currow, c = curcol, arg = cmd_multiplier + 1;
+            int rs, r = currow, c = curcol, arg = cmd_multiplier;
             struct srange * sr;
             if ( (rs = is_range_selected()) != -1) {
                 sr = get_range_by_pos(rs);
@@ -456,7 +456,7 @@ void do_normalmode(struct block * buf) {
         case 'd':
             {
             if (bs != 2) return;
-            int ic = cmd_multiplier + 1;
+            int ic = cmd_multiplier; // orig
 
             if (buf->pnext->value == 'r') {
                 if (any_locked_cells(currow, 0, currow + cmd_multiplier, maxcol)) {
@@ -464,12 +464,13 @@ void do_normalmode(struct block * buf) {
                     return;
                 }
                 create_undo_action();
-                copy_to_undostruct(currow, 0, currow - 1 + ic, maxcol, 'd');
-                save_undo_range_shift(-ic, 0, currow, 0, currow -1 + ic, maxcol);
-                fix_marks(-ic, 0, currow - 1 + ic, maxrow, 0, maxcol);
-                yank_area(currow, 0, currow + cmd_multiplier, maxcol, 'r', ic);
+                copy_to_undostruct(currow, 0, currow + ic - 1, maxcol, 'd');
+                save_undo_range_shift(-ic, 0, currow, 0, currow - 1 + ic, maxcol);
+                fix_marks(-ic, 0, currow + ic - 1, maxrow, 0, maxcol);
+                yank_area(currow, 0, currow - 1 + cmd_multiplier, maxcol, 'r', ic);
                 while (ic--) deleterow();
-                copy_to_undostruct(currow, 0, currow + cmd_multiplier, maxcol, 'a');
+                copy_to_undostruct(currow, 0, currow - 1 + cmd_multiplier, maxcol, 'a');
+
                 if (cmd_multiplier > 0) cmd_multiplier = 0;
                 end_undo_action();
 
@@ -482,9 +483,9 @@ void do_normalmode(struct block * buf) {
                 copy_to_undostruct(0, curcol, maxrow, curcol - 1 + ic, 'd');
                 save_undo_range_shift(0, -ic, 0, curcol, maxrow, curcol - 1 + ic);
                 fix_marks(0, -ic, 0, maxrow,  curcol - 1 + ic, maxcol);
-                yank_area(0, curcol, maxrow, curcol + cmd_multiplier, 'c', ic);
+                yank_area(0, curcol, maxrow, curcol + cmd_multiplier - 1, 'c', ic);
                 while (ic--) deletecol();
-                copy_to_undostruct(0, curcol, maxrow, curcol + cmd_multiplier, 'a');
+                copy_to_undostruct(0, curcol, maxrow, curcol + cmd_multiplier - 1, 'a');
                 if (cmd_multiplier > 0) cmd_multiplier = 0;
                 end_undo_action();
 
@@ -518,26 +519,26 @@ void do_normalmode(struct block * buf) {
         case 'y':
             // yank row
             if ( bs == 2 && buf->pnext->value == 'r') {        
-                yank_area(currow, 0, currow + cmd_multiplier, maxcol, 'r', cmd_multiplier + 1);
+                yank_area(currow, 0, currow + cmd_multiplier - 1, maxcol, 'r', cmd_multiplier);
                 if (cmd_multiplier > 0) cmd_multiplier = 0;
 
             // yank col
             } else if ( bs == 2 && buf->pnext->value == 'c') {
-                yank_area(0, curcol, maxrow, curcol + cmd_multiplier, 'c', cmd_multiplier + 1);
+                yank_area(0, curcol, maxrow, curcol + cmd_multiplier - 1, 'c', cmd_multiplier);
                 if (cmd_multiplier > 0) cmd_multiplier = 0;
 
             // yank cell
             } else if ( bs == 2 && buf->pnext->value == 'y' && is_range_selected() == -1) {
-                yank_area(currow, curcol, currow, curcol, 'e', cmd_multiplier + 1);
+                yank_area(currow, curcol, currow, curcol, 'e', cmd_multiplier);
 
             // yank range
             } else if ( bs == 1 && is_range_selected() != -1) {
                 srange * r = get_selected_range();
-                yank_area(r->tlrow, r->tlcol, r->brrow, r->brcol, 'a', cmd_multiplier + 1);
+                yank_area(r->tlrow, r->tlcol, r->brrow, r->brcol, 'a', cmd_multiplier);
             }
             break;
-               // paste cell below or left
-               
+
+        // paste cell below or left
         case 'p':
             paste_yanked_ents(0);
             update();
@@ -732,7 +733,7 @@ void do_normalmode(struct block * buf) {
             if (atoi(get_conf_value("numeric")) == 1) goto numeric;
             struct ent * p;
             create_undo_action();
-            int arg = cmd_multiplier + 1;
+            int arg = cmd_multiplier;
             int mf = modflg; // keep original modflg
             for (r = tlrow; r <= brrow; r++) {
                 for (c = tlcol; c <= brcol; c++) {

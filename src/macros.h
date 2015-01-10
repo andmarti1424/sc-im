@@ -1,5 +1,7 @@
 #define BUFFERSIZE       256
 #define MAX_MULTIPLIER   100   // efecto multiplicador
+#define MAXSC            15    // MAXSC is the max length of a special key expressed as a string. ex. <C-a>
+#define MAXMAPITEM       (MAXSC * 20) // max length of mapping part (in / out)
 #define TIMEOUT_CURSES   300   // ms  Timeout para esperar una tecla en curses
 #define CMDTIMEOUT       3000  // ms  Timeout para esperar un comando valido
 #define COMPLETECMDTIMEOUT     (CMDTIMEOUT/8) // ms. Tiempo para completar un comando automáticamente
@@ -16,6 +18,7 @@
 // #define SEARCH_MODE      0x32 
 // #define ctl(c) ((c)&037)
 #define ctl(x)           ((x) & 0x1f)
+#define uncl(x)           (0x60 | ((x) & 0x1f))
 #define OKEY_ESC         '\033'
 #define OKEY_TAB         '\011'
 #define OKEY_ENTER       10

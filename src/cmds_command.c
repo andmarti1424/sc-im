@@ -19,6 +19,7 @@
 #include "exec.h"
 #include "help.h"
 #include "marks.h"
+#include "maps.h"
 #include "xls.h"
 #include "xlsx.h"
 
@@ -53,15 +54,18 @@ static char * valid_commands[] = {
 "i! tab",
 "i! xls",
 "i! xlsx",
+"imap",
 "int",
 "load",
 "load!",
+"nmap",
 "q",
 "q!",
 "quit!",
 "quit",
 "set",
 "showcol",
+"showmaps",
 "showrow",
 "showrows",
 "sort",
@@ -377,12 +381,25 @@ void do_commandmode(struct block * sb) {
         } else if ( strcmp(inputline, "set") == 0 ) {
             int d = user_conf_d->len;
             char valores[20 * d];
-            valores[0]='\0';
             get_conf_values(valores);
             show_text(valores);
 
         } else if ( strcmp(inputline, "version") == 0 ) {
             show_text(rev);
+
+        } else if ( strcmp(inputline, "showmaps") == 0 ) {
+            extern int len_maps;
+            char valores[MAXMAPITEM * len_maps];
+            get_mappings(valores);
+            show_text(valores);
+ 
+        } else if ( ! strncmp(inputline, "nmap", 4) ||
+                    ! strncmp(inputline, "imap", 4) ||
+                    ! strncmp(inputline, "inoremap", 8) ||
+                    ! strncmp(inputline, "nnoremap", 8) ||
+                    ! strncmp(inputline, "iunmap", 6) ||
+                    ! strncmp(inputline, "nunmap", 6) ) {
+            send_to_interp(inputline);
 
         } else if ( strncmp(inputline, "!", 1) == 0 ) {
             del_range_chars(inputline, 0, 0); 

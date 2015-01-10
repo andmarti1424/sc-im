@@ -165,7 +165,7 @@ void paste_yanked_ents(int above) {
         int c = yank_arg;
         copy_to_undostruct(0, curcol + above, maxrow, curcol + above - 1 + yank_arg, 'd');
         while (c--) above ? insert_col(1) : insert_col(0);   // insert cols to the right if above or to the left
-        if (above) curcol = back_col(1)->col;
+        //if (above) curcol = back_col(1)->col; NO
         diffr = yl->row;
         diffc = curcol - yl->col;
         fix_marks(0, yank_arg, 0, maxrow, curcol, maxcol);

@@ -1,6 +1,6 @@
 #include "block.h"
 #include <string.h>
-#include "string.h"
+#include "utils/string.h"
 
 
 // Funcion que determina si dentro de la lista ori
@@ -63,7 +63,9 @@ int replace_block_in_block (struct block * olist, struct block * in, struct bloc
     int lin = get_bufsize(in);
     int lout = get_bufsize(out);
 
-    if ( !lin || !lori || !lout ) return -1;
+    if ( ! lin || ! lori || ! lout ) return -1;
+
+    //info("%d %d %d", lori, lin, lout); get_key();
 
     // Primero borro de olist la porcion correspondiente a in
     int pos = block_in_block (olist, in);
@@ -95,24 +97,4 @@ void block_to_str(struct block * b, char * out) {
     }
     return;
 }
-
-// return the contents of a buffer as a single string
-/* FIXME esta funcion tiene bugs???
-char * get_bufcont(struct block * buf) {
-    struct block * aux = buf;
-
-    int slen = get_pbuflen(aux);
-    char * strcmd = (char*) malloc((slen + 1) * sizeof(char));
-    strcmd[0] = '\0';
-
-    char d[2];
-    d[1]='\0';
-    while ( aux != NULL && aux->value != '\0' ) {
-        d[0] = (char) aux->value; //FIXME when we have special keys like esc
-        strcat(strcmd, d);
-        aux = aux->pnext;
-    }
-    return strcmd;
-}
-*/
 

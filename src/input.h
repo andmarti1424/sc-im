@@ -1,6 +1,5 @@
 #include <ncurses.h>
-#include <sys/time.h>
-//#include "buffer.h"
+#include <sys/time.h>                                                 // for struct timeval
 
 extern int multiplier;                                                // Multiplier 
 extern int command_pending;                                           // Command pending

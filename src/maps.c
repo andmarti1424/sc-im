@@ -6,13 +6,12 @@
 #include "string.h"
 #include "macros.h"
 #include "color.h"          // for set_ucolor
-#include "utils/block.h"
+#include "block.h"
 #include "utils/string.h"
-
-#define MAXSC 15            // MAXSC is max length of special key word
 
 static map * maps;
 static int mapdepth = 0;
+int len_maps = 0;
 
 int replace_maps (struct block * b) {
     int r = 0;
@@ -42,7 +41,7 @@ int replace_maps (struct block * b) {
         m = m->psig;
     }
     
-    if (r) replace_maps(b);  // recursive mapping here!
+    if (r && m->recursive) replace_maps(b);  // recursive mapping here!
     return r;
 }
 
@@ -63,12 +62,12 @@ struct block * get_mapbuf_str (char * str) {
 
         } else if (str[i] == '>') {
            is_specialkey = 0;
-           if (! strcmp(sk, "CR"))                            // CR - ENTER KEY
+           if (! strcmp(sk, "CR"))                            // CR - ENTER key
                addto_buf(buffer, OKEY_ENTER);
 
-           else if (! strncmp(sk, "C-", 2) && strlen(sk) == 3 // C-x
+           else if (! strncmp(sk, "C-", 2) && strlen(sk) == 3 // C-X
                     && ( (sk[2] > 64 && sk[2] < 91) || (sk[2] > 96 && sk[2] < 123)) )
-               addto_buf(buffer, ctl(sk[2]));
+               addto_buf(buffer, ctl(tolower(sk[2])));
 
            sk[0]='\0';
 
@@ -118,25 +117,49 @@ map * get_last_map() {
     return e;
 }
 
+// funcion que indica si un string ya está mapeado para un determinado modo
+// devuelve -1 en caso de no existir, o la posicion dentro de maps en caso 
+// de existir.
+int exists_map(char * in, int mode) {
+    map * m = maps;
+    char str_in[MAXMAPITEM] = "";
+    int pos = -1;
+
+    while (m != NULL) {
+        pos++;
+        get_mapstr_buf(m->in, str_in);
+        if ( ! strcmp(in, str_in) && m->mode == mode) {
+            return pos; 
+        }
+        m = m->psig;
+    }
+    return -1;
+}
 // Funcion que agrega un mapeo a la lista de mapeos de sesion
 // recibe un comando in, un out, y un caracter 'type' que indica el modo
 // en donde tiene efecto el mapeo
-void add_map(char * in, char * out, char mode) {
+void add_map(char * in, char * out, int mode, short recursive) {
+    map * m;
+    
+    // si el mapeo ya existe, reemplazo su contenido
+    // guardando su posicion!
+    int exists = exists_map(in, mode);
+    if (exists == -1) {
+        m = (map *) malloc (sizeof(map));
+    } else {
+        m = maps;
+        while (exists--) m = m->psig;
+        erase_buf(m->in);
+        erase_buf(m->out);
+        exists = TRUE;
+    }
 
-    //info(">f>%c,in:%s,out:%s<<", mode, in, out); get_key();
-    map * m = (map *) malloc (sizeof(map));
     m->out = (struct block *) get_mapbuf_str(out);
     m->in = (struct block *) get_mapbuf_str(in);
-    
-    switch (mode) {
-    case 'n':
-        m->mode = NORMAL_MODE;
-        break;
+    m->mode = mode;
+    m->recursive = recursive;
 
-    case 'i':
-        m->mode = INSERT_MODE;
-        break;
-    }
+    if (exists == TRUE) return; // in case a map was updated and not created!
 
 // inserto al comienzo. comentar lo de abajo en caso de desear esta opción
 //    m->psig = maps == NULL ? NULL : maps;
@@ -149,5 +172,103 @@ void add_map(char * in, char * out, char mode) {
     else
         ((map *) get_last_map())->psig = m;
  
+
+
+    len_maps++;
+
     return;
+}
+
+// funcion que elimina un mapeo en un determinado modo
+// recibe como parámetro un char *, además del modo
+void del_map(char * in, int mode) {
+    map * ant;
+    map * m = maps;
+
+    if (m == NULL) return;
+
+    // Si el nodo a eliminar es el primero
+    char strin [MAXSC * get_bufsize(m->in)];
+    get_mapstr_buf(m->in, strin);
+    if ( ! strcmp(in, strin) && mode == m->mode) {
+        maps = m->psig;
+        erase_buf(m->out);
+        erase_buf(m->in);
+        free(m);
+        len_maps--;
+        return;
+    }
+
+    // si el nodo esta al medio o final
+    ant = m;
+    m = m->psig;
+    while (m != NULL) {
+        char strin [MAXSC * get_bufsize(m->in)];
+        get_mapstr_buf(m->in, strin);
+        if ( ! strcmp(in, strin) && mode == m->mode) {
+            ant->psig = m->psig;
+            erase_buf(m->out);
+            erase_buf(m->in);
+            free(m);
+            m = ant->psig;
+            len_maps--;
+            return;
+        }
+        ant = m;
+        m = m->psig;
+    }
+    return;
+}
+
+// funcion que convierte un block en una cadena de caracteres
+// los caracteres especiales los guarda en el formato <CR>..
+void get_mapstr_buf (struct block * b, char * str) {    
+    struct block * a = b;
+    int i, len = get_bufsize(a);
+    
+    str[0]='\0';
+    for (i=0; i<len; i++) {
+        if (isprint(a->value)) {
+            sprintf(str, "%s%c", str, (char) a->value);
+        } else if (a->value == OKEY_ENTER) {
+            strcat(str, "<CR>");                                // enter
+        } else if ( a->value == (uncl(a->value) & 0x1f)) {      // c-x
+            sprintf(str, "%s<C-%c>", str, uncl(a->value));
+        }
+        a = a->pnext;
+    }
+    return;
+}
+
+// función que guarda en un char * el listado y detalle de todos
+// los maps existentes
+void get_mappings(char * salida) {
+   salida[0]='\0';
+   if (maps == NULL) return;
+   char min[MAXMAPITEM] = "";
+   char mout[MAXMAPITEM] = "";
+   char nore[5] = "";
+   
+   char mode = '\0';
+   map * m = maps;
+
+   while (m != NULL) {
+       nore[0] = '\0';
+       switch (m->mode) {
+            case NORMAL_MODE:
+                mode = 'n';
+                break;
+
+            case INSERT_MODE:
+                mode = 'i';
+                break;
+       }
+       get_mapstr_buf(m->in, min);
+       get_mapstr_buf(m->out, mout);
+       if (!m->recursive) strcpy(nore, "nore");
+       sprintf(salida, "%s+ %c%smap \"%s\" = \"%s\"\n", salida, mode, nore, min, mout);
+       m = m->psig;
+   }
+
+   return;
 }
