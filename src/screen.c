@@ -118,8 +118,10 @@ void update(void) {
     // calculo las filas y columnas que quedan ocultas
     //   mxcol-1 es el numero de la ultima sc_col que se ve en pantalla
     //   mxrow-1 es el numero de la ultima sc_row que se ve en pantalla
-    int mxcol = offscr_sc_cols + calc_offscr_sc_cols() - 1;
-    int mxrow = offscr_sc_rows + calc_offscr_sc_rows() - 1;
+    int off_cols = calc_offscr_sc_cols();
+    int off_rows = calc_offscr_sc_rows();
+    int mxcol = offscr_sc_cols + off_cols - 1;
+    int mxrow = offscr_sc_rows + off_rows - 1;
 
     /* You can't hide the last row or col */
     while (row_hidden[currow])
@@ -145,7 +147,7 @@ void update(void) {
 
     // print mode
     (void) print_mode(input_win);
-    wrefresh(input_win);
+    //wrefresh(input_win); // linea comentada el 11/01
     
     return;
 }
@@ -580,7 +582,7 @@ void show_celldetails(WINDOW * win) {
     add_cell_detail(head, p1);
     mvwprintw(win, 0, inputline_pos, "%s", head);
     wclrtoeol(win); //linea agregada el 08/06
-    wrefresh(win);
+    //wrefresh(win); // linea comentada el 11/01
 }
 
 // Calculo la cantidad de filas que quedan ocultas en la parte superior de la pantalla
@@ -637,7 +639,7 @@ int calc_offscr_sc_cols() {
         if (offscr_sc_cols - 1 == curcol) offscr_sc_cols--;
         else if (offscr_sc_cols + cols == curcol) offscr_sc_cols++;
         else {
-            /* Try to put the cursor in the center of the screen */
+            // Try to put the cursor in the center of the screen
             col = (COLS - rescol - fwidth[curcol]) / 2 + rescol;
             offscr_sc_cols = curcol;
             for (i=curcol-1; i >= 0 && col-fwidth[i] > rescol; i--) {
