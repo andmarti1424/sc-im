@@ -26,11 +26,11 @@
 #define OKEY_DEL         0x14a
 
 #ifdef BSD42
-#undef  OKEY_DEL
-#define OKEY_DEL         0x7f
+#define OKEY_BS          0x7f
+#else
+#define OKEY_BS          0x107
 #endif
 
-#define OKEY_BS          0x107
 #define OKEY_HOME        0x106
 #define OKEY_END         0x168
 #define OKEY_PGUP        0x153
