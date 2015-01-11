@@ -13,9 +13,6 @@
 #define EDIT_MODE        0x04
 #define COMMAND_MODE     0x08
 #define VISUAL_MODE      0x16
-// Submenues
-// #define REPLACE_MODE     0x16
-// #define SEARCH_MODE      0x32 
 // #define ctl(c) ((c)&037)
 #define ctl(x)           ((x) & 0x1f)
 #define uncl(x)           (0x60 | ((x) & 0x1f))
@@ -27,6 +24,12 @@
 #define OKEY_DOWN        0x102
 #define OKEY_UP          0x103
 #define OKEY_DEL         0x14a
+
+#ifdef BSD42
+#undef  OKEY_DEL
+#define OKEY_DEL         0x7f
+#endif
+
 #define OKEY_BS          0x107
 #define OKEY_HOME        0x106
 #define OKEY_END         0x168
@@ -47,17 +50,10 @@
     #define ERROR_MSG    9
 #endif
 
+
+
 #include <ncurses.h>
-//#include "color.h"
 extern WINDOW * input_win;
 #define error(...)   set_ucolor(input_win, ERROR_MSG); wmove(input_win, 1, 0); wprintw(input_win, __VA_ARGS__); wclrtoeol(input_win); wrefresh(input_win);
-// wgetch(input_win);
 #define info(...)    set_ucolor(input_win, INFO_MSG); mvwprintw(input_win, 1, 0, __VA_ARGS__); wclrtoeol(input_win); wrefresh(input_win);
-// wgetch(input_win);
-
-/*
-    #include <ncurses.h>
-    extern WINDOW * input_win;
-    mvwprintw(input_win, 1, 0, "%d  %d  %d  %d", tlrow, tlcol, brrow, brcol);
-    wclrtoeol(input_win); wrefresh(input_win);
-*/
+#define debug(...)   set_ucolor(input_win, INFO_MSG); mvwprintw(input_win, 1, 0, __VA_ARGS__); wclrtoeol(input_win); wtimeout(input_win, -1); wgetch(input_win); wtimeout(input_win, TIMEOUT_CURSES); wrefresh(input_win);
