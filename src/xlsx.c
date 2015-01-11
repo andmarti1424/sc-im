@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
-#include <zip.h>
 #include <ctype.h>   // for isdigit
 #include "macros.h"
 #include "sc.h"
@@ -10,6 +9,7 @@
 #include "lex.h"
 
 #ifdef XLSX
+#include <zip.h>
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 #include "xlsx.h"
