@@ -91,7 +91,7 @@ REGEX := -DREGCOMP
 #DFLT_PAGER := -DDFLT_PAGER=\"more\"
 DFLT_PAGER := -DDFLT_PAGER=\"less\"
 
-# This is the name of the history file that is looked in your HOME
+# This is the name of the history file that is looked in your HOME directory
 # If undefined, no history will be saved
 HISTORY_FILE := -DHISTORY_FILE=\".sciminfo\"
 

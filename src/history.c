@@ -37,15 +37,15 @@ void load_history(struct history * h) {
     char infofile[PATHLEN];
     char linea[FBUFLEN];
     int c;
-    char *home;
-    FILE *f;
+    char * home;
+    FILE * f;
 
     if ((home = getenv("HOME"))) {
-    strcpy(infofile, home);
-    strcat(infofile,  HISTORY_FILE);
-    if ((c = open(infofile, O_RDONLY)) > -1) {
-        close(c);
-        f = fopen(infofile, "r");
+        sprintf(infofile, "%s/", home);
+        strcat(infofile, HISTORY_FILE);
+        if ((c = open(infofile, O_RDONLY)) > -1) {
+            close(c);
+            f = fopen(infofile, "r");
             if (f == NULL) return;
             while ( feof(f) == 0 ) {
 
@@ -59,7 +59,7 @@ void load_history(struct history * h) {
                 }
             }
             fclose(f);
-    } 
+        } 
     }
 
     return;
@@ -70,15 +70,15 @@ void load_history(struct history * h) {
 int save_history(struct history * h) {
     if (h->mode != ':' ) return -1;
     char infofile[PATHLEN];
-    char *home;
-    FILE *f;
+    char * home;
+    FILE * f;
     int i;
     struct hlist * nl = h->list;
 
     if ((home = getenv("HOME"))) {
-    sprintf(infofile, "%s/", home);
-    strcat(infofile, HISTORY_FILE);
-    f = fopen(infofile, "w");
+        sprintf(infofile, "%s/", home);
+        strcat(infofile, HISTORY_FILE);
+        f = fopen(infofile, "w");
         if (f == NULL) return -1;
 
         // voy hasta el final
