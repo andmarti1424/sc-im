@@ -31,7 +31,7 @@ void load_help () {
     // cuento cantidad de elementos que tendra long_help
     while ( (line = getc(f)) != -1) {
         c++;
-        if (c > COLS || line == '\n') {
+        if (c >= COLS || line == '\n') {
             c = 0;
             if (max_width < c) max_width = c;
             count++;
@@ -42,7 +42,7 @@ void load_help () {
     rewind(f);
     
     // guardo memoria para tantos punteros como lineas
-    long_help = (char **) malloc (sizeof(char *) * (count + 2));
+    long_help = (char **) malloc (sizeof(char *) * (count + 1));
     
     // cargo long_help
     char word[max_width+1];
@@ -51,16 +51,16 @@ void load_help () {
     while ( (line = getc(f)) != -1) {
         c++;
         add_char(word, line, strlen(word));
-        if (c > COLS || line == '\n') {
+        if (c >= COLS || line == '\n') {
             c = 0;
             long_help[count] = (char *) malloc (sizeof(char) * (strlen(word) + 1));
-            //long_help[count][0]='\0';
             strcpy(long_help[count], word);
             count++;
             word[0]='\0';
         }
     }
-    long_help[count] = (char *) 0;
+    long_help[count] = (char *) malloc (sizeof(char) * (strlen(word) + 1));
+    strcpy(long_help[count], word);
 
     fclose(f);
     return;
@@ -92,7 +92,7 @@ void help() {
         case OKEY_ENTER:
         case OKEY_DOWN:
         case 'j':
-            if (max > delta + LINES + 1) delta++;
+            if (max >= delta + LINES - 1) delta++;
             break;
 
         case OKEY_DEL:
@@ -114,6 +114,14 @@ void help() {
         case ctl('f'):
             if (delta + LINES + LINES/2 < max) delta += LINES/2;
             else if (max > delta + LINES) delta = max - 1 - LINES;
+            break;
+
+        case 'G':
+            delta = max - LINES + RESROW;
+            break;
+
+        case ctl('a'):
+            delta = 0;
             break;
 
         case 'n':
@@ -175,19 +183,11 @@ void help() {
             wrefresh(input_win);
             curs_set(0);
             break;
-
-        case 'G':
-            delta = max - 1 - LINES;
-            break;
-
-        case ctl('a'):
-            delta = 0;
-            break;
         }
     }
 
-    // free memory allocated // FIXME
-    for (delta = 0; delta < max; delta++) {
+    // free memory allocated
+    for (delta = 0; delta <= max; delta++) {
        free(long_help[delta]);
     }
     free(long_help);
@@ -231,7 +231,7 @@ void find_word(char * word, char order) {
 int show_lines() {
     int lineno, c = 0, bold = 0;
 
-    for (lineno = 0; long_help[lineno + delta] && lineno < LINES; lineno++) {
+    for (lineno = 0; long_help[lineno + delta] && lineno < LINES - RESROW; lineno++) {
         if (strlen(word_looked)) look_result = str_in_str(long_help[lineno + delta], word_looked);
 
         wmove(main_win, lineno, 0);

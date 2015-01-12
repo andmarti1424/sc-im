@@ -572,3 +572,5 @@ SCIM modes:
           set variable 'newline_action' to 'j' to move cursor down after an entry.
           set it to 'l' to move it right, or set it to '0' to expect no action.
 
+--
+--
