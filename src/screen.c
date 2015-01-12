@@ -61,7 +61,7 @@ void start_screen() {
     noecho();
     curs_set(0);
 
-    #ifndef BSD42
+    #ifndef NETBSD
     if ((char *) getenv ("ESCDELAY") == NULL) set_escdelay(ESC_DELAY);
     #endif
     cbreak();

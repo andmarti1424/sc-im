@@ -9,6 +9,7 @@
 #include "sc.h"
 #include "utils/string.h"
 
+#if defined HISTORY_FILE
 struct history * create_history(char mode) {
    struct history * h = (struct history *) malloc (sizeof (struct history));
    h->len = 0;
@@ -41,7 +42,7 @@ void load_history(struct history * h) {
 
     if ((home = getenv("HOME"))) {
     strcpy(infofile, home);
-    strcat(infofile, "/.sciminfo");
+    strcat(infofile,  HISTORY_FILE);
     if ((c = open(infofile, O_RDONLY)) > -1) {
         close(c);
         f = fopen(infofile, "r");
@@ -75,8 +76,8 @@ int save_history(struct history * h) {
     struct hlist * nl = h->list;
 
     if ((home = getenv("HOME"))) {
-    strcpy(infofile, home);
-    strcat(infofile, "/.sciminfo");
+    sprintf(infofile, "%s/", home);
+    strcat(infofile, HISTORY_FILE);
     f = fopen(infofile, "w");
         if (f == NULL) return -1;
 
@@ -195,3 +196,4 @@ struct hlist * get_hlist_from_history(struct history * h, int pos) {
     }
     return nl;
 }
+#endif

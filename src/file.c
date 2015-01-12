@@ -19,6 +19,7 @@
 #include "format.h"
 #include "interp.h"
 #include "utils/string.h"
+#include "cmds_edit.h"
 #include "color.h"   // for set_ucolor
 #include "xmalloc.h" // for scxfree
 #include "y.tab.h"
@@ -590,11 +591,6 @@ FILE * openfile(char *fname, int *rpid, int *rfd) {
             *rfd = 1;                    // Set to stdout just in case
     
         efname = findhome(fname);
-#ifdef DOBACKUPS
-        if (rfd == NULL && ! backup_file(efname) )
-            //(yn_ask("Could not create backup copy.  Save anyway?: (y,n)") != 1))
-            return (0);
-#endif
         return (fopen(efname, rfd == NULL ? "w" : "r"));
     }
 
@@ -648,10 +644,10 @@ void closefile(FILE *f, int pid, int rfd) {
     if (pid) {
     while (pid != wait(&temp)) //;
     if (rfd==0) {
-        (void) printf("Press any key to continue ");
-        (void) fflush(stdout);
+        printf("Press any key to continue ");
+        fflush(stdout);
         cbreak();
-        (void) nmgetch();
+        get_key();
         //goraw();
         //clear();
     } else {

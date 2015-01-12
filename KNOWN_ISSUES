@@ -1,7 +1,2 @@
-Problem: Edit mode doesn't show cursor with TMUX, nor NetBSD
-Cause: Tmux / NetBSD incompatibily with ncurses cursor mode number 2 (very visible mode).
-Solution: Replace the number '2' by the number '1' in line 180 of screen.c, and
-build SCIM again.
-
-Problem: It was detected that libxls can make memory leaks.
+Problem: It was detected that libxls can produce memory leaks.
 One example is when you try to read a non xls file, ex. xlsx file.

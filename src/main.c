@@ -91,8 +91,10 @@ int main (int argc, char ** argv) {
     store_default_config_values();
     
     // create command line history structure
+#if defined HISTORY_FILE
     commandline_history = (struct history *) create_history(':');
     load_history(commandline_history);
+#endif
 
     // create basic structures that will depend on the loaded file
     create_structures();
@@ -175,11 +177,13 @@ int exit_app(int status) {
     destroy_dictionary(user_conf_d);
 
     // free history
+#if defined HISTORY_FILE
     if (save_history(commandline_history) != 0) {
         error("Cannot save command line history");
     }
 
     if (commandline_history != NULL) destroy_history(commandline_history);
+#endif
 
     delete_structures();
 
