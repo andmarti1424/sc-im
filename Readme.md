@@ -26,9 +26,9 @@ SCIM stands for Spreadsheet Calculator Improvised. :-)
 
 ## Build & Install
 
-Edit Makefile file according to your system and needs.
-Run 'make' inside /src folder to build scim.
-You can install the binary 'scim' in your system by typing 'make install' with a privileged user.
+* Edit Makefile file according to your system and needs.
+* Run 'make' inside /src folder to build scim.
+* You can install the binary 'scim' in your system by typing 'make install' with a privileged user.
 
 ### Donations
 
