@@ -62,20 +62,38 @@ struct block * get_mapbuf_str (char * str) {
 
         } else if (str[i] == '>') {
            is_specialkey = 0;
-           if (! strcmp(sk, "CR"))                            // CR - ENTER key
+           if (! strcmp(sk, "CR"))                                  // CR - ENTER key
                addto_buf(buffer, OKEY_ENTER);
-
-           else if (! strncmp(sk, "C-", 2) && strlen(sk) == 3 // C-X
+           else if (! strcmp(sk, "TAB"))                            // TAB
+               addto_buf(buffer, OKEY_TAB);
+           else if (! strcmp(sk, "LEFT"))                           // LEFT
+               addto_buf(buffer, OKEY_LEFT);
+           else if (! strcmp(sk, "RIGHT"))                          // RIGHT
+               addto_buf(buffer, OKEY_RIGHT);
+           else if (! strcmp(sk, "DOWN"))                           // DOWN
+               addto_buf(buffer, OKEY_DOWN);
+           else if (! strcmp(sk, "UP"))                             // UP
+               addto_buf(buffer, OKEY_UP);
+           else if (! strcmp(sk, "DEL"))                            // DEL
+               addto_buf(buffer, OKEY_DEL);
+           else if (! strcmp(sk, "BS"))                             // BS
+               addto_buf(buffer, OKEY_BS);
+           else if (! strcmp(sk, "HOME"))                           // HOME
+               addto_buf(buffer, OKEY_HOME);
+           else if (! strcmp(sk, "END"))                            // END
+               addto_buf(buffer, OKEY_END);
+           else if (! strcmp(sk, "PGDOWN"))                         // PGDOWN
+               addto_buf(buffer, OKEY_PGDOWN);
+           else if (! strcmp(sk, "PGUP"))                           // PGUP
+               addto_buf(buffer, OKEY_PGUP);
+           else if (! strncmp(sk, "C-", 2) && strlen(sk) == 3       // C-X
                     && ( (sk[2] > 64 && sk[2] < 91) || (sk[2] > 96 && sk[2] < 123)) )
                addto_buf(buffer, ctl(tolower(sk[2])));
 
            sk[0]='\0';
 
-        } else if (is_specialkey) {
-           if (strlen(sk) < MAXSC-1) {
-               str[i] = toupper(str[i]);
-               add_char(sk, str[i], strlen(sk));
-           }
+        } else if (is_specialkey && strlen(sk) < MAXSC-1) {
+           add_char(sk, str[i], strlen(sk));
 
         // Agrego otros caracteres
         } else {
@@ -86,6 +104,7 @@ struct block * get_mapbuf_str (char * str) {
     // en caso de que se tenga en el buffer un string del tipo "<algo", sin la terminación ">", se inserta en el buffer
     if (is_specialkey && i == l) {
         j = strlen(sk);
+        addto_buf(buffer, '<');
         for (i=0; i<j; i++) addto_buf(buffer, (int) str[l-j+i]);
     }
     return buffer;
@@ -227,13 +246,35 @@ void get_mapstr_buf (struct block * b, char * str) {
     int i, len = get_bufsize(a);
     
     str[0]='\0';
-    for (i=0; i<len; i++) {
+    for (i=0; i < len; i++) {
         if (isprint(a->value)) {
             sprintf(str, "%s%c", str, (char) a->value);
         } else if (a->value == OKEY_ENTER) {
-            strcat(str, "<CR>");                                // enter
-        } else if ( a->value == (uncl(a->value) & 0x1f)) {      // c-x
+            strcat(str, "<CR>");                                 // CR - ENTER
+        } else if ( a->value == (uncl(a->value) & 0x1f)) {       // C-x
             sprintf(str, "%s<C-%c>", str, uncl(a->value));
+        } else if (a->value == OKEY_TAB) {
+            strcat(str, "<TAB>");                                // TAB
+        } else if (a->value == OKEY_LEFT) {
+            strcat(str, "<LEFT>");                               // LEFT
+        } else if (a->value == OKEY_RIGHT) {
+            strcat(str, "<RIGHT>");                              // RIGHT
+        } else if (a->value == OKEY_DOWN) {
+            strcat(str, "<DOWN>");                               // DOWN
+        } else if (a->value == OKEY_UP) {
+            strcat(str, "<UP>");                                 // UP
+        } else if (a->value == OKEY_DEL) {
+            strcat(str, "<DEL>");                                // DEL
+        } else if (a->value == OKEY_BS) {
+            strcat(str, "<BS>");                                 // BS
+        } else if (a->value == OKEY_HOME) {
+            strcat(str, "<HOME>");                               // HOME
+        } else if (a->value == OKEY_END) {
+            strcat(str, "<END>");                                // END
+        } else if (a->value == OKEY_PGDOWN) {
+            strcat(str, "<PGDOWN>");                             // PGDOWN
+        } else if (a->value == OKEY_PGUP) {
+            strcat(str, "<PGUP>");                               // PGUP
         }
         a = a->pnext;
     }

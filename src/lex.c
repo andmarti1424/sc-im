@@ -15,10 +15,6 @@
 #include <limits.h>
 #include "lex.h"
 #include "sc.h"
-#include "macros.h"
-#include "screen.h"
-#include "color.h" // for set_ucolor
-
 
 typedef int bool;
 enum { false, true };
@@ -38,10 +34,6 @@ void fpe_trap(int signo) {
  #ifdef IEEE_MATH
     (void)fpsetsticky((fp_except)0);    /* Clear exception */
  #endif /* IEEE_MATH */
- #ifdef PC
-    debug("fpe_trap PC - NETBSD?");
-    _fpreset();
- #endif
 #endif
     longjmp(fpe_buf, 1);
 }
@@ -60,6 +52,10 @@ struct key statres[] = {
 #include "statres.h"
     { 0, 0 }
 };
+
+#include "macros.h"
+#include "screen.h"
+#include "color.h" // for set_ucolor
 
 int yylex() {
     char * p = line + linelim;

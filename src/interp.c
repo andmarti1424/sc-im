@@ -19,21 +19,10 @@
 #include <ctype.h>
 #include <errno.h>
 
-/*
-#ifdef BSD42
- ?netbsd?
- #include <strings.h>
- #include <sys/time.h>
- #ifndef strchr
- #define strchr index
- #endif
-#else
-*/
- #define __USE_XOPEN
- #define _GNU_SOURCE
- #include <time.h>
- #include <string.h>
-//#endif
+#define __USE_XOPEN
+#define _GNU_SOURCE
+#include <time.h>
+#include <string.h>
 
 #include <stdlib.h>
 #include <curses.h>
@@ -69,8 +58,8 @@ struct go_save gs;
 
 /* g_type can be: */
 #define G_NONE 0    /* Starting value - must be 0 */
-#define G_NUM 1
-#define G_STR 2
+#define G_NUM  1
+#define G_STR  2
 #define G_NSTR 3
 #define G_XSTR 4
 #define G_CELL 5
@@ -911,11 +900,6 @@ void eval_fpe() { /* Trap for FPE errors in eval */
  #ifdef IEEE_MATH
     (void)fpsetsticky((fp_except)0);    /* Clear exception */
  #endif /* IEEE_MATH */
- #ifdef PC
-    //netbsd?
-    debug("eval_fpe PC");
-    _fpreset();
- #endif
 #endif
     /* re-establish signal handler for next time */
     (void) signal(SIGFPE, eval_fpe);

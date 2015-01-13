@@ -514,7 +514,8 @@ Commands for handling cell content:
 
     Some notes:
     Left and Right sequence of a mapping cannot contain numbers.
-    <ESC> key cannot be mapped. But other special keys can. Those are <cr> <C-x>..
+    <ESC> key cannot be mapped. But other special keys can.
+    Those keys are <CR> <C-x> <TAB> <LEFT> <RIGHT> <DOWN> <UP> <DEL> <BS> <HOME> <END> <PGDOWN> <PGUP>
     If a map sequence that exists is re-mapped, it gets replaced with the new one.
     Mapping is recursive by default. The non recursive versions of nmap and imap are
     the nnoremap and inoremap commands. An example of use:
