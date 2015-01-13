@@ -151,9 +151,9 @@ void set_colors_param_dict() {
     sprintf(str, "%d", CELL_SELECTION_SC);
     put(d_colors_param, "CELL_SELECTION_SC", str);
     sprintf(str, "%d", NUMB);
-    put(d_colors_param, "NUMBER", str);
+    put(d_colors_param, "NUMB", str);
     sprintf(str, "%d", STRG);
-    put(d_colors_param, "STRING", str);
+    put(d_colors_param, "STRG", str);
     sprintf(str, "%d", EXPRESSION);
     put(d_colors_param, "EXPRESSION", str);
     sprintf(str, "%d", INFO_MSG);
