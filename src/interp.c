@@ -19,18 +19,21 @@
 #include <ctype.h>
 #include <errno.h>
 
+/*
 #ifdef BSD42
+ ?netbsd?
  #include <strings.h>
  #include <sys/time.h>
  #ifndef strchr
  #define strchr index
  #endif
 #else
+*/
  #define __USE_XOPEN
  #define _GNU_SOURCE
  #include <time.h>
  #include <string.h>
-#endif
+//#endif
 
 #include <stdlib.h>
 #include <curses.h>
@@ -107,8 +110,9 @@ double rint(double d);
 int cellerror = CELLOK;    /* is there an error in this cell */
 
 #ifndef M_PI
-#define M_PI (double)3.14159265358979323846
+ #define M_PI (double)3.14159265358979323846
 #endif
+
 #define dtr(x) ((x)*(M_PI/(double)180.0))
 #define rtd(x) ((x)*(180.0/(double)M_PI))
 
@@ -899,7 +903,7 @@ double eval(register struct enode *e) {
 }
 
 void eval_fpe() { /* Trap for FPE errors in eval */
-#if defined(i386) && ! defined(M_XENIX)
+#if defined(i386)
     debug("eval_fpe i386");
     asm("    fnclex");
     asm("    fwait");
@@ -908,6 +912,7 @@ void eval_fpe() { /* Trap for FPE errors in eval */
     (void)fpsetsticky((fp_except)0);    /* Clear exception */
  #endif /* IEEE_MATH */
  #ifdef PC
+    //netbsd?
     debug("eval_fpe PC");
     _fpreset();
  #endif
