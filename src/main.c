@@ -239,20 +239,11 @@ void nopipe() {
 
 // setup signals catched by SCIM
 void signals() {
-#ifdef SIGVOID
     void sig_int();
     void sig_abrt();
     void sig_term();
     //void nopipe();
     void winchg();
-#else
-    int sig_int();
-    int sig_abrt();
-    int sig_term();
-    //int nopipe();
-    int winchg();
-#endif
-
     
     //signal(SIGINT, sig_int); // FIXME - sig. linea se comenta porque es molesto para probar. 
     signal(SIGABRT, sig_abrt);
@@ -264,42 +255,22 @@ void signals() {
     //(void) signal(SIGFPE, doquit);
 }
 
-#ifdef SIGVOID
-void
-#else
-int
-#endif
-sig_int() {
+void sig_int() {
     error("Got SIGINT. Press «:q<Enter>» to quit Scim");
 }
 
-#ifdef SIGVOID
-void
-#else
-int
-#endif
-sig_abrt() {
+void sig_abrt() {
     error("Error !!! Quitting SCIM.");
     shall_quit = -1; // error !
 }
 
-#ifdef SIGVOID
-void
-#else
-int
-#endif
-sig_term() {
+void sig_term() {
     error("Got SIGTERM signal. Quitting SCIM.");
     shall_quit = 2;
 }
 
 // SIGWINCH signal - resize of terminal
-#ifdef SIGVOID
-void
-#else
-int
-#endif
-winchg() {
+void winchg() {
     endwin();
     start_screen();
     clearok(stdscr, TRUE);

@@ -497,27 +497,6 @@ void doformat(int c1, int c2, int w, int p, int r) {
 }
 
 void formatcol(int c) {
-    /*
-    int c, i;
-    int mf = modflg;
-
-    int *oldformat;
-    info("Current format is %d %d %d", fwidth[curcol], precision[curcol], realfmt[curcol]);
-    refresh();
-    oldformat = (int *)scxmalloc(arg*3*sizeof(int));
-    for (i = 0; i < arg; i++) {
-    oldformat[i * 3 + 0] = fwidth[i + curcol];
-    oldformat[i * 3 + 1] = precision[i + curcol];
-    oldformat[i * 3 + 2] = realfmt[i + curcol];
-    }
-    c = nmgetch();
-    while (c >= 0 && c != ctl('m') && c != 'q' && c != OKEY_ESC &&
-        c != ctl('g') && linelim < 0) {
-    if (c >= '0' && c <= '9')
-        for (i = curcol; i < curcol + arg; i++)
-        realfmt[i] = c - '0';
-    else
-    */
     int arg = 1;
     int i;
 
@@ -563,66 +542,9 @@ void formatcol(int c) {
                 precision[i]++;
             modflg++;
             break;
-/*
-        case ' ':
-            if (arg == 1)
-                (void) sprintf(line, "format [for column] %s ", coltoa(curcol));
-            else {
-                (void) sprintf(line, "format [for columns] %s:", coltoa(curcol));
-                (void) sprintf(line+strlen(line), "%s ", coltoa(curcol+arg-1));
-            }
-            linelim = strlen(line);
-            //insert_mode();
-            info("Current format is %d %d %d", fwidth[curcol], precision[curcol], realfmt[curcol]);
-            continue;
-        case '=':
-            info("Define format type (0-9):");
-            refresh();
-            if ((c = nmgetch()) >= '0' && c <= '9') {
-                if (colformat[c-'0']) {
-                    (void) sprintf(line, "format %c = \"%s\"", c, colformat[c-'0']);
-                    //edit_mode();
-                    linelim = strlen(line) - 1;
-                } else {
-                    (void) sprintf(line, "format %c = \"", c);
-                    //insert_mode();
-                    linelim = strlen(line);
-                }
-                info("");
-            } else {
-                error("Invalid format type");
-                c = -1;
-            }
-            continue;
-        case ctl('l'):
-            FullUpdate++;
-            clearok(stdscr, 1);
-            break;
-        default:
-            break;
-*/
     }
     info("Current format is %d %d %d", fwidth[curcol], precision[curcol], realfmt[curcol]);
-//  FullUpdate++;
     update();
-/*  refresh();
-    if (linelim < 0)
-        if ((c = nmgetch()) == OKEY_ESC || c == ctl('g') || c == 'q') {
-            for (i = 0; i < arg; i++) {
-                fwidth[i + curcol] = oldformat[i * 3 + 0];
-                precision[i + curcol] = oldformat[i * 3 + 1];
-                realfmt[i + curcol] = oldformat[i * 3 + 2];
-            }
-            modflg = mf;
-            FullUpdate++;
-            update();
-        }
-    }
-    scxfree((char *)oldformat);
-    if (c >= 0) {
-        info("");
-    }
-*/
     return;
 }
 
@@ -670,13 +592,13 @@ void insert_col(int after) {
         fwidth[c] = fwidth[c-1];
         precision[c] = precision[c-1];
         realfmt[c] = realfmt[c-1];
-        //col_hidden[c] = col_hidden[c-1];
+        col_hidden[c] = col_hidden[c-1];
     }
     for (c = curcol + after; c - curcol - after < 1; c++) {
         fwidth[c] = DEFWIDTH;
         precision[c] =  DEFPREC;
         realfmt[c] = DEFREFMT;
-        //col_hidden[c] = FALSE;
+        col_hidden[c] = FALSE;
     }
     
     for (r=0; r <= maxrow; r++) {

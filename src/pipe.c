@@ -268,7 +268,7 @@ void dogetkey() {
     int c, len;
 
     //goraw();
-    c = nmgetch();
+    c = get_key();
     //deraw(0);
 
     if (c < 256) {

@@ -589,7 +589,7 @@ command:
                         printf("Press any key to continue ");
                         fflush(stdout);
                         cbreak();
-                        nmgetch();
+                        get_key();
                       }
                       //goraw();
                       scxfree($2); }

@@ -8,13 +8,10 @@
  */
 
 #include <sys/types.h>
-#ifdef aiws
-#undef _C_func            /* Fixes for undefined symbols on AIX */
-#endif
 
 #ifdef IEEE_MATH
 #include <ieeefp.h>
-#endif /* IEEE_MATH */
+#endif
 
 #include <math.h>
 #include <signal.h>
@@ -22,20 +19,17 @@
 #include <ctype.h>
 #include <errno.h>
 
-
 #ifdef BSD42
-#include <strings.h>
-#include <sys/time.h>
-#ifndef strchr
-#define strchr index
-#endif
+ #include <strings.h>
+ #include <sys/time.h>
+ #ifndef strchr
+ #define strchr index
+ #endif
 #else
-#define __USE_XOPEN
-#define _GNU_SOURCE
-#include <time.h>
-#ifndef SYSIII
-#include <string.h>
-#endif
+ #define __USE_XOPEN
+ #define _GNU_SOURCE
+ #include <time.h>
+ #include <string.h>
 #endif
 
 #include <stdlib.h>
@@ -49,28 +43,23 @@
 #include "xmalloc.h" // for scxfree
 #include "lex.h"     // for atocol
 #include "undo.h"
-
-#ifndef MSDOS
 #include <unistd.h>
-#endif
 
 #ifdef REGCOMP
 #include <regex.h>
 #endif
+
 #ifdef RE_COMP
 extern char *re_comp(char *s);
 extern char *re_exec(char *s);
 #endif
+
 #ifdef REGCMP
 char *regcmp();
 char *regex();
 #endif
 
-#ifdef SIGVOID
-    void exit_app();
-#else
-    int exit_app();
-#endif
+void exit_app();
 
 /* Use this structure to save the last 'g' command */
 struct go_save gs;
@@ -909,22 +898,19 @@ double eval(register struct enode *e) {
     return ((double)0.0);
 }
 
-#ifdef SIGVOID
-void
-#else
-int
-#endif
-eval_fpe() { /* Trap for FPE errors in eval */
-#if defined(i386) && !defined(M_XENIX)
+void eval_fpe() { /* Trap for FPE errors in eval */
+#if defined(i386) && ! defined(M_XENIX)
+    debug("eval_fpe i386");
     asm("    fnclex");
     asm("    fwait");
 #else
-#ifdef IEEE_MATH
+ #ifdef IEEE_MATH
     (void)fpsetsticky((fp_except)0);    /* Clear exception */
-#endif /* IEEE_MATH */
-#ifdef PC
+ #endif /* IEEE_MATH */
+ #ifdef PC
+    debug("eval_fpe PC");
     _fpreset();
-#endif
+ #endif
 #endif
     /* re-establish signal handler for next time */
     (void) signal(SIGFPE, eval_fpe);
@@ -1009,19 +995,6 @@ char * dofmt(char *fmtstr, double v) {
  * written to files, etc.
  */
 
-#if defined(VMS) || defined(MSDOS)
-char * doext(struct enode *se) {
-    char *command = seval(se->e.o.left);
-    double value = eval(se->e.o.right);
-
-    error("Warning: External functions unavailable on VMS");
-    cellerror = CELLERROR;    /* not sure if this should be a cellerror */
-    if (command) scxfree(command);
-    return (strcpy(scxmalloc((size_t) 1), "\0"));
-}
-
-#else /* VMS */
-
 char * doext(struct enode *se) {
     char buff[FBUFLEN];        /* command line/return, not permanently alloc */
     char *command;
@@ -1077,9 +1050,6 @@ char * doext(struct enode *se) {
     else
         return (strcpy(scxmalloc((size_t)1), ""));
 }
-
-#endif /* VMS */
-
 
 /*
  * Given a string representing a column name and a value which is a column

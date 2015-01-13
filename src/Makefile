@@ -119,7 +119,7 @@ XLSX :=
 #XLSX := -DXLSX
 
 #CFLAGS := -DSYSV3 -O2 -Wall -pipe -g
-CFLAGS := -DSYSV3 -O2 -Wall -pipe -g -I/usr/include/libxml2
+CFLAGS := -DSYSV3 $(FREEBSD) $(NETBSD) -O2 -Wall -pipe -g -I/usr/include/libxml2
 CFLAGS := $(CFLAGS) $(USECOLORS) $(USELOCALE) $(SIGVOID) $(DFLT_PAGER)
 CFLAGS := $(CFLAGS) $(IEEE_MATH) $(RINT) $(REGEX) $(LIBRARY)
 CFLAGS := $(CFLAGS) $(NO_NOTIMEOUT) $(SIMPLE) $(XLS) $(XLSX) $(HISTORY_FILE)

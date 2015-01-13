@@ -642,29 +642,29 @@ void closefile(FILE *f, int pid, int rfd) {
 
     (void) fclose(f);
     if (pid) {
-    while (pid != wait(&temp)) //;
-    if (rfd==0) {
-        printf("Press any key to continue ");
-        fflush(stdout);
-        cbreak();
-        get_key();
-        //goraw();
-        //clear();
-    } else {
-        close(rfd);
-        if (usecurses) {
-        cbreak();
-        nonl();
-        noecho ();
-        kbd_again();
-        //if (color && has_colors())
-        //    bkgdset(COLOR_PAIR(1) | ' ');
+        while (pid != wait(&temp)) //;
+        if (rfd==0) {
+            printf("Press any key to continue ");
+            fflush(stdout);
+            cbreak();
+            get_key();
+            //goraw();
+            //clear();
+        } else {
+            close(rfd);
+            if (usecurses) {
+                cbreak();
+                nonl();
+                noecho ();
+                //kbd_again();
+            //if (color && has_colors())
+            //    bkgdset(COLOR_PAIR(1) | ' ');
+            }
         }
     }
-    }
     if (brokenpipe) {
-    error("Broken pipe");
-    brokenpipe = FALSE;
+        error("Broken pipe");
+        brokenpipe = FALSE;
     }
 }
 

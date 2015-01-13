@@ -6,20 +6,10 @@ void load_sc(int argc, char ** argv);
 void setorder(int i);
 void nopipe();
 void signals();
-//
+
 // SIGINT signal
-#ifdef SIGVOID
-void
-#else
-int
-#endif
-sig_int();
+void sig_int();
 
 // SIGWINCH signal - resize of terminal
-#ifdef SIGVOID
-void
-#else
-int
-#endif
-winchg();
+void winchg();
 

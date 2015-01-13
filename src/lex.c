@@ -16,30 +16,31 @@
 #include "lex.h"
 #include "sc.h"
 
-#ifdef NONOTIMEOUT
-#define notimeout(a1, a2)
-#endif
+/*
+*ifdef NONOTIMEOUT
+*define notimeout(a1, a2)
+*endif
+*/
 
 typedef int bool;
 enum { false, true };
 
 #include "y.tab.h"
 
-#ifdef hpux
+/*
+*ifdef hpux
 extern YYSTYPE yylval;
-#endif /* hpux */
+*endif // hpux
+*/
 
 jmp_buf wakeup;
 jmp_buf fpe_buf;
 
 bool decimal = FALSE;
 
-#ifdef SIGVOID
-void
-#endif
-fpe_trap(int signo)
-{
-#if defined(i386) && !defined(M_XENIX)
+void fpe_trap(int signo) {
+#if defined(i386) && ! defined(M_XENIX)
+    debug("fpe_trap i386");
     asm("    fnclex");
     asm("    fwait");
 #else
@@ -47,6 +48,7 @@ fpe_trap(int signo)
     (void)fpsetsticky((fp_except)0);    /* Clear exception */
 #endif /* IEEE_MATH */
 #ifdef PC
+    debug("fpe_trap PC");
     _fpreset();
 #endif
 #endif
@@ -178,11 +180,7 @@ int yylex() {
             }
         } // 117
     } else if ((*p == '.') || isdigit(*p)) { // 89
-#ifdef SIGVOID
         void (*sig_save)();
-#else
-        int (*sig_save)();
-#endif
         double v = 0.0;
         int temp;
         char *nstart = p;
@@ -313,7 +311,6 @@ int yylex() {
 * This is a very simpleminded test for plugins:  does the file merely exist
 * in the plugin directories.  Perhaps should test for it being executable
 */
-
 int plugin_exists(char *name, int len, char *path) {
     FILE *fp;
     static char *HomeDir;
@@ -358,7 +355,8 @@ int atocol(char *string, int len) {
 }
 
 
-#ifdef SIMPLE
+/*
+*ifdef SIMPLE
 
 void initkbd() {}
 
@@ -366,16 +364,16 @@ void kbd_again() {}
 
 void resetkbd() {}
 
-#ifndef VMS
+*ifndef VMS
 
 int nmgetch() {
     return (getchar());
 }
 
-#else /* VMS */
+*else // VMS
 
 int nmgetch()
-/*
+//
    This is not perfect, it doesn't move the cursor when goraw changes
    over to deraw, but it works well enough since the whole sc package
    is incredibly stable (loop constantly positions cursor).
@@ -385,12 +383,12 @@ int nmgetch()
    NOTE: During testing it was discovered that the DEBUGGER and curses
    and this method of reading would collide (the screen was not updated
    when continuing from screen mode in the debugger).
-*/
+//
 {
     short c;
     static int key_id=0;
     int status;
-#define VMScheck(a) {if (~(status = (a)) & 1) VMS_MSG (status);}
+*define VMScheck(a) {if (~(status = (a)) & 1) VMS_MSG (status);}
 
     if (VMS_read_raw) {
         VMScheck(smg$read_keystroke (&stdkb->_id, &c, 0, 0, 0));
@@ -408,17 +406,15 @@ int nmgetch()
 }
 
 VMS_MSG (int status)
-/*
-   Routine to put out the VMS operating system error (if one occurs).
-*/
+// Routine to put out the VMS operating system error (if one occurs).
 {
-#include <descrip.h>
+*include <descrip.h>
    char errstr[81], buf[120];
    $DESCRIPTOR(errdesc, errstr);
    short length;
-#define err_out(msg) fprintf (stderr,msg)
+*define err_out(msg) fprintf (stderr,msg)
 
-/* Check for no error or standard error */
+// Check for no error or standard error
 
     if (~status & 1) {
         status = status & 0x8000 ? status & 0xFFFFFFF : status & 0xFFFF;
@@ -430,13 +426,13 @@ VMS_MSG (int status)
             err_out("System error");
     }
 }
-#endif /* VMS */
+*endif // VMS
 
-#else /*SIMPLE*/
+*else //SIMPLE
 
-#if defined(BSD42) || defined (SYSIII) || defined(BSD43)
+*if defined(BSD42) || defined (SYSIII) || defined(BSD43)
 
-#define N_KEY 4
+*define N_KEY 4
 
 struct key_map {
     char *k_str;
@@ -455,9 +451,9 @@ char ks_buf[20];
 char *ke;
 char ke_buf[20];
 
-#ifdef TIOCSLTC
+*ifdef TIOCSLTC
 struct ltchars old_chars, new_chars;
-#endif
+*endif
 
 char dont_use[] = {
     ctl('['), ctl('a'), ctl('b'), ctl('c'), ctl('e'), ctl('f'), ctl('g'),
@@ -475,7 +471,7 @@ void initkbd() {
     register i,j;
     char *p = keyarea;
     char *ktmp;
-    static char buf[1024]; /* Why do I have to do this again? */
+    static char buf[1024]; // Why do I have to do this again?
 
     if (!(ktmp = getenv("TERM"))) {
         (void) fprintf(stderr, "TERM environment variable not set\n");
@@ -501,8 +497,8 @@ void initkbd() {
         ke = ke_buf;
     }
 
-    /* Unmap arrow keys which conflict with our ctl keys   */
-    /* Ignore unset, longer than length 1, and 1-1 mapped keys */
+    // Unmap arrow keys which conflict with our ctl keys
+    // Ignore unset, longer than length 1, and 1-1 mapped keys
 
     for (i = 0; i < N_KEY; i++) {
         kp = &km[i];
@@ -514,7 +510,7 @@ void initkbd() {
                 }
     }
 
-#ifdef TIOCSLTC
+*ifdef TIOCSLTC
     (void)ioctl(fileno(stdin), TIOCGLTC, (char *)&old_chars);
     new_chars = old_chars;
     if (old_chars.t_lnextc == ctl('v'))
@@ -522,25 +518,25 @@ void initkbd() {
     if (old_chars.t_rprntc == ctl('r'))
         new_chars.t_rprntc = -1;
     (void)ioctl(fileno(stdin), TIOCSLTC, (char *)&new_chars);
-#endif
+*endif
 }
 
 void kbd_again() {
     if (ks) 
         tputs(ks, 1, charout);
 
-#ifdef TIOCSLTC
+*ifdef TIOCSLTC
     (void)ioctl(fileno(stdin), TIOCSLTC, (char *)&new_chars);
-#endif
+*endif
 }
 
 void resetkbd() {
     if (ke) 
         tputs(ke, 1, charout);
 
-#ifdef TIOCSLTC
+*ifdef TIOCSLTC
     (void)ioctl(fileno(stdin), TIOCSLTC, (char *)&old_chars);
-#endif
+*endif
 }
 
 int nmgetch() {
@@ -554,11 +550,7 @@ int nmgetch() {
     static char dumpbuf[10];
     static char *dumpindex;
 
-#ifdef SIGVOID
     void time_out();
-#else
-    int time_out();
-#endif
 
     if (dumpindex && *dumpindex)
         return (*dumpindex++);
@@ -612,9 +604,9 @@ int nmgetch() {
     return(c);
 }
 
-#endif
+*endif
 
-#if defined(SYSV2) || defined(SYSV3) || defined(MSDOS)
+*if defined(SYSV2) || defined(SYSV3) || defined(MSDOS)
 
 void initkbd() {
     //keypad(stdscr, TRUE);
@@ -631,54 +623,11 @@ void resetkbd() {
     //notimeout(stdscr, FALSE);
 }
 
-int nmgetch() {
-    register int c;
+*endif // SYSV2 || SYSV3
 
-    c = getch();
-    switch (c) {
-#ifdef KEY_SELECT
-    case KEY_SELECT:    c = 'm';    break;
-#endif
-#ifdef KEY_C1
-/* This stuff works for a wyse wy75 in ANSI mode under 5.3.  Good luck. */
-/* It is supposed to map the curses keypad back to the numeric equiv. */
+*endif // SIMPLE
 
-/* I had to disable this to make programmable function keys work.  I'm
- * not familiar with the wyse wy75 terminal.  Does anyone know how to
- * make this work without causing problems with programmable function
- * keys on everything else?  - CRM
-
-    case KEY_C1:    c = '0'; break;
-    case KEY_A1:    c = '1'; break;
-    case KEY_B2:    c = '2'; break;
-    case KEY_A3:    c = '3'; break;
-    case KEY_F(5):    c = '4'; break;
-    case KEY_F(6):    c = '5'; break;
-    case KEY_F(7):    c = '6'; break;
-    case KEY_F(9):    c = '7'; break;
-    case KEY_F(10):    c = '8'; break;
-    case KEY_F0:    c = '9'; break;
-    case KEY_C3:    c = '.'; break;
-    case KEY_ENTER:    c = ctl('m'); break;
-
- *
- *
- */
-#endif
-    default:    break;
-    }
-    return (c);
-}
-
-#endif /* SYSV2 || SYSV3 */
-
-#endif /* SIMPLE */
-
-#ifdef SIGVOID
-void
-#else
-int
-#endif
-time_out(int signo) {
+void time_out(int signo) {
     longjmp(wakeup, 1);
 }
+*/
