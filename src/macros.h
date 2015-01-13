@@ -35,7 +35,7 @@
 #define OKEY_END         0x168
 #define OKEY_PGUP        0x153
 #define OKEY_PGDOWN      0x152
-#define OKEY_PGDOWN      0x152
+
 //#define metak(x) ((x) | 0x80)
 #define LEFT             0
 #define RIGHT            1
