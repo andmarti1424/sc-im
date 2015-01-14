@@ -1,8 +1,4 @@
-#ifdef BSD42
-#include <sys/time.h>
-#else
 #include <time.h>
-#endif
 double finfunc(int fun, double v1, double v2, double v3);
 char * dostindex(int minr, int minc, int maxr, int maxc, struct enode *val);
 double doindex(int minr, int minc, int maxr, int maxc, struct enode *val);

@@ -3,14 +3,10 @@
 #include "sc.h"
 #include "xmalloc.h"
 
-//void fatal();
-
-#ifdef SYSV3
 extern void free();
 extern void exit();
-#endif
 
-#define    MAGIC    (double)1234567890.12344
+#define MAGIG    ((double) 1234567890.12344)
 
 char * scxmalloc(unsigned n) {
     register char *ptr;
@@ -49,7 +45,7 @@ void scxfree(char *p) {
     free(p);
 }
 
-void fatal(char *str) {
-    (void) fprintf(stderr,"%s\n", str);
+void fatal(char * str) {
+    fprintf(stderr,"%s\n", str);
     exit(1);
 }

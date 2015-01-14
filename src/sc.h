@@ -31,12 +31,12 @@
 #define MAXCMD       160     /* for ! command and commands that use the pager */
 
 #ifndef DFLT_PAGER
-    #define    DFLT_PAGER "more"    /* more is probably more widespread than less */
+ #define    DFLT_PAGER "more"    /* more is probably more widespread than less */
 #endif                       /* DFLT_PAGER */
 
 
 #ifndef A_CHARTEXT           /* Should be defined in curses.h */
-    #define A_CHARTEXT 0xff
+ #define A_CHARTEXT 0xff
 #endif
 
 // comentado el dia 20/06/2014
@@ -52,18 +52,6 @@
                 (*(p) = PAIR_NUMBER(stdscr->_attrs))), OK)
 #endif
 */
-
-#if (defined(BSD42) || defined(BSD43)) && !defined(strrchr)
-    #define strrchr rindex
-#endif
-
-#if (defined(BSD42) || defined(BSD43)) && !defined(strchr)
-    #define strchr index
-#endif
-
-#ifdef SYSV4
-    size_t    strlen();
-#endif
 
 #ifndef FALSE
     # define    FALSE   0

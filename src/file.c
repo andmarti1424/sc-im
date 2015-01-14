@@ -24,8 +24,6 @@
 #include "xmalloc.h" // for scxfree
 #include "y.tab.h"
 
-#define DEFCOLDELIM ':'
-
 extern struct ent * freeents;
 
 /* erase the database (tbl, etc.) */
@@ -60,23 +58,13 @@ void erasedb() {
     maxcol = 0;
 
     clean_range();
-    //clean_frange();
-    //clean_crange();
 
     propagation = 10;
     calc_order = BYROWS;
     prescale = 1.0;
     tbl_style = 0;
-    //craction = 0;
-    //rowlimit = collimit = -1;
-    //qbuf = 0;
-
-    //autocalc=showcell=showtop=1;
-    //autoinsert=autowrap=optimize=numeric=extfunc=color=colorneg=colorerr=cslop=0;
-    //currow=curcol=strow=stcol=0;
-    //autocalc=1;
-    optimize=extfunc=0;
-    currow=curcol=0;
+    optimize = extfunc = 0;
+    currow = curcol = 0;
 
     if (usecurses && has_colors())
         color_set(0, NULL);
@@ -282,9 +270,6 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
             (void) fprintf(f, "hide %d\n", r);
 
     //write_ranges(f);
-    //write_franges(f);
-    //write_colors(f, 0);
-    //write_cranges(f);
     write_marks(f);
 
     if (mdir) 
@@ -485,12 +470,12 @@ int readfile(char * fname, int eraseflg) {
 }
 
 // expand a ~ in a path to your home directory
-char * findhome(char *path) {
-    static    char    *HomeDir = NULL;
+char * findhome(char * path) {
+    static char * HomeDir = NULL;
 
-    if (*path == '~') {
-        char    *pathptr;
-        char    tmppath[PATHLEN];
+    if (* path == '~') {
+        char * pathptr;
+        char tmppath[PATHLEN];
 
         if (HomeDir == NULL) {
             HomeDir = getenv("HOME");
@@ -498,12 +483,12 @@ char * findhome(char *path) {
                 HomeDir = "/";
         }
         pathptr = path + 1;
-        if ((*pathptr == '/') || (*pathptr == '\0'))
+        if ((* pathptr == '/') || (* pathptr == '\0'))
             strcpy(tmppath, HomeDir);
         else {
-            struct    passwd *pwent;
-            char    *namep;
-            char    name[50];
+            struct passwd * pwent;
+            char * namep;
+            char name[50];
 
             namep = name;
             while ((*pathptr != '\0') && (*pathptr != '/'))
@@ -678,41 +663,20 @@ void print_options(FILE *f) {
         ! rndtoeven &&
         propagation == 10 &&
         calc_order == BYROWS &&
-        //! numeric &&
         prescale == 1.0 &&
-        ! extfunc && //showtop &&
-        tbl_style == 0 //&&
-        //craction == 0 &&
-        //pagesize == 0 &&
-        //rowlimit == -1 &&
-        //collimit == -1 //&&
-        //!color &&
-        //!colorneg &&
-        //!colorerr
+        ! extfunc &&
+        tbl_style == 0
        )
-    return;        // No reason to do this
+    return; // No reason to do this
 
     (void) fprintf(f, "set");
-    //if (!autocalc)             (void) fprintf(f," !autocalc");
-    //if (autoinsert)            (void) fprintf(f," autoinsert");
-    //if (autowrap)              (void) fprintf(f," autowrap");
-    //if (cslop)      //       (void) fprintf(f," cslop");
     if (optimize)              (void) fprintf(f," optimize");
     if (rndtoeven)             (void) fprintf(f, " rndtoeven");
     if (propagation != 10)     (void) fprintf(f, " iterations = %d", propagation);
     if (calc_order != BYROWS ) (void) fprintf(f, " bycols");
-    //if (numeric)               (void) fprintf(f, " numeric");
     if (prescale != 1.0)       (void) fprintf(f, " prescale");
     if (extfunc)               (void) fprintf(f, " extfun");
-    //if (!showtop)            (void) fprintf(f, " !toprow");
     if (tbl_style)             (void) fprintf(f, " tblstyle = %s", tbl_style == TBL ? "tbl" : tbl_style == LATEX ? "latex" : tbl_style == SLATEX ? "slatex" : tbl_style == TEX ? "tex" : tbl_style == FRAME ? "frame" : "0" );
-    //if (craction)              (void) fprintf(f, " craction = %d", craction);
-    //if (pagesize)              (void) fprintf(f, " pagesize = %d", pagesize);
-    //if (rowlimit >= 0)         (void) fprintf(f, " rowlimit = %d", rowlimit);
-    //if (collimit >= 0)         (void) fprintf(f, " collimit = %d", collimit);
-    //if (color)                 (void) fprintf(f," color");
-    //if (colorneg)              (void) fprintf(f," colorneg");
-    //if (colorerr)              (void) fprintf(f," colorerr");
     (void) fprintf(f, "\n");
 }
 
@@ -908,232 +872,12 @@ void export_delim(char * fname, char coldelim, int r0, int c0, int rn, int cn) {
 /* unspecial (backquote -> ") things that are special chars in a table */
 void unspecial(FILE *f, char *str, int delim) {
     int backquote = 0;     
+
     if (str_in_str(str, ",") != -1) backquote = 1;
     if (backquote) putc('\"', f);
-
-    //if (*str == '\\') str++; /* delete wheeling string operator, OK? */
     while (*str) {
-        //if (*str != ' ') //elimino los espacios???
         putc(*str, f); 
-        //if (((tbl_style == LATEX) || (tbl_style == SLATEX) || (tbl_style == TEX)) &&
-        //((*str == delim) || (*str == '$') || (*str == '#') || (*str == '%') || (*str == '{') || (*str == '}') || (*str == '&')))
-        //    putc('\\', f);
         str++;
     }
     if (backquote) putc('\"', f);
 }
-
-/*
-void printfile(char *fname, int r0, int c0, int rn, int cn) {
-    FILE *f;
-    static char *pline = NULL;        // only malloc once, malloc is slow
-    static unsigned fbufs_allocated = 0;
-    int plinelim;
-    int pid;
-    int fieldlen, nextcol;
-    long namelen;
-    int row, col;
-    register struct ent **pp;
-    char file[256];
-    char path[1024];
-    char *tpp;
-
-    if (fname) {
-    // printfile will be the [path/]file ---> [path/]file.out
-    if (*fname == '\0') {
-        strcpy(path, curfile);
-
-        if ((tpp = strrchr(path, '/')) == NULL) {
-        namelen = pathconf(".", _PC_NAME_MAX);
-        tpp = path;
-        } else {
-        *tpp = '\0';
-        namelen = pathconf(path, _PC_NAME_MAX);
-        *tpp = '/';
-        tpp++;
-        }
-        strcpy(file, tpp);
-
-        if (!strcmp(file + strlen(file) - 3, ".sc"))
-        file[strlen(file) - 3] = '\0';
-        else if (scext != NULL && file[strlen(file) - strlen(scext) - 1] == '.'
-            && !strcmp(file + strlen(file) - strlen(scext), scext))
-        file[strlen(file) - strlen(scext)] = '\0';
-
-        if (ascext == NULL)
-        file[namelen - 4] = '\0';
-        else
-        file[namelen - strlen(ascext) - 1] = '\0';
-        sprintf(tpp, "%s.%s", file, ascext == NULL ? "asc" : ascext);
-        fname = path;
-    }
-
-    //if ((strcmp(fname, curfile) == 0) &&
-     // !yn_ask("Confirm that you want to destroy the data base: (y,n)")) {
-     // return;
-    }//
-
-    if ((f = openfile(fname, &pid, NULL)) == (FILE *)0) {
-        error("Can't create file \"%s\"", fname);
-        return;
-    }
-    } else
-    f = stdout;
-
-    if (!pline && (pline = scxmalloc((unsigned)(FBUFLEN *
-        ++fbufs_allocated))) == (char *)NULL) {
-    error("Malloc failed in printfile()");
-    return;
-    }
-
-    for (row = r0; row <= rn; row++) {
-    int c = 0;
-
-    if (row_hidden[row])
-        continue;
-
-    pline[plinelim=0] = '\0';
-    for (pp = ATBL(tbl, row, col=c0); col<=cn;
-            pp += nextcol-col, col = nextcol, c += fieldlen) {
-
-        nextcol = col+1;
-        if (col_hidden[col]) {
-        fieldlen = 0;
-        continue;
-        }
-
-        fieldlen = fwidth[col];
-        if (*pp) {
-        char *s;
-
-        // dynamically allocate pline, making sure we are not 
-        // attempting to write 'out of bounds'.
-        while (c > (fbufs_allocated * FBUFLEN)) {
-            if ((pline = scxrealloc ((char *)pline, 
-                (unsigned)(FBUFLEN * ++fbufs_allocated))) == NULL) {
-            error ("Realloc failed in printfile()");
-            return;
-            }
-        }          
-        while (plinelim<c) pline[plinelim++] = ' ';
-        plinelim = c;
-        if ((*pp)->flags&is_valid) {
-            while(plinelim + fwidth[col] > 
-              (fbufs_allocated * FBUFLEN)) {
-              if((pline = ((char *)scxrealloc
-                   ((char *)pline, 
-                    (unsigned)(FBUFLEN * ++fbufs_allocated))))
-             == NULL) {
-            error("Realloc failed in printfile()");
-            return;
-              }
-            }
-            if ((*pp)->cellerror)
-            (void) sprintf(pline+plinelim, "%*s",
-                fwidth[col], ((*pp)->cellerror == CELLERROR ?
-                "ERROR " : "INVALID "));
-            else {
-              char *cfmt;
-
-              cfmt = (*pp)->format ? (*pp)->format :
-                (realfmt[col] >= 0 && realfmt[col] < COLFORMATS &&
-                colformat[realfmt[col]]) ?
-                colformat[realfmt[col]] : 0;
-              if (cfmt) {
-                   char field[FBUFLEN];
-
-            if (*cfmt == ctl('d')) {
-                time_t v = (time_t) ((*pp)->v);
-                strftime(field, sizeof(field), cfmt + 1,
-                    localtime(&v));
-                sprintf(pline+plinelim, "%-*s", fwidth[col],
-                    field);
-            } else {
-                format(cfmt, precision[col], (*pp)->v, field,
-                    sizeof(field));
-                (void) sprintf(pline+plinelim, "%*s", fwidth[col],
-                    field);
-            }
-              } else {
-                   char field[FBUFLEN];
-            (void) engformat(realfmt[col], fwidth[col],
-                                             precision[col], (*pp) -> v,
-                                             field, sizeof(field));
-            (void) sprintf(pline+plinelim, "%*s", fwidth[col],
-                       field);
-              }
-            }
-            plinelim += strlen(pline+plinelim);
-        }
-        if ((s = (*pp)->label)) {
-            int slen;
-            char *start, *last;
-            register char *fp;
-            struct ent *nc;
-
-             // Figure out if the label slops over to a blank field.
-             // A string started with backslash is defining repetition
-             // char
-            slen = strlen(s);
-            if (*s == '\\' && *(s+1) != '\0')
-            slen = fwidth[col];
-            while (slen > fieldlen && nextcol <= cn &&
-                !((nc = lookat(row,nextcol))->flags & is_valid) &&
-                !(nc->label)) {
-            
-                    if (!col_hidden[nextcol])
-                 fieldlen += fwidth[nextcol];
-
-            nextcol++;
-            }
-            if (slen > fieldlen)
-            slen = fieldlen;
-            
-            while(c + fieldlen + 2 > (fbufs_allocated * FBUFLEN)) {
-              if((pline = ((char *)scxrealloc
-                   ((char *)pline, 
-                    (unsigned)(FBUFLEN * ++fbufs_allocated))))
-             == NULL) {
-            error ("scxrealloc failed in printfile()");
-            return;
-              }
-            }          
-
-            // Now justify and print
-            start = (*pp)->flags & is_leftflush ? pline + c
-                    : pline + c + fieldlen - slen;
-            if( (*pp)->flags & is_label )
-            start = pline + (c + ((fwidth[col]>slen)?(fwidth[col]-slen)/2:0));
-            last = pline + c + fieldlen;
-            fp = plinelim < c ? pline + plinelim : pline + c;
-            while (fp < start)
-            *fp++ = ' ';
-            if( *s == '\\' && *(s+1)!= '\0' ) {
-            char *strt;
-            strt = ++s;
-
-            while(slen--) {
-                *fp++ = *s++; if( *s == '\0' ) s = strt;
-            }
-            }
-            else
-            while (slen--)
-            *fp++ = *s++;
-
-            if (!((*pp)->flags & is_valid) || fieldlen != fwidth[col])
-            while(fp < last)
-                *fp++ = ' ';
-            if (plinelim < fp - pline)
-            plinelim = fp - pline;
-        }
-        }
-    }
-    pline[plinelim++] = '\n';
-    pline[plinelim] = '\0';
-    (void) fputs (pline, f);
-    }
-
-    if (fname) closefile(f, pid, 0);
-}
-*/
-

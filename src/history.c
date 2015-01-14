@@ -1,3 +1,5 @@
+#if defined HISTORY_FILE
+
 #include <curses.h>
 #include <string.h>
 #include <stdlib.h>
@@ -9,7 +11,6 @@
 #include "sc.h"
 #include "utils/string.h"
 
-#if defined HISTORY_FILE
 struct history * create_history(char mode) {
    struct history * h = (struct history *) malloc (sizeof (struct history));
    h->len = 0;

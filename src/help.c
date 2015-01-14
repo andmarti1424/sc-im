@@ -8,6 +8,7 @@
 #include "string.h"
 #include "color.h"
 #include "utils/string.h"
+#include "help.h"
 
 
 static char ** long_help;
@@ -16,8 +17,6 @@ static int max;
 static int look_result = -1;
 static char word_looked[50] = "";
 
-int show_lines();
-void find_word(char * word, char order);
 
 // cargo el contenido del archivo help_doc a memoria
 void load_help () {

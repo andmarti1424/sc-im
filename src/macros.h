@@ -25,7 +25,7 @@
 #define OKEY_UP          0x103
 #define OKEY_DEL         0x14a
 
-#ifdef BSD42
+#ifdef NETBSD
 #define OKEY_BS          0x7f
 #else
 #define OKEY_BS          0x107

@@ -39,33 +39,31 @@ int maxrow, maxcol;
 
 int changed;
 int cellassign;
-//int FullUpdate = 0;
 int arg = 1;
-//int numeric;
-char *mdir;
-char *autorun;
+char * mdir;
+char * autorun;
 int skipautorun;
-char *fkey[FKEYS];
-char *scext;
-char *ascext;
-char *tbl0ext;
-char *tblext;
-char *latexext;
-char *slatexext;
-char *texext;
+char * fkey[FKEYS];
+char * scext;
+char * ascext;
+char * tbl0ext;
+char * tblext;
+char * latexext;
+char * slatexext;
+char * texext;
 int scrc = 0;
 int usecurses = TRUE;   /* Use curses unless piping/redirection or using -q */
 int brokenpipe = FALSE; /* Set to true if SIGPIPE is received */
 char curfile[PATHLEN];
 char dpoint = '.';      /* decimal point */
 char thsep = ',';       /* thousands separator */
-int  linelim = -1;
-int  calc_order = BYROWS;
-int  optimize  = 0;     /* Causes numeric expressions to be optimized */
-int  tbl_style = 0;     /* headers for T command output */
-int  rndtoeven = 0;
-int  rowsinrange = 1;
-int  colsinrange = DEFWIDTH;
+int linelim = -1;
+int calc_order = BYROWS;
+int optimize  = 0;     /* Causes numeric expressions to be optimized */
+int tbl_style = 0;     /* headers for T command output */
+int rndtoeven = 0;
+int rowsinrange = 1;
+int colsinrange = DEFWIDTH;
 
 struct block * buffer;
 struct block * lastcmd_buffer;
@@ -111,7 +109,7 @@ int main (int argc, char ** argv) {
     // doy la bienvenida en caso de no haber pasado ninguna planilla como parámetro
     if (argv[1] == NULL) {
         do_welcome();
-        // muestro modo y detalle de celda en barra de estado
+        // muestro modo y detalle de celda actual en la status bar
         show_celldetails(input_win);
         print_mode(input_win);
         wrefresh(input_win);
@@ -185,6 +183,7 @@ int exit_app(int status) {
     if (commandline_history != NULL) destroy_history(commandline_history);
 #endif
 
+    // erase structures
     delete_structures();
 
     // Free mappings
