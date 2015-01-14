@@ -19,7 +19,7 @@ void do_insertmode(struct block * sb) {
         show_header(input_win);
 
     } else if (sb->value == OKEY_BS) {     // BS
-        if ( !strlen(inputline) || !inputline_pos ) { show_header(main_win); return; }
+        if ( !strlen(inputline) || !inputline_pos ) return;
         del_char(inputline, --inputline_pos);
         show_header(input_win);
 

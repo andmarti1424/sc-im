@@ -53,7 +53,7 @@ void do_editmode(struct block * sb) {
             if (isprint(c)) {
                 inputline[inputline_pos] = c;
                 ++inputline_pos;
-                show_header(main_win);
+                //show_header(main_win);
             }
             c = get_key();
         }
@@ -242,7 +242,7 @@ void del_back_char() {
 }
 
 void del_for_char() {
-    if ( !strlen(inputline) || !inputline_pos ) { show_header(main_win); return; }
+    if ( ! strlen(inputline) || ! inputline_pos ) return;
     del_char(inputline, --inputline_pos);
 }
 

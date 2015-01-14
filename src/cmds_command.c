@@ -92,10 +92,7 @@ void do_commandmode(struct block * sb) {
     if (p != -1) sr = get_range_by_pos(p);
     
     if (sb->value == OKEY_BS) {            // BS
-        if (! strlen(inputline) || ! inputline_pos) {
-            //show_header(input_win);
-            return;
-        }
+        if ( ! strlen(inputline) || ! inputline_pos) return;
         del_char(inputline, --inputline_pos);
         if (commandline_history->pos == 0)
             del_char(get_line_from_history(commandline_history, commandline_history->pos), inputline_pos); // borro en el historial
