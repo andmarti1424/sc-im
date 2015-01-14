@@ -1,13 +1,4 @@
-# Makefile $Revision: 0.1
-#
-# 1) Select the proper EXDIR (path), MANDIR, MANEXT, LIBDIR, SIGVOID,
-# REGEX, DFLT_PAGER, and FMOD. Most of the other things aren't
-# normally changed (see the comments with each)
-# 2) Select the proper machine/compiler/OS section of code
-# for MS-DOS look for the pattern 'MS-DOS'
-# 3) make install
-# 4) If you have the command 'file' that uses /etc/magic add the line:
-# 38 string Spreadsheet sc file
+# Makefile $Revision: 0.1.1
 
 
 # Specify the name of the program.
@@ -35,11 +26,15 @@ MANMODE=644
 LIBDIR=$(prefix)/share/doc/$(name)
 LIBRARY=-DLIBDIR=\"$(LIBDIR)\"
 
-# For Building SCIM in FREEBSD, set FREEBSD
+# For Building SCIM in LINUX, set LINUX variable below
+LINUX := -DLINUX
+#LINUX :=
+
+# For Building SCIM in FREEBSD, set FREEBSD variable below
 #FREEBSD := -DFREEBSD
 FREEBSD :=
 
-# For Building SCIM in NETBSD, set NETBSD
+# For Building SCIM in NETBSD, set NETBSD variable below
 #NETBSD := -DNETBSD
 NETBSD :=
 
@@ -118,8 +113,8 @@ XLS :=
 XLSX :=
 #XLSX := -DXLSX
 
-#CFLAGS := -DSYSV3 -O2 -Wall -pipe -g
-CFLAGS := -DSYSV3 $(FREEBSD) $(NETBSD) -O2 -Wall -pipe -g -I/usr/include/libxml2
+#CFLAGS := -O2 -Wall -pipe -g
+CFLAGS := $(LINUX) $(FREEBSD) $(NETBSD) -O2 -Wall -pipe -g -I/usr/include/libxml2
 CFLAGS := $(CFLAGS) $(USECOLORS) $(USELOCALE) $(SIGVOID) $(DFLT_PAGER)
 CFLAGS := $(CFLAGS) $(IEEE_MATH) $(RINT) $(REGEX) $(LIBRARY)
 CFLAGS := $(CFLAGS) $(NO_NOTIMEOUT) $(SIMPLE) $(XLS) $(XLSX) $(HISTORY_FILE)
