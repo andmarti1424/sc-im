@@ -8,14 +8,14 @@ You can use <UP> <DOWN> arrows keys, or 'j' 'k' keys to move throw text.
 You can use the «/» command to search for a pattern in the help.
 ------------------------------------------------------------------------
 SCIM modes:
-NORMAL_MODE      For navigation and common commands
-INSERT_MODE      For entering new cell content (values and expressions)
+NORMAL MODE      For navigation and common commands
+INSERT MODE      For entering new cell content (values and expressions)
                  Submodes: = < > \
-EDIT_MODE        'e' and 'E' keys are used for entering this mode. It is used for single
+EDIT MODE        'e' and 'E' keys are used for entering this mode. It is used for single
                  line -Vi-like- edition of cell content and expressions
-COMMAND_MODE     ':' key is used for entering this mode. It is used for entering special
+COMMAND MODE     ':' key is used for entering this mode. It is used for entering special
                  commands and for quiting app and saving files
-VISUAL_MODE      'v' key is used for entering this mode. It is used for selecting a range of cells
+VISUAL MODE      'v' key is used for entering this mode. It is used for selecting a range of cells
 ---------------- 
 
 
@@ -111,6 +111,10 @@ Commands for handling cell content:
                  14. lock and unlock of cells
                  15. datefmt command
 
+     c-d         converts text content of a selected cell or range to a date, using default LOCALE's D_FMT format.
+                 This converts text content to a numeric value that can shown as a date. See DATE INPUT below for more info.
+                 NOTE: USELOCALE has to be enabled during build.
+
 
  Other commands:
      ^L          Redraw the screen
@@ -129,6 +133,7 @@ Commands for handling cell content:
      rl          Use this command to lock the current cell or a range of cells, i.e. make them immune to any type of editing. A locked cell can't be changed in any way until it is unlocked.
      ru          This command is the opposite of the rl command and thus unlocks a locked cell and makes it editable.
      rv          valueize area: remove expressions from the affected range leaving only the values.
+     c-j         auto resize of column width to fit its contents.
 
 
  *INSERT MODE*
@@ -503,6 +508,9 @@ Commands for handling cell content:
     rv          valueize area: remove expressions from the affected range leaving only the values.
     m           Followed by any lowercase letter, marks the selected range with that letter.
                 NOTE: When a mark is changed, all ranges that use that mark are deleted.
+    c-d         converts text content of the selected range to a date, using default LOCALE's D_FMT format.
+                This converts text content to a numeric value that can shown as a date. See DATE INPUT below for more info.
+                NOTE: USELOCALE has to be enabled during build.
 
 *MAPPING*
     mapping can be done in any SCIM file or in .scimrc file in current home directory.
@@ -548,6 +556,9 @@ Commands for handling cell content:
     the :format function) so that it can be visually seen as a date.
 
     example:      :datefmt "%d/%m/%Y"
+
+    C-d command can be used in NORMAL and VISUAL modes, and acts as the datefmt described above,
+    but considering locale's D_FMT format.
 
 
 *Other configuration variables*
