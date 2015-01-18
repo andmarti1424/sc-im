@@ -133,7 +133,7 @@ Commands for handling cell content:
      rl          Use this command to lock the current cell or a range of cells, i.e. make them immune to any type of editing. A locked cell can't be changed in any way until it is unlocked.
      ru          This command is the opposite of the rl command and thus unlocks a locked cell and makes it editable.
      rv          valueize area: remove expressions from the affected range leaving only the values.
-     c-j         auto resize of column width to fit its contents.
+     c-j         auto resize column width to fit its contents.
 
 
  *INSERT MODE*
@@ -462,6 +462,11 @@ Commands for handling cell content:
 
     :! cmd      executes command 'cmd' in shell
 
+    :autojus A:D   
+                auto resize columns A to D, to fit its contents.
+
+    :autojus    same as previous command, but the columns resized are the columns represented by the selected cell or range.
+
     c-r {char}  Being {char} a mark of a cell or range, the range represented by that char gets inserted in the command line
 
     commandline history is stored in $HOME/.sciminfo
@@ -511,6 +516,7 @@ Commands for handling cell content:
     c-d         converts text content of the selected range to a date, using default LOCALE's D_FMT format.
                 This converts text content to a numeric value that can shown as a date. See DATE INPUT below for more info.
                 NOTE: USELOCALE has to be enabled during build.
+    c-j         auto resize column width to fit its contents.
 
 *MAPPING*
     mapping can be done in any SCIM file or in .scimrc file in current home directory.
