@@ -41,8 +41,8 @@ NETBSD :=
 # Set SIMPLE for lex.c if you don't want arrow keys or lex.c blows up
 #SIMPLE := -DSIMPLE
 
-# Set USELOCALE to enable country-dependent display of decimal points,
-# local character recognition in words, and local @date() format.
+# Set USELOCALE to use your local d_fmt for converting dates with C-d shortcut.
+# See DATES INPUT in help.
 USELOCALE := -DUSELOCALE
 
 # Set this if you want SCIM to have color support

@@ -241,6 +241,32 @@ void do_visualmode(struct block * buf) {
         clr_header(input_win, 0);
         show_header(input_win);
 
+    // datefmt with locale D_FMT format
+    } else if (buf->value == ctl('d')) {
+        #ifdef USELOCALE
+            #include <locale.h>
+            #include <langinfo.h>
+            char * loc = NULL;
+            char * f = NULL;
+            loc = setlocale(LC_TIME, "");
+            if (loc != NULL) {
+                f = nl_langinfo(D_FMT);
+            } else {
+                error("No locale set. Nothing changed");
+            }
+            if (any_locked_cells(r->tlrow, r->tlcol, r->brrow, r->brcol)) {
+                error("Locked cells encountered. Nothing changed");           
+                return;
+            }
+            dateformat(lookat(r->tlrow, r->tlcol), lookat(r->brrow, r->brcol), f);
+        exit_visualmode();
+        curmode = NORMAL_MODE;
+        clr_header(input_win, 0);
+        show_header(input_win);
+        #else
+            info("Build made without USELOCALE enabled");
+        #endif 
+
     // EDITION COMMANDS
     // yank
     } else if (buf->value == 'y') {

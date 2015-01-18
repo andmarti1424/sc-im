@@ -98,6 +98,54 @@ void do_normalmode(struct block * buf) {
             update();
             break;
 
+        // CTRL j
+        case ctl('j'):
+            {
+            int p, c = curcol, cf = curcol;
+            if ( (p = is_range_selected()) != -1) {
+                struct srange * sr = get_range_by_pos(p);
+                c = sr->tlcol;
+                cf = sr->brcol;
+            }
+            auto_justify(c, cf, DEFWIDTH);  // auto justificado de columnas
+            update();
+            break;
+            }
+
+        // CTRL d
+        case ctl('d'):                      // set date format using current locate D_FMT format
+            {
+        #ifdef USELOCALE
+            #include <locale.h>
+            #include <langinfo.h>
+            char * loc = NULL;
+            char * f = NULL;
+            loc = setlocale(LC_TIME, "");
+            if (loc != NULL) {
+                f = nl_langinfo(D_FMT);
+            } else {
+                error("No locale set. Nothing changed");
+            }
+            int p, r = currow, c = curcol, rf = currow, cf = curcol;
+            if ( (p = is_range_selected()) != -1) {
+                struct srange * sr = get_range_by_pos(p);
+                r = sr->tlrow;
+                c = sr->tlcol;
+                rf = sr->brrow;
+                cf = sr->brcol;
+            }
+            if (any_locked_cells(r, c, rf, cf)) {
+                error("Locked cells encountered. Nothing changed");           
+                return;
+            }
+            dateformat(lookat(r, c), lookat(rf, cf), f);
+            update();
+            break;
+        #else
+            info("Build made without USELOCALE enabled");
+        #endif 
+            }
+
         // CTRL f
         case ctl('f'):
             {

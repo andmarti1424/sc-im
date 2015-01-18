@@ -1491,6 +1491,8 @@ int is_single_command (struct block * buf, long timeout) {
         else if (buf->value == OKEY_DOWN)  res = MOVEMENT_CMD;
         else if (buf->value == OKEY_UP)    res = MOVEMENT_CMD;
         else if (buf->value == ctl('f'))   res = MOVEMENT_CMD;
+        else if (buf->value == ctl('j'))   res = EDITION_CMD;
+        else if (buf->value == ctl('d'))   res = EDITION_CMD;
         else if (buf->value == ctl('b'))   res = MOVEMENT_CMD;
         else if (buf->value == ctl('a'))   res = MOVEMENT_CMD;
         else if (buf->value == 'G')        res = MOVEMENT_CMD;
@@ -1644,6 +1646,7 @@ int is_single_command (struct block * buf, long timeout) {
                  buf->value == 'L' ||
                  buf->value == 'G' ||
                  buf->value == ctl('f') ||
+                 buf->value == ctl('d') ||
                  buf->value == ctl('b') ||
                  buf->value == ctl('a') ||
                  buf->value == ':'
