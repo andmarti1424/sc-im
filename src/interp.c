@@ -2204,7 +2204,7 @@ void efree(struct enode *e) {
             scxfree(e->e.o.s);
         e->e.o.left = NULL;
         // e->e.o.left = freeenodes;
-        free(e);
+        scxfree((char *) e);
         //freeenodes = e;
     }
 }
