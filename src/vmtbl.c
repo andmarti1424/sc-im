@@ -6,6 +6,8 @@
 #include "macros.h"
 #include "color.h" // for set_ucolor
 
+//LINUX - PSC not def
+
 /*
  * check to see if *rowp && *colp are currently allocated, if not expand the
  * current size if we can.
@@ -34,7 +36,7 @@ void checkbounds(int *rowp, int *colp) {
             *colp = maxcols - 1;
     }
 }
-#endif /* !PSC */
+#endif /* ! PSC */
     
 /* scxrealloc will just scxmalloc if oldptr is == NULL */
 #define GROWALLOC(newptr, oldptr, nelem, type, msg) \
@@ -47,10 +49,10 @@ void checkbounds(int *rowp, int *colp) {
     oldptr = newptr /* wait incase we can't alloc */
 
 #ifndef PSC
-static char    nolonger[] = "The table can't be any longer";
+static char nolonger[] = "The table can't be any longer";
 #endif /* !PSC */
 
-static char    nowider[] = "The table can't be any wider";
+static char nowider[] = "The table can't be any wider";
 
 /*
  * grow the main && auxiliary tables (reset maxrows/maxcols as needed)
@@ -58,12 +60,12 @@ static char    nowider[] = "The table can't be any wider";
  * we return TRUE if we could grow, FALSE if not....
  */
 int growtbl(int rowcol, int toprow, int topcol) {
-    int *fwidth2;
-    int *precision2;
-    int *realfmt2;
+    int * fwidth2;
+    int * precision2;
+    int * realfmt2;
     int newcols;
 #ifndef PSC
-    struct ent ***tbl2;
+    struct ent *** tbl2;
     struct ent ** nullit;
     int cnt;
     char * col_hidden2;
@@ -72,7 +74,7 @@ int growtbl(int rowcol, int toprow, int topcol) {
     int i;
 
     newrows = maxrows;
-#endif /* !PSC */
+#endif /* ! PSC */
     newcols = maxcols;
     if (rowcol == GROWNEW) {
 #ifndef PSC
