@@ -345,7 +345,7 @@ void do_undo() {
             fix_marks(0,  (ul->range_shift->brcol - ul->range_shift->tlcol + 1), ul->range_shift->tlrow, ul->range_shift->brrow, ul->range_shift->tlcol, maxcol);
 
         shift_range(- ul->range_shift->delta_rows, - ul->range_shift->delta_cols,
-                      ul->range_shift->tlrow, ul->range_shift->tlcol, ul->range_shift->brrow, ul->range_shift->brcol);
+            ul->range_shift->tlrow, ul->range_shift->tlcol, ul->range_shift->brrow, ul->range_shift->brcol);
     }
 
     // Borro los ent de added
@@ -447,7 +447,6 @@ void do_redo() {
         else if (ul->range_shift->delta_cols < 0) // sh
             fix_marks(0, -(ul->range_shift->brcol - ul->range_shift->tlcol + 1), ul->range_shift->tlrow, ul->range_shift->brrow, ul->range_shift->tlcol, maxcol);
 
-        //info ("%d %d", ul->range_shift->brrow, - ul->range_shift->tlrow + 1, ul->range_shift->brcol - ul->range_shift->tlcol + 1);
         shift_range(ul->range_shift->delta_rows, ul->range_shift->delta_cols,
             ul->range_shift->tlrow, ul->range_shift->tlcol, ul->range_shift->brrow, ul->range_shift->brcol);
     }

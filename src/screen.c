@@ -488,7 +488,9 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
                 mvwinchnstr(win, row + 1 - offscr_sc_rows - q_row_hidden, c, cht, fieldlen);
                 for (i=0; i < fieldlen; i++) {
                     caracter = cht[i] & A_CHARTEXT;
+                    #ifdef NETBSD
                     if ( ! caracter ) caracter = ' '; // this is for NetBSD compatibility
+                    #endif
                     mvwprintw(win, row + 1 - offscr_sc_rows - q_row_hidden, c + i, "%c", caracter);
                 }
             }
@@ -690,14 +692,28 @@ int get_formated_value(struct ent ** p, int col, char * value) {
     }
 }
 
+#include <locale.h>
+//#include <ncursesw/ncurses.h>
+
+//#include <wctype.h>
+//#define _XOPEN_SOURCE_EXTENDED 1
+//#define _XOPEN_SOURCE 600
 void show_text_content_of_cell(WINDOW * win, struct ent ** p, int row, int col, int r, int c) {
     char value[FBUFLEN];      // the value to be printed without padding
     char field[FBUFLEN] = ""; // the value with padding and alignment    
     int col_width = fwidth[col];    
     int flen;                 // current length of field
     int left;
-    int str_len  = strlen((*p)->label);
 
+    /*
+    strcpy(value, (*p)->label);
+    int str_len = 0;
+    setlocale(LC_ALL, "");
+    str_len = strlen(value);
+    str_len += (strlen(value) - mbstowcs(NULL, value, 0)) * 2;
+    */
+
+    int str_len  = strlen((*p)->label);
     strcpy(value, (*p)->label);
 
     // in case there is a format
@@ -762,7 +778,6 @@ void show_text_content_of_cell(WINDOW * win, struct ent ** p, int row, int col, 
         strcat(field, value);
     }
 
-    //info("%s.%d", field, strlen(field)); get_key();
     mvwprintw(win, r, c, "%s", field);
     wclrtoeol(win);
 

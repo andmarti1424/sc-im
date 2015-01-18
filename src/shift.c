@@ -5,48 +5,37 @@
 #include "vmtbl.h"   // for growtbl
 #include "cmds.h"
 
-// ESTA FUNCION DESPLAZA UN RANGO DE ENTS, un deltar y deltac.
-// TODO: reescribir shift_range (sin hacer uso de copyent), manera tal que no dependa
+// ESTA FUNCION DESPLAZA UN RANGO DE ENTS
+// TODO reescribir shift_range (sin hacer uso de copyent), manera tal que no dependa
 // de shift_cells, shift_cells_up, shift_cells_down, shift_cells_left, shift_cells_right.
 // borrar todas estas ultimas.
-void shift_range(int delta_rows, int delta_cols, int tlrow, int tlcol, int brrow, int brcol) {
+/*
+void shift_range(int direction, int arg, int tlrow, int tlcol, int brrow, int brcol) {
 
-    //#include <ncurses.h>
-    //extern WINDOW * input_win;
-    //mvwprintw(input_win, 1, 0, "%d  %d %d %d ", tlrow, tlcol, brrow, brcol);
-    //wclrtoeol(input_win); wrefresh(input_win);
-    
     currow = tlrow;
     curcol = tlcol;
 
-    if (delta_rows > 0)      shift_cells_down(brrow - tlrow + 1, brcol - tlcol + 1);
-    else if (delta_rows < 0) shift_cells_up(brrow - tlrow + 1, brcol - tlcol + 1);
+    info("%d %d %d %d", direction, arg, brrow - tlrow + 1, brcol - tlcol + 1);
 
-    if (delta_cols > 0)      shift_cells_right(brrow - tlrow + 1, brcol - tlcol + 1);
-    else if (delta_cols < 0) shift_cells_left(brrow - tlrow + 1, brcol - tlcol + 1);
+    if (direction == 'j')      while(arg--) shift_cells_down (brrow - tlrow + 1, brcol - tlcol + 1);
+    else if (direction == 'k') while(arg--) shift_cells_up   (brrow - tlrow + 1, brcol - tlcol + 1);
+    else if (direction == 'l') while(arg--) shift_cells_right(brrow - tlrow + 1, brcol - tlcol + 1);
+    else if (direction == 'h') while(arg--) shift_cells_left (brrow - tlrow + 1, brcol - tlcol + 1);
 
     return;
 }
+*/
 
-/* Shift cells up / down
- * type 8: Shift cells up
- * type 2: Shift cells down
- * type 4: Shift cells left
- * type 6: Shift cells right
- * deltarows: number of rows to shift
- * deltacols: number of cols to shift
- */
-void shift_cells(int type, int deltarows, int deltacols) {
-    if (type == 8)
-        shift_cells_up(deltarows, deltacols);
-    else if (type == 2)
-        shift_cells_down(deltarows, deltacols);
-    else if (type == 4)
-        shift_cells_left(deltarows, deltacols);
-    else if (type == 6)
-        shift_cells_right(deltarows, deltacols);
+void shift_range(int delta_rows, int delta_cols, int tlrow, int tlcol, int brrow, int brcol) {
+    currow = tlrow;
+    curcol = tlcol;
 
-    modflg++;
+    if (delta_rows > 0)      shift_cells_down (brrow - tlrow + 1, brcol - tlcol + 1);
+    else if (delta_rows < 0) shift_cells_up   (brrow - tlrow + 1, brcol - tlcol + 1);
+
+    if (delta_cols > 0)      shift_cells_right(brrow - tlrow + 1, brcol - tlcol + 1);
+    else if (delta_cols < 0) shift_cells_left (brrow - tlrow + 1, brcol - tlcol + 1);
+
     return;
 }
 

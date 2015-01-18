@@ -25,8 +25,8 @@ srange * r; // SELECTED RANGE!
 void start_visualmode(int tlrow, int tlcol, int brrow, int brcol) {
     unselect_ranges();
 
-    struct srange * sr = get_range_by_marks('\0', '\0');
-    if (sr != NULL) del_ranges_by_mark('\0');
+    struct srange * sr = get_range_by_marks('\t', '\t'); // visual mode selected range
+    if (sr != NULL) del_ranges_by_mark('\t');
 
     r = (srange *) malloc (sizeof(srange));
     r->tlrow = tlrow;
@@ -35,11 +35,12 @@ void start_visualmode(int tlrow, int tlcol, int brrow, int brcol) {
     r->brcol = brcol;
     r->orig_row = currow;
     r->orig_col = curcol;
-    r->marks[0] = '\0';
-    r->marks[1] = '\0';
+    r->marks[0] = '\t';
+    r->marks[1] = '\t';
     r->selected = 1;
     r->pnext = NULL;
  
+    // add visual selected range at start of list
     if (ranges == NULL) ranges = r;
     else { 
         r->pnext = ranges;
@@ -54,7 +55,7 @@ void exit_visualmode() {
     r->selected = 0;
     currow = r->orig_row;
     curcol = r->orig_col;
-    del_ranges_by_mark('\0');
+    del_ranges_by_mark('\t');
     return;
 }
 
@@ -232,9 +233,9 @@ void do_visualmode(struct block * buf) {
 
     // mark a range
     } else if (buf->value == 'm' && get_bufsize(buf) == 2) {
-        srange * sr = create_range('\0', '\0', lookat(r->tlrow, r->tlcol), lookat(r->brrow, r->brcol));
-        set_range_mark(buf->pnext->value, sr);
-
+        del_ranges_by_mark(buf->pnext->value);
+        srange * rn = create_range('\0', '\0', lookat(r->tlrow, r->tlcol), lookat(r->brrow, r->brcol));
+        set_range_mark(buf->pnext->value, rn);
         exit_visualmode();
         curmode = NORMAL_MODE;
         clr_header(input_win, 0);
@@ -329,31 +330,31 @@ void do_visualmode(struct block * buf) {
         create_undo_action();
         switch (buf->pnext->value) {
             case 'j':
-                fix_marks(  r->brrow - r->tlrow + 1  , 0           , r->tlrow, maxrow,   r->tlcol, r->brcol);
-                save_undo_range_shift(r->brrow - r->tlrow + 1, 0   , r->tlrow, r->tlcol, r->brrow, r->brcol);
-                shift_range(r->brrow - r->tlrow + 1, 0             , r->tlrow, r->tlcol, r->brrow, r->brcol);
-                break;
+                    fix_marks(  (r->brrow - r->tlrow + 1) * cmd_multiplier, 0, r->tlrow, maxrow, r->tlcol, r->brcol);
+                    save_undo_range_shift(cmd_multiplier, 0, r->tlrow, r->tlcol, r->brrow + (r->brrow-r->tlrow+1) * (cmd_multiplier - 1), r->brcol);
+                    while (ic--) shift_range(ic, 0, r->tlrow, r->tlcol, r->brrow, r->brcol);
+                    break;
             case 'k':
-                fix_marks( -(r->brrow - r->tlrow + 1), 0           , r->tlrow, maxrow, r->tlcol, r->brcol);
-                yank_area(r->tlrow, r->tlcol, r->brrow, r->brcol, 'a', ic); // keep ents in yanklist for sk
-                copy_to_undostruct(r->tlrow, r->tlcol, r->brrow    , r->brcol, 'd');
-                save_undo_range_shift(-(r->brrow - r->tlrow + 1), 0, r->tlrow, r->tlcol, r->brrow, r->brcol);
-                shift_range(-(r->brrow - r->tlrow + 1), 0          , r->tlrow, r->tlcol, r->brrow, r->brcol);
-                copy_to_undostruct(r->tlrow, r->tlcol, r->brrow    , r->brcol, 'a');
-                break;
+                    fix_marks( -(r->brrow - r->tlrow + 1) * cmd_multiplier, 0, r->tlrow, maxrow, r->tlcol, r->brcol);
+                    yank_area(r->tlrow, r->tlcol, r->brrow + (r->brrow-r->tlrow+1) * (cmd_multiplier - 1), r->brcol, 'a', cmd_multiplier); // keep ents in yanklist for sk
+                    copy_to_undostruct(r->tlrow, r->tlcol, r->brrow + (r->brrow-r->tlrow+1) * (cmd_multiplier - 1), r->brcol, 'd');
+                    save_undo_range_shift(-cmd_multiplier, 0, r->tlrow, r->tlcol, r->brrow + (r->brrow-r->tlrow+1) * (cmd_multiplier - 1), r->brcol);
+                    while (ic--) shift_range(-ic, 0, r->tlrow, r->tlcol, r->brrow, r->brcol);
+                    copy_to_undostruct(r->tlrow, r->tlcol, r->brrow + (r->brrow-r->tlrow+1) * (cmd_multiplier - 1), r->brcol, 'a');
+                    break;
             case 'h':
-                fix_marks(0, -(r->brcol - r->tlcol + 1), r->tlrow  , r->brrow, r->tlcol, maxcol);
-                yank_area(r->tlrow, r->tlcol, r->brrow, r->brcol, 'a', ic); // keep ents in yanklist for sh
-                copy_to_undostruct(r->tlrow, r->tlcol, r->brrow    , r->brcol, 'd');
-                save_undo_range_shift(0, -(r->brcol - r->tlcol + 1), r->tlrow, r->tlcol, r->brrow, r->brcol);
-                shift_range(0, - (r->brcol - r->tlcol + 1)         , r->tlrow, r->tlcol, r->brrow, r->brcol);
-                copy_to_undostruct(r->tlrow, r->tlcol, r->brrow    , r->brcol, 'a');
-                break;
+                    fix_marks(0, -(r->brcol - r->tlcol + 1) * cmd_multiplier, r->tlrow, r->brrow, r->tlcol, maxcol);
+                    yank_area(r->tlrow, r->tlcol, r->brrow, r->brcol + (r->brcol-r->tlcol+1) * (cmd_multiplier - 1), 'a', cmd_multiplier); // keep ents in yanklist for sk
+                    copy_to_undostruct(r->tlrow, r->tlcol, r->brrow, r->brcol + (r->brcol-r->tlcol+1) * (cmd_multiplier - 1), 'd');
+                    save_undo_range_shift(0, -cmd_multiplier, r->tlrow, r->tlcol, r->brrow, r->brcol + (r->brcol-r->tlcol+1) * (cmd_multiplier - 1));
+                    while (ic--) shift_range(0, -ic, r->tlrow, r->tlcol, r->brrow, r->brcol);
+                    copy_to_undostruct(r->tlrow, r->tlcol, r->brrow, r->brcol + (r->brcol-r->tlcol+1) * (cmd_multiplier - 1), 'a');
+                    break;
             case 'l':
-                fix_marks(0, r->brcol - r->tlcol + 1               , r->tlrow, r->brrow, r->tlcol, maxcol);
-                save_undo_range_shift(0, r->brcol - r->tlcol + 1   , r->tlrow, r->tlcol, r->brrow, r->brcol);
-                shift_range(0, r->brcol - r->tlcol + 1             , r->tlrow, r->tlcol, r->brrow, r->brcol);
-                break;
+                    fix_marks(0,  (r->brcol - r->tlcol + 1) * cmd_multiplier, r->tlrow, r->brrow, r->tlcol, maxcol);
+                    save_undo_range_shift(0, cmd_multiplier, r->tlrow, r->tlcol, r->brrow, r->brcol + (r->brcol-r->tlcol+1) * (cmd_multiplier - 1));
+                    while (ic--) shift_range(0, ic, r->tlrow, r->tlcol, r->brrow, r->brcol);
+                    break;
         }
         cmd_multiplier = 0;
         end_undo_action();

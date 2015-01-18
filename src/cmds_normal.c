@@ -419,30 +419,30 @@ void do_normalmode(struct block * buf) {
             int ic = cmd_multiplier + 1;
             switch (buf->pnext->value) {
                 case 'j':
-                    fix_marks(  rf - r + 1  , 0, r, maxrow, c, cf);
-                    save_undo_range_shift(rf - r + 1, 0   , r, c, rf, cf);
-                    shift_range(rf - r + 1, 0             , r, c, rf, cf);
+                    fix_marks(  (rf - r + 1) * cmd_multiplier, 0, r, maxrow, c, cf);
+                    save_undo_range_shift(cmd_multiplier, 0, r, c, rf + (rf-r+1) * (cmd_multiplier - 1), cf);
+                    while (ic--) shift_range(ic, 0, r, c, rf, cf);
                     break;
                 case 'k':
-                    fix_marks( -(rf - r + 1), 0, r, maxrow, c, cf);
-                    yank_area(r, c, rf, cf, 'a', ic); // keep ents in yanklist for sk
-                    copy_to_undostruct(r, c, rf, cf, 'd');
-                    save_undo_range_shift(-(rf - r + 1), 0, r, c, rf, cf);
-                    shift_range(-(rf - r + 1), 0          , r, c, rf, cf);
-                    //copy_to_undostruct(r, c, rf, cf, 'a');
+                    fix_marks( -(rf - r + 1) * cmd_multiplier, 0, r, maxrow, c, cf);
+                    yank_area(r, c, rf + (rf-r+1) * (cmd_multiplier - 1), cf, 'a', cmd_multiplier); // keep ents in yanklist for sk
+                    copy_to_undostruct(r, c, rf + (rf-r+1) * (cmd_multiplier - 1), cf, 'd');
+                    save_undo_range_shift(-cmd_multiplier, 0, r, c, rf + (rf-r+1) * (cmd_multiplier - 1), cf);
+                    while (ic--) shift_range(-ic, 0, r, c, rf, cf);
+                    copy_to_undostruct(r, c, rf + (rf-r+1) * (cmd_multiplier - 1), cf, 'a');
                     break;
                 case 'h':
-                    fix_marks(0, -(cf - c + 1), r, rf, c, maxcol);
-                    yank_area(r, c, rf, cf, 'a', ic); // keep ents in yanklist for sh
-                    copy_to_undostruct(r, c, rf, cf, 'd');
-                    save_undo_range_shift(0, -(cf - c + 1), r, c, rf, cf);
-                    shift_range(0, - (cf - c + 1)         , r, c, rf, cf);
-                    //copy_to_undostruct(r, c, rf   , cf, 'a');
+                    fix_marks(0, -(cf - c + 1) * cmd_multiplier, r, rf, c, maxcol);
+                    yank_area(r, c, rf, cf + (cf-c+1) * (cmd_multiplier - 1), 'a', cmd_multiplier); // keep ents in yanklist for sk
+                    copy_to_undostruct(r, c, rf, cf + (cf-c+1) * (cmd_multiplier - 1), 'd');
+                    save_undo_range_shift(0, -cmd_multiplier, r, c, rf, cf + (cf-c+1) * (cmd_multiplier - 1));
+                    while (ic--) shift_range(0, -ic, r, c, rf, cf);
+                    copy_to_undostruct(r, c, rf, cf + (cf-c+1) * (cmd_multiplier - 1), 'a');
                     break;
                 case 'l':
-                    fix_marks(0, cf - c + 1, r, rf, c, maxcol);
-                    save_undo_range_shift(0, cf - c + 1   , r, c, rf, cf);
-                    shift_range(0, cf - c + 1             , r, c, rf, cf);
+                    fix_marks(0,  (cf - c + 1) * cmd_multiplier, r, rf, c, maxcol);
+                    save_undo_range_shift(0, cmd_multiplier, r, c, rf, cf + (cf-c+1) * (cmd_multiplier - 1));
+                    while (ic--) shift_range(0, ic, r, c, rf, cf);
                     break;
             }
             end_undo_action();
