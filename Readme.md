@@ -24,6 +24,8 @@ SCIM stands for Spreadsheet Calculator Improvised. :-)
 
 ![demo image](https://raw.githubusercontent.com/andmarti1424/scim/dev/scim.png)
 
+![demo image](https://raw.githubusercontent.com/andmarti1424/scim/dev/scim3.png)
+
 ## Build & Install
 
 * Edit Makefile file according to your system and needs.
