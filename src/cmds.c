@@ -167,45 +167,6 @@ void deletecol() {
     return;
 }
 
-/*
-void colshow_op() {
-    register int i,j;
-    for (i = 0; i < maxcols; i++)
-    if (col_hidden[i]) 
-        break;
-    for(j = i; j < maxcols; j++)
-    if (!col_hidden[j])
-        break;
-    j--;
-    if (i >= maxcols) {
-    info("No hidden columns to show");
-    } else {
-    (void) sprintf(line,"show %s:", coltoa(i));
-    (void) sprintf(line + strlen(line),"%s",coltoa(j));
-    linelim = strlen(line);
-    }
-}
-
-void rowshow_op() {
-    register int i,j;
-    for (i = 0; i < maxrows; i++)
-    if (row_hidden[i]) 
-        break;
-    for(j = i; j < maxrows; j++)
-    if (!row_hidden[j]) {
-        break;
-    }
-    j--;
-
-    if (i >= maxrows) {
-    info("No hidden rows to show");
-    } else {
-    (void) sprintf(line,"show %d:%d", i, j);
-        linelim = strlen(line);
-    }
-}
-*/
-
 // Copy a cell (struct ent).  "special" indicates special treatment when
 // merging two cells for the "pm" command, merging formats only for the
 // "pf" command, or for adjusting cell references when transposing with
