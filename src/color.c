@@ -45,9 +45,9 @@ void start_default_ucolors() {
     ucolors[ NUMB            ].fg = CYAN;
     ucolors[ NUMB            ].bg = BLACK;
 
-    ucolors[ STRG            ].fg = RED;
+    ucolors[ STRG            ].fg = GREEN;
     ucolors[ STRG            ].bg = BLACK;
-    ucolors[ STRG            ].bold = 1;
+    ucolors[ STRG            ].bold = 0;
 
     ucolors[ EXPRESSION      ].fg = YELLOW;
     ucolors[ EXPRESSION      ].bg = BLACK;
