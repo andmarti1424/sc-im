@@ -241,6 +241,14 @@ void do_visualmode(struct block * buf) {
         clr_header(input_win, 0);
         show_header(input_win);
 
+    // auto_justify
+    } else if (buf->value == ctl('j')) {
+        auto_justify(r->tlcol, r->brcol, DEFWIDTH);  // auto justificado de columnas
+        exit_visualmode();
+        curmode = NORMAL_MODE;
+        clr_header(input_win, 0);
+        show_header(input_win);
+
     // datefmt with locale D_FMT format
     } else if (buf->value == ctl('d')) {
         #ifdef USELOCALE

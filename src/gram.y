@@ -478,100 +478,11 @@ command:
     |    S_DEFINE strarg var        { add_range($2, $3, $3, 0); }
     |    S_UNDEFINE var_or_range    { del_range($2.left.vp, $2.right.vp); }
 
-
-    |    S_GETNUM var_or_range    { getnum($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col, macrofd); }
-    |    S_GETNUM var_or_range '|' NUMBER { getnum($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col, $4); }
-    |    S_GETNUM { getnum(currow, curcol, currow, curcol, macrofd); }
-    |    S_GETNUM '|' NUMBER    { getnum(currow, curcol,
-                        currow, curcol, $3); }
-    |    S_FGETNUM var_or_range    { fgetnum($2.left.vp->row,
-                        $2.left.vp->col,
-                        $2.right.vp->row,
-                        $2.right.vp->col, macrofd); }
-    |    S_FGETNUM var_or_range '|' NUMBER
-                    { fgetnum($2.left.vp->row,
-                        $2.left.vp->col,
-                        $2.right.vp->row,
-                        $2.right.vp->col, $4); }
-    |    S_FGETNUM        { fgetnum(currow, curcol,
-                        currow, curcol, macrofd); }
-    |    S_FGETNUM '|' NUMBER    { fgetnum(currow, curcol,
-                        currow, curcol, $3); }
-    |    S_GETSTRING var_or_range
-                    { getstring($2.left.vp->row,
-                        $2.left.vp->col,
-                        $2.right.vp->row,
-                        $2.right.vp->col, macrofd); }
-    |    S_GETSTRING var_or_range '|' NUMBER
-                    { getstring($2.left.vp->row,
-                        $2.left.vp->col,
-                        $2.right.vp->row,
-                        $2.right.vp->col, $4); }
-    |    S_GETSTRING        { getstring(currow, curcol,
-                        currow, curcol, macrofd); }
-    |    S_GETSTRING '|' NUMBER    { getstring(currow, curcol,
-                        currow, curcol, $3); }
-    |    S_GETEXP var_or_range    { getexp($2.left.vp->row,
-                        $2.left.vp->col,
-                        $2.right.vp->row,
-                        $2.right.vp->col, macrofd); }
-    |    S_GETEXP var_or_range '|' NUMBER
-                    { getexp($2.left.vp->row,
-                        $2.left.vp->col,
-                        $2.right.vp->row,
-                        $2.right.vp->col, $4); }
-    |    S_GETEXP        { getexp(currow, curcol,
-                        currow, curcol, macrofd); }
-    |    S_GETEXP '|' NUMBER    { getexp(currow, curcol,
-                        currow, curcol, $3); }
-    |    S_GETFORMAT COL        { getformat($2, macrofd); }
-    |    S_GETFORMAT COL '|' NUMBER
-                    { getformat($2, $4); }
-    |    S_GETFORMAT        { getformat(curcol, macrofd); }
-    |    S_GETFORMAT '|' NUMBER    { getformat(curcol, $3); }
-    |    S_GETFMT var_or_range    { getfmt($2.left.vp->row,
-                        $2.left.vp->col,
-                        $2.right.vp->row,
-                        $2.right.vp->col, macrofd); }
-    |    S_GETFMT var_or_range '|' NUMBER
-                    { getfmt($2.left.vp->row,
-                        $2.left.vp->col,
-                        $2.right.vp->row,
-                        $2.right.vp->col, $4); }
-    |    S_GETFMT        { getfmt(currow, curcol,
-                        currow, curcol, macrofd); }
-    |    S_GETFMT '|' NUMBER    { getfmt(currow, curcol,
-                        currow, curcol, $3); }
-//    |    S_GETFRAME        { getframe(macrofd); }
-//    |    S_GETFRAME '|' NUMBER    { getframe($3); }
-//    |    S_GETRANGE STRING    { getrange($2, macrofd); }
-//    |    S_GETRANGE STRING '|' NUMBER { getrange($2, $4); }
-
-    |    S_EVAL e        { doeval($2, NULL, currow, curcol,
-                        macrofd); }
-    |    S_EVAL e STRING        { doeval($2, $3, currow, curcol,
-                        macrofd); }
-    |    S_EVAL e STRING '|' NUMBER
-                    { doeval($2, $3, currow, curcol,
-                        $3); }
-    |    S_SEVAL e        { doseval($2, currow, curcol, macrofd); }
-    |    S_QUERY STRING STRING    { doquery($2, $3, macrofd); }
-    |    S_QUERY STRING STRING '|' NUMBER
-                    { doquery($2, $3, $5); }
-    |    S_QUERY STRING        { doquery($2, NULL, macrofd); }
-    |    S_QUERY STRING '|' NUMBER
-                    { doquery($2, NULL, $4); }
-    |    S_QUERY            { doquery(NULL, NULL, macrofd); }
-    |    S_QUERY '|' NUMBER    { doquery(NULL, NULL, $3); }
-    |    S_GETKEY        { dogetkey(); }
     |    S_ERROR STRING        { error($2); }
-    |    S_STATUS            { dostat(macrofd); }
-    |    S_STATUS '|' NUMBER    { dostat($3); }
-
-    //|    S_RECALC        { EvalAll();
-        //                      update(1);
-        //                      changed = 0;
-                    }
+    |    S_RECALC        { EvalAll();
+                          update(1);
+                          changed = 0;
+                         }
     |    S_REDRAW        { if (usecurses) {
                         clearok(stdscr, TRUE);
                         linelim = -1;

@@ -1607,6 +1607,7 @@ int is_single_command (struct block * buf, long timeout) {
                  buf->value == 'L' ||
                  buf->value == 'G' ||
                  buf->value == ctl('f') ||
+                 buf->value == ctl('j') ||
                  buf->value == ctl('d') ||
                  buf->value == ctl('b') ||
                  buf->value == ctl('a') ||

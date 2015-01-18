@@ -247,7 +247,18 @@ void do_commandmode(struct block * sb) {
             help();
 
         } else if ( strncmp(inputline, "autojus", 7) == 0) {
-            send_to_interp(inputline); 
+            char cline [BUFFERSIZE];
+            strcpy(cline, inputline);
+            int c = curcol, cf = curcol;
+            if (p != -1) {
+                c = sr->tlcol;
+                cf = sr->brcol;
+            }
+            if ( p != -1 || ! strcmp(inputline, "autojus")) {
+                sprintf(cline, "autojus %s:", coltoa(c));
+                sprintf(cline, "%s%s", cline, coltoa(cf));
+            }
+            send_to_interp(cline); 
 
         } else if ( strncmp(inputline, "load", 4) == 0 ) {
             char cline [BUFFERSIZE];
