@@ -413,9 +413,12 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
                 set_ucolor(win, EXPRESSION);
             } else if ((*p)->label) {             // string
                 set_ucolor(win, STRG);
-            } else if ((*p)->flags & is_valid) {  // numeric value
+            } else if ((*p)->flags & is_valid && ! (*p)->format) {  // numeric value
                 set_ucolor(win, NUMB);
             } else if ((*p)->cellerror) {         // cellerror
+                set_ucolor(win, CELL_ERROR);
+            } else if ((*p)->format && (*p)->format[0] == 'd') {  // date format
+                set_ucolor(win, DATEF);
             } else {
                 set_ucolor(win, NORMAL);
             }
@@ -692,12 +695,6 @@ int get_formated_value(struct ent ** p, int col, char * value) {
     }
 }
 
-#include <locale.h>
-//#include <ncursesw/ncurses.h>
-
-//#include <wctype.h>
-//#define _XOPEN_SOURCE_EXTENDED 1
-//#define _XOPEN_SOURCE 600
 void show_text_content_of_cell(WINDOW * win, struct ent ** p, int row, int col, int r, int c) {
     char value[FBUFLEN];      // the value to be printed without padding
     char field[FBUFLEN] = ""; // the value with padding and alignment    

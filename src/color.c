@@ -24,12 +24,12 @@ void start_default_ucolors() {
     // Blanqueo los atributos de todos los colores
     int i;
     for (i=0; i< N_INIT_PAIRS; i++) {
-        ucolors[ i ].bold = 0;
-        ucolors[ i ].dim = 0;
-        ucolors[ i ].reverse = 0;
-        ucolors[ i ].standout = 0;
+        ucolors[ i ].bold      = 0;
+        ucolors[ i ].dim       = 0;
+        ucolors[ i ].reverse   = 0;
+        ucolors[ i ].standout  = 0;
         ucolors[ i ].underline = 0;
-        ucolors[ i ].blink = 0;
+        ucolors[ i ].blink     = 0;
     }
 
     ucolors[ HEADINGS        ].fg = WHITE;
@@ -45,9 +45,12 @@ void start_default_ucolors() {
     ucolors[ NUMB            ].fg = CYAN;
     ucolors[ NUMB            ].bg = BLACK;
 
-    ucolors[ STRG            ].fg = GREEN;
+    ucolors[ STRG            ].fg = RED;
     ucolors[ STRG            ].bg = BLACK;
-    ucolors[ STRG            ].bold = 0;
+    ucolors[ STRG            ].bold = 1;
+
+    ucolors[ DATEF           ].fg = MAGENTA;
+    ucolors[ DATEF           ].bg = BLACK;
 
     ucolors[ EXPRESSION      ].fg = YELLOW;
     ucolors[ EXPRESSION      ].bg = BLACK;
@@ -78,8 +81,11 @@ void start_default_ucolors() {
 
     ucolors[ NORMAL          ].fg = WHITE;
     ucolors[ NORMAL          ].bg = BLACK;
+
     ucolors[ CELL_ERROR      ].fg = RED;
     ucolors[ CELL_ERROR      ].bg = BLACK;
+    ucolors[ CELL_ERROR      ].bold = 1;
+
     ucolors[ CELL_NEGATIVE   ].fg = GREEN;
     ucolors[ CELL_NEGATIVE   ].bg = BLACK;
 
@@ -87,6 +93,7 @@ void start_default_ucolors() {
     init_pair(MODE,              ucolors[MODE].fg,                ucolors[MODE].bg);
     init_pair(NUMB,              ucolors[NUMB].fg,                ucolors[NUMB].bg);
     init_pair(STRG,              ucolors[STRG].fg,                ucolors[STRG].bg);
+    init_pair(DATEF,             ucolors[DATEF].fg,               ucolors[DATEF].bg);
     init_pair(EXPRESSION,        ucolors[EXPRESSION].fg,          ucolors[EXPRESSION].bg);
     init_pair(CELL_ERROR,        ucolors[CELL_ERROR].fg,          ucolors[CELL_ERROR].bg);
     init_pair(CELL_NEGATIVE,     ucolors[CELL_NEGATIVE].fg,       ucolors[CELL_NEGATIVE].bg);
@@ -154,6 +161,8 @@ void set_colors_param_dict() {
     put(d_colors_param, "NUMB", str);
     sprintf(str, "%d", STRG);
     put(d_colors_param, "STRG", str);
+    sprintf(str, "%d", DATEF);
+    put(d_colors_param, "DATEF", str);
     sprintf(str, "%d", EXPRESSION);
     put(d_colors_param, "EXPRESSION", str);
     sprintf(str, "%d", INFO_MSG);

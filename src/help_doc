@@ -442,7 +442,7 @@ Commands for handling cell content:
                      type, fg, bg, bold, dim, reverse, standout, underline, blink.
                 the first three are mandatory
                 type has to be one of the following:
-                     HEADINGS, MODE, NUMBER, STRING, EXPRESSION, CELL_ERROR,
+                     HEADINGS, MODE, NUMB, STRG, DATEF, EXPRESSION, CELL_ERROR,
                      CELL_NEGATIVE, CELL_SELECTION, CELL_SELECTION_SC,
                      INFO_MSG, ERROR_MSG, CELL_ID, CELL_FORMAT,
                      CELL_CONTENT, WELCOME, NORMAL, INPUT.

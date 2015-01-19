@@ -13,7 +13,6 @@
 #define EDIT_MODE        0x04
 #define COMMAND_MODE     0x08
 #define VISUAL_MODE      0x16
-// #define ctl(c) ((c)&037)
 #define ctl(x)           ((x) & 0x1f)
 #define uncl(x)           (0x60 | ((x) & 0x1f))
 #define OKEY_ESC         '\033'
@@ -44,13 +43,6 @@
 #define NO_CMD           0
 #define EDITION_CMD      1
 #define MOVEMENT_CMD     2
-
-#ifndef INFO_MSG
-    #define INFO_MSG     8
-    #define ERROR_MSG    9
-#endif
-
-
 
 #include <ncurses.h>
 extern WINDOW * input_win;
