@@ -1,3 +1,4 @@
+#ifdef UNDO
 /* 
 ----------------------------------------------------------------------------------------
 El UNDO y REDO funciona con una lista de estructuras de tipo 'struct undo'.
@@ -517,3 +518,4 @@ void do_redo() {
 
     return;
 }
+#endif

@@ -5,10 +5,13 @@
 
 #include "sc.h"
 #include "stdlib.h"
-#include "undo.h"
 #include "marks.h"
 #include "cmds.h"
 #include "xmalloc.h" // for scxfree
+
+#ifdef UNDO
+#include "undo.h"
+#endif
 
 extern struct ent * forw_row(int arg);
 extern struct ent * back_row(int arg);
@@ -140,7 +143,9 @@ void paste_yanked_ents(int above) {
     struct ent * yl = yanklist;
     int diffr = 0, diffc = 0, ignorelock = 0;
 
+    #ifdef UNDO
     create_undo_action();
+    #endif
 
     if (type_of_yank == 's') {                               // paste a range that was yanked in the sort function
         diffr = 0;
@@ -153,28 +158,38 @@ void paste_yanked_ents(int above) {
 
     } else if (type_of_yank == 'r') {                        // paste row
         int c = yank_arg;
+        #ifdef UNDO
         copy_to_undostruct(currow + ! above, 0, currow + ! above - 1 + yank_arg, maxcol, 'd');
+        #endif
         while (c--) above ? insert_row(0) : insert_row(1);
         if (! above) currow = forw_row(1)->row;              // paste below
         diffr = currow - yl->row;
         diffc = yl->col;
         fix_marks(yank_arg, 0, currow, maxrow, 0, maxcol);
+        #ifdef UNDO
         save_undo_range_shift(yank_arg, 0, currow, 0, currow - 1 + yank_arg, maxcol);
+        #endif
 
     } else if (type_of_yank == 'c') {                        // paste col
         int c = yank_arg;
+        #ifdef UNDO
         copy_to_undostruct(0, curcol + above, maxrow, curcol + above - 1 + yank_arg, 'd');
+        #endif
         while (c--) above ? insert_col(1) : insert_col(0);   // insert cols to the right if above or to the left
         //if (above) curcol = back_col(1)->col; NO
         diffr = yl->row;
         diffc = curcol - yl->col;
         fix_marks(0, yank_arg, 0, maxrow, curcol, maxcol);
+        #ifdef UNDO
         save_undo_range_shift(0, yank_arg, 0, curcol, maxrow, curcol - 1 + yank_arg);
+        #endif
     }
 
     // por cada ent en yanklist
     while (yl != NULL) {
+        #ifdef UNDO
         copy_to_undostruct(yl->row + diffr, yl->col + diffc, yl->row + diffr, yl->col + diffc, 'd');
+        #endif
 
         // here we delete current content of "destino" ent
         erase_area(yl->row + diffr, yl->col + diffc, yl->row + diffr, yl->col + diffc, ignorelock);
@@ -191,11 +206,15 @@ void paste_yanked_ents(int above) {
         destino->row += diffr;
         destino->col += diffc;
 
+        #ifdef UNDO
         copy_to_undostruct(yl->row + diffr, yl->col + diffc, yl->row + diffr, yl->col + diffc, 'a');
+        #endif
 
         yl = yl->next;
     }
 
+    #ifdef UNDO
     end_undo_action();
+    #endif
     return;
 }

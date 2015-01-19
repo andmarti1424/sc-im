@@ -1,12 +1,14 @@
 #include "sc.h"
 #include "macros.h"
-#include "undo.h"
 #include "screen.h"
 #include "hide_show.h"
 #include "color.h"   // for set_ucolor
 #include "vmtbl.h"   // for growtbl
 
+#ifdef UNDO
+#include "undo.h"
 extern struct undo undo_item;
+#endif
 
 /* mark a row as hidden */
 void hide_row(int from_row, int arg) {
@@ -28,9 +30,11 @@ void hide_row(int from_row, int arg) {
 
     if (! loading) {
         modflg++;
+        #ifdef UNDO
         create_undo_action();
         undo_hide_show(from_row, -1, 'h', arg);
         end_undo_action();
+        #endif
     }
     while ( from_row <= r2)
         row_hidden[ from_row++ ] = TRUE;
@@ -55,9 +59,13 @@ void hide_col(int from_col, int arg) {
 
     if (! loading) {
         modflg++;
+        #ifdef UNDO
+        create_undo_action();
+        create_undo_action();
         create_undo_action();
         undo_hide_show(-1, from_col, 'h', arg);
         end_undo_action();
+        #endif
     }
     while (from_col <= c2)
         col_hidden[ from_col++ ] = TRUE;
@@ -76,12 +84,18 @@ void show_row(int from_row, int arg) {
     }
 
     modflg++;
+    #ifdef UNDO
     create_undo_action();
+    #endif
     while (from_row <= r2) {
+        #ifdef UNDO
         if ( row_hidden[from_row] ) undo_hide_show(from_row, -1, 's', 1);
+        #endif
         row_hidden[ from_row++ ] = FALSE;
     }
+    #ifdef UNDO
     end_undo_action();
+    #endif
     return;
 }
 
@@ -97,12 +111,18 @@ void show_col(int from_col, int arg) {
     }
 
     modflg++;
+    #ifdef UNDO
     create_undo_action();
+    #endif
     while (from_col <= c2) {
+        #ifdef UNDO
         if ( col_hidden[from_col] ) undo_hide_show(-1, from_col, 's', 1);
+        #endif
         col_hidden[ from_col++ ] = FALSE;
     }
+    #ifdef UNDO
     end_undo_action();
+    #endif
     return;
 }
 

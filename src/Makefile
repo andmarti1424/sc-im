@@ -113,9 +113,13 @@ XLS :=
 XLSX :=
 #XLSX := -DXLSX
 
+# Set UNDO variable to enable this feature
+#UNDO :=
+UNDO := -DUNDO
+
 #CFLAGS := -O2 -Wall -pipe -g
 CFLAGS := $(LINUX) $(FREEBSD) $(NETBSD) -O2 -Wall -pipe -g -I/usr/include/libxml2
-CFLAGS := $(CFLAGS) $(USECOLORS) $(USELOCALE) $(SIGVOID) $(DFLT_PAGER)
+CFLAGS := $(CFLAGS) $(USECOLORS) $(USELOCALE) $(UNDO) $(SIGVOID) $(DFLT_PAGER)
 CFLAGS := $(CFLAGS) $(IEEE_MATH) $(RINT) $(REGEX) $(LIBRARY)
 CFLAGS := $(CFLAGS) $(NO_NOTIMEOUT) $(SIMPLE) $(XLS) $(XLSX) $(HISTORY_FILE)
 

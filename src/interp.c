@@ -34,8 +34,11 @@
 #include "range.h"
 #include "xmalloc.h" // for scxfree
 #include "lex.h"     // for atocol
-#include "undo.h"
 #include <unistd.h>
+
+#ifdef UNDO
+#include "undo.h"
+#endif
 
 #ifdef REGCOMP
 #include <regex.h>
@@ -1981,15 +1984,23 @@ void lock_cells(struct ent *v1, struct ent *v2) {
     if (minr < 0) minr = 0;
     if (minc < 0) minc = 0;
 
+    #ifdef UNDO
     create_undo_action();
+    #endif
     for (r = minr; r <= maxr; r++)
         for (c = minc; c <= maxc; c++) {
             n = lookat(r, c);
+    #ifdef UNDO
             copy_to_undostruct(r, c, r, c, 'd');
+    #endif
             n->flags |= is_locked;
+    #ifdef UNDO
             copy_to_undostruct(r, c, r, c, 'a');
+    #endif
         }
+    #ifdef UNDO
     end_undo_action();            
+    #endif
 }
 
 /* unlock a range of cells */
@@ -2009,15 +2020,23 @@ void unlock_cells(struct ent *v1, struct ent *v2) {
     if (minr < 0) minr = 0;
     if (minc < 0) minc = 0;
 
+    #ifdef UNDO
     create_undo_action();
+    #endif
     for (r = minr; r <= maxr; r++)
         for (c = minc; c <= maxc; c++) {
             n = lookat(r, c);
+    #ifdef UNDO
             copy_to_undostruct(r, c, r, c, 'd');
+    #endif
             n->flags &= ~is_locked;
+    #ifdef UNDO
             copy_to_undostruct(r, c, r, c, 'a');
+    #endif
         }
+    #ifdef UNDO
     end_undo_action();            
+    #endif
 }
 
 /* set the numeric part of a cell */
@@ -2601,11 +2620,15 @@ int dateformat(struct ent *v1, struct ent *v2, char * fmt) {
     if (minr < 0) minr = 0;
     if (minc < 0) minc = 0;
 
+    #ifdef UNDO
     create_undo_action();
+    #endif
     for (r = minr; r <= maxr; r++) {
         for (c = minc; c <= maxc; c++) {
             n = lookat(r, c);
+    #ifdef UNDO
             copy_to_undostruct(r, c, r, c, 'd');
+    #endif
             if ( locked_cell(n->row, n->col) || ! (n)->label ) continue;
 
             // free all ent content but its label
@@ -2627,11 +2650,15 @@ int dateformat(struct ent *v1, struct ent *v2, char * fmt) {
             strcat(s, fmt);
             n->format = s;
 
+    #ifdef UNDO
             copy_to_undostruct(r, c, r, c, 'a');
+    #endif
         }
     }
     modflg++; // increase just one time
+    #ifdef UNDO
     end_undo_action();
+    #endif
     return 0;
 }
 

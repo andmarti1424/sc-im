@@ -5,7 +5,6 @@
 #include "yank.h"
 #include "marks.h"
 #include "cmds.h"
-#include "undo.h"
 #include "buffer.h"
 #include "screen.h"
 #include "conf.h"    // for conf parameters
@@ -14,6 +13,9 @@
 #include "vmtbl.h"   // for growtbl
 #include "utils/string.h" // for add_char
 #include "y.tab.h"   // for yyparse
+#ifdef UNDO
+#include "undo.h"
+#endif
 
 void syncref(register struct enode *e);
 extern unsigned int shall_quit;
@@ -803,16 +805,20 @@ void del_selected_cells() {
        }
        yank_area(r->tlrow, r->tlcol, r->brrow, r->brcol, 'a', 1);
 
+       #ifdef UNDO
        create_undo_action();
        copy_to_undostruct(r->tlrow, r->tlcol, r->brrow, r->brcol, 'd');
+       #endif
 
        erase_area(r->tlrow, r->tlcol, r->brrow, r->brcol, 0);
        modflg++;
        sync_refs();
        //flush_saved(); NO DESCOMENTAR. VER ABAJO.
 
+       #ifdef UNDO
        copy_to_undostruct(r->tlrow, r->tlcol, r->brrow, r->brcol, 'a');
        end_undo_action();
+       #endif
 
     // delete cell
     } else {
@@ -822,15 +828,19 @@ void del_selected_cells() {
        }
        yank_area(currow, curcol, currow, curcol, 'e', 1);
 
+       #ifdef UNDO
        create_undo_action();
        copy_to_undostruct(currow, curcol, currow, curcol, 'd');
+       #endif
 
        erase_area(currow, curcol, currow, curcol, 0);
        modflg++;
        sync_refs();
 
+       #ifdef UNDO
        copy_to_undostruct(currow, curcol, currow, curcol, 'a');
        end_undo_action();
+       #endif
 
 /*
        // Para UNDO
@@ -892,12 +902,16 @@ void insert_or_edit_cell() {
         add_char(inputline, '\"', strlen(inputline));
     }
 
+    #ifdef UNDO
     create_undo_action();
     copy_to_undostruct(currow, curcol, currow, curcol, 'd');
+    #endif
     (void) sprintf(interp_line, "%s %s = %s", ope, v_name(currow, curcol), inputline);
     send_to_interp(interp_line); 
+    #ifdef UNDO
     copy_to_undostruct(currow, curcol, currow, curcol, 'a');
     end_undo_action();
+    #endif
 
     inputline[0]='\0';
     inputline_pos = 0;
@@ -1314,7 +1328,9 @@ void valueize_area(int sr, int sc, int er, int ec) {
         sc = 0;
     checkbounds(&er, &ec);
 
+    #ifdef UNDO
     create_undo_action();
+    #endif
     for (r = sr; r <= er; r++) {
         for (c = sc; c <= ec; c++) {
             p = *ATBL(tbl, r, c);
@@ -1322,16 +1338,22 @@ void valueize_area(int sr, int sc, int er, int ec) {
                 error(" Cell %s%d is locked", coltoa(c), r);
                 continue;
             }
+    #ifdef UNDO
             copy_to_undostruct(r, c, r, c, 'd');
+    #endif
             if (p && p->expr) {
                 efree(p->expr);
                 p->expr = (struct enode *)0;
                 p->flags &= ~is_strexpr;
             }
+    #ifdef UNDO
             copy_to_undostruct(r, c, r, c, 'a');
+    #endif
         }
     }
+    #ifdef UNDO
     end_undo_action();
+    #endif
     return;
 }
 

@@ -13,7 +13,6 @@
 #include "screen.h"
 #include "file.h"
 #include "main.h"
-#include "undo.h"
 #include "interp.h"
 #include "hide_show.h"
 #include "exec.h"
@@ -22,6 +21,9 @@
 #include "maps.h"
 #include "xls.h"
 #include "xlsx.h"
+#ifdef UNDO
+#include "undo.h"
+#endif
 
 extern char * rev;
 extern struct dictionary * user_conf_d;
@@ -375,11 +377,15 @@ void do_commandmode(struct block * sb) {
             int l = strlen(interp_line);
             sprintf(interp_line, "%s %s", interp_line, inputline);
             del_range_chars(interp_line, l, l + 6);
+            #ifdef UNDO
             create_undo_action();
             copy_to_undostruct(r, c, rf, cf, 'd');
+            #endif
             send_to_interp(interp_line);
+            #ifdef UNDO
             copy_to_undostruct(r, c, rf, cf, 'a');
             end_undo_action();
+            #endif
 
         } else if ( strncmp(inputline, "color ", 6) == 0 ) {
             strcpy(interp_line, inputline);

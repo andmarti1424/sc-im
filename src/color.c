@@ -49,7 +49,7 @@ void start_default_ucolors() {
     ucolors[ STRG            ].bg = BLACK;
     ucolors[ STRG            ].bold = 1;
 
-    ucolors[ DATEF           ].fg = MAGENTA;
+    ucolors[ DATEF           ].fg = YELLOW;
     ucolors[ DATEF           ].bg = BLACK;
 
     ucolors[ EXPRESSION      ].fg = YELLOW;

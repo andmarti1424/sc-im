@@ -12,7 +12,6 @@
 #include "marks.h"
 #include "maps.h"
 #include "yank.h"
-#include "undo.h"
 #include "file.h"
 #include "utils/dictionary.h"
 #include "history.h"
@@ -21,6 +20,10 @@
 #include "cmds.h"
 #include "color.h"   // for set_ucolor
 #include "vmtbl.h"   // for growtbl
+
+#ifdef UNDO
+#include "undo.h"
+#endif
 
 int currow = 0, curcol = 0;
 int maxrows, maxcols;
@@ -159,7 +162,9 @@ void delete_structures() {
     free_ranges();
 
     // Free undo list - from start of list
+    #ifdef UNDO
     clear_undo_list();
+    #endif
 
     // free deleted ents
     flush_saved();

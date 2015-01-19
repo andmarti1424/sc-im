@@ -9,10 +9,12 @@
 #include "cmds_edit.h"
 #include "history.h"
 #include "hide_show.h"
-#include "undo.h"
 #include "shift.h"
 #include "interp.h"
 #include "utils/extra.h"
+#ifdef UNDO
+#include "undo.h"
+#endif
 
 extern int cmd_multiplier;
 extern struct history * commandline_history;
@@ -463,37 +465,53 @@ void do_normalmode(struct block * buf) {
                 error("Locked cells encountered. Nothing changed");           
                 return;
             }
+#ifdef UNDO
             create_undo_action();
+#endif
             int ic = cmd_multiplier + 1;
             switch (buf->pnext->value) {
                 case 'j':
                     fix_marks(  (rf - r + 1) * cmd_multiplier, 0, r, maxrow, c, cf);
+#ifdef UNDO
                     save_undo_range_shift(cmd_multiplier, 0, r, c, rf + (rf-r+1) * (cmd_multiplier - 1), cf);
+#endif
                     while (ic--) shift_range(ic, 0, r, c, rf, cf);
                     break;
                 case 'k':
                     fix_marks( -(rf - r + 1) * cmd_multiplier, 0, r, maxrow, c, cf);
                     yank_area(r, c, rf + (rf-r+1) * (cmd_multiplier - 1), cf, 'a', cmd_multiplier); // keep ents in yanklist for sk
+#ifdef UNDO
                     copy_to_undostruct(r, c, rf + (rf-r+1) * (cmd_multiplier - 1), cf, 'd');
                     save_undo_range_shift(-cmd_multiplier, 0, r, c, rf + (rf-r+1) * (cmd_multiplier - 1), cf);
+#endif
                     while (ic--) shift_range(-ic, 0, r, c, rf, cf);
+#ifdef UNDO
                     copy_to_undostruct(r, c, rf + (rf-r+1) * (cmd_multiplier - 1), cf, 'a');
+#endif
                     break;
                 case 'h':
                     fix_marks(0, -(cf - c + 1) * cmd_multiplier, r, rf, c, maxcol);
                     yank_area(r, c, rf, cf + (cf-c+1) * (cmd_multiplier - 1), 'a', cmd_multiplier); // keep ents in yanklist for sk
+#ifdef UNDO
                     copy_to_undostruct(r, c, rf, cf + (cf-c+1) * (cmd_multiplier - 1), 'd');
                     save_undo_range_shift(0, -cmd_multiplier, r, c, rf, cf + (cf-c+1) * (cmd_multiplier - 1));
+#endif
                     while (ic--) shift_range(0, -ic, r, c, rf, cf);
+#ifdef UNDO
                     copy_to_undostruct(r, c, rf, cf + (cf-c+1) * (cmd_multiplier - 1), 'a');
+#endif
                     break;
                 case 'l':
                     fix_marks(0,  (cf - c + 1) * cmd_multiplier, r, rf, c, maxcol);
+#ifdef UNDO
                     save_undo_range_shift(0, cmd_multiplier, r, c, rf, cf + (cf-c+1) * (cmd_multiplier - 1));
+#endif
                     while (ic--) shift_range(0, ic, r, c, rf, cf);
                     break;
             }
+#ifdef UNDO
             end_undo_action();
+#endif
             cmd_multiplier = 0;
             unselect_ranges();
             update();
@@ -511,31 +529,38 @@ void do_normalmode(struct block * buf) {
                     error("Locked cells encountered. Nothing changed");           
                     return;
                 }
+#ifdef UNDO
                 create_undo_action();
                 copy_to_undostruct(currow, 0, currow + ic - 1, maxcol, 'd');
                 save_undo_range_shift(-ic, 0, currow, 0, currow - 1 + ic, maxcol);
+#endif
                 fix_marks(-ic, 0, currow + ic - 1, maxrow, 0, maxcol);
                 yank_area(currow, 0, currow - 1 + cmd_multiplier, maxcol, 'r', ic);
                 while (ic--) deleterow();
+#ifdef UNDO
                 copy_to_undostruct(currow, 0, currow - 1 + cmd_multiplier, maxcol, 'a');
-
-                if (cmd_multiplier > 0) cmd_multiplier = 0;
                 end_undo_action();
+#endif
+                if (cmd_multiplier > 0) cmd_multiplier = 0;
 
             } else if (buf->pnext->value == 'c') {
                 if (any_locked_cells(0, curcol, maxrow, curcol + cmd_multiplier)) {
                     error("Locked cells encountered. Nothing changed");           
                     return;
                 }
+#ifdef UNDO
                 create_undo_action();
                 copy_to_undostruct(0, curcol, maxrow, curcol - 1 + ic, 'd');
                 save_undo_range_shift(0, -ic, 0, curcol, maxrow, curcol - 1 + ic);
+#endif
                 fix_marks(0, -ic, 0, maxrow,  curcol - 1 + ic, maxcol);
                 yank_area(0, curcol, maxrow, curcol + cmd_multiplier - 1, 'c', ic);
                 while (ic--) deletecol();
+#ifdef UNDO
                 copy_to_undostruct(0, curcol, maxrow, curcol + cmd_multiplier - 1, 'a');
-                if (cmd_multiplier > 0) cmd_multiplier = 0;
                 end_undo_action();
+#endif
+                if (cmd_multiplier > 0) cmd_multiplier = 0;
 
             } else if (buf->pnext->value == 'd') {
                 del_selected_cells(); 
@@ -548,18 +573,26 @@ void do_normalmode(struct block * buf) {
         case 'i':
             {
             if (bs != 2) return;
+#ifdef UNDO
             create_undo_action();
+#endif
             if (buf->pnext->value == 'r') {
+#ifdef UNDO
                 save_undo_range_shift(1, 0, currow, 0, currow, maxcol);
+#endif
                 fix_marks(1, 0, currow, maxrow, 0, maxcol);
                 insert_row(0);
 
             } else if (buf->pnext->value == 'c') {
+#ifdef UNDO
                 save_undo_range_shift(0, 1, 0, curcol, maxrow, curcol);
+#endif
                 fix_marks(0, 1, 0, maxrow, curcol, maxcol);
                 insert_col(0);
             }
+#ifdef UNDO
             end_undo_action();
+#endif
             update();
             break;
             }
@@ -702,17 +735,25 @@ void do_normalmode(struct block * buf) {
 
         // undo
         case 'u':
+            #ifdef UNDO
             do_undo();
             // sync_refs();
             update();
             break;
+            #else
+            error("Build was done without UNDO support");
+            #endif
 
         // redo
         case ctl('r'):
+            #ifdef UNDO
             do_redo();
             // sync_refs();
             update();
             break;
+            #else
+            error("Build was done without UNDO support");
+            #endif
 
         case '{': // left align
         case '}': // right align
@@ -731,15 +772,21 @@ void do_normalmode(struct block * buf) {
                 error("Locked cells encountered. Nothing changed");           
                 return;
             }
+#ifdef UNDO
             create_undo_action();
+#endif
             if (buf->value == '{')      sprintf(interp_line, "leftjustify %s", v_name(r, c));
             else if (buf->value == '}') sprintf(interp_line, "rightjustify %s", v_name(r, c));
             else if (buf->value == '|') sprintf(interp_line, "center %s", v_name(r, c));
             if (p != -1) sprintf(interp_line, "%s:%s", interp_line, v_name(rf, cf));
+#ifdef UNDO
             copy_to_undostruct(r, c, rf, cf, 'd');
+#endif
             send_to_interp(interp_line);
+#ifdef UNDO
             copy_to_undostruct(r, c, rf, cf, 'a');
             end_undo_action();            
+#endif
             cmd_multiplier = 0;
             update();
             break;
@@ -780,7 +827,9 @@ void do_normalmode(struct block * buf) {
             }
             if (atoi(get_conf_value("numeric")) == 1) goto numeric;
             struct ent * p;
+#ifdef UNDO
             create_undo_action();
+#endif
             int arg = cmd_multiplier;
             int mf = modflg; // keep original modflg
             for (r = tlrow; r <= brrow; r++) {
@@ -792,14 +841,20 @@ void do_normalmode(struct block * buf) {
                         //error("Can't increment / decrement a formula");
                         continue;
                     } else if (p->flags & is_valid) {
+#ifdef UNDO
                         copy_to_undostruct(r, c, r, c, 'd');
+#endif
                         p->v += buf->value == '+' ? (double) arg : - 1 * (double) arg;
+#ifdef UNDO
                         copy_to_undostruct(r, c, r, c, 'a');
+#endif
                         if (mf == modflg) modflg++; // increase just one time
                     }
                 }
             }
+#ifdef UNDO
             end_undo_action();
+#endif
             if (atoi(get_conf_value("autocalc"))) EvalAll();
             cmd_multiplier = 0;
             update();
