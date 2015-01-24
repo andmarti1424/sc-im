@@ -2,14 +2,14 @@ Build instructions for NetBSD
 -----------------------------
 Use gmake and bison.
 Make sure to have ncurses library or a symlink to it in the library directory.
-Setup Makefile acording to the previous comments.
+Setup NETBSD in Makefile and other variables, acording to the previous comments.
 Replace -lncurses with -lcurses in Makefile.
 
 
 Build instructions for FreeBSD
 ------------------------------
 Use gmake and bison for building.
-Setup BSD42 in Makefile.
+Setup FREEBSD in Makefile.
 
 
 Import SCIM generated CSV files to LibreOffice
