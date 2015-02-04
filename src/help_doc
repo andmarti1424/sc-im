@@ -248,9 +248,11 @@ Commands for handling cell content:
 
      :e csv      export current spreadsheet to csv format.
                  the name of the file that is created comes from the current open spreadsheet.
+                 if a range is selected, only the that range is exported.
 
      :e tab      export current spreadsheet to tab delimited file.
                  the name of the file that is created comes from the current open spreadsheet.
+                 if a range is selected, only the that range is exported.
 
      :e csv name 
                  export current spreadsheet to csv file. 'name' is the name of the file to be generated

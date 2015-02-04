@@ -36,7 +36,7 @@ void start_default_ucolors() {
     ucolors[ HEADINGS        ].bg = BLUE;
     ucolors[ WELCOME         ].fg = BLUE;
     ucolors[ WELCOME         ].bg = BLACK;
-    ucolors[ CELL_SELECTION  ].fg = BLUE;        // cell selection in headings
+    ucolors[ CELL_SELECTION  ].fg = BLUE;         // cell selection in headings
     ucolors[ CELL_SELECTION  ].bg = WHITE;
 
     ucolors[ CELL_SELECTION_SC ].fg = BLACK;      // cell selection in spreadsheet
