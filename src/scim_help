@@ -581,5 +581,207 @@ Commands for handling cell content:
     set variable 'newline_action' to 'j' to move cursor down after an entry.
     set it to 'l' to move it right, or set it to '0' to expect no action.
 
+    - external_functions
+    disabled by default, set this variable to enable external functions. see @ext function below.
+
+*Built-in Range Functions*
+    @sum(r)
+    @sum(r,e)
+        Sum all valid (nonblank) entries in the region whose two corners are defined by the two variable
+        names (e.g.  c5:e14) or the range name specified. The optional second argument is an expression
+        which can be used to determine which cells in the range to sum (see above).
+
+    @prod(r)
+    @prod(r,e)
+        Multiply together all valid (nonblank) entries in the specified region. The optional second argu‐
+        ment is an expression which can be used to determine which cells in the range to multiply (see above).
+
+    @avg(r)
+    @avg(r,e)
+        Average all valid (nonblank) entries in the specified region. The optional second argument is an
+        expression which can be used to determine which cells in the range to average (see above).
+
+    @count(r)
+    @count(r,e)
+        Count all valid (nonblank) entries in the specified region. The optional second argument is an
+        expression which can be used to determine which cells in the range to count (see above).
+
+    @max(r)
+    @max(r,e)
+        Return  the  maximum  value in the specified region.  The optional second argument is an expression
+        which can be used to exclude specific cells in the range when determining this maximum  value  (see
+        above).  See also the multi argument version of @max below.
+
+    @min(r)
+    @min(r,e)
+        Return  the  minimum  value in the specified region.  The optional second argument is an expression
+        which can be used to exclude specific cells in the range when determining this minimum  value  (see
+        above).  See also the multi argument version of @min below.
+
+    @stddev(r)
+    @stddev(r,e)
+        Return  the  sample  standard  deviation of the cells in the specified region.  The optional second
+        argument is an expression which can be used to exclude specific cells in the range when calculating
+        the standard deviation (see above).
+
+    @rows(r)
+        Return the number of rows in the specified range.
+
+    @cols(r)
+        Return the number of columns in the specified range.
+
+*Built-in Numeric Functions*
+    @exp(e)
+        Return the exponential function of e.
+
+    @ln(e)
+        Return the natural logarithm of e.
+
+    @log(e)
+        Return the base 10 logarithm of e.
+
+    @floor(e)
+        Return the largest integer not greater than e.
+
+    @ceil(e)
+        Return the smallest integer not less than e.
+
+    @rnd(e)
+        Round e to the nearest integer. default: *.5 will be rounded up to the next integer;
+
+    @round(e,n)
+        Round e to n decimal places.  n may be positive to round off the right side of the decimal or nega‐
+        tive to round off the left side.  See @rnd(e) above for rounding types.
+
+    @abs(e)
+    @fabs(e)
+        Return the absolute value of e.
+
+    @pow(e1,e2)
+        Return e1 raised to the power of e2.
+
+    @hypot(e1,e2)
+        Return sqrt(e1∗e1+e2∗e2), taking precautions against unwarranted overflows.
+
+    @pi
+        A constant quite close to pi.
+
+    @dtr(e)
+        Convert e in degrees to radians.
+
+    @rtd(e)
+        Convert e in radians to degrees.
+
+    @sin(e)
+    @cos(e)
+    @tan(e)
+        Return trigonometric functions of radian arguments. The magnitude of the arguments are not checked
+        to assure meaningful results.
+
+    @asin(e)
+        Return the arc sine of e in the range -pi/2 to pi/2.
+
+    @acos(e)
+        Return the arc cosine of e in the range 0 to pi.
+
+    @atan(e)
+        Return the arc tangent of e in the range -pi/2 to pi/2.
+
+    @atan2(e1,e2)
+        Returns the arc tangent of e1/e2 in the range -pi to pi.
+
+    @max(e1,e2,...)
+        Return the maximum of the values of the expressions. Two or more expressions may be specified.
+        See also the range version of @max above.
+
+    @min(e1,e2,...)
+        Return the minimum of the values of the expressions. Two or more expressions may be specified.
+        See also the range version of @min above.
+
+    @ston(se)
+        Convert string expression se to a numeric value.
+
+    @nval(se,e)
+        Return the numeric value of a cell selected by name. String expression se must evaluate to a  col‐
+        umn  name ("A" - "ZZ") and e must evaluate to a row number (0 - maxrows, by default 65536).
+        If se or e is out of bounds, or the cell has no numeric value, the result is 0.
+        You can use this for simple table lookups. See also @sval() below.
+
+    @eqs(se1,se2)     Return 1 if string expression se1 has the same value as string expression se2, 0 otherwise.
+
+*String Expressions*
+    String expressions are made up of constant strings (characters surrounded by double quotation marks), variables (cell
+    names, which refer to the cells's label strings or expressions), and string functions.  Note that string  expressions
+    are only allowed when entering a cell's label string, not its numeric part.  Also note that string expression results
+    may be left or right flushed or centered, according to the type of the cell's string label.
+
+    #      Concatenate strings.  For example, the string expression
+
+               A0 # "zy dog"
+
+           displays the string ``the lazy dog'' in the cell if the value of A0's string is ``the la''.
+
+*Built-in String Functions*
+    @substr(se,e1,e2)
+        Extract and return from string expression se the substring indexed by character number  e1  through
+        character  number e2 (defaults to the size of se if beyond the end of it).  If e1 is less than 1 or
+        greater than e2, the result is the null string.  For example,
+
+        @substr ("Nice jacket", 4, 8)
+
+        returns the string ``e jac''.
+
+    @upper(se)
+    @lower(se)
+        will case the string expression to upper or lower.
+
+    @capital(se)
+        will  convert the first letter of words in a string into upper case and other letters to lower case
+        (the latter if all letters of the string are upper case).
+
+    @ext(se,e)
+        Call an external function (program or script).  The purpose is to allow arbitrary functions on val‐
+        ues,  e.g.  table lookups and interpolations.  String expression se is a command or command line to
+        call with popen(3).  The value of e is converted to a string and appended to the command line as an
+        argument.   The result of @ext() is a string: the first line printed to standard output by the com‐
+        mand.  The command should emit exactly one output line.  Additional output, or output  to  standard
+        error,  messes  up  the  screen.  @ext() returns a null string and prints an appropriate warning if
+        external functions are disabled, se is null, or the attempt to run the command fails.
+
+        External functions can be slow to run, and if enabled are called at each screen update, so they are
+        disabled by default.  You can enable them with ^T when you really want them called.
+
+        A simple example:
+            @ext ("echo", a1)
+
+            You can use @ston() to convert the @ext() result back to a number.  For example:
+            @ston (@ext ("form.sc.ext", a9 + b9))
+
+        Note  that  you  can build a command line (including more argument values) from a string expression
+        with concatenation.  You can also "hide" the second argument by  ending  the  command  line  (first
+        argument) with `` #'' (shell comment).
+
+*Built-in Date and Time Functions*
+
+    @year(e)
+        Return the year. Valid years begin with 1970, although many systems will return years prior to
+        1970 if e is negative. The last legal year is system dependent.
+
+    @month(e) 
+        Return the month, encoded as 1 (January) to 12 (December).
+
+    @day(e)
+        Return the day of the month, encoded as 1 to 31.
+
+    @hour(e)
+        Return the number of hours since midnight, encoded as 0 to 23.
+
+    @minute(e)
+        Return the number of minutes since the last full hour, encoded as 0 to 59.
+
+    @second(e)
+        Return the number of seconds since the last full minute, encoded as 0 to 59.
+
+
 --
 --
