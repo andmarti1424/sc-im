@@ -324,7 +324,7 @@ extern char *scext;
 extern int repct;
 extern int calc_order;
 extern double prescale;
-extern int extfunc;
+//extern int extfunc;
 extern int propagation;
 //extern int autocalc;
 //extern int autolabel;

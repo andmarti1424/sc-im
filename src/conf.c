@@ -8,10 +8,10 @@ void store_default_config_values() {
     put(user_conf_d, "autocalc", "1");
     put(user_conf_d, "numeric", "0");
     put(user_conf_d, "newline_action", "0");
+    put(user_conf_d, "external_functions", "1");
 }
 
 char * get_conf_values(char * salida) {
-
    if (user_conf_d == NULL) return NULL;
    struct nlist * nl;
 
@@ -25,7 +25,6 @@ char * get_conf_values(char * salida) {
 }
 
 char * get_conf_value(char * key) {
-
    char * val = get(user_conf_d, key);
     
    if ( val != '\0' )

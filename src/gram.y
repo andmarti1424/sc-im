@@ -807,9 +807,6 @@ setitem    :
     |    K_PRESCALE        { prescale = 0.01; }
     |    '~' K_PRESCALE        { prescale = 1.0; }
     |    '!' K_PRESCALE        { prescale = 1.0; }
-    |    K_EXTFUN        { extfunc = 1; }
-    |    '~' K_EXTFUN        { extfunc = 0; }
-    |    '!' K_EXTFUN        { extfunc = 0; }
     //|    K_CELLCUR        { showcell = 1; }
     //|    '~' K_CELLCUR        { showcell = 0; }
     //|    '!' K_CELLCUR        { showcell = 0; }

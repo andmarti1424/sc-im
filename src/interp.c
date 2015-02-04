@@ -31,6 +31,7 @@
 #include "color.h"
 #include "cmds.h"
 #include "format.h"
+#include "conf.h"
 #include "range.h"
 #include "xmalloc.h" // for scxfree
 #include "lex.h"     // for atocol
@@ -72,7 +73,6 @@ struct go_save gs;
 jmp_buf fpe_save;
 int exprerr;           /* Set by eval() and seval() if expression errors */
 double prescale = 1.0;   /* Prescale for constants in let() */
-int extfunc  = 0;      /* Enable/disable external functions */
 int loading = 0;      /* Set when readfile() is active */
 int gmyrow, gmycol;    /* globals used to implement @myrow, @mycol cmds */
 int rowoffset = 0, coloffset = 0;    /* row & col offsets for range functions */
@@ -994,7 +994,7 @@ char * doext(struct enode *se) {
 
     command = seval(se->e.o.left);
     value = eval(se->e.o.right);
-    if (!extfunc) {
+    if ( ! atoi(get_conf_value("external_functions")) ) {
         error("Warning: external functions disabled; using %s value",
         (se->e.o.s && *se->e.o.s) ? "previous" : "null");
 

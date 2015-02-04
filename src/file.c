@@ -10,6 +10,7 @@
 #include <curses.h>
 #include <sys/wait.h> // for wait
 
+#include "conf.h"
 #include "maps.h"
 #include "yank.h"
 #include "cmds.h"
@@ -63,7 +64,7 @@ void erasedb() {
     calc_order = BYROWS;
     prescale = 1.0;
     tbl_style = 0;
-    optimize = extfunc = 0;
+    optimize = 0;
     currow = curcol = 0;
 
     if (usecurses && has_colors())
@@ -664,7 +665,7 @@ void print_options(FILE *f) {
         propagation == 10 &&
         calc_order == BYROWS &&
         prescale == 1.0 &&
-        ! extfunc &&
+        ! atoi(get_conf_value("external_functions")) &&
         tbl_style == 0
        )
     return; // No reason to do this
@@ -675,7 +676,7 @@ void print_options(FILE *f) {
     if (propagation != 10)     (void) fprintf(f, " iterations = %d", propagation);
     if (calc_order != BYROWS ) (void) fprintf(f, " bycols");
     if (prescale != 1.0)       (void) fprintf(f, " prescale");
-    if (extfunc)               (void) fprintf(f, " extfun");
+    if ( atoi(get_conf_value("external_functions")) ) (void) fprintf(f, " extfun");
     if (tbl_style)             (void) fprintf(f, " tblstyle = %s", tbl_style == TBL ? "tbl" : tbl_style == LATEX ? "latex" : tbl_style == SLATEX ? "slatex" : tbl_style == TEX ? "tex" : tbl_style == FRAME ? "frame" : "0" );
     (void) fprintf(f, "\n");
 }
