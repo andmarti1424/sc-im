@@ -16,6 +16,9 @@ prefix=/usr
 # This is where the install step puts it.
 EXDIR=$(prefix)/bin
 
+# Help dir
+HELPDIR=$(prefix)/share/doc
+
 # This is where the man page goes.
 MANDIR=$(prefix)/man/man1
 MANEXT=1
@@ -140,9 +143,13 @@ all : $(name)
 install :
 	install -d $(DESTDIR)$(prefix)/bin
 	install scim $(DESTDIR)$(prefix)/bin/scim
+	install -d $(DESTDIR)$(prefix)$(HELPDIR)
+	install scim_help $(DESTDIR)$(prefix)$(HELPDIR)/scim_help
+
 
 uninstall :
 	-rm $(DESTDIR)$(prefix)/bin/scim
+	-rm $(DESTDIR)$(prefix)$(HELPDIR)/scim_help
 
 $(name) : $(OBJS)
 	$(CC) $(LDFLAGS) $^ -o $@ $(LDLIBS) 

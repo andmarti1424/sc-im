@@ -19,13 +19,13 @@ static char word_looked[50] = "";
 
 
 // cargo el contenido del archivo help_doc a memoria
-void load_help () {
+int load_help () {
     register FILE * f;
     char line;
     int c = 0, count = 0, max_width = COLS;
 
-    f = fopen("help_doc", "r");
-    if (!f) return;
+    f = fopen("scim_help", "r");
+    if (! f ) return -1;
 
     // cuento cantidad de elementos que tendra long_help
     while ( (line = getc(f)) != -1) {
@@ -62,12 +62,15 @@ void load_help () {
     strcpy(long_help[count], word);
 
     fclose(f);
-    return;
+    return 0;
 }
 
 // main function of help
 void help() {
-    load_help();
+    if (load_help() == -1) {
+        error("Cannot open help file");
+        return;
+    }
     delta = 0;
 
     wmove(input_win, 0,0);
