@@ -10,7 +10,6 @@
 #include "utils/string.h"
 #include "help.h"
 
-
 static char ** long_help;
 static int delta = 0;
 static int max; 
@@ -23,8 +22,10 @@ int load_help () {
     register FILE * f;
     char line;
     int c = 0, count = 0, max_width = COLS;
+    char helpfile_path[BUFFERSIZE];
 
-    f = fopen("scim_help", "r");
+    sprintf(helpfile_path, "%s%s", HELP_PATH, "/scim_help");
+    f = fopen(helpfile_path, "r");
     if (! f ) return -1;
 
     // cuento cantidad de elementos que tendra long_help
