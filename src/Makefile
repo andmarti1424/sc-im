@@ -17,7 +17,8 @@ prefix=/usr
 EXDIR=$(prefix)/bin
 
 # Help dir
-HELPDIR=$(prefix)/share/scim
+HELPDIR := $(prefix)/share/scim
+HELP_PATH := -DHELP_PATH=\"$(HELPDIR)\"
 
 # This is where the man page goes.
 MANDIR=$(prefix)/man/man1
@@ -124,7 +125,7 @@ UNDO := -DUNDO
 CFLAGS := $(LINUX) $(FREEBSD) $(NETBSD) -O2 -Wall -pipe -g -I/usr/include/libxml2
 CFLAGS := $(CFLAGS) $(USECOLORS) $(USELOCALE) $(UNDO) $(SIGVOID) $(DFLT_PAGER)
 CFLAGS := $(CFLAGS) $(IEEE_MATH) $(RINT) $(REGEX) $(LIBRARY)
-CFLAGS := $(CFLAGS) $(NO_NOTIMEOUT) $(SIMPLE) $(XLS) $(XLSX) $(HISTORY_FILE)
+CFLAGS := $(CFLAGS) $(HELP_PATH) $(NO_NOTIMEOUT) $(SIMPLE) $(XLS) $(XLSX) $(HISTORY_FILE)
 
 LDLIBS := -lm -lncurses
 #LDLIBS := -lm -lncurses -lxlsreader
@@ -137,7 +138,6 @@ OBJS := $(patsubst %.c, %.o, $(wildcard *.c) $(wildcard utils/*.c)) gram.o
 
 .PHONY : all clean install
 
-#all : $(name) $(name)qref
 all : $(name)
 
 install :
