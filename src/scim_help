@@ -749,7 +749,7 @@ Commands for handling cell content:
         external functions are disabled, se is null, or the attempt to run the command fails.
 
         External functions can be slow to run, and if enabled are called at each screen update, so they are
-        disabled by default.  You can enable them with ^T when you really want them called.
+        disabled by default. Use the set command to enable it, when you really want them called.
 
         A simple example:
             @ext ("echo", a1)
