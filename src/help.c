@@ -26,6 +26,7 @@ int load_help () {
 
     sprintf(helpfile_path, "%s%s", HELP_PATH, "/scim_help");
     f = fopen(helpfile_path, "r");
+    if (! f ) f = fopen("./scim_help", "r");
     if (! f ) return -1;
 
     // cuento cantidad de elementos que tendra long_help
