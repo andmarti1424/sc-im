@@ -159,6 +159,7 @@ void help() {
             if (d == OKEY_ENTER && ( strcmp(hline, "q") == 0 || strcmp(hline, "quit") == 0 )) {
                 quit_help_now = TRUE;
             }
+            curs_set(0);
             break;
 
         case '/':
@@ -247,9 +248,8 @@ int show_lines() {
 
             if (long_help[lineno + delta][c] == '*') {
                   set_ucolor(main_win, NORMAL);
-            //    //mvwprintw(main_win, lineno+2, c, " ");
                 continue;
-            } else if (lineno == 0 && look_result != -1 && c >= look_result &&
+            } else if (look_result != -1 && c >= look_result &&
                 c < look_result + strlen(word_looked) ) {
                   set_ucolor(main_win, CELL_SELECTION_SC);
             }
