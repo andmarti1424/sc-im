@@ -30,3 +30,5 @@ srange * create_custom_range(int tlrow, int tlcol, int brrow, int brcol);
 void free_custom_range(srange * sr);
 void clean_range();
 
+void add_range(char * name, struct ent_ptr left, struct ent_ptr right, int is_range);
+void del_range(struct ent * left, struct ent * right);

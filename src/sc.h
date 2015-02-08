@@ -22,10 +22,7 @@
 #define DEFPREC        2
 #define DEFREFMT      REFMTFIX /* Make default format fixed point  THA 10/14/90 */
 #define FKEYS         24     /* Number of function keys available */
-//#define HISTLEN      100     /* Number of history entries for vi emulation */
-//#define CPAIRS         8     /* Number of color pairs available */
 #define COLFORMATS    10     /* Number of custom column formats */
-//#define DELBUFSIZE    40     /* Number of named buffers + 4 */
 #define FBUFLEN     1024     /* buffer size for a single field */
 #define PATHLEN     1024     /* maximum path length */
 #define MAXCMD       160     /* for ! command and commands that use the pager */
@@ -309,7 +306,7 @@ extern int linelim;
 extern int changed;
 extern int dbidx;
 extern int qbuf;              // buffer no. specified by `"' command
-extern int showsc, showsr;
+extern int showsc, showsr;    // starting cell of highlighted range
 extern int cellassign;
 extern int macrofd;
 extern int cslop;
@@ -324,7 +321,6 @@ extern char *scext;
 extern int repct;
 extern int calc_order;
 extern double prescale;
-//extern int extfunc;
 extern int propagation;
 //extern int autocalc;
 //extern int autolabel;

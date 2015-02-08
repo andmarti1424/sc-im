@@ -24,7 +24,7 @@ int yylex();
 #include <unistd.h>
 #endif
 
-#define ENULL (struct enode *)0
+#define ENULL (struct enode *) 0
 %}
 
 %union {
@@ -37,20 +37,17 @@ int yylex();
 }
 
 %type <ent> var
-/*
-%type <sval> strarg
-*/
 %type <fval> num
 %type <rval> range
 %type <rval> var_or_range
+%type <sval> strarg
 %type <enode> e term expr_list
-
 %token <sval> STRING
-%token <ival> NUMBER
-%token <ival> CARACTER
 %token <ival> COL
+%token <ival> NUMBER
 %token <fval> FNUMBER
 %token <rval> RANGE
+
 %token <rval> VAR
 %token <sval> WORD
 %token <sval> MAPWORD
@@ -74,6 +71,7 @@ int yylex();
 %token S_AUTOJUS
 
 /*
+token <ival> CARACTER
 token S_INSERTCOL
 token S_OPENCOL
 token S_DELETECOL
@@ -96,6 +94,8 @@ token S_GETFORMAT
 %token S_SET
 %token S_LOCK
 %token S_UNLOCK
+%token S_DEFINE
+%token S_UNDEFINE
 
 /*
  token S_ADDNOTE
@@ -110,8 +110,6 @@ token S_GETFORMAT
  token S_ERASE
  token S_YANK
  token S_FILL
- token S_DEFINE
- token S_UNDEFINE
  token S_ABBREV
  token S_UNABBREV
  token S_FRAME
@@ -308,7 +306,7 @@ token S_GETFORMAT
 command:
          S_LET var_or_range '=' e { let($2.left.vp, $4); }
     |    S_LET var_or_range '='
-                                { $2.left.vp->v = (double) 0.0;
+                                  { $2.left.vp->v = (double) 0.0;
                                   if ($2.left.vp->expr && !($2.left.vp->flags & is_strexpr)) {
                                     efree($2.left.vp->expr);
                                     $2.left.vp->expr = NULL;
@@ -317,7 +315,8 @@ command:
                                   $2.left.vp->flags &= ~is_valid;
                                   $2.left.vp->flags |= is_changed;
                                   changed++;
-                                  modflg++; }
+                                  modflg++;
+                                  }
  
     |    S_LABEL var_or_range '=' e       { slet($2.left.vp, $4, 0); }
     |    S_LEFTSTRING var_or_range '=' e  { slet($2.left.vp, $4, -1); }
@@ -418,7 +417,6 @@ command:
 
     |    S_LOCK var_or_range     { lock_cells($2.left.vp, $2.right.vp); }
     |    S_UNLOCK var_or_range   { unlock_cells($2.left.vp, $2.right.vp); }
-
     |    S_NMAP STRING STRING           {
                                           add_map($2, $3, NORMAL_MODE, 1);
                                           scxfree($2);
@@ -461,23 +459,23 @@ command:
                                           scxfree($2);
                                         }
 
-
 /*
-    |    S_DEFINE strarg { struct ent_ptr arg1, arg2;
-                arg1.vp = lookat(showsr, showsc);
-                arg1.vf = 0;
-                arg2.vp = lookat(currow, curcol);
-                arg2.vf = 0;
-                                        if (arg1.vp == arg2.vp )
-                                           add_range($2, arg2, arg2, 0);
-                                        else
-                                           add_range($2, arg1, arg2, 1);
-                                        
+    |    S_DEFINE strarg                { struct ent_ptr arg1, arg2;
+                                          arg1.vp = lookat(showsr, showsc);
+                                          arg1.vf = 0;
+                                          arg2.vp = lookat(currow, curcol);
+                                          arg2.vf = 0;
+                                          if (arg1.vp == arg2.vp )
+                                              add_range($2, arg2, arg2, 0);
+                                          else
+                                              add_range($2, arg1, arg2, 1);
                                         }
+*/
     |    S_DEFINE strarg range      { add_range($2, $3.left, $3.right, 1); }
     |    S_DEFINE strarg var        { add_range($2, $3, $3, 0); }
     |    S_UNDEFINE var_or_range    { del_range($2.left.vp, $2.right.vp); }
 
+/*
     |    S_ERROR STRING        { error($2); }
     |    S_RECALC        { EvalAll();
                           update(1);
@@ -689,7 +687,7 @@ term:           var                     { $$ = new_var(O_VAR, $1); }
         ;
 
 /* expressions */
-e:        e '+' e        { $$ = new('+', $1, $3); }
+e:       e '+' e        { $$ = new('+', $1, $3); }
     |    e '-' e        { $$ = new('-', $1, $3); }
     |    e '*' e        { $$ = new('*', $1, $3); }
     |    e '/' e        { $$ = new('/', $1, $3); }
@@ -710,76 +708,52 @@ e:        e '+' e        { $$ = new('+', $1, $3); }
     |    e '#' e        { $$ = new('#', $1, $3); }
     ;
 
-expr_list:    e        { $$ = new(ELIST, ENULL, $1); }
+expr_list:     e        { $$ = new(ELIST, ENULL, $1); }
     |    expr_list ',' e    { $$ = new(ELIST, $1, $3); }
     ;
 
-range:        var ':' var    { $$.left = $1; $$.right = $3; }
-    |     RANGE        { $$ = $1; }
+range:   var ':' var    { $$.left = $1; $$.right = $3; }
+    |    RANGE          { $$ = $1; }
     ;
 
-var:        COL NUMBER    { $$.vp = lookat($2, $1);
-                            $$.vf = 0;
-                          }
-    |    '$' COL NUMBER   { $$.vp = lookat($3, $2);
+var:     COL NUMBER     { $$.vp = lookat($2, $1);
+                          $$.vf = 0;
+                        }
+    |    '$' COL NUMBER { $$.vp = lookat($3, $2);
                             $$.vf = FIX_COL;
-                          }
-    |    COL '$' NUMBER   { $$.vp = lookat($3, $1);
+                        }
+    |    COL '$' NUMBER { $$.vp = lookat($3, $1);
                             $$.vf = FIX_ROW;
-                          }
+                        }
     |    '$' COL '$' NUMBER {
-                            $$.vp = lookat($4, $2);
-                            $$.vf = FIX_ROW | FIX_COL;
-                          }
-    |    VAR              {
-                            $$ = $1.left;
-                          }
+                          $$.vp = lookat($4, $2);
+                          $$.vf = FIX_ROW | FIX_COL;
+                        }
+    |    VAR            {
+                          $$ = $1.left;
+                        }
     ;
 
-var_or_range:   range     {
-                            $$ = $1;
-                          }
+var_or_range:   range     { $$ = $1; }
+    |    var              { $$.left = $1; $$.right = $1; }
+    ;
+
+num:     NUMBER           { $$ = (double) $1; }
+    |    FNUMBER          { $$ = $1; }
+    |    '-' num          { $$ = -$2; }
+    |    '+' num          { $$ = $2; }
+    ;
+strarg:  STRING           { $$ = $1; }
     |    var              {
-                            $$.left = $1;
-                            $$.right = $1;
+                            char *s, *s1;
+                            s1 = $1.vp->label;
+                            if (!s1)
+                            s1 = "NULL_STRING";
+                            s = scxmalloc((unsigned)strlen(s1)+1);
+                            (void) strcpy(s, s1);
+                            $$ = s;
                           }
     ;
-
-num:     NUMBER         { $$ = (double) $1; }
-    |    FNUMBER        { $$ = $1; }
-    |    '-' num        { $$ = -$2; }
-    |    '+' num        { $$ = $2; }
-    ;
-/*
-strarg:        STRING        { $$ = $1; }
-    |    var        {
-                    char *s, *s1;
-                    s1 = $1.vp->label;
-                    if (!s1)
-                    s1 = "NULL_STRING";
-                    s = scxmalloc((unsigned)strlen(s1)+1);
-                    (void) strcpy(s, s1);
-                    $$ = s;
-                }
-      ;
-
-
-*/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 /* allows >=1 'setitem's to be listed in the same 'set' command

@@ -55,6 +55,7 @@ struct key statres[] = {
 
 #include "macros.h"
 #include "screen.h"
+#include "range.h"
 #include "color.h" // for set_ucolor
 
 int yylex() {
@@ -127,8 +128,7 @@ int yylex() {
             }
             
             if (ret == WORD) {
-                // NMAP
-                if ( tokenst && (strcmp(line, "nmap") > 0 || strcmp(line, "imap") > 0) ) {
+                if (tokenst && ( ! strncmp(line, "nmap", 4) || ! strncmp(line, "imap", 4) )) {
                     char * p = tokenst;
                     char * ptr = p;
                     while (*ptr && (
@@ -137,7 +137,6 @@ int yylex() {
                           || (*(ptr-1) == '\\'))) ptr++;
                     ptr = malloc((unsigned) (ptr - p));
                     yylval.sval = ptr;
-                //p++; // quitado por and
        
                     while ( *p && (
                       (*p != ' ') || 
@@ -149,16 +148,25 @@ int yylex() {
                       && *(p+1) != '\n'
                       && *(p+1) != '\r'
                       )       ) ) *ptr++ = *p++;
-                    if (*p && *p == ' ') (*ptr)--; // agregado por and
-                    (*ptr)--; // agregado por and
+                    if (*p && *p == ' ') (*ptr)--;
+                    (*ptr)--;
                     if (*ptr) *ptr = '\0';
 
-                    //if (*p) p++;
                     ret = MAPWORD;
 
                 } else {
-                    linelim = p-line;
-                    yyerror("Unintelligible word");
+                    struct range * r;
+                    if (!find_range(tokenst, tokenl, (struct ent *)0, (struct ent *)0, &r)) {
+                        yylval.rval.left = r->r_left;
+                        yylval.rval.right = r->r_right;
+                        if (r->r_is_range)
+                            ret = RANGE;
+                        else
+                            ret = VAR;
+                    } else {
+                        linelim = p-line;
+                        yyerror("Unintelligible word");
+                    }
                 }
             }
         } // 117
