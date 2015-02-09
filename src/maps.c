@@ -248,11 +248,11 @@ void get_mapstr_buf (struct block * b, char * str) {
     str[0]='\0';
     for (i=0; i < len; i++) {
         if (isprint(a->value)) {
-            sprintf(str, "%s%c", str, (char) a->value);
+            sprintf(str + strlen(str), "%c", (char) a->value);
         } else if (a->value == OKEY_ENTER) {
             strcat(str, "<CR>");                                 // CR - ENTER
         } else if ( a->value == (uncl(a->value) & 0x1f)) {       // C-x
-            sprintf(str, "%s<C-%c>", str, uncl(a->value));
+            sprintf(str + strlen(str), "<C-%c>", uncl(a->value));
         } else if (a->value == OKEY_TAB) {
             strcat(str, "<TAB>");                                // TAB
         } else if (a->value == OKEY_LEFT) {
@@ -307,7 +307,7 @@ void get_mappings(char * salida) {
        get_mapstr_buf(m->in, min);
        get_mapstr_buf(m->out, mout);
        if (!m->recursive) strcpy(nore, "nore");
-       sprintf(salida, "%s+ %c%smap \"%s\" = \"%s\"\n", salida, mode, nore, min, mout);
+       sprintf(salida + strlen(salida), "+ %c%smap \"%s\" = \"%s\"\n", mode, nore, min, mout);
        m = m->psig;
    }
 

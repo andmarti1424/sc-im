@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "conf.h"
 #include "utils/dictionary.h"
 
@@ -18,7 +19,7 @@ char * get_conf_values(char * salida) {
    nl = user_conf_d->list;
    salida[0]='\0';
    while (nl != NULL) {
-       sprintf(salida, "%s%s=%s\n", salida, nl->key, nl->val);
+       sprintf(salida + strlen(salida), "%s=%s\n", nl->key, nl->val);
        nl = nl->next;
    }
    return salida;

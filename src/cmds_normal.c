@@ -778,7 +778,7 @@ void do_normalmode(struct block * buf) {
             if (buf->value == '{')      sprintf(interp_line, "leftjustify %s", v_name(r, c));
             else if (buf->value == '}') sprintf(interp_line, "rightjustify %s", v_name(r, c));
             else if (buf->value == '|') sprintf(interp_line, "center %s", v_name(r, c));
-            if (p != -1) sprintf(interp_line, "%s:%s", interp_line, v_name(rf, cf));
+            if (p != -1) sprintf(interp_line + strlen(interp_line), ":%s", v_name(rf, cf));
 #ifdef UNDO
             copy_to_undostruct(r, c, rf, cf, 'd');
 #endif

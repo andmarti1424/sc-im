@@ -297,7 +297,7 @@ void do_visualmode(struct block * buf) {
         if (buf->value == '{')      sprintf(interp_line, "leftjustify %s", v_name(r->tlrow, r->tlcol));
         else if (buf->value == '}') sprintf(interp_line, "rightjustify %s", v_name(r->tlrow, r->tlcol));
         else if (buf->value == '|') sprintf(interp_line, "center %s", v_name(r->tlrow, r->tlcol));
-        sprintf(interp_line, "%s:%s", interp_line, v_name(r->brrow, r->brcol));
+        sprintf(interp_line + strlen(interp_line), ":%s", v_name(r->brrow, r->brcol));
 #ifdef UNDO
         create_undo_action();
         copy_to_undostruct(r->tlrow, r->tlcol, r->brrow, r->brcol, 'd');

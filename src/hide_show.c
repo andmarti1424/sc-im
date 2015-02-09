@@ -135,7 +135,7 @@ void show_hiddenrows() {
     valores[0]='\0';
     strcpy(valores, "Hidden rows:\n");
     for (r = 0; r < maxrow; r++) {
-       if (row_hidden[r]) sprintf(valores, "%s- %d\n", valores, r);
+       if (row_hidden[r]) sprintf(valores + strlen(valores), "- %d\n", r);
     }
     show_text(valores);
 
@@ -151,7 +151,7 @@ void show_hiddencols() {
     valores[0]='\0';
     strcpy(valores, "Hidden cols:\n");
     for (c = 0; c < maxcol; c++) {
-       if (col_hidden[c]) sprintf(valores, "%s- %s\n", valores, coltoa(c));
+       if (col_hidden[c]) sprintf(valores + strlen(valores), "- %s\n", coltoa(c));
     }
     show_text(valores);
 

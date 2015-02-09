@@ -41,7 +41,7 @@ char * parse_cell_name(int ignore_first_blocks, struct block * buf_in) {
 
     while (ignore_first_blocks--) b = b->pnext;
     while( b != NULL) {
-          (void) sprintf(cell_name, "%s%c", cell_name, b->value);
+          (void) sprintf(cell_name + strlen(cell_name), "%c", b->value);
           b = b->pnext;
     }
     return cell_name;

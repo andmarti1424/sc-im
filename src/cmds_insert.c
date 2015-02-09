@@ -47,7 +47,7 @@ void do_insertmode(struct block * sb) {
             sprintf(cline, "%s%d", coltoa(get_mark(sb->pnext->value)->col), r);
         } else {
             sprintf(cline, "%s%d:", coltoa(get_mark(sb->pnext->value)->rng->tlcol), get_mark(sb->pnext->value)->rng->tlrow);
-            sprintf(cline, "%s%s%d", cline, coltoa(get_mark(sb->pnext->value)->rng->brcol), get_mark(sb->pnext->value)->rng->brrow);
+            sprintf(cline + strlen(cline), "%s%d", coltoa(get_mark(sb->pnext->value)->rng->brcol), get_mark(sb->pnext->value)->rng->brrow);
         }
         for(i = 0; i < strlen(cline); i++) ins_in_line(cline[i]);
         show_header(input_win);

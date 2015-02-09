@@ -148,7 +148,7 @@ void do_commandmode(struct block * sb) {
             sprintf(cline, "%s%d", coltoa(get_mark(sb->pnext->value)->col), r);
         } else {
             sprintf(cline, "%s%d:", coltoa(get_mark(sb->pnext->value)->rng->tlcol), get_mark(sb->pnext->value)->rng->tlrow);
-            sprintf(cline, "%s%s%d", cline, coltoa(get_mark(sb->pnext->value)->rng->brcol), get_mark(sb->pnext->value)->rng->brrow);
+            sprintf(cline + strlen(cline), "%s%d", coltoa(get_mark(sb->pnext->value)->rng->brcol), get_mark(sb->pnext->value)->rng->brrow);
         }
         for(i = 0; i < strlen(cline); i++) ins_in_line(cline[i]);
 
@@ -258,7 +258,7 @@ void do_commandmode(struct block * sb) {
             }
             if ( p != -1 || ! strcmp(inputline, "autojus")) {
                 sprintf(cline, "autojus %s:", coltoa(c));
-                sprintf(cline, "%s%s", cline, coltoa(cf));
+                sprintf(cline + strlen(cline), "%s", coltoa(cf));
             }
             send_to_interp(cline); 
 
@@ -330,7 +330,7 @@ void do_commandmode(struct block * sb) {
                 if (found == -1) return;
                 del_range_chars(cline, 0, found-1);
                 sprintf(interp_line, "datefmt %s%d:", coltoa(c), r);
-                sprintf(interp_line, "%s%s%d %s", interp_line, coltoa(cf), rf, cline);
+                sprintf(interp_line + strlen(interp_line), "%s%d %s", coltoa(cf), rf, cline);
             }
             send_to_interp(interp_line);
  
@@ -343,7 +343,7 @@ void do_commandmode(struct block * sb) {
                 if (found == -1) return;
                 del_range_chars(cline, 0, found-1);
                 sprintf(interp_line, "sort %s%d:", coltoa(sr->tlcol), sr->tlrow);
-                sprintf(interp_line, "%s%s%d %s", interp_line, coltoa(sr->brcol), sr->brrow, cline);
+                sprintf(interp_line + strlen(interp_line), "%s%d %s", coltoa(sr->brcol), sr->brrow, cline);
             }
             send_to_interp(interp_line); 
 
@@ -366,7 +366,7 @@ void do_commandmode(struct block * sb) {
                 rf = sr->brrow;
                 cf = sr->brcol;
                 sprintf(interp_line, "fmt %s%d:", coltoa(c), r);
-                sprintf(interp_line, "%s%s%d", interp_line, coltoa(cf), rf);
+                sprintf(interp_line +strlen(interp_line), "%s%d", coltoa(cf), rf);
             } else
                 sprintf(interp_line, "fmt %s%d", coltoa(c), r);
 
@@ -375,7 +375,7 @@ void do_commandmode(struct block * sb) {
                 return;
             }
             int l = strlen(interp_line);
-            sprintf(interp_line, "%s %s", interp_line, inputline);
+            sprintf(interp_line + l, "%s", inputline);
             del_range_chars(interp_line, l, l + 6);
             #ifdef UNDO
             create_undo_action();

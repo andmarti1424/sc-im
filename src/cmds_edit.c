@@ -258,7 +258,7 @@ int start_edit_mode(struct block * buf, char type) {
 
     if (type == 'v') { // && p1->flags & is_valid) {   // numeric value
         if (( ! (p1->expr) ) ) {                       // || (p1->flags & is_strexpr)) {
-            (void) sprintf(inputline, "%s%.15g", inputline, p1->v);
+            (void) sprintf(inputline, "%.15g", p1->v);
         } else {              // expression
             linelim = 0;
             editexp(currow, curcol);

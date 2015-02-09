@@ -722,7 +722,7 @@ int import_csv(char * fname, char d) {
             clean_carrier(token);
             if ( (token[0] == '\"' || quote) && (token[strlen(token)-1] != '\"' || strlen(token) == 1) ) {
                 quote = 1;
-                sprintf(token, "%s%s", token, xstrtok(NULL, ","));
+                sprintf(token + strlen(token), "%s", xstrtok(NULL, ","));
                 continue;
             }
             if (quote) { // elimino comillas si vengo de quote
@@ -791,7 +791,7 @@ void do_export(int r0, int c0, int rn, int cn) {
         strcpy(ruta, curfile);
         char * ext = strrchr(ruta, '.');
         if (ext != NULL) del_range_chars(ruta, strlen(ruta) - strlen(ext), strlen(ruta)-1);
-        sprintf(ruta, "%s.%s", ruta, type_export);
+        sprintf(ruta + strlen(ruta), ".%s", type_export);
 
     } else {
         error("No filename specified !");

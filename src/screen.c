@@ -537,9 +537,9 @@ void add_cell_detail(char * d, struct ent * p1) {
     if (p1->flags & is_valid) {
         /* has value or num expr */
         if ( ( ! (p1->expr) ) || ( p1->flags & is_strexpr ) ) {
-            sprintf(d, "%s%c", d, '[');
-            (void) sprintf(d, "%s%.15g", d, p1->v);
-            sprintf(d, "%s%s", d, "]");
+            sprintf(d + strlen(d), "%c", '[');
+            (void) sprintf(d + strlen(d), "%.15g", p1->v);
+            sprintf(d + strlen(d), "%c", ']');
         }
     }
 }
@@ -822,7 +822,7 @@ void show_numeric_content_of_cell(WINDOW * win, struct ent ** p, int col, int r,
             int left = col_width - nlen - tlen;
             strcpy(field, strlen(s) ? s : (*p)->label);
             while (left--) add_char(field, ' ', strlen(field));
-            sprintf(field, "%s%.*f", field, precision[col], (*p)->v);
+            sprintf(field + strlen(field), "%.*f", precision[col], (*p)->v);
         } else {                                   // center label
             field[0]='\0';
             int left = (col_width - tlen) / 2;
@@ -833,7 +833,7 @@ void show_numeric_content_of_cell(WINDOW * win, struct ent ** p, int col, int r,
             while (s > 0 && s--) add_char(field, ' ', strlen(field));
             sprintf(fieldaux, "%.*f", precision[col], (*p)->v);
             int i = col_width - strlen(field) - strlen(fieldaux);
-            sprintf(field, "%s%s", field, &fieldaux[-i]);
+            sprintf(field + strlen(field), "%s", &fieldaux[-i]);
         }
     // label with format (datetime) + numeric value w/o format and no label + number with format.
     // -> fill leftsize
