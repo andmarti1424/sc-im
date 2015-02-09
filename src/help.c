@@ -149,7 +149,8 @@ void help() {
                 if (d == OKEY_BS) {
                     del_char(hline, strlen(hline) - 1);
                 } else {
-                    sprintf(hline, "%s%c", hline, d);
+                    //sprintf(hline, "%s%c", hline, d);
+                    sprintf(hline + strlen(hline), "%c", d);
                 }
                 mvwprintw(input_win, 0, rescol, ":%s", hline);
                 wclrtoeol(input_win);
@@ -172,7 +173,8 @@ void help() {
                 if (d == OKEY_BS) {
                     del_char(word_looked, strlen(word_looked) - 1);
                 } else {
-                    sprintf(word_looked, "%s%c", word_looked, d);
+                    //sprintf(word_looked, "%s%c", word_looked, d);
+                    sprintf(word_looked + strlen(word_looked), "%c", d);
                 }
                 mvwprintw(input_win, 0, rescol, "/%s", word_looked);
                 wclrtoeol(input_win);
