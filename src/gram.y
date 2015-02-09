@@ -407,6 +407,7 @@ command:
     |    S_AUTOJUS COL ':' COL       { auto_justify($2, $4, DEFWIDTH); }  // auto justificado de columnas
     |    S_AUTOJUS COL               { auto_justify($2, $2, DEFWIDTH); }  // auto justificado de columna
 
+    |    S_GOTO var_or_range var_or_range { moveto($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col, $3.left.vp->row, $3.left.vp->col); }
     |    S_GOTO var_or_range     { moveto($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col, -1, -1); }
     |    S_GOTO num              { num_search($2, 0, 0, maxrow, maxcol, 0); }
     |    S_GOTO STRING           { str_search($2, 0, 0, maxrow, maxcol, 0); }
@@ -473,6 +474,7 @@ command:
 */
     |    S_DEFINE strarg range      { add_range($2, $3.left, $3.right, 1); }
     |    S_DEFINE strarg var        { add_range($2, $3, $3, 0); }
+/*    |    S_DEFINE strarg NUMBER     { info("%s %d", $2, $3); get_key(); } */
     |    S_UNDEFINE var_or_range    { del_range($2.left.vp, $2.right.vp); }
 
 /*

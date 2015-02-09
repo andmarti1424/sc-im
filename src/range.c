@@ -206,9 +206,123 @@ void free_custom_range(srange * sr) {
     return;
 }
 
+// ---------------------------------------------------------
 static struct range * rng_base;
 //void sync_enode(struct enode * e);
 //void fix_enode(struct enode * e, int row1, int col1, int row2, int col2, int delta1, int delta2);
+
+void add_range(char * name, struct ent_ptr left, struct ent_ptr right, int is_range) {
+    register char * p;
+    int minr, minc, maxr, maxc;
+    int minrf, mincf, maxrf, maxcf;
+    //register struct ent * rcp;
+    struct range * prev = 0;
+
+    if (left.vp->row < right.vp->row) {
+        minr = left.vp->row; minrf = left.vf & FIX_ROW;
+        maxr = right.vp->row; maxrf = right.vf & FIX_ROW;
+    } else {
+        minr = right.vp->row; minrf = right.vf & FIX_ROW;
+        maxr = left.vp->row; maxrf = right.vf & FIX_ROW;
+    } 
+
+    if (left.vp->col < right.vp->col) {
+        minc = left.vp->col; mincf = left.vf & FIX_COL;
+        maxc = right.vp->col; maxcf = right.vf & FIX_COL;
+    } else {
+        minc = right.vp->col; mincf = right.vf & FIX_COL;
+        maxc = left.vp->col; maxcf = left.vf & FIX_COL;
+    } 
+
+    left.vp = lookat(minr, minc);
+    left.vf = minrf | mincf;
+    right.vp = lookat(maxr, maxc);
+    right.vf = maxrf | maxcf;
+
+    if ( ! find_range(name, strlen(name), (struct ent *) 0, (struct ent *) 0, &prev)) {
+        error("Error: range name \"%s\" already defined", name);
+        scxfree(name);
+        return;
+    }
+
+    for (p = name; *p; p++)
+        if ( ! (isalpha(*p) || isdigit(*p) || *p == '_') ) {
+            error("Invalid range name \"%s\" - illegal combination", name);
+            scxfree(name);
+            return;
+        }
+ 
+    p = name;
+    if (isdigit(*p) || (isalpha(*p++) && (isdigit(*p) || (isalpha(*p++) && isdigit(*p))))) {
+        if (*name == '0' && (name[1] == 'x' || name[1] == 'X')) {
+            ++p;
+            while (isxdigit(*++p)) ;
+            if (*p == 'p' || *p == 'P')
+                while (isxdigit(*++p)) ;
+        } else {
+            while (isdigit(*++p)) ;
+            if (isdigit(*name) && (*p == 'e' || *p == 'E'))
+            while (isdigit(*++p)) ;
+        }
+        if (!(*p)) {
+            error("Invalid range name \"%s\" - ambiguous", name);
+            scxfree(name);
+            return;
+        }
+    }
+ 
+    //if (autolabel && minc>0 && !is_range) {
+    //rcp = lookat(minr, minc-1);
+    //if (rcp->label==0 && rcp->expr==0 && rcp->v==0)
+    //    label(rcp, name, 0);
+    //}
+
+    struct range * rng = (struct range *) scxmalloc((unsigned)sizeof(struct range));
+    rng->r_name = name;
+    rng->r_left = left;
+    rng->r_right = right;
+    rng->r_is_range = is_range;
+    if (prev) {
+        rng->r_next = prev->r_next;
+        rng->r_prev = prev;
+        prev->r_next = rng;
+        if (rng->r_next)
+            rng->r_next->r_prev = rng;
+    } else {
+        rng->r_next = rng_base;
+        rng->r_prev = (struct range *) 0;
+        if (rng_base)
+            rng_base->r_prev = rng;
+        rng_base = rng;
+    }
+    modflg++;
+}
+
+void del_range(struct ent * left, struct ent * right) {
+    struct range * r;
+    int minr, minc, maxr, maxc;
+
+    minr = left->row < right->row ? left->row : right->row;
+    minc = left->col < right->col ? left->col : right->col;
+    maxr = left->row > right->row ? left->row : right->row;
+    maxc = left->col > right->col ? left->col : right->col;
+
+    left = lookat(minr, minc);
+    right = lookat(maxr, maxc);
+
+    if ( find_range((char *) 0, 0, left, right, &r)) 
+    return;
+
+    if (r->r_next)
+        r->r_next->r_prev = r->r_prev;
+    if (r->r_prev)
+        r->r_prev->r_next = r->r_next;
+    else
+    rng_base = r->r_next;
+    scxfree((char *) (r->r_name));
+    scxfree((char *) r);
+    modflg++;
+}
 
 void clean_range() { // usado en erasedb
     register struct range *r;
@@ -286,7 +400,7 @@ void sync_enode(struct enode *e) {
     }
 }
 
-void write_ranges(FILE *f) {       // NO USADO
+void write_ranges(FILE *f) {
     register struct range *r;
     register struct range *nextr;
 
@@ -311,7 +425,7 @@ void write_ranges(FILE *f) {       // NO USADO
     }
 }
 
-void list_ranges(FILE *f) { // NO USADO
+void list_ranges(FILE *f) {
     register struct range *r;
     register struct range *nextr;
 
@@ -462,116 +576,3 @@ void getrange(char * name, int fd) {
 }
 */
 
-
-void add_range(char * name, struct ent_ptr left, struct ent_ptr right, int is_range) {
-    register char * p;
-    int minr, minc, maxr, maxc;
-    int minrf, mincf, maxrf, maxcf;
-    //register struct ent * rcp;
-    struct range * prev = 0;
-
-    if (left.vp->row < right.vp->row) {
-        minr = left.vp->row; minrf = left.vf & FIX_ROW;
-        maxr = right.vp->row; maxrf = right.vf & FIX_ROW;
-    } else {
-        minr = right.vp->row; minrf = right.vf & FIX_ROW;
-        maxr = left.vp->row; maxrf = right.vf & FIX_ROW;
-    } 
-
-    if (left.vp->col < right.vp->col) {
-        minc = left.vp->col; mincf = left.vf & FIX_COL;
-        maxc = right.vp->col; maxcf = right.vf & FIX_COL;
-    } else {
-        minc = right.vp->col; mincf = right.vf & FIX_COL;
-        maxc = left.vp->col; maxcf = left.vf & FIX_COL;
-    } 
-
-    left.vp = lookat(minr, minc);
-    left.vf = minrf | mincf;
-    right.vp = lookat(maxr, maxc);
-    right.vf = maxrf | maxcf;
-
-    if ( ! find_range(name, strlen(name), (struct ent *) 0, (struct ent *) 0, &prev)) {
-        error("Error: range name \"%s\" already defined", name);
-        scxfree(name);
-        return;
-    }
-
-    for (p = name; *p; p++)
-        if ( ! (isalpha(*p) || isdigit(*p) || *p == '_') ) {
-            error("Invalid range name \"%s\" - illegal combination", name);
-            scxfree(name);
-            return;
-        }
- 
-    p = name;
-    if (isdigit(*p) || (isalpha(*p++) && (isdigit(*p) || (isalpha(*p++) && isdigit(*p))))) {
-        if (*name == '0' && (name[1] == 'x' || name[1] == 'X')) {
-            ++p;
-            while (isxdigit(*++p)) ;
-            if (*p == 'p' || *p == 'P')
-                while (isxdigit(*++p)) ;
-        } else {
-            while (isdigit(*++p)) ;
-            if (isdigit(*name) && (*p == 'e' || *p == 'E'))
-            while (isdigit(*++p)) ;
-        }
-        if (!(*p)) {
-            error("Invalid range name \"%s\" - ambiguous", name);
-            scxfree(name);
-            return;
-        }
-    }
- 
-    //if (autolabel && minc>0 && !is_range) {
-    //rcp = lookat(minr, minc-1);
-    //if (rcp->label==0 && rcp->expr==0 && rcp->v==0)
-    //    label(rcp, name, 0);
-    //}
-
-    struct range * rng = (struct range *) scxmalloc((unsigned)sizeof(struct range));
-    rng->r_name = name;
-    rng->r_left = left;
-    rng->r_right = right;
-    rng->r_is_range = is_range;
-    if (prev) {
-        rng->r_next = prev->r_next;
-        rng->r_prev = prev;
-        prev->r_next = rng;
-        if (rng->r_next)
-            rng->r_next->r_prev = rng;
-    } else {
-        rng->r_next = rng_base;
-        rng->r_prev = (struct range *) 0;
-        if (rng_base)
-            rng_base->r_prev = rng;
-        rng_base = rng;
-    }
-    modflg++;
-}
-
-void del_range(struct ent * left, struct ent * right) {
-    struct range * r;
-    int minr, minc, maxr, maxc;
-
-    minr = left->row < right->row ? left->row : right->row;
-    minc = left->col < right->col ? left->col : right->col;
-    maxr = left->row > right->row ? left->row : right->row;
-    maxc = left->col > right->col ? left->col : right->col;
-
-    left = lookat(minr, minc);
-    right = lookat(maxr, maxc);
-
-    if ( find_range((char *) 0, 0, left, right, &r)) 
-    return;
-
-    if (r->r_next)
-        r->r_next->r_prev = r->r_prev;
-    if (r->r_prev)
-        r->r_prev->r_next = r->r_next;
-    else
-    rng_base = r->r_next;
-    scxfree((char *) (r->r_name));
-    scxfree((char *) r);
-    modflg++;
-}
