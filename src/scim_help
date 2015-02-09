@@ -1,11 +1,11 @@
 ------------------------------------------------------------------------
-This is a simple HELP page. Press «:q<Enter>» to go back to spreadsheet.
+This is a simple HELP page. Press ':q<Enter>' to go back to spreadsheet.
 
 You can use <UP> <DOWN> arrows keys, or 'j' 'k' keys to move throw text.
 <SPACE> key moves forward an entire page, while <C-f> and <C-b> moves half page down or up.
-«G» moves to bottom, and <C-a> to the beginning of the text.
+'G' moves to bottom, and <C-a> to the beginning of the text.
 <ENTER> key scrolls one line down, while <DEL> key scrolls one line up, just like in less.
-You can use the «/» command to search for a pattern in the help.
+You can use the '/' command to search for a pattern in the help.
 ------------------------------------------------------------------------
 SCIM modes:
 NORMAL MODE      For navigation and common commands
