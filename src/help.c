@@ -190,6 +190,12 @@ void help() {
             wrefresh(input_win);
             curs_set(0);
             break;
+
+        case 'q':
+            quit_help_now = TRUE;
+            curs_set(0);
+            break;
+
         }
     }
 
