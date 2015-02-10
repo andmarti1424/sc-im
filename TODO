@@ -1,30 +1,34 @@
 TODO
 ----
 
-1. multiple worksheets!!
+1. Paste just values or just format of yanked cells.
+   Paste cells with and without FIXED references.
 
-2. filter rows by multiple criteria
+2. multiple worksheets!!
 
-3. scim_scripting. think how to do this PROPERLY.
+3. filter rows by multiple criteria.
 
-4. isolate UI code (CURSES) from the rest of the code for future
+4. scim_scripting. Use LUA to allow scripting and plugin support.
+
+5. isolate UI code (CURSES) from the rest of the code for future
 implementations in other gui's.
 
-5. status bar format customized by user.
+6. status bar format customized by user.
 can show count of cells and sum of values, when a range is selected..
-*this will be done with a script.
+*this should be done with a script.
 
-6. chain cells with equations into a DOUBLE linked list or dependency tree
+7. chain cells with equations into a DOUBLE linked list or dependency tree
 Have a top level eval, eval and UPDATE all lower nodes
 This is also neccesary for UNDO mods of cells that has equations on them!!!
 
-7. Use UTF-8 encoding and display any Unicode char.
+8. Store user defined variables with "define" token into .sc file.
+
+9. Use UTF-8 encoding and display any Unicode char.
 Change curses calls to cursesw calls.
 
-8. restore external functions funcionality
+10. restore fill funcionality
 
-9. restore fill funcionality
+11. restore abbrev funcionality ?
 
-10. restore abbrev funcionality ?
+12. multiplier with '.' command ?
 
-11. multiplier with '.' command ?
