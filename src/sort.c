@@ -11,6 +11,7 @@ Adaptation of Chuck Martin's code - <nrocinu@myrealbox.com>
 #include <curses.h>
 #include "macros.h"
 #include "yank.h"
+#include "cmds.h"
 #include "color.h"   // for set_ucolor
 #include "xmalloc.h" // for scxfree
 
@@ -97,7 +98,7 @@ void sortrange(struct ent * left, struct ent * right, char * criteria) {
  
     yank_area(minr, minc, maxr, maxc, 's', 1); // guardo en la yanklist todo el rango original
     
-    //erase_area(minr, minc, maxr, maxc, 1); // borro el rango original. no es necesario porque se lo borra en paste_yanked_ents..
+    erase_area(minr, minc, maxr, maxc, 1); // borro el rango original. no es necesario porque se lo borra en paste_yanked_ents..
 
     //sync_ranges();
 
@@ -120,7 +121,7 @@ void sortrange(struct ent * left, struct ent * right, char * criteria) {
     currow = minr;
     curcol = minc;
 
-    paste_yanked_ents(0); // paste ents over currow and curcol
+    paste_yanked_ents(0, 'a'); // paste ents over currow and curcol
     
     scxfree((char *) sort);
     scxfree((char *) rows);

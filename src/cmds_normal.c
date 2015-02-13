@@ -621,13 +621,21 @@ void do_normalmode(struct block * buf) {
 
         // paste cell below or left
         case 'p':
-            paste_yanked_ents(0);
+            paste_yanked_ents(0, 'a');
             update();
             break;
 
-        // paste cell above or right
         case 'P':
-            paste_yanked_ents(1);
+            if (bs != 2) break;
+            if (buf->pnext->value == 'v' || buf->pnext->value == 'f' || buf->pnext->value == 'c') {
+                paste_yanked_ents(0, buf->pnext->value);
+                update();
+            }
+            break;
+
+        // paste cell above or right
+        case 't':
+            paste_yanked_ents(1, 'a');
             update();
             break;
 

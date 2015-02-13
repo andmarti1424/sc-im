@@ -60,3 +60,4 @@ int etype(register struct enode *e);
 void erase_area(int sr, int sc, int er, int ec, int ignorelock);
 void auto_justify(int ci, int cf, int min);
 void valueize_area(int sr, int sc, int er, int ec);
+void sync_refs();

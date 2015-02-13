@@ -184,11 +184,13 @@ void copyent(register struct ent *n, register struct ent *p, int dr, int dc,
     //n->flags = may_sync;
 
     if (special != 'f') {
-        if (special != 'm' || p->flags & is_valid) {
+        //if (special != 'm' || p->flags & is_valid) {
+        if (p->flags & is_valid) {
             n->v = p->v;
             n->flags |= p->flags & is_valid;
         }
-        if (special != 'm' || p->expr) {
+        //if (special != 'm' || p->expr) {
+        if (special != 'v' && p->expr) {
             n->expr = copye(p->expr, dr, dc, r1, c1, r2, c2, special == 't');
             if (p->flags & is_strexpr)
                 n->flags |= is_strexpr;
@@ -201,17 +203,19 @@ void copyent(register struct ent *n, register struct ent *p, int dr, int dc,
             (void) strcpy(n->label, p->label);
             n->flags &= ~is_leftflush;
             n->flags |= ((p->flags & is_label) | (p->flags & is_leftflush));
-        } else if (special != 'm') {
-            n->label = NULL;
-            n->flags &= ~(is_label | is_leftflush);
+        //} else if (special != 'm') {
+        //    n->label = NULL;
+        //    n->flags &= ~(is_label | is_leftflush);
         }
         n->flags |= p->flags & is_locked;
     }
-    if (p->format) {
+    //if (p->format) {
+    if (p->format && special != 'v') {
         if (n->format) scxfree(n->format);
             n->format = scxmalloc((unsigned) (strlen(p->format) + 1));
         (void) strcpy(n->format, p->format);
-    } else if (special != 'm' && special != 'f')
+    //} else if (special != 'm' && special != 'f')
+    } else if (special != 'v' && special != 'f')
         n->format = NULL;
     n->flags |= is_changed;
     n->row = p->row;
@@ -1498,8 +1502,8 @@ int is_single_command (struct block * buf, long timeout) {
         else if (buf->value == '{')        res = EDITION_CMD;
         else if (buf->value == '}')        res = EDITION_CMD;
         else if (buf->value == '|')        res = EDITION_CMD;
-        else if (buf->value == 'p')        res = EDITION_CMD;  // paste yanked cells below or right
-        else if (buf->value == 'P')        res = EDITION_CMD;  // paste yanked cells above or left
+        else if (buf->value == 'p')        res = EDITION_CMD;  // paste yanked cells below or left
+        else if (buf->value == 't')        res = EDITION_CMD;  // paste yanked cells above or right
         else if (buf->value == '-')        res = EDITION_CMD;
         else if (buf->value == '+')        res = EDITION_CMD;
 
@@ -1523,6 +1527,16 @@ int is_single_command (struct block * buf, long timeout) {
                  res = MOVEMENT_CMD; // goto cell
                  // TODO add validation: buf->pnext->value debe ser letra
                                                    
+        else if (buf->value == 'P' && bs == 2 && (
+            buf->pnext->value == 'v' || 
+            buf->pnext->value == 'f' || 
+            buf->pnext->value == 'c' ) )   res = EDITION_CMD;  // paste yanked cells below or left
+
+        else if (buf->value == 'T' && bs == 2 && (
+            buf->pnext->value == 'v' || 
+            buf->pnext->value == 'f' || 
+            buf->pnext->value == 'c' ) )   res = EDITION_CMD;  // paste yanked cells above or right
+
         else if (buf->value == 'Z' && bs == 2 && timeout >= COMPLETECMDTIMEOUT &&  // Zap (or hide) col or row
                ( buf->pnext->value == 'c' ||
                  buf->pnext->value == 'r')) res = EDITION_CMD;

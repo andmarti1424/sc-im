@@ -137,11 +137,12 @@ void yank_area(int tlrow, int tlcol, int brrow, int brcol, char type, int arg) {
 // cuando se hace sort, los valores de row y col pueden variar desde el momento de copia al momento de pegado.
 // por tal razón, para el sort, el valor de diffr debe ser cero.
 // Cuando se implemente el ordenamiento de columnas, en vez de por filas, diffc también deberá ser cero!
-void paste_yanked_ents(int above) {
+// type indica si se pega solo formato, solo valores, todo el contenido.
+void paste_yanked_ents(int above, int type_paste) {
     if (! count_yank_ents()) return;
 
     struct ent * yl = yanklist;
-    int diffr = 0, diffc = 0, ignorelock = 0;
+    int diffr = 0, diffc = 0; // , ignorelock = 0;
 
     #ifdef UNDO
     create_undo_action();
@@ -150,7 +151,7 @@ void paste_yanked_ents(int above) {
     if (type_of_yank == 's') {                               // paste a range that was yanked in the sort function
         diffr = 0;
         diffc = curcol - yl->col;
-        ignorelock = 1;
+        //ignorelock = 1;
 
     } else if (type_of_yank == 'a' || type_of_yank == 'e') { // paste cell or range
         diffr = currow - yl->row;
@@ -176,7 +177,6 @@ void paste_yanked_ents(int above) {
         copy_to_undostruct(0, curcol + above, maxrow, curcol + above - 1 + yank_arg, 'd');
         #endif
         while (c--) above ? insert_col(1) : insert_col(0);   // insert cols to the right if above or to the left
-        //if (above) curcol = back_col(1)->col; NO
         diffr = yl->row;
         diffc = curcol - yl->col;
         fix_marks(0, yank_arg, 0, maxrow, curcol, maxcol);
@@ -192,7 +192,9 @@ void paste_yanked_ents(int above) {
         #endif
 
         // here we delete current content of "destino" ent
-        erase_area(yl->row + diffr, yl->col + diffc, yl->row + diffr, yl->col + diffc, ignorelock);
+        ////erase_area(yl->row + diffr, yl->col + diffc, yl->row + diffr, yl->col + diffc, ignorelock);
+        //FIXME
+        
         /*struct ent **pp = ATBL(tbl, yl->row + diffr, yl->col + diffc);
         if (*pp && (!((*pp)->flags & is_locked) )) {
             mark_ent_as_deleted(*pp);
@@ -201,7 +203,17 @@ void paste_yanked_ents(int above) {
 
         struct ent * destino = lookat(yl->row + diffr, yl->col + diffc);
 
-        (void) copyent(destino, yl, 0, 0, 0, 0, 0, 0, 0);
+        if (type_paste == 'a') {
+            (void) copyent(destino, yl, 0, 0, 0, 0, 0, 0, 0);
+        } else if (type_paste == 'f') {
+            (void) copyent(destino, yl, 0, 0, 0, 0, 0, 0, 'f');
+        } else if (type_paste == 'v') {
+            (void) copyent(destino, yl, 0, 0, 0, 0, 0, 0, 'v');
+        } else if (type_paste == 'c') {
+            (void) copyent(destino, yl, diffr, diffc, 0, 0, maxrows, maxcols, 'c');
+            sync_refs();
+            EvalAll();
+        }
 
         destino->row += diffr;
         destino->col += diffc;
