@@ -1222,15 +1222,13 @@ struct ent * go_forward() {
             return lookat(r, c);
     } while (r < maxrows || c < maxcols);
 
-    if ( ! VALID_CELL(p, r, c) && ! col_hidden[c] && ! row_hidden[r] )
-        return lookat(r_ori, c_ori);
-    return NULL;
+    return lookat(r_ori, c_ori);
 }
 
 struct ent * go_backward() {
     int r = currow, c = curcol;
     int r_ori = r, c_ori = c;
-    register struct ent *p;
+    register struct ent * p;
     do {
         if (c) 
             c--;
@@ -1244,9 +1242,7 @@ struct ent * go_backward() {
             return lookat(r, c);
     } while ( currow || curcol );
 
-    if ( ! VALID_CELL(p, r, c) && ! col_hidden[c] && ! row_hidden[r] )
-        return lookat(r_ori, c_ori);
-    return NULL;
+    return lookat(r_ori, c_ori);
 }
 
 struct ent * vert_top() {
