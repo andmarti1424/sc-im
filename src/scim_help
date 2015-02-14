@@ -92,6 +92,9 @@ Commands for handling cell content:
 
      t           same as 'p' command but if yr was used to yank a row, it creates a new row above, and paste content there.
                  if yc was used to yank a column, this command creates a new col at the right, and paste there.
+     Tf          works like t command except that only cell formatting information is merged in, leaving the actual data untouched.
+     Tv          works like t command except that only cell values are copied, leaving cell format intact.
+     Tc          works like t command except that all cell references are adjusted in the same way that they are for the copy command.
 
 
      dr          deletes row under the cursor
