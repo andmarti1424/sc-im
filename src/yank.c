@@ -142,7 +142,7 @@ void paste_yanked_ents(int above, int type_paste) {
     if (! count_yank_ents()) return;
 
     struct ent * yl = yanklist;
-    int diffr = 0, diffc = 0; // , ignorelock = 0;
+    int diffr = 0, diffc = 0 , ignorelock = 0;
 
     #ifdef UNDO
     create_undo_action();
@@ -151,7 +151,7 @@ void paste_yanked_ents(int above, int type_paste) {
     if (type_of_yank == 's') {                               // paste a range that was yanked in the sort function
         diffr = 0;
         diffc = curcol - yl->col;
-        //ignorelock = 1;
+        ignorelock = 1;
 
     } else if (type_of_yank == 'a' || type_of_yank == 'e') { // paste cell or range
         diffr = currow - yl->row;
@@ -192,8 +192,8 @@ void paste_yanked_ents(int above, int type_paste) {
         #endif
 
         // here we delete current content of "destino" ent
-        ////erase_area(yl->row + diffr, yl->col + diffc, yl->row + diffr, yl->col + diffc, ignorelock);
-        //FIXME
+        if (type_paste == 'a' || type_paste == 's')
+            erase_area(yl->row + diffr, yl->col + diffc, yl->row + diffr, yl->col + diffc, ignorelock);
         
         /*struct ent **pp = ATBL(tbl, yl->row + diffr, yl->col + diffc);
         if (*pp && (!((*pp)->flags & is_locked) )) {
@@ -203,7 +203,7 @@ void paste_yanked_ents(int above, int type_paste) {
 
         struct ent * destino = lookat(yl->row + diffr, yl->col + diffc);
 
-        if (type_paste == 'a') {
+        if (type_paste == 'a' || type_paste == 's') {
             (void) copyent(destino, yl, 0, 0, 0, 0, 0, 0, 0);
         } else if (type_paste == 'f') {
             (void) copyent(destino, yl, 0, 0, 0, 0, 0, 0, 'f');
