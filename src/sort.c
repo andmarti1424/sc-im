@@ -48,8 +48,9 @@ void sortrange(struct ent * left, struct ent * right, char * criteria) {
         sort[1].type = 0;
         sort[1].column = minc;
         howmany = 2;
-    } else
-        for (howmany = 0; criteria[cp]; howmany++) {
+    } else {
+        howmany = 0;
+        while (criteria[cp]) {
             if (howmany > 1)
                 sort = (struct sortcrit *) scxrealloc((char *) sort,  (howmany + 1) * (sizeof(struct sortcrit)));
             
@@ -81,14 +82,19 @@ void sortrange(struct ent * left, struct ent * right, char * criteria) {
                 error("Invalid sort criteria");
                 return;
             }
-            if (criteria[cp] && criteria[cp] != '+' && criteria[cp] != '-')
+            if (criteria[cp] && criteria[cp] != '+' && criteria[cp] != '-' && criteria[cp] != ';')
                 col = (col + 1) * 26 + toupper(criteria[cp++]) - 'A';
             sort[howmany].column = col;
             if (col < minc || col > maxc) {
                 error("Invalid sort criteria");
                 return;
             }
+            cp++;
+            howmany++;
+            if (cp > strlen(criteria))
+                break;
         }
+    }
 
     // realizo el proceso de ordenado dejando el resultado ordenado en la estructura rows
     qsort(rows, maxr - minr + 1, sizeof(int), compare);
@@ -97,8 +103,9 @@ void sortrange(struct ent * left, struct ent * right, char * criteria) {
     //curcol = minc;
  
     yank_area(minr, minc, maxr, maxc, 's', 1); // guardo en la yanklist todo el rango original
-    
-    //erase_area(minr, minc, maxr, maxc, 1); // borro el rango original. no es necesario porque se lo borra en paste_yanked_ents..
+
+    // borro el rango original. no es necesario porque se lo borra en paste_yanked_ents..
+    //erase_area(minr, minc, maxr, maxc, 1);
 
     //sync_ranges();
 
