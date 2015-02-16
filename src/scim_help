@@ -400,10 +400,11 @@ Commands for handling cell content:
                 must be alphabetic (case insensitive), and specifies
                 the column to be used when making the comparisons.
                 This column must be in the range being sorted.
-                Any number of criteria may be concatenated, and will be used
+                Any number of criteria may be concatenated using ';', and will be used
                 in the order specified.
 
-                example:         :sort C10:E13 "+#D"
+                examples:        :sort C10:E13 "+#D"
+                                 :sort C10:E13 "+#C;-#D"
 
     :sort string
                 save as the previous but sort is done over a selected range
