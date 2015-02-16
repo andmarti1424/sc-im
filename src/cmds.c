@@ -901,7 +901,9 @@ void insert_or_edit_cell() {
             strcpy(ope, "label");
             break;
     }
-    if (insert_edit_submode != '=') {
+    if (inputline[0] == '"') {
+        del_char(inputline, 0);
+    } else if (insert_edit_submode != '=' && inputline[0] != '"') {
         add_char(inputline, '\"', 0);
         add_char(inputline, '\"', strlen(inputline));
     }

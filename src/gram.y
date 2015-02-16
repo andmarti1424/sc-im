@@ -292,6 +292,7 @@ token S_GETFORMAT
 %token K_ERR
 %token K_SCRC
 %token K_LOCALE
+%token K_LEN
   
 %right ';'
 %left '?' ':'
@@ -676,6 +677,7 @@ term:           var                     { $$ = new_var(O_VAR, $1); }
         | '@' K_NUMITER                 { $$ = new(NUMITER, ENULL, ENULL);}
         | '@' K_ERR             { $$ = new(ERR_, ENULL, ENULL); }
         |     K_ERR             { $$ = new(ERR_, ENULL, ENULL); }
+        | '@' K_LEN '(' e ')'   { $$ = new(LEN, $4, ENULL); }
 /*
         | '@' K_BLACK           { $$ = new(BLACK, ENULL, ENULL); }
         | '@' K_RED             { $$ = new(RED, ENULL, ENULL); }
