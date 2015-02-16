@@ -291,9 +291,11 @@ void get_mappings(char * salida) {
    char nore[5] = "";
    
    char mode = '\0';
+   int i = 0;
    map * m = maps;
 
    while (m != NULL) {
+       i++;
        nore[0] = '\0';
        switch (m->mode) {
             case NORMAL_MODE:
@@ -307,7 +309,7 @@ void get_mappings(char * salida) {
        get_mapstr_buf(m->in, min);
        get_mapstr_buf(m->out, mout);
        if (!m->recursive) strcpy(nore, "nore");
-       sprintf(salida + strlen(salida), "+ %c%smap \"%s\" = \"%s\"\n", mode, nore, min, mout);
+       sprintf(salida + strlen(salida), "%3d + %c%smap \"%s\" = \"%s\"\n", i, mode, nore, min, mout);
        m = m->psig;
    }
 
