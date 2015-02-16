@@ -511,15 +511,15 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
 void add_cell_detail(char * d, struct ent * p1) {
     if ( !p1 ) return;
 
-    // string part of cell - ?????
+    /* string expressions
     if (p1->expr && (p1->flags & is_strexpr)) {
         if (p1->flags & is_label)
             strcat(d, "|{");
         else
             strcat(d, (p1->flags & is_leftflush) ? "<{" : ">{");
-        strcat(d, "??? } ");        /* and this '}' is for vi % */
+        strcat(d, "??? } ");        // and this '}' is for vi %
 
-    } else if (p1->label) {
+    } else*/ if (p1->label) {
         /* has constant label only */
         if (p1->flags & is_label)
             strcat(d, "|\"");
