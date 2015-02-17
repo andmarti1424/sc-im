@@ -7,6 +7,7 @@
 #include "interp.h"
 #include "macros.h"
 #include "sort.h"
+#include "filter.h"
 #include "maps.h"
 #include "marks.h"
 #include "xmalloc.h" // for scxfree
@@ -90,12 +91,15 @@ token S_GETFORMAT
 %token S_RIGHTJUSTIFY
 %token S_CENTER
 %token S_SORT
+%token S_FILTERON
 %token S_GOTO
 %token S_SET
 %token S_LOCK
 %token S_UNLOCK
 %token S_DEFINE
 %token S_UNDEFINE
+%token S_EVAL
+%token S_SEVAL
 
 /*
  token S_ADDNOTE
@@ -158,8 +162,6 @@ token S_GETFORMAT
  token S_GETFMT
  token S_GETFRAME
  token S_GETRANGE
- token S_EVAL
- token S_SEVAL
  token S_QUERY
  token S_GETKEY
  token S_ERROR
@@ -386,10 +388,11 @@ command:
                                           set_range_mark($2 + 97, sr);
                                           }
 
-    |    S_SORT range STRING {            sortrange($2.left.vp, $2.right.vp, $3);
-                                          //scxfree($3); 
-                             }
-                                          
+    |    S_SORT range STRING         { sortrange($2.left.vp, $2.right.vp, $3);
+                                          //scxfree($3);
+                                     }
+    |    S_FILTERON range            { enable_filters($2.left.vp, $2.right.vp);
+                                     }
                                           /* para debug
                                           wtimeout(input_win, -1);
                                           info("  ********* algo");
@@ -478,6 +481,13 @@ command:
 /*    |    S_DEFINE strarg NUMBER     { info("%s %d", $2, $3); get_key(); } */
     |    S_UNDEFINE var_or_range    { del_range($2.left.vp, $2.right.vp); }
 
+    |    S_EVAL e                   { eval_result = eval($2);
+                                      //info("::%f", eval_result); get_key();
+                                      efree($2);
+                                    } 
+    |    S_SEVAL e                  { seval_result = seval($2);
+                                      efree($2);
+                                    } /* FIXME free string */
 /*
     |    S_ERROR STRING        { error($2); }
     |    S_RECALC        { EvalAll();

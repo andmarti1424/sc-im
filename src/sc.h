@@ -123,7 +123,7 @@ struct enode {
 
     int gram_match; /* some compilers (hp9000ipc) need this */
     double k;       /* constant # */
-    char *s;        /* string part of a cell */
+    char * s;       /* string part of a cell */
 
     struct range_s r;    /* op is on a range */
     struct ent_ptr v;    /* ref. another cell on which this enode depends */
@@ -373,4 +373,6 @@ extern void label(register struct ent *v, register char *s, int flushdir);
 extern void num_search(double n, int firstrow, int firstcol, int lastrow, int lastcol, int errsearch);
 extern void str_search(char *s, int firstrow, int firstcol, int lastrow, int lastcol, int num);
 
+extern double eval_result;
+extern char * seval_result;
 #endif // SC_H_

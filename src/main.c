@@ -20,6 +20,7 @@
 #include "cmds.h"
 #include "color.h"   // for set_ucolor
 #include "vmtbl.h"   // for growtbl
+#include "filter.h"
 
 #ifdef UNDO
 #include "undo.h"
@@ -67,6 +68,8 @@ int tbl_style = 0;     /* headers for T command output */
 int rndtoeven = 0;
 int rowsinrange = 1;
 int colsinrange = DEFWIDTH;
+double eval_result;
+char * seval_result;
 
 struct block * buffer;
 struct block * lastcmd_buffer;
@@ -160,6 +163,9 @@ void delete_structures() {
 
     // Free ranges
     free_ranges();
+
+    // Free filters
+    free_filters();
 
     // Free undo list - from start of list
     #ifdef UNDO

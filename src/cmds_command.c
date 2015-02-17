@@ -18,9 +18,11 @@
 #include "exec.h"
 #include "help.h"
 #include "marks.h"
+#include "filter.h"
 #include "maps.h"
 #include "xls.h"
 #include "xlsx.h"
+
 #ifdef UNDO
 #include "undo.h"
 #endif
@@ -34,6 +36,7 @@ char interp_line[100];
 
 static char * valid_commands[] = {
 "!",
+"addfilter",
 "autojus",
 "color",
 "e csv",
@@ -41,6 +44,8 @@ static char * valid_commands[] = {
 "e! csv",
 "e! tab",
 "datefmt",
+"filteron",
+"filteroff",
 "format",
 "h",
 "help",
@@ -73,6 +78,7 @@ static char * valid_commands[] = {
 "quit",
 "set",
 "showcol",
+"showfilters",
 "showmaps",
 "showrow",
 "showrows",
@@ -239,16 +245,16 @@ void do_commandmode(struct block * sb) {
     // CONFIRM A COMMAND PRESSING ENTER
     } else if (find_val(sb, OKEY_ENTER)) {
 
-        if ( strcmp(inputline, "q") == 0 || strcmp(inputline, "quit") == 0 ) {
+        if ( ! strcmp(inputline, "q") || ! strcmp(inputline, "quit") ) {
             shall_quit = 1;
 
-        } else if ( strcmp(inputline, "q!") == 0 || strcmp(inputline, "quit!") == 0 ) {
+        } else if ( ! strcmp(inputline, "q!") || ! strcmp(inputline, "quit!") ) {
             shall_quit = 2;
 
-        } else if ( strcmp(inputline, "help") == 0 || strcmp(inputline, "h") == 0 ) {
+        } else if ( ! strcmp(inputline, "help") || ! strcmp(inputline, "h") ) {
             help();
 
-        } else if ( strncmp(inputline, "autojus", 7) == 0) {
+        } else if ( ! strncmp(inputline, "autojus", 7) ) {
             char cline [BUFFERSIZE];
             strcpy(cline, inputline);
             int c = curcol, cf = curcol;
@@ -262,12 +268,12 @@ void do_commandmode(struct block * sb) {
             }
             send_to_interp(cline); 
 
-        } else if ( strncmp(inputline, "load", 4) == 0 ) {
+        } else if ( ! strncmp(inputline, "load", 4) ) {
             char cline [BUFFERSIZE];
             int force_rewrite = 0;
             strcpy(cline, inputline);
 
-            if ( strncmp(inputline, "load! ", 6) == 0 ) {
+            if ( ! strncmp(inputline, "load! ", 6) ) {
                 force_rewrite = 1;
                 del_range_chars(cline, 4, 4);
             }
@@ -286,14 +292,14 @@ void do_commandmode(struct block * sb) {
                 update(); 
             }
 
-        } else if ( strncmp(inputline, "hiderow ", 8) == 0 ||
-                    strncmp(inputline, "showrow ", 8) == 0 ||
-                    strncmp(inputline, "showcol ", 8) == 0 ||
-                    strncmp(inputline, "hidecol ", 8) == 0
+        } else if ( ! strncmp(inputline, "hiderow ", 8) ||
+                    ! strncmp(inputline, "showrow ", 8) ||
+                    ! strncmp(inputline, "showcol ", 8) ||
+                    ! strncmp(inputline, "hidecol ", 8) 
                   ) {
             send_to_interp(inputline); 
 
-        } else if ( strncmp(inputline, "showrows", 8) == 0 ) {
+        } else if ( ! strncmp(inputline, "showrows", 8) ) {
             if (p == -1) return; // si no hay un rango seleccionado, regreso.
             int r, arg;
             sr = get_range_by_pos(p);
@@ -302,8 +308,8 @@ void do_commandmode(struct block * sb) {
             show_row(r, arg);
 
         // range lock / unlock
-        } else if ( strncmp(inputline, "lock", 4) == 0 || strncmp(inputline, "unlock", 6) == 0 ||
-                    strncmp(inputline, "valueize", 8) == 0 ) {
+        } else if ( ! strncmp(inputline, "lock", 4) || ! strncmp(inputline, "unlock", 6) ||
+                    ! strncmp(inputline, "valueize", 8) ) {
             int r = currow, c = curcol, rf = currow, cf = curcol;
             if (p != -1) {
                 c = sr->tlcol;
@@ -311,11 +317,11 @@ void do_commandmode(struct block * sb) {
                 rf = sr->brrow;
                 cf = sr->brcol;
             }
-            if (strncmp(inputline, "lock", 4) == 0) lock_cells(lookat(r, c), lookat(rf, cf));
-            else if (strncmp(inputline, "unlock", 6) == 0) unlock_cells(lookat(r, c), lookat(rf, cf));      
-            else if (strncmp(inputline, "valueize", 8) == 0) valueize_area(r, c, rf, cf);      
+            if ( ! strncmp(inputline, "lock", 4) ) lock_cells(lookat(r, c), lookat(rf, cf));
+            else if ( ! strncmp(inputline, "unlock", 6) ) unlock_cells(lookat(r, c), lookat(rf, cf));      
+            else if ( ! strncmp(inputline, "valueize", 8) ) valueize_area(r, c, rf, cf);      
 
-        } else if ( strncmp(inputline, "datefmt", 7) == 0) {
+        } else if ( ! strncmp(inputline, "datefmt", 7)) {
             strcpy(interp_line, inputline);
 
             if (p != -1) { // in case there is a range selected
@@ -334,7 +340,7 @@ void do_commandmode(struct block * sb) {
             }
             send_to_interp(interp_line);
  
-        } else if ( strncmp(inputline, "sort ", 5) == 0 ) {
+        } else if ( ! strncmp(inputline, "sort ", 5) ) {
             strcpy(interp_line, inputline);
             if (p != -1) { // si hay un rango seleccionado
                 char cline [BUFFERSIZE];
@@ -347,18 +353,46 @@ void do_commandmode(struct block * sb) {
             }
             send_to_interp(interp_line); 
 
-        } else if ( strncmp(inputline, "hiddenrows", 10) == 0 ) {
+        } else if ( ! strncmp(inputline, "addfilter", 9) ) {
+            char cline [BUFFERSIZE];
+            strcpy(cline, inputline);
+            int found = str_in_str(cline, "\"");
+            if (found == -1) return;
+            del_range_chars(cline, strlen(cline), strlen(cline));
+            del_range_chars(cline, 0, found);
+            add_filter(cline);
+
+        } else if ( ! strncmp(inputline, "filteron", 8) ) { //FIXME
+            strcpy(interp_line, inputline);
+            if (p != -1) { // si hay un rango seleccionado
+                char cline [BUFFERSIZE];
+                strcpy(cline, interp_line);
+                //int found = str_in_str(interp_line, "\"");
+                //if (found == -1) return;
+                //del_range_chars(cline, 0, found-1);
+                sprintf(interp_line, "filteron %s%d:", coltoa(sr->tlcol), sr->tlrow);
+                sprintf(interp_line + strlen(interp_line), "%s%d", coltoa(sr->brcol), sr->brrow);
+            }
+            send_to_interp(interp_line); 
+
+        } else if ( ! strncmp(inputline, "filteroff", 9) ) {
+            disable_filters();
+
+        } else if ( ! strncmp(inputline, "hiddenrows", 10)) {
             show_hiddenrows();
                     
-        } else if ( strncmp(inputline, "hiddencols", 10) == 0 ) {
+        } else if ( ! strncmp(inputline, "hiddencols", 10)) {
             show_hiddencols();
 
-        } else if ( strncmp(inputline, "int ", 4) == 0 ) { // send cmd to interpreter
+        } else if ( ! strncmp(inputline, "showfilters", 11)) {
+            show_filters();
+
+        } else if ( ! strncmp(inputline, "int ", 4) ) { // send cmd to interpreter
             strcpy(interp_line, inputline);
             del_range_chars(interp_line, 0, 3);
             send_to_interp(interp_line);
 
-        } else if ( strncmp(inputline, "format ", 7) == 0 ) {
+        } else if ( ! strncmp(inputline, "format ", 7) ) {
             int r = currow, c = curcol, rf = currow, cf = curcol;
             if (p != -1) {
                 c = sr->tlcol;
@@ -387,27 +421,27 @@ void do_commandmode(struct block * sb) {
             end_undo_action();
             #endif
 
-        } else if ( strncmp(inputline, "color ", 6) == 0 ) {
+        } else if ( ! strncmp(inputline, "color ", 6) ) {
             strcpy(interp_line, inputline);
             del_range_chars(interp_line, 0, 5);
             chg_color(interp_line);
 
-        } else if ( strncmp(inputline, "set ", 4) == 0 ) {
+        } else if ( ! strncmp(inputline, "set ", 4) ) {
             strcpy(interp_line, inputline);
             del_range_chars(interp_line, 0, 3); 
             parse_str(user_conf_d, interp_line);
             info("Config value changed: %s", interp_line);
 
-        } else if ( strcmp(inputline, "set") == 0 ) {
+        } else if ( ! strcmp(inputline, "set") ) {
             int d = user_conf_d->len;
             char valores[20 * d];
             get_conf_values(valores);
             show_text(valores);
 
-        } else if ( strcmp(inputline, "version") == 0 ) {
+        } else if ( ! strcmp(inputline, "version") ) {
             show_text(rev);
 
-        } else if ( strcmp(inputline, "showmaps") == 0 ) {
+        } else if ( ! strcmp(inputline, "showmaps") ) {
             extern int len_maps;
             char valores[MAXMAPITEM * len_maps];
             get_mappings(valores);
@@ -421,7 +455,7 @@ void do_commandmode(struct block * sb) {
                     ! strncmp(inputline, "nunmap", 6) ) {
             send_to_interp(inputline);
 
-        } else if ( strncmp(inputline, "!", 1) == 0 ) {
+        } else if ( ! strncmp(inputline, "!", 1) ) {
             del_range_chars(inputline, 0, 0); 
             exec_cmd(inputline);
 
@@ -432,22 +466,22 @@ void do_commandmode(struct block * sb) {
             if ( savefile() == 0 ) shall_quit = 1;
 
         } else if (
-            strncmp(inputline, "e csv"  , 5) == 0 ||
-            strncmp(inputline, "e! tab" , 6) == 0 ||
-            strncmp(inputline, "e! csv" , 6) == 0 ||
-            strncmp(inputline, "e tab"  , 5) == 0 ) {
+            ! strncmp(inputline, "e csv"  , 5) ||
+            ! strncmp(inputline, "e! tab" , 6) ||
+            ! strncmp(inputline, "e! csv" , 6) ||
+            ! strncmp(inputline, "e tab"  , 5) ) {
                 do_export( p == -1 ? 0 : sr->tlrow, p == -1 ? 0 : sr->tlcol,
                 p == -1 ? maxrow : sr->brrow, p == -1 ? maxcol : sr->brcol);
 
         } else if (
-            strncmp(inputline, "i csv " , 6) == 0 ||
-            strncmp(inputline, "i! csv ", 7) == 0 ||
-            strncmp(inputline, "i xlsx" , 6) == 0 ||
-            strncmp(inputline, "i! xlsx", 7) == 0 ||
-            strncmp(inputline, "i xls " , 6) == 0 ||
-            strncmp(inputline, "i! xls ", 7) == 0 ||
-            strncmp(inputline, "i tab " , 6) == 0 ||
-            strncmp(inputline, "i! tab ", 7) == 0 ) {
+            ! strncmp(inputline, "i csv " , 6) ||
+            ! strncmp(inputline, "i! csv ", 7) ||
+            ! strncmp(inputline, "i xlsx" , 6) ||
+            ! strncmp(inputline, "i! xlsx", 7) ||
+            ! strncmp(inputline, "i xls " , 6) ||
+            ! strncmp(inputline, "i! xls ", 7) ||
+            ! strncmp(inputline, "i tab " , 6) ||
+            ! strncmp(inputline, "i! tab ", 7) ) {
             
             int force_rewrite = 0;
             char delim = ',';
@@ -459,9 +493,9 @@ void do_commandmode(struct block * sb) {
                 del_range_chars(cline, 1, 1);
             }
 
-            if ( strncmp(cline, "i csv ", 6) == 0) { delim = ',';
-            } else if ( strncmp(cline, "i tab ", 6) == 0) { delim = '\t';
-            } else if ( strncmp(cline, "i xls ", 6) == 0) {
+            if ( ! strncmp(cline, "i csv ", 6) ) { delim = ',';
+            } else if ( ! strncmp(cline, "i tab ", 6) ) { delim = '\t';
+            } else if ( ! strncmp(cline, "i xls ", 6) ) {
                 #ifndef XLS
                 error("XLS import support not compiled in");
                 chg_mode('.');
@@ -470,7 +504,7 @@ void do_commandmode(struct block * sb) {
                 return;
                 #endif
                 delim = 'x';
-            } else if ( strncmp(cline, "i xlsx", 6) == 0) {
+            } else if ( ! strncmp(cline, "i xlsx", 6) ) {
                 #ifndef XLSX
                 error("XLSX import support not compiled in");
                 chg_mode('.');

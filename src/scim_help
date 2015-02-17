@@ -410,6 +410,37 @@ Commands for handling cell content:
                 save as the previous but sort is done over a selected range
 
 
+
+    :addfilter
+    :filteron
+    :filteroff
+                These commands are used to filter a range of rows by multiple criteria.
+
+                To apply a filter over a range first is neccesary to add a filter criteria.
+                To define a criteria you have to use the addfilter command, with this format:
+
+                The first part, is a single character, which must be either # or $, and is used to specify whether the expression evaluates
+                over the numeric portion or the string portion of the cell, respectively,",
+                The second part is a column name where its values are evaluated with an expression.
+                The third part is actually the expression used for the evalutation.
+                Multiple criteria can be specified separating them with the ';' character.
+
+                These are some examples:
+                            :addfilter "#B<8000"
+                            :addfilter "#C>1500"
+                            :addfilter "@eqs(@substr($B,1,3),'SEP')"
+
+                Once filters are added, you can see the details of each filter with :showfilters special command.
+
+                You can apply those filters to a range with the :filteron special command.
+                Ex.:        :filteron B10:C13
+    
+                If a range is already selected you can simply type :filteron
+
+                To turn off the filters you can type:
+                            :filteroff
+
+
     :int string
                 sends a command to the interpreter
                 example:          :int goto B2

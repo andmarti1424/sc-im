@@ -83,20 +83,20 @@ extern bool decimal;      /* Set if there was a decimal point in the number */
 //struct enode *freeenodes = NULL;
 
 double dolookup(struct enode * val, int minr, int minc, int maxr, int maxc, int offr, int offc);
-double fn1_eval(double (*fn)(), double arg);
-double fn2_eval(double (*fn)(), double arg1, double arg2);
+double fn1_eval(double (* fn)(), double arg);
+double fn2_eval(double (* fn)(), double arg1, double arg2);
 int RealEvalAll();
-int constant(register struct enode *e);
-void RealEvalOne(register struct ent *p, int i, int j, int *chgct);
+int constant(register struct enode * e);
+void RealEvalOne(register struct ent * p, int i, int j, int * chgct);
 void copydbuf(int deltar, int deltac);
-void decompile(register struct enode *e, int    priority);
-void index_arg(char *s, struct enode *e);
-void list_arg(char *s, struct enode *e);
-void one_arg(char *s, struct enode *e);
-void range_arg(char *s, struct enode *e);
-void three_arg(char *s, struct enode *e);
-void two_arg(char *s, struct enode *e);
-void two_arg_index(char *s, struct enode *e);
+void decompile(register struct enode * e, int priority);
+void index_arg(char * s, struct enode * e);
+void list_arg(char * s, struct enode * e);
+void one_arg(char * s, struct enode * e);
+void range_arg(char * s, struct enode * e);
+void three_arg(char * s, struct enode * e);
+void two_arg(char * s, struct enode * e);
+void two_arg_index(char * s, struct enode * e);
 
 double rint(double d);
 int cellerror = CELLOK;    /* is there an error in this cell */
@@ -2302,7 +2302,7 @@ static void decompile_list(struct enode *p) {
     line[linelim++] = ',';
 }
 
-void decompile(register struct enode *e, int    priority) {
+void decompile(register struct enode *e, int priority) {
     register char *s;
     if (e) {
     int mypriority;
