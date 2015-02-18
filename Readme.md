@@ -14,8 +14,10 @@ SCIM uses ncurses for visual interface and has vim-like keybindings and some fun
 - CSV / TAB delimited file import and export.
 - XLS / XLSX file import.
 - Key-mappings.
+- Sort of rows.
+- Filter of rows.
 - Cell shifting.
-- More movements commands implemented!
+- More movements commands implemented !
 - Input and Output was completely rewritten.
 - Colors can be customized by user, even at runtime.
 
