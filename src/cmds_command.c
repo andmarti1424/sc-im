@@ -44,6 +44,8 @@ static char * valid_commands[] = {
 "e! csv",
 "e! tab",
 "datefmt",
+"delfilter",
+"delfilters",
 "filteron",
 "filteroff",
 "format",
@@ -362,14 +364,24 @@ void do_commandmode(struct block * sb) {
             del_range_chars(cline, 0, found);
             add_filter(cline);
 
+        } else if ( ! strncmp(inputline, "delfilter ", 10) ) {
+            char cline [BUFFERSIZE];
+            strcpy(cline, inputline);            
+            del_range_chars(cline, 0, 9);
+            int id = atoi(cline);
+            del_filter(id);
+
+        } else if ( ! strncmp(inputline, "delfilters", 10) ) {
+            free_filters();
+
         } else if ( ! strncmp(inputline, "filteron", 8) ) { //FIXME
             strcpy(interp_line, inputline);
-            if (p != -1) { // si hay un rango seleccionado
+            if ( ! strcmp(inputline, "filteron") && p == -1) { // si no hay un rango seleccionado
+                error("Please specify a range or select one");
+                return;
+            } else if (p != -1) { // si hay un rango seleccionado
                 char cline [BUFFERSIZE];
                 strcpy(cline, interp_line);
-                //int found = str_in_str(interp_line, "\"");
-                //if (found == -1) return;
-                //del_range_chars(cline, 0, found-1);
                 sprintf(interp_line, "filteron %s%d:", coltoa(sr->tlcol), sr->tlrow);
                 sprintf(interp_line + strlen(interp_line), "%s%d", coltoa(sr->brcol), sr->brrow);
             }

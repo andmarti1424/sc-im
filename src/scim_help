@@ -414,6 +414,8 @@ Commands for handling cell content:
     :addfilter
     :filteron
     :filteroff
+    :delfilter
+    :delfilters
                 These commands are used to filter a range of rows by multiple criteria.
 
                 To apply a filter over a range first is neccesary to add a filter criteria.
@@ -431,6 +433,11 @@ Commands for handling cell content:
                             :addfilter "@eqs(@substr($B,1,3),'SEP')"
 
                 Once filters are added, you can see the details of each filter with :showfilters special command.
+                Each filter is preceded by a number. You can delete a filter typing :delfilter NUMBER. In this
+                example, the first filter defined is removed:
+                            :delfilter 0
+
+                To delete all defined filters, it can be used the :delfilters special command.
 
                 You can apply those filters to a range with the :filteron special command.
                 Ex.:        :filteron B10:C13
