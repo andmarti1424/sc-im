@@ -37,5 +37,5 @@ SCIM stands for Spreadsheet Calculator Improvised. :-)
 ### Donations
 
 Please. I mean, Please.. make a DONATION with PayPal, so we can keep working on SCIM !!!
-A lot of features are in the roadmap, such as multiple worksheets, filtering of rows, and even a GTK gui!
+A lot of features are in the roadmap, such as multiple worksheets, and even a GTK gui!
 Thanks.
