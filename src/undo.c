@@ -53,7 +53,7 @@ Acciones cuyo UNDO/REDO se encuentra implementado:
 8. delete de row o columna
 9. paste de row o columna
 10. hide / show of rows and columns
-11. order of a range
+11. sort of a range
 12. change in the format of a range or cell
 13. '-' and '+' commands in normal mode
 14. lock and unlock of cells
