@@ -14,6 +14,7 @@ double dodts(int e1, int e2, int e3);
 double dotts(int hr, int min, int sec);
 double dotime(int which, double when);
 double doston(char *s);
+int    doslen(char *s);
 double doeqs(char *s1, char *s2);
 struct ent * getent(char *colstr, double rowdoub);
 double donval(char *colstr, double rowdoub);

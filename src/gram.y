@@ -236,6 +236,7 @@ token S_GETFORMAT
 %token K_LOWER
 %token K_CAPITAL
 %token K_STON
+%token K_SLEN
 %token K_EQS
 %token K_EXT
 %token K_NVAL
@@ -294,7 +295,6 @@ token S_GETFORMAT
 %token K_ERR
 %token K_SCRC
 %token K_LOCALE
-%token K_LEN
   
 %right ';'
 %left '?' ':'
@@ -627,6 +627,7 @@ term:           var                     { $$ = new_var(O_VAR, $1); }
         | '@' K_TTS '(' e ',' e ',' e ')'
                                         { $$ = new(TTS, $4, new(',', $6, $8));}
         | '@' K_STON '(' e ')'          { $$ = new(STON, $4, ENULL); }
+        | '@' K_SLEN '(' e ')'          { $$ = new(SLEN, $4, ENULL); }
         | '@' K_EQS '(' e ',' e ')'     { $$ = new(EQS, $4, $6); }
         | '@' K_DATE '(' e ')'          { $$ = new(DATE, $4, ENULL); }
         | '@' K_DATE '(' e ',' e ')'    { $$ = new(DATE, $4, $6); }
@@ -687,7 +688,6 @@ term:           var                     { $$ = new_var(O_VAR, $1); }
         | '@' K_NUMITER                 { $$ = new(NUMITER, ENULL, ENULL);}
         | '@' K_ERR             { $$ = new(ERR_, ENULL, ENULL); }
         |     K_ERR             { $$ = new(ERR_, ENULL, ENULL); }
-        | '@' K_LEN '(' e ')'   { $$ = new(LEN, $4, ENULL); }
 /*
         | '@' K_BLACK           { $$ = new(BLACK, ENULL, ENULL); }
         | '@' K_RED             { $$ = new(RED, ENULL, ENULL); }

@@ -252,7 +252,7 @@ struct go_save {
 #define SC_MAGENTA  (OP_BASE + 74)
 #define SC_CYAN     (OP_BASE + 75)
 #define SC_WHITE    (OP_BASE + 76)
-#define LEN         (OP_BASE + 77)
+#define SLEN        (OP_BASE + 77)
 
 /* flag values */
 #define is_valid      0001

@@ -547,7 +547,7 @@ double doston(char *s) {
     return(v);
 }
 
-int dolen(char *s) {
+int doslen(char *s) {
     if (!s) return 0;
 
     int i = strlen(s);
@@ -875,7 +875,7 @@ double eval(register struct enode *e) {
                     (int)eval(e->e.o.right->e.o.left),
                     (int)eval(e->e.o.right->e.o.right)));
     case STON:   return (doston(seval(e->e.o.left)));
-    case LEN:    return (dolen(seval(e->e.o.left)));
+    case SLEN:   return (doslen(seval(e->e.o.left)));
     case EQS:    return (doeqs(seval(e->e.o.right), seval(e->e.o.left)));
     case LMAX:   return dolmax(e);
     case LMIN:   return dolmin(e);
@@ -2395,7 +2395,7 @@ void decompile(register struct enode *e, int priority) {
     case DTS:   three_arg("@dts(", e); break;
     case TTS:   three_arg("@tts(", e); break;
     case STON:  one_arg("@ston(", e); break;
-    case LEN:   one_arg("@len(", e); break;
+    case SLEN:  one_arg("@slen(", e); break;
     case EQS:   two_arg("@eqs(", e); break;
     case LMAX:  list_arg("@max(", e); break;
     case LMIN:  list_arg("@min(", e); break;

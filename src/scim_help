@@ -431,6 +431,7 @@ Commands for handling cell content:
                             :addfilter "#B<8000"
                             :addfilter "#C>1500"
                             :addfilter "@eqs(@substr($B,1,3),'SEP')"
+                            :addfilter "#B>3000;#B<5000;#B>@avg(B1:B20)"
 
                 Once filters are added, you can see the details of each filter with :showfilters special command.
                 Each filter is preceded by a number. You can delete a filter typing :delfilter NUMBER. In this
@@ -752,8 +753,8 @@ Commands for handling cell content:
         Convert string expression se to a numeric value.
 
     @nval(se,e)
-        Return the numeric value of a cell selected by name. String expression se must evaluate to a  col‐
-        umn  name ("A" - "ZZ") and e must evaluate to a row number (0 - maxrows, by default 65536).
+        Return the numeric value of a cell selected by name. String expression se must evaluate to a
+        column  name ("A" - "ZZ") and e must evaluate to a row number (0 - maxrows, by default 65536).
         If se or e is out of bounds, or the cell has no numeric value, the result is 0.
         You can use this for simple table lookups. See also @sval() below.
 
@@ -761,8 +762,15 @@ Commands for handling cell content:
 
 *String Expressions*
     String expressions are made up of constant strings (characters surrounded by double quotation marks), variables (cell
-    names, which refer to the cells's label strings or expressions), and string functions.  Note that string  expressions
-    are only allowed when entering a cell's label string, not its numeric part.  Also note that string expression results
+    names, which refer to the cells's label strings or expressions), and string functions.
+
+    IMPORTANT: PLEASE NOTE THAT STRING EXPRESSIONS ARE ONLY ALLOWED WHEN ENTERING A CELL'S LABEL STRING.
+               NOT ITS NUMERIC PART.
+               THEY ARE ENTERED WITH A BACKSLASH FOLLOWED BY A DOUBLE QUOTE:
+               Ex.:   \"@coltoa(4)
+               Ex.:   \"A0 # "Plate"
+
+    Also note that string expression results
     may be left or right flushed or centered, according to the type of the cell's string label.
 
     #      Concatenate strings.  For example, the string expression
@@ -776,10 +784,10 @@ Commands for handling cell content:
         Extract and return from string expression se the substring indexed by character number  e1  through
         character  number e2 (defaults to the size of se if beyond the end of it).  If e1 is less than 1 or
         greater than e2, the result is the null string.  For example,
+        
+        @substr ("River Plate", 4, 8)
 
-        @substr ("Nice jacket", 4, 8)
-
-        returns the string ``e jac''.
+        returns the string 'er Pl'.
 
     @upper(se)
     @lower(se)
@@ -810,6 +818,11 @@ Commands for handling cell content:
         Note  that  you  can build a command line (including more argument values) from a string expression
         with concatenation.  You can also "hide" the second argument by  ending  the  command  line  (first
         argument) with `` #'' (shell comment).
+
+    @coltoa(e)
+        Returns a string name for a column from the numeric argument.  For example:
+
+            @coltoa(@mycol-1)      @nval(coltoa(@mycol-1), @myrow+1)
 
 *Built-in Date and Time Functions*
 
