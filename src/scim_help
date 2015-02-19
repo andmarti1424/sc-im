@@ -760,6 +760,9 @@ Commands for handling cell content:
 
     @eqs(se1,se2)     Return 1 if string expression se1 has the same value as string expression se2, 0 otherwise.
 
+    @slen(se)
+        Returns the length of string expression se.
+
 *String Expressions*
     String expressions are made up of constant strings (characters surrounded by double quotation marks), variables (cell
     names, which refer to the cells's label strings or expressions), and string functions.
@@ -823,6 +826,11 @@ Commands for handling cell content:
         Returns a string name for a column from the numeric argument.  For example:
 
             @coltoa(@mycol-1)      @nval(coltoa(@mycol-1), @myrow+1)
+
+    @sval(se,e) 
+        Return the string value of a cell selected by name.  String expression se must evaluate to a column
+        name  (``A''-``AE'')  and e must evaluate to a row number (0-199).  If se or e is out of bounds, or
+        the cell has no string value, the result is the null string.
 
 *Built-in Date and Time Functions*
 
