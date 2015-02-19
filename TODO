@@ -23,6 +23,4 @@ Change curses calls to cursesw calls.
 
 8. restore fill funcionality
 
-9. restore abbrev funcionality ?
-
-10. multiplier with '.' command ?
+9. multiplier with '.' command ?
