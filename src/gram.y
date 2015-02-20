@@ -482,12 +482,12 @@ command:
     |    S_UNDEFINE var_or_range    { del_range($2.left.vp, $2.right.vp); }
 
     |    S_EVAL e                   { eval_result = eval($2);
-                                      //info("::%f", eval_result); get_key();
                                       efree($2);
                                     } 
+/*
     |    S_SEVAL e                  { seval_result = seval($2);
                                       efree($2);
-                                    } /* FIXME free string */
+                                    } // FIXME free string */
 /*
     |    S_ERROR STRING        { error($2); }
     |    S_RECALC        { EvalAll();
