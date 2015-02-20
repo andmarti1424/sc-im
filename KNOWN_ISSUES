@@ -1,2 +1,5 @@
 Problem: It was detected that libxls can produce memory leaks.
 One example is when you try to read a non xls file, ex. xlsx file.
+
+Problem: functions that calls to "seval" causes memory leaks.
+This also happens in SC and has to be solved.
