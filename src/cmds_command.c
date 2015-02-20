@@ -220,7 +220,6 @@ void do_commandmode(struct block * sb) {
         for (i = 0; i < clen; i++) {
             if ( ! strcmp(inputline, valid_commands[i]) ) {
                 strcpy(inputline, get_curcmd());
-                i++;
                 continue;
             }
             if ( ! strncmp(inputline, valid_commands[i], strlen(inputline)) 

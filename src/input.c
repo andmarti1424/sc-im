@@ -143,6 +143,7 @@ void break_waitcmd_loop(struct block * buffer) {
     if (curmode == COMMAND_MODE) {
         del_item_from_history(commandline_history, 0);
         commandline_history->pos = 0;
+        set_comp(0);
     } else if (curmode == VISUAL_MODE) {
         exit_visualmode();
     }
