@@ -20,3 +20,11 @@ int move_item_from_history_by_str(struct history * h, char * item, int pos);
 void add(struct history * h, char * line);
 char * get_line_from_history(struct history * h, int pos);
 struct hlist * get_hlist_from_history(struct history * h, int pos);
+
+// current command before tab completion
+void copy_to_curcmd(char * inputline);
+char * get_curcmd();
+
+// tab completion mark
+int get_comp();
+void set_comp(int);

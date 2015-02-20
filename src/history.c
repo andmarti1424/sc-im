@@ -11,27 +11,50 @@
 #include "sc.h"
 #include "utils/string.h"
 
+
+// current command before tab completion
+static char curcmd [BUFFERSIZE];
+
+void copy_to_curcmd(char * inputline) {
+    strcpy(curcmd, inputline);
+}
+
+char * get_curcmd() {
+    return curcmd;
+}
+
+// this comp mark is used to mark when tab completion is started
+static int comp = 0;
+
+int get_comp() {
+    return comp;
+}
+
+void set_comp(int i) {
+    comp = i;
+}
+
 struct history * create_history(char mode) {
-   struct history * h = (struct history *) malloc (sizeof (struct history));
-   h->len = 0;
-   h->pos = 0;
-   h->mode = mode;
-   h->list = NULL;
-   return h;
+    struct history * h = (struct history *) malloc (sizeof (struct history));
+    h->len = 0;
+    h->pos = 0;
+    h->mode = mode;
+    h->list = NULL;
+    return h;
 }
 
 void destroy_history(struct history * h) {
-   struct hlist * nl;
-   struct hlist * n_sig;
-   nl = h->list;
-   while (nl != NULL) {
-       n_sig = nl->pnext;
-       free(nl->line);
-       free(nl);
-       nl = n_sig;
-   }
-   free(h);
-   return;
+    struct hlist * nl;
+    struct hlist * n_sig;
+    nl = h->list;
+    while (nl != NULL) {
+        n_sig = nl->pnext;
+        free(nl->line);
+        free(nl);
+        nl = n_sig;
+    }
+    free(h);
+    return;
 }
 
 void load_history(struct history * h) {

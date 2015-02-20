@@ -92,8 +92,6 @@ static char * valid_commands[] = {
 (char *) 0
 };
 
-static int tab_comp = -1; // tab_comp != -1 indicates tab_completation
-
 void do_commandmode(struct block * sb) {
 
     // si hay un rango seleccionado en modo visual
@@ -106,7 +104,6 @@ void do_commandmode(struct block * sb) {
         del_char(inputline, --inputline_pos);
         if (commandline_history->pos == 0)
             del_char(get_line_from_history(commandline_history, commandline_history->pos), inputline_pos); // borro en el historial
-        tab_comp = -1;
         show_header(input_win);
         return;
 
@@ -115,7 +112,6 @@ void do_commandmode(struct block * sb) {
         del_char(inputline, inputline_pos);
         if (commandline_history->pos == 0)
             del_char(get_line_from_history(commandline_history, commandline_history->pos), inputline_pos); // borro en el historial
-        tab_comp = -1;
         show_header(input_win);
         return;
 
@@ -134,7 +130,6 @@ void do_commandmode(struct block * sb) {
         commandline_history->pos += delta;
         strcpy(inputline, get_line_from_history(commandline_history, commandline_history->pos));
         inputline_pos = strlen(inputline);
-        tab_comp = -1;
         show_header(input_win);
         return;
             
@@ -164,7 +159,6 @@ void do_commandmode(struct block * sb) {
             char * sl = get_line_from_history(commandline_history, 0);
             strcat(sl, cline);                        // Inserto en el historial
         }
-        tab_comp = -1;
         show_header(input_win);
         return;
 
@@ -183,7 +177,6 @@ void do_commandmode(struct block * sb) {
             char * sl = get_line_from_history(commandline_history, 0);
             strcat(sl, cline);                        // Inserto en el historial
         }
-        tab_comp = -1;
         show_header(input_win);
         return;
 
@@ -197,7 +190,6 @@ void do_commandmode(struct block * sb) {
             char * sl = get_line_from_history(commandline_history, 0);
             add_char(sl, sb->value, inputline_pos-1); // Inserto en el historial
         }
-        tab_comp = -1;
         return;
 
     } else if ( sb->value == ctl('w') || sb->value == ctl('b') ||
@@ -223,22 +215,29 @@ void do_commandmode(struct block * sb) {
     } else if (sb->value == '\t') {                  // TAB completion
         int i, clen = (sizeof(valid_commands) / sizeof(char *)) - 1;
     
-        for (i = tab_comp + 1; i < clen; i++) {
-            if ((strncmp(get_line_from_history(commandline_history, 0), valid_commands[i],
-            strlen(get_line_from_history(commandline_history, 0))) == 0)
-            || strlen(get_line_from_history(commandline_history, 0)) == 0)
-            {
+        if (! get_comp()) copy_to_curcmd(inputline); // keep original cmd
+
+        for (i = 0; i < clen; i++) {
+            if ( ! strcmp(inputline, valid_commands[i]) ) {
+                strcpy(inputline, get_curcmd());
+                i++;
+                continue;
+            }
+            if ( ! strncmp(inputline, valid_commands[i], strlen(inputline)) 
+               ) {
                 strcpy(inputline, valid_commands[i]);
                 inputline_pos = strlen(inputline);
-                tab_comp = i;
+                set_comp(1);
                 break;
             }
         }
+
         // restauro contenido de inputline
         if (i == clen) {
-            strcpy(inputline, get_line_from_history(commandline_history, 0));
+            //strcpy(inputline, get_line_from_history(commandline_history, 0));
+            strcpy(inputline, get_curcmd());
             inputline_pos = strlen(inputline);
-            tab_comp = -1;
+            set_comp(0);
         }
 
         show_header(input_win);
@@ -562,8 +561,8 @@ void do_commandmode(struct block * sb) {
         chg_mode('.');
         // clr_header(input_win); // COMENTADO el dia 22/06
         inputline[0]='\0';
+        set_comp(0); // unmark tab completion
         update();
-
     }
     //show_header(input_win); // NO DESCOMENTAR.
     return;
