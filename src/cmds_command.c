@@ -102,19 +102,26 @@ void do_commandmode(struct block * sb) {
     if (sb->value == OKEY_BS) {            // BS
         if ( ! strlen(inputline) || ! inputline_pos) return;
         del_char(inputline, --inputline_pos);
+
+#ifdef HISTORY_FILE
         if (commandline_history->pos == 0)
             del_char(get_line_from_history(commandline_history, commandline_history->pos), inputline_pos); // borro en el historial
+#endif
         show_header(input_win);
         return;
 
     } else if (sb->value == OKEY_DEL) {    // DEL
         if (inputline_pos > strlen(inputline)) return;
         del_char(inputline, inputline_pos);
+
+#ifdef HISTORY_FILE
         if (commandline_history->pos == 0)
             del_char(get_line_from_history(commandline_history, commandline_history->pos), inputline_pos); // borro en el historial
+#endif
         show_header(input_win);
         return;
 
+#ifdef HISTORY_FILE
     } else if (sb->value == OKEY_UP || sb->value == ctl('p') ||         // UP
                sb->value == OKEY_DOWN || sb->value == ctl('n')) {       // DOWN
 
@@ -132,6 +139,7 @@ void do_commandmode(struct block * sb) {
         inputline_pos = strlen(inputline);
         show_header(input_win);
         return;
+#endif
             
     } else if (sb->value == OKEY_LEFT) {   // LEFT
         if (inputline_pos) inputline_pos--;
@@ -155,10 +163,12 @@ void do_commandmode(struct block * sb) {
         }
         for(i = 0; i < strlen(cline); i++) ins_in_line(cline[i]);
 
+#ifdef HISTORY_FILE
         if (commandline_history->pos == 0) {          // solo si edito el nuevo comando
             char * sl = get_line_from_history(commandline_history, 0);
             strcat(sl, cline);                        // Inserto en el historial
         }
+#endif
         show_header(input_win);
         return;
 
@@ -173,10 +183,12 @@ void do_commandmode(struct block * sb) {
         sprintf(cline, "%s", p1->format);
         for (i = 0; i < strlen(cline); i++) ins_in_line(cline[i]);
 
+#ifdef HISTORY_FILE
         if (commandline_history->pos == 0) {          // solo si edito el nuevo comando
             char * sl = get_line_from_history(commandline_history, 0);
             strcat(sl, cline);                        // Inserto en el historial
         }
+#endif
         show_header(input_win);
         return;
 
@@ -186,10 +198,12 @@ void do_commandmode(struct block * sb) {
         wmove(input_win, 0, inputline_pos + 1 + rescol);
         wrefresh(input_win);
         
+#ifdef HISTORY_FILE
         if (commandline_history->pos == 0) {          // solo si edito el nuevo comando
             char * sl = get_line_from_history(commandline_history, 0);
             add_char(sl, sb->value, inputline_pos-1); // Inserto en el historial
         }
+#endif
         return;
 
     } else if ( sb->value == ctl('w') || sb->value == ctl('b') ||
@@ -550,12 +564,14 @@ void do_commandmode(struct block * sb) {
             error("COMMAND NOT FOUND !");
         }
 
+#ifdef HISTORY_FILE
         del_item_from_history(commandline_history, 0);
         // si hay en historial algun item con texto igual al del comando que se ejecuta
         // a partir de la posicion 2, se lo coloca al comiendo de la lista (indica que es lo mas reciente ejecutado).
         int moved = move_item_from_history_by_str(commandline_history, inputline, -1);
         if (!moved) add(commandline_history, inputline);
         commandline_history->pos = 0;
+#endif
 
         chg_mode('.');
         // clr_header(input_win); // COMENTADO el dia 22/06

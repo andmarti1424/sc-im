@@ -1,16 +1,5 @@
-#if defined HISTORY_FILE
-
-#include <curses.h>
-#include <string.h>
-#include <stdlib.h>
-#include <fcntl.h>
-#include <unistd.h>
-
 #include "macros.h"
-#include "history.h"
-#include "sc.h"
-#include "utils/string.h"
-
+#include <string.h>
 
 // current command before tab completion
 static char curcmd [BUFFERSIZE];
@@ -33,6 +22,18 @@ int get_comp() {
 void set_comp(int i) {
     comp = i;
 }
+
+#if defined HISTORY_FILE
+
+#include <curses.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+#include "history.h"
+#include "sc.h"
+#include "utils/string.h"
+
 
 struct history * create_history(char mode) {
     struct history * h = (struct history *) malloc (sizeof (struct history));
