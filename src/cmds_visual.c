@@ -424,7 +424,9 @@ void do_visualmode(struct block * buf) {
         clr_header(input_win, 0);
         wrefresh(input_win);
         chg_mode(':');
+#ifdef HISTORY_FILE
         add(commandline_history, "");
+#endif
         print_mode(input_win);
         wrefresh(input_win);
         handle_cursor();
