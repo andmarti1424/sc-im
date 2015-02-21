@@ -37,7 +37,7 @@ SCIM stands for Spreadsheet Calculator Improvised. :-)
 ### Donations
 
 Please. I mean, Please.. make a DONATION with PayPal.
-If you wish to make a donation, please send money to scim.spreadsheet@gmail.com PayPal account.
+If you wish to make a donation, please send money to scim.spreadsheet@gmail.com via PayPal.
 Currently, we already received the amount of 0 (zero) USD.
 
 A lot of features are in the roadmap, such as multiple worksheets, and even a GTK gui!
