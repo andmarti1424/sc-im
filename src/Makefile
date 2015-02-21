@@ -6,6 +6,7 @@
 # 
 name=scim
 NAME=SCIM
+SNAME := -DSNAME=\"$(name)\"
 
 # The base directory where everything should be installed.  If you're
 # packaging this with an O/S, for example, you'll probably want to change
@@ -17,7 +18,7 @@ prefix=/usr
 EXDIR=$(prefix)/bin
 
 # Help dir
-HELPDIR := $(prefix)/share/scim
+HELPDIR := $(prefix)/share/$(name)
 HELP_PATH := -DHELP_PATH=\"$(HELPDIR)\"
 
 # This is where the man page goes.
@@ -92,7 +93,7 @@ DFLT_PAGER := -DDFLT_PAGER=\"less\"
 
 # This is the name of the history file that is looked in your HOME directory
 # If undefined, no history will be saved
-HISTORY_FILE := -DHISTORY_FILE=\".sciminfo\"
+HISTORY_FILE := -DHISTORY_FILE=\".$(name)info\"
 
 # If your system doesn't have notimeout() in curses, define NONOTIMEOUT
 #NO_NOTIMEOUT := -DNONOTIMEOUT
@@ -125,7 +126,7 @@ UNDO := -DUNDO
 CFLAGS := $(LINUX) $(FREEBSD) $(NETBSD) -O2 -Wall -pipe -g -I/usr/include/libxml2
 CFLAGS := $(CFLAGS) $(USECOLORS) $(USELOCALE) $(UNDO) $(SIGVOID) $(DFLT_PAGER)
 CFLAGS := $(CFLAGS) $(IEEE_MATH) $(RINT) $(REGEX) $(LIBRARY)
-CFLAGS := $(CFLAGS) $(HELP_PATH) $(NO_NOTIMEOUT) $(SIMPLE) $(XLS) $(XLSX) $(HISTORY_FILE)
+CFLAGS := $(CFLAGS) $(HELP_PATH) $(SNAME) $(NO_NOTIMEOUT) $(SIMPLE) $(XLS) $(XLSX) $(HISTORY_FILE)
 
 LDLIBS := -lm -lncurses
 #LDLIBS := -lm -lncurses -lxlsreader
@@ -142,14 +143,14 @@ all : $(name)
 
 install :
 	install -d $(DESTDIR)$(prefix)/bin
-	install scim $(DESTDIR)$(prefix)/bin/scim
+	install $(name) $(DESTDIR)$(prefix)/bin/$(name)
 	install -d $(DESTDIR)$(HELPDIR)
-	install scim_help $(DESTDIR)$(HELPDIR)/scim_help
+	install doc $(DESTDIR)$(HELPDIR)/$(name)_help
 
 
 uninstall :
-	-rm $(DESTDIR)$(prefix)/bin/scim
-	-rm $(DESTDIR)$(HELPDIR)/scim_help
+	-rm $(DESTDIR)$(prefix)/bin/$(name)
+	-rm $(DESTDIR)$(HELPDIR)/$(name)_help
 
 $(name) : $(OBJS)
 	$(CC) $(LDFLAGS) $^ -o $@ $(LDLIBS) 
@@ -180,5 +181,5 @@ interp.o : interp.c
 clean:
 	rm -f $(OBJS)
 	rm -f *res.h $(YTAB).h
-	rm -f debug core gram.c y.output pxmalloc.c pvmtbl.c tags scimqref
-	rm -f qhelp.c scim
+	rm -f debug core gram.c y.output pxmalloc.c pvmtbl.c tags $(name)qref
+	rm -f qhelp.c $(name)

@@ -24,9 +24,9 @@ int load_help () {
     int c = 0, count = 0, max_width = COLS;
     char helpfile_path[BUFFERSIZE];
 
-    sprintf(helpfile_path, "%s%s", HELP_PATH, "/scim_help");
+    sprintf(helpfile_path, "%s/%s_help", HELP_PATH, SNAME);
     f = fopen(helpfile_path, "r");
-    if (! f ) f = fopen("./scim_help", "r");
+    if (! f ) f = fopen("./doc", "r");
     if (! f ) return -1;
 
     // cuento cantidad de elementos que tendra long_help
@@ -149,7 +149,6 @@ void help() {
                 if (d == OKEY_BS) {
                     del_char(hline, strlen(hline) - 1);
                 } else {
-                    //sprintf(hline, "%s%c", hline, d);
                     sprintf(hline + strlen(hline), "%c", d);
                 }
                 mvwprintw(input_win, 0, rescol, ":%s", hline);
@@ -159,6 +158,11 @@ void help() {
             }
             if (d == OKEY_ENTER && ( strcmp(hline, "q") == 0 || strcmp(hline, "quit") == 0 )) {
                 quit_help_now = TRUE;
+            } else if (d == OKEY_ESC) {
+                wmove(input_win, 0, rescol);
+                wclrtoeol(input_win);
+                wrefresh(input_win);
+                //d = wgetch(input_win);
             }
             curs_set(0);
             break;
@@ -263,8 +267,6 @@ int show_lines() {
             }
             mvwprintw(main_win, lineno, c, "%c", long_help[lineno + delta][c]);
         }
-        
-        //mvwprintw(main_win, lineno, 0, "%s", (long_help[lineno + delta]));
         wclrtoeol(main_win);
     }
     if (lineno < LINES) {
