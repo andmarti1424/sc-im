@@ -704,6 +704,10 @@ Commands for handling cell content:
         Round e to n decimal places.  n may be positive to round off the right side of the decimal or nega‐
         tive to round off the left side.  See @rnd(e) above for rounding types.
 
+    @ascii(se)
+        Convert string expr (256-base number without digit 0) se to a numeric (10-base nonnegative integer)
+        see also @chr
+
     @abs(e)
     @fabs(e)
         Return the absolute value of e.
@@ -831,6 +835,13 @@ Commands for handling cell content:
         Return the string value of a cell selected by name.  String expression se must evaluate to a column
         name  (``A''-``AE'')  and e must evaluate to a row number (0-199).  If se or e is out of bounds, or
         the cell has no string value, the result is the null string.
+
+    @set8bit(e)
+        Return the string with 8th bit set
+
+    @chr(e)
+        Convert numeric (particular 10-base nonnegative integer) to a string (256-base number without digit 0)
+        see also @ascii
 
 *Built-in Date and Time Functions*
 

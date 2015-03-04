@@ -179,6 +179,17 @@ char * dostindex(int minr, int minc, int maxr, int maxc, struct enode *val) {
         return ((char *)0);
 }
 
+double doascii(char *s) {
+    double v=0.;
+    int i ;
+    if (!s)
+    return ((double)0);
+
+    for (i = 0; s[i] != '\0' ; v = v*256 + (unsigned char)(s[i++]) ) ;
+    scxfree(s);
+    return(v);
+}
+
 double doindex(int minr, int minc, int maxr, int maxc, struct enode *val) {
     int r, c;
     register struct ent *p;
@@ -223,7 +234,10 @@ double dolookup(struct enode * val, int minr, int minc, int maxr, int maxc, int 
                     fndr = incc ? (minr + offset) : r;
                     fndc = incr ? (minc + offset) : c;
                     if (ISVALID(fndr, fndc))
-                        p = *ATBL(tbl, fndr, fndc);
+                        if (p == NULL) // three lines added
+                            cellerror = CELLINVALID;
+                        else // useful when the lookup ends up in a cell with no value
+                            p = *ATBL(tbl, fndr, fndc);
                     else {
                         error(" range specified to @[hv]lookup");
                         cellerror = CELLERROR;
@@ -875,6 +889,7 @@ double eval(register struct enode *e) {
                     (int)eval(e->e.o.right->e.o.left),
                     (int)eval(e->e.o.right->e.o.right)));
     case STON:   return (doston(seval(e->e.o.left)));
+    case ASCII:  return (doascii(seval(e->e.o.left)));
     case SLEN:   return (doslen(seval(e->e.o.left)));
     case EQS:    return (doeqs(seval(e->e.o.right), seval(e->e.o.left)));
     case LMAX:   return dolmax(e);
@@ -971,6 +986,29 @@ char * dodate(time_t tloc, char *fmtstr) {
     return (p);
 }
 
+/*
+ * conversion reverse from doascii
+ */
+char * dochr(double ascii) {
+    char *p = scxmalloc((size_t)10);
+    char *q = p;
+    int digit ;
+    int nbdigits = 0;
+    int i = 0;
+    double stopnbdigits = 1;
+
+    for (stopnbdigits = 1; ascii >= stopnbdigits && nbdigits < 9 ; stopnbdigits *= 256, ++ nbdigits) ;
+    for (; nbdigits > 0 ; -- nbdigits) {
+        for (stopnbdigits = 1, i = 0; i < nbdigits - 1 ; stopnbdigits *= 256, ++ i) ;
+        digit = floor (ascii / stopnbdigits) ;
+        ascii -= digit * stopnbdigits ;
+        if (ascii >= stopnbdigits && digit < 256) { digit ++ ; ascii += stopnbdigits ; }
+        if (ascii < 0 && digit >= 0) { digit -- ; ascii -= stopnbdigits ; }
+        *q++ = digit ;
+    }
+    *q = '\0';
+    return p;
+}
 
 char * dofmt(char *fmtstr, double v) {
     char buff[FBUFLEN];
@@ -1063,7 +1101,11 @@ char * dosval(char *colstr, double rowdoub) {
     struct ent *ep;
     char *llabel;
 
-    llabel = (ep = getent(colstr, rowdoub)) ? (ep -> label) : "";
+    //llabel = (ep = getent(colstr, rowdoub)) ? (ep -> label) : "";
+
+    // getent don't return NULL for a cell with no string.
+    llabel = ( ep = getent(colstr, rowdoub) ) && ep -> label ? (ep -> label) : "";
+
     return (strcpy(scxmalloc((size_t) (strlen(llabel) + 1)), llabel));
 }
 
@@ -1098,7 +1140,7 @@ char * dosubstr(char *s, register int v1, register int v2) {
 }
 
 /*
- * character casing: make upper case, make lower case
+ * character casing: make upper case, make lower case, set 8th bit
  */
 char * docase(int acase, char *s) {
     char *p = s;
@@ -1108,9 +1150,15 @@ char * docase(int acase, char *s) {
 
     if ( acase == UPPER ) {
         while( *p != '\0' ) {
-           if( islower(*p) )
+            if( islower(*p) )
                 *p = toupper(*p);
-           p++;
+            p++;
+        }
+    } else if (acase == SET8BIT) {
+        while (*p != '\0') {
+            if (*p >= 0)
+                *p += 128 ;
+            p++;
         }
     } else if (acase == LOWER) {
         while (*p != '\0') {
@@ -1195,6 +1243,7 @@ char * seval(register struct enode *se) {
     case FMT:    return (dofmt(seval(se->e.o.left), eval(se->e.o.right)));
     case UPPER:  return (docase(UPPER, seval(se->e.o.left)));
     case LOWER:  return (docase(LOWER, seval(se->e.o.left)));
+    case SET8BIT:  return (docase(SET8BIT, seval(se->e.o.left)));
     case CAPITAL:return (docapital(seval(se->e.o.left)));
     case STINDEX: {
         int r, c;
@@ -1215,6 +1264,7 @@ char * seval(register struct enode *se) {
                 (int)eval(se->e.o.right->e.o.right) - 1));
     case COLTOA: return (strcpy(scxmalloc((size_t)10),
                    coltoa((int)eval(se->e.o.left))));
+    case CHR: return (strcpy(scxmalloc((size_t)10), dochr(eval(se->e.o.left))));
     case FILENAME: {
              int n = eval(se->e.o.left);
              char *s = strrchr(curfile, '/');
@@ -2395,6 +2445,7 @@ void decompile(register struct enode *e, int priority) {
     case DTS:   three_arg("@dts(", e); break;
     case TTS:   three_arg("@tts(", e); break;
     case STON:  one_arg("@ston(", e); break;
+    case ASCII: one_arg("@ascii(", e); break;
     case SLEN:  one_arg("@slen(", e); break;
     case EQS:   two_arg("@eqs(", e); break;
     case LMAX:  list_arg("@max(", e); break;
@@ -2425,6 +2476,7 @@ void decompile(register struct enode *e, int priority) {
             linelim--;
             break;
     case COLTOA:   one_arg( "@coltoa(", e); break;
+    case CHR: one_arg( "@chr(", e); break;
     case FILENAME: one_arg( "@filename(", e); break;
     case NUMITER:  for (s = "@numiter"; (line[linelim++] = *s++); );
             linelim--;

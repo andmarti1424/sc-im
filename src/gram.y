@@ -295,6 +295,9 @@ token S_GETFORMAT
 %token K_ERR
 %token K_SCRC
 %token K_LOCALE
+%token K_SET8BIT
+%token K_ASCII
+%token K_CHR
   
 %right ';'
 %left '?' ':'
@@ -685,6 +688,9 @@ term:           var                     { $$ = new_var(O_VAR, $1); }
         | '@' K_LASTROW                 { $$ = new(LASTROW, ENULL, ENULL);}
         | '@' K_LASTCOL                 { $$ = new(LASTCOL, ENULL, ENULL);}
         | '@' K_COLTOA '(' e ')'        { $$ = new(COLTOA, $4, ENULL);}
+        | '@' K_ASCII '(' e ')'         { $$ = new(ASCII, $4, ENULL); }
+        | '@' K_SET8BIT '(' e ')'       { $$ = new(SET8BIT, $4, ENULL); }
+        | '@' K_CHR '(' e ')'           { $$ = new(CHR, $4, ENULL);}
         | '@' K_NUMITER                 { $$ = new(NUMITER, ENULL, ENULL);}
         | '@' K_ERR             { $$ = new(ERR_, ENULL, ENULL); }
         |     K_ERR             { $$ = new(ERR_, ENULL, ENULL); }

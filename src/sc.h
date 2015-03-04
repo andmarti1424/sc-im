@@ -253,6 +253,9 @@ struct go_save {
 #define SC_CYAN     (OP_BASE + 75)
 #define SC_WHITE    (OP_BASE + 76)
 #define SLEN        (OP_BASE + 77)
+#define ASCII       (OP_BASE + 78)
+#define CHR         (OP_BASE + 79)
+#define SET8BIT     (OP_BASE + 80)
 
 /* flag values */
 #define is_valid      0001
