@@ -360,30 +360,41 @@ void do_normalmode(struct block * buf) {
         case 'c': 
             {
             if (bs != 2) break;
-            struct ent * p = *ATBL(tbl, get_mark(buf->pnext->value)->row, get_mark(buf->pnext->value)->col);
-            int c1;
-            struct ent * n;
-            //cmd_multiplier++;
+            struct mark * m = get_mark(buf->pnext->value);
+            if ( m == NULL) return;
+            // if m represents a range
+            if ( m->row == -1 && m->col == -1) {
+                srange * r = m->rng;
+                yank_area(r->tlrow, r->tlcol, r->brrow, r->brcol, 'a', cmd_multiplier);
+                paste_yanked_ents(0, 'c');
 
-            for (c1 = curcol; cmd_multiplier-- && c1 < maxcols; c1++) {
-                if ((n = * ATBL(tbl, currow, c1))) {
-                    if (n->flags & is_locked)
-                        continue;
-                    if (!p) {
-                        clearent(n);
-                        continue;
+            // if m represents just one cell
+            } else {
+                struct ent * p = *ATBL(tbl, get_mark(buf->pnext->value)->row, get_mark(buf->pnext->value)->col);
+                struct ent * n;
+                int c1;
+
+                for (c1 = curcol; cmd_multiplier-- && c1 < maxcols; c1++) {
+                    if ((n = * ATBL(tbl, currow, c1))) {
+                        if (n->flags & is_locked)
+                            continue;
+                        if (!p) {
+                            clearent(n);
+                            continue;
+                        }
+                    } else {
+                        if (!p) break;
+                        n = lookat(currow, c1);
                     }
-                } else {
-                    if (!p) break;
-                    n = lookat(currow, c1);
+                    copyent(n, p, currow - get_mark(buf->pnext->value)->row, c1 - get_mark(buf->pnext->value)->col, 0, 0, maxrow, maxcol, 0);
+
+                    n->row += currow - get_mark(buf->pnext->value)->row;
+                    n->col += c1 - get_mark(buf->pnext->value)->col;
+
+                    n->flags |= is_changed;
                 }
-                copyent(n, p, currow - get_mark(buf->pnext->value)->row, c1 - get_mark(buf->pnext->value)->col, 0, 0, maxrow, maxcol, 0);
-
-                n->row += currow - get_mark(buf->pnext->value)->row;
-                n->col += c1 - get_mark(buf->pnext->value)->col;
-
-                n->flags |= is_changed;
             }
+
             if (atoi(get_conf_value("autocalc"))) EvalAll();
             update();
             break;
