@@ -61,7 +61,8 @@ Commands for handling cell content:
      x , dd      Deletes the current selected cell or range and save its content in yankbuffer
      m           Followed by any lowercase letter, marks the current cell or the selected range with that letter.
                  NOTE: When a mark is changed, all ranges that use that mark are deleted.
-     c           Copy a marked cell to the current cell, adjusting row and column references in its numeric or string expression, if any.
+     c           Followed by a lowercase letter that represents a mark, this command copies a marked cell or range
+                 to the current position, adjusting row and column references in its numeric or string expression, if any.
      R           Followed by two lowercase letters that represent marks of cell, creates a range using those marks and selects it.
                  NOTE: If a range already exists, its replaced with new values.
      { } |       align the content of a cell to the left, right or to center. if a range is selected,
