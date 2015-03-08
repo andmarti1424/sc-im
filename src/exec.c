@@ -10,9 +10,6 @@
 #include "color.h" // for set_ucolor
 #include "screen.h"
 
-//extern WINDOW * main_win;
-//extern WINDOW * input_win;
-
 int exec_cmd (char * line) {
     int waitres;
 
