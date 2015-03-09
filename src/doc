@@ -7,14 +7,14 @@ You can use <UP> <DOWN> arrows keys, or 'j' 'k' keys to move throw text.
 <ENTER> key scrolls one line down, while <DEL> key scrolls one line up, just like in less.
 You can use the '/' command to search for a pattern in the help.
 ------------------------------------------------------------------------
-SCIM modes:
+SCIM has the following modes:
 NORMAL MODE      For navigation and common commands
 INSERT MODE      For entering new cell content (values and expressions)
                  Submodes: = < > \
 EDIT MODE        'e' and 'E' keys are used for entering this mode. It is used for single
                  line -Vi-like- edition of cell content and expressions
 COMMAND MODE     ':' key is used for entering this mode. It is used for entering special
-                 commands and for quiting app and saving files
+                 commands and for quiting app and saving files.
 VISUAL MODE      'v' key is used for entering this mode. It is used for selecting a range of cells
 ---------------- 
 
@@ -249,8 +249,10 @@ Commands for handling cell content:
      :q!         quit ignoring changes since last save
      :quit!      same as the previous
 
-     :load name.sc   load file called 'name.sc' into SCIM database
-     :load! name.sc  same as previous, but ignoring changes done over the current loaded spreadsheet.
+     :load name.sc
+                 load file called 'name.sc' into SCIM database
+     :load! name.sc
+                 same as previous, but ignoring changes done over the current loaded spreadsheet.
 
      :x          saves current spreadsheet and quit app
 
@@ -273,21 +275,26 @@ Commands for handling cell content:
                  same as previous, but forcing the rewrite of file 'name' if it exists
 
      :e tab name
-           export current spreadsheet to tab delimited file. 'name' is the name of the file to be generated
+                 export current spreadsheet to tab delimited file. 'name' is the name of the file to be generated
 
      :e! tab name
                  same as previous, but forcing the rewrite of file 'name' if it exists.
                  NOTE: if a range is selected, its content are exported. if not, the entire spreadsheet is exported
 
-     :i csv name     import a csv delimited file called 'name' to SCIM.
+     :i csv name
+                 import a csv delimited file called 'name' to SCIM.
 
-     :i tab name     import a tab delimited file called 'name' to SCIM.
+     :i tab name
+                 import a tab delimited file called 'name' to SCIM.
 
-     :i xls name     import a xls file called 'name' to SCIM.
+     :i xls name
+                 import a xls file called 'name' to SCIM.
 
-     :i xlsx name    import a xlsx file called 'name' to SCIM.
+     :i xlsx name
+                 import a xlsx file called 'name' to SCIM.
 
-     :i! xlsx name   same as previous, but ignoring changes since last save.
+     :i! xlsx name
+                 same as previous, but ignoring changes since last save.
 
      :version    shows SCIM version number
 
