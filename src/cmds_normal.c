@@ -366,7 +366,10 @@ void do_normalmode(struct block * buf) {
             if ( m->row == -1 && m->col == -1) {
                 srange * r = m->rng;
                 yank_area(r->tlrow, r->tlcol, r->brrow, r->brcol, 'a', cmd_multiplier);
-                paste_yanked_ents(0, 'c');
+                if (paste_yanked_ents(0, 'c') == -1) {
+                    error("Locked cells encountered. Nothing changed");           
+                    break;
+                }
 
             // if m represents just one cell
             } else {
@@ -378,12 +381,12 @@ void do_normalmode(struct block * buf) {
                     if ((n = * ATBL(tbl, currow, c1))) {
                         if (n->flags & is_locked)
                             continue;
-                        if (!p) {
+                        if (! p) {
                             clearent(n);
                             continue;
                         }
                     } else {
-                        if (!p) break;
+                        if (! p) break;
                         n = lookat(currow, c1);
                     }
                     copyent(n, p, currow - get_mark(buf->pnext->value)->row, c1 - get_mark(buf->pnext->value)->col, 0, 0, maxrow, maxcol, 0);
@@ -634,7 +637,10 @@ void do_normalmode(struct block * buf) {
 
         // paste cell below or left
         case 'p':
-            paste_yanked_ents(0, 'a');
+            if (paste_yanked_ents(0, 'a') == -1) {
+                error("Locked cells encountered. Nothing changed");           
+                break;
+            }
             update();
             break;
 
@@ -642,15 +648,21 @@ void do_normalmode(struct block * buf) {
         case 'T':
             if (bs != 2) break;
             if (buf->pnext->value == 'v' || buf->pnext->value == 'f' || buf->pnext->value == 'c') {
-                buf->value == 'P' ? paste_yanked_ents(0, buf->pnext->value) :
-                                    paste_yanked_ents(1, buf->pnext->value); // paste cell above or right
+                int res = buf->value == 'P' ? paste_yanked_ents(0, buf->pnext->value) : paste_yanked_ents(1, buf->pnext->value); // paste cell above or right
+                if (res == -1) {
+                    error("Locked cells encountered. Nothing changed");           
+                    break;
+                }
                 update();
             }
             break;
 
         // paste cell above or right
         case 't':
-            paste_yanked_ents(1, 'a');
+            if (paste_yanked_ents(1, 'a') == -1) {
+                error("Locked cells encountered. Nothing changed");           
+                break;
+            }
             update();
             break;
 

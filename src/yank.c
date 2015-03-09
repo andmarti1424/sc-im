@@ -138,10 +138,12 @@ void yank_area(int tlrow, int tlcol, int brrow, int brcol, char type, int arg) {
 // por tal razón, para el sort, el valor de diffr debe ser cero.
 // Cuando se implemente el ordenamiento de columnas, en vez de por filas, diffc también deberá ser cero!
 // type indica si se pega solo formato, solo valores, todo el contenido.
-void paste_yanked_ents(int above, int type_paste) {
-    if (! count_yank_ents()) return;
+// returns -1 if locked cells are found. 0 otherwise.
+int paste_yanked_ents(int above, int type_paste) {
+    if (! count_yank_ents()) return 0;
 
     struct ent * yl = yanklist;
+    struct ent * yll = yl;
     int diffr = 0, diffc = 0 , ignorelock = 0;
 
     #ifdef UNDO
@@ -184,7 +186,18 @@ void paste_yanked_ents(int above, int type_paste) {
         save_undo_range_shift(0, yank_arg, 0, curcol, maxrow, curcol - 1 + yank_arg);
         #endif
     }
+    
+    // first check if there are any locked cells
+    // if so, just return
+    if (type_of_yank == 'a' || type_of_yank == 'e') {
+        while (yll != NULL) {
+        if (any_locked_cells(yll->row + diffr, yll->col + diffc, yll->row + diffr, yll->col + diffc))
+            return -1;
+        yll = yll->next;
+        }
+    }
 
+    // otherwise continue
     // por cada ent en yanklist
     while (yl != NULL) {
         #ifdef UNDO
@@ -196,7 +209,7 @@ void paste_yanked_ents(int above, int type_paste) {
             erase_area(yl->row + diffr, yl->col + diffc, yl->row + diffr, yl->col + diffc, ignorelock);
         
         /*struct ent **pp = ATBL(tbl, yl->row + diffr, yl->col + diffc);
-        if (*pp && (!((*pp)->flags & is_locked) )) {
+        if (*pp && ( ! ((*pp)->flags & is_locked) )) {
             mark_ent_as_deleted(*pp);
             *pp = NULL;
         }*/
@@ -228,5 +241,5 @@ void paste_yanked_ents(int above, int type_paste) {
     #ifdef UNDO
     end_undo_action();
     #endif
-    return;
+    return 0;
 }
