@@ -19,7 +19,7 @@ VISUAL MODE      'v' key is used for entering this mode. It is used for selectin
 ---------------- 
 
 
-*NORMAL MODE*
+&NORMAL MODE&
 
 Navigation commands:
      j k l h     Move cursor down, up, right or left
@@ -148,7 +148,7 @@ Commands for handling cell content:
      c-j         auto resize column width to fit its contents.
 
 
- *INSERT MODE*
+ &INSERT MODE&
      =           Enter a numeric constant or expression.
      <           Enter a left justified string or string expression.
      \\          Enter a centered label.
@@ -164,7 +164,7 @@ Commands for handling cell content:
      c-r {char}  Being {char} a mark of a cell or range, the range represented by that char gets inserted in the command line
 
 
- *EDIT MODE*
+ &EDIT MODE&
      e           in normal mode, enters edit mode for editing numeric value of a cell
      E           in normal mode, enters edit mode for editing text value of a cell
      h           moves a char left
@@ -217,7 +217,7 @@ Commands for handling cell content:
      <ENTER>     confirm changes
 
 
- *COMMAND MODE*
+ &COMMAND MODE&
      <LEFT>, <RIGHT>
                  moves cursor position with arrow keys
      <ENTER>
@@ -538,7 +538,7 @@ Commands for handling cell content:
 
 
 
- *VISUAL MODE*
+ &VISUAL MODE&
     This mode is used for selecting a range of cells to do an operation
     At entering to this mode, top left limit of the selected range, and the bottom right limit is set to
     current row and column.
@@ -579,12 +579,12 @@ Commands for handling cell content:
                 NOTE: USELOCALE has to be enabled during build.
     c-j         auto resize column width to fit its contents.
 
-*MAPPING*
+&MAPPING&
     mapping can be done in any SCIM file or in .scimrc file in current home directory.
     maps can be added with nmap and imap commands, and they can be removed with
     nunmap, iunmap commands
     ex.:
-        nmap "d" ":h<cr>"     ->   d maps to ':help<cr>' in normal mode
+        nmap "d" ":h<cr>"  ->   d maps to ':help<cr>' in normal mode
         imap "f" "foo"     ->   f maps to 'foo' string in insert mode
 
     Some notes:
@@ -600,7 +600,7 @@ Commands for handling cell content:
     with this, 'a' maps to 'j', and only 'j' maps to ':h<cr>'
 
 
-*COMMAND MULTIPLIER*
+&COMMAND MULTIPLIER&
     Commands in NORMAL MODE, VISUAL MODE or EDIT MODE can be multiplied if a number is previously typed.
     Ex. '4j' in NORMAL MODE, translates to 4 times 'j'.
     Ex. '4yr' in NORMAL MODE, yanks current row and the 3 rows below it.
@@ -608,7 +608,7 @@ Commands for handling cell content:
     selected, cannot be multiplied.
 
 
-*DATES INPUT*
+&DATES INPUT&
     Dates are internally stored in SCIM as numeric values, and they are visually
     seen as dates if a date format is applied to the cells that stores them.
     They can be entered as a label and then use the :datefmt special command to
@@ -628,7 +628,7 @@ Commands for handling cell content:
     but considering locale's D_FMT format.
 
 
-*Other configuration variables*
+&Other configuration variables&
     - autocalc
     set variable 'autocalc' to recalculate automatically, or set it to '0' to do it manually upon execution of '@' command
 
@@ -643,7 +643,7 @@ Commands for handling cell content:
     - external_functions
     disabled by default, set this variable to enable external functions. see @ext function below.
 
-*Built-in Range Functions*
+&Built-in Range Functions&
     @sum(r)
     @sum(r,e)
         Sum all valid (nonblank) entries in the region whose two corners are defined by the two variable
@@ -689,7 +689,7 @@ Commands for handling cell content:
     @cols(r)
         Return the number of columns in the specified range.
 
-*Built-in Numeric Functions*
+&Built-in Numeric Functions&
     @exp(e)
         Return the exponential function of e.
 
@@ -775,7 +775,7 @@ Commands for handling cell content:
     @slen(se)
         Returns the length of string expression se.
 
-*String Expressions*
+&String Expressions&
     String expressions are made up of constant strings (characters surrounded by double quotation marks), variables (cell
     names, which refer to the cells's label strings or expressions), and string functions.
 
@@ -794,7 +794,7 @@ Commands for handling cell content:
 
            displays the string ``the lazy dog'' in the cell if the value of A0's string is ``the la''.
 
-*Built-in String Functions*
+&Built-in String Functions&
     @substr(se,e1,e2)
         Extract and return from string expression se the substring indexed by character number  e1  through
         character  number e2 (defaults to the size of se if beyond the end of it).  If e1 is less than 1 or
@@ -851,7 +851,7 @@ Commands for handling cell content:
         Convert numeric (particular 10-base nonnegative integer) to a string (256-base number without digit 0)
         see also @ascii
 
-*Built-in Date and Time Functions*
+&Built-in Date and Time Functions&
 
     @year(e)
         Return the year. Valid years begin with 1970, although many systems will return years prior to

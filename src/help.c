@@ -255,10 +255,10 @@ int show_lines() {
         wclrtoeol(main_win);
 
         for (c = 0; c < strlen(long_help[lineno + delta]); c++)  {
-            if (long_help[lineno + delta][c] == '*') bold = ! bold;
+            if (long_help[lineno + delta][c] == '&') bold = ! bold;
             bold ? set_ucolor(main_win, CELL_SELECTION_SC) : set_ucolor(main_win, NORMAL);
 
-            if (long_help[lineno + delta][c] == '*') {
+            if (long_help[lineno + delta][c] == '&') {
                   set_ucolor(main_win, NORMAL);
                 continue;
             } else if (look_result != -1 && c >= look_result &&
