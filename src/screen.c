@@ -106,7 +106,7 @@ void do_welcome() {
     return;
 }
 
-// function that refreshs grid of screen
+// function that refreshes grid of screen
 void update(void) {
     if (cmd_multiplier > 1) return;
 
@@ -380,7 +380,7 @@ void show_numeric_content_of_cell(WINDOW * win, struct ent ** p, int col, int r,
 // Muestra contenido de todas las celdas
 void show_content(WINDOW * win, int mxrow, int mxcol) {
 
-    register struct ent **p;
+    register struct ent ** p;
     int row, col;
     int q_row_hidden = 0;
 
@@ -456,10 +456,10 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
                 #endif
             }
 
-            //if ((*p)->cellerror == CELLERROR) {
-            //       (void) mvprintw(row + RESROW + 1 - offscr_sc_rows, c, "%*.*s", fwidth[col], fwidth[col], "ERROR");
-            //       continue;
-            //}
+            if ((*p)->cellerror == CELLERROR) {
+               (void) mvprintw(row + RESROW + 1 - offscr_sc_rows, c, "%*.*s", fwidth[col], fwidth[col], "ERROR");
+               continue;
+            }
             
             // si hay valor numerico
             if ( (*p)->flags & is_valid) {
@@ -468,9 +468,11 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
             // si hay solo valor de texto
             } else if ((*p) -> label) { 
                 show_text_content_of_cell(win, p, row, col, row + 1 - offscr_sc_rows - q_row_hidden, c);
+                //mvwprintw(win, row + 1 - offscr_sc_rows - q_row_hidden, c, "ñandú");//(*p)->label);
+                //mvwprintw(win, row + 1 - offscr_sc_rows - q_row_hidden, c, "nandu");//(*p)->label);
 
-            /* repaint a blank cell. this fixes KI1 */
-            } else if (!((*p)->flags & is_valid) && !(*p)->label   ) {
+            // repaint a blank cell. this fixes    ?? KI1 ??
+            } else if (! ((*p)->flags & is_valid) && !(*p)->label ) {
                 if (( currow == row && curcol == col) ||
                 ( in_range && row >= ranges->tlrow && row <= ranges->brrow &&
                 col >= ranges->tlcol && col <= ranges->brcol ) ) {
@@ -489,13 +491,16 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
                 int i;
 
                 mvwinchnstr(win, row + 1 - offscr_sc_rows - q_row_hidden, c, cht, fieldlen);
-                for (i=0; i < fieldlen; i++) {
+                for (i = 0; i < fieldlen; i++) {
                     caracter = cht[i] & A_CHARTEXT;
                     #ifdef NETBSD
-                    if ( ! caracter ) caracter = ' '; // this is for NetBSD compatibility
+                    if (! caracter) {
+                        caracter = ' '; // this is for NetBSD compatibility
+                    }
                     #endif
                     mvwprintw(win, row + 1 - offscr_sc_rows - q_row_hidden, c + i, "%c", caracter);
                 }
+//
             }
 
             // clean format
@@ -695,22 +700,29 @@ int get_formated_value(struct ent ** p, int col, char * value) {
     }
 }
 
+// get real length of str
+// extended ascii chars counts as one char, not bytes.
+int scstrlen(char * in) {
+    int i, count = 0, neg = 0;
+    for (i = 0; i < strlen(in); i++) {
+        //debug("%d - %c", in[i], in[i]);
+        if (in[i] < 0) neg++;
+        else count++;
+    }
+    return count + neg/2;
+}
+
 void show_text_content_of_cell(WINDOW * win, struct ent ** p, int row, int col, int r, int c) {
+    //debug("%d %d %d %d", row, col, r, c);
     char value[FBUFLEN];      // the value to be printed without padding
     char field[FBUFLEN] = ""; // the value with padding and alignment    
     int col_width = fwidth[col];    
     int flen;                 // current length of field
     int left;
 
-    /*
-    strcpy(value, (*p)->label);
-    int str_len = 0;
-    setlocale(LC_ALL, "");
-    str_len = strlen(value);
-    str_len += (strlen(value) - mbstowcs(NULL, value, 0)) * 2;
-    */
-
     int str_len  = strlen((*p)->label);
+    //int str_len  = scstrlen((*p)->label);
+    //debug("FIN: %d", str_len);
     strcpy(value, (*p)->label);
 
     // in case there is a format
@@ -722,7 +734,7 @@ void show_text_content_of_cell(WINDOW * win, struct ent ** p, int row, int col, 
         sprintf(field, "%0*d", col_width, 0);
         subst(field, '0', '*');
 
-       // Color selected cell
+        // Color selected cell
         if ((currow == row) && (curcol == col)) {
             #ifdef USECOLORS
                 if (has_colors()) set_ucolor(win, CELL_SELECTION_SC);
@@ -752,7 +764,11 @@ void show_text_content_of_cell(WINDOW * win, struct ent ** p, int row, int col, 
         left = col_width - str_len;
         left = left < 0 ? 0 : left;
         flen = str_len;
+        //debug("%d %d", left, flen);
         while (left-- && flen++) add_char(field, ' ', flen-1);
+        
+        //sprintf(field + strlen(field), "%0*d", left, 0);
+        //subst(field, '0', '-');
 
     // centrado
     } else if ( (*p)->label && (*p)->flags & is_label) {
@@ -773,8 +789,10 @@ void show_text_content_of_cell(WINDOW * win, struct ent ** p, int row, int col, 
         flen = 0;
         while (left-- && ++flen) add_char(field, ' ', flen-1);
         strcat(field, value);
+//
     }
 
+    //debug("%d %d-%s-", r, c, field);
     mvwprintw(win, r, c, "%s", field);
     wclrtoeol(win);
 
