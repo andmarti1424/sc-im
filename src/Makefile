@@ -8,6 +8,9 @@ name=scim
 NAME=SCIM
 SNAME := -DSNAME=\"$(name)\"
 
+# Compiler
+CC=gcc
+
 # The base directory where everything should be installed.  If you're
 # packaging this with an O/S, for example, you'll probably want to change
 # this to /usr.  Otherwise, /usr/local is probably more appropriate, unless
