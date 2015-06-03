@@ -20,12 +20,13 @@ static char word_looked[50] = "";
 // cargo el contenido del archivo help_doc a memoria
 int load_help () {
     register FILE * f;
-    char line;
+    int line;
     int c = 0, count = 0, max_width = COLS;
     char helpfile_path[BUFFERSIZE];
 
     sprintf(helpfile_path, "%s/%s_help", HELP_PATH, SNAME);
     f = fopen(helpfile_path, "r");
+
     if (! f ) f = fopen("./doc", "r");
     if (! f ) return -1;
 
