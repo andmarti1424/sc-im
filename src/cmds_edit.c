@@ -53,7 +53,9 @@ void do_editmode(struct block * sb) {
             if (isprint(c)) {
                 inputline[inputline_pos] = c;
                 ++inputline_pos;
-                //show_header(main_win);
+                mvwprintw(input_win, 0, 1 + rescol, "%s", inputline);
+                wmove(input_win, 0, inputline_pos + 1 + rescol);
+                wrefresh(input_win);
             }
             c = get_key();
         }
