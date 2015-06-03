@@ -549,10 +549,14 @@ void do_commandmode(struct block * sb) {
                 delete_structures();
                 create_structures();
                 if (delim == 'x') {           // xls import
+                #ifdef XLS
                     open_xls(cline, "UTF-8");
+                #endif
                 } else if (delim == 'y') {    // xlsx import
+                #ifdef XLSX
                     del_range_chars(cline, 0, 0);
                     open_xlsx(cline, "UTF-8");
+                #endif
                 } else {
                     import_csv(cline, delim); // csv or tab delim import
                 }
