@@ -32,6 +32,8 @@ void start_default_ucolors() {
         ucolors[ i ].blink     = 0;
     }
 
+    ucolors[ DEFAULT         ].fg = WHITE;
+    ucolors[ DEFAULT         ].bg = BLACK;
     ucolors[ HEADINGS        ].fg = WHITE;
     ucolors[ HEADINGS        ].bg = BLUE;
     ucolors[ WELCOME         ].fg = BLUE;
@@ -107,6 +109,7 @@ void start_default_ucolors() {
     init_pair(WELCOME,           ucolors[WELCOME].fg,             ucolors[WELCOME].bg);
     init_pair(NORMAL,            ucolors[NORMAL].fg,              ucolors[NORMAL].bg);
     init_pair(INPUT,             ucolors[INPUT].fg,               ucolors[INPUT].bg);
+    init_pair(DEFAULT,           ucolors[DEFAULT].fg,             ucolors[DEFAULT].bg);
 
 }
 
@@ -185,6 +188,8 @@ void set_colors_param_dict() {
     put(d_colors_param, "CELL_ERROR", str);
     sprintf(str, "%d", CELL_NEGATIVE);
     put(d_colors_param, "CELL_NEGATIVE", str);
+    sprintf(str, "%d", DEFAULT);
+    put(d_colors_param, "DEFAULT", str);
 }
 
 void free_colors_param_dict() {

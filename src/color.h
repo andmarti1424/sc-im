@@ -1,4 +1,4 @@
-#define N_INIT_PAIRS      19
+#define N_INIT_PAIRS      20 
 
 #define HEADINGS          1
 #define WELCOME           2
@@ -18,6 +18,7 @@
 #define NORMAL            16
 #define CELL_ERROR        17
 #define CELL_NEGATIVE     18
+#define DEFAULT           19
 
 #define BLACK             COLOR_BLACK
 #define RED               COLOR_RED

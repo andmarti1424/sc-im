@@ -53,7 +53,8 @@ void start_screen() {
             // de las claves que se definen en los archivos .sc
             set_colors_param_dict();
         }
-        //initcolor(0);                                // Creo los colores initpair
+        wbkgd(input_win, COLOR_PAIR(DEFAULT));
+        wbkgd(main_win, COLOR_PAIR(DEFAULT));
     }   
     #endif
     
@@ -701,7 +702,7 @@ int get_formated_value(struct ent ** p, int col, char * value) {
 }
 
 // get real length of str
-// extended ascii chars counts as one char, not bytes.
+/* extended ascii chars counts as one char, not bytes.
 int scstrlen(char * in) {
     int i, count = 0, neg = 0;
     for (i = 0; i < strlen(in); i++) {
@@ -711,6 +712,7 @@ int scstrlen(char * in) {
     }
     return count + neg/2;
 }
+*/
 
 void show_text_content_of_cell(WINDOW * win, struct ent ** p, int row, int col, int r, int c) {
     //debug("%d %d %d %d", row, col, r, c);
