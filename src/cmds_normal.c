@@ -377,6 +377,9 @@ void do_normalmode(struct block * buf) {
                 struct ent * n;
                 int c1;
 
+#ifdef UNDO
+                create_undo_action();
+#endif
                 for (c1 = curcol; cmd_multiplier-- && c1 < maxcols; c1++) {
                     if ((n = * ATBL(tbl, currow, c1))) {
                         if (n->flags & is_locked)
@@ -389,13 +392,22 @@ void do_normalmode(struct block * buf) {
                         if (! p) break;
                         n = lookat(currow, c1);
                     }
+#ifdef UNDO
+                    copy_to_undostruct(currow, c1, currow, c1, 'd');
+#endif
                     copyent(n, p, currow - get_mark(buf->pnext->value)->row, c1 - get_mark(buf->pnext->value)->col, 0, 0, maxrow, maxcol, 0);
 
                     n->row += currow - get_mark(buf->pnext->value)->row;
                     n->col += c1 - get_mark(buf->pnext->value)->col;
 
                     n->flags |= is_changed;
+#ifdef UNDO
+                    copy_to_undostruct(currow, c1, currow, c1, 'a');
+#endif
                 }
+#ifdef UNDO
+                end_undo_action();            
+#endif
             }
 
             if (atoi(get_conf_value("autocalc"))) EvalAll();
@@ -773,6 +785,7 @@ void do_normalmode(struct block * buf) {
             #ifdef UNDO
             do_undo();
             // sync_refs();
+            EvalAll();
             update();
             break;
             #else
@@ -784,6 +797,7 @@ void do_normalmode(struct block * buf) {
             #ifdef UNDO
             do_redo();
             // sync_refs();
+            EvalAll();
             update();
             break;
             #else
