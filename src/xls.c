@@ -7,6 +7,7 @@
 #include "color.h"
 #include "macros.h"
 #include "xls.h"
+#include "utils/string.h"
 
 // xls.h is part of libxls. make sure its installed and headers are in path.
 // build must be done with '-lxlsreader'
@@ -20,6 +21,24 @@
 // this function returns -1 in case of error
 int open_xls(char * fname, char * encoding) {
 #ifdef XLS
+
+    // Set date format reading LOCALE
+    char fmt[15] = "%d/%m/%Y";
+
+    #ifdef USELOCALE
+    #include <locale.h>
+    #include <langinfo.h>
+    char * loc = NULL;
+    char * f = NULL;
+    loc = setlocale(LC_TIME, "");
+
+    if (loc != NULL) {
+        f = nl_langinfo(D_FMT);
+        strcpy(fmt, f);
+    }
+    #endif
+
+    // Read XLS file
     xlsWorkBook * pWB;
     xlsWorkSheet * pWS;
     WORD r, c;
@@ -36,22 +55,23 @@ int open_xls(char * fname, char * encoding) {
     pWS = xls_getWorkSheet(pWB, 0); //only the first sheet
     xls_parseWorkSheet(pWS);
 
+
     for (r = 0; r <= pWS->rows.lastrow; r++) { // rows
         for (c = 0; c <= pWS->rows.lastcol; c++) { // cols
             xlsCell * cell = xls_cell(pWS, r, c);
             if ((! cell) || (cell->isHidden)) continue;
 
-            // TODO rowspan
-            struct st_xf_data * xf=&pWB->xfs.xf[cell->xf];
+            // TODO enable rowspan ?
+            //if (cell->rowspan > 1) continue;
 
-            if (xf->format == 165) { // date
-            // if (cell->id == 0x27e && (cell->xf == 24 || cell->xf == 26
-            // || cell->xf == 28 || cell->xf == 30 || cell->xf == 32 )) {
+            //struct st_xf_data * xf = &pWB->xfs.xf[cell->xf];
+
+            if (cell->id == 0x27e && cell->xf == 22) {
                 sprintf(line_interp, "let %s%d=%.15g", coltoa(c), r, (cell->d - 25568) * 86400);
                 send_to_interp(line_interp);
                 n = lookat(r, c);
                 n->format = 0;
-                char * s = scxmalloc((unsigned)(strlen("%d/%m/%Y") + 2));
+                char * s = scxmalloc((unsigned)(strlen(fmt) + 2));
                 sprintf(s, "%c", 'd');
                 strcat(s, "%d/%m/%Y");
                 n->format = s;
@@ -75,6 +95,9 @@ int open_xls(char * fname, char * encoding) {
                 }
             
             } else if (cell->str != NULL) {
+                int pad_pos;
+                if ((pad_pos = str_in_str((char *) cell->str, "\n")) != -1) ((char *) cell->str)[pad_pos] = '\0'; // For spanning
+                // clean_carrier((char *) cell->str); // For spanning
                 sprintf(line_interp, "label %s%d=\"%s\"", coltoa(c), r, (char *) cell->str);
             } else {
                 sprintf(line_interp, "label %s%d=\"%s\"", coltoa(c), r, "");
