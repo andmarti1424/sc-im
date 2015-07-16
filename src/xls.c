@@ -53,8 +53,8 @@ int open_xls(char * fname, char * encoding) {
     }
 
     pWS = xls_getWorkSheet(pWB, 0); //only the first sheet
+    if (pWS == NULL) return -1;
     xls_parseWorkSheet(pWS);
-
 
     for (r = 0; r <= pWS->rows.lastrow; r++) { // rows
         for (c = 0; c <= pWS->rows.lastcol; c++) { // cols
@@ -64,9 +64,15 @@ int open_xls(char * fname, char * encoding) {
             // TODO enable rowspan ?
             //if (cell->rowspan > 1) continue;
 
-            //struct st_xf_data * xf = &pWB->xfs.xf[cell->xf];
+            struct st_xf_data * xf = &pWB->xfs.xf[cell->xf];
 
-            if (cell->id == 0x27e && cell->xf == 22) {
+            // these are dates
+            if (((xf->format >= 14 && xf->format <= 22) ||
+                (xf->format >= 165 && xf->format <= 180) ||
+                xf->format == 278 || xf->format == 185 || xf->format == 196 || xf->format
+                == 217 || xf->format == 326 )
+               && cell->id != 0x06 ) {
+
                 sprintf(line_interp, "let %s%d=%.15g", coltoa(c), r, (cell->d - 25568) * 86400);
                 send_to_interp(line_interp);
                 n = lookat(r, c);

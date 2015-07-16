@@ -69,51 +69,58 @@ void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) 
             while (isdigit(col[strlen(col)-1])) col[strlen(col)-1]='\0';
             c = atocol(col, strlen(col));
 
-            if (xmlHasProp(child_node, (xmlChar *) "t")) {
-                char * s = (char *) xmlGetProp(child_node, (xmlChar *) "t");
-                char * style = (char *) xmlGetProp(child_node, (xmlChar *) "s");
-                char * fmtId = get_xlsx_styles(doc_styles, atoi(style));
+            char * s = NULL;
+            if (xmlHasProp(child_node, (xmlChar *) "t"))
+                s = (char *) xmlGetProp(child_node, (xmlChar *) "t");
+            char * style = (char *) xmlGetProp(child_node, (xmlChar *) "s");
+            char * fmtId = style == NULL ? NULL : get_xlsx_styles(doc_styles, atoi(style));
 
-                // number
-                if ( ! strcmp(s, "n") ) {
-                    // v - straight int value
-                    if (! strcmp((char *) child_node->xmlChildrenNode->name, "v") && strcmp(fmtId, "165")) {
-                        //double l = strtol((char *) child_node->xmlChildrenNode->xmlChildrenNode->content, (char **) NULL, 10);
-                        double l = atof((char *) child_node->xmlChildrenNode->xmlChildrenNode->content);
-                        sprintf(line_interp, "let %s%d=%.15f", coltoa(c), r, l);
-                        send_to_interp(line_interp);
+            // string
+            if ( s != NULL && ! strcmp(s, "s") ) {
+                sprintf(line_interp, "label %s%d=\"%s\"", coltoa(c), r, 
+                get_xlsx_string(doc_strings, atoi((char *) child_node->xmlChildrenNode->xmlChildrenNode->content)));
+                send_to_interp(line_interp);
 
-                    // date value in v
-                    } else if (! strcmp((char *) child_node->xmlChildrenNode->name, "v") && !strcmp(fmtId, "165")) {
-                        long l = strtol((char *) child_node->xmlChildrenNode->xmlChildrenNode->content, (char **) NULL, 10);
-                        sprintf(line_interp, "let %s%d=%.15ld", coltoa(c), r, (l - 25568) * 86400);
-                        send_to_interp(line_interp);
-                        struct ent * n = lookat(r, c);
-                        n->format = 0;
-                        char * stringFormat = scxmalloc((unsigned)(strlen("%d/%m/%Y") + 2));
-                        sprintf(stringFormat, "%c", 'd');
-                        strcat(stringFormat, "%d/%m/%Y");
-                        n->format = stringFormat;
-
-                    // f - numeric value is result from formula
-                    } else if (! strcmp((char *) child_node->xmlChildrenNode->name, "f")) {
-                        //double l = strtol((char *) child_node->last->xmlChildrenNode->content, (char **) NULL, 10);
-                        double l = atof((char *) child_node->last->xmlChildrenNode->content);
-                        sprintf(line_interp, "let %s%d=%.15f", coltoa(c), r, l);
-                        send_to_interp(line_interp);
-                    } 
-
-                // string
-                } else if ( ! strcmp(s, "s") ) {
-                    sprintf(line_interp, "label %s%d=\"%s\"", coltoa(c), r, 
-                    get_xlsx_string(doc_strings, atoi((char *) child_node->xmlChildrenNode->xmlChildrenNode->content)));
+            // number
+            } else {
+                // date value in v
+                if (fmtId != NULL && ! strcmp((char *) child_node->xmlChildrenNode->name, "v") &&
+                    ((atoi(fmtId) >= 14 && atoi(fmtId) <= 22) ||
+                    (atoi(fmtId) >= 165 && atoi(fmtId) <= 180) ||
+                    atoi(fmtId) == 278 || atoi(fmtId) == 185 ||
+                    atoi(fmtId) == 196 || atoi(fmtId) == 217 || atoi(fmtId) == 326
+                   )) {
+                    long l = strtol((char *) child_node->xmlChildrenNode->xmlChildrenNode->content, (char **) NULL, 10);
+                    sprintf(line_interp, "let %s%d=%.15ld", coltoa(c), r, (l - 25568) * 86400);
                     send_to_interp(line_interp);
-                }
+                    struct ent * n = lookat(r, c);
+                    n->format = 0;
+                    char * stringFormat = scxmalloc((unsigned)(strlen("%d/%m/%Y") + 2));
+                    sprintf(stringFormat, "%c", 'd');
+                    strcat(stringFormat, "%d/%m/%Y");
+                    n->format = stringFormat;
+                
+                // v - straight int value
+                } else if (! strcmp((char *) child_node->xmlChildrenNode->name, "v") ){
+                    //double l = strtol((char *) child_node->xmlChildrenNode->xmlChildrenNode->content, (char **) NULL, 10);
+                    double l = atof((char *) child_node->xmlChildrenNode->xmlChildrenNode->content);
+                    sprintf(line_interp, "let %s%d=%.15f", coltoa(c), r, l);
+                    send_to_interp(line_interp);
 
-                xmlFree(s);
-                xmlFree(fmtId);
-                xmlFree(style);
+
+                // f - numeric value is result from formula
+                } else if (! strcmp((char *) child_node->xmlChildrenNode->name, "f")) {
+                    //double l = strtol((char *) child_node->last->xmlChildrenNode->content, (char **) NULL, 10);
+                    double l = atof((char *) child_node->last->xmlChildrenNode->content);
+                    sprintf(line_interp, "let %s%d=%.15f", coltoa(c), r, l);
+                    send_to_interp(line_interp);
+                } 
             }
+
+            xmlFree(s);
+            xmlFree(fmtId);
+            xmlFree(style);
+            
             child_node = child_node->next;
             xmlFree(col);
             xmlFree(row);
