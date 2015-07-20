@@ -8,6 +8,7 @@
 #include "cmds.h"
 #include "color.h"
 #include "lex.h"
+#include "utils/string.h"
 
 #ifdef XLSX
 #include <zip.h>
@@ -48,6 +49,28 @@ char * get_xlsx_styles(xmlDocPtr doc_styles, int pos) {
     return id;
 }
 
+char * get_xlsx_number_format_by_id(xmlDocPtr doc_styles, int id) {
+    if (doc_styles == NULL || id < 165 || id > 180) return NULL;
+
+    // we go forward up to numFmts section
+    xmlNode * cur_node = xmlDocGetRootElement(doc_styles)->xmlChildrenNode;
+    while (cur_node != NULL && !(cur_node->type == XML_ELEMENT_NODE && !strcmp((char *) cur_node->name, "numFmts")))
+        cur_node = cur_node->next;
+
+    cur_node = cur_node->xmlChildrenNode;
+    // we go forward up to desidered format
+    char * idFile = (char *) xmlGetProp(cur_node, (xmlChar *) "numFmtId");
+    while (atoi(idFile) != id) {
+        cur_node = cur_node->next;
+        idFile = (char *) xmlGetProp(cur_node, (xmlChar *) "numFmtId");
+    }
+    
+    if (atoi(idFile) == id)
+        return (char *) xmlGetProp(cur_node, (xmlChar *) "formatCode");
+    else
+        return NULL;
+}
+
 // this function takes the sheetfile DOM and builds the tbl spreadsheet (SCIM format)
 void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) {
     xmlNode * cur_node = xmlDocGetRootElement(doc)->xmlChildrenNode;
@@ -63,16 +86,23 @@ void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) 
     while (cur_node != NULL) {
         child_node = cur_node->xmlChildrenNode; // this are rows
         while (child_node != NULL) {            // this are cols
+            // We get r y c
             char * row = (char *) xmlGetProp(cur_node, (xmlChar *) "r");
             r = atoi(row) - 1;
             char * col = (char *) xmlGetProp(child_node, (xmlChar *) "r");
             while (isdigit(col[strlen(col)-1])) col[strlen(col)-1]='\0';
             c = atocol(col, strlen(col));
+            //debug("%d %d", r, c);
 
-            //if (xmlHasProp(child_node, (xmlChar *) "t"))
-            char * s = (char *) xmlGetProp(child_node, (xmlChar *) "t");
-            char * style = (char *) xmlGetProp(child_node, (xmlChar *) "s");
-            char * fmtId = style == NULL ? NULL : get_xlsx_styles(doc_styles, atoi(style));
+            char * s = (char *) xmlGetProp(child_node, (xmlChar *) "t"); // type
+            char * style = NULL;
+            style = (char *) xmlGetProp(child_node, (xmlChar *) "s");    // style
+            char * fmtId = style == NULL ? NULL : get_xlsx_styles(doc_styles, atoi(style)); // numfmtId by style number
+            char * numberFmt = NULL;
+            if (fmtId != NULL && atoi(fmtId) != 0) {
+                //debug("%d %d %s %s--=", r, c, style, fmtId);
+                numberFmt = get_xlsx_number_format_by_id(doc_styles, atoi(fmtId));
+            }
 
             // string
             if ( s != NULL && ! strcmp(s, "s") ) {
@@ -80,17 +110,18 @@ void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) 
                 get_xlsx_string(doc_strings, atoi((char *) child_node->xmlChildrenNode->xmlChildrenNode->content)));
                 send_to_interp(line_interp);
 
-            // number
+            // numbers (can be dates, results from formulas and simple numbers)
             } else {
                 // date value in v
                 if (fmtId != NULL && child_node->xmlChildrenNode != NULL &&
                 ! strcmp((char *) child_node->xmlChildrenNode->name, "v")
-                && ((atoi(fmtId) >= 14 && atoi(fmtId) <= 22) ||
-                (atoi(fmtId) >= 165 && atoi(fmtId) <= 180) ||
+                && (
+                (atoi(fmtId) >= 14 && atoi(fmtId) <= 17) || // 22) ||
                 atoi(fmtId) == 278 || atoi(fmtId) == 185 ||
-                atoi(fmtId) == 196 || atoi(fmtId) == 217 || atoi(fmtId) == 326
+                atoi(fmtId) == 196 || atoi(fmtId) == 217 || atoi(fmtId) == 326 ||
+                (atoi(fmtId) >= 165 && atoi(fmtId) <= 180 && numberFmt != NULL // 165-180 are user defined formats!!
+                && str_in_str(numberFmt, "/") != -1)
                 )) {
-
                     long l = strtol((char *) child_node->xmlChildrenNode->xmlChildrenNode->content, (char **) NULL, 10);
                     sprintf(line_interp, "let %s%d=%.15ld", coltoa(c), r, (l - 25568) * 86400);
                     send_to_interp(line_interp);
@@ -122,6 +153,7 @@ void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) 
             xmlFree(s);
             xmlFree(fmtId);
             xmlFree(style);
+            xmlFree(numberFmt);
 
             child_node = child_node->next;
             xmlFree(col);
