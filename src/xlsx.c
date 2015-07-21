@@ -92,7 +92,6 @@ void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) 
             char * col = (char *) xmlGetProp(child_node, (xmlChar *) "r");
             while (isdigit(col[strlen(col)-1])) col[strlen(col)-1]='\0';
             c = atocol(col, strlen(col));
-            //debug("%d %d", r, c);
 
             char * s = (char *) xmlGetProp(child_node, (xmlChar *) "t"); // type
             char * style = NULL;
@@ -100,7 +99,6 @@ void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) 
             char * fmtId = style == NULL ? NULL : get_xlsx_styles(doc_styles, atoi(style)); // numfmtId by style number
             char * numberFmt = NULL;
             if (fmtId != NULL && atoi(fmtId) != 0) {
-                //debug("%d %d %s %s--=", r, c, style, fmtId);
                 numberFmt = get_xlsx_number_format_by_id(doc_styles, atoi(fmtId));
             }
 
@@ -116,7 +114,7 @@ void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) 
                 if (fmtId != NULL && child_node->xmlChildrenNode != NULL &&
                 ! strcmp((char *) child_node->xmlChildrenNode->name, "v")
                 && (
-                (atoi(fmtId) >= 14 && atoi(fmtId) <= 17) || // 22) ||
+                (atoi(fmtId) >= 14 && atoi(fmtId) <= 17) || 
                 atoi(fmtId) == 278 || atoi(fmtId) == 185 ||
                 atoi(fmtId) == 196 || atoi(fmtId) == 217 || atoi(fmtId) == 326 ||
                 (atoi(fmtId) >= 165 && atoi(fmtId) <= 180 && numberFmt != NULL // 165-180 are user defined formats!!
@@ -130,6 +128,22 @@ void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) 
                     char * stringFormat = scxmalloc((unsigned)(strlen("%d/%m/%Y") + 2));
                     sprintf(stringFormat, "%c", 'd');
                     strcat(stringFormat, "%d/%m/%Y");
+                    n->format = stringFormat;
+
+                // time value in v
+                } else if (fmtId != NULL && child_node->xmlChildrenNode != NULL &&
+                ! strcmp((char *) child_node->xmlChildrenNode->name, "v")
+                && (
+                (atoi(fmtId) >= 18 && atoi(fmtId) <= 21)
+                )) {
+                    double l = atof((char *) child_node->xmlChildrenNode->xmlChildrenNode->content);
+                    sprintf(line_interp, "let %s%d=%.15f", coltoa(c), r, (l + 0.125)*86400);
+                    send_to_interp(line_interp);
+                    struct ent * n = lookat(r, c);
+                    n->format = 0;
+                    char * stringFormat = scxmalloc((unsigned)(strlen("%H:%M:%S") + 2));
+                    sprintf(stringFormat, "%c", 'd');
+                    strcat(stringFormat, "%H:%M:%S");
                     n->format = stringFormat;
 
                 // v - straight int value
