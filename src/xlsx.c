@@ -63,13 +63,17 @@ char * get_xlsx_number_format_by_id(xmlDocPtr doc_styles, int id) {
     char * idFile = (char *) xmlGetProp(cur_node, (xmlChar *) "numFmtId");
     while (atoi(idFile) != id) {
         cur_node = cur_node->next;
+        free(idFile);
         idFile = (char *) xmlGetProp(cur_node, (xmlChar *) "numFmtId");
     }
     
-    if (atoi(idFile) == id)
+    if (atoi(idFile) == id) {
+        free(idFile);
         return (char *) xmlGetProp(cur_node, (xmlChar *) "formatCode");
-    else
+    } else {
+        free(idFile);
         return NULL;
+    }
 }
 
 // this function takes the sheetfile DOM and builds the tbl spreadsheet (SCIM format)
@@ -133,7 +137,12 @@ void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) 
                 && str_in_str(numberFmt, "/") != -1)
                 )) {
                     long l = strtol((char *) child_node->xmlChildrenNode->xmlChildrenNode->content, (char **) NULL, 10);
-                    sprintf(line_interp, "let %s%d=%.15ld", coltoa(c), r, (l - 25569) * 86400);
+
+                    // we calc get gmtoffset
+                    time_t t = time(NULL);
+                    struct tm * lt = localtime(&t);
+
+                    sprintf(line_interp, "let %s%d=%.15ld", coltoa(c), r, (l - 25569) * 86400 - lt->tm_gmtoff);
                     send_to_interp(line_interp);
                     struct ent * n = lookat(r, c);
                     n->format = 0;
@@ -148,8 +157,12 @@ void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) 
                 && (
                 (atoi(fmtId) >= 18 && atoi(fmtId) <= 21)
                 )) {
+                    // we calc get gmtoffset
+                    time_t t = time(NULL);
+                    struct tm * lt = localtime(&t);
+
                     double l = atof((char *) child_node->xmlChildrenNode->xmlChildrenNode->content);
-                    sprintf(line_interp, "let %s%d=%.15f", coltoa(c), r, (l + 0.125)*86400);
+                    sprintf(line_interp, "let %s%d=%.15f", coltoa(c), r, (l - (lt->tm_gmtoff / 24)) * 86400);
                     send_to_interp(line_interp);
                     struct ent * n = lookat(r, c);
                     n->format = 0;
