@@ -50,7 +50,8 @@ char * get_xlsx_styles(xmlDocPtr doc_styles, int pos) {
 }
 
 char * get_xlsx_number_format_by_id(xmlDocPtr doc_styles, int id) {
-    if (doc_styles == NULL || id < 165 || id > 180) return NULL;
+    if (doc_styles == NULL || !((id >= 165 && id <= 180) || id == 100)) 
+        return NULL;
 
     // we go forward up to numFmts section
     xmlNode * cur_node = xmlDocGetRootElement(doc_styles)->xmlChildrenNode;
@@ -86,6 +87,7 @@ void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) 
     while (cur_node != NULL) {
         child_node = cur_node->xmlChildrenNode; // this are rows
         while (child_node != NULL) {            // this are cols
+
             // We get r y c
             char * row = (char *) xmlGetProp(cur_node, (xmlChar *) "r");
             r = atoi(row) - 1;
@@ -104,11 +106,19 @@ void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) 
 
             // string
             if ( s != NULL && ! strcmp(s, "s") ) {
-                sprintf(line_interp, "label %s%d=\"%s\"", coltoa(c), r, 
-                get_xlsx_string(doc_strings, atoi((char *) child_node->xmlChildrenNode->xmlChildrenNode->content)));
+                char * strvalue =  get_xlsx_string(doc_strings, atoi((char *) child_node->xmlChildrenNode->xmlChildrenNode->content));
+                clean_carrier(strvalue);
+                sprintf(line_interp, "label %s%d=\"%s\"", coltoa(c), r, strvalue);
                 send_to_interp(line_interp);
 
-            // numbers (can be dates, results from formulas and simple numbers)
+            // inlinestring
+            } else if ( s != NULL && ! strcmp(s, "inlineStr") ) {
+                char * strvalue = (char *) child_node->xmlChildrenNode->xmlChildrenNode->xmlChildrenNode->content;
+                clean_carrier(strvalue);
+                sprintf(line_interp, "label %s%d=\"%s\"", coltoa(c), r, strvalue);
+                send_to_interp(line_interp);
+
+            // numbers (can be dates, results from formulas or simple numbers)
             } else {
                 // date value in v
                 if (fmtId != NULL && child_node->xmlChildrenNode != NULL &&
@@ -116,8 +126,10 @@ void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) 
                 && (
                 (atoi(fmtId) >= 14 && atoi(fmtId) <= 17) || 
                 atoi(fmtId) == 278 || atoi(fmtId) == 185 ||
-                atoi(fmtId) == 196 || atoi(fmtId) == 217 || atoi(fmtId) == 326 ||
-                (atoi(fmtId) >= 165 && atoi(fmtId) <= 180 && numberFmt != NULL // 165-180 are user defined formats!!
+                atoi(fmtId) == 196 ||
+                atoi(fmtId) == 217 || atoi(fmtId) == 326 ||
+                (((atoi(fmtId) >= 165 && atoi(fmtId) <= 180) ||
+                atoi(fmtId) == 100) && numberFmt != NULL // 100,165-180 are user defined formats!!
                 && str_in_str(numberFmt, "/") != -1)
                 )) {
                     long l = strtol((char *) child_node->xmlChildrenNode->xmlChildrenNode->content, (char **) NULL, 10);
@@ -153,14 +165,12 @@ void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) 
                     sprintf(line_interp, "let %s%d=%.15f", coltoa(c), r, l);
                     send_to_interp(line_interp);
 
-                // f - numeric value is result from formula
+                // f - numeric value that is a result from formula
                 } else if (fmtId != NULL && child_node->xmlChildrenNode != NULL &&
                 ! strcmp((char *) child_node->xmlChildrenNode->name, "f")) {
-                    //double l = strtol((char *) child_node->last->xmlChildrenNode->content, (char **) NULL, 10);
                     double l = atof((char *) child_node->last->xmlChildrenNode->content);
                     sprintf(line_interp, "let %s%d=%.15f", coltoa(c), r, l);
                     send_to_interp(line_interp);
-
                 } 
             }
 
@@ -263,9 +273,9 @@ int open_xlsx(char * fname, char * encoding) {
     LIBXML_TEST_VERSION
 
     // parse the file and get the DOM
-    doc_strings = xmlReadMemory(strings, sb_strings.size, "noname.xml", NULL, 0);
-    doc_styles = xmlReadMemory(styles, sb_styles.size, "noname.xml", NULL, 0);
-    doc = xmlReadMemory(sheet, sb.size, "noname.xml", NULL, 0);
+    doc_strings = xmlReadMemory(strings, sb_strings.size, "noname.xml", NULL, XML_PARSE_NOBLANKS);
+    doc_styles = xmlReadMemory(styles, sb_styles.size, "noname.xml", NULL, XML_PARSE_NOBLANKS);
+    doc = xmlReadMemory(sheet, sb.size, "noname.xml", NULL, XML_PARSE_NOBLANKS);
 
     if (doc == NULL || doc_strings == NULL) {
         error("error: could not parse file");
