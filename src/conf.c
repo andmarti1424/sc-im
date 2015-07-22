@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 #include "conf.h"
 #include "utils/dictionary.h"
 
@@ -10,6 +11,14 @@ void store_default_config_values() {
     put(user_conf_d, "numeric", "0");
     put(user_conf_d, "newline_action", "0");
     put(user_conf_d, "external_functions", "0");
+
+    // we calc get gmtoffset
+    time_t t = time(NULL);
+    struct tm * lt = localtime(&t);
+    char strgmtoff[7];
+    sprintf(strgmtoff, "%ld", lt->tm_gmtoff);
+    put(user_conf_d, "tm_gmtoff", strgmtoff);
+
 }
 
 char * get_conf_values(char * salida) {
