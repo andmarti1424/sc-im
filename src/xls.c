@@ -66,14 +66,19 @@ int open_xls(char * fname, char * encoding) {
 
             struct st_xf_data * xf = &pWB->xfs.xf[cell->xf];
 
+            //debug("%d %d fmt:%d id:%x %d %d", r, c, xf->format, cell->id, cell->d, cell->l);
+
             // these are dates
             if (((xf->format >= 14 && xf->format <= 22) ||
                 (xf->format >= 165 && xf->format <= 180) ||
                 xf->format == 278 || xf->format == 185 || xf->format == 196 || xf->format
                 == 217 || xf->format == 326 )
-               && cell->id != 0x06 ) {
+               && cell->id != 0x06
+               //&& cell->id != 0x27e
+               && cell->id != 0x0BD
+               && cell->id != 0x203 ) {
 
-                sprintf(line_interp, "let %s%d=%.15g", coltoa(c), r, (cell->d - 25568) * 86400);
+                sprintf(line_interp, "let %s%d=%.15g", coltoa(c), r, (cell->d - 25569) * 86400);
                 send_to_interp(line_interp);
                 n = lookat(r, c);
                 n->format = 0;

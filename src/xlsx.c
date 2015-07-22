@@ -133,7 +133,7 @@ void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) 
                 && str_in_str(numberFmt, "/") != -1)
                 )) {
                     long l = strtol((char *) child_node->xmlChildrenNode->xmlChildrenNode->content, (char **) NULL, 10);
-                    sprintf(line_interp, "let %s%d=%.15ld", coltoa(c), r, (l - 25568) * 86400);
+                    sprintf(line_interp, "let %s%d=%.15ld", coltoa(c), r, (l - 25569) * 86400);
                     send_to_interp(line_interp);
                     struct ent * n = lookat(r, c);
                     n->format = 0;
