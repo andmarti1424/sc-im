@@ -13,11 +13,15 @@ void store_default_config_values() {
     put(user_conf_d, "external_functions", "0");
 
     // we calc get gmtoffset
+    #ifdef USELOCALE
     time_t t = time(NULL);
     struct tm * lt = localtime(&t);
     char strgmtoff[7];
     sprintf(strgmtoff, "%ld", lt->tm_gmtoff);
     put(user_conf_d, "tm_gmtoff", strgmtoff);
+    #else
+    put(user_conf_d, "tm_gmtoff", "0");
+    #endif
 
 }
 
