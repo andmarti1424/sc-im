@@ -7,6 +7,7 @@
 #include "sc.h"
 #include "cmds.h"
 #include "color.h"
+#include "conf.h"
 #include "lex.h"
 #include "utils/string.h"
 
@@ -138,11 +139,7 @@ void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) 
                 )) {
                     long l = strtol((char *) child_node->xmlChildrenNode->xmlChildrenNode->content, (char **) NULL, 10);
 
-                    // we calc get gmtoffset
-                    time_t t = time(NULL);
-                    struct tm * lt = localtime(&t);
-
-                    sprintf(line_interp, "let %s%d=%.15ld", coltoa(c), r, (l - 25569) * 86400 - lt->tm_gmtoff);
+                    sprintf(line_interp, "let %s%d=%.15ld", coltoa(c), r, (l - 25569) * 86400 - atoi(get_conf_value("tm_gmtoff")));
                     send_to_interp(line_interp);
                     struct ent * n = lookat(r, c);
                     n->format = 0;
@@ -157,12 +154,8 @@ void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) 
                 && (
                 (atoi(fmtId) >= 18 && atoi(fmtId) <= 21)
                 )) {
-                    // we calc get gmtoffset
-                    time_t t = time(NULL);
-                    struct tm * lt = localtime(&t);
-
                     double l = atof((char *) child_node->xmlChildrenNode->xmlChildrenNode->content);
-                    sprintf(line_interp, "let %s%d=%.15f", coltoa(c), r, (l - (lt->tm_gmtoff / 24)) * 86400);
+                    sprintf(line_interp, "let %s%d=%.15f", coltoa(c), r, (l - atoi(get_conf_value("tm_gmtoff")) * 1.0 / 60 / 60 / 24) * 86400);
                     send_to_interp(line_interp);
                     struct ent * n = lookat(r, c);
                     n->format = 0;
