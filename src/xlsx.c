@@ -94,7 +94,7 @@ void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) 
 
             // We get r y c
             char * row = (char *) xmlGetProp(cur_node, (xmlChar *) "r");
-            r = atoi(row) - 1;
+            r = atoi(row);
             char * col = (char *) xmlGetProp(child_node, (xmlChar *) "r");
             while (isdigit(col[strlen(col)-1])) col[strlen(col)-1]='\0';
             c = atocol(col, strlen(col));
@@ -111,14 +111,14 @@ void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) 
             // string
             if ( s != NULL && ! strcmp(s, "s") ) {
                 char * strvalue =  get_xlsx_string(doc_strings, atoi((char *) child_node->xmlChildrenNode->xmlChildrenNode->content));
-                clean_carrier(strvalue);
+                clean_carrier(strvalue); // we handle padding
                 sprintf(line_interp, "label %s%d=\"%s\"", coltoa(c), r, strvalue);
                 send_to_interp(line_interp);
 
             // inlinestring
             } else if ( s != NULL && ! strcmp(s, "inlineStr") ) {
                 char * strvalue = (char *) child_node->xmlChildrenNode->xmlChildrenNode->xmlChildrenNode->content;
-                clean_carrier(strvalue);
+                clean_carrier(strvalue); // we handle padding
                 sprintf(line_interp, "label %s%d=\"%s\"", coltoa(c), r, strvalue);
                 send_to_interp(line_interp);
 
@@ -320,6 +320,7 @@ int open_xlsx(char * fname, char * encoding) {
     }
  
     auto_justify(0, maxcol, DEFWIDTH);
+    deleterow();
     return 0;
 }
 #endif
