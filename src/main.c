@@ -2,6 +2,7 @@
 #include <curses.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 
 #include "main.h"
@@ -14,6 +15,7 @@
 #include "yank.h"
 #include "file.h"
 #include "utils/dictionary.h"
+#include "utils/string.h"
 #include "history.h"
 #include "conf.h"
 #include "buffer.h"
@@ -84,7 +86,7 @@ int main (int argc, char ** argv) {
 
     // inicializo NCURSES
     start_screen();        
-    //esto habilitarlo para debug de mensajes:    wtimeout(input_win, 1000);
+    // esto habilitarlo para debug de mensajes:    wtimeout(input_win, 1000);
 
     // setup the spreadsheet arrays
     if (! growtbl(GROWNEW, 0, 0)) return exit_app(1);
@@ -112,10 +114,10 @@ int main (int argc, char ** argv) {
     }
     load_sc(argc, argv);      
 
-    // doy la bienvenida en caso de no haber pasado ninguna planilla como parámetro
-    if (argv[1] == NULL) {
+    // we show welcome screen if not spreadsheet was pass to SCIM
+    if ( ! curfile[0] ) {
         do_welcome();
-        // muestro modo y detalle de celda actual en la status bar
+        // show mode and cell's details in status bar
         show_celldetails(input_win);
         print_mode(input_win);
         wrefresh(input_win);
@@ -126,16 +128,20 @@ int main (int argc, char ** argv) {
     // manejo stdin
     shall_quit = 0;
     buffer = (struct block *) create_buf();
-    //Esto habilitarlo para debug:  wtimeout(input_win, TIMEOUT_CURSES);
+
+    // esto habilitarlo para debug:  wtimeout(input_win, TIMEOUT_CURSES);
+
     while ( ! shall_quit ) {
         handle_input(buffer);
+
         // shall_quit=1 implica :q
         // shall_quit=2 implica :q!
         if (shall_quit == 1 && modcheck()) shall_quit = 0;
     }
-
     return shall_quit == -1 ? exit_app(-1) : exit_app(0);
 }
+
+
 
 void create_structures() {
 
@@ -148,6 +154,8 @@ void create_structures() {
     // create yank list structure
     init_yanklist();
 }    
+
+
 
 // delete basic structures that depend on the loaded file
 void delete_structures() {
@@ -178,6 +186,8 @@ void delete_structures() {
     // Free ents of tbl
     erasedb();
 }
+
+
 
 int exit_app(int status) {
 
@@ -211,7 +221,38 @@ int exit_app(int status) {
     return status;
 }
 
+
+
+// we read parameters passed to scim executable
+// and store them in user_conf dictionary
+// then we load the file
 void load_sc(int argc, char ** argv) {
+    // we read parameters
+    int i;
+    for (i = 1; i<argc; i++) {
+        if ( ! strncmp(argv[i], "--", 2) ) {   // it was passed a parameter
+            char ** s = split(argv[i], '=', 0);
+            if (s[1] != NULL)
+                put(user_conf_d, s[0], s[1]);  // --parameter=value
+            else
+                put(user_conf_d, s[0], "");    // --parameter
+        } else {                               // it was passed a file
+            strcpy(curfile, argv[i]);
+        }
+    }
+
+    // we load the file
+    if (! curfile[0]) {                        // there was no file passed to scim executable
+        erasedb();
+    } else {
+        if (! readfile(curfile, 1)) {
+            info("New file: \"%s\"", curfile); // file passed to scim executable does not exists
+        }
+        EvalAll();                             // we eval formulas
+    }
+
+
+    /* old routine:
     if (optind < argc && ! strcmp(argv[optind], "--"))
         optind++;
     if (optind < argc && argv[optind][0] != '|' && strcmp(argv[optind], "-"))
@@ -231,16 +272,23 @@ void load_sc(int argc, char ** argv) {
         (void) readfile(argv[optind], 0);
         optind++;
     }
+    */
 } 
+
+
 
 // set the calculation order 
 void setorder(int i) {
     if ((i == BYROWS) || (i == BYCOLS)) calc_order = i;
 }
 
+
+
 void nopipe() {
     brokenpipe = TRUE;
 }
+
+
 
 // setup signals catched by SCIM
 void signals() {
@@ -260,19 +308,27 @@ void signals() {
     //(void) signal(SIGFPE, doquit);
 }
 
+
+
 void sig_int() {
     error("Got SIGINT. Press «:q<Enter>» to quit Scim");
 }
+
+
 
 void sig_abrt() {
     error("Error !!! Quitting SCIM.");
     shall_quit = -1; // error !
 }
 
+
+
 void sig_term() {
     error("Got SIGTERM signal. Quitting SCIM.");
     shall_quit = 2;
 }
+
+
 
 // SIGWINCH signal - resize of terminal
 void winchg() {
