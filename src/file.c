@@ -368,36 +368,39 @@ int readfile(char * fname, int eraseflg) {
     // Check if file is a correct format
     int len = strlen(fname);
     if (! strcmp( & fname[len-3], ".sc") ||
-        (len > 6 && ! strcmp( & fname[len-7], ".scimrc"))) {
-        //debug("SC FILE: %s", fname);
-        //debug("curfile: %s", curfile);
+        (len > 6 && ! strcasecmp( & fname[len-7], ".scimrc"))) {
         
     // If file is an xlsx file, we import it
-    } else if (len > 5 && ! strcmp( & fname[len-5], ".xlsx")){
+    } else if (len > 5 && ! strcasecmp( & fname[len-5], ".xlsx")){
         #ifndef XLSX
         error("XLSX import support not compiled in");
         #else
         open_xlsx(fname, "UTF-8");
         #endif
-        *curfile = '\0';
+        //*curfile = '\0';
         modflg = 0;
-        return -1;
+        return 1;
 
     // If file is an xls file, we import it
-    } else if (len > 4 && ! strcmp( & fname[len-4], ".xls")){
+    } else if (len > 4 && ! strcasecmp( & fname[len-4], ".xls")){
         #ifndef XLS
         error("XLS import support not compiled in");
         #else
         open_xls(fname, "UTF-8");
         #endif
-        *curfile = '\0';
+        //*curfile = '\0';
         modflg = 0;
-        return -1;
+        return 1;
+
+    // If file is an xls file, we import it
+    } else if (len > 4 && ! strcasecmp( & fname[len-4], ".csv")){
+        char delim = ',';         // TODO: read conf to import TAB delimited too!
+        import_csv(fname, delim); // csv or tab delim import
+        modflg = 0;
+        return 1;
 
     } else {
         info("\"%s\" is not a SCIM compatible file", fname);
-        //*curfile = '\0';
-        //debug("curfile: %s", curfile);
         return -1;
     }
 
