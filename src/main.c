@@ -219,12 +219,7 @@ void load_sc(int argc, char ** argv) {
 
     if (optind < argc) {
         if (! readfile(argv[optind], 1) && (optind == argc - 1)) {
-            //struct timespec ts;
-            //ts.tv_nsec=500000000;
-            //ts.tv_sec=0;
-            //nanosleep(&ts, &ts);
             info("New file: \"%s\"", curfile);
-            //nanosleep(&ts, &ts);
         }
         EvalAll(); // evaluo fórmulas
         optind++;

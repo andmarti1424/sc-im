@@ -24,6 +24,8 @@
 #include "color.h"   // for set_ucolor
 #include "xmalloc.h" // for scxfree
 #include "y.tab.h"
+#include "xlsx.h"
+#include "xls.h"
 
 extern struct ent * freeents;
 
@@ -94,16 +96,7 @@ void erasedb() {
         }
     }
 
-    /*
-    // Load ./.scimrc if present and $HOME/.scimrc contained `set scrc'.
-    if (scrc && strcmp(home, getcwd(curfile, PATHLEN)) &&
-        (c = open(".scimrc", O_RDONLY)) > -1) {
-    close(c);
-    (void) readfile(".scimrc", 0);
-    }
-     */
-
-    * curfile = '\0';
+    *curfile = '\0';
 }
 
 // function that checks if a file exists.
@@ -372,6 +365,42 @@ void write_cells(register FILE *f, int r0, int c0, int rn, int cn, int dr, int d
 }
 
 int readfile(char * fname, int eraseflg) {
+    // Check if file is a correct format
+    int len = strlen(fname);
+    if (! strcmp( & fname[len-3], ".sc") ||
+        (len > 6 && ! strcmp( & fname[len-7], ".scimrc"))) {
+        //debug("SC FILE: %s", fname);
+        //debug("curfile: %s", curfile);
+        
+    // If file is an xlsx file, we import it
+    } else if (len > 5 && ! strcmp( & fname[len-5], ".xlsx")){
+        #ifndef XLSX
+        error("XLSX import support not compiled in");
+        #else
+        open_xlsx(fname, "UTF-8");
+        #endif
+        *curfile = '\0';
+        modflg = 0;
+        return -1;
+
+    // If file is an xls file, we import it
+    } else if (len > 4 && ! strcmp( & fname[len-4], ".xls")){
+        #ifndef XLS
+        error("XLS import support not compiled in");
+        #else
+        open_xls(fname, "UTF-8");
+        #endif
+        *curfile = '\0';
+        modflg = 0;
+        return -1;
+
+    } else {
+        info("\"%s\" is not a SCIM compatible file", fname);
+        //*curfile = '\0';
+        //debug("curfile: %s", curfile);
+        return -1;
+    }
+
     register FILE * f;
     char save[PATHLEN];
     //int tempautolabel;
