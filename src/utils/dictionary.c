@@ -14,7 +14,8 @@ struct dictionary * create_dictionary() {
 }
 
 void put(struct dictionary * d, char * k, char * v) {
-   if ( !strlen(k) || !strlen(v) ) return;
+   //if ( ! strlen (k) || ! strlen(v) ) return;
+   if ( ! strlen (k) ) return;
 
    struct nlist * nl;
 
