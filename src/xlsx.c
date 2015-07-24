@@ -174,12 +174,28 @@ void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) 
 
                 // f - numeric value that is a result from formula
                 } else if (//fmtId != NULL &&
-                child_node->xmlChildrenNode != NULL &&
-                ! strcmp((char *) child_node->xmlChildrenNode->name, "f")) {
-                    char * formula = (char *) child_node->xmlChildrenNode->xmlChildrenNode->content;
-                    //TODO: handle the formula if that is whats desidered!!
-                    double l = atof((char *) child_node->last->xmlChildrenNode->content);
-                    sprintf(line_interp, "let %s%d=%.15f", coltoa(c), r, l);
+                child_node->xmlChildrenNode != NULL && ! strcmp((char *) child_node->xmlChildrenNode->name, "f")) {
+
+                    // handle the formula if that is whats desidered!!
+                    if (atoi(get_conf_value("xlsx_readformulas"))) {
+                        char * formula = (char *) child_node->xmlChildrenNode->xmlChildrenNode->content;
+
+                        // we take some excel common function and adds a @ to them
+                        // we replace count sum avg with @count, @sum, @prod, @avg, @min, @max 
+                        formula = str_replace (formula, "COUNT","@COUNT");
+                        formula = str_replace (formula, "SUM","@SUM");
+                        formula = str_replace (formula, "PROD","@PROD");
+                        formula = str_replace (formula, "AVG","@AVG");
+                        formula = str_replace (formula, "MIN","@MIN");
+                        formula = str_replace (formula, "MAX","@MAX");
+
+                        // we send the formula to the interpreter and hope to resolve it!
+                        sprintf(line_interp, "let %s%d=%s", coltoa(c), r, formula);
+
+                    } else {
+                        double l = atof((char *) child_node->last->xmlChildrenNode->content);
+                        sprintf(line_interp, "let %s%d=%.15f", coltoa(c), r, l);
+                    }
                     send_to_interp(line_interp);
                 } 
             }
