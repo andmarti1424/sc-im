@@ -369,6 +369,7 @@ int readfile(char * fname, int eraseflg) {
     int len = strlen(fname);
     if (! strcmp( & fname[len-3], ".sc") ||
         (len > 6 && ! strcasecmp( & fname[len-7], ".scimrc"))) {
+      // pass
         
     // If file is an xlsx file, we import it
     } else if (len > 5 && ! strcasecmp( & fname[len-5], ".xlsx")){
@@ -392,10 +393,25 @@ int readfile(char * fname, int eraseflg) {
         modflg = 0;
         return 1;
 
-    // If file is an xls file, we import it
-    } else if (len > 4 && ! strcasecmp( & fname[len-4], ".csv")){
-        char delim = ',';         // TODO: read conf to import TAB delimited too!
-        import_csv(fname, delim); // csv or tab delim import
+    // If file is an delimited text file, we import it
+    } else if (len > 4 && ( ! strcasecmp( & fname[len-4], ".csv") ||
+        ! strcasecmp( & fname[len-4], ".tsv") || ! strcasecmp( & fname[len-4], ".tab") ||
+        ! strcasecmp( & fname[len-4], ".txt") )){
+
+        char delim = ',';
+        if ( ! strcasecmp( & fname[len-4], ".tsv") ||  ! strcasecmp( & fname[len-4], ".tab"))
+            delim = '\t'; 
+
+        if (get_conf_value("--txtdelim") != NULL) {
+            if (! strcasecmp(get_conf_value("--txtdelim"), "\\t"))
+                delim = '\t'; 
+            if (! strcasecmp(get_conf_value("--txtdelim"), ","))
+                delim = ','; 
+            if (! strcasecmp(get_conf_value("--txtdelim"), ";"))
+                delim = ';'; 
+        }
+        import_csv(fname, delim); // csv tsv tab txt delim import
+
         modflg = 0;
         return 1;
 
@@ -754,7 +770,7 @@ int import_csv(char * fname, char d) {
             clean_carrier(token);
             if ( (token[0] == '\"' || quote) && (token[strlen(token)-1] != '\"' || strlen(token) == 1) ) {
                 quote = 1;
-                sprintf(token + strlen(token), "%s", xstrtok(NULL, ","));
+                sprintf(token + strlen(token), "%s", xstrtok(NULL, delim));
                 continue;
             }
             if (quote) { // elimino comillas si vengo de quote
@@ -763,17 +779,13 @@ int import_csv(char * fname, char d) {
             }
             if (isnumeric(token)) {
                 sprintf(line_interp, "let %s%d=%s", coltoa(c), r, token);
-            //} else if (token[0] == '"') {
-            //    sprintf(line_interp, "label %s%d=\"%s\"", coltoa(c), r, token);
             } else {
                 sprintf(line_interp, "label %s%d=\"%s\"", coltoa(c), r, token);
-                //info("label %s%d=\"%s\"", coltoa(c), r, token);
-                //get_key();
             }
             send_to_interp(line_interp);
             c++;
             quote = 0;
-            token = xstrtok(NULL, ",");            
+            token = xstrtok(NULL, delim);
         }     
         
         r++;
