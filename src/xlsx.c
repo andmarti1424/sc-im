@@ -165,15 +165,19 @@ void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) 
                     n->format = stringFormat;
 
                 // v - straight int value
-                } else if (fmtId != NULL && child_node->xmlChildrenNode != NULL &&
+                } else if (//fmtId != NULL &&
+                child_node->xmlChildrenNode != NULL &&
                 ! strcmp((char *) child_node->xmlChildrenNode->name, "v") ){
                     double l = atof((char *) child_node->xmlChildrenNode->xmlChildrenNode->content);
                     sprintf(line_interp, "let %s%d=%.15f", coltoa(c), r, l);
                     send_to_interp(line_interp);
 
                 // f - numeric value that is a result from formula
-                } else if (fmtId != NULL && child_node->xmlChildrenNode != NULL &&
+                } else if (//fmtId != NULL &&
+                child_node->xmlChildrenNode != NULL &&
                 ! strcmp((char *) child_node->xmlChildrenNode->name, "f")) {
+                    char * formula = (char *) child_node->xmlChildrenNode->xmlChildrenNode->content;
+                    //TODO: handle the formula if that is whats desidered!!
                     double l = atof((char *) child_node->last->xmlChildrenNode->content);
                     sprintf(line_interp, "let %s%d=%.15f", coltoa(c), r, l);
                     send_to_interp(line_interp);
@@ -212,26 +216,26 @@ int open_xlsx(char * fname, char * encoding) {
     // open xl/sharedStrings.xml
     char * name = "xl/sharedStrings.xml";
     zf = zip_fopen(za, name, ZIP_FL_UNCHANGED);
-    if (! zf) {
-        error("cannot open %s file.\n", name);
-        return -1;
+    char * strings = NULL;
+    if (zf) {
+        // some files may not have strings
+        zip_stat(za, name, ZIP_FL_UNCHANGED, &sb_strings);
+        strings = (char *) malloc(sb_strings.size);
+        len = zip_fread(zf, strings, sb_strings.size);
+        if (len < 0) {
+            error("cannot read file %s.\n", name);
+            free(strings);
+            return -1;
+        }
+        zip_fclose(zf);
     }
-    zip_stat(za, name, ZIP_FL_UNCHANGED, &sb_strings);
-    char * strings = (char *) malloc(sb_strings.size);
-    len = zip_fread(zf, strings, sb_strings.size);
-    if (len < 0) {
-        error("cannot read file %s.\n", name);
-        free(strings);
-        return -1;
-    }
-    zip_fclose(zf);
 
     // open xl/styles.xml
     name = "xl/styles.xml";
     zf = zip_fopen(za, name, ZIP_FL_UNCHANGED);
     if ( ! zf ) {
         error("cannot open %s file.", name);
-        free(strings);
+        if (strings != NULL) free(strings);
         return -1;
     }
     zip_stat(za, name, ZIP_FL_UNCHANGED, &sb_styles);
@@ -239,7 +243,7 @@ int open_xlsx(char * fname, char * encoding) {
     len = zip_fread(zf, styles, sb_styles.size);
     if (len < 0) {
         error("cannot read file %s.", name);
-        free(strings);
+        if (strings != NULL) free(strings);
         free(styles);
         return -1;
     }
@@ -251,7 +255,7 @@ int open_xlsx(char * fname, char * encoding) {
     zf = zip_fopen(za, name, ZIP_FL_UNCHANGED);
     if ( ! zf ) {
         error("cannot open %s file.", name);
-        free(strings);
+        if (strings != NULL) free(strings);
         free(styles);
         return -1;
     }
@@ -260,7 +264,7 @@ int open_xlsx(char * fname, char * encoding) {
     len = zip_fread(zf, sheet, sb.size);
     if (len < 0) {
         error("cannot read file %s.", name);
-        free(strings);
+        if (strings != NULL) free(strings);
         free(styles);
         free(sheet);
         return -1;
@@ -283,9 +287,9 @@ int open_xlsx(char * fname, char * encoding) {
     doc_styles = xmlReadMemory(styles, sb_styles.size, "noname.xml", NULL, XML_PARSE_NOBLANKS);
     doc = xmlReadMemory(sheet, sb.size, "noname.xml", NULL, XML_PARSE_NOBLANKS);
 
-    if (doc == NULL || doc_strings == NULL) {
+    if (doc == NULL) {
         error("error: could not parse file");
-        free(strings);
+        if (strings != NULL) free(strings);
         free(styles);
         free(sheet);
         return -1;
@@ -302,7 +306,7 @@ int open_xlsx(char * fname, char * encoding) {
     xmlCleanupParser();
 
     // free both sheet and strings variables
-    free(strings);
+    if (strings != NULL) free(strings);
     free(styles);
     free(sheet);
 
