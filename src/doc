@@ -873,5 +873,28 @@ Commands for handling cell content:
         Return the number of seconds since the last full minute, encoded as 0 to 59.
 
 
+&Supported file formats / File import&
+    SCIM can handle the following file formats:
+        .sc
+        .xls
+        .xlsx
+        .csv (comma delimited values files)
+        .tsv (tab delimited values files)
+        .tab (tab delimited values files)
+        .txt (simple text files)
+
+    You can pass to SCIM binary any of the above files.
+    If you pass a csv file to SCIM, the file will be imported using a comma as the delimiter.
+    If you pass a tsb or tab file to SCIM, it will be imported using the tab character as the delimiter.
+    If you pass a txt file to SCIM, it will be imported using a comma as the delimiter.
+
+    Take note that you can always override the delimiter used passing the --txtdelim parameter to SCIM.
+    For instance: ./scim --txtdelim="\t" file.txt
+    Possible values are:
+        --txtdelim="\t"
+        --txtdelim=","
+        --txtdelim=";"
+
+
 --
 --
