@@ -365,6 +365,7 @@ void write_cells(register FILE *f, int r0, int c0, int rn, int cn, int dr, int d
 }
 
 int readfile(char * fname, int eraseflg) {
+
     // Check if file is a correct format
     int len = strlen(fname);
     if (! strcmp( & fname[len-3], ".sc") ||
@@ -402,13 +403,14 @@ int readfile(char * fname, int eraseflg) {
         if ( ! strcasecmp( & fname[len-4], ".tsv") ||  ! strcasecmp( & fname[len-4], ".tab"))
             delim = '\t'; 
 
-        if (get_conf_value("--txtdelim") != NULL) {
-            if (! strcasecmp(get_conf_value("--txtdelim"), "\\t"))
+        if (get_conf_value("txtdelim") != NULL) {
+            if (! strcasecmp(get_conf_value("txtdelim"), "\\t")) {
                 delim = '\t'; 
-            if (! strcasecmp(get_conf_value("--txtdelim"), ","))
+            } else if (! strcasecmp(get_conf_value("txtdelim"), ",")) {
                 delim = ','; 
-            if (! strcasecmp(get_conf_value("--txtdelim"), ";"))
+            } else if (! strcasecmp(get_conf_value("txtdelim"), ";")) {
                 delim = ';'; 
+            }
         }
         import_csv(fname, delim); // csv tsv tab txt delim import
 

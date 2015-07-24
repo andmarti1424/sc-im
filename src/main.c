@@ -230,13 +230,13 @@ void load_sc(int argc, char ** argv) {
     // we read parameters
     int i;
     for (i = 1; i<argc; i++) {
-        if ( ! strncmp(argv[i], "--", 2) ) {   // it was passed a parameter
+        if ( ! strncmp(argv[i], "--", 2) ) {       // it was passed a parameter
             char ** s = split(argv[i], '=', 0);
             if (s[1] != NULL)
-                put(user_conf_d, s[0], s[1]);  // --parameter=value
+                put(user_conf_d, &s[0][2], s[1]);  // --parameter=value
             else
-                put(user_conf_d, s[0], "");    // --parameter
-        } else {                               // it was passed a file
+                put(user_conf_d, &s[0][2], "1");   // --parameter
+        } else {                                   // it was passed a file
             strcpy(curfile, argv[i]);
         }
     }
