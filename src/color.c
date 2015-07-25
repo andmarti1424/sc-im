@@ -214,14 +214,24 @@ void chg_color(char * str) {
     parse_str(d, str);
 
     // valido que existan las minimas claves necesarias para cambiar un color
-    // TODO validar tambien que los valores que tengan esas claves sean correctos
     if (get(d, "fg") == '\0' || get(d, "bg") == '\0' || get(d, "type") == '\0') {
         error("Color definition incomplete");
         destroy_dictionary(d);
         return;
     }
 
-    // cambio el color
+    // valido tambien que los valores que tengan esas claves sean correctos
+    if (
+        get(d_colors_param, get(d, "type")) == NULL ||
+        get(d_colors_param, get(d, "bg")) == NULL ||
+        get(d_colors_param, get(d, "fg")) == NULL
+    ) {
+        error("One of the values specified is wrong. Please check the values of type, fg and bg.");
+        destroy_dictionary(d);
+        return;
+    }
+
+    // ahora si, cambio el color
     int type = atoi(get(d_colors_param, get(d, "type")));
     ucolors[ type ].fg = atoi(get(d_colors_param, get(d, "fg")));
     ucolors[ type ].bg = atoi(get(d_colors_param, get(d, "bg")));
