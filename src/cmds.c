@@ -1475,6 +1475,8 @@ int is_single_command (struct block * buf, long timeout) {
         else if (buf->value == OKEY_RIGHT) res = MOVEMENT_CMD;
         else if (buf->value == OKEY_DOWN)  res = MOVEMENT_CMD;
         else if (buf->value == OKEY_UP)    res = MOVEMENT_CMD;
+        else if (buf->value == OKEY_PGUP)  res = MOVEMENT_CMD;
+        else if (buf->value == OKEY_PGDOWN)  res = MOVEMENT_CMD;
         else if (buf->value == ctl('f'))   res = MOVEMENT_CMD;
         else if (buf->value == ctl('j'))   res = EDITION_CMD;
         else if (buf->value == ctl('d'))   res = EDITION_CMD;
