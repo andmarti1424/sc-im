@@ -150,6 +150,7 @@ void do_normalmode(struct block * buf) {
 
         // CTRL f
         case ctl('f'):
+        case OKEY_PGDOWN:
             {
             int n = LINES - RESROW - 1;
             if (atoi(get_conf_value("half_page_scroll"))) n = n / 2;
@@ -163,6 +164,7 @@ void do_normalmode(struct block * buf) {
 
         // CTRL b
         case ctl('b'):
+        case OKEY_PGUP:
             {
             int n = LINES - RESROW - 1;
             if (atoi(get_conf_value("half_page_scroll"))) n = n / 2;
