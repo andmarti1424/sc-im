@@ -184,10 +184,12 @@ void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) 
                         // we replace count sum avg with @count, @sum, @prod, @avg, @min, @max 
                         formula = str_replace (formula, "COUNT","@COUNT");
                         formula = str_replace (formula, "SUM","@SUM");
-                        formula = str_replace (formula, "PROD","@PROD");
-                        formula = str_replace (formula, "AVG","@AVG");
+                        formula = str_replace (formula, "PRODUCT","@PROD");
+                        formula = str_replace (formula, "AVERAGE","@AVG");
                         formula = str_replace (formula, "MIN","@MIN");
                         formula = str_replace (formula, "MAX","@MAX");
+                        formula = str_replace (formula, "ABS","@ABS");
+                        formula = str_replace (formula, "STDEV","@STDDEV");
 
                         // we send the formula to the interpreter and hope to resolve it!
                         sprintf(line_interp, "let %s%d=%s", coltoa(c), r, formula);
