@@ -230,11 +230,14 @@ void chg_color(char * str) {
     if (get(d, "blink")     != '\0')     ucolors[ type ].blink     = atoi(get(d, "blink"));
     if (get(d, "underline") != '\0')     ucolors[ type ].underline = atoi(get(d, "underline"));
 
+    // clean temp variable
     destroy_dictionary(d);
-
     return;
 }
 
+// this functions is for coloring a cell, or a range of cells.
+// it also applies a format such as bold or underline.
+// supports undo / redo
 void color_cell(int r, int c, int rf, int cf, char * str) {
 
     // parse detail
@@ -276,8 +279,8 @@ void color_cell(int r, int c, int rf, int cf, char * str) {
             n = lookat(i, j);
             if (n->ucolor == NULL) {
                 n->ucolor = (struct ucolor *) malloc(sizeof(struct ucolor));
-                n->ucolor->fg = 0;
-                n->ucolor->bg = 0;
+                n->ucolor->fg = WHITE;
+                n->ucolor->bg = BLACK;
                 n->ucolor->bold = 0;
                 n->ucolor->dim = 0;
                 n->ucolor->reverse = 0;
@@ -288,13 +291,9 @@ void color_cell(int r, int c, int rf, int cf, char * str) {
 
             if (get(d, "bg") != '\0')
                 n->ucolor->bg = isnumeric(get(d, "bg")) ? atoi(get(d, "bg")) : atoi(get(d_colors_param, get(d, "bg")));
-            else
-                n->ucolor->bg = BLACK;
 
-            if (get(d, "fg") != '\0') {
+            if (get(d, "fg") != '\0')
                 n->ucolor->fg = isnumeric(get(d, "fg")) ? atoi(get(d, "fg")) : atoi(get(d_colors_param, get(d, "fg")));
-            } else
-                n->ucolor->fg = WHITE;
 
             if (get(d, "bold")      != '\0')     n->ucolor->bold = atoi(get(d, "bold"));
             if (get(d, "dim")       != '\0')     n->ucolor->dim       = atoi(get(d, "dim"));
