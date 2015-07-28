@@ -122,6 +122,7 @@ Commands for handling cell content:
                  13. '-' and '+' commands in normal mode
                  14. lock and unlock of cells
                  15. datefmt command
+                 16. cellcolor command
 
      c-d         converts text content of a selected cell or range to a date, using default LOCALE's D_FMT format.
                  This converts text content to a numeric value that can shown as a date. See DATE INPUT below for more info.
