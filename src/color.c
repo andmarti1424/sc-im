@@ -12,6 +12,7 @@
 #include "range.h"
 #include "color.h"
 #include "screen.h"
+#include "undo.h"
 
 static struct dictionary * d_colors_param = NULL;
 
@@ -246,11 +247,32 @@ void color_cell(int r, int c, int rf, int cf, char * str) {
 
     parse_str(d, str);
 
+    // validaciones
+    if (
+        (get(d, "fg") != '\0' && ! isnumeric(get(d, "fg")) && get(d_colors_param, get(d, "fg")) == NULL) ||
+        (get(d, "bg") != '\0' && ! isnumeric(get(d, "bg")) && get(d_colors_param, get(d, "bg")) == NULL)) {
+            error("One of the values specified is wrong. Please check the values of type, fg and bg.");
+            destroy_dictionary(d);
+            return;
+    }
+
     // we apply format in the range
     struct ent * n;
     int i, j;
     for (i=r; i<=rf; i++) {
         for (j=c; j<=cf; j++) {
+
+            // if we are not loading the file
+            if (! loading) {
+                modflg++;
+
+                #ifdef UNDO
+                create_undo_action();
+                copy_to_undostruct(i, j, i, j, 'd');
+                #endif
+            }
+
+            // action
             n = lookat(i, j);
             if (n->ucolor == NULL) {
                 n->ucolor = (struct ucolor *) malloc(sizeof(struct ucolor));
@@ -262,14 +284,6 @@ void color_cell(int r, int c, int rf, int cf, char * str) {
                 n->ucolor->standout = 0;
                 n->ucolor->underline = 0;
                 n->ucolor->blink = 0;
-            }
-
-            if (
-                (get(d, "fg") != '\0' && ! isnumeric(get(d, "fg")) && get(d_colors_param, get(d, "fg")) == NULL) ||
-                (get(d, "bg") != '\0' && ! isnumeric(get(d, "bg")) && get(d_colors_param, get(d, "bg")) == NULL)) {
-                    error("One of the values specified is wrong. Please check the values of type, fg and bg.");
-                    destroy_dictionary(d);
-                    return;
             }
 
             if (get(d, "bg") != '\0')
@@ -288,6 +302,13 @@ void color_cell(int r, int c, int rf, int cf, char * str) {
             if (get(d, "standout")  != '\0')     n->ucolor->standout  = atoi(get(d, "standout"));
             if (get(d, "blink")     != '\0')     n->ucolor->blink     = atoi(get(d, "blink"));
             if (get(d, "underline") != '\0')     n->ucolor->underline = atoi(get(d, "underline"));
+
+            if (! loading) {
+                #ifdef UNDO        
+                copy_to_undostruct(i, j, i, j, 'a');
+                end_undo_action();
+                #endif
+            }
         }
     }
 
