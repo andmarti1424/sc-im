@@ -217,6 +217,19 @@ void copyent(register struct ent *n, register struct ent *p, int dr, int dc,
     //} else if (special != 'm' && special != 'f')
     } else if (special != 'v' && special != 'f')
         n->format = NULL;
+
+    if (p->ucolor) {
+        n->ucolor = (struct ucolor *) malloc (sizeof(struct ucolor));
+        n->ucolor->fg = p->ucolor->fg;
+        n->ucolor->bg = p->ucolor->bg;
+        n->ucolor->bold = p->ucolor->bold;
+        n->ucolor->dim = p->ucolor->dim;
+        n->ucolor->reverse = p->ucolor->reverse;
+        n->ucolor->standout = p->ucolor->standout;
+        n->ucolor->underline = p->ucolor->underline;
+        n->ucolor->blink = p->ucolor->blink;
+    }
+
     n->flags |= is_changed;
     n->row = p->row;
     n->col = p->col;
@@ -966,6 +979,7 @@ struct ent * lookat(int row, int col) {
         (*pp)->format = (char *) 0;
         (*pp)->cellerror = CELLOK;
         (*pp)->next = NULL;
+        (*pp)->ucolor = NULL;
     }
     (*pp)->row = row;
     (*pp)->col = col;
@@ -985,6 +999,7 @@ void cleanent(struct ent * p) {
     p->format = (char *) 0;
     p->cellerror = CELLOK;
     p->next = NULL;
+    p->ucolor = NULL;
     return;
 }
 
@@ -1000,6 +1015,9 @@ void clearent(struct ent *v) {
 
     if (v->format) scxfree(v->format);
     v->format = NULL;
+
+    if (v->ucolor) free(v->ucolor);
+    v->ucolor = NULL;
 
     v->flags = ( is_changed | iscleared );
     changed++;

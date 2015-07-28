@@ -292,6 +292,8 @@ Commands for handling cell content:
 
      :i xlsx name
                  import a xlsx file called 'name' to SCIM.
+                 You can set xlsx_readformulas variable and SCIM will try to import formulas,
+                 rather than the final values of a cell.
 
      :i! xlsx name
                  same as previous, but ignoring changes since last save.
@@ -498,7 +500,7 @@ Commands for handling cell content:
 
     :color <str>
                 changes a color definition.
-                example of use:  :color type=HEADINGS bold=0 fg=BLACK bg=YELLOW
+                example of use:  :color "type=HEADINGS bold=0 fg=BLACK bg=YELLOW"
                 color parameters have to be one of the following:
                      type, fg, bg, bold, dim, reverse, standout, underline, blink.
                 the first three are mandatory
@@ -514,6 +516,11 @@ Commands for handling cell content:
                      b. in current .sc file.
                 The format is similar:
                 Ex.: color "type=HEADINGS fg=BLACK bg=YELLOW bold=0"
+
+    :cellcolor <str>
+                changes the color of a cell or a group of cells.
+                Ex.: cellcolor "bg=CYAN fg=white"
+                     cellcolor "fg=RED underline=1"
 
     :lock       Use this command to lock the current cell or a range of cells, i.e. make them immune to any type of editing. A locked cell can't be changed in any way until it is unlocked.
 

@@ -181,6 +181,7 @@ token S_GETFORMAT
 %token S_NUNMAP
 %token S_IUNMAP
 %token S_COLOR
+%token S_CELLCOLOR
 
 %token K_ERROR
 %token K_INVALID
@@ -465,6 +466,13 @@ command:
                                           chg_color($2);
 #endif
                                           scxfree($2);
+                                        }
+
+    |    S_CELLCOLOR var_or_range STRING {  
+#ifdef USECOLORS
+                                          color_cell($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col, $3);
+#endif
+                                          scxfree($3);
                                         }
 
 /*

@@ -43,6 +43,7 @@ void free_yanklist () {
         if (r->format) scxfree(r->format);
         if (r->label) scxfree(r->label);
         if (r->expr) efree(r->expr);
+        if (r->ucolor) free(r->ucolor);
 
         free(r);
         r = e;
@@ -83,6 +84,7 @@ void add_ent_to_yanklist(struct ent * item) {
     (i_ent)->format = (char *)0;
     (i_ent)->cellerror = CELLOK;
     (i_ent)->next = NULL;
+    (i_ent)->ucolor = NULL;
 
     // copio contenido de item en i_ent
     (void) copyent(i_ent, item, 0, 0, 0, 0, 0, 0, 0);

@@ -38,6 +38,7 @@ static char * valid_commands[] = {
 "!",
 "addfilter",
 "autojus",
+"cellcolor",
 "color",
 "e csv",
 "e tab",
@@ -445,10 +446,39 @@ void do_commandmode(struct block * sb) {
             end_undo_action();
             #endif
 
+        } else if ( ! strncmp(inputline, "cellcolor ", 10) ) {
+            #ifdef USECOLORS
+            int r = currow, c = curcol, rf = currow, cf = curcol;
+            if (p != -1) {
+                c = sr->tlcol;
+                r = sr->tlrow;
+                rf = sr->brrow;
+                cf = sr->brcol;
+            }
+
+            strcpy(interp_line, inputline);
+            del_range_chars(interp_line, 0, 9);
+            color_cell(r, c, rf, cf, interp_line);
+            #else
+            error("Color support not compiled in");
+            chg_mode('.');
+            inputline[0]='\0';
+            update();
+            return;
+            #endif
+
         } else if ( ! strncmp(inputline, "color ", 6) ) {
+            #ifdef USECOLORS
             strcpy(interp_line, inputline);
             del_range_chars(interp_line, 0, 5);
             chg_color(interp_line);
+            #else
+            error("Color support not compiled in");
+            chg_mode('.');
+            inputline[0]='\0';
+            update();
+            return;
+            #endif
 
         } else if ( ! strncmp(inputline, "set ", 4) ) {
             strcpy(interp_line, inputline);

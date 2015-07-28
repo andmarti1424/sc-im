@@ -9,9 +9,10 @@
 #include "macros.h"
 #include "utils/dictionary.h"
 #include "utils/string.h"
+#include "range.h"
 #include "color.h"
+#include "screen.h"
 
-static struct ucolor ucolors[N_INIT_PAIRS];
 static struct dictionary * d_colors_param = NULL;
 
 struct dictionary * get_d_colors_param() {
@@ -22,7 +23,7 @@ struct dictionary * get_d_colors_param() {
 void start_default_ucolors() {
 
     // Blanqueo los atributos de todos los colores
-    int i;
+    int i, j;
     for (i=0; i< N_INIT_PAIRS; i++) {
         ucolors[ i ].bold      = 0;
         ucolors[ i ].dim       = 0;
@@ -32,10 +33,11 @@ void start_default_ucolors() {
         ucolors[ i ].blink     = 0;
     }
 
-    ucolors[ DEFAULT         ].fg = WHITE;
-    ucolors[ DEFAULT         ].bg = BLACK;
+    // Seteo colores y algunos atributos
+    //ucolors[ DEFAULT         ].fg = WHITE;
+    //ucolors[ DEFAULT         ].bg = BLACK;
     ucolors[ HEADINGS        ].fg = WHITE;
-    ucolors[ HEADINGS        ].bg = BLUE;
+    ucolors[ HEADINGS        ].bg = RED;
     ucolors[ WELCOME         ].fg = BLUE;
     ucolors[ WELCOME         ].bg = BLACK;
     ucolors[ CELL_SELECTION  ].fg = BLUE;         // cell selection in headings
@@ -91,38 +93,23 @@ void start_default_ucolors() {
     ucolors[ CELL_NEGATIVE   ].fg = GREEN;
     ucolors[ CELL_NEGATIVE   ].bg = BLACK;
 
-    init_pair(HEADINGS,          ucolors[HEADINGS].fg,            ucolors[HEADINGS].bg);
-    init_pair(MODE,              ucolors[MODE].fg,                ucolors[MODE].bg);
-    init_pair(NUMB,              ucolors[NUMB].fg,                ucolors[NUMB].bg);
-    init_pair(STRG,              ucolors[STRG].fg,                ucolors[STRG].bg);
-    init_pair(DATEF,             ucolors[DATEF].fg,               ucolors[DATEF].bg);
-    init_pair(EXPRESSION,        ucolors[EXPRESSION].fg,          ucolors[EXPRESSION].bg);
-    init_pair(CELL_ERROR,        ucolors[CELL_ERROR].fg,          ucolors[CELL_ERROR].bg);
-    init_pair(CELL_NEGATIVE,     ucolors[CELL_NEGATIVE].fg,       ucolors[CELL_NEGATIVE].bg);
-    init_pair(CELL_SELECTION,    ucolors[CELL_SELECTION].fg,      ucolors[CELL_SELECTION].bg);
-    init_pair(CELL_SELECTION_SC, ucolors[CELL_SELECTION_SC].fg,   ucolors[CELL_SELECTION_SC].bg);
-    init_pair(INFO_MSG,          ucolors[INFO_MSG].fg,            ucolors[INFO_MSG].bg);
-    init_pair(ERROR_MSG,         ucolors[ERROR_MSG].fg,           ucolors[ERROR_MSG].bg);
-    init_pair(CELL_ID,           ucolors[CELL_ID].fg,             ucolors[CELL_ID].bg);
-    init_pair(CELL_FORMAT,       ucolors[CELL_FORMAT].fg,         ucolors[CELL_FORMAT].bg);
-    init_pair(CELL_CONTENT,      ucolors[CELL_CONTENT].fg,        ucolors[CELL_CONTENT].bg);
-    init_pair(WELCOME,           ucolors[WELCOME].fg,             ucolors[WELCOME].bg);
-    init_pair(NORMAL,            ucolors[NORMAL].fg,              ucolors[NORMAL].bg);
-    init_pair(INPUT,             ucolors[INPUT].fg,               ucolors[INPUT].bg);
-    init_pair(DEFAULT,           ucolors[DEFAULT].fg,             ucolors[DEFAULT].bg);
+    // Inicio los 64 init pairs posibles
+    for (i=0; i < 8; i++)      // fg
+        for (j=0; j < 8; j++)  // bg
+            init_pair( (i*8) + j + 1, i, j); // i is fg and j is bg
 
 }
 
 // Funcion que setea un color
-void set_ucolor(WINDOW * w, int uc) {
+void set_ucolor(WINDOW * w, struct ucolor * uc) {
     long attr = A_NORMAL;
-    if (ucolors[uc].bold)      attr |= A_BOLD;
-    if (ucolors[uc].dim)       attr |= A_DIM;
-    if (ucolors[uc].reverse)   attr |= A_REVERSE;
-    if (ucolors[uc].standout)  attr |= A_STANDOUT;
-    if (ucolors[uc].blink)     attr |= A_BLINK;
-    if (ucolors[uc].underline) attr |= A_UNDERLINE;
-    wattrset (w, attr | COLOR_PAIR(uc) );
+    if (uc->bold)      attr |= A_BOLD;
+    if (uc->dim)       attr |= A_DIM;
+    if (uc->reverse)   attr |= A_REVERSE;
+    if (uc->standout)  attr |= A_STANDOUT;
+    if (uc->blink)     attr |= A_BLINK;
+    if (uc->underline) attr |= A_UNDERLINE;
+    wattrset (w, attr | COLOR_PAIR(uc->fg * 8 + uc->bg + 1));
 }
 
 // Funcion que crea un diccionario y guarda en el 
@@ -135,8 +122,6 @@ void set_colors_param_dict() {
     char str[3];
     str[0]='\0';
 
-    sprintf(str, "%d", WHITE);
-    put(d_colors_param, "WHITE", str);
     sprintf(str, "%d", BLACK);
     put(d_colors_param, "BLACK", str);
     sprintf(str, "%d", RED);
@@ -151,6 +136,8 @@ void set_colors_param_dict() {
     put(d_colors_param, "MAGENTA", str);
     sprintf(str, "%d", CYAN);
     put(d_colors_param, "CYAN", str);
+    sprintf(str, "%d", WHITE);
+    put(d_colors_param, "WHITE", str);
 
     sprintf(str, "%d", HEADINGS);
     put(d_colors_param, "HEADINGS", str);
@@ -188,8 +175,8 @@ void set_colors_param_dict() {
     put(d_colors_param, "CELL_ERROR", str);
     sprintf(str, "%d", CELL_NEGATIVE);
     put(d_colors_param, "CELL_NEGATIVE", str);
-    sprintf(str, "%d", DEFAULT);
-    put(d_colors_param, "DEFAULT", str);
+    //sprintf(str, "%d", DEFAULT);
+    //put(d_colors_param, "DEFAULT", str);
 }
 
 void free_colors_param_dict() {
@@ -209,7 +196,7 @@ void chg_color(char * str) {
 
     // elimino commilas de str
     if (str[0]=='"') del_char(str, 0);
-    if (str[strlen(str)]=='"') del_char(str, strlen(str));
+    if (str[strlen(str)-1]=='"') del_char(str, strlen(str)-1);
 
     parse_str(d, str);
 
@@ -222,16 +209,16 @@ void chg_color(char * str) {
 
     // valido tambien que los valores que tengan esas claves sean correctos
     if (
-        get(d_colors_param, get(d, "type")) == NULL ||
-        get(d_colors_param, get(d, "bg")) == NULL ||
-        get(d_colors_param, get(d, "fg")) == NULL
+        (! isnumeric(get(d, "fg")) && get(d_colors_param, get(d, "fg")) == NULL) ||
+        (! isnumeric(get(d, "bg")) && get(d_colors_param, get(d, "bg")) == NULL) ||
+        (! isnumeric(get(d, "type")) && get(d_colors_param, get(d, "type")) == NULL)
     ) {
         error("One of the values specified is wrong. Please check the values of type, fg and bg.");
         destroy_dictionary(d);
         return;
     }
 
-    // ahora si, cambio el color
+    // cambio el color
     int type = atoi(get(d_colors_param, get(d, "type")));
     ucolors[ type ].fg = atoi(get(d_colors_param, get(d, "fg")));
     ucolors[ type ].bg = atoi(get(d_colors_param, get(d, "bg")));
@@ -242,9 +229,69 @@ void chg_color(char * str) {
     if (get(d, "blink")     != '\0')     ucolors[ type ].blink     = atoi(get(d, "blink"));
     if (get(d, "underline") != '\0')     ucolors[ type ].underline = atoi(get(d, "underline"));
 
-    init_pair(type, ucolors[type].fg, ucolors[type].bg);
-
     destroy_dictionary(d);
 
+    return;
+}
+
+void color_cell(int r, int c, int rf, int cf, char * str) {
+
+    // parse detail
+    // creo un diccionario para guardar las claves y valores que figuran en el string
+    struct dictionary * d = create_dictionary();
+
+    // elimino commilas de str
+    if (str[0]=='"') del_char(str, 0);
+    if (str[strlen(str)-1]=='"') del_char(str, strlen(str)-1);
+
+    parse_str(d, str);
+
+    // we apply format in the range
+    struct ent * n;
+    int i, j;
+    for (i=r; i<=rf; i++) {
+        for (j=c; j<=cf; j++) {
+            n = lookat(i, j);
+            if (n->ucolor == NULL) {
+                n->ucolor = (struct ucolor *) malloc(sizeof(struct ucolor));
+                n->ucolor->fg = 0;
+                n->ucolor->bg = 0;
+                n->ucolor->bold = 0;
+                n->ucolor->dim = 0;
+                n->ucolor->reverse = 0;
+                n->ucolor->standout = 0;
+                n->ucolor->underline = 0;
+                n->ucolor->blink = 0;
+            }
+
+            if (
+                (get(d, "fg") != '\0' && ! isnumeric(get(d, "fg")) && get(d_colors_param, get(d, "fg")) == NULL) ||
+                (get(d, "bg") != '\0' && ! isnumeric(get(d, "bg")) && get(d_colors_param, get(d, "bg")) == NULL)) {
+                    error("One of the values specified is wrong. Please check the values of type, fg and bg.");
+                    destroy_dictionary(d);
+                    return;
+            }
+
+            if (get(d, "bg") != '\0')
+                n->ucolor->bg = isnumeric(get(d, "bg")) ? atoi(get(d, "bg")) : atoi(get(d_colors_param, get(d, "bg")));
+            else
+                n->ucolor->bg = BLACK;
+
+            if (get(d, "fg") != '\0') {
+                n->ucolor->fg = isnumeric(get(d, "fg")) ? atoi(get(d, "fg")) : atoi(get(d_colors_param, get(d, "fg")));
+            } else
+                n->ucolor->fg = WHITE;
+
+            if (get(d, "bold")      != '\0')     n->ucolor->bold = atoi(get(d, "bold"));
+            if (get(d, "dim")       != '\0')     n->ucolor->dim       = atoi(get(d, "dim"));
+            if (get(d, "reverse")   != '\0')     n->ucolor->reverse   = atoi(get(d, "reverse"));
+            if (get(d, "standout")  != '\0')     n->ucolor->standout  = atoi(get(d, "standout"));
+            if (get(d, "blink")     != '\0')     n->ucolor->blink     = atoi(get(d, "blink"));
+            if (get(d, "underline") != '\0')     n->ucolor->underline = atoi(get(d, "underline"));
+        }
+    }
+
+    destroy_dictionary(d);
+    update();
     return;
 }

@@ -6,8 +6,8 @@
 #include <sys/wait.h> // for wait
 
 #include "macros.h"
+#include "color.h"
 #include "utils/string.h"
-#include "color.h" // for set_ucolor
 #include "screen.h"
 
 int exec_cmd (char * line) {

@@ -80,6 +80,7 @@ struct ent {
     struct ent * next;    // used for yanklist, freeents list, undo..
     char * format;        /* printf format for this cell */
     char cellerror;       /* error in a cell? */
+    struct ucolor * ucolor;
 };
 
 #define FIX_ROW 1

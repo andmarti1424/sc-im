@@ -53,8 +53,8 @@ void start_screen() {
             // de las claves que se definen en los archivos .sc
             set_colors_param_dict();
         }
-        wbkgd(input_win, COLOR_PAIR(DEFAULT));
-        wbkgd(main_win, COLOR_PAIR(DEFAULT));
+        //wbkgd(input_win, COLOR_PAIR(DEFAULT));
+        //wbkgd(main_win, COLOR_PAIR(DEFAULT));
     }   
     #endif
     
@@ -93,7 +93,7 @@ void do_welcome() {
     show_sc_row_headings(main_win, mxrow);
 
     #ifdef USECOLORS
-    set_ucolor(main_win, WELCOME);
+    set_ucolor(main_win, &ucolors[WELCOME]);
     #endif
 
     // show message
@@ -192,7 +192,7 @@ void print_mult_pend(WINDOW * win) {
     getyx(win, row_orig, col_orig);
 
     #ifdef USECOLORS
-    set_ucolor(win, MODE);
+    set_ucolor(win, &ucolors[MODE]);
     #endif
     // Muestro efecto multiplicador y/o * de comando_pendiente
     char strm[COLS];
@@ -228,7 +228,7 @@ void show_header(WINDOW * win) {
 
     // imprimo texto de input
     #ifdef USECOLORS
-    set_ucolor(win, INPUT);
+    set_ucolor(win, &ucolors[INPUT]);
     #endif
     switch (curmode) {
         case COMMAND_MODE:
@@ -270,7 +270,7 @@ void print_mode(WINDOW * win) {
     char strm[22] = "";
 
     #ifdef USECOLORS
-    set_ucolor(win, MODE);
+    set_ucolor(win, &ucolors[MODE]);
     #endif
 
     if (curmode == NORMAL_MODE) {
@@ -282,7 +282,7 @@ void print_mode(WINDOW * win) {
         write_j(win, strm, row, RIGHT);
 
         #ifdef USECOLORS
-        set_ucolor(win, INPUT);
+        set_ucolor(win, &ucolors[INPUT]);
         #endif
         // muestro submodo de modo insert
         mvwprintw(win, 0, 0 + rescol, "%c", insert_edit_submode);
@@ -300,7 +300,7 @@ void print_mode(WINDOW * win) {
         strcat(strm, "-- COMMAND --");
         write_j(win, strm, row, RIGHT);
         #ifdef USECOLORS
-        set_ucolor(win, INPUT);
+        set_ucolor(win, &ucolors[INPUT]);
         #endif
         // muestro ':'
         mvwprintw(win, 0, 0 + rescol, ":");
@@ -314,7 +314,7 @@ void print_mode(WINDOW * win) {
 void show_sc_row_headings(WINDOW * win, int mxrow) {
     int row = 0;
     #ifdef USECOLORS
-    if (has_colors()) set_ucolor(win, HEADINGS);
+    if (has_colors()) set_ucolor(win, &ucolors[HEADINGS]);
     #endif
     int i;
     for (i = offscr_sc_rows; i < mxrow; i++) {
@@ -323,7 +323,7 @@ void show_sc_row_headings(WINDOW * win, int mxrow) {
         srange * s = get_selected_range();
         if ( (s != NULL && i >= s->tlrow && i <= s->brrow) || i == currow ) {
             #ifdef USECOLORS
-            if (has_colors()) set_ucolor(win, CELL_SELECTION);
+            if (has_colors()) set_ucolor(win, &ucolors[CELL_SELECTION]);
             #else
             wattron(win, A_REVERSE);
             #endif
@@ -331,7 +331,7 @@ void show_sc_row_headings(WINDOW * win, int mxrow) {
         mvwprintw (win, row+1, 0, "%*d ", rescol-1, i);
 
         #ifdef USECOLORS
-        if (has_colors()) set_ucolor(win, HEADINGS);
+        if (has_colors()) set_ucolor(win, &ucolors[HEADINGS]);
         #else
         wattroff(win, A_REVERSE);
         #endif
@@ -344,7 +344,7 @@ void show_sc_col_headings(WINDOW * win, int mxcol, int mxrow) {
     int i, col = rescol;
 
     #ifdef USECOLORS
-    if (has_colors()) set_ucolor(win, HEADINGS);
+    if (has_colors()) set_ucolor(win, &ucolors[HEADINGS]);
     #endif
 
     wmove(win, 0, 0);
@@ -357,7 +357,7 @@ void show_sc_col_headings(WINDOW * win, int mxcol, int mxrow) {
         srange * s = get_selected_range();
         if ( (s != NULL && i >= s->tlcol && i <= s->brcol) || i == curcol ) {
             #ifdef USECOLORS
-            if (has_colors()) set_ucolor(win, CELL_SELECTION);
+            if (has_colors()) set_ucolor(win, &ucolors[CELL_SELECTION]);
             #else
             wattron(win, A_REVERSE);
             #endif
@@ -367,7 +367,7 @@ void show_sc_col_headings(WINDOW * win, int mxcol, int mxrow) {
         wclrtoeol(win);
 
         #ifdef USECOLORS
-        if (has_colors()) set_ucolor(win, HEADINGS);
+        if (has_colors()) set_ucolor(win, &ucolors[HEADINGS]);
         #else
         wattroff(win, A_REVERSE);
         #endif
@@ -411,24 +411,29 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
             // Clean format
             #ifdef USECOLORS
             if ((*p)->expr) {
-                set_ucolor(win, EXPRESSION);
+                set_ucolor(win, &ucolors[EXPRESSION]);
             } else if ((*p)->label) {             // string
-                set_ucolor(win, STRG);
+                set_ucolor(win, &ucolors[STRG]);
             } else if ((*p)->flags & is_valid && ! (*p)->format) {  // numeric value
-                set_ucolor(win, NUMB);
+                set_ucolor(win, &ucolors[NUMB]);
             } else if ((*p)->cellerror) {         // cellerror
-                set_ucolor(win, CELL_ERROR);
+                set_ucolor(win, &ucolors[CELL_ERROR]);
             } else if ((*p)->format && (*p)->format[0] == 'd') {  // date format
-                set_ucolor(win, DATEF);
+                set_ucolor(win, &ucolors[DATEF]);
             } else {
-                set_ucolor(win, NORMAL);
+                set_ucolor(win, &ucolors[NORMAL]);
             }
             #endif
+
+            // Cell color!
+            if ((*p)->ucolor != NULL) {
+                set_ucolor(win, (*p)->ucolor);
+            }
 
             // Color selected cell
             if ((currow == row) && (curcol == col)) {
                 #ifdef USECOLORS
-                    if (has_colors()) set_ucolor(win, CELL_SELECTION_SC);
+                    if (has_colors()) set_ucolor(win, &ucolors[CELL_SELECTION_SC]);
                 #else
                     wattron(win, A_REVERSE);
                 #endif
@@ -439,7 +444,7 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
             srange * s = get_selected_range();
             if (s != NULL && row >= s->tlrow && row <= s->brrow && col >= s->tlcol && col <= s->brcol ) {
                 #ifdef USECOLORS
-                    set_ucolor(win, CELL_SELECTION_SC);
+                    set_ucolor(win, &ucolors[CELL_SELECTION_SC]);
                 #else
                     wattron(win, A_REVERSE);
                 #endif
@@ -451,7 +456,7 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
                  col >= ranges->tlcol && col <= ranges->brcol
                ) {
                 #ifdef USECOLORS
-                    set_ucolor(win, CELL_SELECTION_SC);
+                    set_ucolor(win, &ucolors[CELL_SELECTION_SC]);
                 #else
                     wattron(win, A_REVERSE);
                 #endif
@@ -472,25 +477,24 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
                 //mvwprintw(win, row + 1 - offscr_sc_rows - q_row_hidden, c, "ñandú");//(*p)->label);
                 //mvwprintw(win, row + 1 - offscr_sc_rows - q_row_hidden, c, "nandu");//(*p)->label);
 
-            // repaint a blank cell. this fixes    ?? KI1 ??
+            // repaint a blank cell, because of in range, or because we have a coloured empty cell!
             } else if (! ((*p)->flags & is_valid) && !(*p)->label ) {
-                if (( currow == row && curcol == col) ||
+                if ( (currow == row && curcol == col) ||
                 ( in_range && row >= ranges->tlrow && row <= ranges->brrow &&
                 col >= ranges->tlcol && col <= ranges->brcol ) ) {
                     #ifdef USECOLORS
-                    if (has_colors()) set_ucolor(win, CELL_SELECTION_SC);
+                    if (has_colors()) set_ucolor(win, &ucolors[CELL_SELECTION_SC]);
                     #else
                         wattron(win, A_REVERSE);
                     #endif
-                } else  {
-                    #ifdef USECOLORS
-                    set_ucolor(win, STRG); // FIXME when no colors
-                    #endif
+                //} else if ((*p)->ucolor == NULL) {
+                //    #ifdef USECOLORS
+                //    set_ucolor(win, &ucolors[STRG]); // FIXME when no colors
+                //    #endif
                 }
                 char caracter;
                 chtype cht[fieldlen];
                 int i;
-
                 mvwinchnstr(win, row + 1 - offscr_sc_rows - q_row_hidden, c, cht, fieldlen);
                 for (i = 0; i < fieldlen; i++) {
                     caracter = cht[i] & A_CHARTEXT;
@@ -501,7 +505,6 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
                     #endif
                     mvwprintw(win, row + 1 - offscr_sc_rows - q_row_hidden, c + i, "%c", caracter);
                 }
-//
             }
 
             // clean format
@@ -558,7 +561,7 @@ void show_celldetails(WINDOW * win) {
 
     // show cell in header
     #ifdef USECOLORS
-        set_ucolor(win, CELL_ID);
+        set_ucolor(win, &ucolors[CELL_ID]);
     #endif
     sprintf(head, "%s%d ", coltoa(curcol), currow);
     mvwprintw(win, 0, 0 + rescol, "%s", head);
@@ -566,7 +569,7 @@ void show_celldetails(WINDOW * win) {
 
     // show the current cell's format
     #ifdef USECOLORS
-        set_ucolor(win, CELL_FORMAT);
+        set_ucolor(win, &ucolors[CELL_FORMAT]);
     #endif
     register struct ent *p1 = *ATBL(tbl, currow, curcol);
     if ((p1) && p1->format)
@@ -578,7 +581,7 @@ void show_celldetails(WINDOW * win) {
 
     // show expr
     #ifdef USECOLORS
-        set_ucolor(win, CELL_CONTENT);
+        set_ucolor(win, &ucolors[CELL_CONTENT]);
     #endif
     if (p1 && p1->expr) {
         linelim = 0;
@@ -739,7 +742,7 @@ void show_text_content_of_cell(WINDOW * win, struct ent ** p, int row, int col, 
         // Color selected cell
         if ((currow == row) && (curcol == col)) {
             #ifdef USECOLORS
-                if (has_colors()) set_ucolor(win, CELL_SELECTION_SC);
+                if (has_colors()) set_ucolor(win, &ucolors[CELL_SELECTION_SC]);
             #else
                 wattron(win, A_REVERSE);
             #endif
@@ -752,7 +755,7 @@ void show_text_content_of_cell(WINDOW * win, struct ent ** p, int row, int col, 
         strcpy(ex, value);
         del_range_chars(ex, 0, col_width-1);
             #ifdef USECOLORS
-                if (has_colors()) set_ucolor(win, STRG);
+                if (has_colors()) set_ucolor(win, &ucolors[STRG]);
             #else
                 wattroff(win, A_REVERSE);
             #endif

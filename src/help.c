@@ -80,7 +80,7 @@ void help() {
     wclrtobot(input_win);
     wrefresh(input_win);
 
-    set_ucolor(main_win, NORMAL);
+    set_ucolor(main_win, &ucolors[NORMAL]);
     wtimeout(input_win, -1);
     noecho();
     curs_set(0);
@@ -242,7 +242,7 @@ void find_word(char * word, char order) {
     if (look_result == -1) {
         info("Pattern not found.");
     }
-    set_ucolor(input_win, NORMAL);
+    set_ucolor(input_win, &ucolors[NORMAL]);
     return;
 }
 
@@ -257,14 +257,14 @@ int show_lines() {
 
         for (c = 0; c < strlen(long_help[lineno + delta]); c++)  {
             if (long_help[lineno + delta][c] == '&') bold = ! bold;
-            bold ? set_ucolor(main_win, CELL_SELECTION_SC) : set_ucolor(main_win, NORMAL);
+            bold ? set_ucolor(main_win, &ucolors[CELL_SELECTION_SC]) : set_ucolor(main_win, &ucolors[NORMAL]);
 
             if (long_help[lineno + delta][c] == '&') {
-                  set_ucolor(main_win, NORMAL);
+                  set_ucolor(main_win, &ucolors[NORMAL]);
                 continue;
             } else if (look_result != -1 && c >= look_result &&
                 c < look_result + strlen(word_looked) ) {
-                  set_ucolor(main_win, CELL_SELECTION_SC);
+                  set_ucolor(main_win, &ucolors[CELL_SELECTION_SC]);
             }
             mvwprintw(main_win, lineno, c, "%c", long_help[lineno + delta][c]);
         }

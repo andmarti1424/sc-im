@@ -20,6 +20,7 @@
 #include "format.h"
 #include "interp.h"
 #include "utils/string.h"
+#include "utils/dictionary.h"
 #include "cmds_edit.h"
 #include "color.h"   // for set_ucolor
 #include "xmalloc.h" // for scxfree
@@ -276,13 +277,28 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
 
     write_cells(f, r0, c0, rn, cn, r0, c0);
 
-    // write blocked cells
     for (r = r0; r <= rn; r++) {
         pp = ATBL(tbl, r, c0);
         for (c = c0; c <= cn; c++, pp++)
             if (*pp) {
+                // write blocked cells
                 if ((*pp)->flags & is_locked)
                     (void) fprintf(f, "lock %s%d\n", coltoa((*pp)->col), (*pp)->row);
+
+                // Write ucolors
+                if ((*pp)->ucolor != NULL) {
+                    char line[BUFFERSIZE];
+                    sprintf(line, "fg=%d bg=%d", (*pp)->ucolor->fg, (*pp)->ucolor->bg);
+
+                    if ((*pp)->ucolor->bold)      sprintf(line + strlen(line), " bold=1");
+                    if ((*pp)->ucolor->dim)       sprintf(line + strlen(line), " dim=1");
+                    if ((*pp)->ucolor->reverse)   sprintf(line + strlen(line), " reverse=1");
+                    if ((*pp)->ucolor->standout)  sprintf(line + strlen(line), " standout=1");
+                    if ((*pp)->ucolor->underline) sprintf(line + strlen(line), " underline=1");
+                    if ((*pp)->ucolor->blink)     sprintf(line + strlen(line), " blink=1");
+                    (void) fprintf(f, "cellcolor %s%d \"%s\"\n", coltoa((*pp)->col), (*pp)->row, line);
+                }
+
                 /*if ((*pp)->nrow >= 0) {
                     (void) fprintf(f, "addnote %s ", v_name((*pp)->row, (*pp)->col));
                     (void) fprintf(f, "%s\n", r_name((*pp)->nrow, (*pp)->ncol, (*pp)->nlastrow, (*pp)->nlastcol));
