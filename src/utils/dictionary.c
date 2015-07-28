@@ -102,6 +102,7 @@ struct nlist * get_nl(struct dictionary * d, char * key) {
    return nl; // por si d->list == NULL
 }
 
+// Obtener el valor de una clave
 char * get(struct dictionary * d, char * key) {
    int i=0;
    if (d == NULL || d->list == NULL) return NULL;
@@ -114,6 +115,21 @@ char * get(struct dictionary * d, char * key) {
    }
    return NULL;
 }
+
+/* Obtener el nombre de una clave a partir de un valor
+char * get_key_name(struct dictionary * d, char * value) {
+   int i=0;
+   if (d == NULL || d->list == NULL) return NULL;
+   struct nlist * nl = d->list;
+   while ( i++ < d->len ) {
+       if (! strcmp(nl->val, value))
+           return nl->key;
+       nl = nl->next;
+   }
+   return NULL;
+}
+*/
+
 
 // Funcion que guarda en un diccionario claves y valores que son contenidos en un string
 void parse_str(struct dictionary * d, char * str) {
