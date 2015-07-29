@@ -521,7 +521,7 @@ Commands for handling cell content:
     :cellcolor <str>
                 changes the color of a cell or a group of cells.
                 Ex.: cellcolor "bg=CYAN fg=white"
-                     cellcolor "fg=RED underline=1"
+                     cellcolor "fg=RED bold=1 underline=1"
 
     :lock       Use this command to lock the current cell or a range of cells, i.e. make them immune to any type of editing. A locked cell can't be changed in any way until it is unlocked.
 
