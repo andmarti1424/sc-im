@@ -265,14 +265,16 @@ token S_GETFORMAT
 %token K_COLORNEG
 %token K_COLORERR
 %token K_BRAILLE
-%token K_BLACK
-%token K_RED
-%token K_GREEN
-%token K_YELLOW
-%token K_BLUE
-%token K_MAGENTA
-%token K_CYAN
-%token K_WHITE
+/*
+token K_BLACK
+token K_RED
+token K_GREEN
+token K_YELLOW
+token K_BLUE
+token K_MAGENTA
+token K_CYAN
+token K_WHITE
+*/
 %token K_TBLSTYLE
 %token K_TBL
 %token K_LATEX

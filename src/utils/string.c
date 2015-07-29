@@ -258,3 +258,8 @@ char * str_replace ( const char * string, const char * substr, const char * repl
     return newstr;
 }
 
+void uppercase(char * sPtr) {
+    while(*sPtr != '\0') {
+         *sPtr++ = toupper(*sPtr);
+    }
+}

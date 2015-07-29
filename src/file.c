@@ -287,16 +287,27 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
 
                 // Write ucolors
                 if ((*pp)->ucolor != NULL) {
-                    char line[BUFFERSIZE];
-                    sprintf(line, "fg=%d bg=%d", (*pp)->ucolor->fg, (*pp)->ucolor->bg);
+                    char strcolor[BUFFERSIZE];
 
-                    if ((*pp)->ucolor->bold)      sprintf(line + strlen(line), " bold=1");
-                    if ((*pp)->ucolor->dim)       sprintf(line + strlen(line), " dim=1");
-                    if ((*pp)->ucolor->reverse)   sprintf(line + strlen(line), " reverse=1");
-                    if ((*pp)->ucolor->standout)  sprintf(line + strlen(line), " standout=1");
-                    if ((*pp)->ucolor->underline) sprintf(line + strlen(line), " underline=1");
-                    if ((*pp)->ucolor->blink)     sprintf(line + strlen(line), " blink=1");
-                    (void) fprintf(f, "cellcolor %s%d \"%s\"\n", coltoa((*pp)->col), (*pp)->row, line);
+                    // decompile int value of color to its string description
+                    linelim=0;
+                    decompile(new((*pp)->ucolor->fg, (struct enode *)0, (struct enode *)0), 0);
+                    del_char(line, 0);
+                    uppercase(line);
+                    sprintf(strcolor, "fg=%s", line);
+                    linelim=0;
+                    decompile(new((*pp)->ucolor->bg, (struct enode *)0, (struct enode *)0), 0);
+                    del_char(line, 0);
+                    uppercase(line);
+                    sprintf(strcolor + strlen(strcolor), " bg=%s", line);
+
+                    if ((*pp)->ucolor->bold)      sprintf(strcolor + strlen(strcolor), " bold=1");
+                    if ((*pp)->ucolor->dim)       sprintf(strcolor + strlen(strcolor), " dim=1");
+                    if ((*pp)->ucolor->reverse)   sprintf(strcolor + strlen(strcolor), " reverse=1");
+                    if ((*pp)->ucolor->standout)  sprintf(strcolor + strlen(strcolor), " standout=1");
+                    if ((*pp)->ucolor->underline) sprintf(strcolor + strlen(strcolor), " underline=1");
+                    if ((*pp)->ucolor->blink)     sprintf(strcolor + strlen(strcolor), " blink=1");
+                    (void) fprintf(f, "cellcolor %s%d \"%s\"\n", coltoa((*pp)->col), (*pp)->row, strcolor);
                 }
 
                 /*if ((*pp)->nrow >= 0) {

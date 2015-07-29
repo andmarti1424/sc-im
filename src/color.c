@@ -210,9 +210,9 @@ void chg_color(char * str) {
 
     // valido tambien que los valores que tengan esas claves sean correctos
     if (
-        (! isnumeric(get(d, "fg")) && get(d_colors_param, get(d, "fg")) == NULL) ||
-        (! isnumeric(get(d, "bg")) && get(d_colors_param, get(d, "bg")) == NULL) ||
-        (! isnumeric(get(d, "type")) && get(d_colors_param, get(d, "type")) == NULL)
+        (get(d_colors_param, get(d, "fg")) == NULL) ||
+        (get(d_colors_param, get(d, "bg")) == NULL) ||
+        (get(d_colors_param, get(d, "type")) == NULL)
     ) {
         error("One of the values specified is wrong. Please check the values of type, fg and bg.");
         destroy_dictionary(d);
@@ -252,8 +252,8 @@ void color_cell(int r, int c, int rf, int cf, char * str) {
 
     // validaciones
     if (
-        (get(d, "fg") != '\0' && ! isnumeric(get(d, "fg")) && get(d_colors_param, get(d, "fg")) == NULL) ||
-        (get(d, "bg") != '\0' && ! isnumeric(get(d, "bg")) && get(d_colors_param, get(d, "bg")) == NULL)) {
+        (get(d, "fg") != '\0' && get(d_colors_param, get(d, "fg")) == NULL) ||
+        (get(d, "bg") != '\0' && get(d_colors_param, get(d, "bg")) == NULL)) {
             error("One of the values specified is wrong. Please check the values of type, fg and bg.");
             destroy_dictionary(d);
             return;
@@ -290,10 +290,10 @@ void color_cell(int r, int c, int rf, int cf, char * str) {
             }
 
             if (get(d, "bg") != '\0')
-                n->ucolor->bg = isnumeric(get(d, "bg")) ? atoi(get(d, "bg")) : atoi(get(d_colors_param, get(d, "bg")));
+                n->ucolor->bg = atoi(get(d_colors_param, get(d, "bg")));
 
             if (get(d, "fg") != '\0')
-                n->ucolor->fg = isnumeric(get(d, "fg")) ? atoi(get(d, "fg")) : atoi(get(d_colors_param, get(d, "fg")));
+                n->ucolor->fg = atoi(get(d_colors_param, get(d, "fg")));
 
             if (get(d, "bold")      != '\0')     n->ucolor->bold = atoi(get(d, "bold"));
             if (get(d, "dim")       != '\0')     n->ucolor->dim       = atoi(get(d, "dim"));
