@@ -516,12 +516,12 @@ Commands for handling cell content:
                      a. the .scimrc file stored in your $HOME variable
                      b. in current .sc file.
                 The format is similar:
-                Ex.: color "type=HEADINGS fg=BLACK bg=YELLOW bold=0"
+                Ex.        :color "type=HEADINGS fg=BLACK bg=YELLOW bold=0"
 
     :cellcolor <str>
                 changes the color of a cell or a group of cells.
-                Ex.: cellcolor "bg=CYAN fg=white"
-                     cellcolor "fg=RED bold=1 underline=1"
+                Ex.:       :cellcolor "bg=CYAN fg=WHITE"
+                           :cellcolor "fg=RED bold=1 underline=1"
 
     :lock       Use this command to lock the current cell or a range of cells, i.e. make them immune to any type of editing. A locked cell can't be changed in any way until it is unlocked.
 
