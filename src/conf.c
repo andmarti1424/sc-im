@@ -9,9 +9,11 @@ void store_default_config_values() {
     put(user_conf_d, "half_page_scroll", "0");
     put(user_conf_d, "autocalc", "1");
     put(user_conf_d, "numeric", "0");
+    put(user_conf_d, "nocurses", "0");
     put(user_conf_d, "newline_action", "0");
     put(user_conf_d, "external_functions", "0");
     put(user_conf_d, "xlsx_readformulas", "0");
+    put(user_conf_d, "quit_afterload", "0");
 
     // we calc get gmtoffset
     #ifdef USELOCALE
