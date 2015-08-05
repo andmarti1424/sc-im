@@ -6,6 +6,8 @@
 #include "string.h"
 #include "macros.h"
 #include "color.h"          // for set_ucolor
+#include "conf.h"
+#include "sc.h"
 #include "block.h"
 #include "utils/string.h"
 
@@ -17,7 +19,7 @@ int replace_maps (struct block * b) {
     int r = 0;
 
     if (++mapdepth == 1000) {
-        error("recursive mapping");
+        scerror("recursive mapping");
         flush_buf(b);
         mapdepth = 0;
         return 0;
@@ -32,7 +34,7 @@ int replace_maps (struct block * b) {
 
             // se reemplaza contenido m->in por m->out en la lista b
             if (replace_block_in_block(b, m->in, m->out) == -1) {
-                error("error replacing maps");
+                scerror("error replacing maps");
                 return -1;
             }
             r = 1;

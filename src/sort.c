@@ -12,6 +12,7 @@ Adaptation of Chuck Martin's code - <nrocinu@myrealbox.com>
 #include "macros.h"
 #include "yank.h"
 #include "cmds.h"
+#include "conf.h"
 #include "color.h"   // for set_ucolor
 #include "xmalloc.h" // for scxfree
 
@@ -62,7 +63,7 @@ void sortrange(struct ent * left, struct ent * right, char * criteria) {
                     sort[howmany].direction = -1;
                     break;
                 default:
-                    error("Invalid sort criteria");
+                    scerror("Invalid sort criteria");
                     return;
             }
             switch (criteria[cp++]) {
@@ -73,20 +74,20 @@ void sortrange(struct ent * left, struct ent * right, char * criteria) {
                     sort[howmany].type = 1;
                     break;
                 default:
-                    error("Invalid sort criteria");
+                    scerror("Invalid sort criteria");
                     return;
             }
             if (criteria[cp]) {
                 col = toupper(criteria[cp++]) - 'A';
             } else {
-                error("Invalid sort criteria");
+                scerror("Invalid sort criteria");
                 return;
             }
             if (criteria[cp] && criteria[cp] != '+' && criteria[cp] != '-' && criteria[cp] != ';')
                 col = (col + 1) * 26 + toupper(criteria[cp++]) - 'A';
             sort[howmany].column = col;
             if (col < minc || col > maxc) {
-                error("Invalid sort criteria");
+                scerror("Invalid sort criteria");
                 return;
             }
             cp++;
