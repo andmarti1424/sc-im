@@ -15,6 +15,7 @@
 #include <limits.h>
 #include "lex.h"
 #include "sc.h"
+#include "conf.h"
 
 typedef int bool;
 enum { false, true };
@@ -180,7 +181,7 @@ int yylex() {
         if (setjmp(fpe_buf)) {
             (void) signal(SIGFPE, sig_save);
             yylval.fval = v;
-            error("Floating point exception\n");
+            scerror("Floating point exception\n");
             isfunc = isgoto = 0;
             tokenst = NULL;
             return FNUMBER;

@@ -9,6 +9,7 @@
 #include "color.h"
 #include "utils/string.h"
 #include "help.h"
+#include "conf.h"
 
 static char ** long_help;
 static int delta = 0;
@@ -71,7 +72,7 @@ int load_help () {
 // main function of help
 void help() {
     if (load_help() == -1) {
-        error("Cannot open help file");
+        scerror("Cannot open help file");
         return;
     }
     delta = 0;
@@ -225,7 +226,7 @@ void find_word(char * word, char order) {
         for (i = delta + 1; i < max - 1; i++) {
             if ((look_result = str_in_str(long_help[i], word)) >= 0) {
                 delta = i;
-                info("");
+                //scinfo("");
                 break;
             }
         }
@@ -233,14 +234,14 @@ void find_word(char * word, char order) {
         for (i = delta - 1; i > 0; i--) {
             if ((look_result = str_in_str(long_help[i], word)) >= 0) {
                 delta = i;
-                info("");
+                //scinfo("");
                 break;
             }
         }
     }
 
     if (look_result == -1) {
-        info("Pattern not found.");
+        scinfo("Pattern not found.");
     }
     set_ucolor(input_win, &ucolors[NORMAL]);
     return;
