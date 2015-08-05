@@ -409,4 +409,6 @@ extern void str_search(char *s, int firstrow, int firstcol, int lastrow, int las
 
 extern double eval_result;
 extern char * seval_result;
+void scerror(char * s, ...);
+void scinfo(char * s, ...);
 #endif // SC_H_
