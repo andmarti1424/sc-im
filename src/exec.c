@@ -6,9 +6,11 @@
 #include <sys/wait.h> // for wait
 
 #include "macros.h"
+#include "conf.h"
 #include "color.h"
 #include "utils/string.h"
 #include "screen.h"
+#include "sc.h"
 
 int exec_cmd (char * line) {
     int waitres;
@@ -18,7 +20,7 @@ int exec_cmd (char * line) {
 
     int my_pipe[2];
     if (pipe(my_pipe) == -1) {
-        error("Error creating pipe");
+        scerror("Error creating pipe");
         getchar();
         reset_prog_mode();
         refresh();
@@ -28,7 +30,7 @@ int exec_cmd (char * line) {
 
     pid_t child_id = fork();
     if (child_id == -1) {
-        error("Fork error");
+        scerror("Fork error");
         getchar();
         reset_prog_mode();
         refresh();
@@ -41,9 +43,16 @@ int exec_cmd (char * line) {
         dup2(my_pipe[1], 1); // redirect stdout
 
         char * l = line;
+        int j;
         l = rtrim(ltrim(line, ' '), ' ');
         char ** param = split(l, ' ', 1);
         execvp(param[0], param);
+
+        for (j=0; param[j]; j++) {
+            free(param[j]);
+        }
+        free(param);
+        param = NULL;
 
         printf("Error executing command. ");
         exit(-1);
