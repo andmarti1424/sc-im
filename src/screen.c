@@ -13,6 +13,7 @@
 #include "sc.h"
 #include "cmds.h"
 #include "color.h"
+#include "conf.h"
 #include "version.h"
 #include "file.h"
 #include "format.h"
@@ -110,6 +111,7 @@ void do_welcome() {
 // function that refreshes grid of screen
 void update(void) {
     if (cmd_multiplier > 1) return;
+    if ( atoi(get_conf_value("nocurses"))) return;
 
     // Limpio desde comienzo hacia to bottom
     //wmove(main_win, RESROW, rescol);
@@ -709,7 +711,7 @@ int get_formated_value(struct ent ** p, int col, char * value) {
 int scstrlen(char * in) {
     int i, count = 0, neg = 0;
     for (i = 0; i < strlen(in); i++) {
-        //debug("%d - %c", in[i], in[i]);
+        //scdebug("%d - %c", in[i], in[i]);
         if (in[i] < 0) neg++;
         else count++;
     }
@@ -718,7 +720,7 @@ int scstrlen(char * in) {
 */
 
 void show_text_content_of_cell(WINDOW * win, struct ent ** p, int row, int col, int r, int c) {
-    //debug("%d %d %d %d", row, col, r, c);
+    //scdebug("%d %d %d %d", row, col, r, c);
     char value[FBUFLEN];      // the value to be printed without padding
     char field[FBUFLEN] = ""; // the value with padding and alignment    
     int col_width = fwidth[col];    
@@ -727,7 +729,7 @@ void show_text_content_of_cell(WINDOW * win, struct ent ** p, int row, int col, 
 
     int str_len  = strlen((*p)->label);
     //int str_len  = scstrlen((*p)->label);
-    //debug("FIN: %d", str_len);
+    //scdebug("FIN: %d", str_len);
     strcpy(value, (*p)->label);
 
     // in case there is a format
@@ -769,7 +771,7 @@ void show_text_content_of_cell(WINDOW * win, struct ent ** p, int row, int col, 
         left = col_width - str_len;
         left = left < 0 ? 0 : left;
         flen = str_len;
-        //debug("%d %d", left, flen);
+        //scdebug("%d %d", left, flen);
         while (left-- && flen++) add_char(field, ' ', flen-1);
         
         //sprintf(field + strlen(field), "%0*d", left, 0);
@@ -797,7 +799,7 @@ void show_text_content_of_cell(WINDOW * win, struct ent ** p, int row, int col, 
 //
     }
 
-    //debug("%d %d-%s-", r, c, field);
+    //scdebug("%d %d-%s-", r, c, field);
     mvwprintw(win, r, c, "%s", field);
     wclrtoeol(win);
 
@@ -883,7 +885,7 @@ void show_text(char * val) {
     (void) strcat(px, pager);
     FILE * f = openfile(px, &pid, NULL);
     if (!f) {
-        error("Can't open pipe to %s", pager);
+        scerror("Can't open pipe to %s", pager);
         return;
     }
     def_prog_mode();
