@@ -4,7 +4,9 @@
 #include "vmtbl.h"
 #include "sc.h"
 #include "macros.h"
-#include "color.h" // for set_ucolor
+#include "color.h"  // for set_ucolor
+#include "conf.h"   // for set_ucolor
+#include <stdlib.h> // for atoi
 
 //LINUX - PSC not def
 
@@ -43,7 +45,7 @@ void checkbounds(int *rowp, int *colp) {
     newptr = (type *)scxrealloc((char *)oldptr, \
         (unsigned)(nelem * sizeof(type))); \
     if (newptr == (type *)NULL) { \
-    error(msg); \
+    scerror(msg); \
     return (FALSE); \
     } \
     oldptr = newptr /* wait incase we can't alloc */
@@ -103,7 +105,7 @@ int growtbl(int rowcol, int toprow, int topcol) {
 #endif /* !PSC */
     if ((rowcol == GROWCOL) || (rowcol == GROWBOTH)) {
         if ((rowcol == GROWCOL) && ((maxcols == ABSMAXCOLS) || (topcol >= ABSMAXCOLS))) {
-            error(nowider);
+            scerror(nowider);
             return (FALSE);
         }
 
@@ -117,7 +119,7 @@ int growtbl(int rowcol, int toprow, int topcol) {
     }
 
     if (newrows > MAXROWS) { // 08/12/2014
-        error(nolonger);
+        scerror(nolonger);
         return (FALSE);
     }
 
@@ -161,7 +163,7 @@ int growtbl(int rowcol, int toprow, int topcol) {
         /* [re]alloc the space for each row */
         for (i = 0; i < maxrows; i++) {
             if ((tbl[i] = (struct ent **) scxrealloc((char *)tbl[i], (unsigned) (newcols * sizeof(struct ent **)))) == (struct ent **)0) {
-                error(nowider);
+                scerror(nowider);
                 return(FALSE);
             }
             for (nullit = ATBL(tbl, i, maxcols), cnt = 0; cnt < newcols - maxcols; cnt++, nullit++)
@@ -175,7 +177,7 @@ int growtbl(int rowcol, int toprow, int topcol) {
     /* fill in the bottom of the table */
     for (; i < newrows; i++) {
         if ((tbl[i] = (struct ent **) scxmalloc((unsigned)(newcols * sizeof(struct ent **)))) == (struct ent **) 0) {
-            error(nowider);
+            scerror(nowider);
             return(FALSE);
         }
         for (nullit = tbl[i], cnt = 0; cnt < newcols; cnt++, nullit++)
