@@ -66,7 +66,7 @@ int open_xls(char * fname, char * encoding) {
 
             struct st_xf_data * xf = &pWB->xfs.xf[cell->xf];
 
-            //debug("%d %d fmt:%d id:%x %d %d", r, c, xf->format, cell->id, cell->d, cell->l);
+            //scdebug("%d %d fmt:%d id:%x %d %d", r, c, xf->format, cell->id, cell->d, cell->l);
 
             // these are dates
             if (((xf->format >= 14 && xf->format <= 22) ||
