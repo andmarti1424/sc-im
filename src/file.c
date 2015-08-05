@@ -70,9 +70,10 @@ void erasedb() {
     optimize = 0;
     currow = curcol = 0;
 
-    if (usecurses && has_colors())
-        color_set(0, NULL);
+//    if (usecurses && has_colors())
+//        color_set(0, NULL);
 
+/*
     if (mdir) {
         scxfree(mdir);
         mdir = NULL;
@@ -86,6 +87,7 @@ void erasedb() {
             scxfree(fkey[c]);
             fkey[c] = NULL;
         }
+*/
 
     // Load $HOME/.scrc if present.
     if ((home = getenv("HOME"))) {
@@ -113,14 +115,14 @@ int file_exists(const char * fname) {
 
 // This function checks if a file suffered mods since it was open
 int modcheck() {
-    if (modflg) {
-        error("File not saved since last change. Add '!' to force");
+    if (modflg && ! atoi(get_conf_value("nocurses"))) {
+        scerror("File not saved since last change. Add '!' to force");
         return(1);
     }
     return 0;
 }
 
-// This function handles the save file process in formato SC
+// This function handles the save file process in SCIM format
 // returns 0 if OK
 // return -1 on error
 int savefile() {
@@ -128,7 +130,7 @@ int savefile() {
     char name[BUFFERSIZE];
 
     if (! curfile[0] && strlen(inputline) < 3) { // casos ":w" ":w!" ":x" ":x!"
-        error("There is no filename");
+        scerror("There is no filename");
         return -1;
     }
 
@@ -139,7 +141,7 @@ int savefile() {
     del_range_chars(name, 0, 1 + force_rewrite);
 
     if (! force_rewrite && file_exists(name)) {
-        error("File already exists. Use \"!\" to force rewrite.");
+        scerror("File already exists. Use \"!\" to force rewrite.");
         return -1;
     }
 
@@ -148,7 +150,7 @@ int savefile() {
     }
 
     if (writefile(curfile, 0, 0, maxrow, maxcol) < 0) {
-        error("File could not be saved");
+        scerror("File could not be saved");
         return -1;
     }
     return 0;
@@ -160,30 +162,11 @@ int writefile(char * fname, int r0, int c0, int rn, int cn) {
     register FILE *f;
     char save[PATHLEN];
     char tfname[PATHLEN];
-    long namelen;
-    char *tpp;
+    //long namelen;
+    //char * tpp;
     int pid;
 
-    /* find the extension and mapped plugin if exists
-    if ((p = strrchr(fname, '.'))) {
-    if ((plugin = findplugin(p+1, 'w')) != NULL) {
-        if (!plugin_exists(plugin, strlen(plugin), save + 1)) {
-        error("plugin not found");
-        return -1;
-        }
-        *save = '|';
-        if ((strlen(save) + strlen(fname) + 20) > PATHLEN) {
-        error("Path too long");
-        return -1;
-        }
-        sprintf(save + strlen(save), " %s%d:", coltoa(c0), r0);
-        sprintf(save + strlen(save), "%s%d \"%s\"", coltoa(cn), rn, fname);
-        // pass it to readfile as an advanced macro
-        readfile(save, 0);
-        return (0);
-    }
-    }*/
-
+/*
     if (*fname == '\0') {
         if (isatty(STDOUT_FILENO) || *curfile != '\0')
             fname = curfile;
@@ -192,7 +175,9 @@ int writefile(char * fname, int r0, int c0, int rn, int cn) {
             return 0;
         }
     }
+*/
 
+/*
     if ((tpp = strrchr(fname, '/')) == NULL)
         namelen = pathconf(".", _PC_NAME_MAX);
     else {
@@ -200,8 +185,10 @@ int writefile(char * fname, int r0, int c0, int rn, int cn) {
         namelen = pathconf(fname, _PC_NAME_MAX);
         *tpp = '/';
     }
+*/
 
     (void) strcpy(tfname, fname);
+/*
     for (tpp = tfname; *tpp != '\0'; tpp++)
         if (*tpp == '\\' && *(tpp + 1) == '"')
             (void) memmove(tpp, tpp + 1, strlen(tpp));
@@ -217,28 +204,31 @@ int writefile(char * fname, int r0, int c0, int rn, int cn) {
             strcat(tfname, ".");
             strcat(tfname, scext);
         }
+*/
 
     (void) strcpy(save, tfname);
+/*
     for (tpp = save; *tpp != '\0'; tpp++)
     if (*tpp == '"') {
         (void) memmove(tpp + 1, tpp, strlen(tpp) + 1);
         *tpp++ = '\\';
     }
+*/
 
     if ((f = openfile(tfname, &pid, NULL)) == NULL) {
-        error("Can't create file \"%s\"", save);
+        scerror("Can't create file \"%s\"", save);
         return -1;
     }
 
-    info("Writing file \"%s\"...", save);
+    scinfo("Writing file \"%s\"...", save);
     write_fd(f, r0, c0, rn, cn);
     
     closefile(f, pid, 0);
 
-    if (!pid) {
+    if (! pid) {
         (void) strcpy(curfile, save);
         modflg = 0;
-        info("File \"%s\" written", curfile);
+        scinfo("File \"%s\" written", curfile);
     }
 
     return 0;
@@ -267,13 +257,15 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
     //write_ranges(f);
     write_marks(f);
 
-    if (mdir) 
+    /*
+    if (mdir)
         (void) fprintf(f, "mdir \"%s\"\n", mdir);
-    if (autorun) 
+    if (autorun)
         (void) fprintf(f, "autorun \"%s\"\n", autorun);
 
     for (c = 0; c < FKEYS; c++)
         if (fkey[c]) (void) fprintf(f, "fkey %d = \"%s\"\n", c + 1, fkey[c]);
+    */
 
     write_cells(f, r0, c0, rn, cn, r0, c0);
 
@@ -291,15 +283,17 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
 
                     // decompile int value of color to its string description
                     linelim=0;
-                    decompile(new((*pp)->ucolor->fg, (struct enode *)0, (struct enode *)0), 0);
-                    del_char(line, 0);
+                    struct enode * e = new((*pp)->ucolor->fg, (struct enode *)0, (struct enode *)0);
+                    decompile(e, 0);
                     uppercase(line);
                     sprintf(strcolor, "fg=%s", line);
+                    free(e);
                     linelim=0;
-                    decompile(new((*pp)->ucolor->bg, (struct enode *)0, (struct enode *)0), 0);
-                    del_char(line, 0);
+                    e = new((*pp)->ucolor->bg, (struct enode *)0, (struct enode *)0);
+                    decompile(e, 0);
                     uppercase(line);
                     sprintf(strcolor + strlen(strcolor), " bg=%s", line);
+                    free(e);
 
                     if ((*pp)->ucolor->bold)      sprintf(strcolor + strlen(strcolor), " bold=1");
                     if ((*pp)->ucolor->dim)       sprintf(strcolor + strlen(strcolor), " dim=1");
@@ -402,7 +396,8 @@ int readfile(char * fname, int eraseflg) {
     // If file is an xlsx file, we import it
     } else if (len > 5 && ! strcasecmp( & fname[len-5], ".xlsx")){
         #ifndef XLSX
-        error("XLSX import support not compiled in");
+        if (! atoi(get_conf_value("nocurses")))
+            scerror("XLSX import support not compiled in");
         #else
         open_xlsx(fname, "UTF-8");
         #endif
@@ -413,7 +408,7 @@ int readfile(char * fname, int eraseflg) {
     // If file is an xls file, we import it
     } else if (len > 4 && ! strcasecmp( & fname[len-4], ".xls")){
         #ifndef XLS
-        error("XLS import support not compiled in");
+        scerror("XLS import support not compiled in");
         #else
         open_xls(fname, "UTF-8");
         #endif
@@ -444,71 +439,34 @@ int readfile(char * fname, int eraseflg) {
         modflg = 0;
         return 1;
 
-    } else {
-        info("\"%s\" is not a SCIM compatible file", fname);
+    } else if (! atoi(get_conf_value("nocurses"))) {
+        scinfo("\"%s\" is not a SCIM compatible file", fname);
         return -1;
     }
 
     register FILE * f;
     char save[PATHLEN];
-    //int tempautolabel;
-    //char *p;
-    //char *plugin;
     int pid = 0;
     int rfd = STDOUT_FILENO;//, savefd;
 
-    //tempautolabel = autolabel;    /* turn off auto label when */
-    //autolabel = 0;            /* reading a file */
-
-    if (*fname == '*' && mdir) { 
-       (void) strcpy(save, mdir);
-       (void) strcat(save, fname);
-    } else {
+    //if (*fname == '*' && mdir) {
+    //   (void) strcpy(save, mdir);
+    //   (void) strcat(save, fname);
+    //} else {
         if (*fname == '\0')
             fname = curfile;
         (void) strcpy(save, fname);
-    }
-
-    /*if ((p = strrchr(fname, '.')) && (fname[0] != '|')) {  // exclude macros
-    if ((plugin = findplugin(p+1, 'r')) != NULL) {
-        if (!(plugin_exists(plugin, strlen(plugin), save + 1))) {
-        error("plugin not found");
-        return -1;
-        }
-        *save = '|';
-        if ((strlen(save) + strlen(fname) + 2) > PATHLEN) {
-        error("Path too long");
-        return -1;
-        }
-        sprintf(save + strlen(save), " \"%s\"", fname);
-        eraseflg = 0;
-        // get filename: could be preceded by params if this is a save
-        while (p > fname) {
-        if (*p == ' ') {
-            p++;
-            break;
-        }
-        p--;
-        }
-        (void) strcpy(curfile, p);
-    }
-    }*/
-
-    // what is this?
-    //if (eraseflg && strcmp(fname, curfile) && modcheck(" first"))
-    //    return 0;
+    //}
 
     if (fname[0] == '-' && fname[1] == '\0') {
         f = stdin;
         *save = '\0';
     } else {
         if ((f = openfile(save, &pid, &rfd)) == NULL) {
-            error("Can't read file \"%s\"", save);
-            //autolabel = tempautolabel;
+            scerror("Can't read file \"%s\"", save);
             return 0;
         } else if (eraseflg) {
-            info("Reading file \"%s\"", save);
-            //refresh();
+            scinfo("Reading file \"%s\"", save);
         }
     }
     if (*fname == '|')
@@ -517,8 +475,6 @@ int readfile(char * fname, int eraseflg) {
     if (eraseflg) erasedb();
 
     loading++;
-    //savefd = macrofd;
-    //macrofd = rfd;
     while (! brokenpipe && fgets(line, sizeof(line), f)) {
         if (line[0] == '|' && pid != 0) {
             line[0] = ' ';
@@ -527,7 +483,6 @@ int readfile(char * fname, int eraseflg) {
         if (line[0] != '#') (void) yyparse();
     }
 
-    //macrofd = savefd;
     --loading;
     closefile(f, pid, rfd);
     if (f == stdin) {
@@ -538,12 +493,12 @@ int readfile(char * fname, int eraseflg) {
         (void) strcpy(curfile, save);
         modflg = 0;
         cellassign = 0;
-        if (autorun && !skipautorun)
+        /*if (autorun && ! skipautorun)
             (void) readfile(autorun, 0);
         skipautorun = 0;
+        */
         EvalAll();
     }
-    //autolabel = tempautolabel;
     return 1;
 }
 
@@ -660,7 +615,7 @@ FILE * openfile(char *fname, int *rpid, int *rfd) {
     fname++;                             // Skip | 
     efname = findhome(fname);
     if (pipe(pipefd) < 0 || (rfd != NULL && pipe(pipefd+2) < 0)) {
-        error("Can't make pipe to child");
+        scerror("Can't make pipe to child");
         *rpid = 0;
         return (0);
     }
@@ -683,7 +638,7 @@ FILE * openfile(char *fname, int *rpid, int *rfd) {
         *rpid = pid;
         if ((f = fdopen(pipefd[(rfd==NULL?1:2)], rfd==NULL?"w":"r")) == NULL) {
             (void) kill(pid, 9);
-            error("Can't fdopen %sput", rfd==NULL?"out":"in");
+            scerror("Can't fdopen %sput", rfd==NULL?"out":"in");
             (void) close(pipefd[1]);
             if (rfd != NULL)
                 (void) close(pipefd[3]);
@@ -715,7 +670,7 @@ void closefile(FILE *f, int pid, int rfd) {
             //clear();
         } else {
             close(rfd);
-            if (usecurses) {
+            if (! atoi(get_conf_value("nocurses"))) {
                 cbreak();
                 nonl();
                 noecho ();
@@ -726,7 +681,7 @@ void closefile(FILE *f, int pid, int rfd) {
         }
     }
     if (brokenpipe) {
-        error("Broken pipe");
+        scerror("Broken pipe");
         brokenpipe = FALSE;
     }
 }
@@ -777,7 +732,7 @@ int import_csv(char * fname, char d) {
 
     //if ((f = openfile(fname, & pid, & rfd)) == NULL) {
     if ((f = fopen(fname , "r")) == NULL) {
-        error("Can't read file \"%s\"", fname);
+        scerror("Can't read file \"%s\"", fname);
         return -1;
     }
 
@@ -867,12 +822,12 @@ void do_export(int r0, int c0, int rn, int cn) {
         sprintf(ruta + strlen(ruta), ".%s", type_export);
 
     } else {
-        error("No filename specified !");
+        scerror("No filename specified !");
         return;
     }
 
     if (! force_rewrite && file_exists(ruta) && strlen(ruta) > 0) {
-        error("File %s already exists. Use \"!\" to force rewrite.", ruta);
+        scerror("File %s already exists. Use \"!\" to force rewrite.", ruta);
         return;
     }
 
@@ -891,10 +846,10 @@ void export_delim(char * fname, char coldelim, int r0, int c0, int rn, int cn) {
     register struct ent **pp;    
     int pid;
     
-    info("Writing file \"%s\"...", fname);
+    scinfo("Writing file \"%s\"...", fname);
 
     if ((f = openfile(fname, &pid, NULL)) == (FILE *)0) {
-        error ("Can't create file \"%s\"", fname);
+        scerror ("Can't create file \"%s\"", fname);
         return;
     }
 
@@ -939,7 +894,7 @@ void export_delim(char * fname, char coldelim, int r0, int c0, int rn, int cn) {
     closefile(f, pid, 0);
 
     if (! pid) {
-        info("File \"%s\" written", fname);
+        scinfo("File \"%s\" written", fname);
     }
 }
 
