@@ -13,6 +13,7 @@
 #include "color.h"
 #include "screen.h"
 #include "undo.h"
+#include "conf.h"
 
 static struct dictionary * d_colors_param = NULL;
 
@@ -203,7 +204,7 @@ void chg_color(char * str) {
 
     // valido que existan las minimas claves necesarias para cambiar un color
     if (get(d, "fg") == '\0' || get(d, "bg") == '\0' || get(d, "type") == '\0') {
-        error("Color definition incomplete");
+        scerror("Color definition incomplete");
         destroy_dictionary(d);
         return;
     }
@@ -214,7 +215,7 @@ void chg_color(char * str) {
         (get(d_colors_param, get(d, "bg")) == NULL) ||
         (get(d_colors_param, get(d, "type")) == NULL)
     ) {
-        error("One of the values specified is wrong. Please check the values of type, fg and bg.");
+        scerror("One of the values specified is wrong. Please check the values of type, fg and bg.");
         destroy_dictionary(d);
         return;
     }
@@ -252,9 +253,9 @@ void color_cell(int r, int c, int rf, int cf, char * str) {
 
     // validaciones
     if (
-        (get(d, "fg") != '\0' && get(d_colors_param, get(d, "fg")) == NULL) ||
-        (get(d, "bg") != '\0' && get(d_colors_param, get(d, "bg")) == NULL)) {
-            error("One of the values specified is wrong. Please check the values of type, fg and bg.");
+        ((get(d, "fg") != '\0' && get(d_colors_param, get(d, "fg")) == NULL) ||
+        (get(d, "bg") != '\0' && get(d_colors_param, get(d, "bg")) == NULL))) {
+            scerror("One of the values specified is wrong. Please check the values of type, fg and bg.");
             destroy_dictionary(d);
             return;
     }
