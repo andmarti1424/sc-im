@@ -70,6 +70,7 @@ NOT implemented:
 #include "undo.h"
 #include "macros.h"
 #include "curses.h"
+#include "conf.h"
 #include "sc.h"
 #include "cmds.h"
 #include "color.h" // for set_ucolor
@@ -322,10 +323,10 @@ void undo_hide_show(int row, int col, char type, int arg) {
 // se agregan los ent de removed y se borran los de added
 void do_undo() {
     if (undo_list == NULL || undo_list_pos == 0) {
-        error("Not UNDO's left");
+        scerror("Not UNDO's left");
         return;
     }
-    //info("%d %d", undo_list_pos, len_undo_list());
+    //scinfo("%d %d", undo_list_pos, len_undo_list());
 
     int ori_currow = currow;
     int ori_curcol = curcol;
@@ -412,7 +413,7 @@ void do_undo() {
 
     if (undo_list->p_ant != NULL) undo_list = undo_list->p_ant;
     undo_list_pos--;
-    info("Change: %d of %d", undo_list_pos, len_undo_list());
+    scinfo("Change: %d of %d", undo_list_pos, len_undo_list());
 
     return;
 }
@@ -422,10 +423,10 @@ void do_undo() {
 // se agregan los ent de added y se borran los de removed
 void do_redo() {
     if ( undo_list == NULL || undo_list_pos == len_undo_list()  ) {
-        error("Not REDO's left");
+        scerror("Not REDO's left");
         return;
     }
-    //info("%d %d", undo_list_pos, len_undo_list());
+    //scinfo("%d %d", undo_list_pos, len_undo_list());
 
     int ori_currow = currow;
     int ori_curcol = curcol;
@@ -513,7 +514,7 @@ void do_redo() {
     // increase modflg
     modflg= mf + 1;
 
-    info("Change: %d of %d", undo_list_pos + 1, len_undo_list());
+    scinfo("Change: %d of %d", undo_list_pos + 1, len_undo_list());
     undo_list_pos++;
 
     return;
