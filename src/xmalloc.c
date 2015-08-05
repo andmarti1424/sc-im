@@ -4,6 +4,7 @@
 #include "xmalloc.h"
 #include "macros.h"
 #include "color.h"
+#include "conf.h"
 
 extern void free();
 extern void exit();
@@ -50,5 +51,5 @@ void scxfree(char *p) {
 void fatal(char * str) {
     //fprintf(stderr,"%s\n", str);
     //exit(1);
-    debug("%s", str);
+    scerror("%s", str);
 }
