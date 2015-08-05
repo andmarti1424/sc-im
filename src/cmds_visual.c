@@ -172,10 +172,10 @@ void do_visualmode(struct block * buf) {
 
         struct ent * e = tick(buf->pnext->value);
         if (row_hidden[e->row]) {
-            error("Cell row is hidden");
+            scerror("Cell row is hidden");
             return;
         } else if (col_hidden[e->col]) {
-            error("Cell column is hidden");
+            scerror("Cell column is hidden");
             return;
         }
         r->tlrow = r->tlrow < e->row ? r->tlrow : e->row;
@@ -262,10 +262,10 @@ void do_visualmode(struct block * buf) {
             if (loc != NULL) {
                 f = nl_langinfo(D_FMT);
             } else {
-                error("No locale set. Nothing changed");
+                scerror("No locale set. Nothing changed");
             }
             if (any_locked_cells(r->tlrow, r->tlcol, r->brrow, r->brcol)) {
-                error("Locked cells encountered. Nothing changed");           
+                scerror("Locked cells encountered. Nothing changed");
                 return;
             }
             dateformat(lookat(r->tlrow, r->tlcol), lookat(r->brrow, r->brcol), f);
@@ -274,7 +274,7 @@ void do_visualmode(struct block * buf) {
         clr_header(input_win, 0);
         show_header(input_win);
         #else
-            info("Build made without USELOCALE enabled");
+            scinfo("Build made without USELOCALE enabled");
         #endif 
 
     // EDITION COMMANDS
@@ -290,7 +290,7 @@ void do_visualmode(struct block * buf) {
     // left / right / center align
     } else if (buf->value == '{' || buf->value == '}' || buf->value == '|') {
         if (any_locked_cells(r->tlrow, r->tlcol, r->brrow, r->brcol)) {
-            error("Locked cells encountered. Nothing changed");           
+            scerror("Locked cells encountered. Nothing changed");
             return;
         }
         char interp_line[100];
@@ -364,7 +364,7 @@ void do_visualmode(struct block * buf) {
         int ic = cmd_multiplier + 1;
         if ( any_locked_cells(r->tlrow, r->tlcol, r->brrow, r->brcol) &&
            (buf->pnext->value == 'h' || buf->pnext->value == 'k') ) {
-            error("Locked cells encountered. Nothing changed");           
+            scerror("Locked cells encountered. Nothing changed");
             return;
         }
 #ifdef UNDO
