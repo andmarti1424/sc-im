@@ -88,11 +88,11 @@ void do_normalmode(struct block * buf) {
             unselect_ranges();
             e = tick(buf->pnext->value);
             if (row_hidden[e->row]) {
-                error("Cell row is hidden");
+                scerror("Cell row is hidden");
                 break;
             }
             if (col_hidden[e->col]) {
-                error("Cell column is hidden");
+                scerror("Cell column is hidden");
                 break;
             }
             currow = e->row;
@@ -126,7 +126,7 @@ void do_normalmode(struct block * buf) {
             if (loc != NULL) {
                 f = nl_langinfo(D_FMT);
             } else {
-                error("No locale set. Nothing changed");
+                scerror("No locale set. Nothing changed");
             }
             int p, r = currow, c = curcol, rf = currow, cf = curcol;
             if ( (p = is_range_selected()) != -1) {
@@ -137,14 +137,14 @@ void do_normalmode(struct block * buf) {
                 cf = sr->brcol;
             }
             if (any_locked_cells(r, c, rf, cf)) {
-                error("Locked cells encountered. Nothing changed");           
+                scerror("Locked cells encountered. Nothing changed");
                 return;
             }
             dateformat(lookat(r, c), lookat(rf, cf), f);
             update();
             break;
         #else
-            info("Build made without USELOCALE enabled");
+            scinfo("Build made without USELOCALE enabled");
         #endif 
             }
 
@@ -326,7 +326,7 @@ void do_normalmode(struct block * buf) {
             inputline_pos = 0;
             if (start_edit_mode(buf, 's')) show_header(input_win);
             else {
-                info("No string value to edit");
+                scinfo("No string value to edit");
                 chg_mode('.');
                 show_celldetails(input_win);
                 print_mode(input_win);
@@ -369,7 +369,7 @@ void do_normalmode(struct block * buf) {
                 srange * r = m->rng;
                 yank_area(r->tlrow, r->tlcol, r->brrow, r->brcol, 'a', cmd_multiplier);
                 if (paste_yanked_ents(0, 'c') == -1) {
-                    error("Locked cells encountered. Nothing changed");           
+                    scerror("Locked cells encountered. Nothing changed");
                     break;
                 }
 
@@ -492,7 +492,7 @@ void do_normalmode(struct block * buf) {
                 cf = sr->brcol;
             }
             if ( any_locked_cells(r, c, rf, cf) && (buf->pnext->value == 'h' || buf->pnext->value == 'k') ) {
-                error("Locked cells encountered. Nothing changed");           
+                scerror("Locked cells encountered. Nothing changed");
                 return;
             }
 #ifdef UNDO
@@ -556,7 +556,7 @@ void do_normalmode(struct block * buf) {
 
             if (buf->pnext->value == 'r') {
                 if (any_locked_cells(currow, 0, currow + cmd_multiplier, maxcol)) {
-                    error("Locked cells encountered. Nothing changed");           
+                    scerror("Locked cells encountered. Nothing changed");
                     return;
                 }
 #ifdef UNDO
@@ -575,7 +575,7 @@ void do_normalmode(struct block * buf) {
 
             } else if (buf->pnext->value == 'c') {
                 if (any_locked_cells(0, curcol, maxrow, curcol + cmd_multiplier)) {
-                    error("Locked cells encountered. Nothing changed");           
+                    scerror("Locked cells encountered. Nothing changed");
                     return;
                 }
 #ifdef UNDO
@@ -652,7 +652,7 @@ void do_normalmode(struct block * buf) {
         // paste cell below or left
         case 'p':
             if (paste_yanked_ents(0, 'a') == -1) {
-                error("Locked cells encountered. Nothing changed");           
+                scerror("Locked cells encountered. Nothing changed");
                 break;
             }
             update();
@@ -664,7 +664,7 @@ void do_normalmode(struct block * buf) {
             if (buf->pnext->value == 'v' || buf->pnext->value == 'f' || buf->pnext->value == 'c') {
                 int res = buf->value == 'P' ? paste_yanked_ents(0, buf->pnext->value) : paste_yanked_ents(1, buf->pnext->value); // paste cell above or right
                 if (res == -1) {
-                    error("Locked cells encountered. Nothing changed");           
+                    scerror("Locked cells encountered. Nothing changed");
                     break;
                 }
                 update();
@@ -674,7 +674,7 @@ void do_normalmode(struct block * buf) {
         // paste cell above or right
         case 't':
             if (paste_yanked_ents(1, 'a') == -1) {
-                error("Locked cells encountered. Nothing changed");           
+                scerror("Locked cells encountered. Nothing changed");
                 break;
             }
             update();
@@ -791,7 +791,7 @@ void do_normalmode(struct block * buf) {
             update();
             break;
             #else
-            error("Build was done without UNDO support");
+            scerror("Build was done without UNDO support");
             #endif
 
         // redo
@@ -803,7 +803,7 @@ void do_normalmode(struct block * buf) {
             update();
             break;
             #else
-            error("Build was done without UNDO support");
+            scerror("Build was done without UNDO support");
             #endif
 
         case '{': // left align
@@ -820,7 +820,7 @@ void do_normalmode(struct block * buf) {
                 cf = sr->brcol;
             }
             if (any_locked_cells(r, c, rf, cf)) {
-                error("Locked cells encountered. Nothing changed");           
+                scerror("Locked cells encountered. Nothing changed");
                 return;
             }
 #ifdef UNDO
@@ -873,7 +873,7 @@ void do_normalmode(struct block * buf) {
                 brcol = sr->brcol;
             }
             if (any_locked_cells(tlrow, tlcol, brrow, brcol)) {
-                error("Locked cells encountered. Nothing changed");           
+                scerror("Locked cells encountered. Nothing changed");
                 return;
             }
             if (atoi(get_conf_value("numeric")) == 1) goto numeric;
@@ -889,7 +889,7 @@ void do_normalmode(struct block * buf) {
                     if ( ! p )  {
                         continue;
                     } else if (p->expr && !(p->flags & is_strexpr)) {
-                        //error("Can't increment / decrement a formula");
+                        //scerror("Can't increment / decrement a formula");
                         continue;
                     } else if (p->flags & is_valid) {
 #ifdef UNDO
