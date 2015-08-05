@@ -178,7 +178,7 @@ void do_commandmode(struct block * sb) {
         int i;
         struct ent * p1 = *ATBL(tbl, currow, curcol);
         if (! p1 || ! p1->format) {
-            error("cell has no format");
+            scerror("cell has no format");
             return;
         }
         sprintf(cline, "%s", p1->format);
@@ -295,9 +295,9 @@ void do_commandmode(struct block * sb) {
 
             del_range_chars(cline, 0, 4);
             if ( ! strlen(cline) ) {
-                error("Path to file to load is missing !");
+                scerror("Path to file to load is missing !");
             } else if ( modflg && ! force_rewrite ) {
-                error("Changes were made since last save. Use '!' to force the load");
+                scerror("Changes were made since last save. Use '!' to force the load");
             } else {
                 delete_structures();
                 create_structures();
@@ -390,7 +390,7 @@ void do_commandmode(struct block * sb) {
         } else if ( ! strncmp(inputline, "filteron", 8) ) { //FIXME
             strcpy(interp_line, inputline);
             if ( ! strcmp(inputline, "filteron") && p == -1) { // si no hay un rango seleccionado
-                error("Please specify a range or select one");
+                scerror("Please specify a range or select one");
                 return;
             } else if (p != -1) { // si hay un rango seleccionado
                 char cline [BUFFERSIZE];
@@ -430,7 +430,7 @@ void do_commandmode(struct block * sb) {
                 sprintf(interp_line, "fmt %s%d", coltoa(c), r);
 
             if (any_locked_cells(r, c, rf, cf)) {
-                error("Locked cells encountered. Nothing changed");           
+                scerror("Locked cells encountered. Nothing changed");
                 return;
             }
             int l = strlen(interp_line);
@@ -460,7 +460,7 @@ void do_commandmode(struct block * sb) {
             del_range_chars(interp_line, 0, 9);
             color_cell(r, c, rf, cf, interp_line);
             #else
-            error("Color support not compiled in");
+            scerror("Color support not compiled in");
             chg_mode('.');
             inputline[0]='\0';
             update();
@@ -473,7 +473,7 @@ void do_commandmode(struct block * sb) {
             del_range_chars(interp_line, 0, 5);
             chg_color(interp_line);
             #else
-            error("Color support not compiled in");
+            scerror("Color support not compiled in");
             chg_mode('.');
             inputline[0]='\0';
             update();
@@ -484,7 +484,7 @@ void do_commandmode(struct block * sb) {
             strcpy(interp_line, inputline);
             del_range_chars(interp_line, 0, 3); 
             parse_str(user_conf_d, interp_line);
-            info("Config value changed: %s", interp_line);
+            scinfo("Config value changed: %s", interp_line);
 
         } else if ( ! strcmp(inputline, "set") ) {
             int d = user_conf_d->len;
@@ -551,7 +551,7 @@ void do_commandmode(struct block * sb) {
             } else if ( ! strncmp(cline, "i tab ", 6) ) { delim = '\t';
             } else if ( ! strncmp(cline, "i xls ", 6) ) {
                 #ifndef XLS
-                error("XLS import support not compiled in");
+                scerror("XLS import support not compiled in");
                 chg_mode('.');
                 inputline[0]='\0';
                 update();
@@ -560,7 +560,7 @@ void do_commandmode(struct block * sb) {
                 delim = 'x';
             } else if ( ! strncmp(cline, "i xlsx", 6) ) {
                 #ifndef XLSX
-                error("XLSX import support not compiled in");
+                scerror("XLSX import support not compiled in");
                 chg_mode('.');
                 inputline[0]='\0';
                 update();
@@ -572,9 +572,9 @@ void do_commandmode(struct block * sb) {
             del_range_chars(cline, 0, 5);
 
             if ( ! strlen(cline) ) {
-                error("Path to file to import is missing !");
+                scerror("Path to file to import is missing !");
             } else if ( modflg && ! force_rewrite ) {
-                error("Changes were made since last save. Save current file or use '!' to force the import.");
+                scerror("Changes were made since last save. Save current file or use '!' to force the import.");
             } else {
                 delete_structures();
                 create_structures();
@@ -595,7 +595,7 @@ void do_commandmode(struct block * sb) {
             }
 
         } else {
-            error("COMMAND NOT FOUND !");
+            scerror("COMMAND NOT FOUND !");
         }
 
 #ifdef HISTORY_FILE
@@ -618,7 +618,7 @@ void do_commandmode(struct block * sb) {
 }
 
 void ins_in_line(int d) {
-    //error(">>%d             ", d);
+    //scerror(">>%d             ", d);
     //if (d < 256 && d > 31) // > 0
         add_char(inputline, (char) d, inputline_pos++);
     return;
