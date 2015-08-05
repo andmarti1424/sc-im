@@ -19,7 +19,9 @@ SCIM uses ncurses for visual interface and has vim-like keybindings and some fun
 - Cell shifting.
 - More movements commands implemented !
 - Input and Output was completely rewritten.
-- Colors can be customized by user, even at runtime.
+- Screen colors can be customized by user, even at runtime.
+- Colorize cells or give them format such as bold or underline.
+- Use SCIM as a non-interactive calculator, reading its input from a external script.
 
 About the name, the idea is that the program can be identified as another vim-like app.
 SCIM stands for Spreadsheet Calculator Improvised. :-) 
