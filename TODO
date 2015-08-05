@@ -1,27 +1,47 @@
 TODO
 ----
-02/06/2015 - Commit test
+05/08/2015
+
+Main features to achieve in near future versions
+------------------------------------------------
+
+1. Finish scripting
+
+2. Colorcell shouldnt be applied if lock cells are found
+
+3. When saving .sc files, save the user defined ranges
+
+4. UNDO/REDO changes in colwidth, precision and realfmt.
+   UNDO/REDO changes of filters applied.
+
+5. Change XLS import routine to work like the XLSX one.
+
+6. lock / freeze (glue down) a section of the screen
+
+
+
+Main features to achieve before v1.0
+------------------------------------
+
+1. CALC CHAIN
+
+2. With calc chain already implemented, fix problem when UNDOing actions that change cells equations !!!
+
+
+
+Long term features
+------------------
 
 1. multiple worksheets!!
 
-2. scim_scripting. Use LUA to allow scripting and plugin support.
-
-3. isolate UI code (CURSES) from the rest of the code for future
+2. isolate UI code (CURSES) from the rest of the code for future
 implementations in other gui's.
 
-4. status bar format customized by user.
-can show count of cells and sum of values, when a range is selected..
-*this should be done with a script.
+3. scim_scripting. Use LUA to allow scripting and plugin support.
 
-5. chain cells with equations into a DOUBLE linked list or dependency tree
-Have a top level eval, eval and UPDATE all lower nodes
-This is also neccesary for UNDO mods of cells that has equations on them!!!
-
-6. Store user defined variables with "define" token into .sc file.
-
-7. Use UTF-8 encoding and display any Unicode char.
+4. Use UTF-8 encoding and display any Unicode char.
 Change curses calls to cursesw calls.
 
-8. restore fill funcionality
-
-9. multiplier with '.' command ?
+5. status bar format customized by user.
+can show count of cells and sum of values, when a range is selected..
+*this should be done with a script.
