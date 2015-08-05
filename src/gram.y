@@ -12,6 +12,10 @@
 #include "marks.h"
 #include "xmalloc.h" // for scxfree
 #include "hide_show.h"
+#include "cmds_normal.h"
+#include "conf.h"
+#include "pipe.h"
+#include "main.h"
 
 void yyerror(char *err);               // error routine for yacc (gram.y)
 int yylex();
@@ -155,7 +159,6 @@ token S_GETFORMAT
  token S_PULLFMT
  token S_PULLCOPY
  token S_WHEREAMI
- token S_GETNUM
  token S_FGETNUM
  token S_GETSTRING
  token S_GETEXP
@@ -165,15 +168,16 @@ token S_GETFORMAT
  token S_QUERY
  token S_GETKEY
  token S_ERROR
- token S_RECALC
  token S_REDRAW
- token S_QUIT
  token S_STATUS
  token S_RUN
  token S_PLUGIN
  token S_PLUGOUT
 */
 
+%token S_GETNUM
+%token S_RECALC
+%token S_QUIT
 %token S_IMAP
 %token S_NMAP
 %token S_INOREMAP
@@ -296,7 +300,6 @@ token K_WHITE
 %token K_PAGESIZE
 %token K_NUMITER
 %token K_ERR
-%token K_SCRC
 %token K_LOCALE
 %token K_SET8BIT
 %token K_ASCII
@@ -472,7 +475,8 @@ command:
 
     |    S_CELLCOLOR var_or_range STRING {  
 #ifdef USECOLORS
-                                          color_cell($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col, $3);
+                                          if ( ! atoi(get_conf_value("nocurses"))) 
+                                              color_cell($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col, $3);
 #endif
                                           scxfree($3);
                                         }
@@ -497,16 +501,28 @@ command:
     |    S_EVAL e                   { eval_result = eval($2);
                                       efree($2);
                                     } 
+    |    S_QUIT                     { printf("quitting. unsaved changes will be lost.\n");
+                                      shall_quit = 2; // unsaved changes are lost!
+                                    }
+
+// For scripting and piping
+
+    |    S_RECALC                   {
+                                      EvalAll();
+                                      //update(1);
+                                      //changed = 0;
+                                    }
+    |    S_GETNUM var_or_range      {
+                                      getnum($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col, fdoutput);
+                                    }
+
 /*
     |    S_SEVAL e                  { seval_result = seval($2);
                                       efree($2);
                                     } // FIXME free string */
 /*
     |    S_ERROR STRING        { error($2); }
-    |    S_RECALC        { EvalAll();
-                          update(1);
-                          changed = 0;
-                         }
+
     |    S_REDRAW        { if (usecurses) {
                         clearok(stdscr, TRUE);
                         linelim = -1;
@@ -515,8 +531,6 @@ command:
                         changed = 0;
                       }
                     }
-    |    S_QUIT            { //stopdisp(); exit(0);
-                                        }
 
     |    S_RUN STRING        { //deraw(1);
                       system($2);
@@ -868,7 +882,6 @@ setitem    :
     //|    K_ROWLIMIT '=' NUMBER    { rowlimit = $3; }
     //|    K_COLLIMIT '=' NUMBER    { collimit = $3; }
     //|    K_PAGESIZE '=' NUMBER    { pagesize = $3; }
-    |    K_SCRC            { scrc++; }
     |    K_LOCALE        {
 #ifdef USELOCALE
                       struct  lconv *locstruct;
