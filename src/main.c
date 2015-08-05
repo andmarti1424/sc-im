@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <fcntl.h>   // for F_GETFL O_NONBLOCK F_SETFL
 
 #include "main.h"
 #include "shift.h"
@@ -36,31 +37,29 @@ int * realfmt;
 char * col_hidden;
 char * row_hidden;
 char line[FBUFLEN];
-int modflg;
-struct ent ***tbl;
-char *progname;
-unsigned int shall_quit = 0;
+int modflg;          // a change was made since last save
+struct ent *** tbl;
+int shall_quit = 0;
 unsigned int curmode = NORMAL_MODE;
 int maxrow, maxcol;
+char curfile[PATHLEN];
 
 int changed;
 int cellassign;
 int arg = 1;
-char * mdir;
-char * autorun;
-int skipautorun;
-char * fkey[FKEYS];
-char * scext;
+int brokenpipe = FALSE; /* Set to true if SIGPIPE is received */
+//char * progname;
+//char * mdir;
+//char * autorun;
+//int skipautorun;
+//char * fkey[FKEYS];
+//char * scext;
 char * ascext;
 char * tbl0ext;
 char * tblext;
 char * latexext;
 char * slatexext;
 char * texext;
-int scrc = 0;
-int usecurses = TRUE;   /* Use curses unless piping/redirection or using -q */
-int brokenpipe = FALSE; /* Set to true if SIGPIPE is received */
-char curfile[PATHLEN];
 char dpoint = '.';      /* decimal point */
 char thsep = ',';       /* thousands separator */
 int linelim = -1;
@@ -72,6 +71,7 @@ int rowsinrange = 1;
 int colsinrange = DEFWIDTH;
 double eval_result;
 char * seval_result;
+FILE * fdoutput; // output file descriptor (stdout or file)
 
 struct block * buffer;
 struct block * lastcmd_buffer;
@@ -79,17 +79,16 @@ struct dictionary * user_conf_d;
 struct dictionary * predefined_conf_d;
 struct history * commandline_history;
 
+
+
+
+/*********************************************************************
+   MAIN LOOP
+ *********************************************************************/
 int main (int argc, char ** argv) {
 
-    // catch up signals
+    // set up signals so we can catch them
     signals();
-
-    // inicializo NCURSES
-    start_screen();        
-    // esto habilitarlo para debug de mensajes:    wtimeout(input_win, 1000);
-
-    // setup the spreadsheet arrays
-    if (! growtbl(GROWNEW, 0, 0)) return exit_app(1);
 
     // start configuration dictionaries
     user_conf_d = (struct dictionary *) create_dictionary();
@@ -98,54 +97,153 @@ int main (int argc, char ** argv) {
     
     // create command line history structure
 #if defined HISTORY_FILE
-    commandline_history = (struct history *) create_history(':');
-    load_history(commandline_history);
+    if (! atoi(get_conf_value("nocurses"))) {
+        commandline_history = (struct history *) create_history(':');
+        load_history(commandline_history);
+    }
 #endif
 
     // create basic structures that will depend on the loaded file
     create_structures();
 
-    // load spreasdsheet passed as argv
+    // setup the spreadsheet arrays (tbl)
+    if (! growtbl(GROWNEW, 0, 0)) return exit_app(1);
+
+    /* load spreasdsheet passed as argv
     char * revi;
-    if ((revi = strrchr(argv[0], '/')) != NULL)
+    // strrchr to find last occurrence of '/'
+    if ((revi = strrchr(argv[0], '/')) != NULL) {
         progname = revi + 1;
-    else {
-        progname = argv[0];
-    }
-    load_sc(argc, argv);      
-
-    // we show welcome screen if not spreadsheet was pass to SCIM
-    if ( ! curfile[0] ) {
-        do_welcome();
-        // show mode and cell's details in status bar
-        show_celldetails(input_win);
-        print_mode(input_win);
-        wrefresh(input_win);
     } else {
-        update(); 
+        progname = argv[0];
+    }*/
+
+
+    // we save parameters and use them to replace conf-values in config dictionary !
+    read_argv(argc, argv);
+
+    // initiate NCURSES if that is what is wanted
+    //freopen("/dev/tty", "rw", stdin);
+    //initscr();
+    if (! atoi(get_conf_value("nocurses")))
+        start_screen();
+
+
+
+    #ifdef USECOLORS
+    //if (has_colors() && get_d_colors_param() == NULL) {
+    if (get_d_colors_param() == NULL) {
+            start_default_ucolors();
+            // in case we decide to change colors
+            // esto crea un diccionario y guarda en él
+            // la equivalencia entre las macros y los valores
+            // de las claves que se definen en los archivos .sc
+            set_colors_param_dict();
+    }
+    #endif
+
+
+    // If the 'output' parameter is defined, SCIM saves its output to that file.
+    // To achieve that, we open the output file and keep it open until exit.
+    // otherwise, SCIM will output to stdout.
+    if (get_conf_value("output") != NULL) {
+        fdoutput = fopen(get_conf_value("output"), "w+");
+        if (fdoutput == NULL) {
+            scerror("Cannot open file: %s.", get_conf_value("output"));
+            return exit_app(-1);
+        }
+
+        if (! atoi(get_conf_value("nocurses"))) { // WE MUST STOP SCREEN!
+            stop_screen();
+
+            // if output is set, nocurses should always be 1 !
+            put(user_conf_d, "nocurses", "1");
+        }
     }
 
-    // manejo stdin
+
+
+    // load sc file
+    load_sc();
+
+    // handle input from stdin (pipeline) in sc format
+    // and send it to interp
+    //FILE * f = fopen("/dev/stdin", "r");
+    FILE * f = stdin;
+    int fd = fileno(f);
+    int flags;
+    flags = fcntl(fd, F_GETFL, 0);
+    flags |= O_NONBLOCK;
+    fcntl(fd, F_SETFL, flags);
+    char stdin_buffer[BUFFERSIZE] = { '\0' };
+    while (f != NULL && fgets(stdin_buffer, BUFFERSIZE, f) != NULL) {
+        send_to_interp(stdin_buffer);
+    }
+    freopen("/dev/tty", "rw", stdin);
+    flags = fcntl(fd, F_GETFL, 0);
+    flags &= ~O_NONBLOCK;
+    fcntl(fd, F_SETFL, flags);
+
+
+    // esto habilitarlo para debug de mensajes
+    // wtimeout(input_win, 1000);
+
+    // initiate gui
+    if ( ! atoi(get_conf_value("nocurses"))) {
+        start_screen();         // Already done above
+
+        // we show welcome screen if no spreadsheet was passed to SCIM
+        if ( ! curfile[0]) {
+            do_welcome();
+
+            // show mode and cell's details in status bar
+            show_celldetails(input_win);
+            print_mode(input_win);
+            wrefresh(input_win);
+        } else {
+            update();
+        }
+    }
+
+    // handle input from keyboard
     shall_quit = 0;
-    buffer = (struct block *) create_buf();
+    buffer = (struct block *) create_buf(); // TODO: this should only take place if curses ui
+    // esto habilitarlo para debug
+    // wtimeout(input_win, TIMEOUT_CURSES);
 
-    // esto habilitarlo para debug:  wtimeout(input_win, TIMEOUT_CURSES);
 
-    while ( ! shall_quit ) {
-        handle_input(buffer);
+    while ( ! shall_quit && ! atoi(get_conf_value("quit_afterload"))) {
+        // if we are in ncurses
+        if (! atoi(get_conf_value("nocurses"))) {
+            handle_input(buffer);
 
-        // shall_quit=1 implica :q
-        // shall_quit=2 implica :q!
+
+        // if we are not in ncurses
+        } else {
+            char buffer[BUFFERSIZE];
+            if (fgets(buffer, BUFFERSIZE, stdin) != NULL) {
+                printf("We are in stdin loop-: %s\n", buffer);
+                send_to_interp(buffer);
+                //printf("back\n");
+            }
+        }
+
+        /* shall_quit=1 means :q
+           shall_quit=2 means :q! */
         if (shall_quit == 1 && modcheck()) shall_quit = 0;
     }
+
     return shall_quit == -1 ? exit_app(-1) : exit_app(0);
 }
 
+/*********************************************************************
+   END OF MAIN LOOP
+ *********************************************************************/
 
 
 void create_structures() {
 
-    // inicializo array de marcas
+    // initiate mark array
     create_mark_array();
 
     // create last command buffer
@@ -191,16 +289,11 @@ void delete_structures() {
 
 int exit_app(int status) {
 
-    // delete user and predefined config dictionaries
-    destroy_dictionary(predefined_conf_d);
-    destroy_dictionary(user_conf_d);
-
     // free history
 #if defined HISTORY_FILE
-    if (save_history(commandline_history) != 0) {
-        error("Cannot save command line history");
+    if (! atoi(get_conf_value("nocurses")) && save_history(commandline_history) != 0 ) {
+        scerror("Cannot save command line history");
     }
-
     if (commandline_history != NULL) destroy_history(commandline_history);
 #endif
 
@@ -215,65 +308,60 @@ int exit_app(int status) {
 
     //timeout(-1);
 
-    // stop CURSES stdout
-    stop_screen();
+    // stop CURSES screen
+    if (! atoi(get_conf_value("nocurses")))
+        stop_screen();
+
+    // close fdoutput
+    if (get_conf_value("output") != '\0' && fdoutput != NULL) {
+       fclose(fdoutput);
+    }
+
+    // delete user and predefined config dictionaries
+    destroy_dictionary(predefined_conf_d);
+    destroy_dictionary(user_conf_d);
 
     return status;
 }
 
 
 
-// we read parameters passed to scim executable
+// we read parameters passed to SCIM executable
 // and store them in user_conf dictionary
-// then we load the file
-void load_sc(int argc, char ** argv) {
-    // we read parameters
-    int i;
-    for (i = 1; i<argc; i++) {
+void read_argv(int argc, char ** argv) {
+    int i, j;
+    for (i = 1; i < argc; i++) {
         if ( ! strncmp(argv[i], "--", 2) ) {       // it was passed a parameter
             char ** s = split(argv[i], '=', 0);
             if (s[1] != NULL)
                 put(user_conf_d, &s[0][2], s[1]);  // --parameter=value
             else
                 put(user_conf_d, &s[0][2], "1");   // --parameter
+
+            for (j=0; s[j]; j++) {
+                free(s[j]);
+            }
+            free(s);
+            s = NULL;
         } else {                                   // it was passed a file
             strcpy(curfile, argv[i]);
         }
     }
+}
 
-    // we load the file
-    if (! curfile[0]) {                        // there was no file passed to scim executable
+
+
+// we try to load a file
+void load_sc() {
+    if (! curfile[0]) {                            // there was no file passed to scim executable
         erasedb();
     } else {
-        if (! readfile(curfile, 1)) {
-            info("New file: \"%s\"", curfile); // file passed to scim executable does not exists
+        if (! readfile(curfile, 1) && ! atoi(get_conf_value("nocurses"))) {
+            scinfo("New file: \"%s\"", curfile);     // file passed to scim executable does not exists
         }
-        EvalAll();                             // we eval formulas
+        EvalAll();                                 // we eval formulas
     }
-
-
-    /* old routine:
-    if (optind < argc && ! strcmp(argv[optind], "--"))
-        optind++;
-    if (optind < argc && argv[optind][0] != '|' && strcmp(argv[optind], "-"))
-        (void) strcpy(curfile, argv[optind]);
-
-    if (optind < argc) {
-        if (! readfile(argv[optind], 1) && (optind == argc - 1)) {
-            info("New file: \"%s\"", curfile);
-        }
-        EvalAll(); // evaluo fórmulas
-        optind++;
-    } else {
-        erasedb();
-    }
-
-    while (optind < argc) {
-        (void) readfile(argv[optind], 0);
-        optind++;
-    }
-    */
-} 
+}
 
 
 
@@ -285,6 +373,7 @@ void setorder(int i) {
 
 
 void nopipe() {
+    scdebug("brokenpipe!");
     brokenpipe = TRUE;
 }
 
@@ -295,13 +384,13 @@ void signals() {
     void sig_int();
     void sig_abrt();
     void sig_term();
-    //void nopipe();
+    void nopipe();
     void winchg();
     
     //signal(SIGINT, sig_int); // FIXME - sig. linea se comenta porque es molesto para probar. 
     signal(SIGABRT, sig_abrt);
     signal(SIGTERM, sig_term); // kill
-    //(void) signal(SIGPIPE, nopipe);
+    signal(SIGPIPE, nopipe);
     //(void) signal(SIGALRM, time_out);
     signal(SIGWINCH, winchg);
     //(void) signal(SIGBUS, doquit);
@@ -311,26 +400,27 @@ void signals() {
 
 
 void sig_int() {
-    error("Got SIGINT. Press «:q<Enter>» to quit Scim");
+    scerror("Got SIGINT. Press «:q<Enter>» to quit Scim");
 }
 
 
 
 void sig_abrt() {
-    error("Error !!! Quitting SCIM.");
+    scerror("Error !!! Quitting SCIM.");
     shall_quit = -1; // error !
 }
 
 
 
 void sig_term() {
-    error("Got SIGTERM signal. Quitting SCIM.");
+    scerror("Got SIGTERM signal. Quitting SCIM.");
     shall_quit = 2;
 }
 
 
 
-// SIGWINCH signal - resize of terminal
+// SIGWINCH signal !!!!
+// resize of terminal
 void winchg() {
     endwin();
     start_screen();
@@ -342,4 +432,79 @@ void winchg() {
     wrefresh(input_win);
     update(); 
     //signal(SIGWINCH, winchg);
+}
+
+
+
+#include <stdlib.h>
+#include <stdarg.h>
+#include "conf.h"
+
+void scerror(char * s, ...) {
+    char t[BUFFERSIZE];
+    va_list args;
+    va_start(args, s);
+    vsprintf (t, s, args);
+    if ( ! atoi(get_conf_value("nocurses"))) {
+        #ifdef USECOLORS
+        set_ucolor(input_win, &ucolors[ERROR_MSG]);
+        #endif
+        mvwprintw(input_win, 1, 0, "%s", t);
+        wclrtoeol(input_win);
+        wrefresh(input_win);
+    } else if (get_conf_value("output") != NULL && fdoutput != NULL) {
+        fprintf(fdoutput, "%s\n", t);
+    } else
+        printf("%s\n", t);
+    va_end(args);
+    return;
+}
+
+
+
+void scinfo(char * s, ...) {
+    char t[BUFFERSIZE];
+    va_list args;
+    va_start(args, s);
+    vsprintf (t, s, args);
+    if ( ! atoi(get_conf_value("nocurses"))) {
+        #ifdef USECOLORS
+        set_ucolor(input_win, &ucolors[INFO_MSG]);
+        #endif
+        mvwprintw(input_win, 1, 0, "%s", t);
+        wclrtoeol(input_win);
+        wrefresh(input_win);
+    } else if (get_conf_value("output") != NULL && fdoutput != NULL) {
+        fprintf(fdoutput, "%s\n", t);
+    } else
+        printf("%s\n", t);
+    va_end(args);
+    return;
+}
+
+
+
+void scdebug(char * s, ...) {
+    char t[BUFFERSIZE];
+    va_list args;
+    va_start(args, s);
+    vsprintf (t, s, args);
+    if ( ! atoi(get_conf_value("nocurses"))) {
+        #ifdef USECOLORS
+        set_ucolor(input_win, &ucolors[INFO_MSG]);
+        #endif
+        mvwprintw(input_win, 1, 0, "%s", t);
+        wclrtoeol(input_win);
+        wtimeout(input_win, -1);
+        wgetch(input_win);
+        wtimeout(input_win, TIMEOUT_CURSES);
+        wrefresh(input_win);
+    } else if (get_conf_value("output") != NULL && fdoutput != NULL) {
+        fprintf(fdoutput, "%s\n", t);
+    } else {
+        printf("%s\n", t);
+        getchar();
+    }
+    va_end(args);
+    return;
 }
