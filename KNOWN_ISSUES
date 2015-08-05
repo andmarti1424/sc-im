@@ -3,3 +3,7 @@ One example is when you try to read a non xls file, ex. xlsx file.
 
 Problem: functions that calls to "seval" causes memory leaks.
 This also happens in SC and has to be solved.
+
+Problem: Some cell equations gets messy after undo/redos.
+This fix requires implementation of Calc Chain. This will allow
+to fix this problem when UNDOing actions that change cells equations.
