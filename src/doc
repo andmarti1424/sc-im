@@ -904,5 +904,43 @@ Commands for handling cell content:
         --txtdelim=";"
 
 
+&External scripts&
+
+    SCIM can read data from a external script, either throw pipeline or redirection.
+    This enables SCIM to be used as a non-interactive calculator.
+    It also can be run interactive but with no ncurses interface if you set the --nocurses flag.
+
+    You can set the --output parameter if you want results to be saved in a file.
+    If you set the --quit_afterload flag, SCIM will quit after loading all files, but before becoming interactive.
+
+    Suppose you have a file called "script" with the following content:
+        let A2=0
+        let A3=A2+14
+        recalc
+        getnum A3
+
+    With the following command, you can send SCIM that script throw piping, then SCIM will output to stdout, and then quit:
+        cat script | ./scim --nocurses --quit_afterload
+
+    You can also receive data throw piping and output results to a file, with this command:
+        cat script | ./scim --quit_afterload --output=return_file
+
+    Other possibilities are:
+
+        - receive data throw piping and continue in non ncurses mode:
+        cat script | ./scim --nocurses
+
+        - receive data from a sc file, and output to a file:
+        ./scim a.sc --quit_afterload --output=return_file
+
+        - receive data from both a script (throw piping) and from a sc file, and output to file:
+        cat script | ./scim a.sc --quit_afterload --output=return_file
+
+        - start interactive but with no ncurses interface:
+        ./scim --nocurses
+
+    Note that if you set the --output parameter, the --nocurses flag is assumed to be true.
+
+
 --
 --
