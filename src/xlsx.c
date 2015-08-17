@@ -29,9 +29,31 @@
 // note that 0 is the first string.
 char * get_xlsx_string(xmlDocPtr doc, int pos) {
     xmlNode * cur_node = xmlDocGetRootElement(doc)->xmlChildrenNode;
+    xmlNode * father;
+    char * result = NULL;
 
     while (pos--) cur_node = cur_node->next;
-    cur_node = cur_node->xmlChildrenNode; return (char *) cur_node->xmlChildrenNode->content;
+
+    father = cur_node;
+    cur_node = father->xmlChildrenNode;
+
+    while (father != NULL) {  // recorro hijos
+        while (cur_node != NULL) {  // recorro hermanos
+            //scdebug("%s", cur_node->name);
+            if ( ! xmlStrcmp(cur_node->name, (const xmlChar *) "t") ) {
+                result = (char *) cur_node->xmlChildrenNode->content;
+                //scdebug("FOUND: %s", result);
+                break;
+            }
+            cur_node = cur_node->next;
+        }
+
+        if (result != NULL) break;
+        father = father->xmlChildrenNode;
+        if (father != NULL) cur_node = father->xmlChildrenNode;
+    }
+
+    return result;
 }
 
 // this functions takes the DOM of the styles file
@@ -112,16 +134,22 @@ void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) 
             // string
             if ( s != NULL && ! strcmp(s, "s") ) {
                 char * strvalue =  get_xlsx_string(doc_strings, atoi((char *) child_node->xmlChildrenNode->xmlChildrenNode->content));
-                clean_carrier(strvalue); // we handle padding
-                sprintf(line_interp, "label %s%d=\"%s\"", coltoa(c), r, strvalue);
-                send_to_interp(line_interp);
+                if (strvalue != NULL && strvalue[0] != '\0') {
+                    strvalue = str_replace (strvalue, "\"", "''");
+                    clean_carrier(strvalue); // we handle padding
+                    sprintf(line_interp, "label %s%d=\"%s\"", coltoa(c), r, strvalue);
+                    send_to_interp(line_interp);
+                }
 
             // inlinestring
             } else if ( s != NULL && ! strcmp(s, "inlineStr") ) {
                 char * strvalue = (char *) child_node->xmlChildrenNode->xmlChildrenNode->xmlChildrenNode->content;
-                clean_carrier(strvalue); // we handle padding
-                sprintf(line_interp, "label %s%d=\"%s\"", coltoa(c), r, strvalue);
-                send_to_interp(line_interp);
+                if (strvalue != NULL && strvalue[0] != '\0') {
+                    strvalue = str_replace (strvalue, "\"", "''");
+                    clean_carrier(strvalue); // we handle padding
+                    sprintf(line_interp, "label %s%d=\"%s\"", coltoa(c), r, strvalue);
+                    send_to_interp(line_interp);
+                }
 
             // numbers (can be dates, results from formulas or simple numbers)
             } else {
