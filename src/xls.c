@@ -48,7 +48,7 @@ int open_xls(char * fname, char * encoding) {
     struct ent * n;
 
     if (pWB == NULL) {
-        error("Error loading %s", fname);
+        scerror("Error loading %s", fname);
         return -1;
     }
 
