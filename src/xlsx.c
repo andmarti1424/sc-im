@@ -39,16 +39,18 @@ char * get_xlsx_string(xmlDocPtr doc, int pos) {
 
     while (father != NULL) {  // recorro hijos
         while (cur_node != NULL) {  // recorro hermanos
-            //scdebug("%s", cur_node->name);
-            if ( ! xmlStrcmp(cur_node->name, (const xmlChar *) "t") ) {
+            if ( ! xmlStrcmp(cur_node->name, (const xmlChar *) "t")
+                && cur_node->xmlChildrenNode != NULL
+                && cur_node->xmlChildrenNode->content != NULL
+               ) {
                 result = (char *) cur_node->xmlChildrenNode->content;
-                //scdebug("FOUND: %s", result);
-                break;
+                //scdebug("%s %s", cur_node->name, result);
+                //return "result;";
+                return result;
             }
             cur_node = cur_node->next;
         }
 
-        if (result != NULL) break;
         father = father->xmlChildrenNode;
         if (father != NULL) cur_node = father->xmlChildrenNode;
     }
@@ -133,22 +135,26 @@ void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) 
 
             // string
             if ( s != NULL && ! strcmp(s, "s") ) {
+                char * s = NULL;
                 char * strvalue =  get_xlsx_string(doc_strings, atoi((char *) child_node->xmlChildrenNode->xmlChildrenNode->content));
                 if (strvalue != NULL && strvalue[0] != '\0') {
-                    strvalue = str_replace (strvalue, "\"", "''");
-                    clean_carrier(strvalue); // we handle padding
-                    sprintf(line_interp, "label %s%d=\"%s\"", coltoa(c), r, strvalue);
+                    s = str_replace (strvalue, "\"", "''");
+                    clean_carrier(s); // we handle padding
+                    sprintf(line_interp, "label %s%d=\"%s\"", coltoa(c), r, s);
                     send_to_interp(line_interp);
+                    free(s);
                 }
 
             // inlinestring
             } else if ( s != NULL && ! strcmp(s, "inlineStr") ) {
+                char * s = NULL;
                 char * strvalue = (char *) child_node->xmlChildrenNode->xmlChildrenNode->xmlChildrenNode->content;
                 if (strvalue != NULL && strvalue[0] != '\0') {
-                    strvalue = str_replace (strvalue, "\"", "''");
-                    clean_carrier(strvalue); // we handle padding
-                    sprintf(line_interp, "label %s%d=\"%s\"", coltoa(c), r, strvalue);
+                    s = str_replace (strvalue, "\"", "''");
+                    clean_carrier(s); // we handle padding
+                    sprintf(line_interp, "label %s%d=\"%s\"", coltoa(c), r, s);
                     send_to_interp(line_interp);
+                    free(s);
                 }
 
             // numbers (can be dates, results from formulas or simple numbers)
@@ -207,17 +213,35 @@ void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) 
                     // handle the formula if that is whats desidered!!
                     if (atoi(get_conf_value("xlsx_readformulas"))) {
                         char * formula = (char *) child_node->xmlChildrenNode->xmlChildrenNode->content;
+                        char * strf;
 
                         // we take some excel common function and adds a @ to them
                         // we replace count sum avg with @count, @sum, @prod, @avg, @min, @max 
-                        formula = str_replace (formula, "COUNT","@COUNT");
-                        formula = str_replace (formula, "SUM","@SUM");
-                        formula = str_replace (formula, "PRODUCT","@PROD");
-                        formula = str_replace (formula, "AVERAGE","@AVG");
-                        formula = str_replace (formula, "MIN","@MIN");
-                        formula = str_replace (formula, "MAX","@MAX");
-                        formula = str_replace (formula, "ABS","@ABS");
-                        formula = str_replace (formula, "STDEV","@STDDEV");
+                        strf = str_replace (formula, "COUNT","@COUNT");
+                        strcpy(formula, strf);
+                        free(strf);
+                        strf = str_replace (formula, "SUM","@SUM");
+                        strcpy(formula, strf);
+                        free(strf);
+                        strf = str_replace (formula, "PRODUCT","@PROD");
+                        strcpy(formula, strf);
+                        free(strf);
+                        strf = str_replace (formula, "AVERAGE","@AVG");
+                        strcpy(formula, strf);
+                        free(strf);
+                        strf = str_replace (formula, "MIN","@MIN");
+                        strcpy(formula, strf);
+                        free(strf);
+                        strf = str_replace (formula, "MAX","@MAX");
+                        strcpy(formula, strf);
+                        free(strf);
+                        strf = str_replace (formula, "ABS","@ABS");
+                        strcpy(formula, strf);
+                        free(strf);
+                        strf = str_replace (formula, "STDEV","@STDDEV");
+                        strcpy(formula, strf);
+                        free(strf);
+                        
 
                         // we send the formula to the interpreter and hope to resolve it!
                         sprintf(line_interp, "let %s%d=%s", coltoa(c), r, formula);
