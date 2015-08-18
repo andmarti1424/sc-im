@@ -123,8 +123,6 @@ int main (int argc, char ** argv) {
     read_argv(argc, argv);
 
     // initiate NCURSES if that is what is wanted
-    //freopen("/dev/tty", "rw", stdin);
-    //initscr();
     if (! atoi(get_conf_value("nocurses")))
         start_screen();
 
@@ -211,6 +209,7 @@ int main (int argc, char ** argv) {
     // esto habilitarlo para debug
     // wtimeout(input_win, TIMEOUT_CURSES);
 
+    char nocurses_buffer[BUFFERSIZE];
 
     while ( ! shall_quit && ! atoi(get_conf_value("quit_afterload"))) {
         // if we are in ncurses
@@ -220,11 +219,9 @@ int main (int argc, char ** argv) {
 
         // if we are not in ncurses
         } else {
-            char buffer[BUFFERSIZE];
-            if (fgets(buffer, BUFFERSIZE, stdin) != NULL) {
-                printf("We are in stdin loop-: %s\n", buffer);
-                send_to_interp(buffer);
-                //printf("back\n");
+            if (fgets(nocurses_buffer, BUFFERSIZE, stdin) != NULL) {
+                printf("Interp will receive: %s", nocurses_buffer);
+                send_to_interp(nocurses_buffer);
             }
         }
 
@@ -503,7 +500,7 @@ void scdebug(char * s, ...) {
         fprintf(fdoutput, "%s\n", t);
     } else {
         printf("%s\n", t);
-        getchar();
+        //printf("%s", t);
     }
     va_end(args);
     return;

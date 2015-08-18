@@ -3,7 +3,7 @@
 #include "conf.h"
 #include "main.h"
 
-// TODO pass fd is not neccesary?
+// FIXME pass fd is not neccesary?
 void getnum(int r0, int c0, int rn, int cn, FILE * fd) {
     struct ent ** pp;
     struct ent * p;
@@ -20,16 +20,16 @@ void getnum(int r0, int c0, int rn, int cn, FILE * fd) {
                     sprintf(line, "%.15g", p->v);
                 }
             }
-            if (c < cn) {
+            /*if (c < cn) {
                 strcat(line, "\t");
             } else {
                 strcat(line, "\n");
-            }
+            }*/
 
             //if (get_conf_value("output") != NULL && fd != NULL)
             //    fprintf(fd, "%s\n", line);
             //else
-            scdebug("%s\n", line);
+            scdebug("resultado: %s", line);
 
             //fwrite(fd, line, strlen(line));
             if (brokenpipe) {
