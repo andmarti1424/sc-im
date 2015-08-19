@@ -45,7 +45,6 @@ char * get_xlsx_string(xmlDocPtr doc, int pos) {
                ) {
                 result = (char *) cur_node->xmlChildrenNode->content;
                 //scdebug("%s %s", cur_node->name, result);
-                //return "result;";
                 return result;
             }
             cur_node = cur_node->next;
@@ -135,26 +134,26 @@ void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) 
 
             // string
             if ( s != NULL && ! strcmp(s, "s") ) {
-                char * s = NULL;
+                char * st = NULL;
                 char * strvalue =  get_xlsx_string(doc_strings, atoi((char *) child_node->xmlChildrenNode->xmlChildrenNode->content));
                 if (strvalue != NULL && strvalue[0] != '\0') {
-                    s = str_replace (strvalue, "\"", "''");
-                    clean_carrier(s); // we handle padding
-                    sprintf(line_interp, "label %s%d=\"%s\"", coltoa(c), r, s);
+                    st = str_replace (strvalue, "\"", "''");
+                    clean_carrier(st); // we handle padding
+                    sprintf(line_interp, "label %s%d=\"%s\"", coltoa(c), r, st);
                     send_to_interp(line_interp);
-                    free(s);
+                    free(st);
                 }
 
             // inlinestring
             } else if ( s != NULL && ! strcmp(s, "inlineStr") ) {
-                char * s = NULL;
+                char * st = NULL;
                 char * strvalue = (char *) child_node->xmlChildrenNode->xmlChildrenNode->xmlChildrenNode->content;
                 if (strvalue != NULL && strvalue[0] != '\0') {
-                    s = str_replace (strvalue, "\"", "''");
-                    clean_carrier(s); // we handle padding
-                    sprintf(line_interp, "label %s%d=\"%s\"", coltoa(c), r, s);
+                    st = str_replace (strvalue, "\"", "''");
+                    clean_carrier(st); // we handle padding
+                    sprintf(line_interp, "label %s%d=\"%s\"", coltoa(c), r, st);
                     send_to_interp(line_interp);
-                    free(s);
+                    free(st);
                 }
 
             // numbers (can be dates, results from formulas or simple numbers)
