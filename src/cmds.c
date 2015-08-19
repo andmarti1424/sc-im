@@ -1318,7 +1318,7 @@ void auto_justify(int ci, int cf, int min) {
                     sprintf(field, "%.*f", precision[c], p->v);
                     sum += strlen(field);
                 }
-                if (sum > fwidth[c])
+                if (sum > fwidth[c] && sum < COLS-rescol)
                     fwidth[c] = sum;
             }
         }
