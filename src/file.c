@@ -286,13 +286,13 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
                     struct enode * e = new((*pp)->ucolor->fg, (struct enode *)0, (struct enode *)0);
                     decompile(e, 0);
                     uppercase(line);
-                    sprintf(strcolor, "fg=%s", line);
+                    sprintf(strcolor, "fg=%s", &line[1]);
                     free(e);
                     linelim=0;
                     e = new((*pp)->ucolor->bg, (struct enode *)0, (struct enode *)0);
                     decompile(e, 0);
                     uppercase(line);
-                    sprintf(strcolor + strlen(strcolor), " bg=%s", line);
+                    sprintf(strcolor + strlen(strcolor), " bg=%s", &line[1]);
                     free(e);
 
                     if ((*pp)->ucolor->bold)      sprintf(strcolor + strlen(strcolor), " bold=1");
