@@ -524,7 +524,7 @@ void formatcol(int c) {
             break;
     }
     scinfo("Current format is %d %d %d", fwidth[curcol], precision[curcol], realfmt[curcol]);
-    update();
+    update(TRUE);
     return;
 }
 
@@ -946,7 +946,7 @@ void insert_or_edit_cell() {
             curcol = forw_col(1)->col;
             break;
     }
-    update();
+    update(TRUE);
     return;
 }
 
@@ -1029,7 +1029,6 @@ void clearent(struct ent *v) {
 void scroll_left(int n) {
     while (n--) {
         if (! offscr_sc_cols ) {
-            //update;
             break;
         }
         int a = 1;
@@ -1450,14 +1449,16 @@ int is_single_command (struct block * buf, long timeout) {
     int res = NO_CMD;
     int bs = get_bufsize(buf);
 
-    if (curmode == COMMAND_MODE && bs == 1 && buf->value != ctl('r')) {
+    if (curmode == COMMAND_MODE && bs == 1 && ( buf->value != ctl('r') ||
+        buf->value == ctl('v')) ) {
         res = MOVEMENT_CMD;
 
     } else if ( curmode == COMMAND_MODE && bs == 2 && buf->value == ctl('r') &&
         (buf->pnext->value - ('a' - 1) < 1 || buf->pnext->value > 26)) {
         res = MOVEMENT_CMD;
 
-    } else if (curmode == INSERT_MODE && bs == 1 && buf->value != ctl('r')) {
+    } else if (curmode == INSERT_MODE && bs == 1 && ( buf->value != ctl('r') ||
+        buf->value == ctl('v')) ) {
         res = MOVEMENT_CMD;
 
     } else if (curmode == INSERT_MODE && bs == 2 && buf->value == ctl('r') &&
@@ -1665,6 +1666,8 @@ int is_single_command (struct block * buf, long timeout) {
                  buf->value == ctl('d') ||
                  buf->value == ctl('b') ||
                  buf->value == ctl('a') ||
+                 buf->value == ctl('o') ||
+                 buf->value == ctl('k') ||
                  buf->value == ':'
              )
                  res = MOVEMENT_CMD;

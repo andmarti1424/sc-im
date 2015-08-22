@@ -1,13 +1,15 @@
 #include "sc.h"
 
 struct srange {
-    int tlrow;     // top left row
-    int tlcol;     // top left col
-    int brrow;     // bottom right row
-    int brcol;     // bottom right col
-    int orig_row;  // row of selected cell before creating range
-    int orig_col;  // col of selected cell before creating range
-    char marks[2]; // marks used for creating the range
+    int tlrow;         // top left row
+    int tlcol;         // top left col
+    int brrow;         // bottom right row
+    int brcol;         // bottom right col
+    int orig_row;      // original row before starting selection
+    int orig_col;      // original col before starting selection
+    int startup_row;   // row position before entering visual mode
+    int startup_col;   // col position before entering visual mode
+    char marks[2];     // marks used for creating the range
     int selected;
     struct srange * pnext;
 };

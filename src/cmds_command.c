@@ -23,6 +23,8 @@
 #include "xls.h"
 #include "xlsx.h"
 
+#include "cmds_visual.h"
+
 #ifdef UNDO
 #include "undo.h"
 #endif
@@ -150,6 +152,12 @@ void do_commandmode(struct block * sb) {
     } else if (sb->value == OKEY_RIGHT) {  // RIGHT
         if (inputline_pos < strlen(inputline)) inputline_pos++;
         show_header(input_win);
+        return;
+
+    } else if (sb->value == ctl('v') ) {  // VISUAL SUBMODE
+        visual_submode = ':';
+        chg_mode('v');
+        start_visualmode(currow, curcol, currow, curcol);
         return;
 
     } else if (sb->value == ctl('r') && get_bufsize(sb) == 2 && // C-r
@@ -304,7 +312,7 @@ void do_commandmode(struct block * sb) {
                 readfile(cline, 0);
                 //EvalAll(); // es necesario???
                 modflg = 0;
-                update(); 
+                update(TRUE); 
             }
 
         } else if ( ! strncmp(inputline, "hiderow ", 8) ||
@@ -463,7 +471,7 @@ void do_commandmode(struct block * sb) {
             scerror("Color support not compiled in");
             chg_mode('.');
             inputline[0]='\0';
-            update();
+            update(TRUE);
             return;
             #endif
 
@@ -476,7 +484,7 @@ void do_commandmode(struct block * sb) {
             scerror("Color support not compiled in");
             chg_mode('.');
             inputline[0]='\0';
-            update();
+            update(TRUE);
             return;
             #endif
 
@@ -554,7 +562,7 @@ void do_commandmode(struct block * sb) {
                 scerror("XLS import support not compiled in");
                 chg_mode('.');
                 inputline[0]='\0';
-                update();
+                update(TRUE);
                 return;
                 #endif
                 delim = 'x';
@@ -563,7 +571,7 @@ void do_commandmode(struct block * sb) {
                 scerror("XLSX import support not compiled in");
                 chg_mode('.');
                 inputline[0]='\0';
-                update();
+                update(TRUE);
                 return;
                 #endif
                 delim = 'y';
@@ -591,7 +599,7 @@ void do_commandmode(struct block * sb) {
                     import_csv(cline, delim); // csv or tab delim import
                 }
                 modflg = 0;
-                update(); 
+                update(TRUE); 
             }
 
         } else {
@@ -611,7 +619,7 @@ void do_commandmode(struct block * sb) {
         // clr_header(input_win); // COMENTADO el dia 22/06
         inputline[0]='\0';
         set_comp(0); // unmark tab completion
-        update();
+        update(TRUE);
     }
     //show_header(input_win); // NO DESCOMENTAR.
     return;

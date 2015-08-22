@@ -7,10 +7,17 @@
 #include "sc.h"            // for rescol
 #include "utils/string.h"
 #include "marks.h"
+#include "cmds_visual.h"
 
 void do_insertmode(struct block * sb) {
 
-    if (sb->value == OKEY_LEFT) {          // LEFT
+    if (sb->value == ctl('v') ) {  // VISUAL SUBMODE
+        visual_submode = insert_edit_submode;
+        chg_mode('v');
+        start_visualmode(currow, curcol, currow, curcol);
+        return;
+
+    } else if (sb->value == OKEY_LEFT) {          // LEFT
         if (inputline_pos) inputline_pos--;
         show_header(input_win);
 

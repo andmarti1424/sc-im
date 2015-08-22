@@ -22,7 +22,10 @@ extern unsigned int curmode;
 extern int cmd_multiplier;
 extern struct history * commandline_history;
 
-srange * r; // SELECTED RANGE!
+char visual_submode = '0';
+
+srange * r;                  // SELECTED RANGE!
+int moving = FALSE;
 
 void start_visualmode(int tlrow, int tlcol, int brrow, int brcol) {
     unselect_ranges();
@@ -35,8 +38,10 @@ void start_visualmode(int tlrow, int tlcol, int brrow, int brcol) {
     r->tlcol = tlcol;
     r->brrow = brrow;
     r->brcol = brcol;
-    r->orig_row = currow;
-    r->orig_col = curcol;
+    r->orig_row = currow;    // original row before starting selection
+    r->orig_col = curcol;    // original col before starting selection
+    r->startup_row = currow;     // original row position before entering visual mode
+    r->startup_col = curcol;     // original col position before entering visual mode
     r->marks[0] = '\t';
     r->marks[1] = '\t';
     r->selected = 1;
@@ -49,23 +54,86 @@ void start_visualmode(int tlrow, int tlcol, int brrow, int brcol) {
         ranges = r;
     }
 
-    update();
+    if (visual_submode == '0') {
+        update(TRUE);
+    } else {
+        update(FALSE);
+        moving = TRUE;
+    }
     return;
 }
 
 void exit_visualmode() {
+    visual_submode = '0';
     r->selected = 0;
-    currow = r->orig_row;
-    curcol = r->orig_col;
+    //currow = r->orig_row;
+    //curcol = r->orig_col;
+    currow = r->startup_row;
+    curcol = r->startup_col;
     del_ranges_by_mark('\t');
     return;
 }
 
 void do_visualmode(struct block * buf) {
-    
+    if (moving == TRUE) {
+        switch (buf->value) {
+            case 'j':
+            case OKEY_DOWN:
+                currow = forw_row(1)->row;
+                break;
+
+            case 'k':
+            case OKEY_UP:
+                currow = back_row(1)->row;
+                break;
+
+            case 'h':
+            case OKEY_LEFT:
+                curcol = back_col(1)->col;
+                break;
+
+            case 'l':
+            case OKEY_RIGHT:
+                curcol = forw_col(1)->col;
+                break;
+
+            case ctl('o'):
+                moving = FALSE;
+                r->tlrow = currow;
+                r->tlcol = curcol;
+                r->brrow = currow;
+                r->brcol = curcol;
+                r->orig_row = currow;
+                r->orig_col = curcol;
+                break;
+        }
+        update(FALSE);
+        return;
+    }
+
+    // ENTER - ctl(k) - Confirm selection
+    if (buf->value == OKEY_ENTER || buf->value == ctl('k')) {
+        char cline [BUFFERSIZE];
+        sprintf(cline, "%s%d", coltoa(r->tlcol), r->tlrow);
+        if (r->tlrow != r->brrow || r->tlcol != r->brcol)
+            sprintf(cline + strlen(cline), ":%s%d", coltoa(r->brcol), r->brrow);
+        sprintf(inputline + strlen(inputline), "%s", cline);
+
+        char c = visual_submode;
+        exit_visualmode();
+        chg_mode(c);
+
+        inputline_pos += strlen(cline);
+        show_header(input_win);
+        return;
+
+    // moving to TRUE
+    //} else if (buf->value == ctl('m')) {
+    //    moving = TRUE;
+
     // MOVEMENT COMMANDS
     // UP - ctl(b)
-    if (buf->value == OKEY_UP || buf->value == 'k' || buf->value == ctl('b') ) {
+    } else if (buf->value == OKEY_UP || buf->value == 'k' || buf->value == ctl('b') ) {
         int n, i;
         if (buf->value == ctl('b')) { 
             n = LINES - RESROW - 1;
@@ -433,5 +501,10 @@ void do_visualmode(struct block * buf) {
         inputline_pos = 0;
         return;
     }
-    update();
+
+    if (visual_submode == '0')
+        update(TRUE);
+    else {
+        update(FALSE);
+    }
 }

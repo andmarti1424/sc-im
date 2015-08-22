@@ -32,54 +32,54 @@ void do_normalmode(struct block * buf) {
         case OKEY_DOWN:
             currow = forw_row(1)->row; 
             unselect_ranges();
-            update();
+            update(TRUE);
             break;
 
         case 'k':
         case OKEY_UP:
             currow = back_row(1)->row;
             unselect_ranges();
-            update();
+            update(TRUE);
             break;
 
         case 'h':
         case OKEY_LEFT:
             curcol = back_col(1)->col;
             unselect_ranges();
-            update();
+            update(TRUE);
             break;
 
         case 'l':
         case OKEY_RIGHT:
             curcol = forw_col(1)->col;
             unselect_ranges();
-            update();
+            update(TRUE);
             break;
 
         case '0':
         case OKEY_HOME:
             curcol = left_limit()->col;
             unselect_ranges();
-            update();
+            update(TRUE);
             break;
 
         case '$':
         case OKEY_END:
             curcol = right_limit()->col;
             unselect_ranges();
-            update();
+            update(TRUE);
             break;
 
         case '^':
             currow = goto_top()->row;
             unselect_ranges();
-            update();
+            update(TRUE);
             break;
 
         case '#':
             currow = goto_bottom()->row;
             unselect_ranges();
-            update();
+            update(TRUE);
             break;
 
         // Tick
@@ -97,7 +97,7 @@ void do_normalmode(struct block * buf) {
             }
             currow = e->row;
             curcol = e->col;
-            update();
+            update(TRUE);
             break;
 
         // CTRL j
@@ -110,7 +110,7 @@ void do_normalmode(struct block * buf) {
                 cf = sr->brcol;
             }
             auto_justify(c, cf, DEFWIDTH);  // auto justificado de columnas
-            update();
+            update(TRUE);
             break;
             }
 
@@ -141,7 +141,7 @@ void do_normalmode(struct block * buf) {
                 return;
             }
             dateformat(lookat(r, c), lookat(rf, cf), f);
-            update();
+            update(TRUE);
             break;
         #else
             scinfo("Build made without USELOCALE enabled");
@@ -158,7 +158,7 @@ void do_normalmode(struct block * buf) {
             currow = e->row;
             unselect_ranges();
             scroll_down(n);
-            update();
+            update(TRUE);
             break;
             }
 
@@ -171,7 +171,7 @@ void do_normalmode(struct block * buf) {
             currow = back_row(n)->row; 
             unselect_ranges();
             scroll_up(n);
-            update();
+            update(TRUE);
             break;
             }
 
@@ -180,7 +180,7 @@ void do_normalmode(struct block * buf) {
             currow = e->row;
             curcol = e->col;
             unselect_ranges();
-            update();
+            update(TRUE);
             break;
 
         case 'b':
@@ -188,7 +188,7 @@ void do_normalmode(struct block * buf) {
             currow = e->row;
             curcol = e->col;
             unselect_ranges();
-            update();
+            update(TRUE);
             break;
 
         case '/':
@@ -206,19 +206,19 @@ void do_normalmode(struct block * buf) {
         case 'H':
             currow = vert_top()->row;
             unselect_ranges();
-            update();
+            update(TRUE);
             break;
 
         case 'M':
             currow = vert_middle()->row;
             unselect_ranges();
-            update();
+            update(TRUE);
             break;
 
         case 'L':
             currow = vert_bottom()->row;
             unselect_ranges();
-            update();
+            update(TRUE);
             break;
 
         case 'G': // goto end
@@ -226,7 +226,7 @@ void do_normalmode(struct block * buf) {
             currow = e->row;
             curcol = e->col;
             unselect_ranges();
-            update();
+            update(TRUE);
             break;
 
         // GOTO goto
@@ -235,7 +235,7 @@ void do_normalmode(struct block * buf) {
             curcol = e->col;
             currow = e->row;
             unselect_ranges();
-            update();
+            update(TRUE);
             break;
 
         case 'g':
@@ -263,7 +263,7 @@ void do_normalmode(struct block * buf) {
                 send_to_interp(interp_line);
             }
             unselect_ranges();
-            update();
+            update(TRUE);
             break;
 
         // repeat last command
@@ -337,7 +337,7 @@ void do_normalmode(struct block * buf) {
         // del current cell or range
         case 'x': 
             del_selected_cells();
-            update();
+            update(TRUE);
             break;
 
         // format col
@@ -413,14 +413,14 @@ void do_normalmode(struct block * buf) {
             }
 
             if (atoi(get_conf_value("autocalc"))) EvalAll();
-            update();
+            update(TRUE);
             break;
             }
 
         // repeat last goto command
         case 'n':
             go_last();
-            update();
+            update(TRUE);
             break;
 
         // range lock / unlock / valueize
@@ -441,7 +441,7 @@ void do_normalmode(struct block * buf) {
             } else if (buf->pnext->value == 'v') {
                 valueize_area(r, c, rf, cf);
             }
-            update();
+            update(TRUE);
             break;
             }
 
@@ -449,7 +449,7 @@ void do_normalmode(struct block * buf) {
         case 'R':  
             if (bs == 3) {
                 create_range(buf->pnext->value, buf->pnext->pnext->value, NULL, NULL);
-                update();
+                update(TRUE);
             }
             break;
 
@@ -476,7 +476,7 @@ void do_normalmode(struct block * buf) {
                 show_col(c, arg);
             }
             cmd_multiplier = 0;
-            update();
+            update(TRUE);
             break;
             }
 
@@ -544,7 +544,7 @@ void do_normalmode(struct block * buf) {
 #endif
             cmd_multiplier = 0;
             unselect_ranges();
-            update();
+            update(TRUE);
             break;
             }
 
@@ -595,7 +595,7 @@ void do_normalmode(struct block * buf) {
             } else if (buf->pnext->value == 'd') {
                 del_selected_cells(); 
             }
-            update();
+            update(TRUE);
             break;
             }
 
@@ -623,7 +623,7 @@ void do_normalmode(struct block * buf) {
 #ifdef UNDO
             end_undo_action();
 #endif
-            update();
+            update(TRUE);
             break;
             }
  
@@ -655,7 +655,7 @@ void do_normalmode(struct block * buf) {
                 scerror("Locked cells encountered. Nothing changed");
                 break;
             }
-            update();
+            update(TRUE);
             break;
 
         case 'P':
@@ -667,7 +667,7 @@ void do_normalmode(struct block * buf) {
                     scerror("Locked cells encountered. Nothing changed");
                     break;
                 }
-                update();
+                update(TRUE);
             }
             break;
 
@@ -677,7 +677,7 @@ void do_normalmode(struct block * buf) {
                 scerror("Locked cells encountered. Nothing changed");
                 break;
             }
-            update();
+            update(TRUE);
             break;
 
         // select inner range - Vir
@@ -767,19 +767,19 @@ void do_normalmode(struct block * buf) {
                     break;
 
             }
-            update();
+            update(TRUE);
             break;
  
         // scroll up a line
         case ctl('y'):
             scroll_up(1);
-            update();
+            update(TRUE);
             break;
 
         // scroll down a line
         case ctl('e'):
             scroll_down(1);
-            update();
+            update(TRUE);
             break;
 
         // undo
@@ -788,7 +788,7 @@ void do_normalmode(struct block * buf) {
             do_undo();
             // sync_refs();
             EvalAll();
-            update();
+            update(TRUE);
             break;
             #else
             scerror("Build was done without UNDO support");
@@ -800,7 +800,7 @@ void do_normalmode(struct block * buf) {
             do_redo();
             // sync_refs();
             EvalAll();
-            update();
+            update(TRUE);
             break;
             #else
             scerror("Build was done without UNDO support");
@@ -839,7 +839,7 @@ void do_normalmode(struct block * buf) {
             end_undo_action();            
 #endif
             cmd_multiplier = 0;
-            update();
+            update(TRUE);
             break;
             }
 
@@ -847,17 +847,17 @@ void do_normalmode(struct block * buf) {
             endwin();
             start_screen();
             clearok(stdscr, TRUE);
-            update();
+            update(TRUE);
             flushinp();
             show_header(input_win);
             show_celldetails(input_win);
             wrefresh(input_win);
-            update();
+            update(TRUE);
             break;
 
         case '@':
             EvalAll();
-            update();
+            update(TRUE);
             break;
  
         // increase or decrease numeric value of cell or range
@@ -908,7 +908,7 @@ void do_normalmode(struct block * buf) {
 #endif
             if (atoi(get_conf_value("autocalc"))) EvalAll();
             cmd_multiplier = 0;
-            update();
+            update(TRUE);
             }
             break;
 
