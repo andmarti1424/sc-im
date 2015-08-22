@@ -21,6 +21,7 @@ SCIM uses ncurses for visual interface and has vim-like keybindings and some fun
 - Input and Output was completely rewritten.
 - Screen colors can be customized by user, even at runtime.
 - Colorize cells or give them format such as bold or underline.
+- Implement external functions in the language you prefer and use them in SCIM.
 - Use SCIM as a non-interactive calculator, reading its input from a external script.
 
 About the name, the idea is that the program can be identified as another vim-like app.
