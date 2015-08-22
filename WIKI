@@ -18,7 +18,7 @@ For BackSpace key to work properly change
 Redefine OKEY_BS macro to 0x7f in macros.h file
 
 
-Import SCIM generated CSV files to LibreOffice
+Import SC-IM generated CSV files to LibreOffice
 ----------------------------------------------
 
 Choose this configuration options:

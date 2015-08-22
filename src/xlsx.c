@@ -100,7 +100,7 @@ char * get_xlsx_number_format_by_id(xmlDocPtr doc_styles, int id) {
     }
 }
 
-// this function takes the sheetfile DOM and builds the tbl spreadsheet (SCIM format)
+// this function takes the sheetfile DOM and builds the tbl spreadsheet (SC-IM format)
 void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) {
     xmlNode * cur_node = xmlDocGetRootElement(doc)->xmlChildrenNode;
     xmlNode * child_node = NULL;

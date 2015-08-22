@@ -4,8 +4,8 @@
 # Specify the name of the program.
 # All documentation and installation keys on this value.
 # 
-name=scim
-NAME=SCIM
+name=sc-im
+NAME=SC-IM
 SNAME := -DSNAME=\"$(name)\"
 
 # Compiler
@@ -34,15 +34,15 @@ MANMODE=644
 LIBDIR=$(prefix)/share/doc/$(name)
 LIBRARY=-DLIBDIR=\"$(LIBDIR)\"
 
-# For Building SCIM in LINUX, set LINUX variable below
+# For Building SC-IM in LINUX, set LINUX variable below
 LINUX := -DLINUX
 #LINUX :=
 
-# For Building SCIM in FREEBSD, set FREEBSD variable below
+# For Building SC-IM in FREEBSD, set FREEBSD variable below
 #FREEBSD := -DFREEBSD
 FREEBSD :=
 
-# For Building SCIM in NETBSD, set NETBSD variable below
+# For Building SC-IM in NETBSD, set NETBSD variable below
 #NETBSD := -DNETBSD
 NETBSD :=
 
@@ -53,7 +53,7 @@ NETBSD :=
 # See DATES INPUT in help.
 USELOCALE := -DUSELOCALE
 
-# Set this if you want SCIM to have color support
+# Set this if you want SC-IM to have color support
 USECOLORS := -DUSECOLORS
 
 # Set SIGVOID if signal routines are type void.

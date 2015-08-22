@@ -7,7 +7,7 @@ You can use <UP> <DOWN> arrows keys, or 'j' 'k' keys to move throw text.
 <ENTER> key scrolls one line down, while <DEL> key scrolls one line up, just like in less.
 You can use the '/' command to search for a pattern in the help.
 ------------------------------------------------------------------------
-SCIM has the following modes:
+SC-IM has the following modes:
 NORMAL MODE      For navigation and common commands
 INSERT MODE      For entering new cell content (values and expressions)
                  Submodes: = < > \
@@ -137,10 +137,10 @@ Commands for handling cell content:
      Sr          if a range is selected, it shows the rows hidden inside the range
      Sc          if a range is selected, it shows the cols hidden inside the range
      '/'         is an alias for ':int goto '.
-                 If a number is given, SCIM will search for a cell containing that number. Searches for either strings or numbers proceed forward from the current cell, wrapping back to a0 at the end of the table, and terminate at the current cell if the string or number is not found.
+                 If a number is given, SC-IM will search for a cell containing that number. Searches for either strings or numbers proceed forward from the current cell, wrapping back to a0 at the end of the table, and terminate at the current cell if the string or number is not found.
                  Ex.: You can type '/4' to look for cells that has the value of 4.
                  Or you can type '/value' to look for cells that has "value" as label content.
-                 You can also quote a regular expression, and SCIM will search for a cell containing a string matching the regular expression.
+                 You can also quote a regular expression, and SC-IM will search for a cell containing a string matching the regular expression.
                  You can also search formatted numbers or expressions using regular expressions by preceding the opening quotes of the regular expression with a '#' (for formatted numbers) or a '%' (for expressions).
                  These are handy for searching for dates within a specified range or cells which reference a given cell, for example, although they are somewhat slower than searching through ordinary strings, since all numbers must be formatted or expressions decompiled on the fly during the search.
 
@@ -255,7 +255,7 @@ Commands for handling cell content:
      :quit!      same as the previous
 
      :load name.sc
-                 load file called 'name.sc' into SCIM database
+                 load file called 'name.sc' into SC-IM database
      :load! name.sc
                  same as previous, but ignoring changes done over the current loaded spreadsheet.
 
@@ -287,23 +287,23 @@ Commands for handling cell content:
                  NOTE: if a range is selected, its content are exported. if not, the entire spreadsheet is exported
 
      :i csv name
-                 import a csv delimited file called 'name' to SCIM.
+                 import a csv delimited file called 'name' to SC-IM.
 
      :i tab name
-                 import a tab delimited file called 'name' to SCIM.
+                 import a tab delimited file called 'name' to SC-IM.
 
      :i xls name
-                 import a xls file called 'name' to SCIM.
+                 import a xls file called 'name' to SC-IM.
 
      :i xlsx name
-                 import a xlsx file called 'name' to SCIM.
-                 You can set xlsx_readformulas variable and SCIM will try to import formulas,
+                 import a xlsx file called 'name' to SC-IM.
+                 You can set xlsx_readformulas variable and SC-IM will try to import formulas,
                  rather than the final values of a cell.
 
      :i! xlsx name
                  same as previous, but ignoring changes since last save.
 
-     :version    shows SCIM version number
+     :version    shows SC-IM version number
 
      :set        changes a configuration parameter in the format of key value.
                  example:    :set half_page_scroll=0 other_key=its_value
@@ -598,7 +598,7 @@ Commands for handling cell content:
 
 
 &MAPPING&
-    mapping can be done in any SCIM file or in .scimrc file in current home directory.
+    mapping can be done in any SC-IM file or in .scimrc file in current home directory.
     maps can be added with nmap and imap commands, and they can be removed with
     nunmap, iunmap commands
     ex.:
@@ -627,7 +627,7 @@ Commands for handling cell content:
 
 
 &DATES INPUT&
-    Dates are internally stored in SCIM as numeric values, and they are visually
+    Dates are internally stored in SC-IM as numeric values, and they are visually
     seen as dates if a date format is applied to the cells that stores them.
     They can be entered as a label and then use the :datefmt special command to
     convert it to a numeric value and apply a format.
@@ -892,7 +892,7 @@ Commands for handling cell content:
 
 
 &Supported file formats / File import&
-    SCIM can handle the following file formats:
+    SC-IM can handle the following file formats:
         .sc
         .xls
         .xlsx
@@ -901,12 +901,12 @@ Commands for handling cell content:
         .tab (tab delimited values files)
         .txt (simple text files)
 
-    You can pass to SCIM binary any of the above files.
-    If you pass a csv file to SCIM, the file will be imported using a comma as the delimiter.
-    If you pass a tsb or tab file to SCIM, it will be imported using the tab character as the delimiter.
-    If you pass a txt file to SCIM, it will be imported using a comma as the delimiter.
+    You can pass to SC-IM binary any of the above files.
+    If you pass a csv file to SC-IM, the file will be imported using a comma as the delimiter.
+    If you pass a tsb or tab file to SC-IM, it will be imported using the tab character as the delimiter.
+    If you pass a txt file to SC-IM, it will be imported using a comma as the delimiter.
 
-    Take note that you can always override the delimiter used passing the --txtdelim parameter to SCIM.
+    Take note that you can always override the delimiter used passing the --txtdelim parameter to SC-IM.
     For instance: ./scim --txtdelim="\t" file.txt
     Possible values are:
         --txtdelim="\t"
@@ -916,12 +916,12 @@ Commands for handling cell content:
 
 &External scripts&
 
-    SCIM can read data from a external script, either throw pipeline or redirection.
-    This enables SCIM to be used as a non-interactive calculator.
+    SC-IM can read data from a external script, either throw pipeline or redirection.
+    This enables SC-IM to be used as a non-interactive calculator.
     It also can be run interactive but with no ncurses interface if you set the --nocurses flag.
 
     You can set the --output parameter if you want results to be saved in a file.
-    If you set the --quit_afterload flag, SCIM will quit after loading all files, but before becoming interactive.
+    If you set the --quit_afterload flag, SC-IM will quit after loading all files, but before becoming interactive.
 
     Suppose you have a file called "script" with the following content:
         let A2=0
@@ -929,7 +929,7 @@ Commands for handling cell content:
         recalc
         getnum A3
 
-    With the following command, you can send SCIM that script throw piping, then SCIM will output to stdout, and then quit:
+    With the following command, you can send SC-IM that script throw piping, then SC-IM will output to stdout, and then quit:
         cat script | ./scim --nocurses --quit_afterload
 
     You can also receive data throw piping and output results to a file, with this command:

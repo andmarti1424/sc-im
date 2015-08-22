@@ -83,7 +83,7 @@ void stop_screen() {
 // pantalla de bienvenida
 void do_welcome() {
 
-    char * msg_title = "SCIM - SpreadSheet Calculator Improvised";
+    char * msg_title = "SC-IM - SpreadSheet Calculator Improvised";
     char * msg_by = "A SC fork by Andrés Martinelli";
     char * msg_version = rev;
     char * msg_help = "Press «:help<Enter>» to get help";

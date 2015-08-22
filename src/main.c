@@ -141,9 +141,9 @@ int main (int argc, char ** argv) {
     #endif
 
 
-    // If the 'output' parameter is defined, SCIM saves its output to that file.
+    // If the 'output' parameter is defined, SC-IM saves its output to that file.
     // To achieve that, we open the output file and keep it open until exit.
-    // otherwise, SCIM will output to stdout.
+    // otherwise, SC-IM will output to stdout.
     if (get_conf_value("output") != NULL) {
         fdoutput = fopen(get_conf_value("output"), "w+");
         if (fdoutput == NULL) {
@@ -190,7 +190,7 @@ int main (int argc, char ** argv) {
     if ( ! atoi(get_conf_value("nocurses"))) {
         start_screen();         // Already done above
 
-        // we show welcome screen if no spreadsheet was passed to SCIM
+        // we show welcome screen if no spreadsheet was passed to SC-IM
         if ( ! curfile[0]) {
             do_welcome();
 
@@ -323,7 +323,7 @@ int exit_app(int status) {
 
 
 
-// we read parameters passed to SCIM executable
+// we read parameters passed to SC-IM executable
 // and store them in user_conf dictionary
 void read_argv(int argc, char ** argv) {
     int i, j;
@@ -376,7 +376,7 @@ void nopipe() {
 
 
 
-// setup signals catched by SCIM
+// setup signals catched by SC-IM
 void signals() {
     void sig_int();
     void sig_abrt();
@@ -403,14 +403,14 @@ void sig_int() {
 
 
 void sig_abrt() {
-    scerror("Error !!! Quitting SCIM.");
+    scerror("Error !!! Quitting SC-IM.");
     shall_quit = -1; // error !
 }
 
 
 
 void sig_term() {
-    scerror("Got SIGTERM signal. Quitting SCIM.");
+    scerror("Got SIGTERM signal. Quitting SC-IM.");
     shall_quit = 2;
 }
 

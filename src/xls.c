@@ -16,7 +16,7 @@
 #endif
 
 // this functions loads an excel file into tbl.
-// As SCIM still does not handle multiple sheets,
+// As SC-IM still does not handle multiple sheets,
 // if the excel file has multiple sheets, only the first one is read.
 // this function returns -1 in case of error
 int open_xls(char * fname, char * encoding) {
