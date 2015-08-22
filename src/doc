@@ -16,8 +16,9 @@ EDIT MODE        'e' and 'E' keys are used for entering this mode. It is used fo
 COMMAND MODE     ':' key is used for entering this mode. It is used for entering special
                  commands and for quiting app and saving files.
 VISUAL MODE      'v' key is used for entering this mode. It is used for selecting a range of cells
+                 You can also use <C-v> in INSERT and COMMAND MODE for entering this mode.
+                 See the section 'Selecting a range' below.
 ---------------- 
-
 
 &NORMAL MODE&
 
@@ -163,6 +164,7 @@ Commands for handling cell content:
                  Delete the chars after or before cursor
      <ESC>       Goes back to NORMAL MODE
      c-r {char}  Being {char} a mark of a cell or range, the range represented by that char gets inserted in the command line
+     c-v         Starts VISUAL MODE. See C-o and C-k commands in VISUAL MODE.
 
 
  &EDIT MODE&
@@ -237,6 +239,8 @@ Commands for handling cell content:
 
      <C-f>
                  current cell format (if exists) gets pasted in commandline.
+
+     <C-v>       Starts VISUAL MODE. See C-o and C-k commands in VISUAL MODE.
 
      :w          saves current spreadsheet
      :w foo      save current spreadsheet with 'foo' filename
@@ -546,10 +550,15 @@ Commands for handling cell content:
 
 
 
- &VISUAL MODE&
-    This mode is used for selecting a range of cells to do an operation
-    At entering to this mode, top left limit of the selected range, and the bottom right limit is set to
-    current row and column.
+ &VISUAL MODE& - Selecting a range
+    This mode is used for selecting a range of cells to do an operation.
+    You can enter this mode using the 'v' command in NORMAL_MODE or using <C-v> in INSERT and COMMAND mode.
+    When entering to this mode using the 'v' command, top left limit of the selected range, and the bottom right limit
+    is set to current row and column.
+
+    If you use <C-v> to enter this mode, you can move the cursor with arrow keys or hjkl keys, and then press <C-o> to begin selection.
+    Once your selection is done, you can press <C-k> and the range will be entered in inputline.
+
     The following movements commands helps to complete a selection in different ways.
     j k l h     Move cursor down, up, right or left
     0           Moves to column A
@@ -586,6 +595,7 @@ Commands for handling cell content:
                 This converts text content to a numeric value that can shown as a date. See DATE INPUT below for more info.
                 NOTE: USELOCALE has to be enabled during build.
     c-j         auto resize column width to fit its contents.
+
 
 &MAPPING&
     mapping can be done in any SCIM file or in .scimrc file in current home directory.
