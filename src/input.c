@@ -11,6 +11,8 @@
 #include "conf.h"   // for config values
 #include "utils/string.h"
 #include "cmds_visual.h"
+#include "buffer.h"
+
 
 static int d;              // char read from stdin
 int cmd_multiplier = 0;    // Multiplier
@@ -165,7 +167,7 @@ void break_waitcmd_loop(struct block * buffer) {
     //clr_header(input_win, 0); // comentado el 22/06/2014
     //show_header(input_win);   // comentado el 22/06/2014
     print_mult_pend(input_win); // agregado  el 22/06/2014 refresco solo el ef. multiplicador y cmd pending
-    update();                   // comentado el 22/06/2014
+    update(TRUE);                   // comentado el 22/06/2014
     return; 
 }
 
@@ -252,7 +254,7 @@ void handle_mult(int * cmd_multiplier, struct block * buf, long timeout) {
     //if (is_single_command(buf, timeout) == EDITION_CMD)
     //    copybuffer(buf, lastcmd_buffer); // save stdin buffer content in lastcmd buffer
     exec_mult(buf, timeout);
-    if (*cmd_multiplier > 1) { *cmd_multiplier = 1; update(); }
+    if (*cmd_multiplier > 1) { *cmd_multiplier = 1; update(TRUE); }
     *cmd_multiplier = 0;
     
     return;

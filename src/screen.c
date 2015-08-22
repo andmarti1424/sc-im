@@ -12,6 +12,7 @@
 #include "range.h"
 #include "sc.h"
 #include "cmds.h"
+#include "cmds_visual.h"
 #include "color.h"
 #include "conf.h"
 #include "version.h"
@@ -108,15 +109,17 @@ void do_welcome() {
     return;
 }
 
+
 // function that refreshes grid of screen
-void update(void) {
+void update(int header) {
     if (cmd_multiplier > 1) return;
-    if ( atoi(get_conf_value("nocurses"))) return;
+    if (atoi(get_conf_value("nocurses"))) return;
 
     // Limpio desde comienzo hacia to bottom
-    //wmove(main_win, RESROW, rescol);
-    wmove(main_win, 0, rescol);
-    wclrtobot(main_win);
+    if (header) {
+        wmove(main_win, 0, rescol);
+        wclrtobot(main_win);
+    }
     
     // calculo las filas y columnas que quedan ocultas
     //   mxcol-1 es el numero de la ultima sc_col que se ve en pantalla
@@ -146,11 +149,11 @@ void update(void) {
     wrefresh(main_win);
 
     // Muestro detalle de celda en header (primera fila)
-    show_celldetails(input_win);
+    if (header)
+        show_celldetails(input_win);
 
     // print mode
     (void) print_mode(input_win);
-    //wrefresh(input_win); // linea comentada el 11/01
     
     return;
 }
@@ -296,10 +299,12 @@ void print_mode(WINDOW * win) {
 
     } else if (curmode == VISUAL_MODE) {
         strcat(strm, " -- VISUAL --");
+        //if (visual_submode != '0') { strm[strlen(strm)-2] = '*'; strm[strlen(strm)-1] = '*'; }
         write_j(win, strm, row, RIGHT);
 
     } else if (curmode == COMMAND_MODE) {
         strcat(strm, "-- COMMAND --");
+
         write_j(win, strm, row, RIGHT);
         #ifdef USECOLORS
         set_ucolor(win, &ucolors[INPUT]);
@@ -596,7 +601,9 @@ void show_celldetails(WINDOW * win) {
     // add cell content to head string 
     head[0] = '\0';
     add_cell_detail(head, p1);
+
     mvwprintw(win, 0, inputline_pos, "%s", head);
+
     wclrtoeol(win); //linea agregada el 08/06
     //wrefresh(win); // linea comentada el 11/01
 }
@@ -896,5 +903,5 @@ void show_text(char * val) {
     getchar();
     reset_prog_mode();
     refresh();
-    update();
+    update(TRUE);
 }

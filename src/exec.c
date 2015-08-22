@@ -24,7 +24,7 @@ int exec_cmd (char * line) {
         getchar();
         reset_prog_mode();
         refresh();
-        update();
+        update(TRUE);
         return -1;
     }
 
@@ -34,7 +34,7 @@ int exec_cmd (char * line) {
         getchar();
         reset_prog_mode();
         refresh();
-        update();
+        update(TRUE);
         return -1;
     }
 
@@ -71,7 +71,7 @@ int exec_cmd (char * line) {
         getchar();
         reset_prog_mode();
         refresh();
-        update();
+        update(TRUE);
     }
     return 0;
 }

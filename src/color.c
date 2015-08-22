@@ -313,6 +313,6 @@ void color_cell(int r, int c, int rf, int cf, char * str) {
     }
 
     destroy_dictionary(d);
-    update();
+    update(TRUE);
     return;
 }

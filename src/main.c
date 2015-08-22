@@ -199,7 +199,7 @@ int main (int argc, char ** argv) {
             print_mode(input_win);
             wrefresh(input_win);
         } else {
-            update();
+            update(TRUE);
         }
     }
 
@@ -422,12 +422,12 @@ void winchg() {
     endwin();
     start_screen();
     clearok(stdscr, TRUE);
-    update(); 
+    update(TRUE); 
     flushinp();
     show_header(input_win);
     show_celldetails(input_win);
     wrefresh(input_win);
-    update(); 
+    update(TRUE); 
     //signal(SIGWINCH, winchg);
 }
 

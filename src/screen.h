@@ -9,7 +9,7 @@ extern struct ent ** p;
 void start_screen();
 void stop_screen();
 void do_welcome();
-void update(void);
+void update(int header);
 
 void show_content(WINDOW * win, int mxrow, int mxcol);
 void show_sc_row_headings(WINDOW * win, int mxrow);
