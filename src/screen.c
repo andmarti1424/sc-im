@@ -299,7 +299,8 @@ void print_mode(WINDOW * win) {
 
     } else if (curmode == VISUAL_MODE) {
         strcat(strm, " -- VISUAL --");
-        //if (visual_submode != '0') { strm[strlen(strm)-2] = '*'; strm[strlen(strm)-1] = '*'; }
+        if (visual_submode != '0')
+            strcpy(strm, " << VISUAL >>");
         write_j(win, strm, row, RIGHT);
 
     } else if (curmode == COMMAND_MODE) {
