@@ -24,7 +24,7 @@ extern struct history * commandline_history;
 
 char visual_submode = '0';
 
-srange * r;                  // SELECTED RANGE!
+srange * r;                       // SELECTED RANGE!
 int moving = FALSE;
 
 void start_visualmode(int tlrow, int tlcol, int brrow, int brcol) {
@@ -38,10 +38,10 @@ void start_visualmode(int tlrow, int tlcol, int brrow, int brcol) {
     r->tlcol = tlcol;
     r->brrow = brrow;
     r->brcol = brcol;
-    r->orig_row = currow;    // original row before starting selection
-    r->orig_col = curcol;    // original col before starting selection
-    r->startup_row = currow;     // original row position before entering visual mode
-    r->startup_col = curcol;     // original col position before entering visual mode
+    r->orig_row = currow;         // original row before starting selection
+    r->orig_col = curcol;         // original col before starting selection
+    r->startup_row = currow;      // original row position before entering visual mode
+    r->startup_col = curcol;      // original col position before entering visual mode
     r->marks[0] = '\t';
     r->marks[1] = '\t';
     r->selected = 1;
@@ -54,9 +54,9 @@ void start_visualmode(int tlrow, int tlcol, int brrow, int brcol) {
         ranges = r;
     }
 
-    if (visual_submode == '0') {
+    if (visual_submode == '0') {  // Started visual mode with 'v' command
         update(TRUE);
-    } else {
+    } else {                      // Started visual mode with 'C-v' command
         update(FALSE);
         moving = TRUE;
     }
@@ -64,10 +64,9 @@ void start_visualmode(int tlrow, int tlcol, int brrow, int brcol) {
 }
 
 void exit_visualmode() {
+    moving = FALSE;
     visual_submode = '0';
     r->selected = 0;
-    //currow = r->orig_row;
-    //curcol = r->orig_col;
     currow = r->startup_row;
     curcol = r->startup_col;
     del_ranges_by_mark('\t');
@@ -99,14 +98,20 @@ void do_visualmode(struct block * buf) {
 
             case ctl('o'):
                 moving = FALSE;
-                r->tlrow = currow;
-                r->tlcol = curcol;
-                r->brrow = currow;
-                r->brcol = curcol;
                 r->orig_row = currow;
                 r->orig_col = curcol;
                 break;
+
+            case OKEY_ENTER:
+                scinfo("Press <C-o> to begin selection or <Esc> key to exit VISUAL MODE");
+                return;
+
         }
+        r->tlrow = currow;
+        r->tlcol = curcol;
+        r->brrow = currow;
+        r->brcol = curcol;
+
         update(FALSE);
         return;
     }
