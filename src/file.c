@@ -47,7 +47,7 @@ void erasedb() {
             if (*pp != NULL) {
                 //(*pp)->next = freeents;    /* save [struct ent] for reuse */
                 //freeents = *pp;
-                
+
                 clearent(*pp);
             }
     }
@@ -222,7 +222,7 @@ int writefile(char * fname, int r0, int c0, int rn, int cn) {
 
     scinfo("Writing file \"%s\"...", save);
     write_fd(f, r0, c0, rn, cn);
-    
+
     closefile(f, pid, 0);
 
     if (! pid) {
@@ -327,7 +327,7 @@ void write_marks(register FILE *f) {
 
     for ( i='a'; i<='z'; i++ ) {
         m = get_mark((char) i);
-    
+
         // m->rng should never be NULL if both m->col and m->row are -1 !!
         if ( m->row == -1 && m->col == -1) { // && m->rng != NULL ) {  
             fprintf(f, "mark %c %s%d ", i, coltoa(m->rng->tlcol), m->rng->tlrow);
@@ -392,7 +392,7 @@ int readfile(char * fname, int eraseflg) {
     if (! strcmp( & fname[len-3], ".sc") ||
         (len > 6 && ! strcasecmp( & fname[len-7], ".scimrc"))) {
       // pass
-        
+
     // If file is an xlsx file, we import it
     } else if (len > 5 && ! strcasecmp( & fname[len-5], ".xlsx")){
         #ifndef XLSX
@@ -607,12 +607,12 @@ FILE * openfile(char *fname, int *rpid, int *rfd) {
         *rpid = 0;
         if (rfd != NULL)
             *rfd = 1;                    // Set to stdout just in case
-    
+
         efname = findhome(fname);
         return (fopen(efname, rfd == NULL ? "w" : "r"));
     }
 
-    fname++;                             // Skip | 
+    fname++;                             // Skip |
     efname = findhome(fname);
     if (pipe(pipefd) < 0 || (rfd != NULL && pipe(pipefd+2) < 0)) {
         scerror("Can't make pipe to child");
@@ -722,7 +722,7 @@ int import_csv(char * fname, char d) {
     //int rfd = STDOUT_FILENO;
     int r = 0, c = 0;
     char line_in[FBUFLEN];
-    char line_interp[FBUFLEN] = "";    
+    char line_interp[FBUFLEN] = "";
 
     char * token;
 
@@ -737,7 +737,7 @@ int import_csv(char * fname, char d) {
     }
 
     // recorro archivo csv
-    while ( ! feof(f) && (fgets(line_in, sizeof(line_in), f) != NULL) ) {        
+    while ( ! feof(f) && (fgets(line_in, sizeof(line_in), f) != NULL) ) {
         // this hack is for importing file that have DOS eol
         int l = strlen(line_in);
         while (l--)
@@ -752,7 +752,9 @@ int import_csv(char * fname, char d) {
 
         while( token != NULL ) {
             clean_carrier(token);
-            if ( (token[0] == '\"' || quote) && (token[strlen(token)-1] != '\"' || strlen(token) == 1) ) {
+            if ( token[0] == '\"' && token[strlen(token)-1] == '\"') {
+                quote = 1;
+            } else if ( (token[0] == '\"' || quote) && (token[strlen(token)-1] != '\"' || strlen(token) == 1) ) {
                 quote = 1;
                 sprintf(token + strlen(token), "%s", xstrtok(NULL, delim));
                 continue;
@@ -770,11 +772,11 @@ int import_csv(char * fname, char d) {
             c++;
             quote = 0;
             token = xstrtok(NULL, delim);
-        }     
-        
+        }
+
         r++;
     }
-    
+
     maxrow = r-1;
     maxcol = c-1;
 
@@ -805,7 +807,7 @@ void do_export(int r0, int c0, int rn, int cn) {
         strcpy(type_export, "csv");
     } else if (str_in_str(linea, "tab") == 0) {
         strcpy(type_export, "tab");
-    } 
+    }
 
     // luego obtengo la ruta y denominación del archivo a grabar.
     // si se ingresa una como parametro, se la toma.
@@ -841,11 +843,11 @@ void do_export(int r0, int c0, int rn, int cn) {
 
 // fname indica la ruta y denominación del archivo
 void export_delim(char * fname, char coldelim, int r0, int c0, int rn, int cn) {
-    FILE *f;    
+    FILE *f;
     int row, col;
-    register struct ent **pp;    
+    register struct ent **pp;
     int pid;
-    
+
     scinfo("Writing file \"%s\"...", fname);
 
     if ((f = openfile(fname, &pid, NULL)) == (FILE *)0) {
