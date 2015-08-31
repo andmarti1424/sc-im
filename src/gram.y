@@ -81,7 +81,6 @@ token S_INSERTCOL
 token S_OPENCOL
 token S_DELETECOL
 token S_YANKCOL
-token S_GETFORMAT
 */
 
 %token S_DATEFMT
@@ -160,9 +159,6 @@ token S_GETFORMAT
  token S_PULLCOPY
  token S_WHEREAMI
  token S_FGETNUM
- token S_GETSTRING
- token S_GETEXP
- token S_GETFMT
  token S_GETFRAME
  token S_GETRANGE
  token S_QUERY
@@ -176,6 +172,10 @@ token S_GETFORMAT
 */
 
 %token S_GETNUM
+%token S_GETSTRING
+%token S_GETEXP
+%token S_GETFMT
+%token S_GETFORMAT
 %token S_RECALC
 %token S_QUIT
 %token S_IMAP
@@ -515,6 +515,14 @@ command:
     |    S_GETNUM var_or_range      {
                                       getnum($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col, fdoutput);
                                     }
+
+    |    S_GETSTRING var_or_range   { getstring($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col, fdoutput); }
+
+    |    S_GETEXP var_or_range      { getexp($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col, fdoutput); }
+
+    |    S_GETFORMAT COL            { getformat($2, fdoutput); }
+
+    |    S_GETFMT var_or_range      { getfmt($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col, fdoutput); }
 
 /*
     |    S_SEVAL e                  { seval_result = seval($2);
