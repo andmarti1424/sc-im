@@ -6,6 +6,7 @@ Adaptation of Chuck Martin's code - <nrocinu@myrealbox.com>
 #include "sc.h"
 #include "conf.h"
 #include "main.h"
+#include "interp.h"
 
 // FIXME - pass fd is not neccesary?
 void getnum(int r0, int c0, int rn, int cn, FILE * fd) {
