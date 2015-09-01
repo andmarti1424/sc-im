@@ -482,8 +482,6 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
             // si hay solo valor de texto
             } else if ((*p) -> label) { 
                 show_text_content_of_cell(win, p, row, col, row + 1 - offscr_sc_rows - q_row_hidden, c);
-                //mvwprintw(win, row + 1 - offscr_sc_rows - q_row_hidden, c, "ñandú");//(*p)->label);
-                //mvwprintw(win, row + 1 - offscr_sc_rows - q_row_hidden, c, "nandu");//(*p)->label);
 
             // repaint a blank cell, because of in range, or because we have a coloured empty cell!
             } else if (! ((*p)->flags & is_valid) && !(*p)->label ) {
@@ -526,7 +524,7 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
 // funcion que agrega detalle de un ent en una cadena que recibe como parametro
 // se usa para mostrar el detalle de una celda en el input_win (funcion de debajo)
 void add_cell_detail(char * d, struct ent * p1) {
-    if ( !p1 ) return;
+    if ( ! p1 ) return;
 
     /* string expressions
     if (p1->expr && (p1->flags & is_strexpr)) {
@@ -536,7 +534,8 @@ void add_cell_detail(char * d, struct ent * p1) {
             strcat(d, (p1->flags & is_leftflush) ? "<{" : ">{");
         strcat(d, "??? } ");        // and this '}' is for vi %
 
-    } else*/ if (p1->label) {
+    } else*/
+    if (p1->label) {
         /* has constant label only */
         if (p1->flags & is_label)
             strcat(d, "|\"");
@@ -564,7 +563,7 @@ void add_cell_detail(char * d, struct ent * p1) {
 // Funcion que agrega en header (la primera fila de pantalla)
 // el detalle del contenido de la celda seleccionada
 void show_celldetails(WINDOW * win) {
-    char head[COLS];
+    char head[FBUFLEN];
     int inputline_pos = 0;
 
     // show cell in header
@@ -602,6 +601,14 @@ void show_celldetails(WINDOW * win) {
     // add cell content to head string 
     head[0] = '\0';
     add_cell_detail(head, p1);
+
+    // cut string if its too large!
+    if (strlen(head) > COLS - inputline_pos - 1) {
+        head[COLS - inputline_pos - 1 - 15]='>';
+        head[COLS - inputline_pos - 1 - 14]='>';
+        head[COLS - inputline_pos - 1 - 13]='>';
+        head[COLS - inputline_pos - 1 - 12]='\0';
+    }
 
     mvwprintw(win, 0, inputline_pos, "%s", head);
 
@@ -653,7 +660,7 @@ int calc_offscr_sc_cols() {
     int i, cols = 0, col = 0;
     // pick up col counts
     if (offscr_sc_cols <= curcol)
-        for (i = offscr_sc_cols, cols = 0, col = rescol; i < maxcols && col + fwidth[i] < COLS - 1; i++) {
+        for (i = offscr_sc_cols, cols = 0, col = rescol; i < maxcols && col + fwidth[i] - 1 < COLS - 1; i++) {
             cols++;
             if (! col_hidden[i])
                 col += fwidth[i];
@@ -666,7 +673,7 @@ int calc_offscr_sc_cols() {
             // Try to put the cursor in the center of the screen
             col = (COLS - rescol - fwidth[curcol]) / 2 + rescol;
             offscr_sc_cols = curcol;
-            for (i=curcol-1; i >= 0 && col-fwidth[i] > rescol; i--) {
+            for (i=curcol-1; i >= 0 && col-fwidth[i] - 1 > rescol; i--) {
                 offscr_sc_cols--;
                 if (! col_hidden[i])
                     col -= fwidth[i];
@@ -674,7 +681,7 @@ int calc_offscr_sc_cols() {
         }
 
         // Now pick up the counts again
-        for (i = offscr_sc_cols, cols = 0, col = rescol; i < maxcols && col + fwidth[i] < COLS - 1; i++) {
+        for (i = offscr_sc_cols, cols = 0, col = rescol; i < maxcols && col + fwidth[i] - 1  < COLS - 1; i++) {
             cols++;
             if (! col_hidden[i])
                 col += fwidth[i];
@@ -728,7 +735,6 @@ int scstrlen(char * in) {
 */
 
 void show_text_content_of_cell(WINDOW * win, struct ent ** p, int row, int col, int r, int c) {
-    //scdebug("%d %d %d %d", row, col, r, c);
     char value[FBUFLEN];      // the value to be printed without padding
     char field[FBUFLEN] = ""; // the value with padding and alignment    
     int col_width = fwidth[col];    
@@ -737,7 +743,6 @@ void show_text_content_of_cell(WINDOW * win, struct ent ** p, int row, int col, 
 
     int str_len  = strlen((*p)->label);
     //int str_len  = scstrlen((*p)->label);
-    //scdebug("FIN: %d", str_len);
     strcpy(value, (*p)->label);
 
     // in case there is a format
