@@ -735,6 +735,7 @@ int import_csv(char * fname, char d) {
         scerror("Can't read file \"%s\"", fname);
         return -1;
     }
+    loading = 1;
 
     // recorro archivo csv
     while ( ! feof(f) && (fgets(line_in, sizeof(line_in), f) != NULL) ) {
@@ -754,7 +755,7 @@ int import_csv(char * fname, char d) {
             clean_carrier(token);
             if ( token[0] == '\"' && token[strlen(token)-1] == '\"') {
                 quote = 1;
-            } else if ( (token[0] == '\"' || quote) && (token[strlen(token)-1] != '\"' || strlen(token) == 1) ) {
+            } else if ( (token[0] == '\"' || quote) && strlen(token) && (token[strlen(token)-1] != '\"' || strlen(token) == 1) ) {
                 quote = 1;
                 sprintf(token + strlen(token), "%s", xstrtok(NULL, delim));
                 continue;
@@ -763,27 +764,35 @@ int import_csv(char * fname, char d) {
                 del_char(token, 0);
                 del_char(token, strlen(token)-1);
             }
-            if (isnumeric(token)) {
-                sprintf(line_interp, "let %s%d=%s", coltoa(c), r, token);
+            char * st = str_replace (token, "\"", "''"); //replace double quotes inside string
+            if (isnumeric(st) && strlen(st) && token[strlen(st)-1] != '-' && token[strlen(st)-1] != '.') { //FIXME do a proper isnumeric function !!
+                sprintf(line_interp, "let %s%d=%s", coltoa(c), r, st);
             } else {
-                sprintf(line_interp, "label %s%d=\"%s\"", coltoa(c), r, token);
+                sprintf(line_interp, "label %s%d=\"%s\"", coltoa(c), r, st);
             }
             send_to_interp(line_interp);
             c++;
             quote = 0;
             token = xstrtok(NULL, delim);
+            free(st);
         }
 
         r++;
     }
+    //scdebug("END");
 
     maxrow = r-1;
     maxcol = c-1;
+
+    // to do a test:
+    //sprintf(line_interp, "let %s%d=%s", coltoa(maxcol), maxrow, "0");
+    //send_to_interp(line_interp);
 
     auto_justify(0, maxcol, DEFWIDTH);
 
     //closefile(f, pid, rfd);
     fclose(f);
+    loading = 0;
 
     EvalAll();
 
