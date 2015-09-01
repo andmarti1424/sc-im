@@ -935,7 +935,7 @@ void insert_or_edit_cell() {
     inputline[0]='\0';
     inputline_pos = 0;
     chg_mode('.');
-    clr_header(input_win, 0);
+    clr_header(input_win, 0); //FIXME
 
     char * opt = get_conf_value("newline_action");
     switch (opt[0]) {
@@ -958,7 +958,7 @@ void send_to_interp(char * oper) {
 
     linelim = 0;
     (void) yyparse();
-    if (atoi(get_conf_value("autocalc"))) EvalAll();
+    if (atoi(get_conf_value("autocalc")) && ! loading) EvalAll();
     //line[0]='\0';
     return;
 }
