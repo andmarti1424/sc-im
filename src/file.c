@@ -752,13 +752,18 @@ int import_csv(char * fname, char d) {
         c = 0;
 
         while( token != NULL ) {
+            if (r > MAXROWS - GROWAMT - 1 || c > ABSMAXCOLS - 1) break;
             clean_carrier(token);
             if ( token[0] == '\"' && token[strlen(token)-1] == '\"') {
                 quote = 1;
             } else if ( (token[0] == '\"' || quote) && strlen(token) && (token[strlen(token)-1] != '\"' || strlen(token) == 1) ) {
                 quote = 1;
-                sprintf(token + strlen(token), "%s", xstrtok(NULL, delim));
-                continue;
+                char * next = xstrtok(NULL, delim);
+
+                if (next != NULL) {
+                    sprintf(token + strlen(token), "%s", next);
+                    continue;
+                }
             }
             if (quote) { // elimino comillas si vengo de quote
                 del_char(token, 0);
@@ -778,6 +783,7 @@ int import_csv(char * fname, char d) {
         }
 
         r++;
+        if (r > MAXROWS - GROWAMT - 1 || c > ABSMAXCOLS - 1) break;
     }
     //scdebug("END");
 
