@@ -770,11 +770,11 @@ int import_csv(char * fname, char d) {
                 del_char(token, strlen(token)-1);
             }
             char * st = str_replace (token, "\"", "''"); //replace double quotes inside string
-            if (isnumeric(st) && strlen(st) && token[strlen(st)-1] != '-' && token[strlen(st)-1] != '.') { //FIXME do a proper isnumeric function !!
-                sprintf(line_interp, "let %s%d=%s", coltoa(c), r, st);
-            } else {
+            //if (isnumeric(st) && strlen(st) && token[strlen(st)-1] != '-' && token[strlen(st)-1] != '.') { //FIXME do a proper isnumeric function !!
+            //    sprintf(line_interp, "let %s%d=%s", coltoa(c), r, st);
+            //} else {
                 sprintf(line_interp, "label %s%d=\"%s\"", coltoa(c), r, st);
-            }
+            //}
             send_to_interp(line_interp);
             c++;
             quote = 0;
