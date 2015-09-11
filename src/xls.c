@@ -43,8 +43,8 @@ int open_xls(char * fname, char * encoding) {
     xlsWorkSheet * pWS;
     WORD r, c;
     pWB = xls_open(fname, encoding);
-    
-    char line_interp[FBUFLEN] = "";    
+
+    char line_interp[FBUFLEN] = "";
     struct ent * n;
 
     if (pWB == NULL) {
@@ -104,7 +104,7 @@ int open_xls(char * fname, char * encoding) {
                         sprintf(line_interp, "label %s%d=\"%s\"", coltoa(c), r, (char *) cell->str);
                     }
                 }
-            
+
             } else if (cell->str != NULL) {
                 int pad_pos;
                 if ((pad_pos = str_in_str((char *) cell->str, "\n")) != -1) ((char *) cell->str)[pad_pos] = '\0'; // For spanning

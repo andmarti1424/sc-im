@@ -54,7 +54,7 @@ void free_yanklist () {
             scxfree(colformat[c]);
             colformat[c] = NULL;
         }
-           
+
     yanklist = NULL;
     return;
 }
@@ -67,7 +67,7 @@ int count_yank_ents() {
     while (r != NULL) {
         i++;
         r = r->next;
-    }    
+    }
     return i;
 }
 
@@ -97,7 +97,7 @@ void add_ent_to_yanklist(struct ent * item) {
         yanklist = i_ent;
         return;
     }
- 
+
     // si la lista no esta vacia, lo inserto al final
     struct ent * r = yanklist;
     struct ent * ant;
@@ -188,7 +188,7 @@ int paste_yanked_ents(int above, int type_paste) {
         save_undo_range_shift(0, yank_arg, 0, curcol, maxrow, curcol - 1 + yank_arg);
         #endif
     }
-    
+
     // first check if there are any locked cells
     // if so, just return
     if (type_of_yank == 'a' || type_of_yank == 'e') {
@@ -209,7 +209,7 @@ int paste_yanked_ents(int above, int type_paste) {
         // here we delete current content of "destino" ent
         if (type_paste == 'a' || type_paste == 's')
             erase_area(yl->row + diffr, yl->col + diffc, yl->row + diffr, yl->col + diffc, ignorelock);
-        
+
         /*struct ent **pp = ATBL(tbl, yl->row + diffr, yl->col + diffc);
         if (*pp && ( ! ((*pp)->flags & is_locked) )) {
             mark_ent_as_deleted(*pp);

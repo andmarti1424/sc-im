@@ -131,7 +131,7 @@ void show_col(int from_col, int arg) {
 void show_hiddenrows() {
     int r, c = 0;
     for (r = 0; r < maxrow; r++) {
-        if (row_hidden[r]) c++; 
+        if (row_hidden[r]) c++;
     }
     char valores[12 * c + 20];
     valores[0]='\0';
@@ -147,7 +147,7 @@ void show_hiddenrows() {
 void show_hiddencols() {
     int c, count = 0;
     for (c = 0; c < maxcol; c++) {
-        if (col_hidden[c]) count++; 
+        if (col_hidden[c]) count++;
     }
     char valores[8 * c + 20];
     valores[0]='\0';

@@ -1,7 +1,7 @@
 #include <ncurses.h>
 #include <sys/time.h>                                                 // for struct timeval
 
-extern int multiplier;                                                // Multiplier 
+extern int multiplier;                                                // Multiplier
 extern int command_pending;                                           // Command pending
 extern WINDOW * input_win;
 extern struct block * lastcmd_buffer;

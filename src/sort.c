@@ -1,7 +1,7 @@
 /*
 Adaptation of Chuck Martin's code - <nrocinu@myrealbox.com>
  */
- 
+
 #include <sys/types.h>
 #include <string.h>
 #include <stdio.h>
@@ -35,7 +35,7 @@ void sortrange(struct ent * left, struct ent * right, char * criteria) {
     maxc = left->col > right->col ? left->col : right->col;
 
     sort = (struct sortcrit *) scxmalloc((2 * sizeof(struct sortcrit)));
-    
+
     // guardo en la estructura rows todos los ents del rango
     rows = (int *) scxmalloc((maxr - minr + 1) * sizeof(int));
     for (r = minr, c = 0; r <= maxr; r++, c++)
@@ -54,7 +54,7 @@ void sortrange(struct ent * left, struct ent * right, char * criteria) {
         while (criteria[cp]) {
             if (howmany > 1)
                 sort = (struct sortcrit *) scxrealloc((char *) sort,  (howmany + 1) * (sizeof(struct sortcrit)));
-            
+
             switch (criteria[cp++]) {
                 case '+':
                     sort[howmany].direction = 1;
@@ -102,7 +102,7 @@ void sortrange(struct ent * left, struct ent * right, char * criteria) {
 
     //currow = minr;
     //curcol = minc;
- 
+
     yank_area(minr, minc, maxr, maxc, 's', 1); // guardo en la yanklist todo el rango original
 
     // borro el rango original. no es necesario porque se lo borra en paste_yanked_ents..
@@ -131,10 +131,10 @@ void sortrange(struct ent * left, struct ent * right, char * criteria) {
 
     //paste_yanked_ents(0, 'a'); // paste ents over currow and curcol
     paste_yanked_ents(0, 's'); // paste ents over currow and curcol
-    
+
     scxfree((char *) sort);
     scxfree((char *) rows);
-    
+
     if (criteria) scxfree(criteria);
 
     //r = currow;

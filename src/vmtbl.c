@@ -31,7 +31,7 @@ void checkbounds(int *rowp, int *colp) {
             return;
         }
     }
-    if (*colp < 0) 
+    if (*colp < 0)
         *colp = 0;
     else if (*colp >= maxcols) {
         if (!growtbl(GROWCOL, 0, *colp))
@@ -39,7 +39,7 @@ void checkbounds(int *rowp, int *colp) {
     }
 }
 #endif /* ! PSC */
-    
+
 /* scxrealloc will just scxmalloc if oldptr is == NULL */
 #define GROWALLOC(newptr, oldptr, nelem, type, msg) \
     newptr = (type *)scxrealloc((char *)oldptr, \
@@ -168,7 +168,7 @@ int growtbl(int rowcol, int toprow, int topcol) {
             }
             for (nullit = ATBL(tbl, i, maxcols), cnt = 0; cnt < newcols - maxcols; cnt++, nullit++)
                 *nullit = (struct ent *)NULL;
-        /*        memset((char *) ATBL(tbl,i, maxcols), 0, (newcols - maxcols) * sizeof(struct ent **)); */               
+        /*        memset((char *) ATBL(tbl,i, maxcols), 0, (newcols - maxcols) * sizeof(struct ent **)); */
         }
     }
     else

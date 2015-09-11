@@ -76,7 +76,7 @@ void load_history(struct history * h) {
 
                 fgets(linea, sizeof(linea), f);
                 int s = strlen(linea)-1;
-                del_range_chars(linea, s, s); 
+                del_range_chars(linea, s, s);
 
                 if (linea[0] == ':') {
                     del_range_chars(linea, 0, 0);
@@ -146,7 +146,7 @@ void del_item_from_history(struct history * h, int pos) {
     free(nl->line);
     free(nl);
     h->len--;
-    
+
     return;
 }
 

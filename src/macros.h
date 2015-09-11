@@ -58,4 +58,3 @@ extern WINDOW * input_win;
 //#define debug(...)   if ( ! atoi(get_conf_value("nocurses"))) { mvwprintw(input_win, 1, 0, __VA_ARGS__); wclrtoeol(input_win); wtimeout(input_win, -1); wgetch(input_win); wtimeout(input_win, TIMEOUT_CURSES); wrefresh(input_win); } else { printf(__VA_ARGS__); printf("\n"); }
 #endif
 */
-

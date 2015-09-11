@@ -17,7 +17,7 @@ void do_insertmode(struct block * sb) {
         start_visualmode(currow, curcol, currow, curcol);
         return;
 
-    } else if (sb->value == OKEY_LEFT) {          // LEFT
+    } else if (sb->value == OKEY_LEFT) {   // LEFT
         if (inputline_pos) inputline_pos--;
         show_header(input_win);
 
@@ -40,7 +40,7 @@ void do_insertmode(struct block * sb) {
         show_header(input_win);
 
     } else if (find_val(sb, OKEY_ENTER)) { // ENTER
-        insert_or_edit_cell(); 
+        insert_or_edit_cell();
 
     } else if ( strlen(inputline) < (COLS - 14) && isprint(sb->value)) { //  ESCRIBO UN NUEVO CHAR
         ins_in_line(sb->value);

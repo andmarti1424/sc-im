@@ -6,4 +6,3 @@ char * get_xlsx_styles(xmlDocPtr doc_styles, int pos);
 char * get_xlsx_number_format_by_id(xmlDocPtr doc_styles, int id);
 #endif
 int open_xlsx(char * fname, char * encoding);
-

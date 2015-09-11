@@ -68,7 +68,7 @@ void start_screen() {
     if ((char *) getenv ("ESCDELAY") == NULL) set_escdelay(ESC_DELAY);
     #endif
     cbreak();
-    keypad(input_win, 1); 
+    keypad(input_win, 1);
 }
 
 void stop_screen() {

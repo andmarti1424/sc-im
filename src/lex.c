@@ -127,7 +127,7 @@ int yylex() {
                         }
                     }
             }
-            
+
             if (ret == WORD) {
                 if (tokenst && ( ! strncmp(line, "nmap", 4) || ! strncmp(line, "imap", 4) )) {
                     char * p = tokenst;
@@ -138,13 +138,13 @@ int yylex() {
                           || (*(ptr-1) == '\\'))) ptr++;
                     ptr = malloc((unsigned) (ptr - p));
                     yylval.sval = ptr;
-       
+
                     while ( *p && (
-                      (*p != ' ') || 
-                      (*p != '\t') || 
-                      ( *(p+1) 
+                      (*p != ' ') ||
+                      (*p != '\t') ||
+                      ( *(p+1)
                       && *(p-1)
-                      && *(p-1) == '\\' 
+                      && *(p-1) == '\\'
                       && *(p+1) != '\0'
                       && *(p+1) != '\n'
                       && *(p+1) != '\r'
@@ -275,7 +275,7 @@ int yylex() {
         linelim = p-line;
         tokenst = NULL;
         return yylex();
- 
+
 /*
     } else if (tokenl ==  3) {
                     //k++;

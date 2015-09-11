@@ -90,7 +90,7 @@ char * get_xlsx_number_format_by_id(xmlDocPtr doc_styles, int id) {
         free(idFile);
         idFile = (char *) xmlGetProp(cur_node, (xmlChar *) "numFmtId");
     }
-    
+
     if (atoi(idFile) == id) {
         free(idFile);
         return (char *) xmlGetProp(cur_node, (xmlChar *) "formatCode");
@@ -104,7 +104,7 @@ char * get_xlsx_number_format_by_id(xmlDocPtr doc_styles, int id) {
 void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) {
     xmlNode * cur_node = xmlDocGetRootElement(doc)->xmlChildrenNode;
     xmlNode * child_node = NULL;
-    char line_interp[FBUFLEN] = "";    
+    char line_interp[FBUFLEN] = "";
     int r, c;
 
     // we go forward up to sheet data
@@ -240,7 +240,6 @@ void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) 
                         strf = str_replace (formula, "STDEV","@STDDEV");
                         strcpy(formula, strf);
                         free(strf);
-                        
 
                         // we send the formula to the interpreter and hope to resolve it!
                         sprintf(line_interp, "let %s%d=%s", coltoa(c), r, formula);
@@ -250,7 +249,7 @@ void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) 
                         sprintf(line_interp, "let %s%d=%.15f", coltoa(c), r, l);
                     }
                     send_to_interp(line_interp);
-                } 
+                }
             }
 
             xmlFree(s);
@@ -274,14 +273,14 @@ int open_xlsx(char * fname, char * encoding) {
     char buf[100];
     int err;
     int len;
-    
+
     // open zip file
     if ((za = zip_open(fname, 0, &err)) == NULL) {
         zip_error_to_str(buf, sizeof(buf), err, errno);
         scerror("can't open zip archive `%s': %s", fname, buf);
         return -1;
     }
- 
+
     // open xl/sharedStrings.xml
     char * name = "xl/sharedStrings.xml";
     zf = zip_fopen(za, name, ZIP_FL_UNCHANGED);
@@ -384,7 +383,7 @@ int open_xlsx(char * fname, char * encoding) {
         scerror("cannot close zip archive `%s'", fname);
         return -1;
     }
- 
+
     auto_justify(0, maxcol, DEFWIDTH);
     deleterow();
     return 0;

@@ -304,7 +304,7 @@ token K_WHITE
 %token K_SET8BIT
 %token K_ASCII
 %token K_CHR
-  
+
 %right ';'
 %left '?' ':'
 %left '|'
@@ -329,7 +329,7 @@ command:
                                   changed++;
                                   modflg++;
                                   }
- 
+
     |    S_LABEL var_or_range '=' e       { slet($2.left.vp, $4, 0); }
     |    S_LEFTSTRING var_or_range '=' e  { slet($2.left.vp, $4, -1); }
     |    S_RIGHTSTRING var_or_range '=' e { slet($2.left.vp, $4, 1); }
@@ -364,7 +364,7 @@ command:
                                        show_col($2, $4-$2+1); }  // show de un rango de columnas
     |    S_SHOWROW NUMBER ':' NUMBER {
                                        show_row($2, $4-$2+1); }  // show de un rango de filas
-    |    S_HIDECOL COL ':' COL       { 
+    |    S_HIDECOL COL ':' COL       {
                                        int c = curcol, arg;
                                        if ($2 < $4) {
                                             curcol = $2;
@@ -391,7 +391,7 @@ command:
 
     |    S_MARK COL var_or_range     { set_cell_mark($2 + 97, $3.left.vp->row, $3.left.vp->col); }
 
-    |    S_MARK COL var_or_range var_or_range { ; 
+    |    S_MARK COL var_or_range var_or_range { ;
                                           srange * sr = create_range('\0', '\0', $3.left.vp, $4.left.vp);
                                           unselect_ranges();
                                           set_range_mark($2 + 97, sr);
@@ -466,16 +466,16 @@ command:
                                           scxfree($2);
                                         }
 
-    |    S_COLOR STRING                 {  
+    |    S_COLOR STRING                 {
 #ifdef USECOLORS
                                           chg_color($2);
 #endif
                                           scxfree($2);
                                         }
 
-    |    S_CELLCOLOR var_or_range STRING {  
+    |    S_CELLCOLOR var_or_range STRING {
 #ifdef USECOLORS
-                                          if ( ! atoi(get_conf_value("nocurses"))) 
+                                          if ( ! atoi(get_conf_value("nocurses")))
                                               color_cell($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col, $3);
 #endif
                                           scxfree($3);
@@ -500,7 +500,7 @@ command:
 
     |    S_EVAL e                   { eval_result = eval($2);
                                       efree($2);
-                                    } 
+                                    }
     |    S_QUIT                     { printf("quitting. unsaved changes will be lost.\n");
                                       shall_quit = 2; // unsaved changes are lost!
                                     }
@@ -924,7 +924,7 @@ setitem    :
 
 /* types of errors, to 'goto'
 errlist :
-  
+
         K_ERROR range        { num_search((double)0,
                       $2.left.vp->row, $2.left.vp->col,
                       $2.right.vp->row, $2.right.vp->col,

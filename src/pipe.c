@@ -93,7 +93,7 @@ void getstring(int r0, int c0, int rn, int cn, FILE * fd) {
             //else
             //    strcat(line, "\n");
             //write(fd, line, strlen(line));
-            
+
             scdebug("%s", line);
             if (brokenpipe) {
                 linelim = -1;
@@ -125,7 +125,7 @@ void getexp(int r0, int c0, int rn, int cn, FILE * fd) {
             //else
             //    strcat(line, "\n");
             //write(fd, line, strlen(line));
-            
+
             scdebug("%s", line);
             if (brokenpipe) {
                 linelim = -1;

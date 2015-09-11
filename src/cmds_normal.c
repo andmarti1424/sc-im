@@ -30,7 +30,7 @@ void do_normalmode(struct block * buf) {
         // Movement commands
         case 'j':
         case OKEY_DOWN:
-            currow = forw_row(1)->row; 
+            currow = forw_row(1)->row;
             unselect_ranges();
             update(TRUE);
             break;
@@ -145,7 +145,7 @@ void do_normalmode(struct block * buf) {
             break;
         #else
             scinfo("Build made without USELOCALE enabled");
-        #endif 
+        #endif
             }
 
         // CTRL f
@@ -168,7 +168,7 @@ void do_normalmode(struct block * buf) {
             {
             int n = LINES - RESROW - 1;
             if (atoi(get_conf_value("half_page_scroll"))) n = n / 2;
-            currow = back_row(n)->row; 
+            currow = back_row(n)->row;
             unselect_ranges();
             scroll_up(n);
             update(TRUE);
@@ -176,7 +176,7 @@ void do_normalmode(struct block * buf) {
             }
 
         case 'w':
-            e = go_forward();  
+            e = go_forward();
             currow = e->row;
             curcol = e->col;
             unselect_ranges();
@@ -184,7 +184,7 @@ void do_normalmode(struct block * buf) {
             break;
 
         case 'b':
-            e = go_backward();  
+            e = go_backward();
             currow = e->row;
             curcol = e->col;
             unselect_ranges();
@@ -222,7 +222,7 @@ void do_normalmode(struct block * buf) {
             break;
 
         case 'G': // goto end
-            e = go_end();  
+            e = go_end();
             currow = e->row;
             curcol = e->col;
             unselect_ranges();
@@ -231,7 +231,7 @@ void do_normalmode(struct block * buf) {
 
         // GOTO goto
         case ctl('a'):
-            e = go_home(); 
+            e = go_home();
             curcol = e->col;
             currow = e->row;
             unselect_ranges();
@@ -246,12 +246,12 @@ void do_normalmode(struct block * buf) {
                 curcol = go_eol()->col;
 
             } else if (buf->pnext->value == 'g') {                        // gg
-                e = go_home(); 
+                e = go_home();
                 curcol = e->col;
                 currow = e->row;
 
             } else if (buf->pnext->value == 'G') {                        // gG
-                e = go_end();  
+                e = go_end();
                 currow = e->row;
                 curcol = e->col;
 
@@ -335,31 +335,31 @@ void do_normalmode(struct block * buf) {
             break;
 
         // del current cell or range
-        case 'x': 
+        case 'x':
             del_selected_cells();
             update(TRUE);
             break;
 
         // format col
-        case 'f': 
+        case 'f':
             if (bs != 2) return;
             formatcol(buf->pnext->value);
             break;
 
         // mark cell or range
-        case 'm': 
-            if (bs != 2) break;                
+        case 'm':
+            if (bs != 2) break;
             int p = is_range_selected();
             if (p != -1) { // mark range
-                struct srange * sr = get_range_by_pos(p); 
-                set_range_mark(buf->pnext->value, sr);                   
+                struct srange * sr = get_range_by_pos(p);
+                set_range_mark(buf->pnext->value, sr);
             } else         // mark cell 
                 set_cell_mark(buf->pnext->value, currow, curcol);
             modflg++;
             break;
 
         // copy
-        case 'c': 
+        case 'c':
             {
             if (bs != 2) break;
             struct mark * m = get_mark(buf->pnext->value);
@@ -408,7 +408,7 @@ void do_normalmode(struct block * buf) {
 #endif
                 }
 #ifdef UNDO
-                end_undo_action();            
+                end_undo_action();
 #endif
             }
 
@@ -446,7 +446,7 @@ void do_normalmode(struct block * buf) {
             }
 
         // create range with two marks
-        case 'R':  
+        case 'R':
             if (bs == 3) {
                 create_range(buf->pnext->value, buf->pnext->pnext->value, NULL, NULL);
                 update(TRUE);
@@ -626,10 +626,10 @@ void do_normalmode(struct block * buf) {
             update(TRUE);
             break;
             }
- 
+
         case 'y':
             // yank row
-            if ( bs == 2 && buf->pnext->value == 'r') {        
+            if ( bs == 2 && buf->pnext->value == 'r') {
                 yank_area(currow, 0, currow + cmd_multiplier - 1, maxcol, 'r', cmd_multiplier);
                 if (cmd_multiplier > 0) cmd_multiplier = 0;
 
@@ -696,7 +696,7 @@ void do_normalmode(struct block * buf) {
                 start_visualmode(*tlr, *tlc, *brr, *brc);
             }
             break;
-          
+
         // scroll
         case 'z':
             if ( bs != 2 ) break;
@@ -731,7 +731,7 @@ void do_normalmode(struct block * buf) {
                     ;
                     int i = 0, c = 0, ancho = rescol;
                     offscr_sc_cols = 0;
- 
+
                     for (i = 0; i < curcol; i++) {
                         for (c = i; c < curcol; c++) {
                             if (!col_hidden[c]) ancho += fwidth[c];
@@ -769,7 +769,7 @@ void do_normalmode(struct block * buf) {
             }
             update(TRUE);
             break;
- 
+
         // scroll up a line
         case ctl('y'):
             scroll_up(1);
@@ -836,7 +836,7 @@ void do_normalmode(struct block * buf) {
             send_to_interp(interp_line);
 #ifdef UNDO
             copy_to_undostruct(r, c, rf, cf, 'a');
-            end_undo_action();            
+            end_undo_action();
 #endif
             cmd_multiplier = 0;
             update(TRUE);
@@ -859,7 +859,7 @@ void do_normalmode(struct block * buf) {
             EvalAll();
             update(TRUE);
             break;
- 
+
         // increase or decrease numeric value of cell or range
         case '-':
         case '+':

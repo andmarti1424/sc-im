@@ -98,7 +98,7 @@ void do_editmode(struct block * sb) {
                  del_range_chars(inputline, d, inputline_pos-1);
                  inputline_pos = d;
                  break;
-  
+
              case 'l':                     // dl or cl
              case OKEY_RIGHT:
                  del_back_char();
@@ -127,7 +127,7 @@ void do_editmode(struct block * sb) {
     } else if (find_val(sb, OKEY_ENTER)) { // ENTER
         insert_or_edit_cell(); 
         return;
- 
+
     } else if (sb->value == '$') {         // $
         inputline_pos = strlen(inputline) - 1;
 
@@ -216,7 +216,7 @@ int for_word(int end_of_word, int delete, int big_word) {
     } else {             // e or E
         if ( inputline[cpos+1] == ' ' ) cpos += 2;
         else if ( ! istext( inputline [cpos+1] ) && istext( inputline[cpos] ) && ! big_word ) cpos++;
-        while ( ++cpos < strlen(inputline) ) 
+        while ( ++cpos < strlen(inputline) )
             if ( ( inputline[cpos] == ' ' ) || ( ! istext( inputline [cpos] )
             && istext( inputline[cpos - 1] ) && ! big_word ) ) return --cpos;
     }

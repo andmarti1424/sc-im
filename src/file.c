@@ -622,16 +622,16 @@ FILE * openfile(char *fname, int *rpid, int *rfd) {
 
     //deraw(rfd==NULL);
 
-    if ((pid=fork()) == 0) {             // if child 
-        (void) close(0);                 // close stdin 
+    if ((pid=fork()) == 0) {             // if child
+        (void) close(0);                 // close stdin
         (void) close(pipefd[1]);
-        (void) dup(pipefd[0]);           // connect to first pipe 
-        if (rfd != NULL) {               // if opening for read 
-            (void) close(1);             // close stdout 
+        (void) dup(pipefd[0]);           // connect to first pipe
+        if (rfd != NULL) {               // if opening for read
+            (void) close(1);             // close stdout
             (void) close(pipefd[2]);
-            (void) dup(pipefd[3]);       // connect to second pipe 
+            (void) dup(pipefd[3]);       // connect to second pipe
         }
-        (void) signal(SIGINT, SIG_DFL);  // reset 
+        (void) signal(SIGINT, SIG_DFL);  // reset
         execl("/bin/sh", "sh", "-c", efname, 0, (char *) NULL);
         exit (-127);
     } else {                             // else parent
@@ -874,7 +874,7 @@ void export_delim(char * fname, char coldelim, int r0, int c0, int rn, int cn) {
     if (rn > ent->row) rn = ent->row;
     //if (cn > ent->col) cn = ent->col;
 
-    for (row = r0; row <= rn; row++) {        
+    for (row = r0; row <= rn; row++) {
         for (pp = ATBL(tbl, row, col = c0); col <= cn; col++, pp++) {
             if (*pp) {
                 char * s;

@@ -94,7 +94,7 @@ int main (int argc, char ** argv) {
     user_conf_d = (struct dictionary *) create_dictionary();
     predefined_conf_d = (struct dictionary *) create_dictionary();
     store_default_config_values();
-    
+
     // create command line history structure
 #if defined HISTORY_FILE
     if (! atoi(get_conf_value("nocurses"))) {
@@ -248,7 +248,7 @@ void create_structures() {
 
     // create yank list structure
     init_yanklist();
-}    
+}
 
 
 
@@ -257,7 +257,7 @@ void delete_structures() {
 
     // Free marks array
     free_marks_array();
-    
+
     // Free yanklist
     free_yanklist();
 
@@ -383,7 +383,7 @@ void signals() {
     void sig_term();
     void nopipe();
     void winchg();
-    
+
     //signal(SIGINT, sig_int); // FIXME - sig. linea se comenta porque es molesto para probar. 
     signal(SIGABRT, sig_abrt);
     signal(SIGTERM, sig_term); // kill

@@ -1,5 +1,5 @@
 #ifdef UNDO
-/* 
+/*
 ----------------------------------------------------------------------------------------
 El UNDO y REDO funciona con una lista de estructuras de tipo 'struct undo'.
 Las mismas contienen
@@ -20,7 +20,7 @@ Sigue un esquema de UNDO / REDO de un único nivel. Si se realiza algún cambio 
 y si luego se realiza otro cambio (C2) a partir de dicha posición, todas las acciones
 posteriores se eliminan.
 Esquema:
- 
+
 + C1 -> + -> UNDO -
 ^                 \
 |_                |
@@ -187,7 +187,7 @@ void free_undo_node(struct undo * ul) {
         }
         e = ul->p_sig;
 
-        if (ul->range_shift != NULL) free(ul->range_shift); // libero memoria de undo_range_shift 
+        if (ul->range_shift != NULL) free(ul->range_shift); // libero memoria de undo_range_shift
         if (ul->row_hidded  != NULL) free(ul->row_hidded);  // libero memoria de row hidded
         if (ul->col_hidded  != NULL) free(ul->col_hidded);  // libero memoria de col hidded
         if (ul->row_showed  != NULL) free(ul->row_showed);  // libero memoria de row showed
@@ -206,11 +206,11 @@ void clear_from_current_pos() {
     if (undo_list == NULL) return;
 
     if (undo_list->p_ant == NULL) {
-        free_undo_node(undo_list); 
+        free_undo_node(undo_list);
         undo_list = NULL;
     } else {
         struct undo * ul = undo_list->p_sig; // ANTERIOR
-        free_undo_node(ul); 
+        free_undo_node(ul);
         undo_list->p_sig = NULL;
     }
 
@@ -228,7 +228,7 @@ void clear_undo_list () {
 
     struct undo * ul = undo_list;
 
-    free_undo_node(ul); 
+    free_undo_node(ul);
 
     undo_list = NULL;
     undo_list_pos = 0;
@@ -248,7 +248,7 @@ int len_undo_list() {
 void copy_to_undostruct (int row_desde, int col_desde, int row_hasta, int col_hasta, char type) {
     int c, r;
     for (r = row_desde; r <= row_hasta; r++)
-        for (c = col_desde; c <= col_hasta; c++) {            
+        for (c = col_desde; c <= col_hasta; c++) {
             struct ent * e = (struct ent *) malloc( (unsigned) sizeof(struct ent) );
             cleanent(e);
             copyent(e, lookat(r, c), 0, 0, 0, 0, r, c, 0);
@@ -279,7 +279,7 @@ void save_undo_range_shift(int delta_rows, int delta_cols, int tlrow, int tlcol,
     urs->brcol = brcol;
     undo_item.range_shift = urs;
     return;
-}    
+}
 
 // esta funcion se utiliza para guardar en una lista de enteros (int *)
 // filas y columnas que se ocultan o se muestran en pantalla.
@@ -358,7 +358,7 @@ void do_undo() {
         cleanent(pp);
         i = i->next;
     }
-  
+
     // Cambio posición del cursor
     //if (ul->removed != NULL) {
     //    currow = ul->removed->row;
@@ -372,7 +372,7 @@ void do_undo() {
         (void) copyent(e_now, j, 0, 0, 0, 0, j->row, j->col, 0);
         j = j->next;
     }
-    
+
     // muestro cols y rows que habian sido ocultadas
     // oculto cols y rows que habian sido mostradas
     if (ul->col_hidded != NULL) {

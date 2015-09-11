@@ -46,10 +46,10 @@ void start_visualmode(int tlrow, int tlcol, int brrow, int brcol) {
     r->marks[1] = '\t';
     r->selected = 1;
     r->pnext = NULL;
- 
+
     // add visual selected range at start of list
     if (ranges == NULL) ranges = r;
-    else { 
+    else {
         r->pnext = ranges;
         ranges = r;
     }
@@ -140,7 +140,7 @@ void do_visualmode(struct block * buf) {
     // UP - ctl(b)
     } else if (buf->value == OKEY_UP || buf->value == 'k' || buf->value == ctl('b') ) {
         int n, i;
-        if (buf->value == ctl('b')) { 
+        if (buf->value == ctl('b')) {
             n = LINES - RESROW - 1;
             if (get_conf_value("half_page_scroll")) n = n / 2;
         } else n = 1;
@@ -157,7 +157,7 @@ void do_visualmode(struct block * buf) {
     // DOWN - ctl('f')
     } else if (buf->value == OKEY_DOWN || buf->value == 'j' || buf->value == ctl('f')) {
         int n, i;
-        if (buf->value == ctl('f')) { 
+        if (buf->value == ctl('f')) {
             n = LINES - RESROW - 1;
             if (get_conf_value("half_page_scroll")) n = n / 2;
         } else n = 1;
@@ -208,14 +208,14 @@ void do_visualmode(struct block * buf) {
     } else if (buf->value == '^') {
         r->brrow = r->tlrow;
         r->tlrow = goto_top()->row;
-        currow = r->tlrow;         
+        currow = r->tlrow;
 
     // #
     } else if (buf->value == '#') {
         int s = goto_bottom()->row;
         r->tlrow = r->brrow;
         r->brrow = r->brrow > s ? r->brrow : s;
-        currow = r->brrow;         
+        currow = r->brrow;
 
     // ctl(a)
     } else if (buf->value == ctl('a')) {
@@ -225,7 +225,7 @@ void do_visualmode(struct block * buf) {
         r->tlcol = e->col;
         r->brrow = r->orig_row;
         r->brcol = r->orig_col;
-        currow = r->tlrow;         
+        currow = r->tlrow;
         curcol = r->tlcol;
 
     // G
@@ -235,7 +235,7 @@ void do_visualmode(struct block * buf) {
         r->tlcol = r->orig_col;
         r->brrow = e->row;
         r->brcol = e->col;
-        currow = r->tlrow;         
+        currow = r->tlrow;
         curcol = r->tlcol;
 
     // '
@@ -258,7 +258,7 @@ void do_visualmode(struct block * buf) {
 
     // w
     } else if (buf->value == 'w') {
-        struct ent * e = go_forward();  
+        struct ent * e = go_forward();
         if (e->col > r->orig_col) {
             r->brcol = e->col;
             r->tlcol = r->orig_col;
@@ -273,7 +273,7 @@ void do_visualmode(struct block * buf) {
 
     // b
     } else if (buf->value == 'b') {
-        struct ent * e = go_backward();  
+        struct ent * e = go_backward();
         if (e->col <= r->orig_col) {
             r->tlcol = e->col;
             r->brcol = r->orig_col;
@@ -304,7 +304,7 @@ void do_visualmode(struct block * buf) {
     } else if (buf->value == 'L') {
         r->tlrow = r->orig_row;
         r->brrow = vert_bottom()->row;
-        currow = r->brrow;         
+        currow = r->brrow;
 
     // mark a range
     } else if (buf->value == 'm' && get_bufsize(buf) == 2) {
@@ -348,7 +348,7 @@ void do_visualmode(struct block * buf) {
         show_header(input_win);
         #else
             scinfo("Build made without USELOCALE enabled");
-        #endif 
+        #endif
 
     // EDITION COMMANDS
     // yank
@@ -378,7 +378,7 @@ void do_visualmode(struct block * buf) {
         send_to_interp(interp_line);
 #ifdef UNDO
         copy_to_undostruct(r->tlrow, r->tlcol, r->brrow, r->brcol, 'a');
-        end_undo_action();            
+        end_undo_action();
 #endif
         cmd_multiplier = 0;
 

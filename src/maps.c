@@ -42,7 +42,7 @@ int replace_maps (struct block * b) {
         }
         m = m->psig;
     }
-    
+
     if (r && m->recursive) replace_maps(b);  // recursive mapping here!
     return r;
 }
@@ -129,7 +129,7 @@ void del_maps () {
 // Funcion que retorna el ultimo mapeo de la lista de mapeos de sesion
 map * get_last_map() {
     map * m = maps;
-    map * e = m; 
+    map * e = m;
 
     while (m != NULL) {
         e = m;
@@ -150,7 +150,7 @@ int exists_map(char * in, int mode) {
         pos++;
         get_mapstr_buf(m->in, str_in);
         if ( ! strcmp(in, str_in) && m->mode == mode) {
-            return pos; 
+            return pos;
         }
         m = m->psig;
     }
@@ -161,7 +161,7 @@ int exists_map(char * in, int mode) {
 // en donde tiene efecto el mapeo
 void add_map(char * in, char * out, int mode, short recursive) {
     map * m;
-    
+
     // si el mapeo ya existe, reemplazo su contenido
     // guardando su posicion!
     int exists = exists_map(in, mode);
@@ -192,8 +192,6 @@ void add_map(char * in, char * out, int mode, short recursive) {
     if (maps == NULL) maps = m;
     else
         ((map *) get_last_map())->psig = m;
- 
-
 
     len_maps++;
 
@@ -243,10 +241,10 @@ void del_map(char * in, int mode) {
 
 // funcion que convierte un block en una cadena de caracteres
 // los caracteres especiales los guarda en el formato <CR>..
-void get_mapstr_buf (struct block * b, char * str) {    
+void get_mapstr_buf (struct block * b, char * str) {
     struct block * a = b;
     int i, len = get_bufsize(a);
-    
+
     str[0]='\0';
     for (i=0; i < len; i++) {
         if (isprint(a->value)) {
@@ -291,7 +289,7 @@ void get_mappings(char * salida) {
    char min[MAXMAPITEM] = "";
    char mout[MAXMAPITEM] = "";
    char nore[5] = "";
-   
+
    char mode = '\0';
    int i = 0;
    map * m = maps;

@@ -43,10 +43,10 @@ int load_help () {
     max = count; //max lines in entire help
 
     rewind(f);
-    
+
     // guardo memoria para tantos punteros como lineas
     long_help = (char **) malloc (sizeof(char *) * (count + 1));
-    
+
     // cargo long_help
     char word[max_width+1];
     word[0] = '\0';
@@ -275,7 +275,7 @@ int show_lines() {
         wmove(main_win, lineno+1, 0);
         wclrtobot(main_win);
     }
-     
+
     (void) wrefresh(main_win);
     return wgetch(input_win);
 }

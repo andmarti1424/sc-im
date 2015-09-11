@@ -61,7 +61,7 @@ void exit_app();
 struct go_save gs;
 
 /* g_type can be: */
-#define G_NONE 0    /* Starting value - must be 0 */
+#define G_NONE 0          /* Starting value - must be 0 */
 #define G_NUM  1
 #define G_STR  2
 #define G_NSTR 3
@@ -71,10 +71,10 @@ struct go_save gs;
 #define ISVALID(r,c)    ((r)>=0 && (r)<maxrows && (c)>=0 && (c)<maxcols)
 
 jmp_buf fpe_save;
-int exprerr;           /* Set by eval() and seval() if expression errors */
-double prescale = 1.0;   /* Prescale for constants in let() */
-int loading = 0;      /* Set when readfile() is active */
-int gmyrow, gmycol;    /* globals used to implement @myrow, @mycol cmds */
+int exprerr;              /* Set by eval() and seval() if expression errors */
+double prescale = 1.0;    /* Prescale for constants in let() */
+int loading = 0;          /* Set when readfile() is active */
+int gmyrow, gmycol;       /* globals used to implement @myrow, @mycol cmds */
 int rowoffset = 0, coloffset = 0;    /* row & col offsets for range functions */
 
 extern bool decimal;      /* Set if there was a decimal point in the number */
@@ -113,9 +113,9 @@ extern int find_range(char * name, int len, struct ent * lmatch, struct ent * rm
 
 double finfunc(int fun, double v1, double v2, double v3) {
     double answer,p;
- 
+
     p = fn2_eval(pow, 1 + v2, v3);
- 
+
     switch (fun) {
         case PV:
             if (v2)
@@ -349,6 +349,7 @@ double doprod(int minr, int minc, int maxr, int maxc, struct enode *e) {
     rowoffset = coloffset = 0;
     return v;
 }
+
 double doavg(int minr, int minc, int maxr, int maxc, struct enode *e) {
     double v;
     int r, c;
@@ -410,7 +411,7 @@ double dostddev(int minr, int minc, int maxr, int maxc, struct enode *e) {
     if ((n == 0) || (n == 1)) return ((double)0);
     nd = (double) n;
     return ( sqrt((nd*lp-rp*rp) / (nd*(nd-1))) );
-} 
+}
 
 double domax(int minr, int minc, int maxr, int maxc, struct enode *e) {
     double v = (double)0;
@@ -1305,7 +1306,7 @@ void setiterations(int i) {
 
 void EvalAll() {
     int lastcnt;//, pair, v;
-  
+
     repct = 1;
     (void) signal(SIGFPE, eval_fpe);
 
@@ -1362,7 +1363,7 @@ int RealEvalAll() {
     }
     else {
         scerror("Internal error calc_order");
-    } 
+    }
     return (chgct);
 }
 
@@ -1405,7 +1406,7 @@ void RealEvalOne(register struct ent *p, int i, int j, int *chgct) {
         if ((cellerror != p->cellerror) || (v != p->v)) {
             p->cellerror = cellerror;
             p->v = v;
- 
+
             // FIXME HERE: aqui controlar dependencia
 
             if (! cellerror)    /* don't keep eval'ing an error */
@@ -1697,12 +1698,12 @@ void go_last() {
 //  case G_CELL:
 //      moveto(gs.g_row, gs.g_col, gs.g_lastrow, gs.g_lastcol, gs.strow, gs.stcol);
 //      break;
-    case G_XSTR: 
-    case G_NSTR: 
+    case G_XSTR:
+    case G_NSTR:
         num++;
-    case G_STR: 
+    case G_STR:
         gs.g_type = G_NONE;    /* Don't free the string */
-        str_search(gs.g_s, gs.g_row, gs.g_col, gs.g_lastrow, gs.g_lastcol, num); 
+        str_search(gs.g_s, gs.g_row, gs.g_col, gs.g_lastrow, gs.g_lastcol, num);
         break;
 
     default:
@@ -1811,7 +1812,7 @@ void num_search(double n, int firstrow, int firstcol, int lastrow, int lastcol, 
             return;
         }
     }
-        
+
     currow = r;
     curcol = c;
     rowsinrange = 1;
@@ -2058,7 +2059,7 @@ void lock_cells(struct ent *v1, struct ent *v2) {
     #endif
         }
     #ifdef UNDO
-    end_undo_action();            
+    end_undo_action();
     #endif
 }
 
@@ -2094,7 +2095,7 @@ void unlock_cells(struct ent *v1, struct ent *v2) {
     #endif
         }
     #ifdef UNDO
-    end_undo_action();            
+    end_undo_action();
     #endif
 }
 
@@ -2787,8 +2788,8 @@ int dateformat(struct ent *v1, struct ent *v2, char * fmt) {
             n->v = (double) mktime(&tm);
             n->flags |= ( is_changed | is_valid );
             label(n, "", -1); // free label
-            
-            // agrego formato de fecha            
+
+            // agrego formato de fecha
             n->format = 0;
             char * s = scxmalloc((unsigned)(strlen(fmt)+2));
             sprintf(s, "%c", 'd');

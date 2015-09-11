@@ -335,7 +335,7 @@ Commands for handling cell content:
            sets current cell format (or cells format of a selected range).
            string parameter contains the format to use to convert the number,
            and can be one or more of these:
- 
+
            #    Digit placeholder.  If the number has fewer digits on either
                 side of the decimal point than  there are '#' characters in
                 the format, the extra '#' characters are ignored.  The number
@@ -457,7 +457,7 @@ Commands for handling cell content:
 
                 You can apply those filters to a range with the :filteron special command.
                 Ex.:        :filteron B10:C13
-    
+
                 If a range is already selected you can simply type :filteron
 
                 To turn off the filters you can type:
@@ -535,7 +535,7 @@ Commands for handling cell content:
 
     :! cmd      executes command 'cmd' in shell
 
-    :autojus A:D   
+    :autojus A:D
                 auto resize columns A to D, to fit its contents.
 
     :autojus    same as previous command, but the columns resized are the columns represented by the selected cell or range.
@@ -817,7 +817,7 @@ Commands for handling cell content:
         Extract and return from string expression se the substring indexed by character number  e1  through
         character  number e2 (defaults to the size of se if beyond the end of it).  If e1 is less than 1 or
         greater than e2, the result is the null string.  For example,
-        
+
         @substr ("River Plate", 4, 8)
 
         returns the string 'er Pl'.
@@ -857,7 +857,7 @@ Commands for handling cell content:
 
             @coltoa(@mycol-1)      @nval(coltoa(@mycol-1), @myrow+1)
 
-    @sval(se,e) 
+    @sval(se,e)
         Return the string value of a cell selected by name.  String expression se must evaluate to a column
         name  (``A''-``AE'')  and e must evaluate to a row number (0-199).  If se or e is out of bounds, or
         the cell has no string value, the result is the null string.
@@ -875,7 +875,7 @@ Commands for handling cell content:
         Return the year. Valid years begin with 1970, although many systems will return years prior to
         1970 if e is negative. The last legal year is system dependent.
 
-    @month(e) 
+    @month(e)
         Return the month, encoded as 1 (January) to 12 (December).
 
     @day(e)

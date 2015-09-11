@@ -90,7 +90,7 @@ void handle_input(struct block * buffer) {
                 // Si estoy en modo normal, visual o de edición, cambio el caracter de esquina superior
                 // izquierda a "en espera de finalizacion de comando"
                 if ( (curmode == NORMAL_MODE && d >= ' ') ||
-                     (curmode == EDIT_MODE   && d >= ' ') || 
+                     (curmode == EDIT_MODE   && d >= ' ') ||
                      (curmode == VISUAL_MODE && d >= ' ') ) {
                     cmd_pending = 1;
                 }
@@ -101,11 +101,11 @@ void handle_input(struct block * buffer) {
                 replace_maps(buffer);
 
             }
-            
+
             gettimeofday(&m_tv, NULL);
             msec = (m_tv.tv_sec - start_tv.tv_sec) * 1000L +
                    (m_tv.tv_usec - start_tv.tv_usec) / 1000L;
-    } 
+    }
 
     // timeout. no se ha completado un comando.
     if (msec >= CMDTIMEOUT) {
@@ -136,9 +136,9 @@ void handle_input(struct block * buffer) {
     print_mult_pend(input_win);    // refresco solo el ef. multiplicador y cmd pending
 
     // para ambos casos hago flush del buffer
-    flush_buf(buffer); 
+    flush_buf(buffer);
     return;
-} 
+}
 
 // Break waiting command loop
 void break_waitcmd_loop(struct block * buffer) {
@@ -167,8 +167,8 @@ void break_waitcmd_loop(struct block * buffer) {
     //clr_header(input_win, 0); // comentado el 22/06/2014
     //show_header(input_win);   // comentado el 22/06/2014
     print_mult_pend(input_win); // agregado  el 22/06/2014 refresco solo el ef. multiplicador y cmd pending
-    update(TRUE);                   // comentado el 22/06/2014
-    return; 
+    update(TRUE);               // comentado el 22/06/2014
+    return;
 }
 
 // Funcion que maneja el timeout de espera de comando dependiendo del modo actual
@@ -192,15 +192,15 @@ void fix_timeout(struct timeval * start_tv) {
 // Ej. buffer = "diw"
 int has_cmd (struct block * buf, long timeout) {
     int len = get_bufsize(buf);
-    if ( !len ) return 0;
-    int k, found = 0; 
+    if ( ! len ) return 0;
+    int k, found = 0;
 
     struct block * auxb = (struct block *) create_buf();
-   
+
     for (k = 0; k < len; k++) {
         addto_buf(auxb, get_bufval(buf, k));
         if ( is_single_command(auxb, timeout)) { found = 1; break; }
-    } 
+    }
     erase_buf(auxb);
     auxb = NULL;
     return found;
@@ -243,7 +243,7 @@ void handle_mult(int * cmd_multiplier, struct block * buf, long timeout) {
     struct block * b_copy = buf;
     int lenbuf = get_bufsize(b_copy);
     if ( ! *cmd_multiplier) *cmd_multiplier = 1;
-    
+
     for (j = 1; j < *cmd_multiplier; j++) {
         for (k = 0; k < lenbuf; k++) {
             addto_buf(buf, b_copy->value);
@@ -256,9 +256,9 @@ void handle_mult(int * cmd_multiplier, struct block * buf, long timeout) {
     exec_mult(buf, timeout);
     if (*cmd_multiplier > 1) { *cmd_multiplier = 1; update(TRUE); }
     *cmd_multiplier = 0;
-    
+
     return;
-} 
+}
 
 // Función que maneja la ejecucion de uno o mas comandos
 // que pudieran existir, uno a continuacion de otro, en un buffer
@@ -271,10 +271,10 @@ void exec_mult (struct block * buf, long timeout) {
     if ((res = is_single_command(buf, timeout))) {
         if (res == EDITION_CMD) copybuffer(buf, lastcmd_buffer); // save stdin buffer content in lastcmd buffer
         //cmd_multiplier--;
-        exec_single_cmd(buf); 
+        exec_single_cmd(buf);
 
     // En caso de no poder, se recorre por bloques
-    } else { 
+    } else {
         struct block * auxb = (struct block *) create_buf();
         for (k = 0; k < len; k++) {
             addto_buf(auxb, get_bufval(buf, k));
@@ -292,7 +292,7 @@ void exec_mult (struct block * buf, long timeout) {
                 if (cmd_multiplier == 0) break;
                 exec_mult (buf, timeout);
                 break;
-            } 
+            }
         }
         erase_buf(auxb);
         auxb = NULL;

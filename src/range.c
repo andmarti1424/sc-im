@@ -32,7 +32,7 @@ srange * create_range(char c, char d, struct ent * tl, struct ent * br) {
         brrow = br->row;
         brcol = br->col;
 
-    } else { 
+    } else {
         // Guardo los valores sobre el nuevo rango o el reutilizado
         mark * mc = get_mark(c);
         mark * md = get_mark(d);
@@ -252,7 +252,7 @@ void add_range(char * name, struct ent_ptr left, struct ent_ptr right, int is_ra
             scxfree(name);
             return;
         }
- 
+
     p = name;
     if (isdigit(*p) || (isalpha(*p++) && (isdigit(*p) || (isalpha(*p++) && isdigit(*p))))) {
         if (*name == '0' && (name[1] == 'x' || name[1] == 'X')) {
@@ -346,7 +346,7 @@ int find_range(char * name, int len, struct ent * lmatch, struct ent * rmatch, s
 
     int cmp;
     int exact = TRUE;
-    
+
     if (len < 0) {
         exact = FALSE;
         len = -len;
@@ -438,7 +438,7 @@ void list_ranges(FILE *f) {
     (void) fprintf(f, "  %-30s %s\n","Name","Definition");
     if (!brokenpipe) (void) fprintf(f, "  %-30s %s\n","----","----------");
 
-    for (r = nextr = rng_base; nextr; r = nextr, nextr = r->r_next) 
+    for (r = nextr = rng_base; nextr; r = nextr, nextr = r->r_next)
        ;
     while (r) {
     (void) fprintf(f, "  %-30s %s%s%s%d",
@@ -465,7 +465,7 @@ char * r_name(int r1, int c1, int r2, int c2) {
     struct ent *v1, *v2;
     struct range *r;
     static char buf[100];
- 
+
     v1 = lookat(r1, c1);
     v2 = lookat(r2, c2);
     if (! find_range((char *)0, 0, v1, v2, &r)) {

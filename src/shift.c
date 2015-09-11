@@ -39,7 +39,7 @@ void shift_range(int delta_rows, int delta_cols, int tlrow, int tlcol, int brrow
     return;
 }
 
-// Shift cells down 
+// Shift cells down
 void shift_cells_down(int deltarows, int deltacols) {
     int r, c;
     struct ent **pp;
@@ -49,7 +49,7 @@ void shift_cells_down(int deltarows, int deltacols) {
 
     // Move cell content
     if (currow > maxrow) maxrow = currow;
-    maxrow += deltarows; 
+    maxrow += deltarows;
 
     lim = maxrow - lim;
     if ((maxrow >= maxrows) && !growtbl(GROWROW, maxrow, 0))
@@ -62,8 +62,8 @@ void shift_cells_down(int deltarows, int deltacols) {
                 n = lookat(r, c);
                 copyent(n, p, 1, 0, 0, 0, r - deltarows, c, 0);
                 n->row += deltarows;
-                p = (struct ent *)0; 
-                
+                p = (struct ent *)0;
+
                 pp = ATBL(tbl, r - deltarows, c);
                 clearent(*pp);
             }
@@ -121,7 +121,7 @@ void shift_cells_right(int deltarows, int deltacols) {
     return;
 }
 
-// Shift cells up 
+// Shift cells up
 void shift_cells_up(int deltarows, int deltacols) {
     register struct ent ** pp;
     register struct ent * n;
@@ -132,7 +132,7 @@ void shift_cells_up(int deltarows, int deltacols) {
 
     // Delete cell content
     for (i = 0; i < deltarows; i++)
-        for (r = currow; r < maxrow; r++) 
+        for (r = currow; r < maxrow; r++)
             for (c = curcol; c < curcol + deltacols; c++) {
 
                 // libero memoria de ent donde estoy parado

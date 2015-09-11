@@ -63,7 +63,7 @@ int exec_cmd (char * line) {
 
         while (read(my_pipe[0], reading_buf, 1) > 0)
             write(1, reading_buf, 1);
-        
+
         close(my_pipe[0]);
         wait(&waitres);
         system("echo -n 'Press ENTER to return.'");

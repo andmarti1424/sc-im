@@ -6,7 +6,7 @@
 struct mark {
     int row;
     int col;
-    srange * rng; 
+    srange * rng;
 };
 typedef struct mark mark;
 

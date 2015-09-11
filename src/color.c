@@ -192,7 +192,7 @@ void free_colors_param_dict() {
 // o bien ingresada en tiempo de ejecucion a través
 // del comando :color str
 void chg_color(char * str) {
-    
+
     // creo un diccionario para guardar las claves y valores que figuran en el string
     struct dictionary * d = create_dictionary();
 
@@ -304,7 +304,7 @@ void color_cell(int r, int c, int rf, int cf, char * str) {
             if (get(d, "underline") != '\0')     n->ucolor->underline = atoi(get(d, "underline"));
 
             if (! loading) {
-                #ifdef UNDO        
+                #ifdef UNDO
                 copy_to_undostruct(i, j, i, j, 'a');
                 end_undo_action();
                 #endif

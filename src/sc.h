@@ -8,7 +8,7 @@
 #define MINROWS      100     /* minimum size at startup */
 //#define MAXROWS 1048576      /* MAX rows size of sheet */
 #define MAXROWS    65536     /* MAX rows size of sheet */
-#define MINCOLS       30 
+#define MINCOLS       30
 #define ABSMAXCOLS   702     /* MAX cols. (ZZ in base 26) */
 #define CRROWS         1
 #define CRCOLS         2
@@ -74,7 +74,7 @@ struct ent {
     double v;             /* v && label are set in EvalAll() */
     char *label;
     struct enode * expr;  /* cell's contents */
-    short flags;    
+    short flags;
     int row, col;
     //short nlastrow, nlastcol;
     struct ent * next;    // used for yanklist, freeents list, undo..

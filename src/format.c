@@ -155,7 +155,7 @@ bool format(char *fmt, int lprecision, double val, char *buf, int buflen) {
         } else
             *cp = EOS;
     }
-  
+
 /*
  * extract other information from format and produce a
  * format string stored in tmpfmt2 also scxmalloc()'d above
@@ -177,12 +177,12 @@ bool format(char *fmt, int lprecision, double val, char *buf, int buflen) {
                 decimal = tp;
             *tp++ = *cp;
             break;
-    
+
         case '%':
             val *= 100.0;
             *tp++ = *cp;
             break;
-    
+
         default:
             *tp++ = *cp;
             break;
@@ -283,7 +283,7 @@ bool format(char *fmt, int lprecision, double val, char *buf, int buflen) {
     char * ci, * cf, * ce;
     int len_ci, len_cf, len_ce;
     bool ret = false;
-    
+
     ci = fmt_int(integer, fmt, comma, negative);
     len_ci = strlen(ci);
     if (len_ci >= cilen) {
@@ -364,7 +364,7 @@ static char * fmt_int(char *val,  /* integer part of the value to be formatted *
         }
         f--;
     }
-    
+
     if (negative && digit >= 0)
         *bufptr++ = '-';
     *bufptr = EOS;
@@ -429,7 +429,7 @@ static char * fmt_exp(int val, /* value of the exponent */
         negative = false;
     }
     (void) sprintf(valbuf, "%d", val);
-  
+
     (void) strcat(buf, fmt_int(valbuf, fmt, false, negative));
     return (buf);
 }
@@ -448,7 +448,7 @@ static void reverse(register char *buf) {
 }
 
 /*****************************************************************************/
-/*  
+/*
  * Tom Anderson    <toma@hpsad.hp.com>
  * 10/14/90
  *
