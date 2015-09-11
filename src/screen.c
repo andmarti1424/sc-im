@@ -45,10 +45,10 @@ void start_screen() {
     #ifdef USECOLORS
     if (has_colors()) {
         start_color();
-        
+
         if (get_d_colors_param() == NULL) {
             start_default_ucolors();
- 
+
             // in case we decide to change colors
             // esto crea un diccionario y guarda en el 
             // la equivalencia entre las macros y los valores
@@ -57,9 +57,9 @@ void start_screen() {
         }
         //wbkgd(input_win, COLOR_PAIR(DEFAULT));
         //wbkgd(main_win, COLOR_PAIR(DEFAULT));
-    }   
+    }
     #endif
-    
+
     wtimeout(input_win, TIMEOUT_CURSES);
     noecho();
     curs_set(0);
@@ -120,7 +120,7 @@ void update(int header) {
         wmove(main_win, 0, rescol);
         wclrtobot(main_win);
     }
-    
+
     // calculo las filas y columnas que quedan ocultas
     //   mxcol-1 es el numero de la ultima sc_col que se ve en pantalla
     //   mxrow-1 es el numero de la ultima sc_row que se ve en pantalla
@@ -141,7 +141,7 @@ void update(int header) {
 
     // Show sc_col headings: A, B, C, D..
     show_sc_col_headings(main_win, mxcol, mxrow);
-    
+
     // Show sc_row headings: 0, 1, 2, 3..
     show_sc_row_headings(main_win, mxrow);
 
@@ -154,7 +154,7 @@ void update(int header) {
 
     // print mode
     (void) print_mode(input_win);
-    
+
     return;
 }
 
@@ -173,7 +173,7 @@ void handle_cursor() {
         default:
             noecho();
             curs_set(0);
-    }    
+    }
     return;
 }
 
@@ -227,7 +227,7 @@ void show_header(WINDOW * win) {
     clr_header(win, 1);
 
     print_mult_pend(win);
-   
+
     // imprimo modo
     print_mode(win);
 
@@ -250,7 +250,7 @@ void show_header(WINDOW * win) {
             break;
     }
     wrefresh(win);
-    
+
     return;
 }
 
@@ -258,6 +258,7 @@ void show_header(WINDOW * win) {
 void clr_header(WINDOW * win, int i) {
     int row_orig, col_orig;
     getyx(win, row_orig, col_orig);
+    if (col_orig > COLS) col_orig = COLS - 1;
 
     wmove(win, i, 0);
     wclrtoeol(win);
@@ -446,7 +447,7 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
                     wattron(win, A_REVERSE);
                 #endif
             }
-            
+
             // Color selected range
             int in_range = 0; // this is for coloring empty cells within a range
             srange * s = get_selected_range();
@@ -474,7 +475,7 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
                (void) mvprintw(row + RESROW + 1 - offscr_sc_rows, c, "%*.*s", fwidth[col], fwidth[col], "ERROR");
                continue;
             }
-            
+
             // si hay valor numerico
             if ( (*p)->flags & is_valid) {
                 show_numeric_content_of_cell(win, p, col, row + 1 - offscr_sc_rows - q_row_hidden, c);
@@ -713,7 +714,7 @@ int get_formated_value(struct ent ** p, int col, char * value) {
             strftime(value, sizeof(char) * FBUFLEN, cfmt + 1, localtime(&v));
             return 0;
         } else {
-            format(cfmt, precision[col], (*p)->v, value, sizeof(char) * FBUFLEN);            
+            format(cfmt, precision[col], (*p)->v, value, sizeof(char) * FBUFLEN);
             return 1;
         }
     } else { // there is no format
@@ -736,8 +737,8 @@ int scstrlen(char * in) {
 
 void show_text_content_of_cell(WINDOW * win, struct ent ** p, int row, int col, int r, int c) {
     char value[FBUFLEN];      // the value to be printed without padding
-    char field[FBUFLEN] = ""; // the value with padding and alignment    
-    int col_width = fwidth[col];    
+    char field[FBUFLEN] = ""; // the value with padding and alignment
+    int col_width = fwidth[col];
     int flen;                 // current length of field
     int left;
 
@@ -786,7 +787,7 @@ void show_text_content_of_cell(WINDOW * win, struct ent ** p, int row, int col, 
         flen = str_len;
         //scdebug("%d %d", left, flen);
         while (left-- && flen++) add_char(field, ' ', flen-1);
-        
+
         //sprintf(field + strlen(field), "%0*d", left, 0);
         //subst(field, '0', '-');
 
@@ -836,20 +837,20 @@ void show_numeric_content_of_cell(WINDOW * win, struct ent ** p, int col, int r,
     char s[FBUFLEN] = "";
     int res = get_formated_value(p, col, s);
     if (res == 0) {
-        strcpy(field, s);            
+        strcpy(field, s);
         nlen = strlen(s); //format in numeric value
         tlen=0;
     } else if (res == 1) {
         strcpy(field, s);
         nlen = strlen(field);
     }
-    
+
     // if content is larger than column width
     if (nlen > col_width || tlen > col_width) {
         sprintf(field, "%0*d", col_width, 0);
         subst(field, '0', '*');
 
-    // if there is (text centered or left aligned) and (numeric value without format or numeric value with format) 
+    // if there is (text centered or left aligned) and (numeric value without format or numeric value with format)
     } else if ( (*p)->label && (*p)->flags & (is_leftflush | is_label ) && ( res == -1 || res == 1) ) {
         int tlen = strlen((*p)->label);
 

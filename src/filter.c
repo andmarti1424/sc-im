@@ -59,14 +59,14 @@ void enable_filters(struct ent * left, struct ent * right) {
         return;
     }
     active = 1;
-    
+
     for (r = minr; r <= maxr; r++) {
         results[r-minr+2] = 0; // show row by default (0 = NOT HIDDEN)
         for (i = 0; i < howmany; i++, c=0) {
             cadena[0]='\0';
             if (filters[i].eval == NULL) continue;
             while (filters[i].eval[c] != '\0') {
-                
+
                 if (filters[i].eval[c] == '#' || filters[i].eval[c] == '$') {
                     if (isalpha(toupper(filters[i].eval[++c])))
                         sprintf(cadena + strlen(cadena), "%c", filters[i].eval[c]);

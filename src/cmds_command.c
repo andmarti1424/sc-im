@@ -101,7 +101,7 @@ void do_commandmode(struct block * sb) {
     int p = is_range_selected();
     struct srange * sr = NULL;
     if (p != -1) sr = get_range_by_pos(p);
-    
+
     if (sb->value == OKEY_BS) {            // BS
         if ( ! strlen(inputline) || ! inputline_pos) return;
         del_char(inputline, --inputline_pos);
@@ -143,7 +143,7 @@ void do_commandmode(struct block * sb) {
         show_header(input_win);
         return;
 #endif
-            
+
     } else if (sb->value == OKEY_LEFT) {   // LEFT
         if (inputline_pos) inputline_pos--;
         show_header(input_win);
@@ -206,7 +206,7 @@ void do_commandmode(struct block * sb) {
         mvwprintw(input_win, 0, 0 + rescol, ":%s", inputline);
         wmove(input_win, 0, inputline_pos + 1 + rescol);
         wrefresh(input_win);
-        
+
 #ifdef HISTORY_FILE
         if (commandline_history->pos == 0) {          // solo si edito el nuevo comando
             char * sl = get_line_from_history(commandline_history, 0);
@@ -237,7 +237,7 @@ void do_commandmode(struct block * sb) {
 
     } else if (sb->value == '\t') {                  // TAB completion
         int i, clen = (sizeof(valid_commands) / sizeof(char *)) - 1;
-    
+
         if (! get_comp()) copy_to_curcmd(inputline); // keep original cmd
 
         for (i = 0; i < clen; i++) {
@@ -264,7 +264,7 @@ void do_commandmode(struct block * sb) {
 
         show_header(input_win);
         return;
- 
+
     // CONFIRM A COMMAND PRESSING ENTER
     } else if (find_val(sb, OKEY_ENTER)) {
 
@@ -318,7 +318,7 @@ void do_commandmode(struct block * sb) {
         } else if ( ! strncmp(inputline, "hiderow ", 8) ||
                     ! strncmp(inputline, "showrow ", 8) ||
                     ! strncmp(inputline, "showcol ", 8) ||
-                    ! strncmp(inputline, "hidecol ", 8) 
+                    ! strncmp(inputline, "hidecol ", 8)
                   ) {
             send_to_interp(inputline); 
 
@@ -341,8 +341,8 @@ void do_commandmode(struct block * sb) {
                 cf = sr->brcol;
             }
             if ( ! strncmp(inputline, "lock", 4) ) lock_cells(lookat(r, c), lookat(rf, cf));
-            else if ( ! strncmp(inputline, "unlock", 6) ) unlock_cells(lookat(r, c), lookat(rf, cf));      
-            else if ( ! strncmp(inputline, "valueize", 8) ) valueize_area(r, c, rf, cf);      
+            else if ( ! strncmp(inputline, "unlock", 6) ) unlock_cells(lookat(r, c), lookat(rf, cf));
+            else if ( ! strncmp(inputline, "valueize", 8) ) valueize_area(r, c, rf, cf);
 
         } else if ( ! strncmp(inputline, "datefmt", 7)) {
             strcpy(interp_line, inputline);
@@ -362,7 +362,7 @@ void do_commandmode(struct block * sb) {
                 sprintf(interp_line + strlen(interp_line), "%s%d %s", coltoa(cf), rf, cline);
             }
             send_to_interp(interp_line);
- 
+
         } else if ( ! strncmp(inputline, "sort ", 5) ) {
             strcpy(interp_line, inputline);
             if (p != -1) { // si hay un rango seleccionado
@@ -387,7 +387,7 @@ void do_commandmode(struct block * sb) {
 
         } else if ( ! strncmp(inputline, "delfilter ", 10) ) {
             char cline [BUFFERSIZE];
-            strcpy(cline, inputline);            
+            strcpy(cline, inputline);
             del_range_chars(cline, 0, 9);
             int id = atoi(cline);
             del_filter(id);
@@ -413,7 +413,7 @@ void do_commandmode(struct block * sb) {
 
         } else if ( ! strncmp(inputline, "hiddenrows", 10)) {
             show_hiddenrows();
-                    
+
         } else if ( ! strncmp(inputline, "hiddencols", 10)) {
             show_hiddencols();
 
@@ -508,7 +508,7 @@ void do_commandmode(struct block * sb) {
             char valores[MAXMAPITEM * len_maps];
             get_mappings(valores);
             show_text(valores);
- 
+
         } else if ( ! strncmp(inputline, "nmap", 4) ||
                     ! strncmp(inputline, "imap", 4) ||
                     ! strncmp(inputline, "inoremap", 8) ||
@@ -518,7 +518,7 @@ void do_commandmode(struct block * sb) {
             send_to_interp(inputline);
 
         } else if ( ! strncmp(inputline, "!", 1) ) {
-            del_range_chars(inputline, 0, 0); 
+            del_range_chars(inputline, 0, 0);
             exec_cmd(inputline);
 
         } else if ( inputline[0] == 'w' ) {
@@ -544,7 +544,7 @@ void do_commandmode(struct block * sb) {
             ! strncmp(inputline, "i! xls ", 7) ||
             ! strncmp(inputline, "i tab " , 6) ||
             ! strncmp(inputline, "i! tab ", 7) ) {
-            
+
             int force_rewrite = 0;
             char delim = ',';
             char cline [BUFFERSIZE];

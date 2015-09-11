@@ -185,13 +185,13 @@ int clean_carrier(char * string) {
 
 /*
  *  * strtok version that handles null fields
- *   */
+ *  */
 char * xstrtok(char * line, char * delims) {
     static char * saveline = NULL;
-    char *p;
+    char * p;
     int n;
  
-    if(line != NULL)
+    if (line != NULL)
        saveline = line;
 
 /*
@@ -203,14 +203,14 @@ char * xstrtok(char * line, char * delims) {
  * *return the number of characters that aren't delims
  * */
     n = strcspn(saveline, delims);
-    p = saveline; /*save start of this token*/
+    p = saveline; // save start of this token
 
-    saveline += n; /*bump past the delim*/
+    saveline += n; // bump past the delim
 
-    if (*saveline != '\0') /*trash the delim if necessary*/
+    if (*saveline != '\0') // trash the delim if necessary
        *saveline++ = '\0';
 
-    return(p);
+    return p;
 }
 
 // Count number of occurences of word in s

@@ -52,7 +52,7 @@ void flush_saved() {
         (void) clearent(p);
         q = p->next;
         free(p);
-        p = q;        
+        p = q;
     }
     freeents = NULL;
     return;
@@ -113,7 +113,7 @@ void syncref(register struct enode *e) {
 void deletecol() {
     int r, c, i;
     struct ent **pp;
- 
+
     if (any_locked_cells(0, curcol, maxrow, curcol)) {
         scinfo("Locked cells encountered. Nothing changed");
         return;
@@ -275,11 +275,11 @@ void erase_area(int sr, int sc, int er, int ec, int ignorelock) {
     struct ent **pp;
 
     if (sr > er) {
-        r = sr; sr = er; er = r;    
+        r = sr; sr = er; er = r;
     }
 
     if (sc > ec) {
-        c = sc; sc = ec; ec = c;    
+        c = sc; sc = ec; ec = c;
     }
 
     if (sr < 0)
@@ -443,7 +443,7 @@ void doformat(int c1, int c2, int w, int p, int r) {
 
     if (c1 >= maxcols && !growtbl(GROWCOL, 0, c1)) c1 = maxcols-1 ;
     if (c2 >= maxcols && !growtbl(GROWCOL, 0, c2)) c2 = maxcols-1 ;
-    
+
     if (w == 0) {
         scinfo("Width too small - setting to 1");
         w = 1;
@@ -473,7 +473,7 @@ void doformat(int c1, int c2, int w, int p, int r) {
 
     modflg++;
     return;
-    
+
 }
 
 void formatcol(int c) {
@@ -580,7 +580,7 @@ void insert_col(int after) {
         realfmt[c] = DEFREFMT;
         col_hidden[c] = FALSE;
     }
-    
+
     for (r=0; r <= maxrow; r++) {
         pp = ATBL(tbl, r, maxcol);
         for (c = lim; --c >= 0; pp--)
@@ -634,7 +634,7 @@ void deleterow() {
                 if (*pp) (*pp)->row = r;
         }
         tbl[r] = tmprow;
-        
+
         maxrow--;
 
         sync_refs();
@@ -870,7 +870,7 @@ void del_selected_cells() {
        //cleanent(e_prev2);
        //copyent(e_prev2, lookat(currow+9, curcol+2), 0, 0, 0, 0, currow+9, curcol+2, 0);
        //e_prev->next = e_prev2;
-       
+
        // create undo struct:
        struct undo u;
        u.removed = e_prev;
@@ -887,12 +887,12 @@ void del_selected_cells() {
        cleanent(e_now);
        (void) copyent(e_now, lookat(currow+9, curcol+2), 0, 0, 0, 0, currow+9, curcol+2, 0);
        u.added = e_now;
-       
+
        // Add undo struct to undolist:
        add_to_undolist(&u); // <---------|
 */
        //flush_saved(); // No descomentar. Se debe hacer flush SOLO al salir
-    } 
+    }
 
     return;
 }
@@ -1379,7 +1379,7 @@ void valueize_area(int sr, int sc, int er, int ec) {
 void select_inner_range(int * vir_tlrow, int * vir_tlcol, int * vir_brrow, int * vir_brcol) {
     struct ent * p;
     int rr, cc, r, c, mf = 1;
-   
+
     while (mf != 0) {
         mf = 0;
         for (rr = *vir_tlrow; rr <= *vir_brrow; rr++) {
@@ -1404,7 +1404,7 @@ void select_inner_range(int * vir_tlrow, int * vir_tlcol, int * vir_brrow, int *
                             }
                             if (*vir_tlrow > rr + r) {
                                 *vir_tlrow = rr + r;
-                                mf=1;
+                                mf = 1;
                             }
                         }
                     }
@@ -1541,11 +1541,11 @@ int is_single_command (struct block * buf, long timeout) {
                  buf->pnext->value == 'G' ||
                  buf->pnext->value == '0' ||
                  buf->pnext->value == '$')) res = MOVEMENT_CMD;
-        
+
         else if (buf->value == 'g' && bs > 2 && timeout >= COMPLETECMDTIMEOUT)
                  res = MOVEMENT_CMD; // goto cell
                  // TODO add validation: buf->pnext->value debe ser letra
-                                                   
+
         else if (buf->value == 'P' && bs == 2 && (
             buf->pnext->value == 'v' || 
             buf->pnext->value == 'f' || 
