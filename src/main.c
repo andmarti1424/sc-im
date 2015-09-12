@@ -81,7 +81,6 @@ struct history * commandline_history;
 
 
 
-
 /*********************************************************************
    MAIN LOOP
  *********************************************************************/
@@ -109,16 +108,6 @@ int main (int argc, char ** argv) {
     // setup the spreadsheet arrays (tbl)
     if (! growtbl(GROWNEW, 0, 0)) return exit_app(1);
 
-    /* load spreasdsheet passed as argv
-    char * revi;
-    // strrchr to find last occurrence of '/'
-    if ((revi = strrchr(argv[0], '/')) != NULL) {
-        progname = revi + 1;
-    } else {
-        progname = argv[0];
-    }*/
-
-
     // we save parameters and use them to replace conf-values in config dictionary !
     read_argv(argc, argv);
 
@@ -126,9 +115,7 @@ int main (int argc, char ** argv) {
     if (! atoi(get_conf_value("nocurses")))
         start_screen();
 
-
-
-    #ifdef USECOLORS
+#ifdef USECOLORS
     //if (has_colors() && get_d_colors_param() == NULL) {
     if (get_d_colors_param() == NULL) {
             start_default_ucolors();
@@ -138,7 +125,7 @@ int main (int argc, char ** argv) {
             // de las claves que se definen en los archivos .sc
             set_colors_param_dict();
     }
-    #endif
+#endif
 
 
     // If the 'output' parameter is defined, SC-IM saves its output to that file.
@@ -158,8 +145,6 @@ int main (int argc, char ** argv) {
             put(user_conf_d, "nocurses", "1");
         }
     }
-
-
 
     // load sc file
     load_sc();
@@ -239,7 +224,7 @@ int main (int argc, char ** argv) {
 
 
 void create_structures() {
-
+ 
     // initiate mark array
     create_mark_array();
 
@@ -248,6 +233,12 @@ void create_structures() {
 
     // create yank list structure
     init_yanklist();
+
+    /* Assign NULL to colformats
+    int c;
+    for (c = 0; c < COLFORMATS; c++)
+        colformat[c] = NULL;
+    */
 }
 
 
@@ -271,9 +262,9 @@ void delete_structures() {
     free_filters();
 
     // Free undo list - from start of list
-    #ifdef UNDO
+#ifdef UNDO
     clear_undo_list();
-    #endif
+#endif
 
     // free deleted ents
     flush_saved();

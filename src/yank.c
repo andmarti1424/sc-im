@@ -49,11 +49,11 @@ void free_yanklist () {
         r = e;
     }
 
-    for (c = 0; c < COLFORMATS; c++)
-        if (colformat[c]) {
+    for (c = 0; c < COLFORMATS; c++) {
+        if (colformat[c] != NULL)
             scxfree(colformat[c]);
-            colformat[c] = NULL;
-        }
+        colformat[c] = NULL;
+    }
 
     yanklist = NULL;
     return;

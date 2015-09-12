@@ -706,7 +706,8 @@ void yyerror(char *err) {
 // returns 1  format of number - (numbers with format) - puede haber label.
 // returns -1 if there is no format in the cell.
 int get_formated_value(struct ent ** p, int col, char * value) {
-    char * cfmt = (*p)->format ? (*p)->format : (realfmt[col] >= 0 && realfmt[col] < COLFORMATS && colformat[realfmt[col]]) ? colformat[realfmt[col]] : NULL;
+    //char * cfmt = (*p)->format ? (*p)->format : NULL;
+    char * cfmt = (*p)->format ? (*p)->format : (realfmt[col] >= 0 && realfmt[col] < COLFORMATS && colformat[realfmt[col]] != NULL) ? colformat[realfmt[col]] : NULL;
 
     if (cfmt) {
         if (*cfmt == 'd') {

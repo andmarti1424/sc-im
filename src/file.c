@@ -52,11 +52,11 @@ void erasedb() {
             }
     }
 
-    for (c = 0; c < COLFORMATS; c++)
-        if (colformat[c]) {
+    for (c = 0; c < COLFORMATS; c++) {
+        if (colformat[c] != NULL)
             scxfree(colformat[c]);
-            colformat[c] = NULL;
-        }
+        colformat[c] = NULL;
+    }
 
     maxrow = 0;
     maxcol = 0;
@@ -770,7 +770,8 @@ int import_csv(char * fname, char d) {
                 del_char(token, strlen(token)-1);
             }
             char * st = str_replace (token, "\"", "''"); //replace double quotes inside string
-            //if (isnumeric(st) && strlen(st) && token[strlen(st)-1] != '-' && token[strlen(st)-1] != '.') { //FIXME do a proper isnumeric function !!
+            // Now every value gets imported as text!
+            //if (isnumeric(st) && strlen(st) && token[strlen(st)-1] != '-' && token[strlen(st)-1] != '.') { // FIXME do a proper isnumeric function !!
             //    sprintf(line_interp, "let %s%d=%s", coltoa(c), r, st);
             //} else {
                 sprintf(line_interp, "label %s%d=\"%s\"", coltoa(c), r, st);

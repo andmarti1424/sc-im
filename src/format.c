@@ -107,7 +107,7 @@ static char *fmt_exp(int val, char *fmt);
 
 static void reverse(register char *buf);
 
-char *colformat[COLFORMATS];
+char * colformat[COLFORMATS];
 
 /*****************************************************************************/
 
@@ -488,7 +488,7 @@ static void reverse(register char *buf) {
 
 bool engformat(int fmt, int width, int lprecision, double val, char *buf, int buflen) {
 
-    static char *engmult[] = {
+    static char * engmult[] = {
     "-18", "-15", "-12", "-09", "-06", "-03",
     "+00",
     "+03", "+06", "+09", "+12", "+15", "+18"

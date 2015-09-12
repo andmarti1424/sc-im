@@ -19,7 +19,7 @@
 extern int cmd_multiplier;
 extern struct history * commandline_history;
 extern void start_visualmode(int tlrow, int tlcol, int brrow, int brcol);
-char interp_line[100];
+char interp_line[BUFFERSIZE];
 
 void do_normalmode(struct block * buf) {
     int bs = get_bufsize(buf);

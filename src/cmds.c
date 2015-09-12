@@ -927,6 +927,7 @@ void insert_or_edit_cell() {
     #endif
     (void) sprintf(interp_line, "%s %s = %s", ope, v_name(currow, curcol), inputline);
     send_to_interp(interp_line); 
+
     #ifdef UNDO
     copy_to_undostruct(currow, curcol, currow, curcol, 'a');
     end_undo_action();
@@ -935,7 +936,7 @@ void insert_or_edit_cell() {
     inputline[0]='\0';
     inputline_pos = 0;
     chg_mode('.');
-    clr_header(input_win, 0); //FIXME
+    clr_header(input_win, 0);
 
     char * opt = get_conf_value("newline_action");
     switch (opt[0]) {
