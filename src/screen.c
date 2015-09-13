@@ -492,12 +492,12 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
                     #ifdef USECOLORS
                     if (has_colors()) set_ucolor(win, &ucolors[CELL_SELECTION_SC]);
                     #else
-                        wattron(win, A_REVERSE);
+                    wattron(win, A_REVERSE);
                     #endif
-                //} else if ((*p)->ucolor == NULL) {
-                //    #ifdef USECOLORS
-                //    set_ucolor(win, &ucolors[STRG]); // FIXME when no colors
-                //    #endif
+                } else if ((*p)->ucolor == NULL) {
+                    #ifdef USECOLORS
+                    set_ucolor(win, &ucolors[STRG]); // When a long string does not fit in column.
+                    #endif
                 }
                 char caracter;
                 chtype cht[fieldlen];
