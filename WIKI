@@ -14,8 +14,7 @@ Setup FREEBSD in Makefile.
 
 Build instructions for OSX
 --------------------------
-For BackSpace key to work properly change
-Redefine OKEY_BS macro to 0x7f in macros.h file
+Setup MACOSX in Makefile.
 
 
 Import SC-IM generated CSV files to LibreOffice
