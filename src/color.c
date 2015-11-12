@@ -14,6 +14,7 @@
 #include "screen.h"
 #include "undo.h"
 #include "conf.h"
+#include "cmds.h"
 
 static struct dictionary * d_colors_param = NULL;
 
@@ -240,6 +241,10 @@ void chg_color(char * str) {
 // it also applies a format such as bold or underline.
 // supports undo / redo
 void color_cell(int r, int c, int rf, int cf, char * str) {
+    if (any_locked_cells(r, c, rf, cf)) {
+        scinfo("Locked cells encountered. Nothing changed");
+        return;
+    }
 
     // parse detail
     // creo un diccionario para guardar las claves y valores que figuran en el string
