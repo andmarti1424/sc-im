@@ -189,7 +189,6 @@ int main (int argc, char ** argv) {
     }
 
     // handle input from keyboard
-    shall_quit = 0;
     buffer = (struct block *) create_buf(); // TODO: this should only take place if curses ui
     // esto habilitarlo para debug
     // wtimeout(input_win, TIMEOUT_CURSES);
