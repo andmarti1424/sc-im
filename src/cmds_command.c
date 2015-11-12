@@ -81,6 +81,7 @@ static char * valid_commands[] = {
 "q!",
 "quit!",
 "quit",
+"refresh",
 "set",
 "showcol",
 "showfilters",
@@ -270,6 +271,9 @@ void do_commandmode(struct block * sb) {
 
         if ( ! strcmp(inputline, "q") || ! strcmp(inputline, "quit") ) {
             shall_quit = 1;
+
+        } else if ( ! strcmp(inputline, "refresh")) {
+            winchg();
 
         } else if ( ! strcmp(inputline, "q!") || ! strcmp(inputline, "quit!") ) {
             shall_quit = 2;

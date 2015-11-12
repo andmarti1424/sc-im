@@ -305,6 +305,8 @@ Commands for handling cell content:
 
      :version    shows SC-IM version number
 
+     :refresh    refreshes UI. acts just like C-l command of NORMAL_MODE.
+
      :set        changes a configuration parameter in the format of key value.
                  example:    :set half_page_scroll=0 other_key=its_value
                  if no key is specified, shows all configuration variables and its values.
