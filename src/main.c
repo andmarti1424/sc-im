@@ -223,7 +223,7 @@ int main (int argc, char ** argv) {
 
 
 void create_structures() {
- 
+
     // initiate mark array
     create_mark_array();
 
@@ -412,12 +412,12 @@ void winchg() {
     endwin();
     start_screen();
     clearok(stdscr, TRUE);
-    update(TRUE); 
+    update(TRUE);
     flushinp();
     show_header(input_win);
     show_celldetails(input_win);
     wrefresh(input_win);
-    update(TRUE); 
+    update(TRUE);
     //signal(SIGWINCH, winchg);
 }
 
