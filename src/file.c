@@ -273,10 +273,6 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
         pp = ATBL(tbl, r, c0);
         for (c = c0; c <= cn; c++, pp++)
             if (*pp) {
-                // write blocked cells
-                if ((*pp)->flags & is_locked)
-                    (void) fprintf(f, "lock %s%d\n", coltoa((*pp)->col), (*pp)->row);
-
                 // Write ucolors
                 if ((*pp)->ucolor != NULL) {
                     char strcolor[BUFFERSIZE];
@@ -303,6 +299,11 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
                     if ((*pp)->ucolor->blink)     sprintf(strcolor + strlen(strcolor), " blink=1");
                     (void) fprintf(f, "cellcolor %s%d \"%s\"\n", coltoa((*pp)->col), (*pp)->row, strcolor);
                 }
+                // write blocked cells
+                // lock should be stored after any other command
+                if ((*pp)->flags & is_locked)
+                    (void) fprintf(f, "lock %s%d\n", coltoa((*pp)->col), (*pp)->row);
+
 
                 /*if ((*pp)->nrow >= 0) {
                     (void) fprintf(f, "addnote %s ", v_name((*pp)->row, (*pp)->col));
