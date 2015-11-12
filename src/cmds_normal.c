@@ -10,6 +10,7 @@
 #include "history.h"
 #include "hide_show.h"
 #include "shift.h"
+#include "main.h"    // for winchg
 #include "interp.h"
 #include "utils/extra.h"
 #ifdef UNDO
@@ -844,6 +845,7 @@ void do_normalmode(struct block * buf) {
             }
 
         case ctl('l'):
+            /*
             endwin();
             start_screen();
             clearok(stdscr, TRUE);
@@ -853,6 +855,8 @@ void do_normalmode(struct block * buf) {
             show_celldetails(input_win);
             wrefresh(input_win);
             update(TRUE);
+            */
+            winchg();
             break;
 
         case '@':
