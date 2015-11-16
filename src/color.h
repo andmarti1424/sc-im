@@ -50,3 +50,4 @@ void color_cell(int r, int c, int rf, int cf, char * detail);
 void set_colors_param_dict();
 void free_colors_param_dict();
 void chg_color(char * str);
+int same_ucolor(struct ucolor * u, struct ucolor * v);

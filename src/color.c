@@ -322,3 +322,21 @@ void color_cell(int r, int c, int rf, int cf, char * str) {
         update(TRUE);
     return;
 }
+
+// this function receives two ucolors variables and returns 1 if both have the same values
+// returns 0 otherwise
+int same_ucolor(struct ucolor * u, struct ucolor * v) {
+    if (u == NULL || v == NULL)       return 0;
+          
+    if (u->fg != v->fg)               return 0;
+    if (u->bg != v->bg)               return 0;
+    if (u->bold != v->bold)           return 0;
+    if (u->dim != v->dim)             return 0;
+    if (u->reverse != v->reverse)     return 0;
+    if (u->standout != v->standout)   return 0;
+    if (u->underline != v->underline) return 0;
+    if (u->blink != v->blink)         return 0;
+
+    return 1;
+}
+
