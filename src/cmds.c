@@ -218,7 +218,7 @@ void copyent(register struct ent *n, register struct ent *p, int dr, int dc,
     } else if (special != 'v' && special != 'f')
         n->format = NULL;
 
-    if (p->ucolor) {
+    if (p->ucolor && special != 'v') {
         n->ucolor = (struct ucolor *) malloc (sizeof(struct ucolor));
         n->ucolor->fg = p->ucolor->fg;
         n->ucolor->bg = p->ucolor->bg;
