@@ -281,39 +281,67 @@ void save_undo_range_shift(int delta_rows, int delta_cols, int tlrow, int tlcol,
     return;
 }
 
-// esta funcion se utiliza para guardar en una lista de enteros (int *)
-// filas y columnas que se ocultan o se muestran en pantalla.
-// se utiliza para hacer undo y redo de esos cambios.
-// en la primera posición de la lista se guarda la (cantidad de elementos - 1) que tiene la lista
+// This function is used for undoing and redoing
+// changes caused by commands that hide/show rows/columns of screen
+// such as Zr Zc Sc Sr commands.
+// it stores in four different lists (int * list) the row or columns numbers
+// that are showed or hidden because of a change.
+// As these lists are dynamically built, in the first position of every list,
+// we always store the number of elements that the list has.
 void undo_hide_show(int row, int col, char type, int arg) {
     int i;
     if (type == 'h') {
         if (row > -1) {        // hide row 
-            undo_item.row_hidded = (int *) malloc(sizeof(int) * (arg + 1));
-            undo_item.row_hidded[0] = arg; // guardo en la primera posicion la cantidad de elementos (rows)
+            if (undo_item.row_hidded == NULL) {
+                undo_item.row_hidded = (int *) malloc(sizeof(int) * (arg + 1));
+                undo_item.row_hidded[0] = 0;
+            } else
+                undo_item.row_hidded = (int *) realloc(undo_item.row_hidded, sizeof(int) * (undo_item.row_hidded[0] + arg + 1));
+
             for (i=0; i < arg; i++)
-                undo_item.row_hidded[i+1] = row + i;
+                undo_item.row_hidded[undo_item.row_hidded[0] + i + 1] = row + i;
+
+            undo_item.row_hidded[0] += arg; // keep in first position the number of elements (rows)
 
         } else if (col > -1) { // hide col
-            undo_item.col_hidded = (int *) malloc(sizeof(int) * (arg + 1));
-            undo_item.col_hidded[0] = arg; // guardo en la primera posicion la cantidad de elementos (cols)
+            if (undo_item.col_hidded == NULL) {
+                undo_item.col_hidded = (int *) malloc(sizeof(int) * (arg + 1));
+                undo_item.col_hidded[0] = 0;
+            } else
+                undo_item.col_hidded = (int *) realloc(undo_item.col_hidded, sizeof(int) * (undo_item.col_hidded[0] + arg + 1));
+
             for (i=0; i < arg; i++)
-                undo_item.col_hidded[i+1] = col + i;
+                undo_item.col_hidded[undo_item.col_hidded[0] + i + 1] = col + i;
+
+            undo_item.col_hidded[0] += arg; // keep in first position the number of elements (cols)
         }
+
     } else if (type == 's') {
         if (row > -1) {        // show row
-            undo_item.row_showed = (int *) malloc(sizeof(int) * (arg + 1));
-            undo_item.row_showed[0] = arg; // guardo en la primera posicion la cantidad de elementos (rows)
+            if (undo_item.row_showed == NULL) {
+                undo_item.row_showed = (int *) malloc(sizeof(int) * (arg + 1));
+                undo_item.row_showed[0] = 0;
+            } else
+                undo_item.row_showed = (int *) realloc(undo_item.row_showed, sizeof(int) * (undo_item.row_showed[0] + arg + 1));
+
             for (i=0; i < arg; i++)
-                undo_item.row_showed[i+1] = row + i;
+                undo_item.row_showed[undo_item.row_showed[0] + i + 1] = row + i;
+
+            undo_item.row_showed[0] += arg; // keep in first position the number of elements (rows)
 
         } else if (col > -1) { // show col
-            undo_item.col_showed = (int *) malloc(sizeof(int) * (arg + 1));
-            undo_item.col_showed[0] = arg; // guardo en la primera posicion la cantidad de elementos (cols)
-            for (i=0; i < arg; i++)
-                undo_item.col_showed[i+1] = col + i;
-        }
+            if (undo_item.col_showed == NULL) {
+                undo_item.col_showed = (int *) malloc(sizeof(int) * (arg + 1));
+                undo_item.col_showed[0] = 0;
+            } else
+                undo_item.col_showed = (int *) realloc(undo_item.col_showed, sizeof(int) * (undo_item.col_showed[0] + arg + 1));
 
+            for (i=0; i < arg; i++)
+                undo_item.col_showed[undo_item.col_showed[0] + i + 1] = col + i;
+
+            undo_item.col_showed[0] += arg; // keep in first position the number of elements (cols)
+
+        }
     }
     return;
 }
