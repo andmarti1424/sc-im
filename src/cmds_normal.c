@@ -698,6 +698,31 @@ void do_normalmode(struct block * buf) {
             }
             break;
 
+        // autojus
+        case 'a':
+            if ( bs != 2 ) break;
+
+            if (buf->pnext->value == 'a') {
+                int p, r = currow, c = curcol, rf = currow, cf = curcol;
+                if ( (p = is_range_selected()) != -1) {
+                    struct srange * sr = get_range_by_pos(p);
+                    r = sr->tlrow;
+                    c = sr->tlcol;
+                    rf = sr->brrow;
+                    cf = sr->brcol;
+                }
+                if (any_locked_cells(r, c, rf, cf)) {
+                    scerror("Locked cells encountered. Nothing changed");
+                    return;
+                }
+                char cline [BUFFERSIZE];
+                sprintf(cline, "autojus %s:", coltoa(c));
+                sprintf(cline + strlen(cline), "%s", coltoa(cf));
+                send_to_interp(cline);
+                update(TRUE);
+            }
+            break;
+
         // scroll
         case 'z':
             if ( bs != 2 ) break;
