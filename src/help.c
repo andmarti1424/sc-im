@@ -18,7 +18,7 @@ static int look_result = -1;
 static char word_looked[50] = "";
 
 
-// cargo el contenido del archivo help_doc a memoria
+// Load the contents of help_doc into memory
 int load_help () {
     register FILE * f;
     int line;

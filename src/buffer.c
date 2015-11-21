@@ -12,7 +12,7 @@ struct block * create_buf() {
     return b;
 }
 
-// Funcion que agrega un item de tipo int a un buffer
+// Add an int to a buffer
 void addto_buf(struct block * buf, int d) {
     struct block * aux = buf;
 
@@ -30,7 +30,7 @@ void addto_buf(struct block * buf, int d) {
     return;
 }
 
-// Funcion que copia un buffer en otro
+// Replace the elements of destino with origen
 void copybuffer(struct block * origen, struct block * destino) {
     flush_buf(destino);
     int len = get_bufsize(origen);
@@ -40,7 +40,7 @@ void copybuffer(struct block * origen, struct block * destino) {
     return;
 }
 
-// Funcion que borra el elemento "pos" de un buffer
+// Replace the element of a buffer at 'pos' with a '\0'
 //FIXME
 void del_buf (struct block * buf, int pos) {
     int i;
@@ -76,8 +76,8 @@ void flush_buf (struct block * buf) {
     return;
 }
 
-// Funcion que borra todos los bloques de un buffer
-// incluyendo el nodo inicial
+// Delete all blocks of a buffer
+// including the initial node
 void erase_buf (struct block * buf) {
     flush_buf(buf);
     free(buf);
@@ -129,7 +129,7 @@ int find_val(struct block * buf, int value) {
     return 0; 
 }
 
-// Funcion que borra el primer elemento de un buffer
+// Delete the first element in a buffer
 struct block * dequeue (struct block * buf) {
     if (buf == NULL) return buf;
     struct block * sig;
