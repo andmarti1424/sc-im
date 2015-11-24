@@ -283,13 +283,15 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
                     struct enode * e = new((*pp)->ucolor->fg, (struct enode *)0, (struct enode *)0);
                     decompile(e, 0);
                     uppercase(line);
-                    sprintf(strcolor, "fg=%s", &line[1]);
+                    if (line[0] == '@') del_char(line, 0); // FIXME THIS !!!
+                    sprintf(strcolor, "fg=%s", &line[0]);
                     free(e);
                     linelim=0;
                     e = new((*pp)->ucolor->bg, (struct enode *)0, (struct enode *)0);
                     decompile(e, 0);
                     uppercase(line);
-                    sprintf(strcolor + strlen(strcolor), " bg=%s", &line[1]);
+                    if (line[0] == '@') del_char(line, 0); // FIXME THIS !!!
+                    sprintf(strcolor + strlen(strcolor), " bg=%s", &line[0]);
                     free(e);
 
                     if ((*pp)->ucolor->bold)      sprintf(strcolor + strlen(strcolor), " bold=1");
@@ -305,7 +307,9 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
                     // new implementation
                     // by row, store cellcolors grouped by ranges
                     int c_aux = c;
-                    if ( ((*pp)->ucolor != NULL) && (c <= maxcol) && (c == 0 || (*(pp-1))->ucolor == NULL || ! same_ucolor((*(pp-1))->ucolor, (*pp)->ucolor))) {
+                    struct ucolor * u = (*pp)->ucolor;
+                    struct ucolor * a = *ATBL(tbl, r, c-1) == NULL ? NULL : (*ATBL(tbl, r, c-1))->ucolor;
+                    if ( (u != NULL) && (c <= maxcol) && ( c == 0 || ( a == NULL ) || ( ! same_ucolor( u, a) ))) {
                         while (c_aux < maxcol && *ATBL(tbl, r, c_aux) != NULL && same_ucolor( (*ATBL(tbl, r, c_aux))->ucolor, (*pp)->ucolor ))
                             c_aux++;
                         fprintf(f, "cellcolor %s%d", coltoa((*pp)->col), (*pp)->row);
@@ -314,7 +318,9 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
 
 
 
+
                 }
+
                 // write blocked cells
                 // lock should be stored after any other command
                 if ((*pp)->flags & is_locked)
