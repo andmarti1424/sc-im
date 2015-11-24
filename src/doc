@@ -129,6 +129,8 @@ Commands for handling cell content:
                  This converts text content to a numeric value that can shown as a date. See DATE INPUT below for more info.
                  NOTE: USELOCALE has to be enabled during build.
 
+     aa          auto resize selected column/s to fit its contents.
+
 
  Other commands:
      ^L          Redraw the screen
