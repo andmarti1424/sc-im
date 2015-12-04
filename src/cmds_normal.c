@@ -28,9 +28,11 @@ void do_normalmode(struct block * buf) {
 
     switch (buf->value) {
 
-        // Movement commands
+        // MOVEMENT COMMANDS
         case 'j':
         case OKEY_DOWN:
+            lastcol = curcol;
+            lastrow = currow;
             currow = forw_row(1)->row;
             unselect_ranges();
             update(TRUE);
@@ -38,6 +40,8 @@ void do_normalmode(struct block * buf) {
 
         case 'k':
         case OKEY_UP:
+            lastcol = curcol;
+            lastrow = currow;
             currow = back_row(1)->row;
             unselect_ranges();
             update(TRUE);
@@ -45,6 +49,8 @@ void do_normalmode(struct block * buf) {
 
         case 'h':
         case OKEY_LEFT:
+            lastrow = currow;
+            lastcol = curcol;
             curcol = back_col(1)->col;
             unselect_ranges();
             update(TRUE);
@@ -52,6 +58,8 @@ void do_normalmode(struct block * buf) {
 
         case 'l':
         case OKEY_RIGHT:
+            lastrow = currow;
+            lastcol = curcol;
             curcol = forw_col(1)->col;
             unselect_ranges();
             update(TRUE);
@@ -59,6 +67,8 @@ void do_normalmode(struct block * buf) {
 
         case '0':
         case OKEY_HOME:
+            lastrow = currow;
+            lastcol = curcol;
             curcol = left_limit()->col;
             unselect_ranges();
             update(TRUE);
@@ -66,18 +76,24 @@ void do_normalmode(struct block * buf) {
 
         case '$':
         case OKEY_END:
+            lastrow = currow;
+            lastcol = curcol;
             curcol = right_limit()->col;
             unselect_ranges();
             update(TRUE);
             break;
 
         case '^':
+            lastcol = curcol;
+            lastrow = currow;
             currow = goto_top()->row;
             unselect_ranges();
             update(TRUE);
             break;
 
         case '#':
+            lastcol = curcol;
+            lastrow = currow;
             currow = goto_bottom()->row;
             unselect_ranges();
             update(TRUE);
@@ -96,10 +112,174 @@ void do_normalmode(struct block * buf) {
                 scerror("Cell column is hidden");
                 break;
             }
+            lastrow = currow;
+            lastcol = curcol;
             currow = e->row;
             curcol = e->col;
             update(TRUE);
             break;
+
+        // CTRL f
+        case ctl('f'):
+        case OKEY_PGDOWN:
+            {
+            int n = LINES - RESROW - 1;
+            if (atoi(get_conf_value("half_page_scroll"))) n = n / 2;
+            struct ent * e = forw_row(n);
+            lastcol = curcol;
+            lastrow = currow;
+            currow = e->row;
+            unselect_ranges();
+            scroll_down(n);
+            update(TRUE);
+            break;
+            }
+
+        // CTRL b
+        case ctl('b'):
+        case OKEY_PGUP:
+            {
+            int n = LINES - RESROW - 1;
+            if (atoi(get_conf_value("half_page_scroll"))) n = n / 2;
+            lastcol = curcol;
+            lastrow = currow;
+            currow = back_row(n)->row;
+            unselect_ranges();
+            scroll_up(n);
+            update(TRUE);
+            break;
+            }
+
+        case 'w':
+            e = go_forward();
+            lastrow = currow;
+            lastcol = curcol;
+            currow = e->row;
+            curcol = e->col;
+            unselect_ranges();
+            update(TRUE);
+            break;
+
+        case 'b':
+            e = go_backward();
+            lastrow = currow;
+            lastcol = curcol;
+            currow = e->row;
+            curcol = e->col;
+            unselect_ranges();
+            update(TRUE);
+            break;
+
+        case 'H':
+            lastrow = currow;
+            lastcol = curcol;
+            currow = vert_top()->row;
+            unselect_ranges();
+            update(TRUE);
+            break;
+
+        case 'M':
+            lastcol = curcol;
+            lastrow = currow;
+            currow = vert_middle()->row;
+            unselect_ranges();
+            update(TRUE);
+            break;
+
+        case 'L':
+            lastrow = currow;
+            lastcol = curcol;
+            currow = vert_bottom()->row;
+            unselect_ranges();
+            update(TRUE);
+            break;
+
+        case 'G': // goto end
+            e = go_end();
+            lastrow = currow;
+            lastcol = curcol;
+            currow = e->row;
+            curcol = e->col;
+            unselect_ranges();
+            update(TRUE);
+            break;
+
+        // GOTO goto
+        case ctl('a'):
+            e = go_home();
+            lastrow = currow;
+            lastcol = curcol;
+            curcol = e->col;
+            currow = e->row;
+            unselect_ranges();
+            update(TRUE);
+            break;
+
+        case 'g':
+            if (buf->pnext->value == '0') {                               // g0
+                lastcol = curcol;
+                lastrow = currow;
+                curcol = go_bol()->col;
+
+            } else if (buf->pnext->value == '$') {                        // g$
+                lastcol = curcol;
+                lastrow = currow;
+                curcol = go_eol()->col;
+
+            } else if (buf->pnext->value == 'g') {                        // gg
+                e = go_home();
+                lastcol = curcol;
+                lastrow = currow;
+                curcol = e->col;
+                currow = e->row;
+
+            } else if (buf->pnext->value == 'G') {                        // gG
+                e = go_end();
+                lastcol = curcol;
+                lastrow = currow;
+                currow = e->row;
+                curcol = e->col;
+
+            } else if (buf->pnext->value == 'M') {                        // gM
+                lastcol = curcol;
+                lastrow = currow;
+                curcol = horiz_middle()->col;
+
+            } else if (buf->pnext->value == 'l') {                        // gl
+                int newlr = currow;
+                int newlc = curcol;
+                curcol = lastcol;
+                currow = lastrow;
+                lastrow = newlr;
+                lastcol = newlc;
+
+            } else {                                                      // gA4 (goto cell)
+                (void) sprintf(interp_line, "goto %s", parse_cell_name(1, buf));
+                send_to_interp(interp_line);
+            }
+            unselect_ranges();
+            update(TRUE);
+            break;
+
+        // repeat last goto command
+        case 'n':
+            go_last();
+            update(TRUE);
+            break;
+
+        // END OF MOVEMENT COMMANDS
+
+        case '/':
+            {
+            char cadena[] = ":int goto ";
+            int i;
+            for (i=0; i<strlen(cadena); i++) {
+                flush_buf(buf);
+                addto_buf(buf, cadena[i]);
+                exec_single_cmd(buf);
+            }
+            break;
+            }
 
         // CTRL j
         case ctl('j'):
@@ -148,124 +328,6 @@ void do_normalmode(struct block * buf) {
             scinfo("Build made without USELOCALE enabled");
         #endif
             }
-
-        // CTRL f
-        case ctl('f'):
-        case OKEY_PGDOWN:
-            {
-            int n = LINES - RESROW - 1;
-            if (atoi(get_conf_value("half_page_scroll"))) n = n / 2;
-            struct ent * e = forw_row(n);
-            currow = e->row;
-            unselect_ranges();
-            scroll_down(n);
-            update(TRUE);
-            break;
-            }
-
-        // CTRL b
-        case ctl('b'):
-        case OKEY_PGUP:
-            {
-            int n = LINES - RESROW - 1;
-            if (atoi(get_conf_value("half_page_scroll"))) n = n / 2;
-            currow = back_row(n)->row;
-            unselect_ranges();
-            scroll_up(n);
-            update(TRUE);
-            break;
-            }
-
-        case 'w':
-            e = go_forward();
-            currow = e->row;
-            curcol = e->col;
-            unselect_ranges();
-            update(TRUE);
-            break;
-
-        case 'b':
-            e = go_backward();
-            currow = e->row;
-            curcol = e->col;
-            unselect_ranges();
-            update(TRUE);
-            break;
-
-        case '/':
-            {
-            char cadena[] = ":int goto ";
-            int i;
-            for (i=0; i<strlen(cadena); i++) {
-                flush_buf(buf);
-                addto_buf(buf, cadena[i]);
-                exec_single_cmd(buf);
-            }
-            break;
-            }
-
-        case 'H':
-            currow = vert_top()->row;
-            unselect_ranges();
-            update(TRUE);
-            break;
-
-        case 'M':
-            currow = vert_middle()->row;
-            unselect_ranges();
-            update(TRUE);
-            break;
-
-        case 'L':
-            currow = vert_bottom()->row;
-            unselect_ranges();
-            update(TRUE);
-            break;
-
-        case 'G': // goto end
-            e = go_end();
-            currow = e->row;
-            curcol = e->col;
-            unselect_ranges();
-            update(TRUE);
-            break;
-
-        // GOTO goto
-        case ctl('a'):
-            e = go_home();
-            curcol = e->col;
-            currow = e->row;
-            unselect_ranges();
-            update(TRUE);
-            break;
-
-        case 'g':
-            if (buf->pnext->value == '0') {                               // g0
-                curcol = go_bol()->col;
-
-            } else if (buf->pnext->value == '$') {                        // g$
-                curcol = go_eol()->col;
-
-            } else if (buf->pnext->value == 'g') {                        // gg
-                e = go_home();
-                curcol = e->col;
-                currow = e->row;
-
-            } else if (buf->pnext->value == 'G') {                        // gG
-                e = go_end();
-                currow = e->row;
-                curcol = e->col;
-
-            } else if (buf->pnext->value == 'M') {                        // gM
-                curcol = horiz_middle()->col;
-
-            } else {                                                      // gA4 (goto cell)
-                (void) sprintf(interp_line, "goto %s", parse_cell_name(1, buf));
-                send_to_interp(interp_line);
-            }
-            unselect_ranges();
-            update(TRUE);
-            break;
 
         // repeat last command
         case '.':
@@ -417,12 +479,6 @@ void do_normalmode(struct block * buf) {
             update(TRUE);
             break;
             }
-
-        // repeat last goto command
-        case 'n':
-            go_last();
-            update(TRUE);
-            break;
 
         // range lock / unlock / valueize
         case 'r':

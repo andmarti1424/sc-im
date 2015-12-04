@@ -1541,6 +1541,7 @@ int is_single_command (struct block * buf, long timeout) {
                  buf->pnext->value == 'g' ||
                  buf->pnext->value == 'G' ||
                  buf->pnext->value == '0' ||
+                 buf->pnext->value == 'l' ||
                  buf->pnext->value == '$')) res = MOVEMENT_CMD;
 
         else if (buf->value == 'g' && bs > 2 && timeout >= COMPLETECMDTIMEOUT)

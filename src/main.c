@@ -30,6 +30,7 @@
 #endif
 
 int currow = 0, curcol = 0;
+int lastrow = 0, lastcol = 0;
 int maxrows, maxcols;
 int * fwidth;
 int * precision;

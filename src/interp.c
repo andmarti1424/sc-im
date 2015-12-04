@@ -1715,19 +1715,21 @@ void go_last() {
  * at row cornerrow and column cornercol in the upper left corner of the
  * screen if possible.
  */
-void moveto(int row, int col, int lastrow, int lastcol, int cornerrow, int cornercol) {
+void moveto(int row, int col, int lastrow_, int lastcol_, int cornerrow, int cornercol) {
     register int i;
 
     //if (!loading && row != -1 && (row != currow || col != curcol)) remember(0);
 
+    lastrow = currow;
+    lastcol = curcol;
     currow = row;
     curcol = col;
     g_free();
     gs.g_type = G_CELL;
     gs.g_row = currow;
     gs.g_col = curcol;
-    gs.g_lastrow = lastrow;
-    gs.g_lastcol = lastcol;
+    gs.g_lastrow = lastrow_;
+    gs.g_lastcol = lastcol_;
     //gs.strow = cornerrow;
     //gs.stcol = cornercol;
     if (cornerrow >= 0) {
@@ -1737,14 +1739,14 @@ void moveto(int row, int col, int lastrow, int lastcol, int cornerrow, int corne
     } else
     gs.stflag = 0;
 
-    for (rowsinrange = 0, i = row; i <= lastrow; i++) {
+    for (rowsinrange = 0, i = row; i <= lastrow_; i++) {
         if (row_hidden[i]) {
             scinfo("Cell's row is hidden");
             continue;
         }
         rowsinrange++;
     }
-    for (colsinrange = 0, i = col; i <= lastcol; i++) {
+    for (colsinrange = 0, i = col; i <= lastcol_; i++) {
         if (col_hidden[i]) {
             colsinrange = 0;
             scinfo("Cell's col is hidden");
@@ -1761,7 +1763,7 @@ void moveto(int row, int col, int lastrow, int lastcol, int cornerrow, int corne
 /*
  * 'goto' either a given number,'error', or 'invalid' starting at (currow,curcol)
  */
-void num_search(double n, int firstrow, int firstcol, int lastrow, int lastcol, int errsearch) {
+void num_search(double n, int firstrow, int firstcol, int lastrow_, int lastcol_, int errsearch) {
     register struct ent *p;
     register int r,c;
     int    endr, endc;
@@ -1772,26 +1774,26 @@ void num_search(double n, int firstrow, int firstcol, int lastrow, int lastcol, 
     gs.g_n = n;
     gs.g_row = firstrow;
     gs.g_col = firstcol;
-    gs.g_lastrow = lastrow;
-    gs.g_lastcol = lastcol;
+    gs.g_lastrow = lastrow_;
+    gs.g_lastcol = lastcol_;
     gs.errsearch = errsearch;
 
-    if (currow >= firstrow && currow <= lastrow &&
-        curcol >= firstcol && curcol <= lastcol) {
+    if (currow >= firstrow && currow <= lastrow_ &&
+        curcol >= firstcol && curcol <= lastcol_) {
             endr = currow;
             endc = curcol;
     } else {
-        endr = lastrow;
-        endc = lastcol;
+        endr = lastrow_;
+        endc = lastcol_;
     }
     r = endr;
     c = endc;
     while (1) {
-        if (c < lastcol)
+        if (c < lastcol_)
             c++;
         else {
-            if (r < lastrow) {
-                while (++r < lastrow && row_hidden[r]) /* */;
+            if (r < lastrow_) {
+                while (++r < lastrow_ && row_hidden[r]) /* */;
                 c = firstcol;
             } else {
                 r = firstrow;
@@ -1813,6 +1815,8 @@ void num_search(double n, int firstrow, int firstcol, int lastrow, int lastcol, 
         }
     }
 
+    lastrow = currow;
+    lastcol = curcol;
     currow = r;
     curcol = c;
     rowsinrange = 1;
@@ -1824,7 +1828,7 @@ void num_search(double n, int firstrow, int firstcol, int lastrow, int lastcol, 
 }
 
 /* 'goto' a cell containing a matching string */
-void str_search(char *s, int firstrow, int firstcol, int lastrow, int lastcol, int num) {
+void str_search(char *s, int firstrow, int firstcol, int lastrow_, int lastcol_, int num) {
     struct ent *p;
     int r, c;
     int endr, endc;
@@ -1866,24 +1870,24 @@ void str_search(char *s, int firstrow, int firstcol, int lastrow, int lastcol, i
     gs.g_s = s;
     gs.g_row = firstrow;
     gs.g_col = firstcol;
-    gs.g_lastrow = lastrow;
-    gs.g_lastcol = lastcol;
-    if (currow >= firstrow && currow <= lastrow &&
-        curcol >= firstcol && curcol <= lastcol) {
+    gs.g_lastrow = lastrow_;
+    gs.g_lastcol = lastcol_;
+    if (currow >= firstrow && currow <= lastrow_ &&
+        curcol >= firstcol && curcol <= lastcol_) {
         endr = currow;
         endc = curcol;
     } else {
-        endr = lastrow;
-        endc = lastcol;
+        endr = lastrow_;
+        endc = lastcol_;
     }
     r = endr;
     c = endc;
     while (1) {
-       if (c < lastcol) {
+       if (c < lastcol_) {
             c++;
         } else {
-            if (r < lastrow) {
-                while (++r < lastrow && row_hidden[r]) /* */;
+            if (r < lastrow_) {
+                while (++r < lastrow_ && row_hidden[r]) /* */;
                 c = firstcol;
             } else {
                 r = firstrow;
@@ -1965,6 +1969,8 @@ void str_search(char *s, int firstrow, int firstcol, int lastrow, int lastcol, i
     }
     }
     linelim = -1;
+    lastrow = currow;
+    lastcol = curcol;
     currow = r;
     curcol = c;
     rowsinrange = 1;

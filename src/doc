@@ -41,6 +41,7 @@ Navigation commands:
      gg  , c-a:  Go to home (first cell of spreadsheet).
      G           Go to last valid cell of spreadsheet.
      gG          Go to last valid cell of spreadsheet.
+     gl          moves to last cell position
      c-f , c-b:  Scrolls down and up full screen.
                  set variable half_page_scroll to 1 to scroll half page,
                  instead of full page. see :set command for details.
