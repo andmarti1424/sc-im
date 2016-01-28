@@ -1,4 +1,4 @@
-# Makefile $Revision: 0.1.1
+# Makefile $Revision: 0.1.2
 
 
 # Specify the name of the program.
@@ -45,6 +45,10 @@ FREEBSD :=
 # For Building SC-IM in NETBSD, set NETBSD variable below
 #NETBSD := -DNETBSD
 NETBSD :=
+
+# For Building SC-IM in MACOSX, set MACOSX variable below
+#MACOSX := -DMACOSX
+MACOSX :=
 
 # Set SIMPLE for lex.c if you don't want arrow keys or lex.c blows up
 #SIMPLE := -DSIMPLE
@@ -126,7 +130,7 @@ XLSX :=
 UNDO := -DUNDO
 
 #CFLAGS := -O2 -Wall -pipe -g
-CFLAGS := $(LINUX) $(FREEBSD) $(NETBSD) -O2 -Wall -pipe -g -I/usr/include/libxml2
+CFLAGS := $(LINUX) $(FREEBSD) $(NETBSD) $(MACOSX) -O2 -Wall -pipe -g -I/usr/include/libxml2
 CFLAGS := $(CFLAGS) $(USECOLORS) $(USELOCALE) $(UNDO) $(SIGVOID) $(DFLT_PAGER)
 CFLAGS := $(CFLAGS) $(IEEE_MATH) $(RINT) $(REGEX) $(LIBRARY)
 CFLAGS := $(CFLAGS) $(HELP_PATH) $(SNAME) $(NO_NOTIMEOUT) $(SIMPLE) $(XLS) $(XLSX) $(HISTORY_FILE)
