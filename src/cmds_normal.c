@@ -245,6 +245,7 @@ void do_normalmode(struct block * buf) {
                 lastrow = currow;
                 curcol = horiz_middle()->col;
 
+            // goto last cell position
             } else if (buf->pnext->value == 'l') {                        // gl
                 int newlr = currow;
                 int newlc = curcol;
@@ -252,12 +253,17 @@ void do_normalmode(struct block * buf) {
                 currow = lastrow;
                 lastrow = newlr;
                 lastcol = newlc;
-
             } else {                                                      // gA4 (goto cell)
                 (void) sprintf(interp_line, "goto %s", parse_cell_name(1, buf));
                 send_to_interp(interp_line);
             }
             unselect_ranges();
+            update(TRUE);
+            break;
+
+        // repeat last goto command - backwards
+        case 'N':
+            go_previous();
             update(TRUE);
             break;
 

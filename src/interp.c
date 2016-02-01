@@ -35,6 +35,7 @@
 #include "range.h"
 #include "xmalloc.h" // for scxfree
 #include "lex.h"     // for atocol
+#include "interp.h"
 #include <unistd.h>
 
 #ifdef UNDO
@@ -46,19 +47,16 @@
 #endif
 
 #ifdef RE_COMP
-extern char *re_comp(char *s);
-extern char *re_exec(char *s);
+extern char * re_comp(char *s);
+extern char * re_exec(char *s);
 #endif
 
 #ifdef REGCMP
-char *regcmp();
-char *regex();
+char * regcmp();
+char * regex();
 #endif
 
 void exit_app();
-
-/* Use this structure to save the last 'g' command */
-struct go_save gs;
 
 /* g_type can be: */
 #define G_NONE 0          /* Starting value - must be 0 */
@@ -67,6 +65,9 @@ struct go_save gs;
 #define G_NSTR 3
 #define G_XSTR 4
 #define G_CELL 5
+
+/* Use this structure to save the last 'g' command */
+struct go_save gs = { .g_type = G_NONE } ;
 
 #define ISVALID(r,c)    ((r)>=0 && (r)<maxrows && (c)>=0 && (c)<maxcols)
 
@@ -209,7 +210,7 @@ double doindex(int minr, int minc, int maxr, int maxc, struct enode *val) {
     }
 
     if (c <= maxc && c >=minc && r <= maxr && r >=minr &&
-        (p = *ATBL(tbl, r, c)) && p->flags&is_valid) {
+        (p = *ATBL(tbl, r, c)) && p->flags & is_valid) {
         if (p->cellerror)
             cellerror = CELLINVALID;
         return p->v;
@@ -229,7 +230,7 @@ double dolookup(struct enode * val, int minr, int minc, int maxr, int maxc, int 
         cellerror = CELLOK;
         v = eval(val);
         for (r = minr, c = minc; r <= maxr && c <= maxc; r+=incr, c+=incc) {
-            if ((p = *ATBL(tbl, r, c)) && p->flags&is_valid) {
+            if ((p = *ATBL(tbl, r, c)) && p->flags & is_valid) {
                 if (p->v <= v) {
                     fndr = incc ? (minr + offset) : r;
                     fndc = incr ? (minc + offset) : c;
@@ -242,7 +243,7 @@ double dolookup(struct enode * val, int minr, int minc, int maxr, int maxc, int 
                         scerror(" range specified to @[hv]lookup");
                         cellerror = CELLERROR;
                     }
-                    if (p && p->flags&is_valid) {
+                    if (p && p->flags & is_valid) {
                         if (p->cellerror)
                             cellerror = CELLINVALID;
                         ret = p->v;
@@ -270,7 +271,7 @@ double dolookup(struct enode * val, int minr, int minc, int maxr, int maxc, int 
                 }
             }
         }
-        if (p && p->flags&is_valid)
+        if (p && p->flags & is_valid)
             ret = p->v;
         scxfree(s);
     }
@@ -366,7 +367,7 @@ double doavg(int minr, int minc, int maxr, int maxc, struct enode *e) {
                 coloffset = c - minc;
             }
             if (!e || eval(e))
-                if ((p = *ATBL(tbl, r, c)) && p->flags&is_valid) {
+                if ((p = *ATBL(tbl, r, c)) && p->flags & is_valid) {
                     if (p->cellerror) cellerr = CELLINVALID;
                     v += p->v;
                     count++;
@@ -397,7 +398,7 @@ double dostddev(int minr, int minc, int maxr, int maxc, struct enode *e) {
                 coloffset = c - minc;
             }
             if (!e || eval(e))
-                if ((p = *ATBL(tbl, r, c)) && p->flags&is_valid) {
+                if ((p = *ATBL(tbl, r, c)) && p->flags & is_valid) {
                     if (p->cellerror) cellerr = CELLINVALID;
                     v = p->v;
                     lp += v*v;
@@ -428,7 +429,7 @@ double domax(int minr, int minc, int maxr, int maxc, struct enode *e) {
                 coloffset = c - minc;
             }
             if (!e || eval(e))
-                if ((p = *ATBL(tbl, r, c)) && p->flags&is_valid) {
+                if ((p = *ATBL(tbl, r, c)) && p->flags & is_valid) {
                     if (p->cellerror) cellerr = CELLINVALID;
 
                     if (! count) {
@@ -461,7 +462,7 @@ double domin(int minr, int minc, int maxr, int maxc, struct enode *e) {
                 coloffset = c - minc;
             }
             if (!e || eval(e))
-                if ((p = *ATBL(tbl, r, c)) && p->flags&is_valid) {
+                if ((p = *ATBL(tbl, r, c)) && p->flags & is_valid) {
                     if (p->cellerror) cellerr = CELLINVALID;
                     if (! count) {
                         v = p->v;
@@ -1675,12 +1676,34 @@ void mover(struct ent *d, struct ent *v1, struct ent *v2) {
 // Goto subroutines */
 void g_free() {
     switch (gs.g_type) {
-    case G_STR:
-    case G_NSTR: scxfree(gs.g_s); break;
-    default: break;
+        case G_STR:
+        case G_NSTR:
+            scxfree(gs.g_s);
+            break;
+        default:
+            break;
     }
     gs.g_type = G_NONE;
     gs.errsearch = 0;
+}
+
+void go_previous() {
+    int num = 0;
+
+    switch (gs.g_type) {
+        case G_NONE:
+            scerror("Nothing to repeat");
+            break;
+        case G_NUM:
+            num_search(gs.g_n, gs.g_row, gs.g_col, gs.g_lastrow, gs.g_lastcol, gs.errsearch, 0);
+            break;
+        case G_STR:
+            gs.g_type = G_NONE;    /* Don't free the string */
+            str_search(gs.g_s, gs.g_row, gs.g_col, gs.g_lastrow, gs.g_lastcol, num, 0);
+            break;
+        default:
+            scerror("go_previous: internal error");
+    }
 }
 
 /* repeat the last goto command */
@@ -1692,18 +1715,17 @@ void go_last() {
         scerror("Nothing to repeat");
         break;
     case G_NUM:
-        num_search(gs.g_n, gs.g_row, gs.g_col,
-        gs.g_lastrow, gs.g_lastcol, gs.errsearch);
+        num_search(gs.g_n, gs.g_row, gs.g_col, gs.g_lastrow, gs.g_lastcol, gs.errsearch, 1);
         break;
-//  case G_CELL:
-//      moveto(gs.g_row, gs.g_col, gs.g_lastrow, gs.g_lastcol, gs.strow, gs.stcol);
-//      break;
+    case G_CELL:
+        moveto(gs.g_row, gs.g_col, gs.g_lastrow, gs.g_lastcol, gs.strow, gs.stcol);
+        break;
     case G_XSTR:
     case G_NSTR:
         num++;
     case G_STR:
         gs.g_type = G_NONE;    /* Don't free the string */
-        str_search(gs.g_s, gs.g_row, gs.g_col, gs.g_lastrow, gs.g_lastcol, num);
+        str_search(gs.g_s, gs.g_row, gs.g_col, gs.g_lastrow, gs.g_lastcol, num, 1);
         break;
 
     default:
@@ -1733,11 +1755,11 @@ void moveto(int row, int col, int lastrow_, int lastcol_, int cornerrow, int cor
     //gs.strow = cornerrow;
     //gs.stcol = cornercol;
     if (cornerrow >= 0) {
-    //strow = cornerrow;
-    //stcol = cornercol;
-    gs.stflag = 1;
+        //strow = cornerrow;
+        //stcol = cornercol;
+        gs.stflag = 1;
     } else
-    gs.stflag = 0;
+        gs.stflag = 0;
 
     for (rowsinrange = 0, i = row; i <= lastrow_; i++) {
         if (row_hidden[i]) {
@@ -1762,11 +1784,13 @@ void moveto(int row, int col, int lastrow_, int lastcol_, int cornerrow, int cor
 
 /*
  * 'goto' either a given number,'error', or 'invalid' starting at (currow,curcol)
+ * flow = 1, look forward
+ * flow = 0, look backwards
  */
-void num_search(double n, int firstrow, int firstcol, int lastrow_, int lastcol_, int errsearch) {
-    register struct ent *p;
-    register int r,c;
-    int    endr, endc;
+void num_search(double n, int firstrow, int firstcol, int lastrow_, int lastcol_, int errsearch, int flow) {
+    register struct ent * p;
+    register int r, c;
+    int endr, endc;
 
     //if (!loading) remember(0);
     g_free();
@@ -1778,10 +1802,9 @@ void num_search(double n, int firstrow, int firstcol, int lastrow_, int lastcol_
     gs.g_lastcol = lastcol_;
     gs.errsearch = errsearch;
 
-    if (currow >= firstrow && currow <= lastrow_ &&
-        curcol >= firstcol && curcol <= lastcol_) {
-            endr = currow;
-            endc = curcol;
+    if (currow >= firstrow && currow <= lastrow_ && curcol >= firstcol && curcol <= lastcol_) {
+        endr = currow;
+        endc = curcol;
     } else {
         endr = lastrow_;
         endc = lastcol_;
@@ -1789,21 +1812,35 @@ void num_search(double n, int firstrow, int firstcol, int lastrow_, int lastcol_
     r = endr;
     c = endc;
     while (1) {
-        if (c < lastcol_)
-            c++;
-        else {
-            if (r < lastrow_) {
-                while (++r < lastrow_ && row_hidden[r]) /* */;
-                c = firstcol;
-            } else {
-                r = firstrow;
-                c = firstcol;
+
+        if (flow) { // search forward
+            if (c < lastcol_)
+                c++;
+            else {
+                if (r < lastrow_) {
+                    while (++r < lastrow_ && row_hidden[r]) /* */;
+                    c = firstcol;
+                } else {
+                    r = firstrow;
+                    c = firstcol;
+                }
+            }
+        } else { // search backwards
+            if (c > firstcol)
+                c--;
+            else {
+                if (r > firstrow) {
+                    while (--r > firstrow && row_hidden[r]) /* */;
+                    c = lastcol_;
+                } else {
+                    r = lastrow_;
+                    c = lastcol_;
+                }
             }
         }
+
         p = *ATBL(tbl, r, c);
-        if (!col_hidden[c] && p && (p->flags & is_valid) &&
-        (errsearch || (p->v == n)) && (!errsearch ||
-        (p->cellerror == errsearch)))    /* CELLERROR vs CELLINVALID */
+        if (! col_hidden[c] && p && (p->flags & is_valid) && (errsearch || (p->v == n)) && (! errsearch || (p->cellerror == errsearch)))    /* CELLERROR vs CELLINVALID */
             break;
         if (r == endr && c == endc) {
             if (errsearch) {
@@ -1827,9 +1864,12 @@ void num_search(double n, int firstrow, int firstcol, int lastrow_, int lastcol_
     } //else remember(1);
 }
 
-/* 'goto' a cell containing a matching string */
-void str_search(char *s, int firstrow, int firstcol, int lastrow_, int lastcol_, int num) {
-    struct ent *p;
+/* 'goto' a cell containing a matching string
+ * flow = 1, look forward
+ * flow = 0, look backwards
+ * */
+void str_search(char *s, int firstrow, int firstcol, int lastrow_, int lastcol_, int num, int flow) {
+    struct ent * p;
     int r, c;
     int endr, endc;
     char * tmp;
@@ -1882,18 +1922,35 @@ void str_search(char *s, int firstrow, int firstcol, int lastrow_, int lastcol_,
     }
     r = endr;
     c = endc;
+
     while (1) {
-       if (c < lastcol_) {
-            c++;
-        } else {
-            if (r < lastrow_) {
-                while (++r < lastrow_ && row_hidden[r]) /* */;
-                c = firstcol;
-            } else {
-                r = firstrow;
-                c = firstcol;
+
+        if (flow) { // search forward
+            if (c < lastcol_)
+                c++;
+            else {
+                if (r < lastrow_) {
+                    while (++r < lastrow_ && row_hidden[r]) /* */;
+                    c = firstcol;
+                } else {
+                    r = firstrow;
+                    c = firstcol;
+                }
+            }
+        } else { // search backwards
+            if (c > firstcol)
+                c--;
+            else {
+                if (r > firstrow) {
+                    while (--r > firstrow && row_hidden[r]) /* */;
+                    c = lastcol_;
+                } else {
+                    r = lastrow_;
+                    c = lastcol_;
+                }
             }
         }
+
         p = *ATBL(tbl, r, c);
         if (gs.g_type == G_NSTR) {
             *line = '\0';
