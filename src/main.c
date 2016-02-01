@@ -177,7 +177,8 @@ int main (int argc, char ** argv) {
         start_screen();         // Already done above
 
         // we show welcome screen if no spreadsheet was passed to SC-IM
-        if ( ! curfile[0]) {
+        // and no input was sent throw pipeline
+        if ( ! curfile[0] && ! strlen(stdin_buffer)) {
             do_welcome();
 
             // show mode and cell's details in status bar
