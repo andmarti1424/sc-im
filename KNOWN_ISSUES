@@ -7,3 +7,7 @@ This also happens in SC and has to be solved.
 Problem: Some cell equations gets messy after undo/redos.
 This fix requires implementation of Calc Chain. This will allow
 to fix this problem when UNDOing actions that change cells equations.
+
+Problem: Extended ascii chars not showing correctly.
+Compile sc-im against -lncursesw and not -lncurses.
+
