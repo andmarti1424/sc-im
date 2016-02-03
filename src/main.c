@@ -5,6 +5,7 @@
 #include <string.h>
 #include <time.h>
 #include <fcntl.h>   // for F_GETFL O_NONBLOCK F_SETFL
+#include <locale.h>
 
 #include "main.h"
 #include "shift.h"
@@ -87,6 +88,10 @@ struct history * commandline_history;
  *********************************************************************/
 int main (int argc, char ** argv) {
 
+#ifdef USELOCALE
+    setlocale(LC_ALL, "");
+#endif
+
     // set up signals so we can catch them
     signals();
 
@@ -96,7 +101,7 @@ int main (int argc, char ** argv) {
     store_default_config_values();
 
     // create command line history structure
-#if defined HISTORY_FILE
+#ifdef HISTORY_FILE
     if (! atoi(get_conf_value("nocurses"))) {
         commandline_history = (struct history *) create_history(':');
         load_history(commandline_history);
@@ -146,6 +151,7 @@ int main (int argc, char ** argv) {
             put(user_conf_d, "nocurses", "1");
         }
     }
+
 
     // load sc file
     load_sc();
@@ -279,7 +285,7 @@ void delete_structures() {
 int exit_app(int status) {
 
     // free history
-#if defined HISTORY_FILE
+#ifdef HISTORY_FILE
     if (! atoi(get_conf_value("nocurses")) && save_history(commandline_history) != 0 ) {
         scerror("Cannot save command line history");
     }
@@ -435,9 +441,9 @@ void scerror(char * s, ...) {
     va_start(args, s);
     vsprintf (t, s, args);
     if ( ! atoi(get_conf_value("nocurses"))) {
-        #ifdef USECOLORS
+#ifdef USECOLORS
         set_ucolor(input_win, &ucolors[ERROR_MSG]);
-        #endif
+#endif
         mvwprintw(input_win, 1, 0, "%s", t);
         wclrtoeol(input_win);
         wrefresh(input_win);
@@ -448,8 +454,6 @@ void scerror(char * s, ...) {
     va_end(args);
     return;
 }
-
-
 
 void scinfo(char * s, ...) {
     char t[BUFFERSIZE];
@@ -457,9 +461,9 @@ void scinfo(char * s, ...) {
     va_start(args, s);
     vsprintf (t, s, args);
     if ( ! atoi(get_conf_value("nocurses"))) {
-        #ifdef USECOLORS
+#ifdef USECOLORS
         set_ucolor(input_win, &ucolors[INFO_MSG]);
-        #endif
+#endif
         mvwprintw(input_win, 1, 0, "%s", t);
         wclrtoeol(input_win);
         wrefresh(input_win);
@@ -471,17 +475,15 @@ void scinfo(char * s, ...) {
     return;
 }
 
-
-
 void scdebug(char * s, ...) {
     char t[BUFFERSIZE];
     va_list args;
     va_start(args, s);
     vsprintf (t, s, args);
     if ( ! atoi(get_conf_value("nocurses"))) {
-        #ifdef USECOLORS
+#ifdef USECOLORS
         set_ucolor(input_win, &ucolors[INFO_MSG]);
-        #endif
+#endif
         mvwprintw(input_win, 1, 0, "%s", t);
         wclrtoeol(input_win);
         wtimeout(input_win, -1);
@@ -492,7 +494,6 @@ void scdebug(char * s, ...) {
         fprintf(fdoutput, "%s\n", t);
     } else {
         printf("%s\n", t);
-        //printf("%s", t);
     }
     va_end(args);
     return;
