@@ -263,3 +263,9 @@ void uppercase(char * sPtr) {
          *sPtr++ = toupper(*sPtr);
     }
 }
+
+int sc_isprint(int d) {
+    if ( ((d > 31) && (d < 127)) || ((d > 127) && (d < 255)) )
+        return 1;
+    return 0;
+}
