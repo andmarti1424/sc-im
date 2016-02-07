@@ -3,21 +3,19 @@
 #include "utils/string.h"
 
 
-// Funcion que determina si dentro de la lista ori
-// se encuentran los int que figuran en la lista bus
-// En caso de encontrarse, devuelve la posicion
-// dentro de la lista ori donde se encuentra.
+// Find out if the int elements in the bus list are inside the ori list
+// If so, return the ori position of it.
 
-// TODO - MEJORAR esto. Sacar dos while que arman un array a partir de un bloque
-// y hacerlo funciones separadas.
-// La logica dejarla
+// TODO - IMPROVE this. Use two while statements in order to create an array
+// from a block, and make them work separately.
+// Leave the logic unmodified
 int block_in_block (struct block * o, struct block * b) {
     int lori = get_bufsize(o);
     int lbus = get_bufsize(b);
 
     if (!lori || !lbus || lbus > lori) return -1;
 
-    // Genero arrays a partir de listas de bloques
+    // Generate arrays from two block lists
     int ori[lori];
     int bus[lbus];
 
@@ -52,10 +50,10 @@ int block_in_block (struct block * o, struct block * b) {
     return -1;
 }
 
-// Funcion que reemplaza del contenido de la lista de block "olist"
-// los nodos correspondientes a la lista in
-// con los nodos de la lista out
-// Retorna 0 en caso de exito, -1 en caso de error.
+// Replace the content of the block list "olist"
+// replace the nodes of the 'in' list
+// with the nodes of the 'out' list
+// Returns 0 on success, -1 on error.
 int replace_block_in_block (struct block * olist, struct block * in, struct block * out) {
     struct block * ori = olist;
 
@@ -67,12 +65,12 @@ int replace_block_in_block (struct block * olist, struct block * in, struct bloc
 
     //info("%d %d %d", lori, lin, lout); get_key();
 
-    // Primero borro de olist la porcion correspondiente a in
+    // Remove the 'in' part of "olist"
     int pos = block_in_block (olist, in);
-    // Borro posicion pos de la lista olist
-    while (lin--) del_buf (olist, pos); //FIXME ojo cuando pos es 0
+    // Remove the 'pos' position of the "olist" list
+    while (lin--) del_buf (olist, pos); //FIXME checkout this when 'pos' == 0
 
-    // Luego agrego los nodos de la lista out a la lista olist
+    // Then add the nodes of the 'out' list to "olist"
     while (out != NULL) {
         int e = out->value;
         addto_buf(olist, e); 
