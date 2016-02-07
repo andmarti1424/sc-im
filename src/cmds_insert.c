@@ -42,7 +42,7 @@ void do_insertmode(struct block * sb) {
     } else if (find_val(sb, OKEY_ENTER)) { // ENTER
         insert_or_edit_cell();
 
-    } else if ( strlen(inputline) < (COLS - 14) && isprint(sb->value)) { //  ESCRIBO UN NUEVO CHAR
+    } else if ( strlen(inputline) < (COLS - 14) && isprint(sb->value)) { // Write new char
         ins_in_line(sb->value);
         show_header(input_win);
 
