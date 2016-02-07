@@ -21,8 +21,7 @@ extern int curcol;
 extern char * col_hidden;
 extern char * row_hidden;
 
-// Funcion que crea un rango a partir de dos marcas
-// o bien, a partir de dos celdas
+// Create a range from either to marks or two cells
 srange * create_range(char c, char d, struct ent * tl, struct ent * br) {
     int tlrow, tlcol, brrow, brcol;
 
@@ -33,7 +32,7 @@ srange * create_range(char c, char d, struct ent * tl, struct ent * br) {
         brcol = br->col;
 
     } else {
-        // Guardo los valores sobre el nuevo rango o el reutilizado
+        // Save values upon new range
         mark * mc = get_mark(c);
         mark * md = get_mark(d);
         tlrow = mc->row < md->row ? mc->row : md->row;
@@ -52,10 +51,10 @@ srange * create_range(char c, char d, struct ent * tl, struct ent * br) {
         return NULL;
     }
 
-    // Si el rango ya existe, y la creacion era por marca, lo utilizo
+    // If the range already exists, and using marks creation, use it
     srange * exists_range = (c == '\0') && (d == '\0') ? NULL : get_range_by_marks (c, d);
 
-    // Si no existe el rango, lo creo
+    // If it doesn't exist, create it
     srange * r = exists_range != NULL ? exists_range : (srange *) malloc (sizeof(srange));
 
     r->tlrow = tlrow;
@@ -85,12 +84,12 @@ srange * create_range(char c, char d, struct ent * tl, struct ent * br) {
     return r;
 }
 
-// Funcion que deselecciona todos los rangos grabados
+// Deselect recorded ranges
 void unselect_ranges() {
     srange * r = ranges;
     while (r != NULL) {
-        //Descomentar si se desea que currow y curcol se restablezcan
-        //a lo que estaban antes de que se cree el rango
+        // Uncomment this to restore 'currow' and 'curcol' to the position
+        // before creating the range
         //if (r->selected) {
         //    currow = r->orig_row;
         //    curcol = r->orig_col;
@@ -98,19 +97,18 @@ void unselect_ranges() {
 
         if (r->selected) {
             r->selected = 0;
-            break; // agregado el día 16/06/2014
+            break;
         }
         r = r->pnext;
     }
 }
 
-// Funcion que devuelve un rango de la lista de rangos a partir de la posicion
-// pasada como parametro
+// Returns a range from the range list on POS
 srange * get_range_by_pos(int pos) {
     return (ranges + pos); 
 }
 
-// Funcion que devuelve el rango seleccionado si es que existe
+// Return the select range if any
 srange * get_selected_range() {
     srange * s = ranges;
     while (s != NULL) {
@@ -120,8 +118,7 @@ srange * get_selected_range() {
     return NULL;
 }
 
-// Funcion que verifica si hay un rango seleccionado
-// returns position in list if found, -1 otherwise
+// Returns the position of the select range if any, -1 otherwise
 int is_range_selected() {
     srange * r = ranges;
     int f = 0;
@@ -133,7 +130,7 @@ int is_range_selected() {
     return -1;
 }
 
-// Funcion que elimina todos los rangos grabados y libera la memoria asignada
+// Remove all recorded ranges and free the corresponding  memory
 void free_ranges () {
     srange * r = ranges;
     srange * e = r;
@@ -146,22 +143,22 @@ void free_ranges () {
     return;
 }
 
-// Funcion que elimina rangos que usa una marca y libera la memoria asignada
+// Remove ranges by mark C, and free corresponding memory
 void del_ranges_by_mark (char c) {
     srange * r = ranges;
     srange * ant;
 
-    // Si la lista de rangos está vacía
+    // If range list is empty
     if (!r) return;
 
-    // Si el nodo a eliminar es el primero
+    // If target node is the first one
     if ( ( r->marks[0] == c || r->marks[1] == c ) ) {
         ranges = r->pnext;
         free(r);
         return;
     }
 
-    // Si el nodo a eliminar está entremedio en la lista
+    // If the target node is in the middle of the list
     ant = r;
     r = r->pnext;
     while (r != NULL) {
@@ -178,7 +175,7 @@ void del_ranges_by_mark (char c) {
     return;
 }
 
-// Funcion que retorna el rango que fue creado con dos marcas
+// Returns the range created by two marks
 srange * get_range_by_marks (char c, char d) {
     srange * r = ranges;
 
@@ -325,7 +322,7 @@ void del_range(struct ent * left, struct ent * right) {
     modflg++;
 }
 
-void clean_range() { // usado en erasedb
+void clean_range() { // Used in 'erasedb'
     register struct range *r;
     register struct range *nextr;
 
@@ -340,7 +337,7 @@ void clean_range() { // usado en erasedb
     }
 }
 
-// IMPORTANTE
+// IMPORTANT
 int find_range(char * name, int len, struct ent * lmatch, struct ent * rmatch, struct range ** rng) {
     struct range * r;
 
