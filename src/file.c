@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <curses.h>
-#include <sys/wait.h> // for wait
+#include <sys/wait.h>
 
 #include "conf.h"
 #include "maps.h"
@@ -22,8 +22,8 @@
 #include "utils/string.h"
 #include "utils/dictionary.h"
 #include "cmds_edit.h"
-#include "color.h"   // for set_ucolor
-#include "xmalloc.h" // for scxfree
+#include "color.h"
+#include "xmalloc.h"
 #include "y.tab.h"
 #include "xlsx.h"
 #include "xls.h"
@@ -156,8 +156,8 @@ int savefile() {
     return 0;
 }
 
-// Funcion que graba un archivo
-// recibe un rango como parametros y un nombre de archivo a generar
+// Write a file
+// receives parameter range and file name
 int writefile(char * fname, int r0, int c0, int rn, int cn) {
     register FILE *f;
     char save[PATHLEN];
@@ -737,7 +737,7 @@ void print_options(FILE *f) {
 }
 
 
-// Importación de CSV a SC
+// Import: CSV to SC
 int import_csv(char * fname, char d) {
 
     register FILE * f;
@@ -760,7 +760,7 @@ int import_csv(char * fname, char d) {
     }
     loading = 1;
 
-    // recorro archivo csv
+    // CSV file traversing
     while ( ! feof(f) && (fgets(line_in, sizeof(line_in), f) != NULL) ) {
         // this hack is for importing file that have DOS eol
         int l = strlen(line_in);
@@ -770,7 +770,7 @@ int import_csv(char * fname, char d) {
                 break;
             }
 
-        // rompo la cadena por delimitador
+        // Split string using the delimiter
         token = xstrtok(line_in, delim);
         c = 0;
 
@@ -788,7 +788,7 @@ int import_csv(char * fname, char d) {
                     continue;
                 }
             }
-            if (quote) { // elimino comillas si vengo de quote
+            if (quote) { // Remove quotes
                 del_char(token, 0);
                 del_char(token, strlen(token)-1);
             }
@@ -829,8 +829,7 @@ int import_csv(char * fname, char d) {
     return 0;
 }
 
-// Exportación a CSV y TAB
-
+// Export: to CSV and TAB
 void do_export(int r0, int c0, int rn, int cn) {
     int force_rewrite = 0;
     char type_export[4] = "";
@@ -838,24 +837,24 @@ void do_export(int r0, int c0, int rn, int cn) {
     char linea[BUFFERSIZE];
 
     if (inputline[1] == '!') force_rewrite = 1;
-    strcpy(linea, inputline); // copio a una nueva variable para no afectar el historial de comandos
-    del_range_chars(linea, 0, 1 + force_rewrite); // elimino 'e ' o 'e! ' del inputline
+    strcpy(linea, inputline); // Use new variable to keep command history untouched
+    del_range_chars(linea, 0, 1 + force_rewrite); // Remove 'e' or 'e!' from inputline
 
-    // obtengo el tipo de formato al cual se exportará la planilla
+    // Get format to export
     if (str_in_str(linea, "csv") == 0) {
         strcpy(type_export, "csv");
     } else if (str_in_str(linea, "tab") == 0) {
         strcpy(type_export, "tab");
     }
 
-    // luego obtengo la ruta y denominación del archivo a grabar.
-    // si se ingresa una como parametro, se la toma.
+    // Get route and file name to write.
+    // Use parameter if any.
     if (strlen(linea) > 4) {   // 'csv '
-        del_range_chars(linea, 0, 3); // elimino 'csv '
+        del_range_chars(linea, 0, 3); // Remove 'csv'
         strcpy(ruta, linea);
 
-    // si no se ingresa una, se toma el nombre de curfile y se le agrega el tipo de extensión (csv o tab)
-    // se verifica si el nombre actual termina con ".sc" y se lo quita si es necesario.
+    // Use curfile name and '.csv' o '.tab' extension
+    // Remove current '.sc' extension if necessary
     } else if (curfile[0]) {
         strcpy(ruta, curfile);
         char * ext = strrchr(ruta, '.');
@@ -872,7 +871,7 @@ void do_export(int r0, int c0, int rn, int cn) {
         return;
     }
 
-    // llamo a las rutinas de exportacion
+    // Call export routines
     if (strcmp(type_export, "csv") == 0) {
         export_delim(ruta, ',', r0, c0, rn, cn);
     } if (strcmp(type_export, "tab") == 0) {
@@ -880,7 +879,7 @@ void do_export(int r0, int c0, int rn, int cn) {
     }
 }
 
-// fname indica la ruta y denominación del archivo
+// FNAME: route and name of file
 void export_delim(char * fname, char coldelim, int r0, int c0, int rn, int cn) {
     FILE *f;
     int row, col;
@@ -907,10 +906,10 @@ void export_delim(char * fname, char coldelim, int r0, int c0, int rn, int cn) {
                         (void) fprintf (f, "%*s", fwidth[col], ((*pp)->cellerror == CELLERROR ? "ERROR" : "INVALID"));
                     } else if ((*pp)->format) {
                         char field[FBUFLEN];
-                        if (*((*pp)->format) == 'd') {  // formato fecha
+                        if (*((*pp)->format) == 'd') {  // Date format
                             time_t v = (time_t) ((*pp)->v);
                             strftime(field, sizeof(field), ((*pp)->format)+1, localtime(&v));
-                        } else {                        // formato numerico
+                        } else {                        // Numeric format
                             format((*pp)->format, precision[col], (*pp)->v, field, sizeof(field));
                         }
                         ltrim(field, ' ');
