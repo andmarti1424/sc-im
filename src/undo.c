@@ -1,25 +1,24 @@
 #ifdef UNDO
 /*
 ----------------------------------------------------------------------------------------
-El UNDO y REDO funciona con una lista de estructuras de tipo 'struct undo'.
-Las mismas contienen
-      p_ant: puntero a otra estructura de tipo 'struct undo'. Si es NULL, indica que este nodo
-             representa el primer cambio luego de cargada la planilla.
-      struct ent * added: lista de ents agregados por el cambio
-      struct ent * removed: lista de ents eliminados por el cambio
-      struct undo_range_shift * range_shift: un rango que sufre un desplazamiento por el cambio
-      row_hidded: lista de enteros (int *) que representan filas que se ocultan en pantalla
-      row_showed: lista de enteros (int *) que representan filas que se muestran en pantalla
-      col_hidded: lista de enteros (int *) que representan columnas que se ocultan en pantalla
-      col_showed: lista de enteros (int *) que representan columnas que se muestran en pantalla
-             NOTE: en la primera posición de las listas se guarda la (cantidad de elementos - 1) que tiene la lista
-      p_sig: puntero a otra estructura de tipo 'struct undo'. Si es NULL, indica que este nodo
-             representa el último cambio, y no hay ningun cambio posterior.
+UNDO and REDO features works with a 'undo' struct list.
+Which contain:
+      p_ant: pointer to 'undo' struct. If NULL, this node is the first change
+             for the session.
+      struct ent * added: 'ent' elements modified
+      struct ent * removed: 'ent' elements removed
+      struct undo_range_shift * range_shift: range shifted by change
+      row_hidded: integers list (int *) hidden rows
+      row_showed: integers list (int *) visible rows
+      col_hidded: integers list (int *) hidden columns
+      col_showed: integers list (int *) visible columns
+             NOTE: the first position of the list contains (number of elements - 1) in the list
+      p_sig: pointer to 'undo' struct, If NULL, this node is the last change in
+             the session
 
-Sigue un esquema de UNDO / REDO de un único nivel. Si se realiza algún cambio (C1), se hace UNDO
-y si luego se realiza otro cambio (C2) a partir de dicha posición, todas las acciones
-posteriores se eliminan.
-Esquema:
+One level UNDO/REDO scheme. A change (C1) is made, then an UNDO operation, and
+another change (C2). Orphan changes branch is removed.
+Scheme:
 
 + C1 -> + -> UNDO -
 ^                 \
@@ -30,29 +29,25 @@ Esquema:
 |
  \-> C2 --> + ...
 
-La estructura undo_shift_range contiene:
-    int delta_rows: delta de filas por el que se desplaza el rango
-    int delta_cols: delta de columnas por el que se desplaza el rango
-    int tlrow:      fila superior izquierda que define el rango sobre el que se hara el desplazamiento
-                    (tal cual se hiciera shift de un rango de celdas)
-    int tlcol:      columna superior izquierda que define el rango sobre el que se hara el desplazamiento
-                    (tal cual se hiciera shift de un rango de celdas)
-    int brrow:      fila inferior derecha que define el rango sobre el que se hara el desplazamiento
-                    (tal cual se hiciera shift de un rango de celdas)
-    int brcol:      columna inferior derecha que define el rango sobre el que se hara el desplazamiento
-                    (tal cual se hiciera shift de un rango de celdas)
+undo_shift_range struct contains:
+    int delta_rows: range shift for rows
+    int delta_cols: range shift for columns
+    int tlrow:      Upper left row of the shift
+    int tlcol:      Upper left column of the shift
+    int brrow:      Lower right row of the shift
+    int brcol:      Lower right column of the shift
 
-Acciones cuyo UNDO/REDO se encuentra implementado:
-1. eliminación de contenido de celda o un rango
-2. ingreso de contenido en una celda en puntual
-3. edición de una celda en puntual
-4. change in the alignment of a range or cell
-5. paste de rango o celda
-6. shift de rango o celda con sh sj sk sl
-7. insert de row o columna
-8. delete de row o columna
-9. paste de row o columna
-10. hide / show of rows and columns
+Implemented actions for UNDO/REDO:
+1. Remove content from cell or range
+2. Input content into a cell
+3. Edit a cell
+4. Change alginment of range or cell
+5. Paste range or cell
+6. Shift range or cell with sh, sj, sk, sl
+7. Insert row or column
+8. Delete row or column
+9. Paste row or column
+10. hide/show rows and columns
 11. sort of a range
 12. change in the format of a range or cell
 13. '-' and '+' commands in normal mode
@@ -60,7 +55,7 @@ Acciones cuyo UNDO/REDO se encuentra implementado:
 15. datefmt command
 
 NOT implemented:
-1. cambio de formato de columna completa
+1. Change format of column
 2. Recover equations after redo of changes over ents that have equations on them.
 
 ----------------------------------------------------------------------------------------
@@ -80,16 +75,15 @@ NOT implemented:
 // undolist
 static struct undo * undo_list = NULL;
 
-// posición actual en lista
+// current position in the list
 static int undo_list_pos = 0;
 
-// cantidad de elementos en la lista
+// Number of elements in the list
 static int undo_list_len = 0;
 
-// variable temporal
 static struct undo undo_item;
 
-// setea en blanco el undo_item
+// Init 'unto_item'
 void create_undo_action() {
     undo_item.added       = NULL;
     undo_item.removed     = NULL;
@@ -104,9 +98,7 @@ void create_undo_action() {
     return;
 }
 
-// esta función guarda en la undolist, una copia del
-// undo_item con los datos de ents agregados o quitados
-// y de undo range shift struct
+// Save undolist, undo_item and 'ent' elements data
 void end_undo_action() {
     add_to_undolist(undo_item);
 
@@ -123,19 +115,16 @@ void end_undo_action() {
     return;
 }
 
-// Función que agrega un nodo undo a la lista undolist,
-// hace el malloc del undo struct, completa la variable
-// con el valor de la variable estatica undo_item
-// y lo agrega a la lista
+// Add a undo node to the undolist
 void add_to_undolist(struct undo u) {
-        // Si no estamos al final de lista, borro desde la posicion al final.
+        // If not at the end of the list, remove from the end
         if ( undo_list != NULL && undo_list_pos != len_undo_list() )
             clear_from_current_pos();
 
         struct undo * ul = (struct undo *) malloc (sizeof(struct undo));
         ul->p_sig = NULL;
 
-        // Agrego ents
+        // Add 'ent' elements
         ul->added = u.added;
         ul->removed = u.removed;
         ul->range_shift = u.range_shift;
@@ -161,15 +150,14 @@ void add_to_undolist(struct undo u) {
     return;
 }
 
-// Funcion que libera le memoria de un nodo UNDO
-// y los subsiguientes que tenga enlazados
+// Cascade free UNDO node memory
 void free_undo_node(struct undo * ul) {
 
     struct ent * de;
     struct ent * en;
     struct undo * e;
 
-    // Borro desde posicion actual en adelante
+    // Remove from current position
     while (ul != NULL) {
         en = ul->added;
         while (en != NULL) {
@@ -187,11 +175,11 @@ void free_undo_node(struct undo * ul) {
         }
         e = ul->p_sig;
 
-        if (ul->range_shift != NULL) free(ul->range_shift); // libero memoria de undo_range_shift
-        if (ul->row_hidded  != NULL) free(ul->row_hidded);  // libero memoria de row hidded
-        if (ul->col_hidded  != NULL) free(ul->col_hidded);  // libero memoria de col hidded
-        if (ul->row_showed  != NULL) free(ul->row_showed);  // libero memoria de row showed
-        if (ul->col_showed  != NULL) free(ul->col_showed);  // libero memoria de col hidded
+        if (ul->range_shift != NULL) free(ul->range_shift);
+        if (ul->row_hidded  != NULL) free(ul->row_hidded);
+        if (ul->col_hidded  != NULL) free(ul->col_hidded);
+        if (ul->row_showed  != NULL) free(ul->row_showed);
+        if (ul->col_showed  != NULL) free(ul->col_showed);
 
         free(ul);
         undo_list_len--;
@@ -200,8 +188,7 @@ void free_undo_node(struct undo * ul) {
     return;
 }
 
-// Función que elimina de la lista undolist, los nodos que se encuentran
-// a partir de la posicion actual
+// Remove undolist, and nodes from current position
 void clear_from_current_pos() {
     if (undo_list == NULL) return;
 
@@ -217,11 +204,11 @@ void clear_from_current_pos() {
     return;
 }
 
-// Funcion que elimina todo contenido de la UNDOLIST
+// Remove undolist content
 void clear_undo_list () {
     if (undo_list == NULL) return;
 
-    // Voy al comienzo de lista
+    // Go to the beginning of the list
     while (undo_list->p_ant != NULL ) {
         undo_list = undo_list->p_ant;
     }
@@ -232,7 +219,6 @@ void clear_undo_list () {
 
     undo_list = NULL;
     undo_list_pos = 0;
-    //undo_list_len = 0; // no es necesario ya que se decrementa en free_undo_node.
 
     return;
 }
@@ -241,10 +227,8 @@ int len_undo_list() {
     return undo_list_len;
 }
 
-// esta función toma un rango de ents,
-// y crea nuevos ents (tantos, como ents dentro del rango especificado).
-// luego copia en los nuevos ents el contenido de los originales
-// y los guarda en la lista added o removed del undo_item, segun el char type.
+// Create new 'ent' elements from a range and copy the content of the original
+// ones
 void copy_to_undostruct (int row_desde, int col_desde, int row_hasta, int col_hasta, char type) {
     int c, r;
     for (r = row_desde; r <= row_hasta; r++)
@@ -253,7 +237,7 @@ void copy_to_undostruct (int row_desde, int col_desde, int row_hasta, int col_ha
             cleanent(e);
             copyent(e, lookat(r, c), 0, 0, 0, 0, r, c, 0);
 
-            // agrego ent al comienzo
+            // Append 'ent' element at the beginning
             if (type == 'a') {
                 e->next = undo_item.added;
                 undo_item.added = e;
@@ -266,9 +250,7 @@ void copy_to_undostruct (int row_desde, int col_desde, int row_hasta, int col_ha
     return;
 }
 
-// esta funcion toma un rango y un delta de filas y columnas y lo guarda en la struct de undo
-// se utiliza para que cuando se hace UNDO o REDO, se desplace un rango sin necesidad de duplicar
-// todos los ents de ese rango cuando solo se modifica su ubicación.
+// Save undo range shift by a range
 void save_undo_range_shift(int delta_rows, int delta_cols, int tlrow, int tlcol, int brrow, int brcol) {
     struct undo_range_shift * urs = (struct undo_range_shift *) malloc( (unsigned) sizeof(struct undo_range_shift ) );
     urs->delta_rows = delta_rows;
@@ -346,9 +328,7 @@ void undo_hide_show(int row, int col, char type, int arg) {
     return;
 }
 
-// Funcion que realiza un UNDO
-// En esta función se desplaza un rango de undo shift range a la posición original, en caso de existir,
-// se agregan los ent de removed y se borran los de added
+// Make UNDO operation and take action over undo/redo structs
 void do_undo() {
     if (undo_list == NULL || undo_list_pos == 0) {
         scerror("Not UNDO's left");
@@ -362,7 +342,7 @@ void do_undo() {
 
     struct undo * ul = undo_list;
 
-    // realizo el undo shift range, en caso de existir
+    // Make undo shift, if any
     if (ul->range_shift != NULL) {
         // fix marks
         if (ul->range_shift->delta_rows > 0)      // sj
@@ -378,7 +358,7 @@ void do_undo() {
             ul->range_shift->tlrow, ul->range_shift->tlcol, ul->range_shift->brrow, ul->range_shift->brcol);
     }
 
-    // Borro los ent de added
+    // Remove 'ent' elements
     struct ent * i = ul->added;
     while (i != NULL) {
         struct ent * pp = *ATBL(tbl, i->row, i->col);
@@ -387,13 +367,13 @@ void do_undo() {
         i = i->next;
     }
 
-    // Cambio posición del cursor
+    // Change cursor position
     //if (ul->removed != NULL) {
     //    currow = ul->removed->row;
     //    curcol = ul->removed->col;
     //}
 
-    // Agrego los ent de removed.
+    // Append 'ent' elements from the removed ones
     struct ent * j = ul->removed;
     while (j != NULL) {
         struct ent * e_now = lookat(j->row, j->col);
@@ -401,8 +381,8 @@ void do_undo() {
         j = j->next;
     }
 
-    // muestro cols y rows que habian sido ocultadas
-    // oculto cols y rows que habian sido mostradas
+    // Show hidden cols and rows
+    // Hide visible cols and rows
     if (ul->col_hidded != NULL) {
         int * pd = ul->col_hidded;
         int left = *(pd++);
@@ -432,7 +412,7 @@ void do_undo() {
         }
     }
 
-    // Muevo el cursor a posición original
+    // Restores cursor position
     currow = ori_currow;
     curcol = ori_curcol;
 
@@ -446,9 +426,7 @@ void do_undo() {
     return;
 }
 
-// Función que realiza un REDO
-// En esta función se desplaza un rango de undo shift range en caso de existir,
-// se agregan los ent de added y se borran los de removed
+// Make REDO, and take action over undo/redo structs
 void do_redo() {
     if ( undo_list == NULL || undo_list_pos == len_undo_list()  ) {
         scerror("Not REDO's left");
@@ -465,7 +443,7 @@ void do_redo() {
 
     struct undo * ul = undo_list;
 
-    // realizo el undo shift range, en caso de existir
+    // Make undo shift, if any
     if (ul->range_shift != NULL) {
         // fix marks
         if (ul->range_shift->delta_rows > 0)      // sj
@@ -481,7 +459,7 @@ void do_redo() {
             ul->range_shift->tlrow, ul->range_shift->tlcol, ul->range_shift->brrow, ul->range_shift->brcol);
     }
 
-    // Borro los ent de removed
+    // Remove 'ent' elements
     struct ent * i = ul->removed;
     while (i != NULL) {
         struct ent * pp = *ATBL(tbl, i->row, i->col);
@@ -490,13 +468,13 @@ void do_redo() {
         i = i->next;
     }
 
-    // Cambio posición del cursor
+    // Change cursor position
     //if (ul->p_sig != NULL && ul->p_sig->removed != NULL) {
     //    currow = ul->p_sig->removed->row;
     //    curcol = ul->p_sig->removed->col;
     //}
 
-    // Agrego los ent de added
+    // Append 'ent' elements
     struct ent * j = ul->added;
     while (j != NULL) {
         struct ent * e_now = lookat(j->row, j->col);
@@ -504,8 +482,8 @@ void do_redo() {
         j = j->next;
     }
 
-    // oculto cols y rows que habian sido ocultadas originalmente
-    // muestro cols y rows que habian sido mostradas originalmente
+    // Hide previously hidden cols and rows
+    // Show previously visible cols and rows
     if (ul->col_hidded != NULL) {
         int * pd = ul->col_hidded;
         int left = *(pd++);
@@ -535,7 +513,7 @@ void do_redo() {
         }
     }
 
-    // Muevo el cursor a posición original
+    // Restores cursor position
     currow = ori_currow;
     curcol = ori_curcol;
 
