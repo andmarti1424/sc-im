@@ -1,5 +1,9 @@
 /*
+<<<<<<< HEAD
+    main_win: window that loads the spreadsheet
+=======
     main_win: template loader window
+>>>>>>> 0d90e395cd22ecde363995846dc2bbeba6fadbad
     input_win: stdin and state bar window
 */
 #include <string.h>

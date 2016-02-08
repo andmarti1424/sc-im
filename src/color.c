@@ -96,7 +96,11 @@ void start_default_ucolors() {
     ucolors[ CELL_NEGATIVE   ].fg = GREEN;
     ucolors[ CELL_NEGATIVE   ].bg = BLACK;
 
+<<<<<<< HEAD
+    // Initialize all possible 64 init pairs
+=======
     // Initialize all possible 64 int pairs
+>>>>>>> 0d90e395cd22ecde363995846dc2bbeba6fadbad
     for (i=0; i < 8; i++)      // fg
         for (j=0; j < 8; j++)  // bg
             init_pair( (i*8) + j + 1, i, j); // i is fg and j is bg

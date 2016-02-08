@@ -1,5 +1,12 @@
+<<<<<<< HEAD
+// Yanklist doesn't keep references to 'ent' elements, it creates new nodes.
+// the yanklist is constantly cleaned out.
+// Ex.: When removing 'ent' elements with `dc`, the original ones are removed
+// and new elements are created in the yanklist.
+=======
 // Yanklist doesn't keep references to 'ent' elements, it create new ones.
 // When removing 'ent' elements, new entries in yanklist are created.
+>>>>>>> 0d90e395cd22ecde363995846dc2bbeba6fadbad
 // Important: each 'ent' element should keep a row and col.
 
 #include "sc.h"
@@ -17,7 +24,11 @@ extern struct ent * back_row(int arg);
 extern struct ent * forw_col(int arg);
 extern struct ent * back_col(int arg);
 
+<<<<<<< HEAD
+int yank_arg;                 // number of rows and columns yanked. Used for commands like `4yr`
+=======
 int yank_arg;                 // number of rows and columns tanked
+>>>>>>> 0d90e395cd22ecde363995846dc2bbeba6fadbad
 char type_of_yank;            // yank type. c=col, r=row, a=range, e=cell, '\0'=no yanking
 static struct ent * yanklist;
 
@@ -30,7 +41,11 @@ struct ent * get_yanklist() {
     return yanklist;
 }
 
+<<<<<<< HEAD
+// Remove yank 'ent' elements and free corresponding memory
+=======
 // Remove yanks and free memory
+>>>>>>> 0d90e395cd22ecde363995846dc2bbeba6fadbad
 void free_yanklist () {
     if (yanklist == NULL) return;
     int c;
@@ -58,7 +73,11 @@ void free_yanklist () {
     return;
 }
 
+<<<<<<< HEAD
+// Count and return number of entries in the yanklist
+=======
 // Return number of entries in the yanklist
+>>>>>>> 0d90e395cd22ecde363995846dc2bbeba6fadbad
 int count_yank_ents() {
     int i = 0;
 
@@ -109,8 +128,14 @@ void add_ent_to_yanklist(struct ent * item) {
 }
 
 // yank a range of ents
+<<<<<<< HEAD
+// ARG: number of rows or columns yanked. Used in commands like `4yr`
+// TYPE: yank type. c=col, r=row, a=range, e=cell, '\0'=no yanking
+// This two args are used for pasting.
+=======
 // ARG: number of rows or columns yanked
 // TYPE: yank type
+>>>>>>> 0d90e395cd22ecde363995846dc2bbeba6fadbad
 void yank_area(int tlrow, int tlcol, int brrow, int brcol, char type, int arg) {
     int r,c;
     free_yanklist();
@@ -121,7 +146,11 @@ void yank_area(int tlrow, int tlcol, int brrow, int brcol, char type, int arg) {
         for (c = tlcol; c <= brcol; c++) {
             struct ent * elm = *ATBL(tbl, r, c);
 
+<<<<<<< HEAD
+            // Important: each 'ent' element keeps the corresponding row and col
+=======
             // Importante: each 'ent' element keeps a row and col
+>>>>>>> 0d90e395cd22ecde363995846dc2bbeba6fadbad
             if (elm != NULL) add_ent_to_yanklist(elm);
         }
     return;
@@ -136,7 +165,12 @@ void yank_area(int tlrow, int tlcol, int brrow, int brcol, char type, int arg) {
 // diffc: diff between current cols and the yanked 'ent'
 // When sorting, row and col values can vary from yank to paste time, so diffr
 // should be zero.
+<<<<<<< HEAD
+// When implementing column sorting, diffc should be zero as well!
+// type indicates if pasting format only, value only or the whole content
+=======
 // diffc should be zero when sorting columns as well
+>>>>>>> 0d90e395cd22ecde363995846dc2bbeba6fadbad
 // returns -1 if locked cells are found. 0 otherwise.
 int paste_yanked_ents(int above, int type_paste) {
     if (! count_yank_ents()) return 0;

@@ -1,6 +1,25 @@
 #ifdef UNDO
 /*
 ----------------------------------------------------------------------------------------
+<<<<<<< HEAD
+UNDO and REDO features works with an 'undo' struct list.
+Which contain:
+      p_ant: pointer to 'undo' struct. If NULL, this node is the first change
+             for the session.
+      struct ent * added: 'ent' elements added by the change
+      struct ent * removed: 'ent' elements removed by the change
+      struct undo_range_shift * range_shift: range shifted by change
+      row_hidded: integers list (int *) hidden rows on screen
+      row_showed: integers list (int *) visible rows on screen
+      col_hidded: integers list (int *) hidden columns on screen
+      col_showed: integers list (int *) visible columns on screen
+             NOTE: the first position of the lists contains (number of elements - 1) in the list
+      p_sig: pointer to 'undo' struct, If NULL, this node is the last change in
+             the session.
+
+Follows one level UNDO/REDO scheme. A change (C1) is made, then an UNDO operation, and
+another change (C2). From there later changes are removed.
+=======
 UNDO and REDO features works with a 'undo' struct list.
 Which contain:
       p_ant: pointer to 'undo' struct. If NULL, this node is the first change
@@ -18,6 +37,7 @@ Which contain:
 
 One level UNDO/REDO scheme. A change (C1) is made, then an UNDO operation, and
 another change (C2). Orphan changes branch is removed.
+>>>>>>> 0d90e395cd22ecde363995846dc2bbeba6fadbad
 Scheme:
 
 + C1 -> + -> UNDO -
@@ -30,32 +50,59 @@ Scheme:
  \-> C2 --> + ...
 
 undo_shift_range struct contains:
+<<<<<<< HEAD
+    int delta_rows: delta rows for the range shift
+    int delta_cols: delta columns for the range shift
+    int tlrow:      Upper left row defining the range of the shift
+                    (As if a cell range shift is made)
+    int tlcol:      Upper left column defining the range of the shift
+                    (As if a cell range shift is made)
+    int brrow:      Lower right row defining the range of the shift
+                    (As if a cell range shift is made)
+    int brcol:      Lower right column defining the range of the shift
+                    (As if a cell range shift is made)
+=======
     int delta_rows: range shift for rows
     int delta_cols: range shift for columns
     int tlrow:      Upper left row of the shift
     int tlcol:      Upper left column of the shift
     int brrow:      Lower right row of the shift
     int brcol:      Lower right column of the shift
+>>>>>>> 0d90e395cd22ecde363995846dc2bbeba6fadbad
 
 Implemented actions for UNDO/REDO:
 1. Remove content from cell or range
 2. Input content into a cell
 3. Edit a cell
+<<<<<<< HEAD
+4. Change alignment of range or cell
+=======
 4. Change alginment of range or cell
+>>>>>>> 0d90e395cd22ecde363995846dc2bbeba6fadbad
 5. Paste range or cell
 6. Shift range or cell with sh, sj, sk, sl
 7. Insert row or column
 8. Delete row or column
 9. Paste row or column
+<<<<<<< HEAD
+10. Hide/show rows and columns
+11. Sort of a range
+12. Change in the format of a range or cell
+=======
 10. hide/show rows and columns
 11. sort of a range
 12. change in the format of a range or cell
+>>>>>>> 0d90e395cd22ecde363995846dc2bbeba6fadbad
 13. '-' and '+' commands in normal mode
-14. lock and unlock of cells
+14. Lock and unlock of cells
 15. datefmt command
 
 NOT implemented:
+<<<<<<< HEAD
+1. Change format of an entire column
+=======
 1. Change format of column
+>>>>>>> 0d90e395cd22ecde363995846dc2bbeba6fadbad
 2. Recover equations after redo of changes over ents that have equations on them.
 
 ----------------------------------------------------------------------------------------
@@ -81,6 +128,10 @@ static int undo_list_pos = 0;
 // Number of elements in the list
 static int undo_list_len = 0;
 
+<<<<<<< HEAD
+// Temporal variable
+=======
+>>>>>>> 0d90e395cd22ecde363995846dc2bbeba6fadbad
 static struct undo undo_item;
 
 // Init 'unto_item'
@@ -98,7 +149,12 @@ void create_undo_action() {
     return;
 }
 
+<<<<<<< HEAD
+// Save undo_item copy with 'ent' elements modified, and the undo range shift
+// struct into the undolist
+=======
 // Save undolist, undo_item and 'ent' elements data
+>>>>>>> 0d90e395cd22ecde363995846dc2bbeba6fadbad
 void end_undo_action() {
     add_to_undolist(undo_item);
 
@@ -115,7 +171,13 @@ void end_undo_action() {
     return;
 }
 
+<<<<<<< HEAD
+// Add a undo node to the undolist,
+// allocate memory for undo struct,
+// fill variable with undo_item value and append it to the list
+=======
 // Add a undo node to the undolist
+>>>>>>> 0d90e395cd22ecde363995846dc2bbeba6fadbad
 void add_to_undolist(struct undo u) {
         // If not at the end of the list, remove from the end
         if ( undo_list != NULL && undo_list_pos != len_undo_list() )
@@ -175,11 +237,19 @@ void free_undo_node(struct undo * ul) {
         }
         e = ul->p_sig;
 
+<<<<<<< HEAD
+        if (ul->range_shift != NULL) free(ul->range_shift); // Free undo_range_shift memory
+        if (ul->row_hidded  != NULL) free(ul->row_hidded); // Free hidden row memory
+        if (ul->col_hidded  != NULL) free(ul->col_hidded); // Free hidden col memory
+        if (ul->row_showed  != NULL) free(ul->row_showed); // Free showed row memory
+        if (ul->col_showed  != NULL) free(ul->col_showed); // Free showed col memory
+=======
         if (ul->range_shift != NULL) free(ul->range_shift);
         if (ul->row_hidded  != NULL) free(ul->row_hidded);
         if (ul->col_hidded  != NULL) free(ul->col_hidded);
         if (ul->row_showed  != NULL) free(ul->row_showed);
         if (ul->col_showed  != NULL) free(ul->col_showed);
+>>>>>>> 0d90e395cd22ecde363995846dc2bbeba6fadbad
 
         free(ul);
         undo_list_len--;
@@ -188,7 +258,11 @@ void free_undo_node(struct undo * ul) {
     return;
 }
 
+<<<<<<< HEAD
+// Remove nodes below the current position from the undolist
+=======
 // Remove undolist, and nodes from current position
+>>>>>>> 0d90e395cd22ecde363995846dc2bbeba6fadbad
 void clear_from_current_pos() {
     if (undo_list == NULL) return;
 
@@ -196,7 +270,7 @@ void clear_from_current_pos() {
         free_undo_node(undo_list);
         undo_list = NULL;
     } else {
-        struct undo * ul = undo_list->p_sig; // ANTERIOR
+        struct undo * ul = undo_list->p_sig; // Previous
         free_undo_node(ul);
         undo_list->p_sig = NULL;
     }
@@ -227,8 +301,15 @@ int len_undo_list() {
     return undo_list_len;
 }
 
+<<<<<<< HEAD
+// Take a range of 'ent' elements and create new ones (as many as elements
+// inside the specified range).
+// Then copy the content of the original ones to the new ones and save them into
+// the 'added' or 'removed' list of undo_item, according to the char type.
+=======
 // Create new 'ent' elements from a range and copy the content of the original
 // ones
+>>>>>>> 0d90e395cd22ecde363995846dc2bbeba6fadbad
 void copy_to_undostruct (int row_desde, int col_desde, int row_hasta, int col_hasta, char type) {
     int c, r;
     for (r = row_desde; r <= row_hasta; r++)
@@ -250,7 +331,12 @@ void copy_to_undostruct (int row_desde, int col_desde, int row_hasta, int col_ha
     return;
 }
 
+<<<<<<< HEAD
+// Takes a range, a rows and columns delta and save them in the undo struct
+// Used to shift ranges when UNDO or REDO without duplicating 'ent' elements
+=======
 // Save undo range shift by a range
+>>>>>>> 0d90e395cd22ecde363995846dc2bbeba6fadbad
 void save_undo_range_shift(int delta_rows, int delta_cols, int tlrow, int tlcol, int brrow, int brcol) {
     struct undo_range_shift * urs = (struct undo_range_shift *) malloc( (unsigned) sizeof(struct undo_range_shift ) );
     urs->delta_rows = delta_rows;
@@ -328,7 +414,13 @@ void undo_hide_show(int row, int col, char type, int arg) {
     return;
 }
 
+<<<<<<< HEAD
+// Do UNDO operation
+// Shift a range of an undo shift range to the original position, if any, append
+// 'ent' elements from 'removed' and remove those from 'added'
+=======
 // Make UNDO operation and take action over undo/redo structs
+>>>>>>> 0d90e395cd22ecde363995846dc2bbeba6fadbad
 void do_undo() {
     if (undo_list == NULL || undo_list_pos == 0) {
         scerror("Not UNDO's left");
@@ -426,7 +518,13 @@ void do_undo() {
     return;
 }
 
+<<<<<<< HEAD
+// Do REDO
+// Shift a range of an undo shift range to the original position, if any, append
+// 'ent' elements from 'added' and remove those from 'removed'
+=======
 // Make REDO, and take action over undo/redo structs
+>>>>>>> 0d90e395cd22ecde363995846dc2bbeba6fadbad
 void do_redo() {
     if ( undo_list == NULL || undo_list_pos == len_undo_list()  ) {
         scerror("Not REDO's left");
