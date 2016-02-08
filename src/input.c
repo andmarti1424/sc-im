@@ -2,13 +2,13 @@
 #include <string.h>
 #include <ctype.h>   // for isdigit
 #include <curses.h>
-#include <stdlib.h> // for free
+#include <stdlib.h>
 
 #include "screen.h"
 #include "maps.h"
 #include "cmds.h"
 #include "history.h"
-#include "conf.h"   // for config values
+#include "conf.h"
 #include "utils/string.h"
 #include "cmds_visual.h"
 #include "buffer.h"
@@ -19,13 +19,11 @@ int cmd_multiplier = 0;    // Multiplier
 int cmd_pending = 0;       // Command pending
 int shall_quit;            // Break loop if ESC key is pressed
 
-/* Función que lee de stdin esperando por un comando valido.
-   Detalles: Lee caracteres de stdin y los copia a un buffer
-   de entrada al sistema. A medida que se llena, se verifica
-   si se forma un comando valido. En caso de encontrarlo,
-   lo maneja segun corresponda, delegandolo a una funcion
-   especifica por cada modo. Luego de un timeout, si no se
-   obtiene un comando valido, se hace flush del buffer.
+
+/* Reads stdin for a valid command.
+ * Details: Read characters from stdin to a input buffer.
+ * When filled up, validate the command and call the appropriate handler.
+ * When a timeout is reached, flush the buffer.
 */
 void handle_input(struct block * buffer) {
 
@@ -39,27 +37,24 @@ void handle_input(struct block * buffer) {
     cmd_multiplier = 0;
     cmd_pending = 0;
 
-    // Mientras no tenga un comando y no se supere el timeout
     while ( ! has_cmd(buffer, msec) && msec <= CMDTIMEOUT ) {
 
-            // if command pending, refresco solo el ef. multiplicador y cmd pending
+            // if command pending, refresh 'ef' only. Multiplier and cmd pending
             if (cmd_pending) {
                 print_mult_pend(input_win);
                 wrefresh(input_win);
             }
 
-            // Modifico el estado del cursor de acuerdo
-            // al modo actual en el cual se está operando
+            // Modify cursor state according to the current mode
             handle_cursor();
 
-            // Leo un nuevo caracter desde stdin
+            // Read new character from stdin
             if ( (d = wgetch(input_win)) == OKEY_ESC) {
                 break_waitcmd_loop(buffer);
                 return;
             }
 
-            // Manejo el efecto multiplicador de un comando
-            // para el modo NORMAL.
+            // Handle multiplier of commands form NORMAL mode.
             if ( d != -1 && isdigit(d)
                && ( buffer->value == '\0' || isdigit((char) buffer->value))
                && ( curmode == NORMAL_MODE || curmode == VISUAL_MODE || curmode == EDIT_MODE )
@@ -79,16 +74,16 @@ void handle_input(struct block * buffer) {
                     continue;
             }
 
-            // Actualizo time stamp start para resetear el timeout en cada ciclo
-            // (siempre que el modo sea COMMAND, INSERT o EDIT) o bien con cada
-            // entrada del usuario
+            // Update time stap to reset timeout after each loop
+            // (Only if current mode is COMMAND, INSERT or EDIT) and for each
+            // user input as well.
             fix_timeout(&start_tv);
 
-            // Se ha ingresado un caracter especial: BS TAB ENTER HOME END DEL PGUP PGDOWN
-            // o se ha ingresado un caracter alfanumerico
+            // Handle special characters input: BS TAG ENTER HOME END DEL PGUP
+            // PGDOWN and alphanumeric characters
             if (is_idchar(d) || d != -1) {
-                // Si estoy en modo normal, visual o de edición, cambio el caracter de esquina superior
-                // izquierda a "en espera de finalizacion de comando"
+                // If in NORMAL, VISUAL or EDITION mode , change top left corner
+                // indicator
                 if ( (curmode == NORMAL_MODE && d >= ' ') ||
                      (curmode == EDIT_MODE   && d >= ' ') ||
                      (curmode == VISUAL_MODE && d >= ' ') ) {
@@ -97,7 +92,7 @@ void handle_input(struct block * buffer) {
 
                 addto_buf(buffer, d);
 
-                //Reemplazo mapeos del buffer
+                // Replace maps in buffer
                 replace_maps(buffer);
 
             }
@@ -107,35 +102,34 @@ void handle_input(struct block * buffer) {
                    (m_tv.tv_usec - start_tv.tv_usec) / 1000L;
     }
 
-    // timeout. no se ha completado un comando.
+    // timeout. Command incomplete
     if (msec >= CMDTIMEOUT) {
 
-        // Ya no espero por un comando. Saco flag de pantalla si estaba.
+        // No longer wait for a command, set flag.
         cmd_pending = 0;
 
-        // Reseteo el efecto multiplicador
+        // Reset multiplier
         cmd_multiplier = 0;
 
-        //limpio segunda linea
-        //clr_header(input_win, 1); //comentado el 22/06/2014
+        // Clean second line
+        //clr_header(input_win, 1); // commented on 22/06/2014
 
-    // Si llego hasta aqui es porque debo ejecutar un comando o un mapeo
+    // Execute command or mapping
     } else {
 
-        cmd_pending = 0; // Ya no espero por un comando. Saco flag de pantalla.
-        //if (curmode == NORMAL_MODE) show_header(input_win); linea comentada el 08/06
+        cmd_pending = 0;
+        //if (curmode == NORMAL_MODE) show_header(input_win); commented on 08/06
 
-        //limpio segunda linea      // agregado el 22/06/2014
-        clr_header(input_win, 1); // agregado el 22/06/2014
+        // Clean second line
+        clr_header(input_win, 1);
 
-        // Manejo comando, repitiendolo tantas veces como el efecto multiplicador indique.
-        // Ej. Si por ej. se tipea 2k, en el buffer se graba kk.
+        // Handle command and repeat as many times as the multiplier dictates
         handle_mult( &cmd_multiplier, buffer, msec );
     }
 
-    print_mult_pend(input_win);    // refresco solo el ef. multiplicador y cmd pending
+    print_mult_pend(input_win);
 
-    // para ambos casos hago flush del buffer
+    // Flush the buffer
     flush_buf(buffer);
     return;
 }
@@ -154,25 +148,25 @@ void break_waitcmd_loop(struct block * buffer) {
 
     curmode = NORMAL_MODE;
 
-    // Ya no espero por un comando. Saco flag de pantalla si estaba.
+    // No longer wait for command. Set flag.
     cmd_pending = 0;
 
-    // Reseteo el efecto multiplicador
+    // Reset the multiplier
     cmd_multiplier = 0;
 
-    // limpio la inputline de modo insert y edit
+    // clean inputline
     inputline[0] = '\0';
 
-    flush_buf(buffer); 
-    //clr_header(input_win, 0); // comentado el 22/06/2014
-    //show_header(input_win);   // comentado el 22/06/2014
-    print_mult_pend(input_win); // agregado  el 22/06/2014 refresco solo el ef. multiplicador y cmd pending
-    update(TRUE);               // comentado el 22/06/2014
+    flush_buf(buffer);
+    //clr_header(input_win, 0);
+    //show_header(input_win);
+    print_mult_pend(input_win);
+    update(TRUE);
     return;
 }
 
-// Funcion que maneja el timeout de espera de comando dependiendo del modo actual
-// NO hay timeout para los modos COMANDO, INSERT y EDIT.
+// Handle timeout depending on the current mode
+// there is NO timeout for COMMAND, INSERT and EDIT modes.
 void fix_timeout(struct timeval * start_tv) {
     switch (curmode) {
         case COMMAND_MODE:
@@ -188,7 +182,7 @@ void fix_timeout(struct timeval * start_tv) {
 }
 
 
-// Funcion que recorre un stuffbuff y determina si en el hay un comando valido
+// Traverse 'stuffbuff' and determines if there  is a valid command
 // Ej. buffer = "diw"
 int has_cmd (struct block * buf, long timeout) {
     int len = get_bufsize(buf);
@@ -212,7 +206,7 @@ void do_insertmode(struct block * sb);
 void do_editmode(struct block * sb);
 void do_visualmode(struct block * sb);
 
-// Funcion que delega un comando para ser tratado por una funcion especifica para cada modo
+// Use specific functions for every command on each mode
 void exec_single_cmd (struct block * sb) {
     switch (curmode) {
         case NORMAL_MODE:
@@ -234,10 +228,7 @@ void exec_single_cmd (struct block * sb) {
     return;
 }
 
-// Manejo el comando final a ser ejecutado, agregando al buffer
-// el comando tantas veces como el efecto multiplicador indique.
-// Ej.: 4 en el efecto multiplicador y "j" como contenido
-// del buffer es reemplazado por "jjjj"
+// Handle the final command to be executed, using the multiplier
 void handle_mult(int * cmd_multiplier, struct block * buf, long timeout) {
     int j, k;
     struct block * b_copy = buf;
@@ -260,20 +251,18 @@ void handle_mult(int * cmd_multiplier, struct block * buf, long timeout) {
     return;
 }
 
-// Función que maneja la ejecucion de uno o mas comandos
-// que pudieran existir, uno a continuacion de otro, en un buffer
-// ej. yryr
+// Handle multiple command execution in sequence
 void exec_mult (struct block * buf, long timeout) {
     int k, res, len = get_bufsize(buf);
     if ( ! len ) return;
 
-    // Primero intento ejecutar todo el contenido del buffer
+    // Try to execute the whole buffer content
     if ((res = is_single_command(buf, timeout))) {
         if (res == EDITION_CMD) copybuffer(buf, lastcmd_buffer); // save stdin buffer content in lastcmd buffer
         //cmd_multiplier--;
         exec_single_cmd(buf);
 
-    // En caso de no poder, se recorre por bloques
+    // If not possible, traverse blockwise
     } else {
         struct block * auxb = (struct block *) create_buf();
         for (k = 0; k < len; k++) {
@@ -285,10 +274,10 @@ void exec_mult (struct block * buf, long timeout) {
                 exec_single_cmd(auxb);
                 flush_buf(auxb);
 
-                // saco de buf los primeros k valores
+                // Take the first K values from 'buf'
                 k++;
                 while ( k-- ) buf = dequeue(buf);
-                // y vuelvo a ejecutar
+                // Execute again
                 if (cmd_multiplier == 0) break;
                 exec_mult (buf, timeout);
                 break;
