@@ -168,7 +168,7 @@ int main (int argc, char ** argv) {
     fcntl(fd, F_SETFL, flags);
 
 
-    // Enable this for message debugging
+    // esto habilitarlo para debug de mensajes
     // wtimeout(input_win, 1000);
 
     // initiate gui
@@ -190,7 +190,7 @@ int main (int argc, char ** argv) {
 
     // handle input from keyboard
     buffer = (struct block *) create_buf(); // TODO: this should only take place if curses ui
-    // Enable for debugging purposes
+    // esto habilitarlo para debug
     // wtimeout(input_win, TIMEOUT_CURSES);
 
     char nocurses_buffer[BUFFERSIZE];
@@ -374,7 +374,7 @@ void signals() {
     void nopipe();
     void winchg();
 
-    //signal(SIGINT, sig_int); // FIXME - sig. Commented to reduce annoyance //while testing
+    //signal(SIGINT, sig_int); // FIXME - sig. linea se comenta porque es molesto para probar. 
     signal(SIGABRT, sig_abrt);
     signal(SIGTERM, sig_term); // kill
     signal(SIGPIPE, nopipe);

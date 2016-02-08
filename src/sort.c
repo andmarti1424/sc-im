@@ -36,7 +36,7 @@ void sortrange(struct ent * left, struct ent * right, char * criteria) {
 
     sort = (struct sortcrit *) scxmalloc((2 * sizeof(struct sortcrit)));
 
-    // Save 'ent' elements in the range to the 'rows' structure
+    // guardo en la estructura rows todos los ents del rango
     rows = (int *) scxmalloc((maxr - minr + 1) * sizeof(int));
     for (r = minr, c = 0; r <= maxr; r++, c++)
         rows[c] = r;
@@ -97,24 +97,29 @@ void sortrange(struct ent * left, struct ent * right, char * criteria) {
         }
     }
 
-    // Sort 'rows' structure
+    // realizo el proceso de ordenado dejando el resultado ordenado en la estructura rows
     qsort(rows, maxr - minr + 1, sizeof(int), compare);
 
     //currow = minr;
     //curcol = minc;
 
-    yank_area(minr, minc, maxr, maxc, 's', 1); // save yanklist in the original range
+    yank_area(minr, minc, maxr, maxc, 's', 1); // guardo en la yanklist todo el rango original
+
+    // borro el rango original. no es necesario porque se lo borra en paste_yanked_ents..
+    //erase_area(minr, minc, maxr, maxc, 1);
 
     //sync_ranges();
 
-    // Fix the 'ent' elements in the sorted range
+    // acomodo los rows de cada ent que se encontraba en el rango ordenado
+    // a partir de los que dejó qsort en la estructura rows
     int i, d, move;
     struct ent * p_aux, * yl = get_yanklist();
 
-    // Traverse 'rows' structure
+    // recorro estructura rows     0 1 2 3
     for (d = 0; d < (maxr - minr + 1); d++) {
         for (i = 0; i < (maxc - minc + 1); i++) {
             p_aux = yl;
+            // rows[d] da numeros entre minr y maxr
             move = ( rows[d] - minr) * (maxc - minc + 1) + i;
             while (move--) p_aux = p_aux->next;
             p_aux->row = minr + d;

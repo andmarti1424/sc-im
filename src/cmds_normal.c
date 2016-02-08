@@ -1,5 +1,5 @@
-#include <ctype.h>
-#include <stdlib.h> 
+#include <ctype.h>   // for isdigit
+#include <stdlib.h>  // for atoi
 #include "yank.h"
 #include "marks.h"
 #include "cmds.h"
@@ -110,7 +110,7 @@ void do_normalmode(struct block * buf) {
                 c = sr->tlcol;
                 cf = sr->brcol;
             }
-            auto_justify(c, cf, DEFWIDTH);  // auto justify columns
+            auto_justify(c, cf, DEFWIDTH);  // auto justificado de columnas
             update(TRUE);
             break;
             }

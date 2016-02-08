@@ -22,10 +22,10 @@ struct dictionary * get_d_colors_param() {
     return d_colors_param;
 }
 
-// Generate DEFAULT 'initcolor' colors
+// Funcion que genera los initcolor de colores DEFAULT
 void start_default_ucolors() {
 
-    // Initialize colors attributes
+    // Blanqueo los atributos de todos los colores
     int i, j;
     for (i=0; i< N_INIT_PAIRS; i++) {
         ucolors[ i ].bold      = 0;
@@ -36,7 +36,7 @@ void start_default_ucolors() {
         ucolors[ i ].blink     = 0;
     }
 
-    // Set some colors attributes
+    // Seteo colores y algunos atributos
     //ucolors[ DEFAULT         ].fg = WHITE;
     //ucolors[ DEFAULT         ].bg = BLACK;
     ucolors[ HEADINGS        ].fg = WHITE;
@@ -96,18 +96,14 @@ void start_default_ucolors() {
     ucolors[ CELL_NEGATIVE   ].fg = GREEN;
     ucolors[ CELL_NEGATIVE   ].bg = BLACK;
 
-<<<<<<< HEAD
-    // Initialize all possible 64 init pairs
-=======
-    // Initialize all possible 64 int pairs
->>>>>>> 0d90e395cd22ecde363995846dc2bbeba6fadbad
+    // Inicio los 64 init pairs posibles
     for (i=0; i < 8; i++)      // fg
         for (j=0; j < 8; j++)  // bg
             init_pair( (i*8) + j + 1, i, j); // i is fg and j is bg
 
 }
 
-// Set a color
+// Funcion que setea un color
 void set_ucolor(WINDOW * w, struct ucolor * uc) {
     long attr = A_NORMAL;
     if (uc->bold)      attr |= A_BOLD;
@@ -119,8 +115,10 @@ void set_ucolor(WINDOW * w, struct ucolor * uc) {
     wattrset (w, attr | COLOR_PAIR(uc->fg * 8 + uc->bg + 1));
 }
 
-// Create a dictionary that stores the correspondence between macros and key
-// values (integers) defined in '.sc' files or through the color command.
+// Funcion que crea un diccionario y guarda en el 
+// la equivalencia entre las macros y los valores
+// de las claves (enteros) que se definen en
+// los archivos .sc o a través del comando color.
 void set_colors_param_dict() {
     d_colors_param = create_dictionary();
 
@@ -189,28 +187,30 @@ void free_colors_param_dict() {
     return;
 }
 
-// Change color definition with users's one
-// STR: color definition read from '.sc' file
-// It can also be obtained at run time with the `:color str` command
+// Funcion que cambia la definicion de un color
+// por una definida por el usuario.
+// str = es la definicion que se lee del archivo .sc
+// o bien ingresada en tiempo de ejecucion a través
+// del comando :color str
 void chg_color(char * str) {
 
-    // Create key-value dictionary for the content of the string
+    // creo un diccionario para guardar las claves y valores que figuran en el string
     struct dictionary * d = create_dictionary();
 
-    // Remove quotes
+    // elimino commilas de str
     if (str[0]=='"') del_char(str, 0);
     if (str[strlen(str)-1]=='"') del_char(str, strlen(str)-1);
 
     parse_str(d, str);
 
-    // Validate we got enough keys to change a color
+    // valido que existan las minimas claves necesarias para cambiar un color
     if (get(d, "fg") == '\0' || get(d, "bg") == '\0' || get(d, "type") == '\0') {
         scerror("Color definition incomplete");
         destroy_dictionary(d);
         return;
     }
 
-    // Validate the values for those keys are correct
+    // valido tambien que los valores que tengan esas claves sean correctos
     if (
         (get(d_colors_param, get(d, "fg")) == NULL) ||
         (get(d_colors_param, get(d, "bg")) == NULL) ||
@@ -221,7 +221,7 @@ void chg_color(char * str) {
         return;
     }
 
-    // Change the color
+    // cambio el color
     int type = atoi(get(d_colors_param, get(d, "type")));
     ucolors[ type ].fg = atoi(get(d_colors_param, get(d, "fg")));
     ucolors[ type ].bg = atoi(get(d_colors_param, get(d, "bg")));
@@ -247,16 +247,16 @@ void color_cell(int r, int c, int rf, int cf, char * str) {
     }
 
     // parse detail
-    // Create key-value dictionary for the content of the string
+    // creo un diccionario para guardar las claves y valores que figuran en el string
     struct dictionary * d = create_dictionary();
 
-    // Remove quotes
+    // elimino commilas de str
     if (str[0]=='"') del_char(str, 0);
     if (str[strlen(str)-1]=='"') del_char(str, strlen(str)-1);
 
     parse_str(d, str);
 
-    // Validations
+    // validaciones
     if (
         ((get(d, "fg") != '\0' && get(d_colors_param, get(d, "fg")) == NULL) ||
         (get(d, "bg") != '\0' && get(d_colors_param, get(d, "bg")) == NULL))) {
