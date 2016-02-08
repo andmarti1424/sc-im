@@ -37,8 +37,8 @@ char * get_xlsx_string(xmlDocPtr doc, int pos) {
     father = cur_node;
     cur_node = father->xmlChildrenNode;
 
-    while (father != NULL) {  // traverse children
-        while (cur_node != NULL) {  // traverse relatives
+    while (father != NULL) {  // recorro hijos
+        while (cur_node != NULL) {  // recorro hermanos
             if ( ! xmlStrcmp(cur_node->name, (const xmlChar *) "t")
                 && cur_node->xmlChildrenNode != NULL
                 && cur_node->xmlChildrenNode->content != NULL

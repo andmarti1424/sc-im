@@ -318,7 +318,7 @@ void do_visualmode(struct block * buf) {
 
     // auto_justify
     } else if (buf->value == ctl('j')) {
-        auto_justify(r->tlcol, r->brcol, DEFWIDTH);  // auto justify columns
+        auto_justify(r->tlcol, r->brcol, DEFWIDTH);  // auto justificado de columnas
         exit_visualmode();
         curmode = NORMAL_MODE;
         clr_header(input_win, 0);

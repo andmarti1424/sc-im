@@ -98,7 +98,7 @@ static char * valid_commands[] = {
 
 void do_commandmode(struct block * sb) {
 
-    // If a visual selected range exists
+    // si hay un rango seleccionado en modo visual
     int p = is_range_selected();
     struct srange * sr = NULL;
     if (p != -1) sr = get_range_by_pos(p);
@@ -109,7 +109,7 @@ void do_commandmode(struct block * sb) {
 
 #ifdef HISTORY_FILE
         if (commandline_history->pos == 0)
-            del_char(get_line_from_history(commandline_history, commandline_history->pos), inputline_pos); // Clean history
+            del_char(get_line_from_history(commandline_history, commandline_history->pos), inputline_pos); // borro en el historial
 #endif
         show_header(input_win);
         return;
@@ -120,7 +120,7 @@ void do_commandmode(struct block * sb) {
 
 #ifdef HISTORY_FILE
         if (commandline_history->pos == 0)
-            del_char(get_line_from_history(commandline_history, commandline_history->pos), inputline_pos); // Clean history
+            del_char(get_line_from_history(commandline_history, commandline_history->pos), inputline_pos); // borro en el historial
 #endif
         show_header(input_win);
         return;
@@ -174,9 +174,9 @@ void do_commandmode(struct block * sb) {
         for(i = 0; i < strlen(cline); i++) ins_in_line(cline[i]);
 
 #ifdef HISTORY_FILE
-        if (commandline_history->pos == 0) {          // Only if editing the new command
+        if (commandline_history->pos == 0) {          // solo si edito el nuevo comando
             char * sl = get_line_from_history(commandline_history, 0);
-            strcat(sl, cline);                        // Insert into history
+            strcat(sl, cline);                        // Inserto en el historial
         }
 #endif
         show_header(input_win);
@@ -194,24 +194,24 @@ void do_commandmode(struct block * sb) {
         for (i = 0; i < strlen(cline); i++) ins_in_line(cline[i]);
 
 #ifdef HISTORY_FILE
-        if (commandline_history->pos == 0) {          // Only if editing the new command
+        if (commandline_history->pos == 0) {          // solo si edito el nuevo comando
             char * sl = get_line_from_history(commandline_history, 0);
-            strcat(sl, cline);                        // Insert into history
+            strcat(sl, cline);                        // Inserto en el historial
         }
 #endif
         show_header(input_win);
         return;
 
-    } else if (isprint(sb->value)) {       //  Write new char
+    } else if (isprint(sb->value)) {       //  ESCRIBO UN NUEVO CHAR
         ins_in_line(sb->value);
         mvwprintw(input_win, 0, 0 + rescol, ":%s", inputline);
         wmove(input_win, 0, inputline_pos + 1 + rescol);
         wrefresh(input_win);
 
 #ifdef HISTORY_FILE
-        if (commandline_history->pos == 0) {          // Only if editing the new command
+        if (commandline_history->pos == 0) {          // solo si edito el nuevo comando
             char * sl = get_line_from_history(commandline_history, 0);
-            add_char(sl, sb->value, inputline_pos-1); // Insert into history
+            add_char(sl, sb->value, inputline_pos-1); // Inserto en el historial
         }
 #endif
         return;
@@ -255,7 +255,7 @@ void do_commandmode(struct block * sb) {
             }
         }
 
-        // Restore inputline content
+        // restauro contenido de inputline
         if (i == clen) {
             //strcpy(inputline, get_line_from_history(commandline_history, 0));
             strcpy(inputline, get_curcmd());
@@ -314,7 +314,7 @@ void do_commandmode(struct block * sb) {
                 delete_structures();
                 create_structures();
                 readfile(cline, 0);
-                //EvalAll(); // is it necessary?
+                //EvalAll(); // es necesario???
                 modflg = 0;
                 update(TRUE); 
             }
@@ -327,7 +327,7 @@ void do_commandmode(struct block * sb) {
             send_to_interp(inputline); 
 
         } else if ( ! strncmp(inputline, "showrows", 8) ) {
-            if (p == -1) return; // If there is not selected range, go back.
+            if (p == -1) return; // si no hay un rango seleccionado, regreso.
             int r, arg;
             sr = get_range_by_pos(p);
             r = sr->tlrow;
@@ -369,7 +369,7 @@ void do_commandmode(struct block * sb) {
 
         } else if ( ! strncmp(inputline, "sort ", 5) ) {
             strcpy(interp_line, inputline);
-            if (p != -1) {
+            if (p != -1) { // si hay un rango seleccionado
                 char cline [BUFFERSIZE];
                 strcpy(cline, interp_line);
                 int found = str_in_str(interp_line, "\"");
@@ -401,10 +401,10 @@ void do_commandmode(struct block * sb) {
 
         } else if ( ! strncmp(inputline, "filteron", 8) ) { //FIXME
             strcpy(interp_line, inputline);
-            if ( ! strcmp(inputline, "filteron") && p == -1) { // If there is no selected range
+            if ( ! strcmp(inputline, "filteron") && p == -1) { // si no hay un rango seleccionado
                 scerror("Please specify a range or select one");
                 return;
-            } else if (p != -1) {
+            } else if (p != -1) { // si hay un rango seleccionado
                 char cline [BUFFERSIZE];
                 strcpy(cline, interp_line);
                 sprintf(interp_line, "filteron %s%d:", coltoa(sr->tlcol), sr->tlrow);

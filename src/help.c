@@ -31,7 +31,7 @@ int load_help () {
     if (! f ) f = fopen("./doc", "r");
     if (! f ) return -1;
 
-    // Calculate number of elements in long_help
+    // cuento cantidad de elementos que tendra long_help
     while ( (line = getc(f)) != -1) {
         c++;
         if (c >= COLS || line == '\n') {
@@ -44,10 +44,10 @@ int load_help () {
 
     rewind(f);
 
-    // Allocate memory for pointers and lines
+    // guardo memoria para tantos punteros como lineas
     long_help = (char **) malloc (sizeof(char *) * (count + 1));
 
-    // Load long_help
+    // cargo long_help
     char word[max_width+1];
     word[0] = '\0';
     count = 0;
