@@ -22,10 +22,10 @@ struct dictionary * get_d_colors_param() {
     return d_colors_param;
 }
 
-// Funcion que genera los initcolor de colores DEFAULT
+// Generate DEFAULT 'initcolor' colors
 void start_default_ucolors() {
 
-    // Blanqueo los atributos de todos los colores
+    // Initialize colors attributes
     int i, j;
     for (i=0; i< N_INIT_PAIRS; i++) {
         ucolors[ i ].bold      = 0;
@@ -36,7 +36,7 @@ void start_default_ucolors() {
         ucolors[ i ].blink     = 0;
     }
 
-    // Seteo colores y algunos atributos
+    // Set some colors attributes
     //ucolors[ DEFAULT         ].fg = WHITE;
     //ucolors[ DEFAULT         ].bg = BLACK;
     ucolors[ HEADINGS        ].fg = WHITE;
@@ -96,14 +96,14 @@ void start_default_ucolors() {
     ucolors[ CELL_NEGATIVE   ].fg = GREEN;
     ucolors[ CELL_NEGATIVE   ].bg = BLACK;
 
-    // Inicio los 64 init pairs posibles
+    // Initialize all possible 64 init pairs
     for (i=0; i < 8; i++)      // fg
         for (j=0; j < 8; j++)  // bg
             init_pair( (i*8) + j + 1, i, j); // i is fg and j is bg
 
 }
 
-// Funcion que setea un color
+// Set a color
 void set_ucolor(WINDOW * w, struct ucolor * uc) {
     long attr = A_NORMAL;
     if (uc->bold)      attr |= A_BOLD;
@@ -115,10 +115,8 @@ void set_ucolor(WINDOW * w, struct ucolor * uc) {
     wattrset (w, attr | COLOR_PAIR(uc->fg * 8 + uc->bg + 1));
 }
 
-// Funcion que crea un diccionario y guarda en el 
-// la equivalencia entre las macros y los valores
-// de las claves (enteros) que se definen en
-// los archivos .sc o a través del comando color.
+// Create a dictionary that stores the correspondence between macros and key
+// values (integers) defined in '.sc' files or through the color command.
 void set_colors_param_dict() {
     d_colors_param = create_dictionary();
 
@@ -187,30 +185,28 @@ void free_colors_param_dict() {
     return;
 }
 
-// Funcion que cambia la definicion de un color
-// por una definida por el usuario.
-// str = es la definicion que se lee del archivo .sc
-// o bien ingresada en tiempo de ejecucion a través
-// del comando :color str
+// Change color definition with users's one
+// STR: color definition read from '.sc' file
+// It can also be obtained at run time with the `:color str` command
 void chg_color(char * str) {
 
-    // creo un diccionario para guardar las claves y valores que figuran en el string
+    // Create key-value dictionary for the content of the string
     struct dictionary * d = create_dictionary();
 
-    // elimino commilas de str
+    // Remove quotes
     if (str[0]=='"') del_char(str, 0);
     if (str[strlen(str)-1]=='"') del_char(str, strlen(str)-1);
 
     parse_str(d, str);
 
-    // valido que existan las minimas claves necesarias para cambiar un color
+    // Validate we got enough keys to change a color
     if (get(d, "fg") == '\0' || get(d, "bg") == '\0' || get(d, "type") == '\0') {
         scerror("Color definition incomplete");
         destroy_dictionary(d);
         return;
     }
 
-    // valido tambien que los valores que tengan esas claves sean correctos
+    // Validate the values for those keys are correct
     if (
         (get(d_colors_param, get(d, "fg")) == NULL) ||
         (get(d_colors_param, get(d, "bg")) == NULL) ||
@@ -221,7 +217,7 @@ void chg_color(char * str) {
         return;
     }
 
-    // cambio el color
+    // Change the color
     int type = atoi(get(d_colors_param, get(d, "type")));
     ucolors[ type ].fg = atoi(get(d_colors_param, get(d, "fg")));
     ucolors[ type ].bg = atoi(get(d_colors_param, get(d, "bg")));
@@ -247,16 +243,16 @@ void color_cell(int r, int c, int rf, int cf, char * str) {
     }
 
     // parse detail
-    // creo un diccionario para guardar las claves y valores que figuran en el string
+    // Create key-value dictionary for the content of the string
     struct dictionary * d = create_dictionary();
 
-    // elimino commilas de str
+    // Remove quotes
     if (str[0]=='"') del_char(str, 0);
     if (str[strlen(str)-1]=='"') del_char(str, strlen(str)-1);
 
     parse_str(d, str);
 
-    // validaciones
+    // Validations
     if (
         ((get(d, "fg") != '\0' && get(d_colors_param, get(d, "fg")) == NULL) ||
         (get(d, "bg") != '\0' && get(d_colors_param, get(d, "bg")) == NULL))) {
