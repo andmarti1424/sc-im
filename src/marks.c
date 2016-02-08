@@ -23,7 +23,7 @@ struct mark * get_mark(char c) {
 }
 
 void set_range_mark(char c, struct srange * s) {
-    // Al grabar una marca borro los rangos que utilizaban esa marca !!
+    // Delete marked ranges when recording a new one with same char
     del_ranges_by_mark(c);
 
     (marks + c)->rng = s;
@@ -33,7 +33,7 @@ void set_range_mark(char c, struct srange * s) {
 }
 
 void set_cell_mark(char c, int row, int col) {
-    // Al grabar una marca borro los rangos que utilizaban esa marca !!
+    // Delete marked ranges when recording a new one with same char
     del_ranges_by_mark(c);
 
     (marks + c)->rng = NULL;

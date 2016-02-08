@@ -2,9 +2,9 @@
 #include <stdio.h>
 #include "macros.h"
 #include "screen.h"
-#include "color.h"   // for set_ucolor
+#include "color.h"
 #include "conf.h"
-#include "xmalloc.h" // for scxfree
+#include "xmalloc.h"
 #include "filter.h"
 #include "math.h"
 #include "utils/string.h"
@@ -13,7 +13,7 @@
 #include "sc.h"
 #include "cmds.h"
 
-static int howmany = 0;        // howmany filters were defined
+static int howmany = 0;        // how many filters were defined
 static int active = 0;         // indicates if those filters are applied or not
 static int * results = NULL;   // this keeps the results of the applied filters
 
@@ -88,7 +88,7 @@ void enable_filters(struct ent * left, struct ent * right) {
         }
     }
 
-    // oculto las filas que no cumplen con los filtros
+    // Hide rows that don't match with filters
     for (r = results[0]; r <= results[1]; r++) {
         row_hidden[r] = results[r-results[0]+2];
     }
@@ -101,7 +101,7 @@ void disable_filters() {
         scerror("There are no filters active");
         return;
     }
-    // oculto las filas que no cumplen con los filtros
+    // Hide rows that don't match with filters
     int r;
     for (r=results[0]; r<=results[1]; r++) {
         row_hidden[r] = 0;
