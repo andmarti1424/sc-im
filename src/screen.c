@@ -1,6 +1,6 @@
 /*
-    main_win: ventana que carga la planilla
-    input_win: ventana usada para stdin y como barra de estado
+    main_win: window that loads the spreadsheet
+    input_win: stdin and state bar window
 */
 #include <string.h>
 #include <curses.h>
@@ -50,9 +50,8 @@ void start_screen() {
             start_default_ucolors();
 
             // in case we decide to change colors
-            // esto crea un diccionario y guarda en el 
-            // la equivalencia entre las macros y los valores
-            // de las claves que se definen en los archivos .sc
+            // Create a dictionary and save equivalences between macros and
+            // values defined in '.sc' files
             set_colors_param_dict();
         }
         //wbkgd(input_win, COLOR_PAIR(DEFAULT));
@@ -80,7 +79,7 @@ void stop_screen() {
     return;
 }
 
-// pantalla de bienvenida
+// Welcome screen
 void do_welcome() {
 
     char * msg_title = "SC-IM - SpreadSheet Calculator Improvised";
@@ -115,15 +114,15 @@ void update(int header) {
     if (cmd_multiplier > 1) return;
     if (atoi(get_conf_value("nocurses"))) return;
 
-    // Limpio desde comienzo hacia to bottom
+    // Clean from top to bottom
     if (header) {
         wmove(main_win, 0, rescol);
         wclrtobot(main_win);
     }
 
-    // calculo las filas y columnas que quedan ocultas
-    //   mxcol-1 es el numero de la ultima sc_col que se ve en pantalla
-    //   mxrow-1 es el numero de la ultima sc_row que se ve en pantalla
+    // Calculate hidden rows and columns
+    //   mxcol-1: las 'sc_col' in the screen
+    //   mxrow-1: las 'sc_row' in the screen
     int off_cols = calc_offscr_sc_cols();
     int off_rows = calc_offscr_sc_rows();
     int mxcol = offscr_sc_cols + off_cols - 1;
@@ -135,8 +134,8 @@ void update(int header) {
     while (col_hidden[curcol])
         curcol++;
 
-    // Muestro en pantalla el contenido de las celdas
-    // Valores numericos, strings justificados, centrados y expresiones.
+    // Show the content of the cells
+    // Numeric values, strings.
     show_content(main_win, mxrow, mxcol);
 
     // Show sc_col headings: A, B, C, D..
@@ -145,10 +144,10 @@ void update(int header) {
     // Show sc_row headings: 0, 1, 2, 3..
     show_sc_row_headings(main_win, mxrow);
 
-    // Refresco ventanas de curses
+    // Refresh curses windows
     wrefresh(main_win);
 
-    // Muestro detalle de celda en header (primera fila)
+    // Show cell details in header (first row)
     if (header)
         show_celldetails(input_win);
 
@@ -158,7 +157,7 @@ void update(int header) {
     return;
 }
 
-// Habilito cursor y el echo dependiendo del MODO actual
+// Enable cursor and echo depending on the current mode
 void handle_cursor() {
     switch (curmode) {
         case COMMAND_MODE:
@@ -177,9 +176,9 @@ void handle_cursor() {
     return;
 }
 
-/* Funcion que imprime una cadena en pantalla, aplicando un justificado.
-El tercer parametro 0, indica un justificado a la izquierda
-El tercer parametro 1, indica un justificado a la derecha
+/* Print sting with alignment
+JUSTIF: 0 left shift
+JUSTIF: 1 right shift
 */
 void write_j(WINDOW * win, const char * word, const unsigned int row, const unsigned int justif) {
     (justif == 0) ? (wmove(win, row, 0) && wclrtoeol(win)) : wmove(win, row, COLS - strlen(word));
@@ -187,8 +186,7 @@ void write_j(WINDOW * win, const char * word, const unsigned int row, const unsi
     return;
 }
 
-// funcion que imprime en status_bar el efecto
-// multiplicador y el comando pendiente
+// Print multiplier and pending operator on the status bar
 void print_mult_pend(WINDOW * win) {
 
     if (curmode != NORMAL_MODE && curmode != VISUAL_MODE && curmode != EDIT_MODE) return;
@@ -199,7 +197,7 @@ void print_mult_pend(WINDOW * win) {
     #ifdef USECOLORS
     set_ucolor(win, &ucolors[MODE]);
     #endif
-    // Muestro efecto multiplicador y/o * de comando_pendiente
+    // Show multiplier and pending operator
     char strm[COLS];
     strm[0]='\0';
     if (cmd_multiplier > 0) sprintf(strm, "%d", cmd_multiplier);
@@ -215,12 +213,12 @@ void print_mult_pend(WINDOW * win) {
 
     mvwprintw(win, 0, 0, "%s", strm);
 
-    // vuelvo a la posicion anterior del cursor
+    // Return cursor to previous position
     wmove(win, row_orig, col_orig);
 }
 
-// Muestro primera y segunda fila (header)
-// tambien maneja posicion del cursor
+// Show first and second row (header)
+// Handle cursor position
 void show_header(WINDOW * win) {
 
     clr_header(win, 0);
@@ -228,10 +226,10 @@ void show_header(WINDOW * win) {
 
     print_mult_pend(win);
 
-    // imprimo modo
+    // Show current mode
     print_mode(win);
 
-    // imprimo texto de input
+    // Print input text
     #ifdef USECOLORS
     set_ucolor(win, &ucolors[INPUT]);
     #endif
@@ -254,7 +252,7 @@ void show_header(WINDOW * win) {
     return;
 }
 
-// Función que limpia una fila de la pantalla.
+// Clean a whole row
 void clr_header(WINDOW * win, int i) {
     int row_orig, col_orig;
     getyx(win, row_orig, col_orig);
@@ -263,14 +261,14 @@ void clr_header(WINDOW * win, int i) {
     wmove(win, i, 0);
     wclrtoeol(win);
 
-    // vuelvo a la posicion anterior del cursor
+    // Return cursor to previous position
     wmove(win, row_orig, col_orig);
 
     return;
 }
 
-// Función que imprime el modo actual en la primera fila en pantalla
-// tambien imprime el : o el submodo de insert a la izq.
+// Print current mode in the first row
+// Print ':' (colon) or submode indicator
 void print_mode(WINDOW * win) {
     unsigned int row = 0; // Print mode in first row
     char strm[22] = "";
@@ -290,9 +288,9 @@ void print_mode(WINDOW * win) {
         #ifdef USECOLORS
         set_ucolor(win, &ucolors[INPUT]);
         #endif
-        // muestro submodo de modo insert
+        // Show submode (INSERT)
         mvwprintw(win, 0, 0 + rescol, "%c", insert_edit_submode);
-        //wmove(win, 0, 1); comentado el dia 01/06
+        //wmove(win, 0, 1); commented on 01/06
 
     } else if (curmode == EDIT_MODE) {
         strcat(strm, "   -- EDIT --");
@@ -387,7 +385,7 @@ void show_sc_col_headings(WINDOW * win, int mxcol, int mxrow) {
 void show_text_content_of_cell(WINDOW * win, struct ent ** p, int row, int col, int r, int c);
 void show_numeric_content_of_cell(WINDOW * win, struct ent ** p, int col, int r, int c);
 
-// Muestra contenido de todas las celdas
+// Show the content of the cells
 void show_content(WINDOW * win, int mxrow, int mxcol) {
 
     register struct ent ** p;
@@ -476,11 +474,11 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
                continue;
             }
 
-            // si hay valor numerico
+            // If a numeric value exists
             if ( (*p)->flags & is_valid) {
                 show_numeric_content_of_cell(win, p, col, row + 1 - offscr_sc_rows - q_row_hidden, c);
 
-            // si hay solo valor de texto
+            // If only string exists
             } else if ((*p) -> label) { 
                 show_text_content_of_cell(win, p, row, col, row + 1 - offscr_sc_rows - q_row_hidden, c);
 
@@ -522,8 +520,7 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
     }
 }
 
-// funcion que agrega detalle de un ent en una cadena que recibe como parametro
-// se usa para mostrar el detalle de una celda en el input_win (funcion de debajo)
+// Add details to ENT, used for 'input_win'
 void add_cell_detail(char * d, struct ent * p1) {
     if ( ! p1 ) return;
 
@@ -561,8 +558,7 @@ void add_cell_detail(char * d, struct ent * p1) {
     }
 }
 
-// Funcion que agrega en header (la primera fila de pantalla)
-// el detalle del contenido de la celda seleccionada
+// Draw cell content detail in header
 void show_celldetails(WINDOW * win) {
     char head[FBUFLEN];
     int inputline_pos = 0;
@@ -613,11 +609,10 @@ void show_celldetails(WINDOW * win) {
 
     mvwprintw(win, 0, inputline_pos, "%s", head);
 
-    wclrtoeol(win); //linea agregada el 08/06
-    //wrefresh(win); // linea comentada el 11/01
+    wclrtoeol(win);
 }
 
-// Calculo la cantidad de filas que quedan ocultas en la parte superior de la pantalla
+// Calculate number of hide rows above
 int calc_offscr_sc_rows() {
     // pick up row counts
     int i, rows = 0, row = 0;
@@ -656,7 +651,7 @@ int calc_offscr_sc_rows() {
     return rows;
 }
 
-// Calculo la cantidad de columnas que quedan ocultas a la izquierda de la pantalla
+// Calculate number of hidden columns in the left
 int calc_offscr_sc_cols() {
     int i, cols = 0, col = 0;
     // pick up col counts
@@ -751,7 +746,7 @@ void show_text_content_of_cell(WINDOW * win, struct ent ** p, int row, int col, 
     char s[FBUFLEN] = "";
     int res = get_formated_value(p, col, s);
 
-    // si no entra en pantalla
+    // If there isn't enough space on the screen
     if (str_len > col_width) {
         sprintf(field, "%0*d", col_width, 0);
         subst(field, '0', '*');
@@ -780,7 +775,7 @@ void show_text_content_of_cell(WINDOW * win, struct ent ** p, int row, int col, 
         wclrtoeol(win);
         return;
 
-    // izquierda
+    // Left
     } else if ( (*p)->label && (*p)->flags & is_leftflush ) {
         strcpy(field, value);
         left = col_width - str_len;
@@ -792,7 +787,7 @@ void show_text_content_of_cell(WINDOW * win, struct ent ** p, int row, int col, 
         //sprintf(field + strlen(field), "%0*d", left, 0);
         //subst(field, '0', '-');
 
-    // centrado
+    // Centered
     } else if ( (*p)->label && (*p)->flags & is_label) {
         left = (col_width - str_len )/2;
         left = left < 0 ? 0 : left;
@@ -804,7 +799,7 @@ void show_text_content_of_cell(WINDOW * win, struct ent ** p, int row, int col, 
         left = left < 0 ? 0 : left;
         while (left-- && ++flen) add_char(field, ' ', flen-1);
 
-    // derecha
+    // Right
     } else if ( (*p)->label || res == 0) {
         left = col_width - str_len;
         left = left < 0 ? 0 : left;
