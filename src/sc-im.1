@@ -10,6 +10,7 @@
 sc-im \- A curses based, vim-like spreadsheet calculator
 .SH SYNOPSIS
 .B sc-im
+.RI [ OPTION ].\|.\|.\|
 .RI [ FILE ]
 .
 .SH DESCRIPTION
@@ -33,6 +34,53 @@ recalculation. Modern spreadsheet software can have multiple interacting sheets,
 and can display data either as text and numerals, or in graphical form. SC-IM
 uses ncurses for visual interface and has vim-like keybindings and some
 functional similarities with vim text editor.
+.
+.SH OPTIONS
+.SS "Input Control"
+.TP
+.IR FILE
+The input file from where to read the spreadsheet.
+
+.SS "External scripts"
+.TP
+.BR \-\^\-nocurses
+Run interactive but without ncurses interface.
+.TP
+.BR \-\^\-output=FILE
+Save the results in FILE.
+.TP
+.BR \-\^\-quit_afterload
+Quit after loading all the files.
+Useful when sending scripts to SC-IM.
+
+.SS "Other configuration variables"
+.TP
+.BR \-\^\-autocalc
+Set variable 'autocalc'. Recalculations occur automatically.
+.TP
+.BR \-\^\-numeric
+Set variable 'numeric'. A digit starts a numeric value instead of a command
+multiplier.
+.TP
+.BR \-\^\-half_page_scroll
+Set variable 'half_page_scroll'. <c-f>, <c-b> and other scroll mappings scroll
+half page instead of full page.
+.TP
+.BR \-\^\-newline_action=VAL
+Set variable 'newline_action' VAL to
+.IR j
+to move the cursor down after an entry. Set to
+.IR l
+to move the cursor right after an entry.
+.TP
+.BR \-\^\-external_functions
+Set variable 'external_functions'. Enable external functions.
+.TP
+.BR \-\^\-xlsx_readformulas
+Set variable 'xlsx_readformulas'. SC-IM will try to import formulas, rather than
+the final values of a cell.
+
+.
 .
 .SH COLOR SUPPORT
 Most terminals are able to display 256 colors these days. But some of them
@@ -145,9 +193,6 @@ to get more help
 .BR
 .
 .SH FEATURES
-Some features of
-.BR sc-im
-are:
 .BR
 .IP \[bu] 2
 UNDO / REDO
@@ -179,7 +224,7 @@ Implement external functions in the language you prefer and use them in SC-IM
 Use SC-IM as a non-interactive calculator, reading its input from a external script
 .
 .SH ABOUT THE NAME
-About the name, the idea is that the program can be identified as another
+The idea is that the program can be identified as another
 vim-like app. SC-IM stands for Spreadsheet Calculator Improvised.
 .
 .SH AUTHOR
