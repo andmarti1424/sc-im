@@ -3,7 +3,6 @@
 
 # Specify the name of the program.
 # All documentation and installation keys on this value.
-# 
 name=sc-im
 NAME=SC-IM
 SNAME := -DSNAME=\"$(name)\"
@@ -54,7 +53,8 @@ MACOSX :=
 #SIMPLE := -DSIMPLE
 
 # Set USELOCALE to use your local d_fmt for converting dates with C-d shortcut.
-# See DATES INPUT in help.
+# (See DATES INPUT in help for more details).
+# You also should set this flag if you use extended ascii chars.
 USELOCALE := -DUSELOCALE
 
 # Set this if you want SC-IM to have color support
@@ -135,7 +135,8 @@ CFLAGS := $(CFLAGS) $(USECOLORS) $(USELOCALE) $(UNDO) $(SIGVOID) $(DFLT_PAGER)
 CFLAGS := $(CFLAGS) $(IEEE_MATH) $(RINT) $(REGEX) $(LIBRARY)
 CFLAGS := $(CFLAGS) $(HELP_PATH) $(SNAME) $(NO_NOTIMEOUT) $(SIMPLE) $(XLS) $(XLSX) $(HISTORY_FILE)
 
-LDLIBS := -lm -lncurses
+LDLIBS := -lm -lncursesw
+#LDLIBS := -lm -lncurses
 #LDLIBS := -lm -lncurses -lxlsreader
 #LDLIBS := -lm -lncurses -lxlsreader -lzip -lxml2 
 

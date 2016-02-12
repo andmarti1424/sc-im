@@ -1,3 +1,9 @@
+Building SC-IM
+--------------
+Try building SC-IM linking to ncursesw library rather than ncurses library and setting the USELOCALE flag.
+This will prevent to have problems with special characters (extended ascii chars), whatever encoding you use.
+
+
 Build instructions for NetBSD
 -----------------------------
 Use gmake and bison.
