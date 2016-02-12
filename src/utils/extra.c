@@ -16,8 +16,8 @@ void nofreeNULL(void *x) {
     return;
 }
 
-// devuelve el nombre de una celda, a partir del numero de row y col
-// ej D4.
+// Returns the ROW/COL cell name
+// ex.: D4.
 char * v_name(int row, int col) {
     struct ent *v;
     struct range *r;
@@ -32,8 +32,7 @@ char * v_name(int row, int col) {
     }
 }
 
-// funcion que parsea de un buf el nombre de una celda
-// ignora los primeros bloques en caso de especificarse
+// Parse BUF_IN to get a cell name. Skip first blocks with IGNORE_FIRST_BLOCKS
 char * parse_cell_name(int ignore_first_blocks, struct block * buf_in) {
     struct block * b = buf_in;
     static char cell_name[3]; //length of max col is 3 (ZZZ)
