@@ -89,6 +89,7 @@ struct history * commandline_history;
 int main (int argc, char ** argv) {
 
 #ifdef USELOCALE
+    // pass LC_CTYPE env variable to libraries
     //setlocale(LC_ALL, "");
     setlocale(LC_CTYPE, "");
 #endif
@@ -383,7 +384,7 @@ void signals() {
     void nopipe();
     void winchg();
 
-    //signal(SIGINT, sig_int); // FIXME - sig. Commented to reduce annoyance //while testing
+    //signal(SIGINT, sig_int); // FIXME - sig. Commented to reduce annoyance while testing
     signal(SIGABRT, sig_abrt);
     signal(SIGTERM, sig_term); // kill
     signal(SIGPIPE, nopipe);
