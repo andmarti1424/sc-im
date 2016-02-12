@@ -7,10 +7,8 @@
 #include "../sc.h"
 #include "../macros.h"
 
-// Funcion que elimina un caracter de una cadena.
-// La posicion del caracter a eliminar es indicada como parametro.
-// 0 es la primera posición
-// retorna 0 si OK, -1 en caso negativo.
+// Remove POSICION character of a cell (zero based)
+// returns 0 on success, -1 otherwise
 int del_char(char * str, int posicion) {
     int i, slen = strlen(str);
 
@@ -22,9 +20,8 @@ int del_char(char * str, int posicion) {
     return 0;
 }
 
-// Funcion que elimina un rango de caracteres de una cadena.
-// La posicion desde y hasta es indicada como parametro.
-// retorna 0 si OK, -1 en caso negativo.
+// Remove D to H characters range of a cell
+// returns 0 on success, -1 otherwise
 int del_range_chars(char * str, int d, int h) {
     int i = 0, j = 0, slen = strlen(str);
 
@@ -38,11 +35,9 @@ int del_range_chars(char * str, int d, int h) {
     return 0;
 }
 
-// Funcion que agrega un caracter a una cadena
-// en la posicion indicada como parametro.
-// Se asume que str tiene alocada suficiente
-// memoria como para albergar al nuevo char
-// retorna 0 si OK, -1 en caso negativo.
+// Add a C character to a cell in POSICION
+// STR should be previously allocated with enough memory
+// returns 0 on success, -1 otherwise
 int add_char(char * str, char c, int posicion) {
     int slen = strlen(str);
     int len = slen - posicion;
@@ -56,16 +51,14 @@ int add_char(char * str, char c, int posicion) {
     return 0;
 }
 
-// Funcion que reemplaza de una cadena todas los ocurrencias de un caracter
-// por otro
+// Replace all matches FROM character TO character
 void subst(char * s, char from, char to) {
     while (*s == from) *s++ = to;
     return;
 }
 
-// funcion que busca la cadena b dentro de la cadena s
-// devuelve la posicion en la cadena s, en caso de ser encontrada
-// devuelve -1 en caso contrario
+// Find string B inside string S
+// returns S position in B , -1 otherwise
 int str_in_str(char * s, char * b) {
     int slen = strlen(s);
     int blen = strlen(b);
@@ -87,7 +80,7 @@ int str_in_str(char * s, char * b) {
     return -1;
 }
 
-// Funcion que indica si se tiene un caracter especial o de control.
+// Returns 1 if a special or control character is found
 int is_idchar (int d) {
     switch (d) {
         case OKEY_LEFT:
