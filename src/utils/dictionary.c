@@ -19,7 +19,7 @@ void put(struct dictionary * d, char * k, char * v) {
 
    struct nlist * nl;
 
-   // se inserta primer elemento
+   // Insert the first element
    if (d->list == NULL) {
        nl = (struct nlist *) malloc(sizeof(struct nlist));
        nl->next = NULL;
@@ -31,22 +31,21 @@ void put(struct dictionary * d, char * k, char * v) {
        strcpy(key, k);
        nl->key = key;
 
-   // no están permitidas las claves duplicadas.
-   // si se intenta insertar una clave existente,
-   // se sobreescribe su valor
+   // Duplicated keys are not allowed.
+   // If an existent key is inserted, the value is overwritten.
    } else if ( get(d, k) != '\0' ) {
        nl = get_nl(d, k);
        free(nl->val);
    
-   // si la clave no existe, se crea
+   // If the key doesn't exists, Create it.
    } else {
        nl = (struct nlist *) malloc(sizeof(struct nlist));
 
-       // inserto al principio
+       // Insert at the beginning
        if (strcmp(k, d->list->key) < 0) {
            nl->next = d->list;
            d->list = nl; 
-       // recorro e inserto en el medio o al final
+       // Traverse and insert in the middle or at the end
        } else {
            struct nlist * nant = d->list;
            struct nlist * nact = d->list->next;
@@ -65,7 +64,7 @@ void put(struct dictionary * d, char * k, char * v) {
        nl->key = key;
    }
 
-   // para todos los casos, guardo el valor
+   // Always save the value
    char * val = (char *) malloc(sizeof(char) * strlen(v)+1);
    val[0] = '\0';
    strcpy(val, v);
@@ -99,10 +98,10 @@ struct nlist * get_nl(struct dictionary * d, char * key) {
            return nl;
        nl = nl->next;
    }
-   return nl; // por si d->list == NULL
+   return nl; // just in case d->list == NULL
 }
 
-// Obtener el valor de una clave
+// Get the value for KEY
 char * get(struct dictionary * d, char * key) {
    int i=0;
    if (d == NULL || d->list == NULL) return NULL;
@@ -116,7 +115,7 @@ char * get(struct dictionary * d, char * key) {
    return NULL;
 }
 
-/* Obtener el nombre de una clave a partir de un valor
+/* Get the key name from a value
 char * get_key_name(struct dictionary * d, char * value) {
    int i=0;
    if (d == NULL || d->list == NULL) return NULL;
@@ -131,7 +130,7 @@ char * get_key_name(struct dictionary * d, char * value) {
 */
 
 
-// Funcion que guarda en un diccionario claves y valores que son contenidos en un string
+// Save key/value pairs in D dictionary from a string STR
 void parse_str(struct dictionary * d, char * str) {
     char c = str[0];
     char key[30];
@@ -139,7 +138,7 @@ void parse_str(struct dictionary * d, char * str) {
     key[0] = '\0';
     value[0] = '\0';
 
-    // creo un diccionario para guardar las claves y valores que vinieron en el string
+    // Create the dictionary
     while (c != '\0') {
         while (c != '=' && c != '\0') {
             add_char(key, c, strlen(key));
