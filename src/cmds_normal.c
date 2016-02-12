@@ -167,7 +167,6 @@ void do_normalmode(struct block * buf) {
         #endif
             }
 
->>>>>>> master
         // CTRL f
         case ctl('f'):
         case OKEY_PGDOWN:
