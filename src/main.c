@@ -89,7 +89,8 @@ struct history * commandline_history;
 int main (int argc, char ** argv) {
 
 #ifdef USELOCALE
-    setlocale(LC_ALL, "");
+    //setlocale(LC_ALL, "");
+    setlocale(LC_CTYPE, "");
 #endif
 
     // set up signals so we can catch them
