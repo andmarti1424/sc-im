@@ -41,6 +41,7 @@ Navigation commands:
      gg  , c-a:  Go to home (first cell of spreadsheet).
      G           Go to last valid cell of spreadsheet.
      gG          Go to last valid cell of spreadsheet.
+     gl          moves to last cell position
      c-f , c-b:  Scrolls down and up full screen.
                  set variable half_page_scroll to 1 to scroll half page,
                  instead of full page. see :set command for details.
@@ -141,10 +142,12 @@ Commands for handling cell content:
      '/'         is an alias for ':int goto '.
                  If a number is given, SC-IM will search for a cell containing that number. Searches for either strings or numbers proceed forward from the current cell, wrapping back to a0 at the end of the table, and terminate at the current cell if the string or number is not found.
                  Ex.: You can type '/4' to look for cells that has the value of 4.
-                 Or you can type '/value' to look for cells that has "value" as label content.
+                 Or you can type '/"value"' to look for cells that has "value" as label content.
                  You can also quote a regular expression, and SC-IM will search for a cell containing a string matching the regular expression.
                  You can also search formatted numbers or expressions using regular expressions by preceding the opening quotes of the regular expression with a '#' (for formatted numbers) or a '%' (for expressions).
                  These are handy for searching for dates within a specified range or cells which reference a given cell, for example, although they are somewhat slower than searching through ordinary strings, since all numbers must be formatted or expressions decompiled on the fly during the search.
+     n           Moves to next search match
+     N           Moves to previous search match
 
      rl          Use this command to lock the current cell or a range of cells, i.e. make them immune to any type of editing. A locked cell can't be changed in any way until it is unlocked.
      ru          This command is the opposite of the rl command and thus unlocks a locked cell and makes it editable.

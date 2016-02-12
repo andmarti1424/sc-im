@@ -422,10 +422,10 @@ command:
 
     |    S_GOTO var_or_range var_or_range { moveto($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col, $3.left.vp->row, $3.left.vp->col); }
     |    S_GOTO var_or_range     { moveto($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col, -1, -1); }
-    |    S_GOTO num              { num_search($2, 0, 0, maxrow, maxcol, 0); }
-    |    S_GOTO STRING           { str_search($2, 0, 0, maxrow, maxcol, 0); }
-    |    S_GOTO '#' STRING       { str_search($3, 0, 0, maxrow, maxcol, 1); }
-    |    S_GOTO '%' STRING       { str_search($3, 0, 0, maxrow, maxcol, 2); }
+    |    S_GOTO num              { num_search($2, 0, 0, maxrow, maxcol, 0, 1); }
+    |    S_GOTO STRING           { str_search($2, 0, 0, maxrow, maxcol, 0, 1); }
+    |    S_GOTO '#' STRING       { str_search($3, 0, 0, maxrow, maxcol, 1, 1); }
+    |    S_GOTO '%' STRING       { str_search($3, 0, 0, maxrow, maxcol, 2, 1); }
     |    S_GOTO WORD             { /* don't repeat last goto on "unintelligible word" */ ; }
 
 
@@ -928,16 +928,16 @@ errlist :
         K_ERROR range        { num_search((double)0,
                       $2.left.vp->row, $2.left.vp->col,
                       $2.right.vp->row, $2.right.vp->col,
-                      CELLERROR); }
+                      CELLERROR, 1); }
     | K_ERROR            { num_search((double)0, 0, 0,
-                      maxrow, maxcol, CELLERROR); }
+                      maxrow, maxcol, CELLERROR, 1); }
 
     |    K_INVALID range        { num_search((double)0,
                       $2.left.vp->row, $2.left.vp->col,
                       $2.right.vp->row, $2.right.vp->col,
-                      CELLINVALID); }
+                      CELLINVALID, 1); }
 
     |    K_INVALID        { num_search((double)0, 0, 0,
-                      maxrow, maxcol, CELLINVALID); }
+                      maxrow, maxcol, CELLINVALID, 1); }
     ;
 */

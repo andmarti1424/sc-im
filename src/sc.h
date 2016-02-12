@@ -72,7 +72,7 @@
 /* info for each cell, only alloc'd when something is stored in a cell */
 struct ent {
     double v;             /* v && label are set in EvalAll() */
-    char *label;
+    char * label;
     struct enode * expr;  /* cell's contents */
     short flags;
     int row, col;
@@ -103,7 +103,7 @@ struct ent_ptr {
 struct range {
     struct ent_ptr r_left, r_right;
     char * r_name;
-    struct range *r_next, *r_prev;
+    struct range * r_next, * r_prev;
     int r_is_range;
 };
 
@@ -118,7 +118,7 @@ struct enode {
     union {
 
     struct {        /* other cells use to eval() / seval() */
-        struct enode *left, *right;
+        struct enode * left, * right;
         char *s;    /* previous value of @ext function in case */
     } o;            /* external functions are turned off */
 
@@ -151,14 +151,14 @@ struct impexfilt {
     char ext[PATHLEN];
     char plugin[PATHLEN];
     char type;
-    struct impexfilt *next;
+    struct impexfilt * next;
 };
 
 /* Use this structure to save the last 'g' command */
 struct go_save {
     int g_type;
     double g_n;
-    char *g_s;
+    char * g_s;
     int g_row;
     int g_col;
     int g_lastrow;
@@ -404,8 +404,6 @@ extern struct colorpair *cpairs[8];
 extern void editexp(int row, int col);
 extern void efree(struct enode *e);
 extern void label(register struct ent *v, register char *s, int flushdir);
-extern void num_search(double n, int firstrow, int firstcol, int lastrow, int lastcol, int errsearch);
-extern void str_search(char *s, int firstrow, int firstcol, int lastrow, int lastcol, int num);
 
 extern double eval_result;
 extern char * seval_result;

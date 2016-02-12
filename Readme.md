@@ -41,7 +41,7 @@ SC-IM stands for Spreadsheet Calculator Improvised. :-)
 
 Please. I mean, Please.. make a DONATION with PayPal.
 If you wish to make a donation, please send money to scim.spreadsheet@gmail.com via PayPal.
-Currently, we already received the amount of 20 USD and 30 euros.
+Currently, we already received the amount of 21 USD and 30 euros.
 
 A lot of features are in the roadmap, such as multiple worksheets, and even a GTK gui!
 Thanks.

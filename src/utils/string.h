@@ -13,3 +13,4 @@ char * xstrtok(char * line, char * delims);
 int count_word_occurrences(char * s, char * word, int overlap);
 char * str_replace ( const char * string, const char * substr, const char * replacement);
 void uppercase(char * sPtr);
+int sc_isprint(int d);

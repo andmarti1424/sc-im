@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <locale.h>
 #include "input.h"
 #include "screen.h"
 #include "range.h"
@@ -511,7 +512,6 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
                     mvwprintw(win, row + 1 - offscr_sc_rows - q_row_hidden, c + i, "%c", caracter);
                 }
             }
-
             // clean format
             #ifndef USECOLORS
                 wattroff(win, A_REVERSE);
@@ -719,27 +719,23 @@ int get_formated_value(struct ent ** p, int col, char * value) {
 }
 
 // get real length of str
-/* extended ascii chars counts as one char, not bytes.
-int scstrlen(char * in) {
-    int i, count = 0, neg = 0;
-    for (i = 0; i < strlen(in); i++) {
-        //scdebug("%d - %c", in[i], in[i]);
-        if (in[i] < 0) neg++;
-        else count++;
-    }
-    return count + neg/2;
+// extended ascii chars counts as one char, not bytes.
+int scstrlen(char * s) {
+    int len = 0;
+    for (; *s; ++s) if ((*s & 0xC0) != 0x80) ++len;
+        return len;
 }
-*/
 
 void show_text_content_of_cell(WINDOW * win, struct ent ** p, int row, int col, int r, int c) {
+
     char value[FBUFLEN];      // the value to be printed without padding
     char field[FBUFLEN] = ""; // the value with padding and alignment
     int col_width = fwidth[col];
     int flen;                 // current length of field
     int left;
 
-    int str_len  = strlen((*p)->label);
-    //int str_len  = scstrlen((*p)->label);
+    //int str_len  = strlen((*p)->label);
+    int str_len  = scstrlen((*p)->label);
     strcpy(value, (*p)->label);
 
     // in case there is a format
@@ -781,35 +777,29 @@ void show_text_content_of_cell(WINDOW * win, struct ent ** p, int row, int col, 
         left = col_width - str_len;
         left = left < 0 ? 0 : left;
         flen = str_len;
-        //scdebug("%d %d", left, flen);
-        while (left-- && flen++) add_char(field, ' ', flen-1);
-
-        //sprintf(field + strlen(field), "%0*d", left, 0);
-        //subst(field, '0', '-');
+        while (left-- && flen++) add_char(field, ' ', strlen(field));
 
     // Centered
     } else if ( (*p)->label && (*p)->flags & is_label) {
-        left = (col_width - str_len )/2;
+        left = (col_width - str_len ) / 2;
         left = left < 0 ? 0 : left;
         flen = 0;
-        while (left-- && ++flen) add_char(field, ' ', flen-1);
+        while (left-- && ++flen) add_char(field, ' ', 0);
         strcat(field, value);
         flen += str_len;
         left = (col_width - flen);
         left = left < 0 ? 0 : left;
-        while (left-- && ++flen) add_char(field, ' ', flen-1);
+        while (left-- && ++flen) add_char(field, ' ', strlen(field));
 
     // Right
     } else if ( (*p)->label || res == 0) {
         left = col_width - str_len;
         left = left < 0 ? 0 : left;
         flen = 0;
-        while (left-- && ++flen) add_char(field, ' ', flen-1);
+        while (left-- && ++flen) add_char(field, ' ', 0);
         strcat(field, value);
-//
     }
 
-    //scdebug("%d %d-%s-", r, c, field);
     mvwprintw(win, r, c, "%s", field);
     wclrtoeol(win);
 

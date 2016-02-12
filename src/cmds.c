@@ -1512,6 +1512,7 @@ int is_single_command (struct block * buf, long timeout) {
         else if (buf->value == 'b')        res = MOVEMENT_CMD;
         else if (buf->value == '/')        res = MOVEMENT_CMD; // search
         else if (buf->value == 'n')        res = MOVEMENT_CMD; // repeat last goto cmd
+        else if (buf->value == 'N')        res = MOVEMENT_CMD; // repeat last goto cmd - backwards
 
         // edition commands
         else if (buf->value == 'x')        res = EDITION_CMD;  // cuts a cell
@@ -1540,7 +1541,9 @@ int is_single_command (struct block * buf, long timeout) {
                  buf->pnext->value == 'g' ||
                  buf->pnext->value == 'G' ||
                  buf->pnext->value == '0' ||
-                 buf->pnext->value == '$')) res = MOVEMENT_CMD;
+                 buf->pnext->value == 'l' ||
+                 buf->pnext->value == '$'))
+                 res = MOVEMENT_CMD;
 
         else if (buf->value == 'g' && bs > 2 && timeout >= COMPLETECMDTIMEOUT)
                  res = MOVEMENT_CMD; // goto cell

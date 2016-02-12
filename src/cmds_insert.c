@@ -2,7 +2,7 @@
 #include "cmds.h"
 #include "screen.h"
 #include <string.h>
-#include <ctype.h>         // for isprint()
+//#include <ctype.h>         // for isprint()
 #include "buffer.h"
 #include "sc.h"            // for rescol
 #include "utils/string.h"
@@ -42,7 +42,7 @@ void do_insertmode(struct block * sb) {
     } else if (find_val(sb, OKEY_ENTER)) { // ENTER
         insert_or_edit_cell();
 
-    } else if ( strlen(inputline) < (COLS - 14) && isprint(sb->value)) { // Write new char
+    } else if ( strlen(inputline) < (COLS - 14) && sc_isprint(sb->value)) { // Write new char
         ins_in_line(sb->value);
         show_header(input_win);
 
