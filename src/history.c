@@ -90,8 +90,8 @@ void load_history(struct history * h) {
     return;
 }
 
-// guardo historial en archivo
-// devuelve 0 si ok, -1 si hay error
+// Save history to file
+// returns 0 on success, -1 otherwise
 int save_history(struct history * h) {
     if (h->mode != ':' ) return -1;
     char infofile[PATHLEN];
@@ -106,12 +106,11 @@ int save_history(struct history * h) {
         f = fopen(infofile, "w");
         if (f == NULL) return -1;
 
-        // voy hasta el final
+        // Go to the end
         for (i=1; i < h->len; i++) {
             nl = nl->pnext;
         }
-        // recorro de atras hacia adelante de la lista
-        // para que en el archivo se guarde de mas viejo a mas actual
+        // Traverse list back to front, so the history is saved in chronological order
         for (i=0; i < h->len; i++) {
             fprintf(f, ":");
             fprintf(f, "%s\n", nl->line);
@@ -123,7 +122,7 @@ int save_history(struct history * h) {
     return -1;
 }
 
-// borro elemento del historial
+// Remove history element
 // 0 first element, -1 second element
 void del_item_from_history(struct history * h, int pos) {
     if (h->len - 1 < -pos) return;
@@ -150,12 +149,11 @@ void del_item_from_history(struct history * h, int pos) {
     return;
 }
 
-// funcion que busca un elemento en un historial a partir del texto
-// y lo mueve. comienza la busqueda a partir de la posicion pasada como parametro
+// Find a history element and move it. Starts from POS
 // pos=0 first element, pos=-1 second element
 // returns 1 if moved, 0 otherwise.
 int move_item_from_history_by_str(struct history * h, char * item, int pos) {
-    if (h->len - 1 < -pos || ! pos || ! strlen(item)) return 0; // mover primer elemento no permitido
+    if (h->len - 1 < -pos || ! pos || ! strlen(item)) return 0; // Move the first element is disallowed
     struct hlist * nl = h->list;
     struct hlist * n_ant = NULL;
     int i;
@@ -181,11 +179,11 @@ int move_item_from_history_by_str(struct history * h, char * item, int pos) {
     return 1;
 }
 
-// agrego más reciente al comienzo
+// Add recent entry at the beginning
 void add(struct history * h, char * line) {
     struct hlist * nl = (struct hlist *) malloc(sizeof(struct hlist));
 
-    // guardo la linea
+    // Save the line
     int size = strlen(line)+1;
     if (size == 1) size = BUFFERSIZE + 1;
 
@@ -195,7 +193,7 @@ void add(struct history * h, char * line) {
     strcpy(val, line);
     nl->line = val;
 
-    // inserto al comienzo
+    // Append at the beginning
     nl->pant = NULL;
     nl->pnext = h->list;
     if (h->list != NULL) h->list->pant = nl;
@@ -205,8 +203,8 @@ void add(struct history * h, char * line) {
     return;
 }
 
-// funcion que devuelve una linea del historial del modo COMMAND_MODE
-// pos 0 es linea mas reciente, sigue con -1, -2
+// Returns a history line from COMMAND_MODE
+// POS 0 is the most recent line
 char * get_line_from_history(struct history * h, int pos) {
     return get_hlist_from_history(h, pos)->line;
 }

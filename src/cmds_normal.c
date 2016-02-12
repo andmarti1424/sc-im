@@ -1,5 +1,5 @@
-#include <ctype.h>   // for isdigit
-#include <stdlib.h>  // for atoi
+#include <ctype.h>
+#include <stdlib.h> 
 #include "yank.h"
 #include "marks.h"
 #include "cmds.h"
@@ -119,6 +119,55 @@ void do_normalmode(struct block * buf) {
             update(TRUE);
             break;
 
+        // CTRL j
+        case ctl('j'):
+            {
+            int p, c = curcol, cf = curcol;
+            if ( (p = is_range_selected()) != -1) {
+                struct srange * sr = get_range_by_pos(p);
+                c = sr->tlcol;
+                cf = sr->brcol;
+            }
+            auto_justify(c, cf, DEFWIDTH);  // auto justify columns
+            update(TRUE);
+            break;
+            }
+
+        // CTRL d
+        case ctl('d'):                      // set date format using current locate D_FMT format
+            {
+        #ifdef USELOCALE
+            #include <locale.h>
+            #include <langinfo.h>
+            char * loc = NULL;
+            char * f = NULL;
+            loc = setlocale(LC_TIME, "");
+            if (loc != NULL) {
+                f = nl_langinfo(D_FMT);
+            } else {
+                scerror("No locale set. Nothing changed");
+            }
+            int p, r = currow, c = curcol, rf = currow, cf = curcol;
+            if ( (p = is_range_selected()) != -1) {
+                struct srange * sr = get_range_by_pos(p);
+                r = sr->tlrow;
+                c = sr->tlcol;
+                rf = sr->brrow;
+                cf = sr->brcol;
+            }
+            if (any_locked_cells(r, c, rf, cf)) {
+                scerror("Locked cells encountered. Nothing changed");
+                return;
+            }
+            dateformat(lookat(r, c), lookat(rf, cf), f);
+            update(TRUE);
+            break;
+        #else
+            scinfo("Build made without USELOCALE enabled");
+        #endif
+            }
+
+>>>>>>> master
         // CTRL f
         case ctl('f'):
         case OKEY_PGDOWN:
@@ -285,54 +334,6 @@ void do_normalmode(struct block * buf) {
                 exec_single_cmd(buf);
             }
             break;
-            }
-
-        // CTRL j
-        case ctl('j'):
-            {
-            int p, c = curcol, cf = curcol;
-            if ( (p = is_range_selected()) != -1) {
-                struct srange * sr = get_range_by_pos(p);
-                c = sr->tlcol;
-                cf = sr->brcol;
-            }
-            auto_justify(c, cf, DEFWIDTH);  // auto justificado de columnas
-            update(TRUE);
-            break;
-            }
-
-        // CTRL d
-        case ctl('d'):                      // set date format using current locate D_FMT format
-            {
-        #ifdef USELOCALE
-            #include <locale.h>
-            #include <langinfo.h>
-            char * loc = NULL;
-            char * f = NULL;
-            loc = setlocale(LC_TIME, "");
-            if (loc != NULL) {
-                f = nl_langinfo(D_FMT);
-            } else {
-                scerror("No locale set. Nothing changed");
-            }
-            int p, r = currow, c = curcol, rf = currow, cf = curcol;
-            if ( (p = is_range_selected()) != -1) {
-                struct srange * sr = get_range_by_pos(p);
-                r = sr->tlrow;
-                c = sr->tlcol;
-                rf = sr->brrow;
-                cf = sr->brcol;
-            }
-            if (any_locked_cells(r, c, rf, cf)) {
-                scerror("Locked cells encountered. Nothing changed");
-                return;
-            }
-            dateformat(lookat(r, c), lookat(rf, cf), f);
-            update(TRUE);
-            break;
-        #else
-            scinfo("Build made without USELOCALE enabled");
-        #endif
             }
 
         // repeat last command

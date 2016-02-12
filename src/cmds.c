@@ -63,7 +63,7 @@ void flush_saved() {
 // Note that the deleted structure must still
 // be hanging around before the call, but not referenced
 // by an entry in tbl.
-// MEJORAR: No debiera recorrerse toda la tabla.
+// IMPROVE: Shouldn't traverse the whole table.
 void sync_refs() {
     int i, j;
     register struct ent *p;
@@ -130,7 +130,7 @@ void deletecol() {
         }
     }
 
-    // copio referencias de celdas de columna derecha a la de la izquierda (la que se borra)
+    // Copy references from right column cells to left column (which gets removed)
     for (r = 0; r <= maxrow; r++) {
         for (c = curcol; c < maxcol; c++) {
             pp = ATBL(tbl, r, c);
@@ -140,13 +140,13 @@ void deletecol() {
             pp[0] = pp[1];
         }
 
-        // libero memoria de última columna (pudiera tmb blanquear ent con "cleanent").
+        // Free last column memory (Could also initialize 'ent' to zero with `cleanent`).
         pp = ATBL(tbl, r, maxcol);
         *pp = (struct ent *) 0;
         // agregado el 06/12/2014
     }
 
-    // corrijo precision y ancho de columnas
+    // Fix columns precision and width
     for (i = curcol; i < maxcols - 2; i++) {
         fwidth[i] = fwidth[i+1];
         precision[i] = precision[i+1];
@@ -860,7 +860,7 @@ void del_selected_cells() {
        #endif
 
 /*
-       // Para UNDO
+       // UNDO feature
        // Save deleted ent
        struct ent * e_prev = (struct ent *) malloc( (unsigned) sizeof(struct ent) );
        cleanent(e_prev);
@@ -1050,8 +1050,8 @@ void scroll_left(int n) {
 
 void scroll_right(int n) {
     while (n--) {
-        // este while es para que el cursor se desplace a la
-        // derecha cuando llegamos a la ultima columna visible en pantalla
+        // This while statement allow the cursor to shift to the right when the
+        // las visible column is reached in the screen
         while (curcol < offscr_sc_cols + 1) {
             curcol++;
         }
@@ -1439,8 +1439,7 @@ int any_locked_cells(int r1, int c1, int r2, int c2) {
     return 0;
 }
 
-// Funcion que indica si el contenido completo de un buffer
-// forma un comando valido.
+// Check if the buffer content is a valid command
 // res = 0 or NO_CMD : buf has no command
 // res = 1 or EDITION_CMD : buf has a command
 // res = 2 or MOVEMENT_CMD : buf has a movement command or a command that do not
