@@ -308,8 +308,12 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
                     // by row, store cellcolors grouped by ranges
                     int c_aux = c;
                     struct ucolor * u = (*pp)->ucolor;
-                    struct ucolor * a = *ATBL(tbl, r, c-1) == NULL ? NULL : (*ATBL(tbl, r, c-1))->ucolor;
-                    if ( (u != NULL) && (c <= maxcol) && ( c == 0 || ( a == NULL ) || ( ! same_ucolor( u, a) ))) {
+//                  struct ucolor * a = (*ATBL(tbl, r, c-1)) == NULL ? NULL : (*ATBL(tbl, r, c-1))->ucolor;
+                    struct ucolor * a = NULL;
+                    if ( c > 0 && *ATBL(tbl, r, c-1) != NULL)
+                         a = (*ATBL(tbl, r, c-1))->ucolor;
+
+                    if ( (u != NULL) && (c <= maxcol) && ( c == 0 || ( a == NULL ) || ( ! same_ucolor( NULL, NULL) ))) {
                         while (c_aux < maxcol && *ATBL(tbl, r, c_aux) != NULL && same_ucolor( (*ATBL(tbl, r, c_aux))->ucolor, (*pp)->ucolor ))
                             c_aux++;
                         fprintf(f, "cellcolor %s%d", coltoa((*pp)->col), (*pp)->row);
@@ -509,7 +513,7 @@ int readfile(char * fname, int eraseflg) {
     --loading;
     closefile(f, pid, rfd);
     if (f == stdin) {
-        freopen("/dev/tty", "r", stdin);
+        (void) freopen("/dev/tty", "r", stdin);
     }
     linelim = -1;
     if (eraseflg) {
@@ -594,7 +598,7 @@ int backup_file(char *path) {
         umask(oldumask);
         if (outfd < 0)
             return (0);
-        chown(tpath, statbuf.st_uid, statbuf.st_gid);
+        (void) chown(tpath, statbuf.st_uid, statbuf.st_gid);
 
         while ((count = read(infd, buf, sizeof(buf))) > 0) {
             if (write(outfd, buf, count) != count) {
