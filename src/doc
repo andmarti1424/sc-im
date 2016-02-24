@@ -14,7 +14,7 @@ INSERT MODE      For entering new cell content (values and expressions)
 EDIT MODE        'e' and 'E' keys are used for entering this mode. It is used for single
                  line -Vi-like- edition of cell content and expressions
 COMMAND MODE     ':' key is used for entering this mode. It is used for entering special
-                 commands and for quiting app and saving files.
+                 commands and for quitting app and saving files.
 VISUAL MODE      'v' key is used for entering this mode. It is used for selecting a range of cells
                  You can also use <C-v> in INSERT and COMMAND MODE for entering this mode.
                  See the section 'Selecting a range' below.
