@@ -76,6 +76,10 @@ void stop_screen() {
         //if (get_d_colors_param() != NULL)
         free_colors_param_dict();
     #endif
+    move(0, 0);
+    clrtobot();
+    refresh();
+
     endwin();
     return;
 }
