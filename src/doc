@@ -278,6 +278,9 @@ Commands for handling cell content:
                  the name of the file that is created comes from the current open spreadsheet.
                  if a range is selected, only the that range is exported.
 
+     :e txt      export current spreadsheet to plain text.
+                 if a range is selected, only the that range is exported.
+
      :e csv name 
                  export current spreadsheet to csv file. 'name' is the name of the file to be generated
 
@@ -290,6 +293,12 @@ Commands for handling cell content:
      :e! tab name
                  same as previous, but forcing the rewrite of file 'name' if it exists.
                  NOTE: if a range is selected, its content are exported. if not, the entire spreadsheet is exported
+
+     :e txt name
+                 export current spreadsheet to plain text. 'name' is the name of the file to be generated
+
+     :e! txt name
+                 same as previous, but forcing the rewrite of file 'name' if it exists.
 
      :i csv name
                  import a csv delimited file called 'name' to SC-IM.

@@ -44,8 +44,10 @@ static char * valid_commands[] = {
 "color",
 "e csv",
 "e tab",
+"e txt",
 "e! csv",
 "e! tab",
+"e! txt",
 "datefmt",
 "delfilter",
 "delfilters",
@@ -533,9 +535,11 @@ void do_commandmode(struct block * sb) {
 
         } else if (
             ! strncmp(inputline, "e csv"  , 5) ||
-            ! strncmp(inputline, "e! tab" , 6) ||
             ! strncmp(inputline, "e! csv" , 6) ||
-            ! strncmp(inputline, "e tab"  , 5) ) {
+            ! strncmp(inputline, "e tab"  , 5) ||
+            ! strncmp(inputline, "e! tab" , 6) ||
+            ! strncmp(inputline, "e txt" , 5) ||
+            ! strncmp(inputline, "e! txt" , 6) ) {
                 do_export( p == -1 ? 0 : sr->tlrow, p == -1 ? 0 : sr->tlcol,
                 p == -1 ? maxrow : sr->brrow, p == -1 ? maxcol : sr->brcol);
 

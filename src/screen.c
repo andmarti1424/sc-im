@@ -730,10 +730,11 @@ int scstrlen(char * s) {
         return len;
 }
 
-void show_text_content_of_cell(WINDOW * win, struct ent ** p, int row, int col, int r, int c) {
-
+// function to arrange padding and format of ent with text
+// out would be the value to be printed with padding and format
+void pad_text(char * out, struct ent ** p, int row, int col) {
     char value[FBUFLEN];      // the value to be printed without padding
-    char field[FBUFLEN] = ""; // the value with padding and alignment
+    //char field[FBUFLEN] = ""; // the value with padding
     int col_width = fwidth[col];
     int flen;                 // current length of field
     int left;
@@ -748,65 +749,71 @@ void show_text_content_of_cell(WINDOW * win, struct ent ** p, int row, int col, 
 
     // If there isn't enough space on the screen
     if (str_len > col_width) {
-        sprintf(field, "%0*d", col_width, 0);
-        subst(field, '0', '*');
+        //sprintf(out, "%0*d", col_width, 0);
+        //subst(out, '0', '*');
 
-        // Color selected cell
+        /* Color selected cell
         if ((currow == row) && (curcol == col)) {
             #ifdef USECOLORS
                 if (has_colors()) set_ucolor(win, &ucolors[CELL_SELECTION_SC]);
             #else
                 wattron(win, A_REVERSE);
             #endif
-        }
-        strncpy(field, value, col_width);
-        field[col_width]='\0';
-        mvwprintw(win, r, c, "%s", field);
+        }*/
+        strncpy(out, value, col_width);
+        out[col_width-1]='*';
+        out[col_width]='\0';
+        //mvwprintw(win, r, c, "%s", out);
 
-        char ex[str_len+1];
-        strcpy(ex, value);
-        del_range_chars(ex, 0, col_width-1);
-            #ifdef USECOLORS
-                if (has_colors()) set_ucolor(win, &ucolors[STRG]);
-            #else
-                wattroff(win, A_REVERSE);
-            #endif
-        mvwprintw(win, r, c + col_width, "%s", ex);
-        wclrtoeol(win);
+        //char ex[str_len+1];
+        //strcpy(ex, value);
+        //del_range_chars(ex, 0, col_width-1);
+        //
+        //    #ifdef USECOLORS
+        //        if (has_colors()) set_ucolor(win, &ucolors[STRG]);
+        //    #else
+        //        wattroff(win, A_REVERSE);
+        //    #endif
+        //mvwprintw(win, r, c + col_width, "%s", ex);
+        //wclrtoeol(win);
+
         return;
 
     // Left
     } else if ( (*p)->label && (*p)->flags & is_leftflush ) {
-        strcpy(field, value);
+        strcpy(out, value);
         left = col_width - str_len;
         left = left < 0 ? 0 : left;
         flen = str_len;
-        while (left-- && flen++) add_char(field, ' ', strlen(field));
+        while (left-- && flen++) add_char(out, ' ', strlen(out));
 
     // Centered
     } else if ( (*p)->label && (*p)->flags & is_label) {
         left = (col_width - str_len ) / 2;
         left = left < 0 ? 0 : left;
         flen = 0;
-        while (left-- && ++flen) add_char(field, ' ', 0);
-        strcat(field, value);
+        while (left-- && ++flen) add_char(out, ' ', 0);
+        strcat(out, value);
         flen += str_len;
         left = (col_width - flen);
         left = left < 0 ? 0 : left;
-        while (left-- && ++flen) add_char(field, ' ', strlen(field));
+        while (left-- && ++flen) add_char(out, ' ', strlen(out));
 
     // Right
     } else if ( (*p)->label || res == 0) {
         left = col_width - str_len;
         left = left < 0 ? 0 : left;
         flen = 0;
-        while (left-- && ++flen) add_char(field, ' ', 0);
-        strcat(field, value);
+        while (left-- && ++flen) add_char(out, ' ', 0);
+        strcat(out, value);
     }
+}
 
-    mvwprintw(win, r, c, "%s", field);
+void show_text_content_of_cell(WINDOW * win, struct ent ** p, int row, int col, int r, int c) {
+    char out[FBUFLEN] = "";
+    pad_text(out, p, row, col);
+    mvwprintw(win, r, c, "%s", out);
     wclrtoeol(win);
-
     return;
 }
 

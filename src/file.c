@@ -833,7 +833,7 @@ int import_csv(char * fname, char d) {
     return 0;
 }
 
-// Export: to CSV and TAB
+// Export to CSV, TAB or plain TXT
 void do_export(int r0, int c0, int rn, int cn) {
     int force_rewrite = 0;
     char type_export[4] = "";
@@ -849,12 +849,14 @@ void do_export(int r0, int c0, int rn, int cn) {
         strcpy(type_export, "csv");
     } else if (str_in_str(linea, "tab") == 0) {
         strcpy(type_export, "tab");
+    } else if (str_in_str(linea, "txt") == 0) {
+        strcpy(type_export, "txt");
     }
 
     // Get route and file name to write.
     // Use parameter if any.
-    if (strlen(linea) > 4) {   // 'csv '
-        del_range_chars(linea, 0, 3); // Remove 'csv'
+    if (strlen(linea) > 4) {   // ex. 'csv '
+        del_range_chars(linea, 0, 3); // remove 'csv'
         strcpy(ruta, linea);
 
     // Use curfile name and '.csv' o '.tab' extension
@@ -878,16 +880,90 @@ void do_export(int r0, int c0, int rn, int cn) {
     // Call export routines
     if (strcmp(type_export, "csv") == 0) {
         export_delim(ruta, ',', r0, c0, rn, cn);
-    } if (strcmp(type_export, "tab") == 0) {
+    } else if (strcmp(type_export, "tab") == 0) {
         export_delim(ruta, '\t', r0, c0, rn, cn);
+    } else if (strcmp(type_export, "txt") == 0) {
+        export_plain(ruta, r0, c0, rn, cn);
     }
 }
 
-// FNAME: route and name of file
-void export_delim(char * fname, char coldelim, int r0, int c0, int rn, int cn) {
-    FILE *f;
+// fname is the path and name of file
+void export_plain(char * fname, int r0, int c0, int rn, int cn) {
+    FILE * f;
     int row, col;
-    register struct ent **pp;
+    register struct ent ** pp;
+    int pid;
+    char out[FBUFLEN] = "";
+
+    scinfo("Writing file \"%s\"...", fname);
+
+    if ((f = openfile(fname, &pid, NULL)) == (FILE *)0) {
+        scerror ("Can't create file \"%s\"", fname);
+        return;
+    }
+    struct ent * ent = go_end();
+    if (rn > ent->row) rn = ent->row;
+
+    for (row = r0; row <= rn; row++) {
+        // ignore hidden rows
+        if (row_hidden[row]) continue;
+
+        for (pp = ATBL(tbl, row, col = c0); col <= cn; col++, pp++) {
+            // ignore hidden cols
+            if (col_hidden[col]) continue;
+
+            if (*pp) {
+                if ((*pp)->flags & is_valid) {
+                    if ((*pp)->cellerror) {
+                        (void) fprintf (f, "%*s", fwidth[col], ((*pp)->cellerror == CELLERROR ? "ERROR" : "INVALID"));
+                    } else if ((*pp)->format) {
+                        char field[FBUFLEN];
+                        if (*((*pp)->format) == 'd') {  // Date format
+                            time_t v = (time_t) ((*pp)->v);
+                            strftime(field, sizeof(field), ((*pp)->format)+1, localtime(&v));
+                        } else {                        // Numeric format
+                            format((*pp)->format, precision[col], (*pp)->v, field, sizeof(field));
+                        }
+                        (void) fprintf (f, "%*s", fwidth[col], field);
+                    } else { //eng number format
+                        char field[FBUFLEN] = "";
+                        (void) engformat(realfmt[col], fwidth[col], precision[col], (*pp)->v, field, sizeof(field));
+                        (void) fprintf (f, "%*s", fwidth[col], field);
+                    }
+                }
+
+                else if ((*pp)->label) {
+                    out[0] = '\0';
+                    pad_text(out, pp, row, col);
+                    //scdebug("_%s_", out);
+                    (void) fprintf (f, "%s", out);
+                } else {
+                    (void) fprintf (f, "%*s", fwidth[col], " ");
+                }
+            } else { // ! *pp
+                (void) fprintf (f, "%*s", fwidth[col], " ");
+            }
+
+        }
+        (void) fprintf(f,"\n");
+    }
+    closefile(f, pid, 0);
+
+    if (! pid) {
+        scinfo("File \"%s\" written", fname);
+    }
+
+}
+
+
+
+
+
+// fname is the path and name of file
+void export_delim(char * fname, char coldelim, int r0, int c0, int rn, int cn) {
+    FILE * f;
+    int row, col;
+    register struct ent ** pp;
     int pid;
 
     scinfo("Writing file \"%s\"...", fname);
