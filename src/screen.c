@@ -181,10 +181,9 @@ void handle_cursor() {
     return;
 }
 
-/* Print sting with alignment
-JUSTIF: 0 left shift
-JUSTIF: 1 right shift
-*/
+/* Print string with alignment
+    JUSTIF: 0 left shift
+    JUSTIF: 1 right shift */
 void write_j(WINDOW * win, const char * word, const unsigned int row, const unsigned int justif) {
     (justif == 0) ? (wmove(win, row, 0) && wclrtoeol(win)) : wmove(win, row, COLS - strlen(word));
     wprintw(win, "%s", word);
@@ -387,9 +386,6 @@ void show_sc_col_headings(WINDOW * win, int mxcol, int mxrow) {
     }
 }
 
-void show_text_content_of_cell(WINDOW * win, struct ent ** p, int row, int col, int r, int c);
-void show_numeric_content_of_cell(WINDOW * win, struct ent ** p, int col, int r, int c);
-
 // Show the content of the cells
 void show_content(WINDOW * win, int mxrow, int mxcol) {
 
@@ -479,16 +475,42 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
                continue;
             }
 
+            char num [FBUFLEN] = "";
+            char text[FBUFLEN] = "";
+            char out [FBUFLEN] = "";
+            char formated_s[FBUFLEN] = "";
+            int res = -1;
+            int align = 1;
+
             // If a numeric value exists
             if ( (*p)->flags & is_valid) {
-                show_numeric_content_of_cell(win, p, col, row + 1 - offscr_sc_rows - q_row_hidden, c);
+                //show_numeric_content_of_cell(win, p, col, row + 1 - offscr_sc_rows - q_row_hidden, c);
 
-            // If only string exists
-            } else if ((*p) -> label) { 
-                show_text_content_of_cell(win, p, row, col, row + 1 - offscr_sc_rows - q_row_hidden, c);
+                res = get_formated_value(p, col, formated_s);
+                // res = 0, indicates that in num we store a date
+                // res = 1, indicates a format is applied in num
+                if (res == 0 || res == 1) {
+                    strcpy(num, formated_s);
+                } else if (res == -1) {
+                    sprintf(num, "%.*f", precision[col], (*p)->v);
+                }
+            }
+
+            // If a string exists
+            if ((*p)->label) { 
+                strcpy(text, (*p)->label);
+                align = 1;                               // right alignment
+                if ((*p)->flags & is_label) {            // center alignment
+                    align = 0;
+                } else if ((*p)->flags & is_leftflush) { // left alignment
+                    align = -1;
+                } else if (res == 0) {                   // res must ¿NOT? be zero for label to be printed // TODO CHECK!
+                    text[0] = '\0';
+                }
+            }
 
             // repaint a blank cell, because of in range, or because we have a coloured empty cell!
-            } else if (! ((*p)->flags & is_valid) && !(*p)->label ) {
+            if (! ((*p)->flags & is_valid) && !(*p)->label ) {
                 if ( (currow == row && curcol == col) ||
                 ( in_range && row >= ranges->tlrow && row <= ranges->brrow &&
                 col >= ranges->tlcol && col <= ranges->brcol ) ) {
@@ -515,7 +537,14 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
                     #endif
                     mvwprintw(win, row + 1 - offscr_sc_rows - q_row_hidden, c + i, "%c", caracter);
                 }
+
+            // we print text and number
+            } else {
+                pad_and_align (text, num, fwidth[col], align, 0, out);
+                mvwprintw(win, row + 1 - offscr_sc_rows - q_row_hidden, c, "%s", out);
+                wclrtoeol(win);
             }
+
             // clean format
             #ifndef USECOLORS
                 wattroff(win, A_REVERSE);
@@ -726,161 +755,64 @@ int get_formated_value(struct ent ** p, int col, char * value) {
 // extended ascii chars counts as one char, not bytes.
 int scstrlen(char * s) {
     int len = 0;
+    if (s == NULL) return len;
     for (; *s; ++s) if ((*s & 0xC0) != 0x80) ++len;
         return len;
 }
 
-// function to arrange padding and format of ent with text
-// out would be the value to be printed with padding and format
-void pad_text(char * out, struct ent ** p, int row, int col) {
-    char value[FBUFLEN];      // the value to be printed without padding
-    //char field[FBUFLEN] = ""; // the value with padding
-    int col_width = fwidth[col];
-    int flen;                 // current length of field
-    int left;
+// this function aligns text of a cell (align = 0 center, align = 1 right, align = -1 left)
+// and adds padding between cells.
+// returns resulting string to be printed in screen.
+void pad_and_align (char * str_value, char * numeric_value, int col_width, int align, int padding, char * str_out) {
+    int str_len  = scstrlen(str_value);
+    int num_len  = scstrlen(numeric_value);
+    str_out[0] = '\0';
 
-    //int str_len  = strlen((*p)->label);
-    int str_len  = scstrlen((*p)->label);
-    strcpy(value, (*p)->label);
-
-    // in case there is a format
-    char s[FBUFLEN] = "";
-    int res = get_formated_value(p, col, s);
-
-    // If there isn't enough space on the screen
-    if (str_len > col_width) {
-        //sprintf(out, "%0*d", col_width, 0);
-        //subst(out, '0', '*');
-
-        /* Color selected cell
-        if ((currow == row) && (curcol == col)) {
-            #ifdef USECOLORS
-                if (has_colors()) set_ucolor(win, &ucolors[CELL_SELECTION_SC]);
-            #else
-                wattron(win, A_REVERSE);
-            #endif
-        }*/
-        strncpy(out, value, col_width);
-        out[col_width-1]='*';
-        out[col_width]='\0';
-        //mvwprintw(win, r, c, "%s", out);
-
-        //char ex[str_len+1];
-        //strcpy(ex, value);
-        //del_range_chars(ex, 0, col_width-1);
-        //
-        //    #ifdef USECOLORS
-        //        if (has_colors()) set_ucolor(win, &ucolors[STRG]);
-        //    #else
-        //        wattroff(win, A_REVERSE);
-        //    #endif
-        //mvwprintw(win, r, c + col_width, "%s", ex);
-        //wclrtoeol(win);
-
+    // If padding exceedes column width, returns n number of '-' needed to fill column width
+    if (padding >= col_width ) {
+        sprintf(str_out, "%0*d", col_width, 0);
+        subst(str_out, '0', '-');
         return;
-
-    // Left
-    } else if ( (*p)->label && (*p)->flags & is_leftflush ) {
-        strcpy(out, value);
-        left = col_width - str_len;
-        left = left < 0 ? 0 : left;
-        flen = str_len;
-        while (left-- && flen++) add_char(out, ' ', strlen(out));
-
-    // Centered
-    } else if ( (*p)->label && (*p)->flags & is_label) {
-        left = (col_width - str_len ) / 2;
-        left = left < 0 ? 0 : left;
-        flen = 0;
-        while (left-- && ++flen) add_char(out, ' ', 0);
-        strcat(out, value);
-        flen += str_len;
-        left = (col_width - flen);
-        left = left < 0 ? 0 : left;
-        while (left-- && ++flen) add_char(out, ' ', strlen(out));
-
-    // Right
-    } else if ( (*p)->label || res == 0) {
-        left = col_width - str_len;
-        left = left < 0 ? 0 : left;
-        flen = 0;
-        while (left-- && ++flen) add_char(out, ' ', 0);
-        strcat(out, value);
-    }
-}
-
-void show_text_content_of_cell(WINDOW * win, struct ent ** p, int row, int col, int r, int c) {
-    char out[FBUFLEN] = "";
-    pad_text(out, p, row, col);
-    mvwprintw(win, r, c, "%s", out);
-    wclrtoeol(win);
-    return;
-}
-
-// this functions shows:
-// 1. numeric value of a cell
-// 2. numeric value and label value if both exists in a cell
-void show_numeric_content_of_cell(WINDOW * win, struct ent ** p, int col, int r, int c) {
-    char field[1024]="";
-    char fieldaux[1024]="";
-    int col_width = fwidth[col];
-    int tlen = 0, nlen = 0;
-
-    // save number with default format of column
-    sprintf(field, "%.*f", precision[col], (*p)->v);
-    nlen = strlen(field);
-
-    // we get cell format, in case there is one defined for that cell
-    char s[FBUFLEN] = "";
-    int res = get_formated_value(p, col, s);
-    if (res == 0) {
-        strcpy(field, s);
-        nlen = strlen(s); //format in numeric value
-        tlen=0;
-    } else if (res == 1) {
-        strcpy(field, s);
-        nlen = strlen(field);
     }
 
-    // if content is larger than column width
-    if (nlen > col_width || tlen > col_width) {
-        sprintf(field, "%0*d", col_width, 0);
-        subst(field, '0', '*');
-
-    // if there is (text centered or left aligned) and (numeric value without format or numeric value with format)
-    } else if ( (*p)->label && (*p)->flags & (is_leftflush | is_label ) && ( res == -1 || res == 1) ) {
-        int tlen = strlen((*p)->label);
-
-        if ( nlen + tlen > col_width) {            // content doesnt fit
-            sprintf(field, "%0*d", col_width, 0);
-            subst(field, '0', '*');
-        } else if ((*p)->flags & (is_leftflush)) { // left label
-            int left = col_width - nlen - tlen;
-            strcpy(field, strlen(s) ? s : (*p)->label);
-            while (left--) add_char(field, ' ', strlen(field));
-            sprintf(field + strlen(field), "%.*f", precision[col], (*p)->v);
-        } else {                                   // center label
-            field[0]='\0';
-            int left = (col_width - tlen) / 2;
-            while (left--) add_char(field, ' ', strlen(field));
-            strcat(field, strlen(s) ? s : (*p)->label);
-            left = col_width - strlen(field);
-            int s = nlen < left ? left - nlen : 0;
-            while (s > 0 && s--) add_char(field, ' ', strlen(field));
-            sprintf(fieldaux, "%.*f", precision[col], (*p)->v);
-            int i = col_width - strlen(field) - strlen(fieldaux);
-            sprintf(field + strlen(field), "%s", &fieldaux[-i]);
-        }
-    // label with format (datetime) + numeric value w/o format and no label + number with format.
-    // -> fill leftsize
-    } else if (
-         //(res == -1 || res == 1 || res == 0) &&
-         strlen(field) < col_width) {
-         int left = col_width - strlen(field) + 1;
-         while (left-- && left > 0) add_char(field, ' ', 0);
+    // If content exceedes column width, outputs n number of '*' needed to fill column width
+    if (str_len + num_len > col_width ) {
+        if (padding) sprintf(str_out, "%0*d", padding, 0);
+        subst(str_out, '0', ' ');
+        strncat(str_out, str_value, col_width - padding);
+        str_out[col_width-1] = '*';
+        str_out[col_width] = '\0';
+        return;
     }
-    mvwprintw(win, r, c, "%s", field);
-    wclrtoeol(win);
+
+    // padding
+    if (padding) sprintf(str_out, "%0*d", padding, 0);
+    subst(str_out, '0', ' ');
+
+    // left spaces
+    int left_spaces = 0;
+    if (align == 0 && str_len) {                           // center align
+        left_spaces = (col_width - padding - str_len) / 2;
+    } else if (align == 1 && str_len && ! num_len) {       // right align
+        left_spaces = col_width - padding - str_len;
+    }
+    while (left_spaces-- > 0) add_char(str_out, ' ', strlen(str_out));
+
+    // add text
+    if (align != 1 || ! num_len)
+        strcat(str_out, str_value);
+
+    // spaces after string value
+    int spaces = col_width - scstrlen(str_out) - num_len;
+    while (spaces-- > 0) add_char(str_out, ' ', strlen(str_out));
+
+    // add number
+    int fill_with_number = col_width - scstrlen(str_out);
+    if (num_len && num_len >= fill_with_number)
+        strncat(str_out, & numeric_value[num_len - fill_with_number], fill_with_number);
+    else if (num_len)
+        strcat(str_out, numeric_value);
+
     return;
 }
 
@@ -888,7 +820,7 @@ void show_numeric_content_of_cell(WINDOW * win, struct ent ** p, int col, int r,
 void show_text(char * val) {
     int pid;
     char px[MAXCMD];
-    char *pager;
+    char * pager;
 
     (void) strcpy(px, "| ");
     if (!(pager = getenv("PAGER")))

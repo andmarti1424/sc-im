@@ -16,9 +16,7 @@ void show_sc_row_headings(WINDOW * win, int mxrow);
 void show_sc_col_headings(WINDOW * win, int mxcol, int mxrow);
 void show_celldetails(WINDOW * win);
 
-void pad_text(char * out, struct ent ** p, int row, int col);
-void show_text_content_of_cell(WINDOW * win, struct ent ** p, int row, int col, int r, int c);
-void show_numeric_content_of_cell(WINDOW * win, struct ent ** p, int col, int r, int c);
+void pad_and_align (char * str_value, char * numeric_value, int col_width, int align, int padding, char * str_out);
 int get_formated_value(struct ent ** p, int col, char * value);
 
 int calc_offscr_sc_rows();

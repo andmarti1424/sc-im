@@ -27,6 +27,7 @@
 #include "y.tab.h"
 #include "xlsx.h"
 #include "xls.h"
+#include "screen.h"
 
 extern struct ent * freeents;
 
@@ -904,46 +905,60 @@ void export_plain(char * fname, int r0, int c0, int rn, int cn) {
     struct ent * ent = go_end();
     if (rn > ent->row) rn = ent->row;
 
+    char num [FBUFLEN] = "";
+    char text[FBUFLEN] = "";
+    char formated_s[FBUFLEN] = "";
+    int res = -1;
+    int align = 1;
+
     for (row = r0; row <= rn; row++) {
         // ignore hidden rows
-        if (row_hidden[row]) continue;
+        //if (row_hidden[row]) continue;
 
         for (pp = ATBL(tbl, row, col = c0); col <= cn; col++, pp++) {
             // ignore hidden cols
-            if (col_hidden[col]) continue;
+            //if (col_hidden[col]) continue;
 
             if (*pp) {
-                if ((*pp)->flags & is_valid) {
-                    if ((*pp)->cellerror) {
-                        (void) fprintf (f, "%*s", fwidth[col], ((*pp)->cellerror == CELLERROR ? "ERROR" : "INVALID"));
-                    } else if ((*pp)->format) {
-                        char field[FBUFLEN];
-                        if (*((*pp)->format) == 'd') {  // Date format
-                            time_t v = (time_t) ((*pp)->v);
-                            strftime(field, sizeof(field), ((*pp)->format)+1, localtime(&v));
-                        } else {                        // Numeric format
-                            format((*pp)->format, precision[col], (*pp)->v, field, sizeof(field));
-                        }
-                        (void) fprintf (f, "%*s", fwidth[col], field);
-                    } else { //eng number format
-                        char field[FBUFLEN] = "";
-                        (void) engformat(realfmt[col], fwidth[col], precision[col], (*pp)->v, field, sizeof(field));
-                        (void) fprintf (f, "%*s", fwidth[col], field);
+
+                num [0] = '\0';
+                text[0] = '\0';
+                out [0] = '\0';
+                formated_s[0] = '\0';
+                res = -1;
+                align = 1;
+
+                // If a numeric value exists
+                if ( (*pp)->flags & is_valid) {
+                    res = get_formated_value(pp, col, formated_s);
+                    // res = 0, indicates that in num we store a date
+                    // res = 1, indicates a format is applied in num
+                    if (res == 0 || res == 1) {
+                        strcpy(num, formated_s);
+                    } else if (res == -1) {
+                        sprintf(num, "%.*f", precision[col], (*pp)->v);
                     }
                 }
 
-                else if ((*pp)->label) {
-                    out[0] = '\0';
-                    pad_text(out, pp, row, col);
-                    //scdebug("_%s_", out);
-                    (void) fprintf (f, "%s", out);
-                } else {
-                    (void) fprintf (f, "%*s", fwidth[col], " ");
+                // If a string exists
+                if ((*pp)->label) {
+                    strcpy(text, (*pp)->label);
+                    align = 1;                                // right alignment
+                    if ((*pp)->flags & is_label) {            // center alignment
+                        align = 0;
+                    } else if ((*pp)->flags & is_leftflush) { // left alignment
+                        align = -1;
+                    } else if (res == 0) {                    // res must ¿NOT? be zero for label to be printed // TODO CHECK!
+                        text[0] = '\0';
+                    }
                 }
-            } else { // ! *pp
+
+                pad_and_align (text, num, fwidth[col], align, 0, out);
+                (void) fprintf (f, "%s", out);
+
+            } else {
                 (void) fprintf (f, "%*s", fwidth[col], " ");
             }
-
         }
         (void) fprintf(f,"\n");
     }
@@ -954,10 +969,6 @@ void export_plain(char * fname, int r0, int c0, int rn, int cn) {
     }
 
 }
-
-
-
-
 
 // fname is the path and name of file
 void export_delim(char * fname, char coldelim, int r0, int c0, int rn, int cn) {
