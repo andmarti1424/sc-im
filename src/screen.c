@@ -779,9 +779,8 @@ void pad_and_align (char * str_value, char * numeric_value, int col_width, int a
     if (str_len + num_len > col_width ) {
         if (padding) sprintf(str_out, "%0*d", padding, 0);
         subst(str_out, '0', ' ');
-        strncat(str_out, str_value, col_width - padding);
-        str_out[col_width-1] = '*';
-        str_out[col_width] = '\0';
+        sprintf(str_out, "%0*d", col_width - padding, 0);
+        subst(str_out, '0', '*');
         return;
     }
 
