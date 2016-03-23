@@ -45,6 +45,7 @@ int shall_quit = 0;
 unsigned int curmode = NORMAL_MODE;
 int maxrow, maxcol;
 char curfile[PATHLEN];
+char exepath[PATHLEN];
 
 int changed;
 int cellassign;
@@ -80,7 +81,6 @@ struct block * lastcmd_buffer;
 struct dictionary * user_conf_d;
 struct dictionary * predefined_conf_d;
 struct history * commandline_history;
-
 
 
 /*********************************************************************
@@ -344,6 +344,7 @@ void read_argv(int argc, char ** argv) {
             strcpy(curfile, argv[i]);
         }
     }
+    strcpy(exepath, argv[0]);
 }
 
 

@@ -17,7 +17,6 @@ static int max;
 static int look_result = -1;
 static char word_looked[50] = "";
 
-
 // Load the contents of help_doc into memory
 int load_help () {
     register FILE * f;
@@ -25,10 +24,27 @@ int load_help () {
     int c = 0, count = 0, max_width = COLS;
     char helpfile_path[BUFFERSIZE];
 
+    // we try to read help file in HELP_PATH
     sprintf(helpfile_path, "%s/%s_help", HELP_PATH, SNAME);
     f = fopen(helpfile_path, "r");
 
-    if (! f ) f = fopen("./doc", "r");
+    // we try to read help file in current dir
+    if (! f ) {
+        f = fopen("./doc", "r");
+    }
+
+    // last change to read the help file !
+    if (! f ) {
+        char cwd[1024];
+        extern char exepath[];
+        if (realpath(exepath, cwd) == NULL) return -1;
+        char * str_pos = strrchr(cwd, '/');
+        if (str_pos == NULL) return -1;
+        cwd[str_pos - cwd + 1] = '\0';
+        strcat(cwd, "doc");
+        f = fopen(cwd, "r");
+    }
+
     if (! f ) return -1;
 
     // Calculate number of elements in long_help
