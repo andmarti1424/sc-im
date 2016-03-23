@@ -255,6 +255,13 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
         if (row_hidden[r])
             (void) fprintf(f, "hide %d\n", r);
 
+    // padding
+    for (c = c0; c <= cn; c++) {
+        pp = ATBL(tbl, 0, c);
+        if (*pp && (*pp)->pad)
+            (void) fprintf(f, "pad %d %s\n", (*pp)->pad, coltoa(c));
+    }
+
     //write_ranges(f);
     write_marks(f);
 
@@ -320,9 +327,6 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
                         fprintf(f, "cellcolor %s%d", coltoa((*pp)->col), (*pp)->row);
                         fprintf(f, ":%s%d \"%s\"\n", coltoa(c_aux-1), (*pp)->row, strcolor);
                     }
-
-
-
 
                 }
 

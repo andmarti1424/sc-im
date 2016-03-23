@@ -218,6 +218,9 @@ void copyent(register struct ent *n, register struct ent *p, int dr, int dc,
     } else if (special != 'v' && special != 'f')
         n->format = NULL;
 
+    if (special != 'v')
+        n->pad = p->pad;
+
     if (p->ucolor && special != 'v') {
         n->ucolor = (struct ucolor *) malloc (sizeof(struct ucolor));
         n->ucolor->fg = p->ucolor->fg;
@@ -981,6 +984,7 @@ struct ent * lookat(int row, int col) {
         (*pp)->cellerror = CELLOK;
         (*pp)->next = NULL;
         (*pp)->ucolor = NULL;
+        (*pp)->pad = 0;
     }
     (*pp)->row = row;
     (*pp)->col = col;
@@ -1001,6 +1005,7 @@ void cleanent(struct ent * p) {
     p->cellerror = CELLOK;
     p->next = NULL;
     p->ucolor = NULL;
+    p->pad = 0;
     return;
 }
 
@@ -1434,6 +1439,39 @@ int any_locked_cells(int r1, int c1, int r2, int c2) {
     for (c = c1; c <= c2; c++) {
         p = *ATBL(tbl, r, c);
         if (p && (p->flags & is_locked))
+        return 1;
+    }
+    return 0;
+}
+
+// add padd to cells!
+// this sets n to padding of a range
+int pad(int n, int r1, int c1, int r2, int c2) {
+    int r, c;
+    struct ent *p ;
+    int pad_exceed_width = 0;
+
+    create_undo_action();
+
+    for (c = c1; c <= c2; c++)
+        for (r = r1; r <= r2; r++) {
+            p = *ATBL(tbl, r, c);
+            if (n > fwidth[c]) {
+                pad_exceed_width = 1;
+                continue;
+            }
+            if (p) {
+                copy_to_undostruct(r, c, r, c, 'd');
+                p->pad = n;
+                copy_to_undostruct(r, c, r, c, 'a');
+            }
+            modflg++;
+        }
+
+    end_undo_action();
+
+    if (pad_exceed_width) {
+        scerror(" Could not add padding in some cells. Padding exceeded column width");
         return 1;
     }
     return 0;

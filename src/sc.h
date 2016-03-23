@@ -81,6 +81,7 @@ struct ent {
     char * format;        /* printf format for this cell */
     char cellerror;       /* error in a cell? */
     struct ucolor * ucolor;
+    int pad;              // padding between other cells
 };
 
 #define FIX_ROW 1

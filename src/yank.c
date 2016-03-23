@@ -86,6 +86,7 @@ void add_ent_to_yanklist(struct ent * item) {
     (i_ent)->cellerror = CELLOK;
     (i_ent)->next = NULL;
     (i_ent)->ucolor = NULL;
+    (i_ent)->pad = 0;
 
     // Copy 'item' content to 'i_ent'
     (void) copyent(i_ent, item, 0, 0, 0, 0, 0, 0, 0);

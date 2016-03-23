@@ -540,7 +540,7 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
 
             // we print text and number
             } else {
-                pad_and_align (text, num, fwidth[col], align, 0, out);
+                pad_and_align (text, num, fwidth[col], align, (*p)->pad, out);
                 mvwprintw(win, row + 1 - offscr_sc_rows - q_row_hidden, c, "%s", out);
                 wclrtoeol(win);
             }
@@ -566,6 +566,7 @@ void add_cell_detail(char * d, struct ent * p1) {
         strcat(d, "??? } ");        // and this '}' is for vi %
 
     } else*/
+
     if (p1->label) {
         /* has constant label only */
         if (p1->flags & is_label)
@@ -608,11 +609,20 @@ void show_celldetails(WINDOW * win) {
     #ifdef USECOLORS
         set_ucolor(win, &ucolors[CELL_FORMAT]);
     #endif
+
     register struct ent *p1 = *ATBL(tbl, currow, curcol);
-    if ((p1) && p1->format)
-        sprintf(head, "(%s) ", p1->format);
+
+    // show padding
+    if (p1->pad)
+        sprintf(head, "(%d) ", p1->pad);
     else
-        sprintf(head, "(%d %d %d) ", fwidth[curcol], precision[curcol], realfmt[curcol]);
+        head[0]='\0';
+
+    // show format
+    if ((p1) && p1->format)
+        sprintf(head + strlen(head), "(%s) ", p1->format);
+    else
+        sprintf(head + strlen(head), "(%d %d %d) ", fwidth[curcol], precision[curcol], realfmt[curcol]);
     mvwprintw(win, 0, inputline_pos, "%s", head);
     inputline_pos += strlen(head);
 

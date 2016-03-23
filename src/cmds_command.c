@@ -79,6 +79,7 @@ static char * valid_commands[] = {
 "nmap",
 "nnoremap",
 "nunmap",
+"pad",
 "q",
 "q!",
 "quit!",
@@ -499,6 +500,17 @@ void do_commandmode(struct block * sb) {
             del_range_chars(interp_line, 0, 3); 
             parse_str(user_conf_d, interp_line);
             scinfo("Config value changed: %s", interp_line);
+
+        } else if ( ! strncmp(inputline, "pad ", 4) ) {
+            int c = curcol, cf = curcol;
+            if (p != -1) { // in case there is a range selected
+                c = sr->tlcol;
+                cf = sr->brcol;
+            }
+            strcpy(interp_line, inputline); // pad 5
+            sprintf(interp_line + strlen(interp_line), " %s:", coltoa(c)); // pad 5 A:
+            sprintf(interp_line + strlen(interp_line), "%s", coltoa(cf));  // B
+            send_to_interp(interp_line);
 
         } else if ( ! strcmp(inputline, "set") ) {
             int d = user_conf_d->len;

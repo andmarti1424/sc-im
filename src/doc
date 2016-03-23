@@ -485,13 +485,13 @@ Commands for handling cell content:
                 example:          :int goto B2
 
 
-    :hidecol C  
+    :hidecol C
                 hide column C
 
-    :hiderow 4 
+    :hiderow 4
                 hide row 4
 
-    :showcol C 
+    :showcol C
                 show column C that was previously hidden
 
     :showrow 5
@@ -509,9 +509,12 @@ Commands for handling cell content:
     :showrow 5:7
                 show a range of rows that were previously hidden
 
-    :showrows  
+    :showrows
                 if a range is selected, this command shows the rows hidden that are covered by the range
 
+    :pad n      being n an integer, this command applies a left padding to a column.
+                that padding would be n chars width.
+                if a range selected, this command affect the columns inside that range.
 
     :hiddenrows
                 show details of hidden rows

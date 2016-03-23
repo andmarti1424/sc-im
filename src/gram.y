@@ -74,6 +74,7 @@ int yylex();
 %token S_HIDECOL
 %token S_MARK
 %token S_AUTOJUS
+%token S_PAD
 
 /*
 token <ival> CARACTER
@@ -480,6 +481,10 @@ command:
 #endif
                                           scxfree($3);
                                         }
+
+    |    S_PAD NUMBER COL ':' COL    { pad($2, 0, $3, maxrow, $5); }
+    |    S_PAD NUMBER COL            { pad($2, 0, $3, maxrow, $3); }
+    |    S_PAD NUMBER var_or_range   { pad($2, $3.left.vp->row, $3.left.vp->col, $3.right.vp->row, $3.right.vp->col); }
 
 /*
     |    S_DEFINE strarg                { struct ent_ptr arg1, arg2;
