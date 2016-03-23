@@ -14,6 +14,8 @@ void store_default_config_values() {
     put(user_conf_d, "external_functions", "0");
     put(user_conf_d, "xlsx_readformulas", "0");
     put(user_conf_d, "quit_afterload", "0");
+    put(user_conf_d, "numeric_zero", "0");
+    put(user_conf_d, "numeric_decimal", "0");
 
     // we calc get gmtoffset
     #ifdef USELOCALE
