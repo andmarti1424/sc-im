@@ -673,6 +673,10 @@ Commands for handling cell content:
     setting variable 'numeric' to '1', a digit starts a numeric value
     setting the variable to '0', a digit acts as a command multiplier
 
+    - numeric_zero
+    - numeric_decimal
+    when these are each set, the corresponding zero and decimal will initiate numeric entry, but only when numeric mode is also set.
+
     - newline_action
     set variable 'newline_action' to 'j' to move cursor down after an entry.
     set it to 'l' to move it right, or set it to '0' to expect no action.
