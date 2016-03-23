@@ -1451,7 +1451,14 @@ int pad(int n, int r1, int c1, int r2, int c2) {
     struct ent *p ;
     int pad_exceed_width = 0;
 
+    if (any_locked_cells(r1, c1, r2, c2)) {
+        scinfo("Locked cells encountered. Nothing changed");
+        return -1;
+     }
+
+#ifdef UNDO
     create_undo_action();
+#endif
 
     for (c = c1; c <= c2; c++)
         for (r = r1; r <= r2; r++) {
@@ -1461,14 +1468,20 @@ int pad(int n, int r1, int c1, int r2, int c2) {
                 continue;
             }
             if (p) {
+#ifdef UNDO
                 copy_to_undostruct(r, c, r, c, 'd');
+#endif
                 p->pad = n;
+#ifdef UNDO
                 copy_to_undostruct(r, c, r, c, 'a');
+#endif
             }
             modflg++;
         }
 
+#ifdef UNDO
     end_undo_action();
+#endif
 
     if (pad_exceed_width) {
         scerror(" Could not add padding in some cells. Padding exceeded column width");
