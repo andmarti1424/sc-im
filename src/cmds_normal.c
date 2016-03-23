@@ -66,6 +66,7 @@ void do_normalmode(struct block * buf) {
             break;
 
         case '0':
+            if (atoi(get_conf_value("numeric_zero")) == 1) goto numeric;
         case OKEY_HOME:
             lastrow = currow;
             lastcol = curcol;
@@ -337,6 +338,7 @@ void do_normalmode(struct block * buf) {
 
         // repeat last command
         case '.':
+            if (atoi(get_conf_value("numeric_decimal")) == 1) goto numeric;
             copybuffer(lastcmd_buffer, buf); // nose graba en lastcmd_buffer!!
             cmd_multiplier = 1;
             exec_mult(buf, COMPLETECMDTIMEOUT);
@@ -1006,7 +1008,8 @@ void do_normalmode(struct block * buf) {
         // input of numbers
         default:
         numeric:
-            if ( (isdigit(buf->value) || buf->value == '-' || buf->value == '+') &&
+            if ( (isdigit(buf->value) || buf->value == '-' || buf->value == '+' || 
+                  ( buf->value == '.' &&  atoi(get_conf_value("numeric_decimal")) )) &&
                 atoi(get_conf_value("numeric")) ) {
                 insert_edit_submode='=';
                 chg_mode(insert_edit_submode);
