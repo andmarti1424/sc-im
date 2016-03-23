@@ -770,23 +770,19 @@ void pad_and_align (char * str_value, char * numeric_value, int col_width, int a
 
     // If padding exceedes column width, returns n number of '-' needed to fill column width
     if (padding >= col_width ) {
-        sprintf(str_out, "%0*d", col_width, 0);
-        subst(str_out, '0', '-');
+        sprintf(str_out, "%*s", col_width, "");
         return;
     }
 
     // If content exceedes column width, outputs n number of '*' needed to fill column width
-    if (str_len + num_len > col_width ) {
-        if (padding) sprintf(str_out, "%0*d", padding, 0);
-        subst(str_out, '0', ' ');
-        sprintf(str_out, "%0*d", col_width - padding, 0);
-        subst(str_out, '0', '*');
+    if (str_len + num_len + padding > col_width ) {
+        if (padding) sprintf(str_out, "%*s", padding, "");
+        memset(str_out + strlen(str_out), '*', col_width - padding);
         return;
     }
 
     // padding
-    if (padding) sprintf(str_out, "%0*d", padding, 0);
-    subst(str_out, '0', ' ');
+    if (padding) sprintf(str_out, "%*s", padding, "");
 
     // left spaces
     int left_spaces = 0;

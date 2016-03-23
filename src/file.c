@@ -948,7 +948,7 @@ void export_plain(char * fname, int r0, int c0, int rn, int cn) {
                         align = 0;
                     } else if ((*pp)->flags & is_leftflush) { // left alignment
                         align = -1;
-                    } else if (res == 0) {                    // res must ¿NOT? be zero for label to be printed // TODO CHECK!
+                    } else if (res == 0) {                    // res must ¿NOT? be zero for label to be printed
                         text[0] = '\0';
                     }
                 }
@@ -986,7 +986,6 @@ void export_delim(char * fname, char coldelim, int r0, int c0, int rn, int cn) {
 
     struct ent * ent = go_end();
     if (rn > ent->row) rn = ent->row;
-    //if (cn > ent->col) cn = ent->col;
 
     for (row = r0; row <= rn; row++) {
         for (pp = ATBL(tbl, row, col = c0); col <= cn; col++, pp++) {
