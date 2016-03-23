@@ -613,7 +613,7 @@ void show_celldetails(WINDOW * win) {
     register struct ent *p1 = *ATBL(tbl, currow, curcol);
 
     // show padding
-    if (p1->pad)
+    if (p1 != NULL && p1->pad)
         sprintf(head, "(%d) ", p1->pad);
     else
         head[0]='\0';
