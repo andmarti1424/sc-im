@@ -291,14 +291,14 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
                     struct enode * e = new((*pp)->ucolor->fg, (struct enode *)0, (struct enode *)0);
                     decompile(e, 0);
                     uppercase(line);
-                    if (line[0] == '@') del_char(line, 0); // FIXME THIS !!!
+                    if (line[0] == '@') del_char(line, 0); // FIXME THIS !!! SEE ISSUE #42 in github
                     sprintf(strcolor, "fg=%s", &line[0]);
                     free(e);
                     linelim=0;
                     e = new((*pp)->ucolor->bg, (struct enode *)0, (struct enode *)0);
                     decompile(e, 0);
                     uppercase(line);
-                    if (line[0] == '@') del_char(line, 0); // FIXME THIS !!!
+                    if (line[0] == '@') del_char(line, 0); // FIXME THIS !!! SEE ISSUE #42 in github
                     sprintf(strcolor + strlen(strcolor), " bg=%s", &line[0]);
                     free(e);
 
@@ -316,24 +316,40 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
                     // by row, store cellcolors grouped by ranges
                     int c_aux = c;
                     struct ucolor * u = (*pp)->ucolor;
-//                  struct ucolor * a = (*ATBL(tbl, r, c-1)) == NULL ? NULL : (*ATBL(tbl, r, c-1))->ucolor;
                     struct ucolor * a = NULL;
                     if ( c > 0 && *ATBL(tbl, r, c-1) != NULL)
                          a = (*ATBL(tbl, r, c-1))->ucolor;
 
-                    if ( (u != NULL) && (c <= maxcol) && ( c == 0 || ( a == NULL ) || ( ! same_ucolor( NULL, NULL) ))) {
+                    if ( (u != NULL) && (c <= maxcol) && ( c == 0 || ( a == NULL ) || ( a != NULL && ! same_ucolor( a, u ) ))) {
                         while (c_aux < maxcol && *ATBL(tbl, r, c_aux) != NULL && same_ucolor( (*ATBL(tbl, r, c_aux))->ucolor, (*pp)->ucolor ))
                             c_aux++;
                         fprintf(f, "cellcolor %s%d", coltoa((*pp)->col), (*pp)->row);
-                        fprintf(f, ":%s%d \"%s\"\n", coltoa(c_aux-1), (*pp)->row, strcolor);
+                        if (c_aux-1 != (*pp)->col)
+                            fprintf(f, ":%s%d \"%s\"\n", coltoa(c_aux-1), (*pp)->row, strcolor);
+                        else
+                            fprintf(f, " \"%s\"\n", strcolor);
                     }
 
                 }
 
-                // write blocked cells
+                // write locked cells
                 // lock should be stored after any other command
-                if ((*pp)->flags & is_locked)
-                    (void) fprintf(f, "lock %s%d\n", coltoa((*pp)->col), (*pp)->row);
+
+                // previous implementation
+                //if ((*pp)->flags & is_locked)
+                //    (void) fprintf(f, "lock %s%d\n", coltoa((*pp)->col), (*pp)->row);
+
+                // new implementation
+                int c_aux = c;
+                if ( (*pp)->flags & is_locked && c <= maxcol && ( c == 0 || ( *ATBL(tbl, r, c-1) != NULL && ! ((*ATBL(tbl, r, c-1))->flags & is_locked) ) )) {
+                    while (c_aux < maxcol && *ATBL(tbl, r, c_aux) != NULL && (*ATBL(tbl, r, c_aux))->flags & is_locked )
+                        c_aux++;
+                    fprintf(f, "lock %s%d", coltoa((*pp)->col), (*pp)->row);
+                    if (c_aux-1 != (*pp)->col)
+                        fprintf(f, ":%s%d\n", coltoa(c_aux-1), (*pp)->row);
+                    else
+                        fprintf(f, "\n");
+                }
 
 
                 /*if ((*pp)->nrow >= 0) {
