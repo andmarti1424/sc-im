@@ -187,6 +187,7 @@ token S_YANKCOL
 %token S_IUNMAP
 %token S_COLOR
 %token S_CELLCOLOR
+%token S_REDEFINE_COLOR
 
 %token K_ERROR
 %token K_INVALID
@@ -481,6 +482,10 @@ command:
 #endif
                                           scxfree($3);
                                         }
+
+    |    S_REDEFINE_COLOR STRING NUMBER NUMBER NUMBER {
+                                         redefine_color($2, $3, $4, $5);
+                                         scxfree($2); }
 
     |    S_PAD NUMBER COL ':' COL    { pad($2, 0, $3, maxrow, $5); }
     |    S_PAD NUMBER COL            { pad($2, 0, $3, maxrow, $3); }

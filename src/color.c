@@ -323,7 +323,7 @@ void color_cell(int r, int c, int rf, int cf, char * str) {
 // returns 0 otherwise
 int same_ucolor(struct ucolor * u, struct ucolor * v) {
     if (u == NULL || v == NULL)       return 0;
-          
+
     if (u->fg != v->fg)               return 0;
     if (u->bg != v->bg)               return 0;
     if (u->bold != v->bold)           return 0;
@@ -334,5 +334,28 @@ int same_ucolor(struct ucolor * u, struct ucolor * v) {
     if (u->blink != v->blink)         return 0;
 
     return 1;
+}
+
+int redefine_color(char * color, int r, int g, int b) {
+    void winchg();
+
+#ifdef USECOLORS
+    if (
+        ! atoi(get_conf_value("nocurses")) &&
+        has_colors() &&
+        can_change_color()
+       ) {
+           int c = atoi(get(d_colors_param, color));
+           int res = init_color(c, r, g, b);
+           if (res == 0) {
+               winchg(); 
+               scinfo("Color %s redefined to %d %d %d.", color, r, g, b);
+               return 0;
+           }
+       }
+
+#endif
+       scinfo("Could not redefine color");
+       return -1;
 }
 

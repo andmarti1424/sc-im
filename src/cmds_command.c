@@ -84,6 +84,7 @@ static char * valid_commands[] = {
 "q!",
 "quit!",
 "quit",
+"redefine_color"
 "refresh",
 "set",
 "showcol",
@@ -297,6 +298,9 @@ void do_commandmode(struct block * sb) {
                 sprintf(cline + strlen(cline), "%s", coltoa(cf));
             }
             send_to_interp(cline); 
+
+        } else if ( ! strncmp(inputline, "redefine_color", 14) ) {
+            send_to_interp(inputline); 
 
         } else if ( ! strncmp(inputline, "load", 4) ) {
             char cline [BUFFERSIZE];
