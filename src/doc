@@ -548,8 +548,10 @@ Commands for handling cell content:
 
     :redefine_color <str> <number> <number> <number>
                 This command is used for changing RGB values of the colors defined by ncurses.
-                For this, ncurses shall be built with --enable-ext-colors and your terminal shall support 256 colors.
-                One for example is TERM=xterm-256color
+                RGB values can vary from 0 to 1000.
+                NOTES: ncurses shall be built with --enable-ext-colors.
+                       your terminal shall support 256 colors. One for example is TERM=xterm-256color.
+                       should link to ncursesw library and not the common ncurses library.
                 Example of use:              :redefine_color "RED" 700 100 100
                 
     :lock       Use this command to lock the current cell or a range of cells, i.e. make them immune to any type of editing. A locked cell can't be changed in any way until it is unlocked.
