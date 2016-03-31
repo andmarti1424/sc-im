@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <fcntl.h>
+#include <limits.h>
 #include "sc.h"
 #include "macros.h"
 #include "screen.h"
@@ -35,7 +36,7 @@ int load_help () {
 
     // last change to read the help file !
     if (! f ) {
-        char cwd[1024];
+        char cwd[PATH_MAX];
         extern char exepath[];
         if (realpath(exepath, cwd) == NULL) return -1;
         char * str_pos = strrchr(cwd, '/');
