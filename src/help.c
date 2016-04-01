@@ -37,7 +37,7 @@ int load_help () {
     // last change to read the help file !
     if (! f ) {
         char cwd[PATH_MAX];
-        extern char exepath[];
+        extern char *exepath;
         if (realpath(exepath, cwd) == NULL) return -1;
         char * str_pos = strrchr(cwd, '/');
         if (str_pos == NULL) return -1;
