@@ -6,8 +6,13 @@
 
 #define ATBL(tbl, row, col)    (*(tbl + row) + (col))
 #define MINROWS      100     /* minimum size at startup */
-//#define MAXROWS 1048576      /* MAX rows size of sheet */
-#define MAXROWS    65536     /* MAX rows size of sheet */
+
+/* MAX rows size of sheet. Default 65536.   */
+/* Can be changed up to 1048576 in Makefile */
+#ifndef MAXROWS
+#define MAXROWS    65536
+#endif
+
 #define MINCOLS       30
 #define ABSMAXCOLS   702     /* MAX cols. (ZZ in base 26) */
 #define CRROWS         1
