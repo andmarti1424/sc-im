@@ -84,7 +84,7 @@ static char * valid_commands[] = {
 "q!",
 "quit!",
 "quit",
-"redefine_color"
+"redefine_color",
 "refresh",
 "set",
 "showcol",
