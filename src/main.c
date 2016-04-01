@@ -45,7 +45,7 @@ int shall_quit = 0;
 unsigned int curmode = NORMAL_MODE;
 int maxrow, maxcol;
 char curfile[PATHLEN];
-char exepath[PATHLEN];
+char *exepath;
 
 int changed;
 int cellassign;
@@ -344,7 +344,7 @@ void read_argv(int argc, char ** argv) {
             strcpy(curfile, argv[i]);
         }
     }
-    strcpy(exepath, argv[0]);
+    exepath = argv[0];
 }
 
 
