@@ -1,5 +1,2 @@
-1. XLS and XLSX export support.
-2. Keep undo structures in undofile.
-3. Implement cursorline and cursorcolumn.
-4. Implement named functions.
-5. Autosuggestion / completion -> for this, script support has to be completed.
+See the issues labeled as "feature request" in:
+https://github.com/andmarti1424/sc-im/issues

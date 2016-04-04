@@ -1,22 +1,19 @@
 TODO
 ----
-05/08/2015
+04/04/2016
+
 
 Main features to achieve in near future versions
 ------------------------------------------------
 
-1. Finish scripting
+1. Fix problem when entering extended ascii chars.
 
-2. Colorcell shouldnt be applied if lock cells are found
-
-3. When saving .sc files, save the user defined ranges
-
-4. UNDO/REDO changes in colwidth, precision and realfmt.
+2. UNDO/REDO changes in colwidth, precision and realfmt.
    UNDO/REDO changes of filters applied.
 
-5. Change XLS import routine to work like the XLSX one.
+3. lock / freeze a section of the screen (rows or columns).
 
-6. lock / freeze (glue down) a section of the screen
+4. Export spreadsheet to Latex format.
 
 
 
@@ -28,20 +25,17 @@ Main features to achieve before v1.0
 2. With calc chain already implemented, fix problem when UNDOing actions that change cells equations !!!
 
 
-
 Long term features
 ------------------
 
-1. multiple worksheets!!
-
-2. isolate UI code (CURSES) from the rest of the code for future
+1. isolate UI code (CURSES) from the rest of the code for future
 implementations in other gui's.
 
-3. scim_scripting. Use LUA to allow scripting and plugin support.
+2. scim_scripting. Use LUA to allow scripting and plugin support.
 
-4. Use UTF-8 encoding and display any Unicode char.
+3. Use UTF-8 encoding and display any Unicode char.
 Change curses calls to cursesw calls.
 
-5. status bar format customized by user.
+4. status bar format customized by user.
 can show count of cells and sum of values, when a range is selected..
 *this should be done with a script.
