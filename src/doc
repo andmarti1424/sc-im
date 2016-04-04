@@ -553,7 +553,11 @@ Commands for handling cell content:
                        your terminal shall support 256 colors. One for example is TERM=xterm-256color.
                        should link to ncursesw library and not the common ncurses library.
                 Example of use:              :redefine_color "RED" 700 100 100
-                
+                If you want this to take effect every time you start SC-IM, you can store this command in your $HOME/.scimrc adding:
+                       REDEFINE_COLOR "RED" 700 100 100
+
+                You can also redefine the BLACK color, changing the default background color of SC-IM.
+
     :lock       Use this command to lock the current cell or a range of cells, i.e. make them immune to any type of editing. A locked cell can't be changed in any way until it is unlocked.
 
     :unlock     This command is the opposite of the :lock command and thus unlocks a locked cell and makes it editable.
