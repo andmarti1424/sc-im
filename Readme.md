@@ -19,7 +19,7 @@ SC-IM uses ncurses for visual interface and has vim-like keybindings and some fu
 - Cell shifting.
 - More movements commands implemented !
 - Input and Output was completely rewritten.
-- Screen colors can be customized by user, even at runtime.
+- 256 color support - screen colors can be customized by user, even at runtime.
 - Colorize cells or give them format such as bold or underline.
 - Implement external functions in the language you prefer and use them in SC-IM.
 - Use SC-IM as a non-interactive calculator, reading its input from a external script.
