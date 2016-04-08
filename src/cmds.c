@@ -1318,6 +1318,7 @@ void auto_justify(int ci, int cf, int min) {
         for (r = 0; r <= maxrow; r++) {
             if ((p = *ATBL(tbl, r, c))) {
                 sum = 0;
+                if (p->pad) sum += p->pad;
                 if (p->label) sum += strlen(p->label);
                 if (p->flags & is_valid) {
                     sprintf(field, "%.*f", precision[c], p->v);
