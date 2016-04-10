@@ -1,0 +1,192 @@
+execve("./scim", ["./scim"], [/* 18 vars */]) = 0
+brk(0)                                  = 0x1425000
+uname({sys="Linux", node="iomega", ...}) = 0
+access("/etc/ld.so.nohwcap", F_OK)      = -1 ENOENT (No such file or directory)
+mmap2(NULL, 4096, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0xb6f3c000
+access("/etc/ld.so.preload", R_OK)      = -1 ENOENT (No such file or directory)
+open("/etc/ld.so.cache", O_RDONLY|O_CLOEXEC) = 3
+fstat64(3, {st_mode=S_IFREG|0644, st_size=50777, ...}) = 0
+mmap2(NULL, 50777, PROT_READ, MAP_PRIVATE, 3, 0) = 0xb6f2f000
+close(3)                                = 0
+access("/etc/ld.so.nohwcap", F_OK)      = -1 ENOENT (No such file or directory)
+open("/lib/arm-linux-gnueabi/libm.so.6", O_RDONLY|O_CLOEXEC) = 3
+read(3, "\177ELF\1\1\1\0\0\0\0\0\0\0\0\0\3\0(\0\1\0\0\0\360<\0\0004\0\0\0"..., 512) = 512
+lseek(3, 655828, SEEK_SET)              = 655828
+read(3, "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"..., 1160) = 1160
+lseek(3, 655504, SEEK_SET)              = 655504
+read(3, "A)\0\0\0aeabi\0\1\37\0\0\0\0054T\0\6\2\10\1\t\1\22\4\23\1\24\1"..., 42) = 42
+fstat64(3, {st_mode=S_IFREG|0644, st_size=656988, ...}) = 0
+mmap2(NULL, 721048, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_DENYWRITE, 3, 0) = 0xb6e5e000
+mprotect(0xb6efe000, 61440, PROT_NONE)  = 0
+mmap2(0xb6f0d000, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x9f000) = 0xb6f0d000
+close(3)                                = 0
+access("/etc/ld.so.nohwcap", F_OK)      = -1 ENOENT (No such file or directory)
+open("/lib/arm-linux-gnueabi/libncursesw.so.5", O_RDONLY|O_CLOEXEC) = 3
+read(3, "\177ELF\1\1\1\0\0\0\0\0\0\0\0\0\3\0(\0\1\0\0\0\344]\0\0004\0\0\0"..., 512) = 512
+lseek(3, 185784, SEEK_SET)              = 185784
+read(3, "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"..., 1000) = 1000
+lseek(3, 185496, SEEK_SET)              = 185496
+read(3, "A'\0\0\0aeabi\0\1\35\0\0\0\0054T\0\6\2\10\1\t\1\22\4\24\1\25\1"..., 40) = 40
+fstat64(3, {st_mode=S_IFREG|0644, st_size=186784, ...}) = 0
+mmap2(NULL, 4096, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0xb6e5d000
+mmap2(NULL, 251392, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_DENYWRITE, 3, 0) = 0xb6e1f000
+mprotect(0xb6e4c000, 61440, PROT_NONE)  = 0
+mmap2(0xb6e5b000, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x2c000) = 0xb6e5b000
+close(3)                                = 0
+access("/etc/ld.so.nohwcap", F_OK)      = -1 ENOENT (No such file or directory)
+open("/lib/arm-linux-gnueabi/libtinfo.so.5", O_RDONLY|O_CLOEXEC) = 3
+read(3, "\177ELF\1\1\1\0\0\0\0\0\0\0\0\0\3\0(\0\1\0\0\0004]\0\0004\0\0\0"..., 512) = 512
+lseek(3, 124300, SEEK_SET)              = 124300
+read(3, "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"..., 1040) = 1040
+lseek(3, 124004, SEEK_SET)              = 124004
+read(3, "A'\0\0\0aeabi\0\1\35\0\0\0\0054T\0\6\2\10\1\t\1\22\4\24\1\25\1"..., 40) = 40
+fstat64(3, {st_mode=S_IFREG|0644, st_size=125340, ...}) = 0
+mmap2(NULL, 190668, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_DENYWRITE, 3, 0) = 0xb6df0000
+mprotect(0xb6e0c000, 65536, PROT_NONE)  = 0
+mmap2(0xb6e1c000, 12288, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x1c000) = 0xb6e1c000
+close(3)                                = 0
+access("/etc/ld.so.nohwcap", F_OK)      = -1 ENOENT (No such file or directory)
+open("/lib/arm-linux-gnueabi/libc.so.6", O_RDONLY|O_CLOEXEC) = 3
+read(3, "\177ELF\1\1\1\0\0\0\0\0\0\0\0\0\3\0(\0\1\0\0\0\230\204\1\0004\0\0\0"..., 512) = 512
+lseek(3, 1272700, SEEK_SET)             = 1272700
+read(3, "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"..., 2840) = 2840
+lseek(3, 1269268, SEEK_SET)             = 1269268
+read(3, "A)\0\0\0aeabi\0\1\37\0\0\0\0054T\0\6\2\10\1\t\1\22\4\23\1\24\1"..., 42) = 42
+fstat64(3, {st_mode=S_IFREG|0755, st_size=1275540, ...}) = 0
+mmap2(NULL, 1344920, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_DENYWRITE, 3, 0) = 0xb6ca7000
+mprotect(0xb6ddb000, 61440, PROT_NONE)  = 0
+mmap2(0xb6dea000, 12288, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x133000) = 0xb6dea000
+mmap2(0xb6ded000, 9624, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_ANONYMOUS, -1, 0) = 0xb6ded000
+close(3)                                = 0
+access("/etc/ld.so.nohwcap", F_OK)      = -1 ENOENT (No such file or directory)
+open("/lib/arm-linux-gnueabi/libdl.so.2", O_RDONLY|O_CLOEXEC) = 3
+read(3, "\177ELF\1\1\1\0\0\0\0\0\0\0\0\0\3\0(\0\1\0\0\0\220\t\0\0004\0\0\0"..., 512) = 512
+lseek(3, 8652, SEEK_SET)                = 8652
+read(3, "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"..., 1160) = 1160
+lseek(3, 8328, SEEK_SET)                = 8328
+read(3, "A)\0\0\0aeabi\0\1\37\0\0\0\0054T\0\6\2\10\1\t\1\22\4\23\1\24\1"..., 42) = 42
+fstat64(3, {st_mode=S_IFREG|0644, st_size=9812, ...}) = 0
+mmap2(NULL, 73912, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_DENYWRITE, 3, 0) = 0xb6c94000
+mprotect(0xb6c96000, 61440, PROT_NONE)  = 0
+mmap2(0xb6ca5000, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x1000) = 0xb6ca5000
+close(3)                                = 0
+mmap2(NULL, 4096, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0xb6c93000
+set_tls(0xb6c936d0, 0xb6c93db8, 0xb6f3f050, 0xb6c936d0, 0xb6f3f050) = 0
+mprotect(0xb6dea000, 8192, PROT_READ)   = 0
+mprotect(0xb6ca5000, 4096, PROT_READ)   = 0
+mprotect(0xb6e1c000, 8192, PROT_READ)   = 0
+mprotect(0xb6e5b000, 4096, PROT_READ)   = 0
+mprotect(0xb6f0d000, 4096, PROT_READ)   = 0
+mprotect(0xb6f3e000, 4096, PROT_READ)   = 0
+munmap(0xb6f2f000, 50777)               = 0
+brk(0)                                  = 0x1425000
+brk(0x1446000)                          = 0x1446000
+open("/usr/lib/locale/locale-archive", O_RDONLY|O_LARGEFILE|O_CLOEXEC) = 3
+fstat64(3, {st_mode=S_IFREG|0644, st_size=1607712, ...}) = 0
+mmap2(NULL, 1607712, PROT_READ, MAP_PRIVATE, 3, 0) = 0xb6b0a000
+close(3)                                = 0
+rt_sigaction(SIGABRT, {0x16ef8, [ABRT], SA_RESTORER|SA_RESTART, 0xb6cd6d30}, {SIG_DFL, [], 0}, 8) = 0
+rt_sigaction(SIGTERM, {0x16f20, [TERM], SA_RESTORER|SA_RESTART, 0xb6cd6d30}, {SIG_DFL, [], 0}, 8) = 0
+rt_sigaction(SIGPIPE, {0x171d8, [PIPE], SA_RESTORER|SA_RESTART, 0xb6cd6d30}, {SIG_DFL, [], 0}, 8) = 0
+rt_sigaction(SIGWINCH, {0x16b10, [WINCH], SA_RESTORER|SA_RESTART, 0xb6cd6d30}, {SIG_DFL, [], 0}, 8) = 0
+gettimeofday({1459535893, 694429}, NULL) = 0
+open("/etc/localtime", O_RDONLY|O_CLOEXEC) = 3
+fcntl64(3, F_GETFD)                     = 0x1 (flags FD_CLOEXEC)
+fstat64(3, {st_mode=S_IFREG|0644, st_size=1061, ...}) = 0
+fstat64(3, {st_mode=S_IFREG|0644, st_size=1061, ...}) = 0
+mmap2(NULL, 4096, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0xb6f3b000
+read(3, "TZif2\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\5\0\0\0\5\0\0\0\0"..., 4096) = 1061
+_llseek(3, -6, [1055], SEEK_CUR)        = 0
+read(3, "\nART3\n", 4096)               = 6
+close(3)                                = 0
+munmap(0xb6f3b000, 4096)                = 0
+open("/mnt/raid1/mongo/.sciminfo", O_RDONLY) = 3
+close(3)                                = 0
+open("/mnt/raid1/mongo/.sciminfo", O_RDONLY) = 3
+fstat64(3, {st_mode=S_IFREG|0644, st_size=403, ...}) = 0
+mmap2(NULL, 4096, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0xb6f3b000
+read(3, ":e! txt b.txt\n:e txt d.txt\n:e tx"..., 4096) = 403
+read(3, "", 4096)                       = 0
+close(3)                                = 0
+munmap(0xb6f3b000, 4096)                = 0
+ioctl(1, SNDCTL_TMR_TIMEBASE or SNDRV_TIMER_IOCTL_NEXT_DEVICE or TCGETS, {B38400 opost isig icanon echo ...}) = 0
+stat64("/mnt/raid1/mongo/.terminfo", 0x1429e28) = -1 ENOENT (No such file or directory)
+stat64("/etc/terminfo", {st_mode=S_IFDIR|0755, st_size=4096, ...}) = 0
+stat64("/lib/terminfo", {st_mode=S_IFDIR|0755, st_size=4096, ...}) = 0
+stat64("/usr/share/terminfo", {st_mode=S_IFDIR|0755, st_size=4096, ...}) = 0
+gettimeofday({1459535893, 701035}, NULL) = 0
+access("/etc/terminfo/l/linux", R_OK)   = -1 ENOENT (No such file or directory)
+access("/lib/terminfo/l/linux", R_OK)   = 0
+open("/lib/terminfo/l/linux", O_RDONLY|O_LARGEFILE) = 3
+fstat64(3, {st_mode=S_IFREG|0644, st_size=1794, ...}) = 0
+mmap2(NULL, 4096, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0xb6f3b000
+read(3, "\32\1\24\0\35\0\20\0}\1I\3linux|linux console\0"..., 4096) = 1794
+read(3, "", 4096)                       = 0
+close(3)                                = 0
+munmap(0xb6f3b000, 4096)                = 0
+gettimeofday({1459535893, 703417}, NULL) = 0
+ioctl(1, SNDCTL_TMR_TIMEBASE or SNDRV_TIMER_IOCTL_NEXT_DEVICE or TCGETS, {B38400 opost isig icanon echo ...}) = 0
+ioctl(1, SNDCTL_TMR_TIMEBASE or SNDRV_TIMER_IOCTL_NEXT_DEVICE or TCGETS, {B38400 opost isig icanon echo ...}) = 0
+ioctl(1, TIOCGWINSZ, {ws_row=26, ws_col=88, ws_xpixel=0, ws_ypixel=0}) = 0
+ioctl(1, SNDCTL_TMR_TIMEBASE or SNDRV_TIMER_IOCTL_NEXT_DEVICE or TCGETS, {B38400 opost isig icanon echo ...}) = 0
+ioctl(1, TIOCGWINSZ, {ws_row=26, ws_col=88, ws_xpixel=0, ws_ypixel=0}) = 0
+brk(0x1467000)                          = 0x1467000
+ioctl(1, SNDCTL_TMR_TIMEBASE or SNDRV_TIMER_IOCTL_NEXT_DEVICE or TCGETS, {B38400 opost isig icanon echo ...}) = 0
+ioctl(1, SNDCTL_TMR_TIMEBASE or SNDRV_TIMER_IOCTL_NEXT_DEVICE or TCGETS, {B38400 opost isig icanon echo ...}) = 0
+ioctl(1, SNDCTL_TMR_TIMEBASE or SNDRV_TIMER_IOCTL_NEXT_DEVICE or TCGETS, {B38400 opost isig icanon echo ...}) = 0
+ioctl(1, SNDCTL_TMR_TIMEBASE or SNDRV_TIMER_IOCTL_NEXT_DEVICE or TCGETS, {B38400 opost isig icanon echo ...}) = 0
+ioctl(1, SNDCTL_TMR_STOP or SNDRV_TIMER_IOCTL_GINFO or TCSETSW, {B38400 opost isig -icanon echo ...}) = 0
+ioctl(1, SNDCTL_TMR_TIMEBASE or SNDRV_TIMER_IOCTL_NEXT_DEVICE or TCGETS, {B38400 opost isig -icanon echo ...}) = 0
+ioctl(1, SNDCTL_TMR_TIMEBASE or SNDRV_TIMER_IOCTL_NEXT_DEVICE or TCGETS, {B38400 opost isig -icanon echo ...}) = 0
+ioctl(1, SNDCTL_TMR_STOP or SNDRV_TIMER_IOCTL_GINFO or TCSETSW, {B38400 opost isig -icanon -echo ...}) = 0
+ioctl(1, SNDCTL_TMR_TIMEBASE or SNDRV_TIMER_IOCTL_NEXT_DEVICE or TCGETS, {B38400 opost isig -icanon -echo ...}) = 0
+rt_sigaction(SIGTSTP, NULL, {SIG_DFL, [], 0}, 8) = 0
+rt_sigaction(SIGTSTP, {0xb6e35d70, [], SA_RESTORER|SA_RESTART, 0xb6cd6d30}, NULL, 8) = 0
+rt_sigaction(SIGINT, NULL, {SIG_DFL, [], 0}, 8) = 0
+rt_sigaction(SIGINT, {0xb6e35c6c, [], SA_RESTORER|SA_RESTART, 0xb6cd6d30}, NULL, 8) = 0
+rt_sigaction(SIGTERM, NULL, {0x16f20, [TERM], SA_RESTORER|SA_RESTART, 0xb6cd6d30}, 8) = 0
+rt_sigaction(SIGWINCH, NULL, {0x16b10, [WINCH], SA_RESTORER|SA_RESTART, 0xb6cd6d30}, 8) = 0
+ioctl(1, SNDCTL_TMR_TIMEBASE or SNDRV_TIMER_IOCTL_NEXT_DEVICE or TCGETS, {B38400 opost isig -icanon -echo ...}) = 0
+write(1, "\33[1;26r\33[0;10m\33[4l\33[?7h\33[39;49m\33"..., 42) = 42
+ioctl(1, SNDCTL_TMR_TIMEBASE or SNDRV_TIMER_IOCTL_NEXT_DEVICE or TCGETS, {B38400 opost isig -icanon -echo ...}) = 0
+ioctl(1, SNDCTL_TMR_STOP or SNDRV_TIMER_IOCTL_GINFO or TCSETSW, {B38400 opost isig -icanon -echo ...}) = 0
+ioctl(1, SNDCTL_TMR_TIMEBASE or SNDRV_TIMER_IOCTL_NEXT_DEVICE or TCGETS, {B38400 opost isig -icanon -echo ...}) = 0
+open("/mnt/raid1/mongo/.scimrc", O_RDONLY) = -1 ENOENT (No such file or directory)
+fcntl64(0, F_GETFL)                     = 0x402 (flags O_RDWR|O_APPEND)
+fcntl64(0, F_SETFL, O_RDWR|O_APPEND|O_NONBLOCK) = 0
+fstat64(0, {st_mode=S_IFCHR|0620, st_rdev=makedev(136, 0), ...}) = 0
+mmap2(NULL, 4096, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0xb6f3b000
+read(0, 0xb6f3b000, 1024)               = -1 EAGAIN (Resource temporarily unavailable)
+munmap(0xb6f3b000, 4096)                = 0
+open("/dev/tty", O_RDONLY)              = 3
+dup3(3, 0, 0)                           = 0
+close(3)                                = 0
+fcntl64(0, F_GETFL)                     = 0 (flags O_RDONLY)
+fcntl64(0, F_SETFL, O_RDONLY)           = 0
+brk(0x1488000)                          = 0x1488000
+ioctl(1, SNDCTL_TMR_TIMEBASE or SNDRV_TIMER_IOCTL_NEXT_DEVICE or TCGETS, {B38400 opost isig -icanon -echo ...}) = 0
+ioctl(1, SNDCTL_TMR_STOP or SNDRV_TIMER_IOCTL_GINFO or TCSETSW, {B38400 opost isig -icanon -echo ...}) = 0
+ioctl(1, SNDCTL_TMR_TIMEBASE or SNDRV_TIMER_IOCTL_NEXT_DEVICE or TCGETS, {B38400 opost isig -icanon -echo ...}) = 0
+open("/usr/lib/arm-linux-gnueabi/gconv/gconv-modules.cache", O_RDONLY) = 3
+fstat64(3, {st_mode=S_IFREG|0644, st_size=26260, ...}) = 0
+mmap2(NULL, 26260, PROT_READ, MAP_SHARED, 3, 0) = 0xb6f35000
+close(3)                                = 0
+rt_sigaction(SIGTSTP, {SIG_IGN, [], SA_RESTORER|SA_RESTART, 0xb6cd6d30}, {0xb6e35d70, [], SA_RESTORER|SA_RESTART, 0xb6cd6d30}, 8) = 0
+write(1, "\33[39;49m\33[37m\33[40m\33[H\33[J\n\n    \33["..., 552) = 552
+rt_sigaction(SIGTSTP, {0xb6e35d70, [], SA_RESTORER|SA_RESTART, 0xb6cd6d30}, NULL, 8) = 0
+rt_sigaction(SIGTSTP, {SIG_IGN, [], SA_RESTORER|SA_RESTART, 0xb6cd6d30}, {0xb6e35d70, [], SA_RESTORER|SA_RESTART, 0xb6cd6d30}, 8) = 0
+select(1, [0], NULL, NULL, {0, 0})      = 0 (Timeout)
+select(1, [0], NULL, NULL, {0, 0})      = 0 (Timeout)
+write(1, "\33[H    \33[0;10;1m\33[34m\33[40mA0 \33[0"..., 125) = 125
+rt_sigaction(SIGTSTP, {0xb6e35d70, [], SA_RESTORER|SA_RESTART, 0xb6cd6d30}, NULL, 8) = 0
+gettimeofday({1459535893, 725019}, NULL) = 0
+gettimeofday({1459535893, 725220}, NULL) = 0
+gettimeofday({1459535893, 725460}, NULL) = 0
+select(1, [0], NULL, NULL, {0, 300000}) = 0 (Timeout)
+gettimeofday({1459535894, 26392}, NULL) = 0
+gettimeofday({1459535894, 26621}, NULL) = 0
+gettimeofday({1459535894, 26831}, NULL) = 0
+select(1, [0], NULL, NULL, {0, 300000}) = 0 (Timeout)
+gettimeofday({1459535894, 327764}, NULL) = 0
+--- SIGSEGV {si_signo=SIGSEGV, si_code=SEGV_MAPERR, si_addr=0x12e} ---
++++ killed by SIGSEGV +++

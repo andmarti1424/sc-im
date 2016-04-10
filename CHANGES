@@ -1,0 +1,23 @@
+v0.2.2
+* Added plain text export.
+* Added padding between cells.
+* Added 256 color support and "redefine_color" special command.
+* Added "aa" command in normal mode to act as autojus special command.
+* Added "gl" for going to last position in normal mode.
+* Added SC-IM man page.
+* Added "refresh" special command to refresh UI.
+* Big fix in how extended ascii are chars shown.
+* Big changes in functions used for showing cell content.
+* Fix in autonumeric mode.
+* Fix bug when typing real long string (issue #32).
+* Fix when using QUIT command with external scripts.
+* "cellcolor" command now checks if a locked cell exists prior to change format.
+* Locked cells are stored after any other command when saving a file.
+* Saving sc file: cellcolor and lock commands now are stored by rows when saving a sc file.
+* "Pv" command now do not paste cellcolors.
+* Translated source code comments to English.
+* Various fixes when using SC-IM without UI (--nocurses).
+* Help documentation now can be loaded without making install SC-IM.
+* MAXROWS now can be defined in Makefile.
+
+

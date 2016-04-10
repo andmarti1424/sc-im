@@ -1,0 +1,17 @@
+To report bugs please first check the KNOWN_ISSUES file.
+If you detect a bug, please fill the following items:
+
+COMPILER USED AND OPTIONS (although Makefile would be welcome):
+
+ACTIONS DONE:
+
+SC-IM BEHAVIOUR:
+
+EXPECTED BEHAVIOUR:
+
+and send them to scim.spreadsheet@gmail.com
+or create an issue in https://github.com/andmarti1424/sc-im
+
+Thanks!!
+
+
