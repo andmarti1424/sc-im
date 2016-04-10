@@ -96,7 +96,6 @@ void load_history(struct history * h) {
 int save_history(struct history * h) {
     if (h->mode != ':' ) return -1;
     char infofile [PATHLEN];
-    char line [PATHLEN];
     char * home;
     FILE * f;
     int i;
@@ -115,8 +114,7 @@ int save_history(struct history * h) {
         // Traverse list back to front, so the history is saved in chronological order
         for (i=0; i < h->len; i++) {
             fwprintf(f, L":");
-            wcstombs(line, nl->line, BUFFERSIZE);
-            fwprintf(f, L"%ls\n", line);
+            fwprintf(f, L"%ls\n", nl->line);
             nl = nl->pant;
         }
         fclose(f);
