@@ -134,15 +134,16 @@ UNDO := -DUNDO
 MAXROWS := 65536
 
 #CFLAGS := -O2 -Wall -pipe -g
-CFLAGS := $(LINUX) $(FREEBSD) $(NETBSD) $(MACOSX) -O2 -Wall -pipe -g -I/usr/include/libxml2 -I/usr/include/ncursesw
+CFLAGS := $(LINUX) $(FREEBSD) $(NETBSD) $(MACOSX) -O2 -Wall -pipe -g -I/usr/include/libxml2
 CFLAGS := $(CFLAGS) $(USECOLORS) $(USELOCALE) $(UNDO) $(SIGVOID) $(DFLT_PAGER)
 CFLAGS := $(CFLAGS) $(IEEE_MATH) $(RINT) $(REGEX) $(LIBRARY) -DMAXROWS=$(MAXROWS)
 CFLAGS := $(CFLAGS) $(HELP_PATH) $(SNAME) $(NO_NOTIMEOUT) $(SIMPLE) $(XLS) $(XLSX) $(HISTORY_FILE)
 
+# NOTE: ncursesw library should be used.
+# Not the ncurses library.
 LDLIBS := -lm -lncursesw
-#LDLIBS := -lm -lncurses
 #LDLIBS := -lm -lncurses -lxlsreader
-#LDLIBS := -lm -lncurses -lxlsreader -lzip -lxml2 
+#LDLIBS := -lm -lncurses -lxlsreader -lzip -lxml2
 
 OBJS := $(patsubst %.c, %.o, $(wildcard *.c) $(wildcard utils/*.c)) gram.o
 
