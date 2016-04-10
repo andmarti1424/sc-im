@@ -920,11 +920,11 @@ void insert_or_edit_cell() {
             strcpy(ope, "label");
             break;
     }
-    if (inputline[0] == '"') {
-        del_wchar(inputline, 0);                                       //FIXME!!!
+    if (inputline[0] == L'"') {
+        del_wchar(inputline, 0);
     } else if (insert_edit_submode != '=' && inputline[0] != L'"') {
-        add_wchar(inputline, L'\"', 0);                                //FIXME!!!
-        add_wchar(inputline, L'\"', wcslen(inputline));                //FIXME!!!
+        add_wchar(inputline, L'\"', 0);
+        add_wchar(inputline, L'\"', wcslen(inputline));
     }
 
     #ifdef UNDO
@@ -1526,10 +1526,9 @@ int is_single_command (struct block * buf, long timeout) {
         buf->value == ctl('v')) ) {
         res = MOVEMENT_CMD;
 
-// FIXME
-//    } else if (curmode == INSERT_MODE && bs == 2 && buf->value == ctl('r') &&
-//        (buf->pnext->value - ('a' - 1) < 1 || buf->pnext->value > 26)) {
-//        res = MOVEMENT_CMD;
+    } else if (curmode == INSERT_MODE && bs == 2 && buf->value == ctl('r') &&
+        (buf->pnext->value - (L'a' - 1) < 1 || buf->pnext->value > 26)) {
+        res = MOVEMENT_CMD;
 
     } else if (curmode == EDIT_MODE && bs == 1) {
         res = MOVEMENT_CMD;
@@ -1583,7 +1582,7 @@ int is_single_command (struct block * buf, long timeout) {
         // edition commands
         else if (buf->value == L'x')        res = EDITION_CMD;  // cuts a cell
         else if (buf->value == L'u')        res = EDITION_CMD;  // undo
-        else if (buf->value == ctl('r'))   res = EDITION_CMD;  // redo
+        else if (buf->value == ctl('r'))    res = EDITION_CMD;  // redo
         else if (buf->value == L'@')        res = EDITION_CMD;  // EvallAll 
         else if (buf->value == L'{')        res = EDITION_CMD;
         else if (buf->value == L'}')        res = EDITION_CMD;

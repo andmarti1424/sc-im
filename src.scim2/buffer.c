@@ -13,7 +13,7 @@ struct block * create_buf() {
     return b;
 }
 
-// Add an int to a buffer
+// Add an wint_t to a buffer
 void addto_buf(struct block * buf, wint_t d) {
     struct block * aux = buf;
 
@@ -31,7 +31,7 @@ void addto_buf(struct block * buf, wint_t d) {
     return;
 }
 
-// Replace the elements of destino with origen
+// Replace the elements of "origen" buffer to "destino" buffer
 void copybuffer(struct block * origen, struct block * destino) {
     flush_buf(destino);
     int len = get_bufsize(origen);
@@ -48,11 +48,11 @@ void del_buf (struct block * buf, int pos) {
     struct block * ant = buf;
     struct block * cur = buf;
     for (i = 0; i < pos; i++) {
-        ant = cur; 
-        cur = cur->pnext; 
+        ant = cur;
+        cur = cur->pnext;
     }
     if (ant == cur) {
-        cur->value = '\0';        
+        cur->value = '\0';
         //buf = cur->pnext; //FIXME
         //free(cur);
     } else {
@@ -64,7 +64,7 @@ void del_buf (struct block * buf, int pos) {
 
 void flush_buf (struct block * buf) {
     if (buf == NULL) return;
-     
+
     struct block * aux, * np;
     for (aux = buf->pnext; aux != NULL; aux = np)
     {

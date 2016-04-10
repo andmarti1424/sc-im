@@ -80,6 +80,7 @@ int replace_block_in_block (struct block * olist, struct block * in, struct bloc
     return 0;
 }
 
+/* NOT USED
 void block_to_str(struct block * b, char * out) {
     struct block * b_aux = b;
 
@@ -95,3 +96,4 @@ void block_to_str(struct block * b, char * out) {
     }
     return;
 }
+*/

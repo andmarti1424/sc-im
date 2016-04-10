@@ -188,7 +188,7 @@ void do_commandmode(struct block * sb) {
         show_header(input_win);
         return;
 
-    } else if (sb->value == ctl('f')) { // C-f
+    } else if (sb->value == ctl('f')) {               // C-f
         wchar_t cline [BUFFERSIZE];
         int i;
         struct ent * p1 = *ATBL(tbl, currow, curcol);
