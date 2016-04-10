@@ -445,8 +445,10 @@ int readfile(char * fname, int eraseflg) {
     // If file is an xlsx file, we import it
     } else if (len > 5 && ! strcasecmp( & fname[len-5], ".xlsx")){
         #ifndef XLSX
-        if (! atoi(get_conf_value("nocurses")))
+        if (! atoi(get_conf_value("nocurses"))) {
+            if (loading) loading = 0;
             scerror("XLSX import support not compiled in");
+        }
         #else
         open_xlsx(fname, "UTF-8");
         #endif
@@ -457,6 +459,7 @@ int readfile(char * fname, int eraseflg) {
     // If file is an xls file, we import it
     } else if (len > 4 && ! strcasecmp( & fname[len-4], ".xls")){
         #ifndef XLS
+        if (loading) loading = 0;
         scerror("XLS import support not compiled in");
         #else
         open_xls(fname, "UTF-8");
@@ -489,6 +492,7 @@ int readfile(char * fname, int eraseflg) {
         return 1;
 
     } else if (! atoi(get_conf_value("nocurses"))) {
+        if (loading) loading = 0;
         scinfo("\"%s\" is not a SC-IM compatible file", fname);
         return -1;
     }
@@ -844,7 +848,7 @@ int import_csv(char * fname, char d) {
     //swprintf(line_interp, BUFFERSIZE, L"let %s%d=%s", coltoa(maxcol), maxrow, "0");
     //send_to_interp(line_interp);
 
-    auto_justify(0, maxcol, DEFWIDTH);
+    auto_justify(0, maxcols, DEFWIDTH);
 
     //closefile(f, pid, rfd);
     fclose(f);

@@ -104,7 +104,7 @@ char * get_xlsx_number_format_by_id(xmlDocPtr doc_styles, int id) {
 void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) {
     xmlNode * cur_node = xmlDocGetRootElement(doc)->xmlChildrenNode;
     xmlNode * child_node = NULL;
-    char line_interp[FBUFLEN] = "";
+    wchar_t line_interp[FBUFLEN] = L"";
     int r, c;
 
     // we go forward up to sheet data
@@ -139,7 +139,7 @@ void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) 
                 if (strvalue != NULL && strvalue[0] != '\0') {
                     st = str_replace (strvalue, "\"", "''");
                     clean_carrier(st); // we handle padding
-                    sprintf(line_interp, "label %s%d=\"%s\"", coltoa(c), r, st);
+                    swprintf(line_interp, FBUFLEN, L"label %s%d=\"%s\"", coltoa(c), r, st);
                     send_to_interp(line_interp);
                     free(st);
                 }
@@ -151,7 +151,7 @@ void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) 
                 if (strvalue != NULL && strvalue[0] != '\0') {
                     st = str_replace (strvalue, "\"", "''");
                     clean_carrier(st); // we handle padding
-                    sprintf(line_interp, "label %s%d=\"%s\"", coltoa(c), r, st);
+                    swprintf(line_interp, FBUFLEN, L"label %s%d=\"%s\"", coltoa(c), r, st);
                     send_to_interp(line_interp);
                     free(st);
                 }
@@ -172,7 +172,7 @@ void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) 
                 )) {
                     long l = strtol((char *) child_node->xmlChildrenNode->xmlChildrenNode->content, (char **) NULL, 10);
 
-                    sprintf(line_interp, "let %s%d=%.15ld", coltoa(c), r, (l - 25569) * 86400 - atoi(get_conf_value("tm_gmtoff")));
+                    swprintf(line_interp, FBUFLEN, L"let %s%d=%.15ld", coltoa(c), r, (l - 25569) * 86400 - atoi(get_conf_value("tm_gmtoff")));
                     send_to_interp(line_interp);
                     struct ent * n = lookat(r, c);
                     n->format = 0;
@@ -188,7 +188,7 @@ void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) 
                 (atoi(fmtId) >= 18 && atoi(fmtId) <= 21)
                 )) {
                     double l = atof((char *) child_node->xmlChildrenNode->xmlChildrenNode->content);
-                    sprintf(line_interp, "let %s%d=%.15f", coltoa(c), r, (l - atoi(get_conf_value("tm_gmtoff")) * 1.0 / 60 / 60 / 24) * 86400);
+                    swprintf(line_interp, FBUFLEN, L"let %s%d=%.15f", coltoa(c), r, (l - atoi(get_conf_value("tm_gmtoff")) * 1.0 / 60 / 60 / 24) * 86400);
                     send_to_interp(line_interp);
                     struct ent * n = lookat(r, c);
                     n->format = 0;
@@ -202,7 +202,7 @@ void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) 
                 child_node->xmlChildrenNode != NULL &&
                 ! strcmp((char *) child_node->xmlChildrenNode->name, "v") ){
                     double l = atof((char *) child_node->xmlChildrenNode->xmlChildrenNode->content);
-                    sprintf(line_interp, "let %s%d=%.15f", coltoa(c), r, l);
+                    swprintf(line_interp, FBUFLEN, L"let %s%d=%.15f", coltoa(c), r, l);
                     send_to_interp(line_interp);
 
                 // f - numeric value that is a result from formula
@@ -242,11 +242,11 @@ void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) 
                         free(strf);
 
                         // we send the formula to the interpreter and hope to resolve it!
-                        sprintf(line_interp, "let %s%d=%s", coltoa(c), r, formula);
+                        swprintf(line_interp, FBUFLEN, L"let %s%d=%s", coltoa(c), r, formula);
 
                     } else {
                         double l = atof((char *) child_node->last->xmlChildrenNode->content);
-                        sprintf(line_interp, "let %s%d=%.15f", coltoa(c), r, l);
+                        swprintf(line_interp, FBUFLEN, L"let %s%d=%.15f", coltoa(c), r, l);
                     }
                     send_to_interp(line_interp);
                 }
@@ -384,7 +384,7 @@ int open_xlsx(char * fname, char * encoding) {
         return -1;
     }
 
-    auto_justify(0, maxcol, DEFWIDTH);
+    auto_justify(0, maxcols, DEFWIDTH);
     deleterow();
     return 0;
 }

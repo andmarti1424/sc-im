@@ -1315,21 +1315,22 @@ void auto_justify(int ci, int cf, int min) {
     int r, c, sum = 0;
     char field[1024] = "";
     struct ent * p;
-    wchar_t widestring[256] = { L'\0' };
+    wchar_t widestring[BUFFERSIZE] = { L'\0' };
     mbstate_t state;
     size_t result;
     const char * mbsptr;
 
+    checkbounds(&maxrow, &cf);
     for (c = ci; c <= cf; c++) {
         fwidth[c] = min;
         for (r = 0; r <= maxrow; r++) {
-            if ((p = *ATBL(tbl, r, c))) {
+            if ((p = *ATBL(tbl, r, c)) != NULL) {
                 sum = 0;
                 if (p->pad) sum += p->pad;
                 if (p->label) {
                     memset( &state, '\0', sizeof state );
                     mbsptr = p->label;
-                    result = mbsrtowcs(widestring, & mbsptr, 256, & state);
+                    result = mbsrtowcs(widestring, &mbsptr, BUFFERSIZE, &state);
                     if ( result != (size_t)-1 )
                         sum += wcslen(widestring);
                 }

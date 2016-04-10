@@ -44,7 +44,7 @@ int open_xls(char * fname, char * encoding) {
     WORD r, c;
     pWB = xls_open(fname, encoding);
 
-    char line_interp[FBUFLEN] = "";
+    wchar_t line_interp[FBUFLEN] = L"";
     struct ent * n;
 
     if (pWB == NULL) {
@@ -78,7 +78,7 @@ int open_xls(char * fname, char * encoding) {
                && cell->id != 0x0BD
                && cell->id != 0x203 ) {
 
-                sprintf(line_interp, "let %s%d=%.15g", coltoa(c), r, (cell->d - 25569) * 86400);
+                swprintf(line_interp, FBUFLEN, L"let %s%d=%.15g", coltoa(c), r, (cell->d - 25569) * 86400);
                 send_to_interp(line_interp);
                 n = lookat(r, c);
                 n->format = 0;
@@ -90,18 +90,18 @@ int open_xls(char * fname, char * encoding) {
 
             // display the value of the cell (either numeric or string)
             } else if (cell->id == 0x27e || cell->id == 0x0BD || cell->id == 0x203) {
-                sprintf(line_interp, "let %s%d=%.15g", coltoa(c), r, cell->d);
+                swprintf(line_interp, FBUFLEN, L"let %s%d=%.15g", coltoa(c), r, cell->d);
 
             } else if (cell->id == 0x06) { // formula
                 if (cell->l == 0) {        // its a number
-                    sprintf(line_interp, "let %s%d=%.15g", coltoa(c), r, cell->d);
+                    swprintf(line_interp, FBUFLEN, L"let %s%d=%.15g", coltoa(c), r, cell->d);
                 } else {
                     if (!strcmp((char *) cell->str, "bool")) {          // its boolean, and test cell->d
-                        sprintf(line_interp, "label %s%d=\"%s\"", coltoa(c), r, (int) cell->d ? "true" : "false");
+                        swprintf(line_interp, FBUFLEN, L"label %s%d=\"%s\"", coltoa(c), r, (int) cell->d ? "true" : "false");
                     } else if (! strcmp((char *) cell->str, "error")) { // formula is in error
-                        sprintf(line_interp, "label %s%d=\"%s\"", coltoa(c), r, "error"); //FIXME
+                        swprintf(line_interp, FBUFLEN, L"label %s%d=\"%s\"", coltoa(c), r, "error"); //FIXME
                     } else {
-                        sprintf(line_interp, "label %s%d=\"%s\"", coltoa(c), r, (char *) cell->str);
+                        swprintf(line_interp, FBUFLEN, L"label %s%d=\"%s\"", coltoa(c), r, (char *) cell->str);
                     }
                 }
 
@@ -109,16 +109,16 @@ int open_xls(char * fname, char * encoding) {
                 int pad_pos;
                 if ((pad_pos = str_in_str((char *) cell->str, "\n")) != -1) ((char *) cell->str)[pad_pos] = '\0'; // For spanning
                 // clean_carrier((char *) cell->str); // For spanning
-                sprintf(line_interp, "label %s%d=\"%s\"", coltoa(c), r, (char *) cell->str);
+                swprintf(line_interp, FBUFLEN, L"label %s%d=\"%s\"", coltoa(c), r, (char *) cell->str);
             } else {
-                sprintf(line_interp, "label %s%d=\"%s\"", coltoa(c), r, "");
+                swprintf(line_interp, FBUFLEN, L"label %s%d=\"%s\"", coltoa(c), r, "");
             }
             send_to_interp(line_interp);
         }
     }
     xls_close_WS(pWS);
     xls_close(pWB);
-    auto_justify(0, maxcol, DEFWIDTH);
+    auto_justify(0, maxcols, DEFWIDTH);
     return 0;
 #else
     return -1;
