@@ -774,7 +774,7 @@ int import_csv(char * fname, char d) {
     //int pid = 0;
     //int rfd = STDOUT_FILENO;
     int r = 0, c = 0;
-    char line_in[FBUFLEN];
+    char line_in[ABSMAXCOLS * COLS];
     wchar_t line_interp[FBUFLEN] = L"";
 
     char * token;
