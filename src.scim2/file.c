@@ -774,7 +774,6 @@ int import_csv(char * fname, char d) {
     //int pid = 0;
     //int rfd = STDOUT_FILENO;
     int r = 0, c = 0;
-    char line_in[ABSMAXCOLS * COLS];
     wchar_t line_interp[FBUFLEN] = L"";
 
     char * token;
@@ -789,6 +788,11 @@ int import_csv(char * fname, char d) {
         return -1;
     }
     loading = 1;
+
+    // Check max length of line
+    int max = max_length(f);
+    char line_in[max];
+    rewind(f);
 
     // CSV file traversing
     while ( ! feof(f) && (fgets(line_in, sizeof(line_in), f) != NULL) ) {
@@ -1054,14 +1058,34 @@ void export_delim(char * fname, char coldelim, int r0, int c0, int rn, int cn) {
 }
 
 /* unspecial (backquote -> ") things that are special chars in a table */
-void unspecial(FILE *f, char *str, int delim) {
-    int backquote = 0;     
+void unspecial(FILE * f, char * str, int delim) {
+    int backquote = 0;
 
     if (str_in_str(str, ",") != -1) backquote = 1;
     if (backquote) putc('\"', f);
     while (*str) {
-        putc(*str, f); 
+        putc(*str, f);
         str++;
     }
     if (backquote) putc('\"', f);
+}
+
+// check max length of lines in a file
+// FILE * f shall be opened.
+int max_length(FILE * f) {
+    int count = 0, max = 0;
+    int c = fgetc(f);
+
+    while (c != EOF) {
+        if (c != '\n') {
+            count++;
+        } else if (count > max) {
+            max = count;
+            count = 0;
+        } else {
+            count = 0;
+        }
+        c = fgetc(f);
+    }
+    return max + 1;
 }
