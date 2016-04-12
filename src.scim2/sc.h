@@ -383,6 +383,7 @@ extern void label(register struct ent *v, register char *s, int flushdir);
 
 extern double eval_result;
 extern char * seval_result;
-void scerror(char * s, ...);
-void scinfo(char * s, ...);
+void sc_debug(char * s, ...);
+void sc_info(char * s, ...);
+void sc_error(char * s, ...);
 #endif // SC_H_
