@@ -1,4 +1,4 @@
-#include <curses.h>
+#include <ncursesw/curses.h>
 #include <stdlib.h>
 #include "sc.h"
 #include "xmalloc.h"
@@ -51,5 +51,5 @@ void scxfree(char *p) {
 void fatal(char * str) {
     //fprintf(stderr,"%s\n", str);
     //exit(1);
-    scerror("%s", str);
+    sc_error("%s", str);
 }

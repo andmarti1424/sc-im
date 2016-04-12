@@ -1,4 +1,4 @@
-#include <curses.h>
+#include <ncursesw/curses.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <fcntl.h>
@@ -89,7 +89,7 @@ int load_help () {
 // main function of help
 void help() {
     if (load_help() == -1) {
-        scerror("Cannot open help file");
+        sc_error("Cannot open help file");
         return;
     }
     delta = 0;
@@ -243,7 +243,7 @@ void find_word(char * word, char order) {
         for (i = delta + 1; i < max - 1; i++) {
             if ((look_result = str_in_str(long_help[i], word)) >= 0) {
                 delta = i;
-                //scinfo("");
+                //sc_info("");
                 break;
             }
         }
@@ -251,14 +251,14 @@ void find_word(char * word, char order) {
         for (i = delta - 1; i > 0; i--) {
             if ((look_result = str_in_str(long_help[i], word)) >= 0) {
                 delta = i;
-                //scinfo("");
+                //sc_info("");
                 break;
             }
         }
     }
 
     if (look_result == -1) {
-        scinfo("Pattern not found.");
+        sc_info("Pattern not found.");
     }
     set_ucolor(input_win, &ucolors[NORMAL]);
     return;

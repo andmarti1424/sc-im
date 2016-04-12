@@ -55,7 +55,7 @@ void enable_filters(struct ent * left, struct ent * right) {
     results[0] = minr; // keep in first position the first row of the range!
     results[1] = maxr; // keep in second position the last row of the range!
     if (filters == NULL) {
-        scerror("There are no filters defined");
+        sc_error("There are no filters defined");
         return;
     }
     active = 1;
@@ -98,7 +98,7 @@ void enable_filters(struct ent * left, struct ent * right) {
 // disable any applied filter
 void disable_filters() {
     if (results == NULL) {
-        scerror("There are no filters active");
+        sc_error("There are no filters active");
         return;
     }
     // Hide rows that don't match with filters
@@ -113,7 +113,7 @@ void disable_filters() {
 // Show details of each filter
 void show_filters() {
     if (filters == NULL) {
-        scerror("There are no filters defined");
+        sc_error("There are no filters defined");
         return;
     }
 
@@ -150,7 +150,7 @@ void free_filters() {
 // Remove a filter, freeing its memory
 void del_filter(int id) {
     if (filters == NULL || id < 0 || id > howmany) {
-        scerror("Cannot delete the filter");
+        sc_error("Cannot delete the filter");
         return;
     }
     if (filters[id].eval != NULL) {

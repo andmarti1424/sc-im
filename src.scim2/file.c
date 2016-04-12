@@ -7,7 +7,7 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <unistd.h>
-//#include <curses.h>
+//#include <ncursesw/curses.h>
 #include <ncursesw/curses.h>
 #include <sys/wait.h>
 
@@ -118,7 +118,7 @@ int file_exists(const char * fname) {
 // This function checks if a file suffered mods since it was open
 int modcheck() {
     if (modflg && ! atoi(get_conf_value("nocurses"))) {
-        scerror("File not saved since last change. Add '!' to force");
+        sc_error("File not saved since last change. Add '!' to force");
         return(1);
     }
     return 0;
@@ -132,7 +132,7 @@ int savefile() {
     char name[BUFFERSIZE];
 
     if (! curfile[0] && wcslen(inputline) < 3) { // casos ":w" ":w!" ":x" ":x!"
-        scerror("There is no filename");
+        sc_error("There is no filename");
         return -1;
     }
 
@@ -143,7 +143,7 @@ int savefile() {
     del_range_chars(name, 0, 1 + force_rewrite);
 
     if (! force_rewrite && file_exists(name)) {
-        scerror("File already exists. Use \"!\" to force rewrite.");
+        sc_error("File already exists. Use \"!\" to force rewrite.");
         return -1;
     }
 
@@ -152,7 +152,7 @@ int savefile() {
     }
 
     if (writefile(curfile, 0, 0, maxrow, maxcol) < 0) {
-        scerror("File could not be saved");
+        sc_error("File could not be saved");
         return -1;
     }
     return 0;
@@ -218,11 +218,11 @@ int writefile(char * fname, int r0, int c0, int rn, int cn) {
 */
 
     if ((f = openfile(tfname, &pid, NULL)) == NULL) {
-        scerror("Can't create file \"%s\"", save);
+        sc_error("Can't create file \"%s\"", save);
         return -1;
     }
 
-    scinfo("Writing file \"%s\"...", save);
+    sc_info("Writing file \"%s\"...", save);
     write_fd(f, r0, c0, rn, cn);
 
     closefile(f, pid, 0);
@@ -230,7 +230,7 @@ int writefile(char * fname, int r0, int c0, int rn, int cn) {
     if (! pid) {
         (void) strcpy(curfile, save);
         modflg = 0;
-        scinfo("File \"%s\" written", curfile);
+        sc_info("File \"%s\" written", curfile);
     }
 
     return 0;
@@ -447,7 +447,7 @@ int readfile(char * fname, int eraseflg) {
         #ifndef XLSX
         if (! atoi(get_conf_value("nocurses"))) {
             if (loading) loading = 0;
-            scerror("XLSX import support not compiled in");
+            sc_error("XLSX import support not compiled in");
         }
         #else
         open_xlsx(fname, "UTF-8");
@@ -460,7 +460,7 @@ int readfile(char * fname, int eraseflg) {
     } else if (len > 4 && ! strcasecmp( & fname[len-4], ".xls")){
         #ifndef XLS
         if (loading) loading = 0;
-        scerror("XLS import support not compiled in");
+        sc_error("XLS import support not compiled in");
         #else
         open_xls(fname, "UTF-8");
         #endif
@@ -493,7 +493,7 @@ int readfile(char * fname, int eraseflg) {
 
     } else if (! atoi(get_conf_value("nocurses"))) {
         if (loading) loading = 0;
-        scinfo("\"%s\" is not a SC-IM compatible file", fname);
+        sc_info("\"%s\" is not a SC-IM compatible file", fname);
         return -1;
     }
 
@@ -516,10 +516,10 @@ int readfile(char * fname, int eraseflg) {
         *save = '\0';
     } else {
         if ((f = openfile(save, &pid, &rfd)) == NULL) {
-            scerror("Can't read file \"%s\"", save);
+            sc_error("Can't read file \"%s\"", save);
             return 0;
         } else if (eraseflg) {
-            scinfo("Reading file \"%s\"", save);
+            sc_info("Reading file \"%s\"", save);
         }
     }
     if (*fname == '|')
@@ -668,7 +668,7 @@ FILE * openfile(char *fname, int *rpid, int *rfd) {
     fname++;                             // Skip |
     efname = findhome(fname);
     if (pipe(pipefd) < 0 || (rfd != NULL && pipe(pipefd+2) < 0)) {
-        scerror("Can't make pipe to child");
+        sc_error("Can't make pipe to child");
         *rpid = 0;
         return (0);
     }
@@ -691,7 +691,7 @@ FILE * openfile(char *fname, int *rpid, int *rfd) {
         *rpid = pid;
         if ((f = fdopen(pipefd[(rfd==NULL?1:2)], rfd==NULL?"w":"r")) == NULL) {
             (void) kill(pid, 9);
-            scerror("Can't fdopen %sput", rfd==NULL?"out":"in");
+            sc_error("Can't fdopen %sput", rfd==NULL?"out":"in");
             (void) close(pipefd[1]);
             if (rfd != NULL)
                 (void) close(pipefd[3]);
@@ -734,7 +734,7 @@ void closefile(FILE *f, int pid, int rfd) {
         }
     }
     if (brokenpipe) {
-        scerror("Broken pipe");
+        sc_error("Broken pipe");
         brokenpipe = FALSE;
     }
 }
@@ -784,7 +784,7 @@ int import_csv(char * fname, char d) {
 
     //if ((f = openfile(fname, & pid, & rfd)) == NULL) {
     if ((f = fopen(fname , "r")) == NULL) {
-        scerror("Can't read file \"%s\"", fname);
+        sc_error("Can't read file \"%s\"", fname);
         return -1;
     }
     loading = 1;
@@ -843,7 +843,7 @@ int import_csv(char * fname, char d) {
         r++;
         if (r > MAXROWS - GROWAMT - 1 || c > ABSMAXCOLS - 1) break;
     }
-    //scdebug("END");
+    //sc_debug("END");
 
     maxrow = r-1;
     maxcol = c-1;
@@ -898,12 +898,12 @@ void do_export(int r0, int c0, int rn, int cn) {
         sprintf(ruta + strlen(ruta), ".%s", type_export);
 
     } else {
-        scerror("No filename specified !");
+        sc_error("No filename specified !");
         return;
     }
 
     if (! force_rewrite && file_exists(ruta) && strlen(ruta) > 0) {
-        scerror("File %s already exists. Use \"!\" to force rewrite.", ruta);
+        sc_error("File %s already exists. Use \"!\" to force rewrite.", ruta);
         return;
     }
 
@@ -925,10 +925,10 @@ void export_plain(char * fname, int r0, int c0, int rn, int cn) {
     int pid;
     char out[FBUFLEN] = "";
 
-    scinfo("Writing file \"%s\"...", fname);
+    sc_info("Writing file \"%s\"...", fname);
 
     if ((f = openfile(fname, &pid, NULL)) == (FILE *)0) {
-        scerror ("Can't create file \"%s\"", fname);
+        sc_error ("Can't create file \"%s\"", fname);
         return;
     }
     struct ent * ent = go_end();
@@ -994,7 +994,7 @@ void export_plain(char * fname, int r0, int c0, int rn, int cn) {
     closefile(f, pid, 0);
 
     if (! pid) {
-        scinfo("File \"%s\" written", fname);
+        sc_info("File \"%s\" written", fname);
     }
 
 }
@@ -1006,10 +1006,10 @@ void export_delim(char * fname, char coldelim, int r0, int c0, int rn, int cn) {
     register struct ent ** pp;
     int pid;
 
-    scinfo("Writing file \"%s\"...", fname);
+    sc_info("Writing file \"%s\"...", fname);
 
     if ((f = openfile(fname, &pid, NULL)) == (FILE *)0) {
-        scerror ("Can't create file \"%s\"", fname);
+        sc_error ("Can't create file \"%s\"", fname);
         return;
     }
 
@@ -1053,7 +1053,7 @@ void export_delim(char * fname, char coldelim, int r0, int c0, int rn, int cn) {
     closefile(f, pid, 0);
 
     if (! pid) {
-        scinfo("File \"%s\" written", fname);
+        sc_info("File \"%s\" written", fname);
     }
 }
 

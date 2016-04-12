@@ -18,14 +18,14 @@ void hide_row(int from_row, int arg) {
 
     r2 = from_row + arg - 1;
     if (from_row < 0 || from_row > r2) {
-        scerror("Cannot hide row: Invalid range.");
+        sc_error("Cannot hide row: Invalid range.");
         return;
     }
     if (r2 >= maxrows - 1) {
         // error: tried to hide a row higher than maxrow.
         lookat(from_row + arg + 1, curcol); //FIXME this HACK
         if (! growtbl(GROWROW, arg + 1, 0)) {
-            scerror("You can't hide the last row");
+            sc_error("You can't hide the last row");
             return;
         }
     }
@@ -47,14 +47,14 @@ void hide_row(int from_row, int arg) {
 void hide_col(int from_col, int arg) {
     int c2 = from_col + arg - 1;
     if (from_col < 0 || from_col > c2) {
-        scerror ("Cannot hide col: Invalid range.");
+        sc_error ("Cannot hide col: Invalid range.");
         return;
     }
     if (c2 >= maxcols - 1) {
-        // scerror: tried to hide a column higher than maxcol.
+        // sc_error: tried to hide a column higher than maxcol.
         lookat(currow, from_col + arg + 1); //FIXME this HACK
         if ((arg >= ABSMAXCOLS - 1) || ! growtbl(GROWCOL, 0, arg + 1)) {
-            scerror("You can't hide the last col");
+            sc_error("You can't hide the last col");
             return;
         }
     }
@@ -78,7 +78,7 @@ void hide_col(int from_col, int arg) {
 void show_row(int from_row, int arg) {
     int r2 = from_row + arg - 1;
     if (from_row < 0 || from_row > r2) {
-        scerror ("Cannot show row: Invalid range.");
+        sc_error ("Cannot show row: Invalid range.");
         return;
     }
     if (r2 > maxrows - 1) {
@@ -105,7 +105,7 @@ void show_row(int from_row, int arg) {
 void show_col(int from_col, int arg) {
     int c2 = from_col + arg - 1;
     if (from_col < 0 || from_col > c2) {
-        scerror ("Cannot show col: Invalid range.");
+        sc_error ("Cannot show col: Invalid range.");
         return;
     }
     if (c2 > maxcols - 1) {

@@ -44,7 +44,7 @@ void do_insertmode(struct block * sb) {
         insert_or_edit_cell();
 
     } else if ( wcslen(inputline) < (COLS - 14) && sc_isprint(sb->value)) { // Write new char
-        //DEBUG scinfo("2: %d %lc", sb->value, sb->value);
+        //DEBUG sc_info("2: %d %lc", sb->value, sb->value);
         ins_in_line(sb->value);
         show_header(input_win);
 

@@ -20,7 +20,7 @@ int exec_cmd (char * line) {
 
     int my_pipe[2];
     if (pipe(my_pipe) == -1) {
-        scerror("Error creating pipe");
+        sc_error("Error creating pipe");
         getchar();
         reset_prog_mode();
         refresh();
@@ -30,7 +30,7 @@ int exec_cmd (char * line) {
 
     pid_t child_id = fork();
     if (child_id == -1) {
-        scerror("Fork error");
+        sc_error("Fork error");
         getchar();
         reset_prog_mode();
         refresh();

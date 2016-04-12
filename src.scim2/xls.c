@@ -48,7 +48,7 @@ int open_xls(char * fname, char * encoding) {
     struct ent * n;
 
     if (pWB == NULL) {
-        scerror("Error loading %s", fname);
+        sc_error("Error loading %s", fname);
         return -1;
     }
 
@@ -66,7 +66,7 @@ int open_xls(char * fname, char * encoding) {
 
             struct st_xf_data * xf = &pWB->xfs.xf[cell->xf];
 
-            //scdebug("%d %d fmt:%d id:%x %d %d", r, c, xf->format, cell->id, cell->d, cell->l);
+            //sc_debug("%d %d fmt:%d id:%x %d %d", r, c, xf->format, cell->id, cell->d, cell->l);
 
             // these are dates
             if (((xf->format >= 14 && xf->format <= 22) ||

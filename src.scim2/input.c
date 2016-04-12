@@ -1,7 +1,6 @@
 #include <sys/time.h>
 #include <string.h>
 #include <ctype.h>   // for isdigit
-//#include <curses.h>
 #include <ncursesw/curses.h>
 #include <stdlib.h>
 #include <wchar.h>
@@ -59,9 +58,9 @@ void handle_input(struct block * buffer) {
 
             // WIDE CHAR input
             // UNCOMMENT FOR DEBUGGING
-            //scinfo("%d %d %c", d, return_value, wd);
+            //sc_info("%d %d %c", d, return_value, wd);
             //if (d != 0)
-                //scinfo("%d %d %c", d, return_value, c);
+                //sc_info("%d %d %c", d, return_value, c);
                 //TODO
                 //mvwprintw(input_win, 1, 0, "-%lc-%d", d, d); //á 225
                 //wclrtoeol(input_win);

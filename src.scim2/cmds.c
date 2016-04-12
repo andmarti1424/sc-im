@@ -1,4 +1,4 @@
-#include <curses.h>
+#include <ncursesw/curses.h>
 #include <stdlib.h>
 #include <ctype.h>   // for isdigit
 #include <wchar.h>
@@ -74,7 +74,7 @@ void sync_refs() {
     for (j=0; j <= maxcol; j++)
         if ( (p = *ATBL(tbl, i, j)) && p->expr ) {
                syncref(p->expr);
-               //scinfo("%d %d %d", i, j, ++k);
+               //sc_info("%d %d %d", i, j, ++k);
             }
     return;
 }
@@ -92,7 +92,7 @@ void syncref(register struct enode *e) {
         //if (e->e.v.vp->flags & iscleared) {
         if (e->e.v.vp->flags & is_deleted) {
             e->op = ERR_;
-                    //scinfo("%d %d", e->e.v.vp->row, e->e.v.vp->col);
+                    //sc_info("%d %d", e->e.v.vp->row, e->e.v.vp->col);
             e->e.o.left = NULL;
             e->e.o.right = NULL;
         } else if (e->e.v.vp->flags & may_sync)
@@ -117,7 +117,7 @@ void deletecol() {
     struct ent **pp;
 
     if (any_locked_cells(0, curcol, maxrow, curcol)) {
-        scinfo("Locked cells encountered. Nothing changed");
+        sc_info("Locked cells encountered. Nothing changed");
         return;
     }
 
@@ -179,7 +179,7 @@ void deletecol() {
 void copyent(register struct ent *n, register struct ent *p, int dr, int dc,
              int r1, int c1, int r2, int c2, int special) {
     if (!n || !p) {
-        scerror("internal error");
+        sc_error("internal error");
         return;
     }
 
@@ -450,23 +450,23 @@ void doformat(int c1, int c2, int w, int p, int r) {
     if (c2 >= maxcols && !growtbl(GROWCOL, 0, c2)) c2 = maxcols-1 ;
 
     if (w == 0) {
-        scinfo("Width too small - setting to 1");
+        sc_info("Width too small - setting to 1");
         w = 1;
     }
 
     if (! atoi(get_conf_value("nocurses")) && w > COLS - rescol - 2) {
-        scinfo("Width too large - Maximum = %d", COLS - rescol - 2);
+        sc_info("Width too large - Maximum = %d", COLS - rescol - 2);
         w = COLS - rescol - 2;
     }
 
     if (p > w) {
-        scinfo("Precision too large");
+        sc_info("Precision too large");
         p = w;
     }
 
     checkbounds(&crows, &ccols);
     if (ccols < c2) {
-        scerror("Format statement failed to create implied column %d", c2);
+        sc_error("Format statement failed to create implied column %d", c2);
         return;
     }
 
@@ -528,7 +528,7 @@ void formatcol(int c) {
             modflg++;
             break;
     }
-    scinfo("Current format is %d %d %d", fwidth[curcol], precision[curcol], realfmt[curcol]);
+    sc_info("Current format is %d %d %d", fwidth[curcol], precision[curcol], realfmt[curcol]);
     update(TRUE);
     return;
 }
@@ -609,7 +609,7 @@ void deleterow() {
 
 
     if (any_locked_cells(currow, 0, currow, maxcol)) {
-        scinfo("Locked cells encountered. Nothing changed");
+        sc_info("Locked cells encountered. Nothing changed");
 
     } else {
         //flush_saved();
@@ -822,7 +822,7 @@ void del_selected_cells() {
     if (is_range_selected() != -1) {
        srange * r = get_selected_range();
        if (any_locked_cells(r->tlrow, r->tlcol, r->brrow, r->brcol)) {
-           scerror("Locked cells encountered. Nothing changed");
+           sc_error("Locked cells encountered. Nothing changed");
            return;
        }
        yank_area(r->tlrow, r->tlcol, r->brrow, r->brcol, 'a', 1);
@@ -845,7 +845,7 @@ void del_selected_cells() {
     // delete cell
     } else {
        if (any_locked_cells(currow, curcol, currow, curcol)) {
-           scerror("Locked cells encountered. Nothing changed");
+           sc_error("Locked cells encountered. Nothing changed");
            return;
        }
        yank_area(currow, curcol, currow, curcol, 'e', 1);
@@ -961,9 +961,9 @@ void insert_or_edit_cell() {
 
 // REVISED - Send command to interpreter
 void send_to_interp(wchar_t * oper) {
-    //debug(oper);
+    //sc_debug("!!%ls!!", oper);
     wcstombs(line, oper, BUFFERSIZE);
-    //scdebug("enviado a intérprete. line >>%s<<", line);
+    //sc_debug("enviado a intérprete. line >>%s<<", line);
     linelim = 0;
     (void) yyparse();
     if (atoi(get_conf_value("autocalc")) && ! loading) EvalAll();
@@ -1126,7 +1126,7 @@ struct ent * back_col(int arg) {
     if (c)
         c--;
     else {
-        scinfo ("At column A");
+        sc_info ("At column A");
         break; 
     }
     while( col_hidden[c] && c )
@@ -1145,7 +1145,7 @@ struct ent * forw_col(int arg) {
             c++;
         else
             if (! growtbl(GROWCOL, 0, arg)) {    /* get as much as needed */
-                //scerror("cannot grow");
+                //sc_error("cannot grow");
                 return lookat(currow, curcol);
                 //break;
             } else
@@ -1166,7 +1166,7 @@ struct ent * forw_row(int arg) {
             r++;
         else {
             if (! growtbl(GROWROW, arg, 0)) {
-                //scerror("cannot grow");
+                //sc_error("cannot grow");
                 return lookat(currow, curcol);
             } else 
                 r++;
@@ -1184,7 +1184,7 @@ struct ent * back_row(int arg) {
     while (arg--) {
         if (r) r--;
         else { 
-            scinfo("At row zero");
+            sc_info("At row zero");
             break;
         }
         while (row_hidden[r] && r)
@@ -1375,7 +1375,7 @@ void valueize_area(int sr, int sc, int er, int ec) {
         for (c = sc; c <= ec; c++) {
             p = *ATBL(tbl, r, c);
             if (p && p->flags&is_locked) {
-                scerror(" Cell %s%d is locked", coltoa(c), r);
+                sc_error(" Cell %s%d is locked", coltoa(c), r);
                 continue;
             }
     #ifdef UNDO
@@ -1439,7 +1439,7 @@ void select_inner_range(int * vir_tlrow, int * vir_tlcol, int * vir_brrow, int *
 int locked_cell(int r, int c) {
     struct ent *p = *ATBL(tbl, r, c);
     if (p && (p->flags & is_locked)) {
-        scerror("Cell %s%d is locked", coltoa(c), r) ;
+        sc_error("Cell %s%d is locked", coltoa(c), r) ;
         return 1;
     }
     return 0;
@@ -1467,7 +1467,7 @@ int pad(int n, int r1, int c1, int r2, int c2) {
     int pad_exceed_width = 0;
 
     if (any_locked_cells(r1, c1, r2, c2)) {
-        scinfo("Locked cells encountered. Nothing changed");
+        sc_info("Locked cells encountered. Nothing changed");
         return -1;
      }
 
@@ -1499,7 +1499,7 @@ int pad(int n, int r1, int c1, int r2, int c2) {
 #endif
 
     if (pad_exceed_width) {
-        scerror(" Could not add padding in some cells. Padding exceeded column width");
+        sc_error(" Could not add padding in some cells. Padding exceeded column width");
         return 1;
     }
     return 0;

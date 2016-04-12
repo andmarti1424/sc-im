@@ -1,5 +1,5 @@
 #include <string.h>
-#include <curses.h>
+#include <ncursesw/curses.h>
 //#include <ctype.h> // for isalnum isprint
 #include "cmds.h"
 #include "screen.h"
@@ -57,7 +57,7 @@ void do_editmode(struct block * sb) {
                 inputline[inputline_pos] = c;
                 ++inputline_pos;
 
-                mvwaddwstr(input_win, 0, 1 + rescol, inputline);
+                mvwprintw(input_win, 0, 1 + rescol, "%ls", inputline);
                 wmove(input_win, 0, inputline_pos + 1 + rescol);
                 wrefresh(input_win);
             }

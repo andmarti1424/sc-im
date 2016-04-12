@@ -44,7 +44,7 @@ char * get_xlsx_string(xmlDocPtr doc, int pos) {
                 && cur_node->xmlChildrenNode->content != NULL
                ) {
                 result = (char *) cur_node->xmlChildrenNode->content;
-                //scdebug("%s %s", cur_node->name, result);
+                //sc_debug("%s %s", cur_node->name, result);
                 return result;
             }
             cur_node = cur_node->next;
@@ -277,7 +277,7 @@ int open_xlsx(char * fname, char * encoding) {
     // open zip file
     if ((za = zip_open(fname, 0, &err)) == NULL) {
         zip_error_to_str(buf, sizeof(buf), err, errno);
-        scerror("can't open zip archive `%s': %s", fname, buf);
+        sc_error("can't open zip archive `%s': %s", fname, buf);
         return -1;
     }
 
@@ -291,7 +291,7 @@ int open_xlsx(char * fname, char * encoding) {
         strings = (char *) malloc(sb_strings.size);
         len = zip_fread(zf, strings, sb_strings.size);
         if (len < 0) {
-            scerror("cannot read file %s.\n", name);
+            sc_error("cannot read file %s.\n", name);
             free(strings);
             return -1;
         }
@@ -302,7 +302,7 @@ int open_xlsx(char * fname, char * encoding) {
     name = "xl/styles.xml";
     zf = zip_fopen(za, name, ZIP_FL_UNCHANGED);
     if ( ! zf ) {
-        scerror("cannot open %s file.", name);
+        sc_error("cannot open %s file.", name);
         if (strings != NULL) free(strings);
         return -1;
     }
@@ -310,7 +310,7 @@ int open_xlsx(char * fname, char * encoding) {
     char * styles = (char *) malloc(sb_styles.size);
     len = zip_fread(zf, styles, sb_styles.size);
     if (len < 0) {
-        scerror("cannot read file %s.", name);
+        sc_error("cannot read file %s.", name);
         if (strings != NULL) free(strings);
         free(styles);
         return -1;
@@ -322,7 +322,7 @@ int open_xlsx(char * fname, char * encoding) {
     name = "xl/worksheets/sheet1.xml";
     zf = zip_fopen(za, name, ZIP_FL_UNCHANGED);
     if ( ! zf ) {
-        scerror("cannot open %s file.", name);
+        sc_error("cannot open %s file.", name);
         if (strings != NULL) free(strings);
         free(styles);
         return -1;
@@ -331,7 +331,7 @@ int open_xlsx(char * fname, char * encoding) {
     char * sheet = (char *) malloc(sb.size);
     len = zip_fread(zf, sheet, sb.size);
     if (len < 0) {
-        scerror("cannot read file %s.", name);
+        sc_error("cannot read file %s.", name);
         if (strings != NULL) free(strings);
         free(styles);
         free(sheet);
@@ -356,7 +356,7 @@ int open_xlsx(char * fname, char * encoding) {
     doc = xmlReadMemory(sheet, sb.size, "noname.xml", NULL, XML_PARSE_NOBLANKS);
 
     if (doc == NULL) {
-        scerror("error: could not parse file");
+        sc_error("error: could not parse file");
         if (strings != NULL) free(strings);
         free(styles);
         free(sheet);
@@ -380,7 +380,7 @@ int open_xlsx(char * fname, char * encoding) {
 
     // close zip file
     if (zip_close(za) == -1) {
-        scerror("cannot close zip archive `%s'", fname);
+        sc_error("cannot close zip archive `%s'", fname);
         return -1;
     }
 

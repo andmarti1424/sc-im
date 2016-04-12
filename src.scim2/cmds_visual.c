@@ -1,4 +1,4 @@
-#include <curses.h>
+#include <ncursesw/curses.h>
 #include <stdlib.h>
 
 #include "screen.h"
@@ -103,7 +103,7 @@ void do_visualmode(struct block * buf) {
                 break;
 
             case OKEY_ENTER:
-                scinfo("Press <C-o> to begin selection or <Esc> key to exit VISUAL MODE");
+                sc_info("Press <C-o> to begin selection or <Esc> key to exit VISUAL MODE");
                 return;
 
         }
@@ -245,10 +245,10 @@ void do_visualmode(struct block * buf) {
 
         struct ent * e = tick(buf->pnext->value);
         if (row_hidden[e->row]) {
-            scerror("Cell row is hidden");
+            sc_error("Cell row is hidden");
             return;
         } else if (col_hidden[e->col]) {
-            scerror("Cell column is hidden");
+            sc_error("Cell column is hidden");
             return;
         }
         r->tlrow = r->tlrow < e->row ? r->tlrow : e->row;
@@ -335,10 +335,10 @@ void do_visualmode(struct block * buf) {
             if (loc != NULL) {
                 f = nl_langinfo(D_FMT);
             } else {
-                scerror("No locale set. Nothing changed");
+                sc_error("No locale set. Nothing changed");
             }
             if (any_locked_cells(r->tlrow, r->tlcol, r->brrow, r->brcol)) {
-                scerror("Locked cells encountered. Nothing changed");
+                sc_error("Locked cells encountered. Nothing changed");
                 return;
             }
             dateformat(lookat(r->tlrow, r->tlcol), lookat(r->brrow, r->brcol), f);
@@ -347,7 +347,7 @@ void do_visualmode(struct block * buf) {
         clr_header(input_win, 0);
         show_header(input_win);
         #else
-            scinfo("Build made without USELOCALE enabled");
+            sc_info("Build made without USELOCALE enabled");
         #endif
 
     // EDITION COMMANDS
@@ -363,7 +363,7 @@ void do_visualmode(struct block * buf) {
     // left / right / center align
     } else if (buf->value == L'{' || buf->value == L'}' || buf->value == L'|') {
         if (any_locked_cells(r->tlrow, r->tlcol, r->brrow, r->brcol)) {
-            scerror("Locked cells encountered. Nothing changed");
+            sc_error("Locked cells encountered. Nothing changed");
             return;
         }
         wchar_t interp_line[BUFFERSIZE];
@@ -437,7 +437,7 @@ void do_visualmode(struct block * buf) {
         int ic = cmd_multiplier + 1;
         if ( any_locked_cells(r->tlrow, r->tlcol, r->brrow, r->brcol) &&
            (buf->pnext->value == L'h' || buf->pnext->value == L'k') ) {
-            scerror("Locked cells encountered. Nothing changed");
+            sc_error("Locked cells encountered. Nothing changed");
             return;
         }
 #ifdef UNDO

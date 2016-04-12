@@ -1,4 +1,4 @@
-#include <curses.h>
+#include <ncursesw/curses.h>
 #include <stdlib.h>
 #include "sc.h"
 #include "marks.h"
@@ -12,7 +12,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <unistd.h>
-#include <curses.h>
+#include <ncursesw/curses.h>
 
 srange * ranges = NULL;
 
@@ -42,12 +42,12 @@ srange * create_range(char c, char d, struct ent * tl, struct ent * br) {
     }
 
     if ( row_hidden[tlrow] || row_hidden[brrow] ) {
-        scerror("Row of cell is hidden");
+        sc_error("Row of cell is hidden");
         return NULL;
     }
 
     if ( col_hidden[tlcol] || col_hidden[brcol] ) {
-        scerror("Column of cell is hidden");
+        sc_error("Column of cell is hidden");
         return NULL;
     }
 
@@ -238,14 +238,14 @@ void add_range(char * name, struct ent_ptr left, struct ent_ptr right, int is_ra
     right.vf = maxrf | maxcf;
 
     if ( ! find_range(name, strlen(name), (struct ent *) 0, (struct ent *) 0, &prev)) {
-        scerror("Error: range name \"%s\" already defined", name);
+        sc_error("Error: range name \"%s\" already defined", name);
         scxfree(name);
         return;
     }
 
     for (p = name; *p; p++)
         if ( ! (isalpha(*p) || isdigit(*p) || *p == '_') ) {
-            scerror("Invalid range name \"%s\" - illegal combination", name);
+            sc_error("Invalid range name \"%s\" - illegal combination", name);
             scxfree(name);
             return;
         }
@@ -263,7 +263,7 @@ void add_range(char * name, struct ent_ptr left, struct ent_ptr right, int is_ra
             while (isdigit(*++p)) ;
         }
         if (!(*p)) {
-            scerror("Invalid range name \"%s\" - ambiguous", name);
+            sc_error("Invalid range name \"%s\" - ambiguous", name);
             scxfree(name);
             return;
         }

@@ -344,10 +344,10 @@ void undo_hide_show(int row, int col, char type, int arg) {
 // 'ent' elements from 'removed' and remove those from 'added'
 void do_undo() {
     if (undo_list == NULL || undo_list_pos == 0) {
-        scerror("Not UNDO's left");
+        sc_error("Not UNDO's left");
         return;
     }
-    //scinfo("%d %d", undo_list_pos, len_undo_list());
+    //sc_info("%d %d", undo_list_pos, len_undo_list());
 
     int ori_currow = currow;
     int ori_curcol = curcol;
@@ -434,7 +434,7 @@ void do_undo() {
 
     if (undo_list->p_ant != NULL) undo_list = undo_list->p_ant;
     undo_list_pos--;
-    scinfo("Change: %d of %d", undo_list_pos, len_undo_list());
+    sc_info("Change: %d of %d", undo_list_pos, len_undo_list());
 
     return;
 }
@@ -444,10 +444,10 @@ void do_undo() {
 // 'ent' elements from 'added' and remove those from 'removed'
 void do_redo() {
     if ( undo_list == NULL || undo_list_pos == len_undo_list()  ) {
-        scerror("Not REDO's left");
+        sc_error("Not REDO's left");
         return;
     }
-    //scinfo("%d %d", undo_list_pos, len_undo_list());
+    //sc_info("%d %d", undo_list_pos, len_undo_list());
 
     int ori_currow = currow;
     int ori_curcol = curcol;
@@ -535,7 +535,7 @@ void do_redo() {
     // increase modflg
     modflg= mf + 1;
 
-    scinfo("Change: %d of %d", undo_list_pos + 1, len_undo_list());
+    sc_info("Change: %d of %d", undo_list_pos + 1, len_undo_list());
     undo_list_pos++;
 
     return;

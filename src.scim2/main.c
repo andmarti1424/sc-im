@@ -1,6 +1,4 @@
 #include <signal.h>
-//#include <curses.h>
-//#include <ncurses.h>
 #include <ncursesw/curses.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -145,7 +143,7 @@ int main (int argc, char ** argv) {
     if (get_conf_value("output") != NULL) {
         fdoutput = fopen(get_conf_value("output"), "w+");
         if (fdoutput == NULL) {
-            scerror("Cannot open file: %s.", get_conf_value("output"));
+            sc_error("Cannot open file: %s.", get_conf_value("output"));
             return exit_app(-1);
         }
 
@@ -291,7 +289,7 @@ int exit_app(int status) {
     // free history
 #ifdef HISTORY_FILE
     if (! atoi(get_conf_value("nocurses")) && save_history(commandline_history) != 0 ) {
-        scerror("Cannot save command line history");
+        sc_error("Cannot save command line history");
     }
     if (commandline_history != NULL) destroy_history(commandline_history);
 #endif
@@ -357,7 +355,7 @@ void load_sc() {
         erasedb();
     } else {
         if (! readfile(curfile, 1) && ! atoi(get_conf_value("nocurses"))) {
-            scinfo("New file: \"%s\"", curfile);     // file passed to scim executable does not exists
+            sc_info("New file: \"%s\"", curfile);     // file passed to scim executable does not exists
         }
         EvalAll();                                 // we eval formulas
     }
@@ -373,7 +371,7 @@ void setorder(int i) {
 
 
 void nopipe() {
-    scdebug("brokenpipe!");
+    sc_error("brokenpipe!");
     brokenpipe = TRUE;
 }
 
@@ -400,20 +398,20 @@ void signals() {
 
 
 void sig_int() {
-    scerror("Got SIGINT. Press «:q<Enter>» to quit Scim");
+    sc_error("Got SIGINT. Press «:q<Enter>» to quit Scim");
 }
 
 
 
 void sig_abrt() {
-    scerror("Error !!! Quitting SC-IM.");
+    sc_error("Error !!! Quitting SC-IM.");
     shall_quit = -1; // error !
 }
 
 
 
 void sig_term() {
-    scerror("Got SIGTERM signal. Quitting SC-IM.");
+    sc_error("Got SIGTERM signal. Quitting SC-IM.");
     shall_quit = 2;
 }
 
@@ -440,7 +438,7 @@ void winchg() {
 #include <stdarg.h>
 #include "conf.h"
 
-void scerror(char * s, ...) {
+void sc_error(char * s, ...) {
     char t[BUFFERSIZE];
     va_list args;
     va_start(args, s);
@@ -460,7 +458,7 @@ void scerror(char * s, ...) {
     return;
 }
 
-void scinfo(char * s, ...) {
+void sc_info(char * s, ...) {
     char t[BUFFERSIZE];
     va_list args;
     va_start(args, s);
@@ -480,15 +478,7 @@ void scinfo(char * s, ...) {
     return;
 }
 
-void debug(wchar_t * mes) {
-    mvwaddwstr(input_win, 0, 1 + rescol, mes);
-    wrefresh(input_win);
-    wtimeout(input_win, -1);
-    wgetch(input_win);
-    wtimeout(input_win, TIMEOUT_CURSES);
-}
-
-void scdebug(char * s, ...) {
+void sc_debug(char * s, ...) {
     char t[BUFFERSIZE];
     va_list args;
     va_start(args, s);

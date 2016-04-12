@@ -25,7 +25,7 @@
 #include <string.h>
 
 #include <stdlib.h>
-#include <curses.h>
+#include <ncursesw/curses.h>
 #include "sc.h"
 #include "macros.h"
 #include "color.h"
@@ -144,7 +144,7 @@ double finfunc(int fun, double v1, double v2, double v3) {
             }
             break;
         default:
-            scerror("Unknown function in finfunc");
+            sc_error("Unknown function in finfunc");
             cellerror = CELLERROR;
             return ((double)0);
         }
@@ -205,7 +205,7 @@ double doindex(int minr, int minc, int maxr, int maxc, struct enode *val) {
         r = minr + (int) eval(val) - 1;
         c = minc;
     } else {
-        scerror("Improper indexing operation");
+        sc_error("Improper indexing operation");
         return (double) 0;
     }
 
@@ -240,7 +240,7 @@ double dolookup(struct enode * val, int minr, int minc, int maxr, int maxc, int 
                         else // useful when the lookup ends up in a cell with no value
                             p = *ATBL(tbl, fndr, fndc);
                     else {
-                        scerror(" range specified to @[hv]lookup");
+                        sc_error(" range specified to @[hv]lookup");
                         cellerror = CELLERROR;
                     }
                     if (p && p->flags & is_valid) {
@@ -264,7 +264,7 @@ double dolookup(struct enode * val, int minr, int minc, int maxr, int maxc, int 
                         if (p->cellerror)
                             cellerror = CELLINVALID;
                     } else {
-                        scerror(" range specified to @[hv]lookup");
+                        sc_error(" range specified to @[hv]lookup");
                         cellerror = CELLERROR;
                     }
                     break;
@@ -504,7 +504,7 @@ double dodts(int e1, int e2, int e3) {
     t.tm_isdst = -1;
 
     if (mo < 0 || mo > 11 || day < 1 || day > mdays[mo] || (secs = mktime(&t)) == -1) {
-        scerror("@dts: invalid argument or date out of range");
+        sc_error("@dts: invalid argument or date out of range");
         cellerror = CELLERROR;
         return (0.0);
     }
@@ -514,7 +514,7 @@ double dodts(int e1, int e2, int e3) {
 
 double dotts(int hr, int min, int sec) {
     if (hr < 0 || hr > 23 || min < 0 || min > 59 || sec < 0 || sec > 59) {
-        scerror ("@tts: Invalid argument");
+        sc_error ("@tts: Invalid argument");
         cellerror = CELLERROR;
         return ((double) 0);
     }
@@ -913,7 +913,7 @@ double eval(register struct enode *e) {
     case MAGENTA: return ((double) COLOR_MAGENTA);
     case CYAN:   return ((double) COLOR_CYAN);
     case WHITE:  return ((double) COLOR_WHITE);
-    default:    scerror ("Illegal numeric expression");
+    default:    sc_error ("Illegal numeric expression");
                 exprerr = 1;
     }
     cellerror = CELLERROR;
@@ -922,7 +922,7 @@ double eval(register struct enode *e) {
 
 void eval_fpe() { /* Trap for FPE errors in eval */
 #if defined(i386)
-    scdebug("eval_fpe i386");
+    sc_debug("eval_fpe i386");
     asm("    fnclex");
     asm("    fwait");
 #else
@@ -1044,13 +1044,13 @@ char * doext(struct enode *se) {
     command = seval(se->e.o.left);
     value = eval(se->e.o.right);
     if ( ! atoi(get_conf_value("external_functions")) ) {
-        scerror("Warning: external functions disabled; using %s value",
+        sc_error("Warning: external functions disabled; using %s value",
         (se->e.o.s && *se->e.o.s) ? "previous" : "null");
 
         if (command) scxfree(command);
     } else {
         if ((! command) || (! *command)) {
-            scerror ("Warning: external function given null command name");
+            sc_error ("Warning: external function given null command name");
             cellerror = CELLERROR;
             if (command) scxfree(command);
         } else {
@@ -1059,18 +1059,18 @@ char * doext(struct enode *se) {
             (void) sprintf(buff, "%s %g", command, value); /* build cmd line */
             scxfree(command);
 
-            scerror("Running external function...");
+            sc_error("Running external function...");
             //(void) refresh();
 
             if ((pp = popen(buff, "r")) == (FILE *) NULL) {    /* run it */
-                scerror("Warning: running \"%s\" failed", buff);
+                sc_error("Warning: running \"%s\" failed", buff);
                 cellerror = CELLERROR;
             } else {
                 if (fgets(buff, sizeof(buff)-1, pp) == NULL) {    /* one line */
-                    scerror("Warning: external function returned nothing");
+                    sc_error("Warning: external function returned nothing");
                 } else {
                     char *cp;
-                    //scerror("");                /* erase notice */
+                    //sc_error("");                /* erase notice */
                     buff[sizeof(buff)-1] = '\0';
 
                     if ((cp = strchr(buff, '\n')))    /* contains newline */
@@ -1277,7 +1277,7 @@ char * seval(register struct enode *se) {
              return (p);
     }
     default:
-             scerror("Illegal string expression");
+             sc_error("Illegal string expression");
              exprerr = 1;
              return (NULL);
     }
@@ -1299,7 +1299,7 @@ int repct = 1;        /* Make repct a global variable so that the
 
 void setiterations(int i) {
     if (i < 1) {
-        scerror("iteration count must be at least 1");
+        sc_error("iteration count must be at least 1");
         propagation = 1;
     } else
         propagation = i;
@@ -1313,7 +1313,7 @@ void EvalAll() {
 
     while ((lastcnt = RealEvalAll()) && (++repct <= propagation));
     if ((propagation > 1) && (lastcnt > 0) && ! atoi(get_conf_value("nocurses"))) {
-        scerror("Still changing after %d iterations", repct - 1);
+        sc_error("Still changing after %d iterations", repct - 1);
     }
     /*
     if (usecurses && color && has_colors()) {
@@ -1331,7 +1331,7 @@ void EvalAll() {
         color = 0;
         attron(COLOR_PAIR(0));
         color_set(0, NULL);
-        scerror("Error in color 1: color turned off");
+        sc_error("Error in color 1: color turned off");
         }
     }
     }
@@ -1363,7 +1363,7 @@ int RealEvalAll() {
     }
     }
     else {
-        scerror("Internal error calc_order");
+        sc_error("Internal error calc_order");
     }
     return (chgct);
 }
@@ -1374,7 +1374,7 @@ void RealEvalOne(register struct ent *p, int i, int j, int *chgct) {
     if (p->flags & is_strexpr) {
         char *v;
         if (setjmp(fpe_save)) {
-            scerror("Floating point exception %s", v_name(i, j));
+            sc_error("Floating point exception %s", v_name(i, j));
             cellerror = CELLERROR;
             v = "";
         } else {
@@ -1395,7 +1395,7 @@ void RealEvalOne(register struct ent *p, int i, int j, int *chgct) {
     } else {
         double v;
         if (setjmp(fpe_save)) {
-            scerror("Floating point exception %s", v_name(i, j));
+            sc_error("Floating point exception %s", v_name(i, j));
             cellerror = CELLERROR;
             v = (double)0.0;
         } else {
@@ -1562,7 +1562,7 @@ void copy(struct ent *dv1, struct ent *dv2, struct ent *v1, struct ent *v2) {
     sync_refs();
     flush_saved();
 
-    scerror("Copying...");
+    sc_error("Copying...");
     if (!loading)
     refresh();
 //   p = delbuf[dbidx];
@@ -1600,7 +1600,7 @@ void copy(struct ent *dv1, struct ent *dv2, struct ent *v1, struct ent *v2) {
 //    }
     qbuf = 0;
     }
-    scerror("Copy done.");
+    sc_error("Copy done.");
 }
 
 void copydbuf(int deltar, int deltac) {
@@ -1692,7 +1692,7 @@ void go_previous() {
 
     switch (gs.g_type) {
         case G_NONE:
-            scerror("Nothing to repeat");
+            sc_error("Nothing to repeat");
             break;
         case G_NUM:
             num_search(gs.g_n, gs.g_row, gs.g_col, gs.g_lastrow, gs.g_lastcol, gs.errsearch, 0);
@@ -1702,7 +1702,7 @@ void go_previous() {
             str_search(gs.g_s, gs.g_row, gs.g_col, gs.g_lastrow, gs.g_lastcol, num, 0);
             break;
         default:
-            scerror("go_previous: internal error");
+            sc_error("go_previous: internal error");
     }
 }
 
@@ -1712,7 +1712,7 @@ void go_last() {
 
     switch (gs.g_type) {
     case G_NONE:
-        scerror("Nothing to repeat");
+        sc_error("Nothing to repeat");
         break;
     case G_NUM:
         num_search(gs.g_n, gs.g_row, gs.g_col, gs.g_lastrow, gs.g_lastcol, gs.errsearch, 1);
@@ -1729,7 +1729,7 @@ void go_last() {
         break;
 
     default:
-        scerror("go_last: internal error");
+        sc_error("go_last: internal error");
     }
 }
 
@@ -1763,7 +1763,7 @@ void moveto(int row, int col, int lastrow_, int lastcol_, int cornerrow, int cor
 
     for (rowsinrange = 0, i = row; i <= lastrow_; i++) {
         if (row_hidden[i]) {
-            scinfo("Cell's row is hidden");
+            sc_info("Cell's row is hidden");
             continue;
         }
         rowsinrange++;
@@ -1771,7 +1771,7 @@ void moveto(int row, int col, int lastrow_, int lastcol_, int cornerrow, int cor
     for (colsinrange = 0, i = col; i <= lastcol_; i++) {
         if (col_hidden[i]) {
             colsinrange = 0;
-            scinfo("Cell's col is hidden");
+            sc_info("Cell's col is hidden");
             continue;
         }
         colsinrange += fwidth[i];
@@ -1844,9 +1844,9 @@ void num_search(double n, int firstrow, int firstcol, int lastrow_, int lastcol_
             break;
         if (r == endr && c == endc) {
             if (errsearch) {
-                scerror("no %s cell found", errsearch == CELLERROR ? "ERROR" : "INVALID");
+                sc_error("no %s cell found", errsearch == CELLERROR ? "ERROR" : "INVALID");
             } else {
-                scerror("Number not found");
+                sc_error("Number not found");
             }
             return;
         }
@@ -1885,7 +1885,7 @@ void str_search(char *s, int firstrow, int firstcol, int lastrow_, int lastcol_,
         scxfree(s);
         tmp = scxmalloc((size_t)160);
         regerror(errcode, &preg, tmp, sizeof(tmp));
-        scerror(tmp);
+        sc_error(tmp);
         scxfree(tmp);
         return;
     }
@@ -1893,7 +1893,7 @@ void str_search(char *s, int firstrow, int firstcol, int lastrow_, int lastcol_,
 #if defined(RE_COMP)
     if ((tmp = re_comp(s)) != NULL) {
         scxfree(s);
-        scerror(tmp);
+        sc_error(tmp);
         return;
     }
 #endif
@@ -1901,7 +1901,7 @@ void str_search(char *s, int firstrow, int firstcol, int lastrow_, int lastcol_,
     if ((tmp = regcmp(s, NULL)) == NULL) {
         scxfree(s);
         cellerror = CELLERROR;
-        scerror("Invalid search string");
+        sc_error("Invalid search string");
         return;
     }
 #endif
@@ -2014,7 +2014,7 @@ void str_search(char *s, int firstrow, int firstcol, int lastrow_, int lastcol_,
             break;
     }
     if (r == endr && c == endc) {
-        scerror("String not found");
+        sc_error("String not found");
 #if defined(REGCOMP)
         regfree(&preg);
 #endif
@@ -2085,7 +2085,7 @@ void fill(struct ent *v1, struct ent *v2, double start, double inc) {
             }
     }
     else {
-        scerror(" Internal error calc_order");
+        sc_error(" Internal error calc_order");
     }
     changed++;
 }
@@ -2178,7 +2178,7 @@ void let(struct ent *v, struct enode *e) {
         exprerr = 0;
         (void) signal(SIGFPE, eval_fpe);
         if (setjmp(fpe_save)) {
-            scerror("Floating point exception in cell %s", v_name(v->row, v->col));
+            sc_error("Floating point exception in cell %s", v_name(v->row, v->col));
             val = (double)0.0;
             cellerror = CELLERROR;
         } else {
@@ -2233,7 +2233,7 @@ void slet(struct ent *v, struct enode *se, int flushdir) {
     exprerr = 0;
     (void) signal(SIGFPE, eval_fpe);
     if (setjmp(fpe_save)) {
-        scerror ("Floating point exception in cell %s", v_name(v->row, v->col));
+        sc_error ("Floating point exception in cell %s", v_name(v->row, v->col));
         cellerror = CELLERROR;
         p = "";
     } else {

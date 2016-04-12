@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <ctype.h>
-#include <curses.h>
+#include <ncursesw/curses.h>
 #include <string.h>
 #include "maps.h"
 #include "string.h"
@@ -19,7 +19,7 @@ int replace_maps (struct block * b) {
     int r = 0;
 
     if (++mapdepth == 1000) {
-        scerror("recursive mapping");
+        sc_error("recursive mapping");
         flush_buf(b);
         mapdepth = 0;
         return 0;
@@ -34,7 +34,7 @@ int replace_maps (struct block * b) {
 
             // Replace m->in with m->out in 'b' list
             if (replace_block_in_block(b, m->in, m->out) == -1) {
-                scerror("error replacing maps");
+                sc_error("error replacing maps");
                 return -1;
             }
             r = 1;

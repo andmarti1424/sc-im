@@ -181,7 +181,7 @@ int yylex() {
         if (setjmp(fpe_buf)) {
             (void) signal(SIGFPE, sig_save);
             yylval.fval = v;
-            scerror("Floating point exception\n");
+            sc_error("Floating point exception\n");
             isfunc = isgoto = 0;
             tokenst = NULL;
             return FNUMBER;

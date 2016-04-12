@@ -1,7 +1,7 @@
 #include <sys/types.h>
 #include <string.h>
 #include <stdlib.h>      // for atoi
-#include <curses.h>
+#include <ncursesw/curses.h>
 #include <ctype.h>
 #include <unistd.h>
 
@@ -201,7 +201,7 @@ void chg_color(char * str) {
 
     // Validate we got enough keys to change a color
     if (get(d, "fg") == '\0' || get(d, "bg") == '\0' || get(d, "type") == '\0') {
-        scerror("Color definition incomplete");
+        sc_error("Color definition incomplete");
         destroy_dictionary(d);
         return;
     }
@@ -212,7 +212,7 @@ void chg_color(char * str) {
         (get(d_colors_param, get(d, "bg")) == NULL) ||
         (get(d_colors_param, get(d, "type")) == NULL)
     ) {
-        scerror("One of the values specified is wrong. Please check the values of type, fg and bg.");
+        sc_error("One of the values specified is wrong. Please check the values of type, fg and bg.");
         destroy_dictionary(d);
         return;
     }
@@ -238,7 +238,7 @@ void chg_color(char * str) {
 // supports undo / redo
 void color_cell(int r, int c, int rf, int cf, char * str) {
     if (any_locked_cells(r, c, rf, cf)) {
-        scinfo("Locked cells encountered. Nothing changed");
+        sc_error("Locked cells encountered. Nothing changed");
         return;
     }
 
@@ -256,7 +256,7 @@ void color_cell(int r, int c, int rf, int cf, char * str) {
     if (
         ((get(d, "fg") != '\0' && get(d_colors_param, get(d, "fg")) == NULL) ||
         (get(d, "bg") != '\0' && get(d_colors_param, get(d, "bg")) == NULL))) {
-            scerror("One of the values specified is wrong. Please check the values of type, fg and bg.");
+            sc_error("One of the values specified is wrong. Please check the values of type, fg and bg.");
             destroy_dictionary(d);
             return;
     }
@@ -350,14 +350,14 @@ int redefine_color(char * color, int r, int g, int b) {
            if (res == 0) {
                winchg();
                if (! loading)
-                   scinfo("Color %s redefined to %d %d %d.", color, r, g, b);
+                   sc_info("Color %s redefined to %d %d %d.", color, r, g, b);
                return 0;
            }
        }
 
 #endif
        if (! loading)
-           scinfo("Could not redefine color");
+           sc_error("Could not redefine color");
        return -1;
 }
 

@@ -8,7 +8,7 @@ Adaptation of Chuck Martin's code - <nrocinu@myrealbox.com>
 #include <ctype.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <curses.h>
+#include <ncursesw/curses.h>
 #include "macros.h"
 #include "yank.h"
 #include "cmds.h"
@@ -63,7 +63,7 @@ void sortrange(struct ent * left, struct ent * right, char * criteria) {
                     sort[howmany].direction = -1;
                     break;
                 default:
-                    scerror("Invalid sort criteria");
+                    sc_error("Invalid sort criteria");
                     return;
             }
             switch (criteria[cp++]) {
@@ -74,20 +74,20 @@ void sortrange(struct ent * left, struct ent * right, char * criteria) {
                     sort[howmany].type = 1;
                     break;
                 default:
-                    scerror("Invalid sort criteria");
+                    sc_error("Invalid sort criteria");
                     return;
             }
             if (criteria[cp]) {
                 col = toupper(criteria[cp++]) - 'A';
             } else {
-                scerror("Invalid sort criteria");
+                sc_error("Invalid sort criteria");
                 return;
             }
             if (criteria[cp] && criteria[cp] != '+' && criteria[cp] != '-' && criteria[cp] != ';')
                 col = (col + 1) * 26 + toupper(criteria[cp++]) - 'A';
             sort[howmany].column = col;
             if (col < minc || col > maxc) {
-                scerror("Invalid sort criteria");
+                sc_error("Invalid sort criteria");
                 return;
             }
             cp++;

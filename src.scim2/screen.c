@@ -3,7 +3,7 @@
     input_win: stdin and state bar window
 */
 #include <string.h>
-#include <curses.h>
+#include <ncursesw/curses.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -240,17 +240,15 @@ void show_header(WINDOW * win) {
     #endif
     switch (curmode) {
         case COMMAND_MODE:
-            mvwaddwstr(win, 0, 0 + rescol, L":");
-            mvwaddwstr(win, 0, 1 + rescol, inputline);
+            mvwprintw(win, 0, rescol, ":%ls", inputline);
             wmove(win, 0, inputline_pos + 1 + rescol);
             break;
         case INSERT_MODE:
-            mvwaddwstr(win, 0, 1 + rescol, inputline);
+            mvwprintw(win, 0, 1 + rescol, "%ls", inputline);
             wmove(win, 0, inputline_pos + 1 + rescol);
             break;
         case EDIT_MODE:
-            mvwaddwstr(win, 0, 0 + rescol, L" ");
-            mvwaddwstr(win, 0, 1 + rescol, inputline);
+            mvwprintw(win, 0, rescol, " %ls", inputline);
             wmove(win, 0, inputline_pos + 1 + rescol);
     }
     wrefresh(win);
@@ -835,7 +833,7 @@ void show_text(char * val) {
     (void) strcat(px, pager);
     FILE * f = openfile(px, &pid, NULL);
     if (!f) {
-        scerror("Can't open pipe to %s", pager);
+        sc_error("Can't open pipe to %s", pager);
         return;
     }
     def_prog_mode();
