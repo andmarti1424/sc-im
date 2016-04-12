@@ -3,7 +3,7 @@
 
 # Specify the name of the program.
 # All documentation and installation keys on this value.
-name=scim2
+name=scim
 NAME=SC-IM
 SNAME := -DSNAME=\"$(name)\"
 
