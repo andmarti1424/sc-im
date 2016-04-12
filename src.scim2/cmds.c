@@ -1332,7 +1332,7 @@ void auto_justify(int ci, int cf, int min) {
                     mbsptr = p->label;
                     result = mbsrtowcs(widestring, &mbsptr, BUFFERSIZE, &state);
                     if ( result != (size_t)-1 )
-                        sum += wcslen(widestring);
+                        sum += wcswidth(widestring, wcslen(widestring));
                 }
                 if (p->flags & is_valid) {
                     sprintf(field, "%.*f", precision[c], p->v);
