@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>   // for isdigit
+#include <wctype.h>  // for iswprint
 #include <wchar.h>
 #include <stdio.h>
 #include "string.h"
@@ -330,7 +331,7 @@ void uppercase(char * sPtr) {
 }
 
 int sc_isprint(int d) {
-    if ( ((d > 31) && (d < 127)) || ((d > 127) && (d < 255)) )
+    if ( ((d > 31) && (d < 127)) || ((d > 127) && (d < 255)) || iswprint(d) )
         return 1;
     return 0;
 }

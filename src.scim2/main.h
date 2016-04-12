@@ -14,8 +14,4 @@ void sig_int();
 // SIGWINCH signal - resize of terminal
 void winchg();
 
-void scerror(char * s, ...);
-void scinfo(char * s, ...);
-void scdebug(char * s, ...);
-
 extern FILE * fdoutput; // output file descriptor (stdout or file)
