@@ -13,6 +13,7 @@ SC-IM uses ncurses for visual interface and has vim-like keybindings and some fu
 - 65.536 rows and 702 columns supported. (The number of rows can be expanded to 1.048.576 if wished).
 - CSV / TAB delimited file import and export.
 - XLS / XLSX file import.
+- Wide character support.
 - Key-mappings.
 - Sort of rows.
 - Filter of rows.
@@ -25,7 +26,7 @@ SC-IM uses ncurses for visual interface and has vim-like keybindings and some fu
 - Use SC-IM as a non-interactive calculator, reading its input from a external script.
 
 About the name, the idea is that the program can be identified as another vim-like app.
-SC-IM stands for Spreadsheet Calculator Improvised. :-) 
+SC-IM stands for Spreadsheet Calculator Improvised. :-)
 
 ![demo image](https://raw.githubusercontent.com/andmarti1424/sc-im/dev/scim.png)
 
