@@ -166,16 +166,14 @@ void do_editmode(struct block * sb) {
         show_header(input_win);
         return;
 
-
-
-    //FIXME - from here
     } else if (sb->value == L'R') {         // R
         curs_set(1);
         wint_t c = get_key();
         while (c != OKEY_ENTER && c != -1) {
             if (iswprint(c)) {
-                inputline[inputline_pos] = c;
-                ++inputline_pos;
+                inputline[real_inputline_pos] = c;
+                ++real_inputline_pos;
+                inputline_pos = wcswidth(inputline, real_inputline_pos);
 
                 mvwprintw(input_win, 0, 1 + rescol, "%ls", inputline);
                 wmove(input_win, 0, inputline_pos + 1 + rescol);
@@ -191,33 +189,37 @@ void do_editmode(struct block * sb) {
         if ( (c = get_key()) != -1 ) {
              switch (c) {
              case L'e':                     // de or ce
-                 del_range_wchars(inputline, inputline_pos, for_word(1, 0, 0));
+                 del_range_wchars(inputline, real_inputline_pos, for_word(1, 0, 0));
                  break;
 
              case L'E':                     // dE or cE
-                 del_range_wchars(inputline, inputline_pos, for_word(1, 0, 1));
+                 del_range_wchars(inputline, real_inputline_pos, for_word(1, 0, 1));
                  break;
 
              case L'w':                     // dw or cw
-                 del_range_wchars(inputline, inputline_pos, for_word(0, 1, 0) - 1);
-                 if (inputline_pos == wcslen(inputline) && inputline_pos) inputline_pos--;
+                 del_range_wchars(inputline, real_inputline_pos, for_word(0, 1, 0) - 1);
+                 inputline_pos = wcswidth(inputline, real_inputline_pos);
+                 if (real_inputline_pos == wcslen(inputline) && real_inputline_pos) real_inputline_pos--;
                  break;
 
              case L'W':                     // dW or cW
-                 del_range_wchars(inputline, inputline_pos, for_word(0, 1, 1) - 1);
-                 if (inputline_pos == wcslen(inputline) && inputline_pos) inputline_pos--;
+                 del_range_wchars(inputline, real_inputline_pos, for_word(0, 1, 1) - 1);
+                 inputline_pos = wcswidth(inputline, real_inputline_pos);
+                 if (real_inputline_pos == wcslen(inputline) && real_inputline_pos) real_inputline_pos--;
                  break;
 
              case L'b':                     // db or cb
                  d = back_word(0);
-                 del_range_wchars(inputline, d, inputline_pos-1);
-                 inputline_pos = d;
+                 del_range_wchars(inputline, d, real_inputline_pos-1);
+                 real_inputline_pos = d;
+                 inputline_pos = wcswidth(inputline, real_inputline_pos);
                  break;
 
              case L'B':                     // dB or cB
                  d = back_word(1);
-                 del_range_wchars(inputline, d, inputline_pos-1);
-                 inputline_pos = d;
+                 del_range_wchars(inputline, d, real_inputline_pos-1);
+                 real_inputline_pos = d;
+                 inputline_pos = wcswidth(inputline, real_inputline_pos);
                  break;
 
              case L'l':                     // dl or cl
@@ -232,13 +234,15 @@ void do_editmode(struct block * sb) {
 
              case L'a':
                  if ( (d = get_key()) == L'W' ) {     // daW or caW
-                     c = ( inputline_pos && inputline[inputline_pos-1] == ' ' ) ? inputline_pos : back_word(1);
+                     c = ( real_inputline_pos && inputline[real_inputline_pos-1] == L' ' ) ? real_inputline_pos : back_word(1);
                      del_range_wchars(inputline, c, for_word(0, 1, 1) - 1);
-                     inputline_pos = (wcslen(inputline) > inputline_pos) ? c : wcslen(inputline)-2;
+                     real_inputline_pos = (wcslen(inputline) > real_inputline_pos) ? c : wcslen(inputline)-2;
+                     inputline_pos = wcswidth(inputline, real_inputline_pos);
                  } else if ( d == L'w' ) { // daw or caw
-                     d = ( inputline_pos && ! istext( inputline[inputline_pos-1]) ) ? inputline_pos : back_word(0);
+                     d = ( real_inputline_pos && ! istext( inputline[real_inputline_pos-1]) ) ? real_inputline_pos : back_word(0);
                      del_range_wchars(inputline, d, for_word(0, 1, 0) - 1);
-                     inputline_pos = (wcslen(inputline) > inputline_pos) ? d : wcslen(inputline)-2;
+                     real_inputline_pos = (wcslen(inputline) > real_inputline_pos) ? d : wcslen(inputline)-2;
+                     inputline_pos = wcswidth(inputline, real_inputline_pos);
                  }
                  break;
              }
@@ -250,15 +254,7 @@ void do_editmode(struct block * sb) {
     return;
 }
 
-    //FIXME - up to here
-
-
-
-
-
-
 // looks for a char in inputline
-// REVISED
 int look_for(wchar_t cb) {
     int c, cpos = inputline_pos;
     while (++cpos < wcslen(inputline))
@@ -268,7 +264,6 @@ int look_for(wchar_t cb) {
 }
 
 // move backwards a word
-// REVISED
 int back_word(int big_word) {
     int c, cpos = real_inputline_pos;
     if (inputline[cpos-1] == L' ' ) cpos--;
@@ -283,7 +278,6 @@ int back_word(int big_word) {
 // end_of_word is used for moving forward to end of a WORD
 // big_word looks for ' ', else looks for istext.
 // delete 1 is used when typing dw command
-// REVISED
 int for_word(int end_of_word, int delete, int big_word) {
     int cpos = real_inputline_pos;
 
