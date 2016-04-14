@@ -55,18 +55,6 @@ void handle_input(struct block * buffer) {
             // Read new character from stdin
             return_value = wget_wch(input_win, & wd);
             d = wd;
-
-            // WIDE CHAR input
-            // UNCOMMENT FOR DEBUGGING
-            //sc_info("%d %d %c", d, return_value, wd);
-            //if (d != 0)
-                //sc_info("%d %d %c", d, return_value, c);
-                //TODO
-                //mvwprintw(input_win, 1, 0, "-%lc-%d", d, d); //á 225
-                //wclrtoeol(input_win);
-                //wrefresh(input_win);
-            //OLD: d = wgetch(input_win);
-
             if ( d == OKEY_ESC) {
                 break_waitcmd_loop(buffer);
                 return;
@@ -194,7 +182,7 @@ void fix_timeout(struct timeval * start_tv) {
         case VISUAL_MODE:
         case EDIT_MODE:
         case NORMAL_MODE:
-            if (d != -1) gettimeofday(start_tv, NULL);
+            if (d != 0) gettimeofday(start_tv, NULL);
     }
     return;
 }
