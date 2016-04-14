@@ -355,6 +355,7 @@ void do_normalmode(struct block * buf) {
             wrefresh(input_win);
             handle_cursor();
             inputline_pos = 0;
+            real_inputline_pos = 0;
             break;
 
         // enter visual mode
@@ -379,6 +380,7 @@ void do_normalmode(struct block * buf) {
             print_mode(input_win);
             wrefresh(input_win);
             inputline_pos = 0;
+            real_inputline_pos = 0;
             break;
 
         // EDITION COMMANDS
@@ -387,6 +389,7 @@ void do_normalmode(struct block * buf) {
             if (locked_cell(currow, curcol)) return;
             clr_header(input_win, 0);
             inputline_pos = 0;
+            real_inputline_pos = 0;
             if (start_edit_mode(buf, 'v')) show_header(input_win);
             break;
 
@@ -395,6 +398,7 @@ void do_normalmode(struct block * buf) {
             if (locked_cell(currow, curcol)) return;
             clr_header(input_win, 0);
             inputline_pos = 0;
+            real_inputline_pos = 0;
             if (start_edit_mode(buf, 's')) show_header(input_win);
             else {
                 sc_info("No string value to edit");
@@ -1014,6 +1018,7 @@ void do_normalmode(struct block * buf) {
                 insert_edit_submode='=';
                 chg_mode(insert_edit_submode);
                 inputline_pos = 0;
+                real_inputline_pos = 0;
                 ins_in_line(buf->value);
                 show_header(input_win);
             }
