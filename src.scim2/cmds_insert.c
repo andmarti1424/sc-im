@@ -30,8 +30,8 @@ void do_insertmode(struct block * sb) {
 
     } else if (sb->value == OKEY_LEFT) {   // LEFT
         if (inputline_pos) {
-            int l = wcwidth(inputline[real_inputline_pos-1]);
             real_inputline_pos--;
+            int l = wcwidth(inputline[real_inputline_pos]);
             inputline_pos -= l;
             show_header(input_win);
         }

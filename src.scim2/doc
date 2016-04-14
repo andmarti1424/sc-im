@@ -220,7 +220,7 @@ Commands for handling cell content:
      s           deletes a char under the cursor and enters insert mode
      A           append at eol
      I           append at bol
-     D           deletes entire line
+     D           deletes from current cursor position to end of line
      <SPACE>     adds a space under the cursor
      <ENTER>     confirm changes
 
