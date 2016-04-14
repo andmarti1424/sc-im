@@ -790,7 +790,7 @@ int import_csv(char * fname, char d) {
     loading = 1;
 
     // Check max length of line
-    int max = max_length(f);
+    int max = max_length(f) + 1;
     char line_in[max];
     rewind(f);
 
