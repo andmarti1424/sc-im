@@ -385,7 +385,7 @@ void signals() {
     void nopipe();
     void winchg();
 
-    signal(SIGINT, sig_int);
+    //signal(SIGINT, sig_int);
     signal(SIGABRT, sig_abrt);
     signal(SIGTERM, sig_term); // kill
     signal(SIGPIPE, nopipe);
