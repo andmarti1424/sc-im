@@ -477,7 +477,7 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
 
             char num [FBUFLEN] = "";
             char text[FBUFLEN] = "";
-            char out [FBUFLEN] = "";
+            wchar_t out [FBUFLEN] = L"";
             char formated_s[FBUFLEN] = "";
             int res = -1;
             int align = 1;
@@ -540,8 +540,8 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
 
             // we print text and number
             } else {
-                pad_and_align (text, num, fwidth[col], align, (*p)->pad, out);
-                mvwprintw(win, row + 1 - offscr_sc_rows - q_row_hidden, c, "%s", out);
+                pad_and_align(text, num, fwidth[col], align, (*p)->pad, out);
+                mvwprintw(win, row + 1 - offscr_sc_rows - q_row_hidden, c, "%ls", out);
                 wclrtoeol(win);
             }
 
@@ -773,50 +773,67 @@ int scstrlen(char * s) {
 // this function aligns text of a cell (align = 0 center, align = 1 right, align = -1 left)
 // and adds padding between cells.
 // returns resulting string to be printed in screen.
-void pad_and_align (char * str_value, char * numeric_value, int col_width, int align, int padding, char * str_out) {
-    int str_len  = scstrlen(str_value);
-    int num_len  = scstrlen(numeric_value);
-    str_out[0] = '\0';
+void pad_and_align (char * str_value, char * numeric_value, int col_width, int align, int padding, wchar_t * str_out) {
+    int str_len  = 0;
+    int num_len  = strlen(numeric_value);
+    str_out[0] = L'\0';
+
+    wchar_t wcs_value[BUFFERSIZE] = { L'\0' };
+    mbstate_t state;
+    size_t result;
+    const char * mbsptr;
+    mbsptr = str_value;
+
+
+    // create wcs string based on multibyte string..
+    memset( &state, '\0', sizeof state );
+    result = mbsrtowcs(wcs_value, &mbsptr, BUFFERSIZE, &state);
+    if ( result != (size_t)-1 )
+        str_len = wcswidth(wcs_value, wcslen(wcs_value));
 
     // If padding exceedes column width, returns n number of '-' needed to fill column width
     if (padding >= col_width ) {
-        sprintf(str_out, "%*s", col_width, "");
+        wmemset(str_out + wcslen(str_out), L'#', col_width);
         return;
     }
 
     // If content exceedes column width, outputs n number of '*' needed to fill column width
     if (str_len + num_len + padding > col_width ) {
-        if (padding) sprintf(str_out, "%*s", padding, "");
-        memset(str_out + strlen(str_out), '*', col_width - padding);
+        if (padding) wmemset(str_out + wcslen(str_out), L'#', padding);
+        wmemset(str_out + wcslen(str_out), L'*', col_width - padding);
         return;
     }
 
     // padding
-    if (padding) sprintf(str_out, "%*s", padding, "");
+    if (padding) swprintf(str_out, BUFFERSIZE, L"%*ls", padding, L"");
 
     // left spaces
     int left_spaces = 0;
     if (align == 0 && str_len) {                           // center align
         left_spaces = (col_width - padding - str_len) / 2;
+        if (num_len > left_spaces) left_spaces = col_width - padding - str_len - num_len;
     } else if (align == 1 && str_len && ! num_len) {       // right align
         left_spaces = col_width - padding - str_len;
     }
-    while (left_spaces-- > 0) add_char(str_out, ' ', strlen(str_out));
+    while (left_spaces-- > 0) add_wchar(str_out, L' ', wcslen(str_out));
 
     // add text
     if (align != 1 || ! num_len)
-        strcat(str_out, str_value);
+        swprintf(str_out + wcslen(str_out), BUFFERSIZE, L"%s", str_value);
 
     // spaces after string value
-    int spaces = col_width - scstrlen(str_out) - num_len;
-    while (spaces-- > 0) add_char(str_out, ' ', strlen(str_out));
+    int spaces = col_width - padding - str_len - num_len;
+    if (align == 1) spaces += str_len;
+    if (align == 0) spaces -= (col_width - padding - str_len) / 2;
+    while (spaces-- > 0) add_wchar(str_out, L' ', wcslen(str_out));
 
     // add number
-    int fill_with_number = col_width - scstrlen(str_out);
-    if (num_len && num_len >= fill_with_number)
-        strncat(str_out, & numeric_value[num_len - fill_with_number], fill_with_number);
-    else if (num_len)
-        strcat(str_out, numeric_value);
+    int fill_with_number = col_width - str_len - padding;
+    if (num_len && num_len >= fill_with_number) {
+        swprintf(str_out + wcslen(str_out), BUFFERSIZE, L"%.*s", fill_with_number, & numeric_value[num_len - fill_with_number]);
+    } else if (num_len) {
+        swprintf(str_out + wcslen(str_out), BUFFERSIZE, L"%s", numeric_value);
+    }
 
     return;
 }

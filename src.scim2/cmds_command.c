@@ -35,7 +35,9 @@ extern struct dictionary * user_conf_d;
 
 wchar_t inputline[BUFFERSIZE];
 wchar_t interp_line[BUFFERSIZE];
-int inputline_pos;
+int inputline_pos;          // This is the position in window. Some chars has 2 chars width
+                            // \-> https://en.wikipedia.org/wiki/Halfwidth_and_fullwidth_forms
+int real_inputline_pos;     // This is the real position in inputline
 
 static wchar_t * valid_commands[] = {
 L"!",
@@ -661,7 +663,10 @@ void do_commandmode(struct block * sb) {
 void ins_in_line(wint_t d) {
     //DEBUG
     //sc_info("3: %d %lc", d, d);
-
-    add_wchar(inputline, (wchar_t) d, inputline_pos++);
+    int real = get_real_inputline_pos();
+    add_wchar(inputline, (wchar_t) d, real);
+    //add_wchar(inputline, (wchar_t) d, real_inputline_pos);
+    real_inputline_pos++;
+    inputline_pos += wcwidth((wchar_t) d);
     return;
 }

@@ -3,12 +3,22 @@
 #include "screen.h"
 #include <string.h>
 #include <wchar.h>
-//#include <ctype.h>       // for isprint()
+#include <stdlib.h>
 #include "buffer.h"
 #include "sc.h"            // for rescol
 #include "utils/string.h"
 #include "marks.h"
 #include "cmds_visual.h"
+
+// used for wchar_t that has more than 1 column width
+int get_real_inputline_pos() {
+    int pos;
+    int sum = 0;
+    for (pos = 0; pos < wcslen(inputline) && sum < inputline_pos; pos++) {
+        sum += wcwidth(inputline[pos]);
+    }
+    return pos;
+}
 
 void do_insertmode(struct block * sb) {
 
@@ -19,21 +29,33 @@ void do_insertmode(struct block * sb) {
         return;
 
     } else if (sb->value == OKEY_LEFT) {   // LEFT
-        if (inputline_pos) inputline_pos--;
-        show_header(input_win);
+        if (inputline_pos) {
+            int l = wcwidth(inputline[real_inputline_pos-1]);
+            real_inputline_pos--;
+            inputline_pos -= l;
+            show_header(input_win);
+        }
 
     } else if (sb->value == OKEY_RIGHT) {  // RIGHT
-        if (inputline_pos < wcslen(inputline)) inputline_pos++;
+        int max = wcswidth(inputline, wcslen(inputline));
+        int l = wcwidth(inputline[real_inputline_pos++]);
+        if (inputline_pos <= max) inputline_pos += l;
         show_header(input_win);
 
     } else if (sb->value == OKEY_BS) {     // BS
-        if ( ! wcslen(inputline) || ! inputline_pos ) return;
-        del_wchar(inputline, --inputline_pos);
+        if ( ! wcslen(inputline) ) return;
+
+        int l = wcwidth(inputline[real_inputline_pos - 1]);
+        real_inputline_pos--;
+        del_wchar(inputline, real_inputline_pos);
+        inputline_pos -= l;
+
         show_header(input_win);
 
     } else if (sb->value == OKEY_DEL) {    // DEL
-        if (inputline_pos > wcslen(inputline)) return;
-        del_wchar(inputline, inputline_pos);
+        int max = wcswidth(inputline, wcslen(inputline));
+        if (inputline_pos > max) return;
+        del_wchar(inputline, real_inputline_pos);
         show_header(input_win);
 
     } else if (sb->value == OKEY_TAB) {    // TAB
@@ -44,7 +66,7 @@ void do_insertmode(struct block * sb) {
         insert_or_edit_cell();
 
     // Write new char !!
-    } else if ( wcslen(inputline) < (COLS - 14) && sc_isprint(sb->value)) {
+    } else if ( wcslen(inputline) < (COLS - 16) && sc_isprint(sb->value)) {
         //DEBUG sc_info("2: %d %lc", sb->value, sb->value);
         ins_in_line(sb->value);
         show_header(input_win);
@@ -62,9 +84,9 @@ void do_insertmode(struct block * sb) {
         for(i = 0; i < strlen(cline); i++) ins_in_line(cline[i]);
         show_header(input_win);
 
-    } else {
-        move(0, rescol + inputline_pos + 1);
-        show_header(input_win);
+//    } else {
+//        move(0, rescol + inputline_pos + 1);
+//        show_header(input_win);
     }
 
     return;

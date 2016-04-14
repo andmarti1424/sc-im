@@ -943,6 +943,7 @@ void insert_or_edit_cell() {
 
     inputline[0] = L'\0';
     inputline_pos = 0;
+    real_inputline_pos = 0;
     chg_mode('.');
     clr_header(input_win, 0);
 

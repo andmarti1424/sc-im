@@ -5,6 +5,7 @@ extern char insert_edit_submode;       // insert or edit submode
 extern WINDOW * main_win;
 extern wchar_t inputline[BUFFERSIZE];
 extern int inputline_pos;
+extern int real_inputline_pos;
 extern struct block * lastcmd_buffer;
 
 void ins_in_line(wint_t d);
