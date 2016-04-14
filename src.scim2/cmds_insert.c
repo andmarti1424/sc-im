@@ -38,9 +38,11 @@ void do_insertmode(struct block * sb) {
 
     } else if (sb->value == OKEY_RIGHT) {  // RIGHT
         int max = wcswidth(inputline, wcslen(inputline));
-        int l = wcwidth(inputline[real_inputline_pos++]);
-        if (inputline_pos <= max) inputline_pos += l;
-        show_header(input_win);
+        if (inputline_pos < max) {
+            int l = wcwidth(inputline[real_inputline_pos++]);
+            inputline_pos += l;
+            show_header(input_win);
+        }
 
     } else if (sb->value == OKEY_BS) {     // BS
         if ( ! wcslen(inputline) ) return;
@@ -49,7 +51,6 @@ void do_insertmode(struct block * sb) {
         real_inputline_pos--;
         del_wchar(inputline, real_inputline_pos);
         inputline_pos -= l;
-
         show_header(input_win);
 
     } else if (sb->value == OKEY_DEL) {    // DEL
