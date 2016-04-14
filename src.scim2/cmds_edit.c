@@ -95,15 +95,15 @@ void do_editmode(struct block * sb) {
         return;
 
     } else if (sb->value == L'a') {         // a
-        inputline_pos += wcwidth(inputline[real_inputline_pos]);
         real_inputline_pos++;
+        inputline_pos = wcswidth(inputline, real_inputline_pos);
         chg_mode(insert_edit_submode);
         show_header(input_win);
         return;
 
     } else if (sb->value == L'A') {         // A
-        inputline_pos = wcswidth(inputline, wcslen(inputline));
         real_inputline_pos = wcslen(inputline);
+        inputline_pos = wcswidth(inputline, real_inputline_pos);
         chg_mode(insert_edit_submode);
         show_header(input_win);
         return;
