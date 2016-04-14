@@ -45,7 +45,7 @@ void do_insertmode(struct block * sb) {
         }
 
     } else if (sb->value == OKEY_BS) {     // BS
-        if ( ! wcslen(inputline) ) return;
+        if ( ! wcslen(inputline) || ! real_inputline_pos ) return;
 
         int l = wcwidth(inputline[real_inputline_pos - 1]);
         real_inputline_pos--;
@@ -65,6 +65,18 @@ void do_insertmode(struct block * sb) {
 
     } else if (find_val(sb, OKEY_ENTER)) { // ENTER
         insert_or_edit_cell();
+
+    } else if (sb->value == OKEY_HOME) {   // HOME
+        real_inputline_pos = 0;
+        inputline_pos = wcswidth(inputline, real_inputline_pos);
+        show_header(input_win);
+        return;
+
+    } else if (sb->value == OKEY_END) {    // END
+        real_inputline_pos = wcslen(inputline);
+        inputline_pos = wcswidth(inputline, real_inputline_pos);
+        show_header(input_win);
+        return;
 
     // Write new char !!
     } else if ( wcslen(inputline) < (COLS - 16) && sc_isprint(sb->value)) {

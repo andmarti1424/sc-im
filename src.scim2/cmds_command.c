@@ -110,34 +110,50 @@ void do_commandmode(struct block * sb) {
     struct srange * sr = NULL;
     if (p != -1) sr = get_range_by_pos(p);
 
-    if (sb->value == OKEY_BS) {            // BS                      FIXME
-        if ( ! wcslen(inputline) || ! inputline_pos) return;
-        del_wchar(inputline, --inputline_pos);
+
+    //-------------------------------------
+    // Normal KEY handlers for this MODE
+    //-------------------------------------
+    if (sb->value == OKEY_BS) {            // BS
+        if ( ! wcslen(inputline) || ! real_inputline_pos ) return;
+        int l = wcwidth(inputline[real_inputline_pos - 1]);
+        real_inputline_pos--;
+        del_wchar(inputline, real_inputline_pos);
+        inputline_pos -= l;
+        show_header(input_win);
 
 #ifdef HISTORY_FILE
         if (commandline_history->pos == 0)
-            del_wchar(get_line_from_history(commandline_history, commandline_history->pos), inputline_pos); // Clean history     FIXME
+            del_wchar(get_line_from_history(commandline_history, commandline_history->pos), real_inputline_pos); // Clean history
 #endif
         show_header(input_win);
         return;
 
-    } else if (sb->value == OKEY_LEFT) {   // LEFT                      FIXME
-        if (inputline_pos) inputline_pos--;
-        show_header(input_win);
+    } else if (sb->value == OKEY_LEFT) {   // LEFT
+        if (inputline_pos) {
+            real_inputline_pos--;
+            int l = wcwidth(inputline[real_inputline_pos]);
+            inputline_pos -= l;
+            show_header(input_win);
+        }
         return;
 
     } else if (sb->value == OKEY_RIGHT) {  // RIGHT
-        if (inputline_pos < wcslen(inputline)) inputline_pos++;         //FIXME
-        show_header(input_win);
+        int max = wcswidth(inputline, wcslen(inputline));
+        if (inputline_pos < max) {
+            int l = wcwidth(inputline[real_inputline_pos++]);
+            inputline_pos += l;
+            show_header(input_win);
+        }
         return;
 
     } else if (sb->value == OKEY_DEL) {    // DEL
-        if (inputline_pos > wcslen(inputline)) return;                  //FIXME
-        del_wchar(inputline, inputline_pos);
+        if (inputline_pos > wcswidth(inputline, wcslen(inputline))) return;
+        del_wchar(inputline, real_inputline_pos);
 
 #ifdef HISTORY_FILE
         if (commandline_history->pos == 0)
-            del_wchar(get_line_from_history(commandline_history, commandline_history->pos), inputline_pos); // Clean history //FIXME
+            del_wchar(get_line_from_history(commandline_history, commandline_history->pos), real_inputline_pos); // Clean history
 #endif
         show_header(input_win);
         return;
@@ -157,7 +173,7 @@ void do_commandmode(struct block * sb) {
         }
         commandline_history->pos += delta;
         wcscpy(inputline, get_line_from_history(commandline_history, commandline_history->pos));
-        inputline_pos = wcslen(inputline); // FIXME
+        inputline_pos = wcswidth(inputline, real_inputline_pos);
         show_header(input_win);
         return;
 #endif
@@ -168,8 +184,14 @@ void do_commandmode(struct block * sb) {
         start_visualmode(currow, curcol, currow, curcol);
         return;
 
-    } else if (sb->value == ctl('r') && get_bufsize(sb) == 2 && // C-r
-        //FIXME
+
+
+
+
+
+
+
+    } else if (sb->value == ctl('r') && get_bufsize(sb) == 2 &&        // C-r      // FIXME ???
         (sb->pnext->value - (L'a' - 1) < 1 || sb->pnext->value > 26)) {
         wchar_t cline [BUFFERSIZE];
         int i, r = get_mark(sb->pnext->value)->row;
@@ -210,35 +232,24 @@ void do_commandmode(struct block * sb) {
         show_header(input_win);
         return;
 
-    } else if (sc_isprint(sb->value)) {               //  Write new char
-        ins_in_line(sb->value);
-        show_header(input_win);
-
-#ifdef HISTORY_FILE
-        if (commandline_history->pos == 0) {          // Only if editing the new command
-            wchar_t * sl = get_line_from_history(commandline_history, 0);
-            add_wchar(sl, sb->value, inputline_pos-1); // Insert into history //FIXME
-        }
-#endif
-        return;
-
     } else if ( sb->value == ctl('w') || sb->value == ctl('b') ||
                 sb->value == OKEY_HOME || sb->value == OKEY_END) {
         switch (sb->value) {
         case ctl('w'):
-            inputline_pos = for_word(1, 0, 1) + 1;   // E             FIXME
+            real_inputline_pos = for_word(1, 0, 1) + 1;   // E
             break;
         case ctl('b'):
-            inputline_pos = back_word(1);            // B             FIXME
+            real_inputline_pos = back_word(1);            // B
             break;
         case OKEY_HOME:
-            inputline_pos = 0;                       // 0             FIXME
+            real_inputline_pos = 0;                       // 0
             break;
         case OKEY_END:
-            inputline_pos = wcslen(inputline);       // $             FIXME
+            real_inputline_pos = wcslen(inputline);       // $
             break;
         }
-        wmove(input_win, 0, inputline_pos + 1 + rescol);             // FIXME
+        inputline_pos = wcswidth(inputline, real_inputline_pos);
+        wmove(input_win, 0, inputline_pos + 1 + rescol);
         wrefresh(input_win);
         return;
 
@@ -255,7 +266,8 @@ void do_commandmode(struct block * sb) {
             if ( ! wcsncmp(inputline, valid_commands[i], wcslen(inputline)) 
                ) {
                 wcscpy(inputline, valid_commands[i]);
-                inputline_pos = wcslen(inputline);                      //FIXME
+                real_inputline_pos = wcslen(inputline);
+                inputline_pos = wcswidth(inputline, real_inputline_pos);
                 set_comp(1);
                 break;
             }
@@ -264,17 +276,32 @@ void do_commandmode(struct block * sb) {
         // Restore inputline content
         if (i == clen) {
             wcscpy(inputline, get_curcmd());
-            inputline_pos = wcslen(inputline);                      //FIXME
+            real_inputline_pos = wcslen(inputline);
+            inputline_pos = wcswidth(inputline, real_inputline_pos);
             set_comp(0);
         }
 
         show_header(input_win);
         return;
 
+    } else if (sc_isprint(sb->value)) {               //  Write new char
+        ins_in_line(sb->value);
+        show_header(input_win);
+
+#ifdef HISTORY_FILE
+        if (commandline_history->pos == 0) {          // Only if editing the new command
+            wchar_t * sl = get_line_from_history(commandline_history, 0);
+            add_wchar(sl, sb->value, real_inputline_pos-1); // Insert into history
+        }
+#endif
+        return;
 
 
 
+
+    //-------------------------------------
     // CONFIRM A COMMAND PRESSING ENTER
+    //-------------------------------------
     } else if (find_val(sb, OKEY_ENTER)) {
 
         if ( ! wcscmp(inputline, L"q") || ! wcscmp(inputline, L"quit") ) {
@@ -663,14 +690,8 @@ void do_commandmode(struct block * sb) {
 }
 
 void ins_in_line(wint_t d) {
-    //DEBUG
     //sc_info("3: %d %lc", d, d);
-
-    //int real = get_real_inputline_pos();
-    //add_wchar(inputline, (wchar_t) d, real);
-
-    add_wchar(inputline, (wchar_t) d, real_inputline_pos);
-    real_inputline_pos++;
+    add_wchar(inputline, (wchar_t) d, real_inputline_pos++);
     inputline_pos += wcwidth((wchar_t) d);
     return;
 }

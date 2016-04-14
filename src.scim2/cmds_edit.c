@@ -47,13 +47,13 @@ void do_editmode(struct block * sb) {
         show_header(input_win);
         return;
 
-    } else if (sb->value == L'0') {         // 0
+    } else if (sb->value == L'0' || sb->value == OKEY_HOME) {         // 0
         inputline_pos = 0;
         real_inputline_pos = 0;
         show_header(input_win);
         return;
 
-    } else if (sb->value == L'$') {         // $
+    } else if (sb->value == L'$' || sb->value == OKEY_END) {          // $
         inputline_pos = wcswidth(inputline, wcslen(inputline)) - 1;
         real_inputline_pos = wcslen(inputline) - 1;
         show_header(input_win);
@@ -165,7 +165,6 @@ void do_editmode(struct block * sb) {
         inputline_pos = wcswidth(inputline, real_inputline_pos);
         show_header(input_win);
         return;
-
 
 
 
