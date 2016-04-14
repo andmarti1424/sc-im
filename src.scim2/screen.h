@@ -1,4 +1,5 @@
 #include <ncurses.h>
+#include <wchar.h>
 extern WINDOW * main_win;
 extern WINDOW * input_win;
 extern int offscr_sc_rows, offscr_sc_cols;

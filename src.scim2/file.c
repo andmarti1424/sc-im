@@ -7,7 +7,7 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <unistd.h>
-//#include <ncursesw/curses.h>
+#include <wchar.h>
 #include <ncursesw/curses.h>
 #include <sys/wait.h>
 
@@ -923,7 +923,7 @@ void export_plain(char * fname, int r0, int c0, int rn, int cn) {
     int row, col;
     register struct ent ** pp;
     int pid;
-    char out[FBUFLEN] = "";
+    wchar_t out[FBUFLEN] = L"";
 
     sc_info("Writing file \"%s\"...", fname);
 
@@ -952,7 +952,7 @@ void export_plain(char * fname, int r0, int c0, int rn, int cn) {
 
                 num [0] = '\0';
                 text[0] = '\0';
-                out [0] = '\0';
+                out [0] = L'\0';
                 formated_s[0] = '\0';
                 res = -1;
                 align = 1;
@@ -983,7 +983,7 @@ void export_plain(char * fname, int r0, int c0, int rn, int cn) {
                 }
 
                 pad_and_align (text, num, fwidth[col], align, 0, out);
-                (void) fprintf (f, "%s", out);
+                (void) fprintf (f, "%ls", out);
 
             } else {
                 (void) fprintf (f, "%*s", fwidth[col], " ");

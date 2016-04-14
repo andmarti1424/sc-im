@@ -663,9 +663,13 @@ void do_commandmode(struct block * sb) {
 void ins_in_line(wint_t d) {
     //DEBUG
     //sc_info("3: %d %lc", d, d);
+
     int real = get_real_inputline_pos();
     add_wchar(inputline, (wchar_t) d, real);
+
+    //FIXME para usar real_inputline_pos;
     //add_wchar(inputline, (wchar_t) d, real_inputline_pos);
+
     real_inputline_pos++;
     inputline_pos += wcwidth((wchar_t) d);
     return;
