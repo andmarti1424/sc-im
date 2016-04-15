@@ -184,14 +184,11 @@ void copyent(register struct ent *n, register struct ent *p, int dr, int dc,
     }
 
     //n->flags = may_sync;
-
     if (special != 'f') {
-        //if (special != 'm' || p->flags & is_valid) {
         if (p->flags & is_valid) {
             n->v = p->v;
             n->flags |= p->flags & is_valid;
         }
-        //if (special != 'm' || p->expr) {
         if (special != 'v' && p->expr) {
             n->expr = copye(p->expr, dr, dc, r1, c1, r2, c2, special == 't');
             if (p->flags & is_strexpr)
@@ -205,34 +202,33 @@ void copyent(register struct ent *n, register struct ent *p, int dr, int dc,
             (void) strcpy(n->label, p->label);
             n->flags &= ~is_leftflush;
             n->flags |= ((p->flags & is_label) | (p->flags & is_leftflush));
-        //} else if (special != 'm') {
-        //    n->label = NULL;
-        //    n->flags &= ~(is_label | is_leftflush);
         }
         n->flags |= p->flags & is_locked;
     }
-    //if (p->format) {
     if (p->format && special != 'v') {
         if (n->format) scxfree(n->format);
             n->format = scxmalloc((unsigned) (strlen(p->format) + 1));
         (void) strcpy(n->format, p->format);
-    //} else if (special != 'm' && special != 'f')
     } else if (special != 'v' && special != 'f')
         n->format = NULL;
 
-    if (special != 'v')
+    if (special != 'v') {
         n->pad = p->pad;
-
-    if (p->ucolor && special != 'v') {
-        n->ucolor = (struct ucolor *) malloc (sizeof(struct ucolor));
-        n->ucolor->fg = p->ucolor->fg;
-        n->ucolor->bg = p->ucolor->bg;
-        n->ucolor->bold = p->ucolor->bold;
-        n->ucolor->dim = p->ucolor->dim;
-        n->ucolor->reverse = p->ucolor->reverse;
-        n->ucolor->standout = p->ucolor->standout;
-        n->ucolor->underline = p->ucolor->underline;
-        n->ucolor->blink = p->ucolor->blink;
+        if (n->ucolor) { // remove current cellcolor format in n ent
+            free(n->ucolor);
+            n->ucolor = NULL;
+        }
+        if (p->ucolor) { // copy new cellcolor format from p to n ent
+            n->ucolor = (struct ucolor *) malloc (sizeof(struct ucolor));
+            n->ucolor->fg = p->ucolor->fg;
+            n->ucolor->bg = p->ucolor->bg;
+            n->ucolor->bold = p->ucolor->bold;
+            n->ucolor->dim = p->ucolor->dim;
+            n->ucolor->reverse = p->ucolor->reverse;
+            n->ucolor->standout = p->ucolor->standout;
+            n->ucolor->underline = p->ucolor->underline;
+            n->ucolor->blink = p->ucolor->blink;
+        }
     }
 
     n->flags |= is_changed;

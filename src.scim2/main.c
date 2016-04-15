@@ -385,7 +385,7 @@ void signals() {
     void nopipe();
     void winchg();
 
-    //signal(SIGINT, sig_int);
+    signal(SIGINT, sig_int);
     signal(SIGABRT, sig_abrt);
     signal(SIGTERM, sig_term); // kill
     signal(SIGPIPE, nopipe);
@@ -398,7 +398,10 @@ void signals() {
 
 
 void sig_int() {
+    // REMOVED FOR MAKE DEBUGGING EASIER
     sc_error("Got SIGINT. Press «:q<Enter>» to quit SC-IM");
+
+    //shall_quit = 2;
 }
 
 
