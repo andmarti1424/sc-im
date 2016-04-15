@@ -34,9 +34,23 @@ SC-IM stands for Spreadsheet Calculator Improvised. :-)
 
 ## Build & Install
 
-* Edit Makefile file according to your system and needs.
-* Run 'make' inside /src folder to build SC-IM.
-* You can install the binary 'scim' in your system by typing 'make install' with a privileged user.
+* 1. Edit Makefile file according to your system and needs.
+
+For OSX users do:
+```
+    brew install ncurses
+    brew link ncurses
+```
+
+* 2. Inside /src folder run:
+```
+make
+```
+* 3. Optional: You can install the binary 'sc-im' in your system by typing with a privileged user:
+```
+make install
+```
+
 
 ### Donations
 
