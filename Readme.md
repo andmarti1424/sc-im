@@ -23,8 +23,8 @@ SC-IM is a spreadsheet program that is based on SC (http://ibiblio.org/pub/Linux
 About the name, the idea is that the program can be identified as another vim-like app.
 SC-IM stands for Spreadsheet Calculator Improvised. :-)
 
+![demo image](https://raw.githubusercontent.com/andmarti1424/sc-im/widechar/scim2.png)
 ![demo image](https://raw.githubusercontent.com/andmarti1424/sc-im/widechar/scim.png)
-
 ![demo image](https://raw.githubusercontent.com/andmarti1424/sc-im/widechar/scim3.png)
 
 ## Build & Install
