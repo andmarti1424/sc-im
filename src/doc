@@ -76,6 +76,8 @@ Commands for handling cell content:
      f> , fl , f-RIGHT:      Change cell format: Incrementa column width.
      ir          inserts a row
      ic          inserts a column
+     or          opens a row - (insert a row after current row)
+     oc          opens a column - (insert a col after current col)
      sk          shifts up current cell or current range
      sj          shifts down current cell or current range
      sh          shifts left current cell or current range

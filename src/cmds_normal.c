@@ -696,6 +696,34 @@ void do_normalmode(struct block * buf) {
             break;
             }
 
+        // open row or column
+        case L'o':
+            {
+            if (bs != 2) return;
+#ifdef UNDO
+            create_undo_action();
+#endif
+            if (buf->pnext->value == L'r') {
+#ifdef UNDO
+                save_undo_range_shift(1, 0, currow+1, 0, currow+1, maxcol);
+#endif
+                fix_marks(1, 0, currow+1, maxrow, 0, maxcol);
+                insert_row(1);
+
+            } else if (buf->pnext->value == L'c') {
+#ifdef UNDO
+                save_undo_range_shift(0, 1, 0, curcol+1, maxrow, curcol+1);
+#endif
+                fix_marks(0, 1, 0, maxrow, curcol+1, maxcol);
+                insert_col(1);
+            }
+#ifdef UNDO
+            end_undo_action();
+#endif
+            update(TRUE);
+            break;
+            }
+
         case L'y':
             // yank row
             if ( bs == 2 && buf->pnext->value == L'r') {

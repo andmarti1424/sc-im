@@ -1699,6 +1699,10 @@ int is_single_command (struct block * buf, long timeout) {
                ( buf->pnext->value == L'r' ||
                  buf->pnext->value == L'c' )) res = EDITION_CMD;
 
+        else if (buf->value == L'o' && bs == 2 &&    // Open row or column
+               ( buf->pnext->value == L'r' ||
+                 buf->pnext->value == L'c' )) res = EDITION_CMD;
+
         else if (buf->value == L'd' && bs == 2 &&    // Delete row or column
                ( buf->pnext->value == L'r' ||
                  buf->pnext->value == L'c' )) res = EDITION_CMD;
