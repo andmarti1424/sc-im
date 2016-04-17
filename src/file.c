@@ -256,13 +256,6 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
         if (row_hidden[r])
             (void) fprintf(f, "hide %d\n", r);
 
-    // padding
-    for (c = c0; c <= cn; c++) {
-        pp = ATBL(tbl, 0, c);
-        if (*pp && (*pp)->pad)
-            (void) fprintf(f, "pad %d %s\n", (*pp)->pad, coltoa(c));
-    }
-
     //write_ranges(f);
     write_marks(f);
 
@@ -357,6 +350,9 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
                     (void) fprintf(f, "addnote %s ", v_name((*pp)->row, (*pp)->col));
                     (void) fprintf(f, "%s\n", r_name((*pp)->nrow, (*pp)->ncol, (*pp)->nlastrow, (*pp)->nlastcol));
                 }*/
+                // padding
+                if ((*pp)->pad)
+                    (void) fprintf(f, "pad %d %s%d\n", (*pp)->pad, coltoa((*pp)->col), (*pp)->row);
             }
     }
 
