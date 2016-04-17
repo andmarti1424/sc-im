@@ -533,13 +533,14 @@ void formatcol(int c) {
 // if after is 0; after if it is 1.
 void insert_row(int after) {
     int    r, c;
-    struct ent    **tmprow, **pp;
+    struct ent ** tmprow, ** pp, ** qq;
+    struct ent * p;
     int lim = maxrow - currow + 1;
 
     if (currow > maxrow) maxrow = currow;
     maxrow++;
     lim = maxrow - lim + after;
-    if (maxrow >= maxrows && !growtbl(GROWROW, maxrow, 0)) return;
+    if (maxrow >= maxrows && ! growtbl(GROWROW, maxrow, 0)) return;
 
     tmprow = tbl[maxrow];
     for (r = maxrow; r > lim; r--) {
@@ -550,6 +551,14 @@ void insert_row(int after) {
     }
     tbl[r] = tmprow;        // the last row is never used
 
+    // if padding exists in the old currow, we copy it to the new row!
+    for (c = 0; c < maxcols; c++) {
+        if (r >= 0 && (qq = ATBL(tbl, r+1, c)) && (*qq) && (*qq)->pad) {
+            p = lookat(r, c);
+            p->pad = (*qq)->pad;
+        }
+    }
+
     modflg++;
     return;
 }
@@ -559,7 +568,8 @@ void insert_row(int after) {
 // AFTER  CURCOL if it is 1.
 void insert_col(int after) {
     int r, c;
-    register struct ent **pp;
+    register struct ent ** pp, ** qq;
+    struct ent * p;
     int lim = maxcol - curcol - after + 1;
 
     if (curcol + after > maxcol)
@@ -590,6 +600,14 @@ void insert_col(int after) {
         pp = ATBL(tbl, r, curcol + after);
         for (c = curcol + after; c - curcol - after < 1; c++, pp++)
             *pp = (struct ent *) 0;
+    }
+
+    // if padding exists in the old curcol, we copy it to the new col!
+    for (r = 0; r < maxrows; r++) {
+        if (c >= 0 && (qq = ATBL(tbl, r, c+1)) && (*qq) && (*qq)->pad) {
+            p = lookat(r, c);
+            p->pad = (*qq)->pad;
+        }
     }
 
     curcol += after;
