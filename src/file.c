@@ -326,13 +326,35 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
 
                 }
 
+
+                /*if ((*pp)->nrow >= 0) {
+                    (void) fprintf(f, "addnote %s ", v_name((*pp)->row, (*pp)->col));
+                    (void) fprintf(f, "%s\n", r_name((*pp)->nrow, (*pp)->ncol, (*pp)->nlastrow, (*pp)->nlastcol));
+                }*/
+
+                // padding
+                // previous implementation
+                //if ((*pp)->pad)
+                //    (void) fprintf(f, "pad %d %s%d\n", (*pp)->pad, coltoa((*pp)->col), (*pp)->row);
+                // new implementation
+                int r_aux = r;
+                if ( (*pp)->pad  && r <= maxrow && ( r == 0 || (*ATBL(tbl, r-1, c) == NULL) ||
+                    (*ATBL(tbl, r-1, c) != NULL && ((*ATBL(tbl, r-1, c))->pad != (*pp)->pad)) )) {
+                    while (r_aux < maxrow && *ATBL(tbl, r_aux, c) != NULL && (*pp)->pad == (*ATBL(tbl, r_aux, c))->pad )
+                        r_aux++;
+                    fprintf(f, "pad %d %s%d", (*pp)->pad, coltoa((*pp)->col), (*pp)->row);
+                    if (r_aux-1 != (*pp)->row)
+                        fprintf(f, ":%s%d\n", coltoa((*pp)->col), r_aux-1);
+                    else
+                        fprintf(f, "\n");
+                }
+
+
                 // write locked cells
                 // lock should be stored after any other command
-
                 // previous implementation
                 //if ((*pp)->flags & is_locked)
                 //    (void) fprintf(f, "lock %s%d\n", coltoa((*pp)->col), (*pp)->row);
-
                 // new implementation
                 int c_aux = c;
                 if ( (*pp)->flags & is_locked && c <= maxcol && ( c == 0 || ( *ATBL(tbl, r, c-1) != NULL && ! ((*ATBL(tbl, r, c-1))->flags & is_locked) ) )) {
@@ -346,13 +368,6 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
                 }
 
 
-                /*if ((*pp)->nrow >= 0) {
-                    (void) fprintf(f, "addnote %s ", v_name((*pp)->row, (*pp)->col));
-                    (void) fprintf(f, "%s\n", r_name((*pp)->nrow, (*pp)->ncol, (*pp)->nlastrow, (*pp)->nlastcol));
-                }*/
-                // padding
-                if ((*pp)->pad)
-                    (void) fprintf(f, "pad %d %s%d\n", (*pp)->pad, coltoa((*pp)->col), (*pp)->row);
             }
     }
 

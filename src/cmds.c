@@ -946,6 +946,7 @@ void insert_or_edit_cell() {
     copy_to_undostruct(currow, curcol, currow, curcol, 'd');
     #endif
 
+    // ADD PADDING INTELLIGECE HERE?
     (void) swprintf(interp_line, BUFFERSIZE, L"%s %s = %ls", ope, v_name(currow, curcol), inputline);
 
     send_to_interp(interp_line); 
@@ -1389,7 +1390,7 @@ void valueize_area(int sr, int sc, int er, int ec) {
     for (r = sr; r <= er; r++) {
         for (c = sc; c <= ec; c++) {
             p = *ATBL(tbl, r, c);
-            if (p && p->flags&is_locked) {
+            if (p && p->flags & is_locked) {
                 sc_error(" Cell %s%d is locked", coltoa(c), r);
                 continue;
             }
@@ -1478,7 +1479,7 @@ int any_locked_cells(int r1, int c1, int r2, int c2) {
 // this sets n to padding of a range
 int pad(int n, int r1, int c1, int r2, int c2) {
     int r, c;
-    struct ent *p ;
+    struct ent * p ;
     int pad_exceed_width = 0;
 
     if (any_locked_cells(r1, c1, r2, c2)) {
@@ -1490,14 +1491,14 @@ int pad(int n, int r1, int c1, int r2, int c2) {
     create_undo_action();
 #endif
 
-    for (c = c1; c <= c2; c++)
-        for (r = r1; r <= r2; r++) {
-            p = *ATBL(tbl, r, c);
+    for (r = r1; r <= r2; r++) {
+        for (c = c1; c <= c2; c++) {
             if (n > fwidth[c]) {
                 pad_exceed_width = 1;
                 continue;
             }
-            if (p) {
+            //p = lookat(r, c);
+            if ((p = *ATBL(tbl, r, c)) != NULL) {
 #ifdef UNDO
                 copy_to_undostruct(r, c, r, c, 'd');
 #endif
@@ -1508,6 +1509,7 @@ int pad(int n, int r1, int c1, int r2, int c2) {
             }
             modflg++;
         }
+    }
 
 #ifdef UNDO
     end_undo_action();

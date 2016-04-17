@@ -10,7 +10,7 @@
 #include "marks.h"
 #include "cmds_visual.h"
 
-// used for wchar_t that has more than 1 column width
+/* used for wchar_t that has more than 1 column width
 int get_real_inputline_pos() {
     int pos;
     int sum = 0;
@@ -19,6 +19,7 @@ int get_real_inputline_pos() {
     }
     return pos;
 }
+*/
 
 void do_insertmode(struct block * sb) {
 
