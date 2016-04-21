@@ -533,13 +533,14 @@ void formatcol(int c) {
 // if after is 0; after if it is 1.
 void insert_row(int after) {
     int    r, c;
-    struct ent    **tmprow, **pp;
+    struct ent ** tmprow, ** pp, ** qq;
+    struct ent * p;
     int lim = maxrow - currow + 1;
 
     if (currow > maxrow) maxrow = currow;
     maxrow++;
     lim = maxrow - lim + after;
-    if (maxrow >= maxrows && !growtbl(GROWROW, maxrow, 0)) return;
+    if (maxrow >= maxrows && ! growtbl(GROWROW, maxrow, 0)) return;
 
     tmprow = tbl[maxrow];
     for (r = maxrow; r > lim; r--) {
@@ -550,6 +551,14 @@ void insert_row(int after) {
     }
     tbl[r] = tmprow;        // the last row is never used
 
+    // if padding exists in the old currow, we copy it to the new row!
+    for (c = 0; c < maxcols; c++) {
+        if (r >= 0 && (qq = ATBL(tbl, r+1, c)) && (*qq) && (*qq)->pad) {
+            p = lookat(r, c);
+            p->pad = (*qq)->pad;
+        }
+    }
+
     modflg++;
     return;
 }
@@ -559,7 +568,8 @@ void insert_row(int after) {
 // AFTER  CURCOL if it is 1.
 void insert_col(int after) {
     int r, c;
-    register struct ent **pp;
+    register struct ent ** pp, ** qq;
+    struct ent * p;
     int lim = maxcol - curcol - after + 1;
 
     if (curcol + after > maxcol)
@@ -590,6 +600,14 @@ void insert_col(int after) {
         pp = ATBL(tbl, r, curcol + after);
         for (c = curcol + after; c - curcol - after < 1; c++, pp++)
             *pp = (struct ent *) 0;
+    }
+
+    // if padding exists in the old curcol, we copy it to the new col!
+    for (r = 0; r < maxrows; r++) {
+        if (c >= 0 && (qq = ATBL(tbl, r, c+1)) && (*qq) && (*qq)->pad) {
+            p = lookat(r, c);
+            p->pad = (*qq)->pad;
+        }
     }
 
     curcol += after;
@@ -928,6 +946,7 @@ void insert_or_edit_cell() {
     copy_to_undostruct(currow, curcol, currow, curcol, 'd');
     #endif
 
+    // ADD PADDING INTELLIGECE HERE?
     (void) swprintf(interp_line, BUFFERSIZE, L"%s %s = %ls", ope, v_name(currow, curcol), inputline);
 
     send_to_interp(interp_line); 
@@ -1386,7 +1405,7 @@ void valueize_area(int sr, int sc, int er, int ec) {
     for (r = sr; r <= er; r++) {
         for (c = sc; c <= ec; c++) {
             p = *ATBL(tbl, r, c);
-            if (p && p->flags&is_locked) {
+            if (p && p->flags & is_locked) {
                 sc_error(" Cell %s%d is locked", coltoa(c), r);
                 continue;
             }
@@ -1475,7 +1494,7 @@ int any_locked_cells(int r1, int c1, int r2, int c2) {
 // this sets n to padding of a range
 int pad(int n, int r1, int c1, int r2, int c2) {
     int r, c;
-    struct ent *p ;
+    struct ent * p ;
     int pad_exceed_width = 0;
 
     if (any_locked_cells(r1, c1, r2, c2)) {
@@ -1487,14 +1506,14 @@ int pad(int n, int r1, int c1, int r2, int c2) {
     create_undo_action();
 #endif
 
-    for (c = c1; c <= c2; c++)
-        for (r = r1; r <= r2; r++) {
-            p = *ATBL(tbl, r, c);
+    for (r = r1; r <= r2; r++) {
+        for (c = c1; c <= c2; c++) {
             if (n > fwidth[c]) {
                 pad_exceed_width = 1;
                 continue;
             }
-            if (p) {
+            //p = lookat(r, c);
+            if ((p = *ATBL(tbl, r, c)) != NULL) {
 #ifdef UNDO
                 copy_to_undostruct(r, c, r, c, 'd');
 #endif
@@ -1505,6 +1524,7 @@ int pad(int n, int r1, int c1, int r2, int c2) {
             }
             modflg++;
         }
+    }
 
 #ifdef UNDO
     end_undo_action();
@@ -1691,6 +1711,10 @@ int is_single_command (struct block * buf, long timeout) {
                  buf->pnext->value == L'l')) res = EDITION_CMD;
 
         else if (buf->value == L'i' && bs == 2 &&    // Insert row or column
+               ( buf->pnext->value == L'r' ||
+                 buf->pnext->value == L'c' )) res = EDITION_CMD;
+
+        else if (buf->value == L'o' && bs == 2 &&    // Open row or column
                ( buf->pnext->value == L'r' ||
                  buf->pnext->value == L'c' )) res = EDITION_CMD;
 
