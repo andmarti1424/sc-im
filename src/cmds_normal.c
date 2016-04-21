@@ -418,7 +418,16 @@ void do_normalmode(struct block * buf) {
         // format col
         case L'f':
             if (bs != 2) return;
+#ifdef UNDO
+
+            create_undo_action();
+            add_undo_col_format(curcol, 'R', fwidth[curcol], precision[curcol], realfmt[curcol]);
+#endif
             formatcol(buf->pnext->value);
+#ifdef UNDO
+            add_undo_col_format(curcol, 'A', fwidth[curcol], precision[curcol], realfmt[curcol]);
+            end_undo_action();
+#endif
             break;
 
         // mark cell or range

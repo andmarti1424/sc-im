@@ -1317,8 +1317,16 @@ void auto_justify(int ci, int cf, int min) {
     size_t result;
     const char * mbsptr;
 
+#ifdef UNDO
+    create_undo_action();
+#endif
+
     checkbounds(&maxrow, &cf);
+
     for (c = ci; c <= cf; c++) {
+#ifdef UNDO
+        add_undo_col_format(c, 'R', fwidth[c], precision[c], realfmt[c]);
+#endif
         fwidth[c] = min;
         for (r = 0; r <= maxrow; r++) {
             if ((p = *ATBL(tbl, r, c)) != NULL) {
@@ -1339,7 +1347,14 @@ void auto_justify(int ci, int cf, int min) {
                     fwidth[c] = sum;
             }
         }
+#ifdef UNDO
+        add_undo_col_format(c, 'A', fwidth[c], precision[c], realfmt[c]);
+#endif
     }
+#ifdef UNDO
+    end_undo_action();
+#endif
+
     return;
 }
 

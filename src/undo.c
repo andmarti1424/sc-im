@@ -13,6 +13,7 @@ Which contains:
       col_hidded: integers list (int *) hidden columns on screen
       col_showed: integers list (int *) visible columns on screen
              NOTE: the first position of the lists contains (number of elements - 1) in the list
+      struct undo_cols_format * cols_format: list of 'undo_col_info' elements used for undoing / redoing changes in columns format
       p_sig: pointer to 'undo' struct, If NULL, this node is the last change in
              the session.
 
@@ -57,9 +58,11 @@ Implemented actions for UNDO/REDO:
 13. '-' and '+' commands in normal mode
 14. Lock and unlock of cells
 15. datefmt command
+16. Change in format of a column as a result of the 'f' command
+17. Change in format of a column as a result of auto_jus
 
 NOT implemented:
-1. Change format of an entire column
+1. Change format of columns as a result of ic dc sh sl
 2. Recover equations after redo of changes over ents that have equations on them.
 
 ----------------------------------------------------------------------------------------
@@ -95,6 +98,7 @@ void create_undo_action() {
     undo_item.p_ant       = NULL;
     undo_item.p_sig       = NULL;
     undo_item.range_shift = NULL;
+    undo_item.cols_format = NULL;
 
     undo_item.row_hidded  = NULL;
     undo_item.row_showed  = NULL;
@@ -112,6 +116,7 @@ void end_undo_action() {
     if ((undo_item.added      == NULL &&
         undo_item.removed     == NULL && undo_item.range_shift == NULL &&
         undo_item.row_hidded  == NULL && undo_item.row_showed  == NULL &&
+        undo_item.cols_format == NULL &&
         undo_item.col_hidded  == NULL && undo_item.col_showed  == NULL) || loading) {
         if (undo_list->p_ant != NULL) undo_list = undo_list->p_ant;
         undo_list_pos--;
@@ -136,6 +141,7 @@ void add_to_undolist(struct undo u) {
         ul->added = u.added;
         ul->removed = u.removed;
         ul->range_shift = u.range_shift;
+        ul->cols_format = u.cols_format;
         ul->row_hidded = u.row_hidded;
         ul->col_hidded = u.col_hidded;
         ul->row_showed = u.row_showed;
@@ -184,6 +190,10 @@ void free_undo_node(struct undo * ul) {
         e = ul->p_sig;
 
         if (ul->range_shift != NULL) free(ul->range_shift); // Free undo_range_shift memory
+        if (ul->cols_format != NULL) {                      // Free cols_format memory
+                free(ul->cols_format->cols);
+                free(ul->cols_format);
+        }
         if (ul->row_hidded  != NULL) free(ul->row_hidded); // Free hidden row memory
         if (ul->col_hidded  != NULL) free(ul->col_hidded); // Free hidden col memory
         if (ul->row_showed  != NULL) free(ul->row_showed); // Free showed row memory
@@ -257,6 +267,23 @@ void copy_to_undostruct (int row_desde, int col_desde, int row_hasta, int col_ha
             }
 
         }
+    return;
+}
+
+void add_undo_col_format(int col, int type, int fwidth, int precision, int realfmt) {
+    if (undo_item.cols_format == NULL) {
+        undo_item.cols_format = (struct undo_cols_format *) malloc( sizeof(struct undo_cols_format));
+        undo_item.cols_format->length = 1;
+        undo_item.cols_format->cols = (struct undo_col_info *) malloc( sizeof(struct undo_col_info));
+    } else {
+        undo_item.cols_format->length++;
+        undo_item.cols_format->cols = (struct undo_col_info *) realloc(undo_item.cols_format->cols, undo_item.cols_format->length * sizeof(struct undo_col_info));
+    }
+    undo_item.cols_format->cols[ undo_item.cols_format->length - 1].type = type;
+    undo_item.cols_format->cols[ undo_item.cols_format->length - 1].col = col;
+    undo_item.cols_format->cols[ undo_item.cols_format->length - 1].fwidth = fwidth;
+    undo_item.cols_format->cols[ undo_item.cols_format->length - 1].precision = precision;
+    undo_item.cols_format->cols[ undo_item.cols_format->length - 1].realfmt = realfmt;
     return;
 }
 
@@ -394,6 +421,7 @@ void do_undo() {
         j = j->next;
     }
 
+
     // Show hidden cols and rows
     // Hide visible cols and rows
     if (ul->col_hidded != NULL) {
@@ -424,6 +452,22 @@ void do_undo() {
             row_hidden[*(pd++)] = TRUE;
         }
     }
+
+    // Restore previous col format
+    if (ul->cols_format != NULL) {
+        struct undo_cols_format * uf = ul->cols_format;
+        int size = uf->length;
+        int i;
+
+        for (i=0; i < size; i++) {
+           if (uf->cols[i].type == 'R') {
+               fwidth[uf->cols[i].col]     = uf->cols[i].fwidth;
+               precision[uf->cols[i].col] = uf->cols[i].precision;
+               realfmt[uf->cols[i].col]   = uf->cols[i].realfmt;
+           }
+        }
+    }
+
 
     // Restores cursor position
     currow = ori_currow;
@@ -525,6 +569,21 @@ void do_redo() {
         int left = *(pd++);
         while (left--) {
             row_hidden[*(pd++)] = FALSE;
+        }
+    }
+
+    // Restore new col format
+    if (ul->cols_format != NULL) {
+        struct undo_cols_format * uf = ul->cols_format;
+        int size = uf->length;
+        int i;
+
+        for (i=0; i < size; i++) {
+            if (uf->cols[i].type == 'A') {
+                fwidth[uf->cols[i].col]     = uf->cols[i].fwidth;
+                precision[uf->cols[i].col] = uf->cols[i].precision;
+                realfmt[uf->cols[i].col]   = uf->cols[i].realfmt;
+            }
         }
     }
 
