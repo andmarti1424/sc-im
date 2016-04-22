@@ -79,7 +79,7 @@ void enable_filters(struct ent * left, struct ent * right) {
                 c++;
             }
 
-            swprintf(aux, BUFFERSIZE, L"eval %s", cadena);
+            swprintf(aux, BUFFERSIZE, L"eval %ls", cadena);
             send_to_interp(aux);
             if ( (! seval_result && str_in_str(filters[i].eval, "seval") != -1) || ! eval_result) {
                 results[r-minr+2] = 1; // this row does not eval to expression. we hide it. (1 = HIDDEN)!
