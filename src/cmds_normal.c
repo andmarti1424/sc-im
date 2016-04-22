@@ -661,9 +661,14 @@ void do_normalmode(struct block * buf) {
                 copy_to_undostruct(0, curcol, maxrow, curcol - 1 + ic, 'd');
                 save_undo_range_shift(0, -ic, 0, curcol, maxrow, curcol - 1 + ic);
 #endif
-                fix_marks(0, -ic, 0, maxrow,  curcol - 1 + ic, maxcol);
+                fix_marks(0, -ic, 0, maxrow,  curcol - 1 + ic, maxcol); // FIXME
                 yank_area(0, curcol, maxrow, curcol + cmd_multiplier - 1, 'c', ic);
-                while (ic--) deletecol();
+                while (ic--) {
+#ifdef UNDO
+                    add_undo_col_format(curcol-ic+1, 'R', fwidth[curcol], precision[curcol], realfmt[curcol]);
+#endif
+                    deletecol();
+                }
 #ifdef UNDO
                 copy_to_undostruct(0, curcol, maxrow, curcol + cmd_multiplier - 1, 'a');
                 end_undo_action();
@@ -684,6 +689,9 @@ void do_normalmode(struct block * buf) {
 #ifdef UNDO
             create_undo_action();
 #endif
+
+
+
             if (buf->pnext->value == L'r') {
 #ifdef UNDO
                 save_undo_range_shift(1, 0, currow, 0, currow, maxcol);
@@ -694,9 +702,13 @@ void do_normalmode(struct block * buf) {
             } else if (buf->pnext->value == L'c') {
 #ifdef UNDO
                 save_undo_range_shift(0, 1, 0, curcol, maxrow, curcol);
+                //add_undo_col_format(curcol, 'R', fwidth[curcol], precision[curcol], realfmt[curcol]);
 #endif
                 fix_marks(0, 1, 0, maxrow, curcol, maxcol);
                 insert_col(0);
+#ifdef UNDO
+                add_undo_col_format(curcol, 'A', fwidth[curcol], precision[curcol], realfmt[curcol]);
+#endif
             }
 #ifdef UNDO
             end_undo_action();
@@ -725,6 +737,9 @@ void do_normalmode(struct block * buf) {
 #endif
                 fix_marks(0, 1, 0, maxrow, curcol+1, maxcol);
                 insert_col(1);
+#ifdef UNDO
+                add_undo_col_format(curcol, 'A', fwidth[curcol], precision[curcol], realfmt[curcol]);
+#endif
             }
 #ifdef UNDO
             end_undo_action();

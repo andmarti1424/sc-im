@@ -13,7 +13,8 @@ Which contains:
       col_hidded: integers list (int *) hidden columns on screen
       col_showed: integers list (int *) visible columns on screen
              NOTE: the first position of the lists contains (number of elements - 1) in the list
-      struct undo_cols_format * cols_format: list of 'undo_col_info' elements used for undoing / redoing changes in columns format
+      struct undo_cols_format * cols_format: list of 'undo_col_info' elements used for
+             undoing / redoing changes in columns format (fwidth, precision y realfmt)
       p_sig: pointer to 'undo' struct, If NULL, this node is the last change in
              the session.
 
@@ -60,10 +61,10 @@ Implemented actions for UNDO/REDO:
 15. datefmt command
 16. Change in format of a column as a result of the 'f' command
 17. Change in format of a column as a result of auto_jus
+18. Change format of columns as a result of ic dc
 
 NOT implemented:
-1. Change format of columns as a result of ic dc sh sl
-2. Recover equations after redo of changes over ents that have equations on them.
+1. Recover equations after redo of changes over ents that have equations on them.
 
 ----------------------------------------------------------------------------------------
 */
@@ -396,6 +397,23 @@ void do_undo() {
 
         shift_range(- ul->range_shift->delta_rows, - ul->range_shift->delta_cols,
             ul->range_shift->tlrow, ul->range_shift->tlcol, ul->range_shift->brrow, ul->range_shift->brcol);
+
+        // shift col_formats here
+        if (ul->range_shift->tlcol >= 0 && ul->range_shift->tlrow == 0 && ul->range_shift->brrow == maxrow) { // && ul->range_shift->delta_cols > 0) {
+            int i;
+            if (ul->range_shift->delta_cols > 0)
+            for (i = ul->range_shift->brcol + ul->range_shift->delta_cols; i <= maxcol; i++) {
+                fwidth[i - ul->range_shift->delta_cols] = fwidth[i];
+                precision[i - ul->range_shift->delta_cols] = precision[i];
+                realfmt[i - ul->range_shift->delta_cols] = realfmt[i];
+            }
+            else
+            for (i = maxcol; i >= ul->range_shift->tlcol - ul->range_shift->delta_cols; i--) {
+                 fwidth[i] = fwidth[i + ul->range_shift->delta_cols];
+                 precision[i] = precision[i + ul->range_shift->delta_cols];
+                 realfmt[i] = realfmt[i + ul->range_shift->delta_cols];
+            }
+        }
     }
 
     // Remove 'ent' elements
@@ -420,7 +438,6 @@ void do_undo() {
         (void) copyent(e_now, j, 0, 0, 0, 0, j->row, j->col, 0);
         j = j->next;
     }
-
 
     // Show hidden cols and rows
     // Hide visible cols and rows
@@ -467,7 +484,6 @@ void do_undo() {
            }
         }
     }
-
 
     // Restores cursor position
     currow = ori_currow;
@@ -516,6 +532,23 @@ void do_redo() {
 
         shift_range(ul->range_shift->delta_rows, ul->range_shift->delta_cols,
             ul->range_shift->tlrow, ul->range_shift->tlcol, ul->range_shift->brrow, ul->range_shift->brcol);
+
+        // shift col_formats here
+        if (ul->range_shift->tlcol >= 0 && ul->range_shift->tlrow == 0 && ul->range_shift->brrow == maxrow) {
+            int i;
+            if (ul->range_shift->delta_cols > 0)
+            for (i = maxcol; i >= ul->range_shift->tlcol + ul->range_shift->delta_cols; i--) {
+                fwidth[i] = fwidth[i - ul->range_shift->delta_cols];
+                precision[i] = precision[i - ul->range_shift->delta_cols];
+                realfmt[i] = realfmt[i - ul->range_shift->delta_cols];
+            }
+            else
+            for (i = ul->range_shift->tlcol; i - ul->range_shift->delta_cols <= maxcol; i++) {
+                fwidth[i] = fwidth[i - ul->range_shift->delta_cols];
+                precision[i] = precision[i - ul->range_shift->delta_cols];
+                realfmt[i] = realfmt[i - ul->range_shift->delta_cols];
+            }
+        }
     }
 
     // Remove 'ent' elements
