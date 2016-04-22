@@ -702,7 +702,6 @@ void do_normalmode(struct block * buf) {
             } else if (buf->pnext->value == L'c') {
 #ifdef UNDO
                 save_undo_range_shift(0, 1, 0, curcol, maxrow, curcol);
-                //add_undo_col_format(curcol, 'R', fwidth[curcol], precision[curcol], realfmt[curcol]);
 #endif
                 fix_marks(0, 1, 0, maxrow, curcol, maxcol);
                 insert_col(0);
