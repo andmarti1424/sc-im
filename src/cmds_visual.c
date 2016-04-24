@@ -504,6 +504,7 @@ void do_visualmode(struct block * buf) {
         wrefresh(input_win);
         handle_cursor();
         inputline_pos = 0;
+        real_inputline_pos = 0;
         return;
     }
 
