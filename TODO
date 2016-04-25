@@ -1,19 +1,14 @@
 TODO
 ----
-04/04/2016
+25/04/2016
 
 
 Main features to achieve in near future versions
 ------------------------------------------------
 
-1. Fix problem when entering extended ascii chars.
+1. lock / freeze a section of the screen (rows or columns).
 
-2. UNDO/REDO changes in colwidth, precision and realfmt.
-   UNDO/REDO changes of filters applied.
-
-3. lock / freeze a section of the screen (rows or columns).
-
-4. Export spreadsheet to Latex format.
+2. Export spreadsheet to Latex format.
 
 
 
@@ -33,9 +28,6 @@ implementations in other gui's.
 
 2. scim_scripting. Use LUA to allow scripting and plugin support.
 
-3. Use UTF-8 encoding and display any Unicode char.
-Change curses calls to cursesw calls.
-
-4. status bar format customized by user.
+3. status bar format customized by user.
 can show count of cells and sum of values, when a range is selected..
 *this should be done with a script.

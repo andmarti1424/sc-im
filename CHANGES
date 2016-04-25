@@ -1,3 +1,14 @@
+v0.3.0
+* FIX when importing large CSV files
+* SC-IM now supports wide chars, enabling the use of different alphabets.
+  The following alphabets are supported:
+  English, Spanish, French, Italian, German, Portuguese, Russian, Ukrainian, Greek, Turkish, Czech, Japanese, Chinese
+* Modification in padding of cells and how they are saved in files.
+* UNDO / REDO improvements. Now the following actions are supported:
+  Change in format of a column as a result of the 'f' command
+  Change in format of a column as a result of auto_jus
+  Change format of columns as a result of ic dc
+
 v0.2.2
 * Added plain text export.
 * Added padding between cells.
@@ -19,5 +30,3 @@ v0.2.2
 * Various fixes when using SC-IM without UI (--nocurses).
 * Help documentation now can be loaded without making install SC-IM.
 * MAXROWS now can be defined in Makefile.
-
-
