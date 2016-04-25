@@ -10,17 +10,6 @@
 #include "marks.h"
 #include "cmds_visual.h"
 
-/* used for wchar_t that has more than 1 column width
-int get_real_inputline_pos() {
-    int pos;
-    int sum = 0;
-    for (pos = 0; pos < wcslen(inputline) && sum < inputline_pos; pos++) {
-        sum += wcwidth(inputline[pos]);
-    }
-    return pos;
-}
-*/
-
 void do_insertmode(struct block * sb) {
 
     if (sb->value == ctl('v') ) {  // VISUAL SUBMODE
@@ -98,10 +87,6 @@ void do_insertmode(struct block * sb) {
         for(i = 0; i < strlen(cline); i++) ins_in_line(cline[i]);
         show_header(input_win);
 
-//    } else {
-//        move(0, rescol + inputline_pos + 1);
-//        show_header(input_win);
     }
-
     return;
 }
