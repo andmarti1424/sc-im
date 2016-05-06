@@ -245,7 +245,7 @@ void destroy_vertex(struct ent * ent) {
 
 
    // if vertex to free was the first one..
-   if (graph->vertices->ent->row == ent->row && graph->vertices->ent->col == ent->col)
+   if (graph->vertices && graph->vertices->ent->row == ent->row && graph->vertices->ent->col == ent->col)
        graph->vertices = v_cur->next;
 
    free(v_cur);

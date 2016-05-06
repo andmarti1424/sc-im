@@ -16,6 +16,9 @@
 #include "conf.h"
 #include "pipe.h"
 #include "main.h"
+#include "screen.h"
+#include "undo.h"
+#include "dep_graph.h"
 
 void yyerror(char *err);               // error routine for yacc (gram.y)
 int yylex();
@@ -179,6 +182,10 @@ token S_YANKCOL
 %token S_GETFORMAT
 %token S_RECALC
 %token S_QUIT
+%token S_REBUILD_GRAPH
+%token S_PRINT_GRAPH
+%token S_REDO
+%token S_UNDO
 %token S_IMAP
 %token S_NMAP
 %token S_INOREMAP
@@ -318,7 +325,11 @@ token K_WHITE
 
 %%
 command:
-         S_LET var_or_range '=' e { let($2.left.vp, $4); }
+         S_LET var_or_range '=' e { let($2.left.vp, $4);
+                                    //sc_debug("!! %d %d %d %d", $2.left.vp->row, $2.left.vp->col);
+                                    //if ($4->e.v.vp != NULL) {
+                                    //    sc_debug("!!! %d %d - %d %d", $2.left.vp->row, $2.left.vp->col, $4->e.v.vp->row, $4->e.v.vp->col);
+                                  }
     |    S_LET var_or_range '='
                                   { $2.left.vp->v = (double) 0.0;
                                   if ($2.left.vp->expr && !($2.left.vp->flags & is_strexpr)) {
@@ -335,12 +346,15 @@ command:
     |    S_LABEL var_or_range '=' e       { slet($2.left.vp, $4, 0); }
     |    S_LEFTSTRING var_or_range '=' e  { slet($2.left.vp, $4, -1); }
     |    S_RIGHTSTRING var_or_range '=' e { slet($2.left.vp, $4, 1); }
+
+
+
     |    S_LEFTJUSTIFY var_or_range  { ljustify($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col); }
     |    S_RIGHTJUSTIFY var_or_range { rjustify($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col); }
     |    S_CENTER var_or_range       { center($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col); }
     |    S_FORMAT COL NUMBER NUMBER NUMBER { doformat($2,$2,$3,$4,$5); }
     |    S_FMT var_or_range STRING   { format_cell($2.left.vp, $2.right.vp, $3);
-                                       scxfree($3); 
+                                       scxfree($3);
                                      }
 
     |    S_DATEFMT var_or_range STRING { dateformat($2.left.vp, $2.right.vp, $3);
@@ -406,7 +420,7 @@ command:
                                      }
                                           /* para debug
                                           wtimeout(input_win, -1);
-                                          info("  ********* algo");
+                                          info("  ********* FILTERON");
                                           int d = wgetch(input_win);
                                           wtimeout(input_win, TIMEOUT_CURSES);
                                           */
@@ -425,11 +439,13 @@ command:
     |    S_GOTO var_or_range var_or_range { moveto($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col, $3.left.vp->row, $3.left.vp->col); }
     |    S_GOTO var_or_range     { moveto($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col, -1, -1); }
     |    S_GOTO num              { num_search($2, 0, 0, maxrow, maxcol, 0, 1); }
-    |    S_GOTO STRING           { str_search($2, 0, 0, maxrow, maxcol, 0, 1); }
-    |    S_GOTO '#' STRING       { str_search($3, 0, 0, maxrow, maxcol, 1, 1); }
-    |    S_GOTO '%' STRING       { str_search($3, 0, 0, maxrow, maxcol, 2, 1); }
+    |    S_GOTO STRING           { str_search($2, 0, 0, maxrow, maxcol, 0, 1);
+                                   scxfree($2); }
+    |    S_GOTO '#' STRING       { str_search($3, 0, 0, maxrow, maxcol, 1, 1);
+                                   scxfree($3); }
+    |    S_GOTO '%' STRING       { str_search($3, 0, 0, maxrow, maxcol, 2, 1);
+                                   scxfree($3); }
     |    S_GOTO WORD             { /* don't repeat last goto on "unintelligible word" */ ; }
-
 
     |    S_LOCK var_or_range     { lock_cells($2.left.vp, $2.right.vp); }
     |    S_UNLOCK var_or_range   { unlock_cells($2.left.vp, $2.right.vp); }
@@ -439,7 +455,7 @@ command:
                                           scxfree($3);
                                         }
 
-    |    S_IMAP STRING STRING 
+    |    S_IMAP STRING STRING
                                         {
                                           add_map($2, $3, INSERT_MODE, 1);
                                           scxfree($2);
@@ -508,12 +524,31 @@ command:
 /*    |    S_DEFINE strarg NUMBER     { info("%s %d", $2, $3); get_key(); } */
     |    S_UNDEFINE var_or_range    { del_range($2.left.vp, $2.right.vp); }
 
-    |    S_EVAL e                   { eval_result = eval($2);
+    |    S_EVAL e                   { eval_result = eval(NULL, $2);
                                       efree($2);
                                     }
     |    S_QUIT                     { printf("quitting. unsaved changes will be lost.\n");
                                       shall_quit = 2; // unsaved changes are lost!
                                     }
+    |    S_REBUILD_GRAPH            { rebuild_graph();
+                                      update(FALSE);
+                                    }
+
+    |    S_PRINT_GRAPH              { print_vertexs(); }
+    |    S_UNDO                     {
+                                      do_undo();
+                                      // sync_refs();
+                                      EvalAll();
+                                      update(TRUE);
+                                    }
+
+    |    S_REDO                     {
+                                      do_redo();
+                                      // sync_refs();
+                                      EvalAll();
+                                      update(TRUE);
+                                    }
+
 
 // For scripting and piping
 
@@ -534,10 +569,9 @@ command:
 
     |    S_GETFMT var_or_range      { getfmt($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col, fdoutput); }
 
-/*
-    |    S_SEVAL e                  { seval_result = seval($2);
+    |    S_SEVAL e                  { seval_result = seval(NULL, $2); // TODO make sure this seval_result is always freed afterwards
                                       efree($2);
-                                    } // FIXME free string */
+                                    }
 /*
     |    S_ERROR STRING        { error($2); }
 
@@ -564,9 +598,9 @@ command:
 
 
     |    S_PLUGIN STRING '=' STRING
-                    { addplugin($2, $4, 'r'); } 
+                    { addplugin($2, $4, 'r'); }
     |    S_PLUGOUT STRING '=' STRING
-                    { addplugin($2, $4, 'w'); } 
+                    { addplugin($2, $4, 'w'); }
     |    PLUGIN            { *line = '|';
                       sprintf(line + 1, $1);
                       readfile(line, 0);
