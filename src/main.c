@@ -26,6 +26,7 @@
 #include "color.h"   // for set_ucolor
 #include "vmtbl.h"   // for growtbl
 #include "filter.h"
+#include "dep_graph.h"
 
 #ifdef UNDO
 #include "undo.h"
@@ -46,36 +47,30 @@ int shall_quit = 0;
 unsigned int curmode = NORMAL_MODE;
 int maxrow, maxcol;
 char curfile[PATHLEN];
-char *exepath;
+char * exepath;
 
 int changed;
 int cellassign;
 int arg = 1;
 int brokenpipe = FALSE; /* Set to true if SIGPIPE is received */
-//char * progname;
-//char * mdir;
-//char * autorun;
-//int skipautorun;
-//char * fkey[FKEYS];
-//char * scext;
 char * ascext;
 char * tbl0ext;
 char * tblext;
 char * latexext;
 char * slatexext;
 char * texext;
-char dpoint = '.';      /* decimal point */
-char thsep = ',';       /* thousands separator */
+char dpoint = '.';      // decimal point
+char thsep = ',';       // thousands separator
 int linelim = -1;
 int calc_order = BYROWS;
-int optimize  = 0;     /* Causes numeric expressions to be optimized */
-int tbl_style = 0;     /* headers for T command output */
+int optimize  = 0;      // Causes numeric expressions to be optimized
+int tbl_style = 0;      // headers for T command output
 int rndtoeven = 0;
 int rowsinrange = 1;
 int colsinrange = DEFWIDTH;
 double eval_result;
 char * seval_result;
-FILE * fdoutput; // output file descriptor (stdout or file)
+FILE * fdoutput;        // output file descriptor (stdout or file)
 
 struct block * buffer;
 struct block * lastcmd_buffer;
@@ -83,6 +78,7 @@ struct dictionary * user_conf_d;
 struct dictionary * predefined_conf_d;
 struct history * commandline_history;
 
+extern graphADT graph;
 
 /*********************************************************************
    MAIN LOOP
@@ -226,7 +222,6 @@ int main (int argc, char ** argv) {
 
     return shall_quit == -1 ? exit_app(-1) : exit_app(0);
 }
-
 /*********************************************************************
    END OF MAIN LOOP
  *********************************************************************/
@@ -248,6 +243,9 @@ void create_structures() {
     for (c = 0; c < COLFORMATS; c++)
         colformat[c] = NULL;
     */
+
+    // init calc chain graph
+    graph = GraphCreate();
 }
 
 
@@ -277,6 +275,9 @@ void delete_structures() {
 
     // free deleted ents
     flush_saved();
+
+    // free calc chain graph
+    destroy_graph(graph);
 
     // Free ents of tbl
     erasedb();
@@ -345,6 +346,7 @@ void read_argv(int argc, char ** argv) {
         }
     }
     exepath = argv[0];
+    return;
 }
 
 
@@ -359,6 +361,7 @@ void load_sc() {
         }
         EvalAll();                                 // we eval formulas
     }
+    return;
 }
 
 
@@ -366,6 +369,7 @@ void load_sc() {
 // set the calculation order 
 void setorder(int i) {
     if ((i == BYROWS) || (i == BYCOLS)) calc_order = i;
+    return;
 }
 
 
@@ -373,6 +377,7 @@ void setorder(int i) {
 void nopipe() {
     sc_error("brokenpipe!");
     brokenpipe = TRUE;
+    return;
 }
 
 
@@ -393,6 +398,7 @@ void signals() {
     signal(SIGWINCH, winchg);
     //(void) signal(SIGBUS, doquit);
     //(void) signal(SIGFPE, doquit);
+    return;
 }
 
 
@@ -401,7 +407,8 @@ void sig_int() {
     // REMOVED FOR MAKE DEBUGGING EASIER
     sc_error("Got SIGINT. Press «:q<Enter>» to quit SC-IM");
 
-    //shall_quit = 2;
+    //shall_quit = 2;            // TO MAKE IT EASIER TO DEBUG
+    return;
 }
 
 
@@ -409,6 +416,7 @@ void sig_int() {
 void sig_abrt() {
     sc_error("Error !!! Quitting SC-IM.");
     shall_quit = -1; // error !
+    return;
 }
 
 
@@ -416,6 +424,7 @@ void sig_abrt() {
 void sig_term() {
     sc_error("Got SIGTERM signal. Quitting SC-IM.");
     shall_quit = 2;
+    return;
 }
 
 
@@ -433,6 +442,7 @@ void winchg() {
     wrefresh(input_win);
     update(TRUE);
     //signal(SIGWINCH, winchg);
+    return;
 }
 
 

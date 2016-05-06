@@ -41,20 +41,6 @@
  #define A_CHARTEXT 0xff
 #endif
 
-// comentado el dia 20/06/2014
-//#ifndef color_set
-//    #define color_set(c, o)        attron(COLOR_PAIR(c))
-//#endif
-
-/*
-#if !defined(attr_get) || defined(NCURSES_VERSION) && NCURSES_VERSION_MAJOR < 5
-#undef attr_get
-#define attr_get(a, p, o)    ((void)((a) != 0 && (*(a) = stdscr->_attrs)), \
-                (void)((p) != 0 && \
-                (*(p) = PAIR_NUMBER(stdscr->_attrs))), OK)
-#endif
-*/
-
 #ifndef FALSE
     # define    FALSE   0
     # define    TRUE    1
@@ -134,24 +120,9 @@ struct enode {
 
     struct range_s r;    /* op is on a range */
     struct ent_ptr v;    /* ref. another cell on which this enode depends */
-    struct ent_ptr x;    /* ref to cells that depends on this enode */
+    //struct ent_ptr x;    /* ref to cells that depends on this enode */
     } e;
 };
-
-/* stores a color range (left, right) 
-// comentado el 19/06/2014
-struct crange {
-    struct ent *r_left, *r_right;
-    int r_color;
-    struct crange *r_next, *r_prev;    // chained ranges 
-};
-
-struct colorpair {
-    int fg;
-    int bg;
-    struct enode *expr;
-};
-*/
 
 struct impexfilt {
     char ext[PATHLEN];
@@ -298,7 +269,7 @@ struct go_save {
 
 extern int currow, curcol;
 extern int maxrow, maxcol;
-extern struct ent ***tbl;     // data table ref. in vmtbl.c and ATBL()
+extern struct ent *** tbl;     // data table ref. in vmtbl.c and ATBL()
 extern char curfile[];
 extern int arg;
 extern int lastrow, lastcol;
@@ -307,9 +278,9 @@ extern int rescol;            // columns reserved for row numbers
 extern int maxrows, maxcols;  // # cells currently allocated
 extern int rowsinrange;       // Number of rows in target range of a goto
 extern int colsinrange;       // Number of cols in target range of a goto
-extern int *fwidth;
-extern int *precision;
-extern int *realfmt;
+extern int * fwidth;
+extern int * precision;
+extern int * realfmt;
 extern char *colformat[10];
 extern char *col_hidden;
 extern char *row_hidden;
@@ -325,11 +296,11 @@ extern int cslop;
 extern int usecurses;
 extern int brokenpipe;        // Set to true if SIGPIPE is received
 extern int modflg;
-extern char *mdir;
-extern char *autorun;
+extern char * mdir;
+extern char * autorun;
 extern int skipautorun;
-extern char *fkey[FKEYS];
-extern char *scext;
+extern char * fkey[FKEYS];
+extern char * scext;
 extern int repct;
 extern int calc_order;
 extern double prescale;
@@ -362,9 +333,11 @@ extern char * findhome(char *path);
 extern char * r_name(int r1, int c1, int r2, int c2);
 extern char * scxmalloc(unsigned n);
 extern char * scxrealloc(char *ptr, unsigned n);
-extern char * seval(register struct enode *se);
+//extern char * seval(register struct enode * se);
+extern char * seval(register struct ent * ent, register struct enode * se);
 extern char * v_name(int row, int col);
-extern double eval(register struct enode *e);
+//extern double eval(register struct enode *e);
+extern double eval(register struct ent * ent, register struct enode * e);
 extern struct enode *new(int op, struct enode *a1, struct enode *a2);
 extern struct enode *new_const(int op, double a1);
 extern struct enode *new_range(int op, struct range_s a1);

@@ -845,11 +845,11 @@ void show_text(char * val) {
     char * pager;
 
     (void) strcpy(px, "| ");
-    if (!(pager = getenv("PAGER")))
+    if ( !(pager = getenv("PAGER")) )
         pager = DFLT_PAGER;
     (void) strcat(px, pager);
     FILE * f = openfile(px, &pid, NULL);
-    if (!f) {
+    if ( !f ) {
         sc_error("Can't open pipe to %s", pager);
         return;
     }

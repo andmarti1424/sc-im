@@ -31,7 +31,7 @@ SC-IM stands for Spreadsheet Calculator Improvised. :-)
 
 * Edit Makefile file according to your system and needs.
 ```
-    vim Makefile
+    vim /src/Makefile
 ```
 
 * Only for OSX users do:

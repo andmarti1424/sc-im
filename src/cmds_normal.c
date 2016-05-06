@@ -1,5 +1,5 @@
 #include <ctype.h>
-#include <stdlib.h> 
+#include <stdlib.h>
 #include "yank.h"
 #include "marks.h"
 #include "cmds.h"
@@ -17,6 +17,12 @@
 #include "undo.h"
 #endif
 
+
+#include "dep_graph.h"
+extern graphADT graph;
+extern char valores;
+
+
 extern int cmd_multiplier;
 extern struct history * commandline_history;
 extern void start_visualmode(int tlrow, int tlcol, int brrow, int brcol);
@@ -27,6 +33,36 @@ void do_normalmode(struct block * buf) {
     struct ent * e;
 
     switch (buf->value) {
+        // TEST
+        case L'A':
+            print_vertexs(graph);
+            break;
+
+        case L'Q':
+            //scim_RealEval();
+            //destroy_graph(graph);
+            //graph = NULL;
+            destroy_vertex(lookat(8, 3));
+            break;
+
+        case L'W':
+            rebuild_graph();
+//            GraphAddEdge( getVertex(graph, lookat(0, 0)), getVertex(graph, lookat(0,4)) ) ;
+//            GraphAddEdge( getVertex(graph, lookat(0, 4)), getVertex(graph, lookat(2,2)) ) ;
+//            GraphAddEdge( getVertex(graph, lookat(8, 5)), getVertex(graph, lookat(0,0)) ) ;
+//            GraphAddEdge( getVertex(graph, lookat(2, 2)), getVertex(graph, lookat(2,3)) ) ;
+//            GraphAddEdge( getVertex(graph, lookat(2, 3)), getVertex(graph, lookat(1,1)) ) ;
+
+//            markAllVerticesNotVisited(graph);
+//            ents_that_depends_on(graph, lookat(2, 2));
+//            show_text(&valores);
+            break;
+
+
+
+
+
+
 
         // MOVEMENT COMMANDS
         case L'j':

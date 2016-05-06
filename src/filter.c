@@ -85,6 +85,7 @@ void enable_filters(struct ent * left, struct ent * right) {
                 results[r-minr+2] = 1; // this row does not eval to expression. we hide it. (1 = HIDDEN)!
                 i = howmany;
             }
+            if (seval_result != NULL) free(seval_result);
         }
     }
 

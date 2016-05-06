@@ -15,6 +15,7 @@
 #include "vmtbl.h"   // for growtbl
 #include "utils/string.h" // for add_char
 #include "y.tab.h"   // for yyparse
+#include "dep_graph.h"
 #ifdef UNDO
 #include "undo.h"
 #endif
@@ -24,6 +25,8 @@ extern unsigned int shall_quit;
 char insert_edit_submode;
 struct ent * freeents = NULL; // keep deleted ents around before sync_refs
 wchar_t interp_line[BUFFERSIZE];
+extern graphADT graph;
+
 
 // mark_ent_as_deleted (free_ents en sc original):
 // This structure is used to keep ent structs around before they
@@ -82,31 +85,31 @@ void sync_refs() {
 void syncref(register struct enode *e) {
     if ( e == (struct enode *) 0 ) {
     //if ( e == NULL || e->op == ERR_ ) {
-    return;
+        return;
     } else if (e->op & REDUCE) {
-     e->e.r.right.vp = lookat(e->e.r.right.vp->row, e->e.r.right.vp->col);
-     e->e.r.left.vp = lookat(e->e.r.left.vp->row, e->e.r.left.vp->col);
+        e->e.r.right.vp = lookat(e->e.r.right.vp->row, e->e.r.right.vp->col);
+        e->e.r.left.vp = lookat(e->e.r.left.vp->row, e->e.r.left.vp->col);
     } else {
-    switch (e->op) {
+        switch (e->op) {
         case 'v':
-        //if (e->e.v.vp->flags & iscleared) {
-        if (e->e.v.vp->flags & is_deleted) {
-            e->op = ERR_;
-                    //sc_info("%d %d", e->e.v.vp->row, e->e.v.vp->col);
-            e->e.o.left = NULL;
-            e->e.o.right = NULL;
-        } else if (e->e.v.vp->flags & may_sync)
-            e->e.v.vp = lookat(e->e.v.vp->row, e->e.v.vp->col);
-        break;
+            //if (e->e.v.vp->flags & iscleared) {
+            if (e->e.v.vp->flags & is_deleted) {
+                e->op = ERR_;
+                //sc_info("%d %d", e->e.v.vp->row, e->e.v.vp->col);
+                e->e.o.left = NULL;
+                e->e.o.right = NULL;
+            } else if (e->e.v.vp->flags & may_sync)
+                e->e.v.vp = lookat(e->e.v.vp->row, e->e.v.vp->col);
+            break;
         case 'k':
-        break;
+            break;
         case '$':
-        break;
+            break;
         default:
-        syncref(e->e.o.right);
-        syncref(e->e.o.left);
+            syncref(e->e.o.right);
+            syncref(e->e.o.left);
         break;
-    }
+        }
     }
     return;
 }
@@ -289,18 +292,19 @@ void erase_area(int sr, int sc, int er, int ec, int ignorelock) {
         sc = 0;
     checkbounds(&er, &ec);
 
+    // mark the ent as delete
     // Do a lookat() for the upper left and lower right cells of the range
     // being erased to make sure they are included in the delete buffer so
     // that pulling cells always works correctly even if the cells at one
     // or more edges of the range are all empty.
-
     (void) lookat(sr, sc);
     (void) lookat(er, ec);
-
     for (r = sr; r <= er; r++) {
     for (c = sc; c <= ec; c++) {
         pp = ATBL(tbl, r, c);
         if (*pp && (!((*pp)->flags & is_locked) || ignorelock)) {
+            /* delete vertex in graph */
+            if (getVertex(graph, *pp, 0) != NULL) destroy_vertex(*pp);
             mark_ent_as_deleted(*pp);
             *pp = NULL;
         }
@@ -965,7 +969,7 @@ void insert_or_edit_cell() {
     char * opt = get_conf_value("newline_action");
     switch (opt[0]) {
         case 'j':
-            currow = forw_row(1)->row; 
+            currow = forw_row(1)->row;
             break;
         case 'l':
             curcol = forw_col(1)->col;
@@ -1574,8 +1578,11 @@ int is_single_command (struct block * buf, long timeout) {
         else if (buf->value == L'>')        res = MOVEMENT_CMD;
         else if (buf->value == L'=')        res = MOVEMENT_CMD;
         else if (buf->value == L'e')        res = MOVEMENT_CMD;
-        else if (buf->value == L'E')        res = MOVEMENT_CMD;
         else if (buf->value == L'v')        res = MOVEMENT_CMD;
+
+        else if (buf->value == L'Q')        res = MOVEMENT_CMD;  //TEST
+        else if (buf->value == L'A')        res = MOVEMENT_CMD;  //TEST
+        else if (buf->value == L'W')        res = MOVEMENT_CMD;  //TEST
 
         // movement commands
         else if (buf->value == L'j')        res = MOVEMENT_CMD;
@@ -1616,7 +1623,7 @@ int is_single_command (struct block * buf, long timeout) {
         else if (buf->value == L'x')        res = EDITION_CMD;  // cuts a cell
         else if (buf->value == L'u')        res = EDITION_CMD;  // undo
         else if (buf->value == ctl('r'))    res = EDITION_CMD;  // redo
-        else if (buf->value == L'@')        res = EDITION_CMD;  // EvallAll 
+        else if (buf->value == L'@')        res = EDITION_CMD;  // EvalAll
         else if (buf->value == L'{')        res = EDITION_CMD;
         else if (buf->value == L'}')        res = EDITION_CMD;
         else if (buf->value == L'|')        res = EDITION_CMD;
