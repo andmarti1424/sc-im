@@ -65,7 +65,6 @@ void erasedb() {
 
     clean_range();
 
-    propagation = 10;
     calc_order = BYROWS;
     prescale = 1.0;
     tbl_style = 0;
@@ -758,7 +757,6 @@ void print_options(FILE *f) {
         //! cslop &&
         ! optimize &&
         ! rndtoeven &&
-        propagation == 10 &&
         calc_order == BYROWS &&
         prescale == 1.0 &&
         ! atoi(get_conf_value("external_functions")) &&
@@ -769,7 +767,6 @@ void print_options(FILE *f) {
     (void) fprintf(f, "set");
     if (optimize)              (void) fprintf(f," optimize");
     if (rndtoeven)             (void) fprintf(f, " rndtoeven");
-    if (propagation != 10)     (void) fprintf(f, " iterations = %d", propagation);
     if (calc_order != BYROWS ) (void) fprintf(f, " bycols");
     if (prescale != 1.0)       (void) fprintf(f, " prescale");
     if ( atoi(get_conf_value("external_functions")) ) (void) fprintf(f, " extfun");

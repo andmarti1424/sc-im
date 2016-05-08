@@ -33,7 +33,7 @@ extern graphADT graph;
 // are actualy deleted (memory freed) to allow the sync_refs routine a chance to fix the
 // variable references.
 // it sets is_deleted flag of an ent.
-void mark_ent_as_deleted(register struct ent *p) {
+void mark_ent_as_deleted(register struct ent * p) {
     if (p == NULL) return;
     //p->flags |= iscleared;
     p->flags |= is_deleted;
@@ -49,8 +49,8 @@ void mark_ent_as_deleted(register struct ent *p) {
 // and free ent pointer. this function should always be called
 // at exit. this is mandatory, just in case we want to UNDO any changes.
 void flush_saved() {
-    register struct ent *p;
-    register struct ent *q;
+    register struct ent * p;
+    register struct ent * q;
 
     p = freeents;
     while (p != NULL) {
@@ -71,7 +71,7 @@ void flush_saved() {
 // IMPROVE: Shouldn't traverse the whole table.
 void sync_refs() {
     int i, j;
-    register struct ent *p;
+    register struct ent * p;
     // sync_ranges();
     for (i=0; i <= maxrow; i++)
     for (j=0; j <= maxcol; j++)
@@ -82,7 +82,7 @@ void sync_refs() {
     return;
 }
 
-void syncref(register struct enode *e) {
+void syncref(register struct enode * e) {
     if ( e == (struct enode *) 0 ) {
     //if ( e == NULL || e->op == ERR_ ) {
         return;
@@ -93,12 +93,13 @@ void syncref(register struct enode *e) {
         switch (e->op) {
         case 'v':
             //if (e->e.v.vp->flags & iscleared) {
-            if (e->e.v.vp->flags & is_deleted) {
+            /* if (e->e.v.vp->flags & is_deleted) {
                 e->op = ERR_;
                 //sc_info("%d %d", e->e.v.vp->row, e->e.v.vp->col);
                 e->e.o.left = NULL;
                 e->e.o.right = NULL;
-            } else if (e->e.v.vp->flags & may_sync)
+            } else */
+                if (e->e.v.vp->flags & may_sync)
                 e->e.v.vp = lookat(e->e.v.vp->row, e->e.v.vp->col);
             break;
         case 'k':
@@ -117,7 +118,7 @@ void syncref(register struct enode *e) {
 // Delete a column
 void deletecol() {
     int r, c, i;
-    struct ent **pp;
+    struct ent ** pp;
 
     if (any_locked_cells(0, curcol, maxrow, curcol)) {
         sc_info("Locked cells encountered. Nothing changed");
@@ -179,7 +180,7 @@ void deletecol() {
 // "pf" command, or for adjusting cell references when transposing with
 // the "pt" command.  r1, c1, r2, and c2 define the range in which the dr
 // and dc values should be used.
-void copyent(register struct ent *n, register struct ent *p, int dr, int dc,
+void copyent(register struct ent * n, register struct ent * p, int dr, int dc,
              int r1, int c1, int r2, int c2, int special) {
     if (!n || !p) {
         sc_error("internal error");
@@ -303,8 +304,10 @@ void erase_area(int sr, int sc, int er, int ec, int ignorelock) {
     for (c = sc; c <= ec; c++) {
         pp = ATBL(tbl, r, c);
         if (*pp && (!((*pp)->flags & is_locked) || ignorelock)) {
+
             /* delete vertex in graph */
             if (getVertex(graph, *pp, 0) != NULL) destroy_vertex(*pp);
+
             mark_ent_as_deleted(*pp);
             *pp = NULL;
         }
@@ -871,57 +874,28 @@ void del_selected_cells() {
        #ifdef UNDO
        create_undo_action();
        copy_to_undostruct(currow, curcol, currow, curcol, 'd');
+
+       // TODO: save in undostruct, all the ents that depends on the deleted one
        #endif
 
        erase_area(currow, curcol, currow, curcol, 0);
        modflg++;
        sync_refs();
+
+       // TODO: here, Eval all ents that depends on the deleted one
+       EvalAll();
 
        #ifdef UNDO
        copy_to_undostruct(currow, curcol, currow, curcol, 'a');
        end_undo_action();
        #endif
 
-/*
-       // UNDO feature
-       // Save deleted ent
-       struct ent * e_prev = (struct ent *) malloc( (unsigned) sizeof(struct ent) );
-       cleanent(e_prev);
-       copyent(e_prev, lookat(currow, curcol), 0, 0, 0, 0, currow, curcol, 0);
-       // Save ents that depends on the deleted one: TODO
-       //struct ent * e_prev2 = (struct ent *) malloc( (unsigned) sizeof(struct ent) );
-       //cleanent(e_prev2);
-       //copyent(e_prev2, lookat(currow+9, curcol+2), 0, 0, 0, 0, currow+9, curcol+2, 0);
-       //e_prev->next = e_prev2;
-
-       // create undo struct:
-       struct undo u;
-       u.removed = e_prev;
-       u.added = NULL; // Eliminar esta linea, luego de implementar los TODO descriptos
-
-       // delete the ent:
-       erase_area(currow, curcol, currow, curcol, 0);
-       modflg++;
-       // sync refs after the delete
-       sync_refs();
-
-       // Save current status of each ent that depends on the deleted one TODO
-       struct ent * e_now = (struct ent *) malloc( (unsigned) sizeof(struct ent) );
-       cleanent(e_now);
-       (void) copyent(e_now, lookat(currow+9, curcol+2), 0, 0, 0, 0, currow+9, curcol+2, 0);
-       u.added = e_now;
-
-       // Add undo struct to undolist:
-       add_to_undolist(&u); // <---------|
-*/
-       //flush_saved(); // No descomentar. Se debe hacer flush SOLO al salir
     }
 
     return;
 }
 
 // Change cell content sending inputline to interpreter
-// REVISED
 void insert_or_edit_cell() {
     char ope[BUFFERSIZE] = "";
     switch (insert_edit_submode) {
@@ -950,7 +924,7 @@ void insert_or_edit_cell() {
     copy_to_undostruct(currow, curcol, currow, curcol, 'd');
     #endif
 
-    // ADD PADDING INTELLIGECE HERE?
+    // ADD PADDING INTELLIGECE HERE ?
     (void) swprintf(interp_line, BUFFERSIZE, L"%s %s = %ls", ope, v_name(currow, curcol), inputline);
 
     send_to_interp(interp_line); 
@@ -979,7 +953,7 @@ void insert_or_edit_cell() {
     return;
 }
 
-// REVISED - Send command to interpreter
+// Send command to interpreter
 void send_to_interp(wchar_t * oper) {
     //sc_debug("!!%ls!!", oper);
     wcstombs(line, oper, BUFFERSIZE);

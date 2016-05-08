@@ -418,15 +418,15 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
 
             // Clean format
             #ifdef USECOLORS
-            if ((*p)->expr) {
+            if ((*p)->cellerror) {                                  // cellerror
+                set_ucolor(win, &ucolors[CELL_ERROR]);
+            } else if ((*p)->expr) {
                 set_ucolor(win, &ucolors[EXPRESSION]);
-            } else if ((*p)->label) {             // string
+            } else if ((*p)->label) {                               // string
                 set_ucolor(win, &ucolors[STRG]);
             } else if ((*p)->flags & is_valid && ! (*p)->format) {  // numeric value
                 set_ucolor(win, &ucolors[NUMB]);
-            } else if ((*p)->cellerror) {         // cellerror
-                set_ucolor(win, &ucolors[CELL_ERROR]);
-            } else if ((*p)->format && (*p)->format[0] == 'd') {  // date format
+            } else if ((*p)->format && (*p)->format[0] == 'd') {    // date format
                 set_ucolor(win, &ucolors[DATEF]);
             } else {
                 set_ucolor(win, &ucolors[NORMAL]);
@@ -470,10 +470,6 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
                 #endif
             }
 
-            if ((*p)->cellerror == CELLERROR) {
-               (void) mvprintw(row + RESROW + 1 - offscr_sc_rows, c, "%*.*s", fwidth[col], fwidth[col], "ERROR");
-               continue;
-            }
 
             char num [FBUFLEN] = "";
             char text[FBUFLEN] = "";
@@ -509,8 +505,15 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
                 }
             }
 
+            if ((*p)->cellerror == CELLERROR) {
+               (void) mvprintw(row + RESROW + 1 - offscr_sc_rows, c, "%*.*s", fwidth[col], fwidth[col], "ERROR");
+               align = 0;
+               strcpy(text, "ERROR");
+               num[0]='\0';
+            }
+
             // repaint a blank cell, because of in range, or because we have a coloured empty cell!
-            if (! ((*p)->flags & is_valid) && !(*p)->label ) {
+            if ( ( !((*p)->flags & is_valid) && !(*p)->label ) && !((*p)->cellerror == CELLERROR) ) {
                 if ( (currow == row && curcol == col) ||
                 ( in_range && row >= ranges->tlrow && row <= ranges->brrow &&
                 col >= ranges->tlcol && col <= ranges->brcol ) ) {
@@ -531,7 +534,7 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
                 for (i = 0; i < fieldlen; i++) {
                     caracter = cht[i] & A_CHARTEXT;
                     #ifdef NETBSD
-                    if (! caracter) {
+                    if ( !caracter ) {
                         caracter = ' '; // this is for NetBSD compatibility
                     }
                     #endif

@@ -140,13 +140,13 @@ void GraphAddEdge(vertexT * from, vertexT * to) {
 void rebuild_graph() {
     destroy_graph(graph);
     graph = GraphCreate();
-    int i, j, chgct = 0;
+    int i, j;
     struct ent * p;
 
     for (i = 0; i <= maxrow; i++)
         for (j = 0; j <= maxcol; j++)
         if ((p = *ATBL(tbl, i, j)) && p->expr)
-            RealEvalOne(p, i, j, &chgct, 1);
+            EvalJustOneVertex(p, i, j, 1);
     return;
 }
 

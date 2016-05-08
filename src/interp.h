@@ -81,5 +81,5 @@ void edits(int row, int col, int saveinfile);
 int dateformat(struct ent * v1, struct ent * v2, char * fmt);
 double rint(double d);
 
-void scim_RealEval();
-void rebuild_graph();
+void EvalAllVertexs();
+void EvalJustOneVertex(register struct ent * p, int i, int j, int rebuild_graph);

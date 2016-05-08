@@ -917,7 +917,7 @@ double eval(register struct ent * ent, register struct enode * e) {
     case MYCOL:  return ((double) (gmycol + coloffset));
     case LASTROW: return ((double) maxrow);
     case LASTCOL: return ((double) maxcol);
-    case NUMITER: return ((double) repct);
+    //case NUMITER: return ((double) repct);
     case ERR_:    cellerror = CELLERROR;
                  return ((double) 0);
     case PI_:    return ((double) M_PI);
@@ -1305,65 +1305,19 @@ char * seval(register struct ent * ent, register struct enode * se) {
     }
 }
 
-/*
- * The graph formed by cell expressions which use other cells's values is not
- * evaluated "bottom up".  The whole table is merely re-evaluated cell by cell,
- * top to bottom, left to right, in RealEvalAll().  Each cell's expression uses
- * constants in other cells.  However, RealEvalAll() notices when a cell gets a
- * new numeric or string value, and reports if this happens for any cell.
- * EvalAll() repeats calling RealEvalAll() until there are no changes or the
- * evaluation count expires.
+//int propagation = 10; // max number of times to try calculation
+//int repct = 1;        // Make repct a global variable so that the function @numiter can access it
 
-int propagation = 10; // max number of times to try calculation
-int repct = 1;        // Make repct a global variable so that the function @numiter can access it
-void setiterations(int i) {
-    if (i < 1) {
-        sc_error("iteration count must be at least 1");
-        propagation = 1;
-    } else
-        propagation = i;
-}
-
-//
- * Evaluate all cells which have expressions and alter their numeric or string
- * values.  Return the number of cells which changed.
-int RealEvalAll() {
-    register int i,j;
-    int chgct = 0;
-    register struct ent * p;
-
-    if (calc_order == BYROWS) {
-    for (i = 0; i <= maxrow; i++)
-        for (j = 0; j <= maxcol; j++)
-        if ((p = *ATBL(tbl, i, j)) && p->expr)
-            RealEvalOne(p, i, j, &chgct);
-    }
-    else if (calc_order == BYCOLS) {
-    for (j = 0; j <= maxcol; j++) {
-        for (i = 0; i <= maxrow; i++)
-        if ((p = *ATBL(tbl,i, j)) && p->expr)
-            RealEvalOne(p, i, j, &chgct);
-    }
-    }
-    else {
-        sc_error("Internal error calc_order");
-    }
-    return (chgct);
-}
- */
-
-int propagation = 10; // max number of times to try calculation
-int repct = 1;        // Make repct a global variable so that the function @numiter can access it
-
-void scim_RealEval() {
-    int chgct = 0;
+void EvalAllVertexs() {
+//    int chgct = 0;
     struct ent * p;
 
     //(void) signal(SIGFPE, eval_fpe);
     vertexT * temp = graph->vertices;
     while (temp != NULL) {
         if ((p = *ATBL(tbl, temp->ent->row, temp->ent->col)) && p->expr)
-            RealEvalOne(p, temp->ent->row, temp->ent->col, &chgct, 0);
+            //RealEvalOne(p, temp->ent->row, temp->ent->col, &chgct, 0);
+            EvalJustOneVertex(p, temp->ent->row, temp->ent->col, 0);
         temp = temp->next;
     }
     //(void) signal(SIGFPE, exit_app);
@@ -1371,24 +1325,15 @@ void scim_RealEval() {
 
 
 void EvalAll() {
-    scim_RealEval();
-    return; // THIS CANCELS PREVIOUS CALCULATION
-
-    /*
-    int lastcnt;
-    repct = 1;
-    (void) signal(SIGFPE, eval_fpe);
-
-    while ((lastcnt = RealEvalAll()) && (++repct <= propagation));
-    if ((propagation > 1) && (lastcnt > 0) && ! atoi(get_conf_value("nocurses"))) {
-        sc_error("Still changing after %d iterations", repct - 1);
-    }
-    (void) signal(SIGFPE, exit_app);
-    */
+    EvalAllVertexs();
+    return;
 }
 
-// Evaluate One Cell
-void RealEvalOne(register struct ent * p, int i, int j, int * chgct, int rebuild_graph) {
+// Evaluate just one vertex
+void EvalJustOneVertex(register struct ent * p, int i, int j, int rebuild_graph) {
+//void RealEvalOne(register struct ent * p, int i, int j, int * chgct, int rebuild_graph) {
+
+
     //sc_debug("RealEvalOne: %d %d", i, j);
     gmyrow=i; gmycol=j;
 
@@ -1406,7 +1351,7 @@ void RealEvalOne(register struct ent * p, int i, int j, int * chgct, int rebuild
         if ( !v && !p->label) /* Everything's fine */
             return;
         if ( !p->label || !v || strcmp(v, p->label) != 0 || cellerror) {
-            (*chgct)++;
+            //(*chgct)++;
             p->flags |= is_changed;
             changed++;
         }
@@ -1430,8 +1375,8 @@ void RealEvalOne(register struct ent * p, int i, int j, int * chgct, int rebuild
             p->cellerror = cellerror;
             p->v = v;
 
-            if (! cellerror)    /* don't keep eval'ing an error */
-                (*chgct)++;
+            //if (! cellerror)    /* don't keep eval'ing an error */
+            //    (*chgct)++;
             p->flags |= is_changed | is_valid;
             changed++;
         }
@@ -2405,11 +2350,10 @@ void label(register struct ent * v, register char * s, int flushdir) {
 }
 
 void decodev(struct ent_ptr v) {
-    //if ( v.vp == NULL) return; // FIXME
     struct range * r;
     if ( ! v.vp || v.vp->flags & is_deleted)
         (void) sprintf(line + linelim, "@ERR");
-    else if ( ! find_range( (char *)0, 0, v.vp, v.vp, &r) && !r->r_is_range)
+    else if ( !find_range( (char *) 0, 0, v.vp, v.vp, &r) && !r->r_is_range)
         (void) sprintf(line+linelim, "%s", r->r_name);
     else {
         (void) sprintf( line + linelim, "%s%s%s%d", v.vf & FIX_COL ? "$" : "", coltoa(v.vp->col), v.vf & FIX_ROW ? "$" : "", v.vp->row);

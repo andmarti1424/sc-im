@@ -54,7 +54,7 @@
  *    is_strexpr set means expr yields a string expression.
  *    If is_strexpr is not set, and expr points to an expression tree, the
  *        expression yields a numeric expression.
- *    So, either v or label can be set to a constant. 
+ *    So, either v or label can be set to a constant.
  *        Either (but not both at the same time) can be set from an expression.
  */
 
