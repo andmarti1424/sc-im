@@ -36,14 +36,12 @@
 
 graphADT graph;
 
-
 /* Creates an empty graph, with no vertices. Allocate memory from the heap */
 graphADT GraphCreate() {
    graphADT emptyGraph = (graphCDT *) malloc(sizeof(graphCDT));
    emptyGraph->vertices = NULL;
    return emptyGraph;
 }
-
 
 /* this adds the vertex sorted in the list
  * and not at the end
@@ -137,6 +135,7 @@ void GraphAddEdge(vertexT * from, vertexT * to) {
   return;
 }
 
+
 void rebuild_graph() {
     destroy_graph(graph);
     graph = GraphCreate();
@@ -150,6 +149,7 @@ void rebuild_graph() {
     return;
 }
 
+
 // iterate through all the vertices. Set visited = false
 void markAllVerticesNotVisited () {
    vertexT * temp = graph->vertices;
@@ -159,6 +159,7 @@ void markAllVerticesNotVisited () {
    }
    return;
 }
+
 
 // print vertices
 void print_vertexs() {
@@ -190,8 +191,6 @@ void print_vertexs() {
    show_text((char *) &det);
    return;
 }
-
-
 
 
 /* this function frees the memory of vertex's edges.
@@ -252,6 +251,7 @@ void destroy_vertex(struct ent * ent) {
    return;
 }
 
+
 // for each edge in edges, we look for the reference to the vertex we are deleting and we erase it!
 // v_cur is the reference
 // if back_reference is set, the delete is done over the back_edges list
@@ -289,6 +289,7 @@ void delete_reference(vertexT * v_cur, vertexT * vc, int back_reference) {
     return;
 }
 
+
 // this free memory of an edge and its linked edges
 void destroy_list_edges(edgeT * e) {
     if (e == NULL) return;
@@ -302,6 +303,7 @@ void destroy_list_edges(edgeT * e) {
     }
     return;
 }
+
 
 // this free memory of a graph
 void destroy_graph(graphADT graph) {
@@ -319,10 +321,16 @@ void destroy_graph(graphADT graph) {
     return;
 }
 
-// this variable is for debugging ent_that_depends_on function
-char valores[2000] = "";
 
-void ents_that_depends_on (graphADT graph, struct ent * ent) {
+/**********************************************************************************
+ * the folowing functions and variables are used for ent_that_depends_on function.
+ * the last is used to get the list of ents that depends on an specific ent
+ * the result is saved in a list of ents.
+ **********************************************************************************/
+struct ent_ptr * deps = NULL;
+int dep_size = 0;
+
+void ents_that_depends_on (struct ent * ent) {
    if (graph == NULL) {
        return;
    } else {
@@ -331,8 +339,10 @@ void ents_that_depends_on (graphADT graph, struct ent * ent) {
 
        struct edgeTag * edges = v->back_edges;
        while (edges != NULL) {
-           sprintf(valores + strlen(valores), "%d %d\n", edges->connectsTo->ent->row, edges->connectsTo->ent->col);
-           ents_that_depends_on(graph, edges->connectsTo->ent);
+           deps = (struct ent_ptr *) realloc(deps, sizeof(struct ent_ptr) * (++dep_size));
+           deps[0].vf = dep_size; // we always keep size of list in the first position !
+           deps[dep_size-1].vp = lookat(edges->connectsTo->ent->row, edges->connectsTo->ent->col);
+           ents_that_depends_on(edges->connectsTo->ent);
            edges->connectsTo->visited = 1;
            edges = edges->next;
        }
@@ -340,49 +350,32 @@ void ents_that_depends_on (graphADT graph, struct ent * ent) {
    return;
 }
 
+// This method returns if a vertex called dest is reachable from the vertex called src
+// (if back_dep is set to false).
+// if back_dep is set to true, the relationship is evaluated in the opposite way.
 int GraphIsReachable(vertexT * src, vertexT * dest, int back_dep) {
-   // This method returns if a vertex called dest is reachable from the vertex called source
-   // first set visited = false for all vertices
    if (src == dest) {
-      return 1;
-   }else if (src->visited) {
-      return 0;
-   }else{
-      // visit all edges of vertexT * src
-      src->visited = 1;
+       return 1;
+   } else if (src->visited) {
+       return 0;
+   } else {
+       // visit all edges of vertexT * src
+       src->visited = 1;
 
-      edgeT * tempe;                // the first edge outgoing from this vertex
-      if (! back_dep)
-          tempe = src->edges;       // the first edge outgoing from this vertex
-      else
-          tempe = src->back_edges;  // the first edge outgoing from this vertex
+       edgeT * tempe;
+       if ( !back_dep )
+           tempe = src->edges;
+       else
+           tempe = src->back_edges;
 
-      while (tempe != NULL) {
-         if ( ! GraphIsReachable(tempe->connectsTo, dest, back_dep)) {
-            tempe = tempe->next;
-         } else{
-            return 1;
-         }
-      }
+       while (tempe != NULL) {
+          if ( ! GraphIsReachable(tempe->connectsTo, dest, back_dep)) {
+             tempe = tempe->next;
+          } else {
+             return 1;
+          }
+       }
    }
    return 0;
 }
-
-/*
-int isDestReachable(graphADT graph, int from_row, int from_col, int to_row, int to_col, int back_dep) {
-   if(graph == NULL){
-      return 0;
-   }else{
-      vertexT * src = getVertex(graph, from_row, from_col);
-      vertexT * dest = getVertex(graph, to_row, to_col);
-      if(src == NULL || dest == NULL) {
-         return 0;
-      }else{
-         // The graph is not null. The vertices do exist in the graph. Get to work! find if dest is rechable from src
-         // first set visited = false for all vertices
-         markAllVerticesNotVisited(graph);
-         return GraphIsReachable(graph, src, dest, back_dep);
-      }
-   }
-}
-*/
+/*******************************************************************/

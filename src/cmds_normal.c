@@ -35,27 +35,28 @@ void do_normalmode(struct block * buf) {
     switch (buf->value) {
         // TEST
         case L'A':
-            print_vertexs(graph);
-            break;
-
-        case L'Q':
-            //scim_RealEval();
-            //destroy_graph(graph);
-            //graph = NULL;
-            destroy_vertex(lookat(8, 3));
             break;
 
         case L'W':
-            rebuild_graph();
-//            GraphAddEdge( getVertex(graph, lookat(0, 0)), getVertex(graph, lookat(0,4)) ) ;
-//            GraphAddEdge( getVertex(graph, lookat(0, 4)), getVertex(graph, lookat(2,2)) ) ;
-//            GraphAddEdge( getVertex(graph, lookat(8, 5)), getVertex(graph, lookat(0,0)) ) ;
-//            GraphAddEdge( getVertex(graph, lookat(2, 2)), getVertex(graph, lookat(2,3)) ) ;
-//            GraphAddEdge( getVertex(graph, lookat(2, 3)), getVertex(graph, lookat(1,1)) ) ;
+            break;
 
-//            markAllVerticesNotVisited(graph);
-//            ents_that_depends_on(graph, lookat(2, 2));
-//            show_text(&valores);
+        case L'Q':
+            {
+            // TEST dependence of specific ent
+            extern struct ent_ptr * deps;
+            extern int dep_size;
+            dep_size = 0;
+            markAllVerticesNotVisited();
+            ents_that_depends_on(lookat(2, 2));
+            if (deps != NULL) {
+                int i, n = deps->vf;
+                for (i = 0; i < n; i++) {
+                    sc_debug("i:%d  n:%d   r:%d c:%d", i, deps->vf, deps[i].vp->row, deps[i].vp->col);
+                }
+            }
+            if (deps != NULL) free(deps);
+            deps = NULL;
+            }
             break;
 
 

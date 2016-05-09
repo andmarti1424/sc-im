@@ -78,8 +78,6 @@ struct dictionary * user_conf_d;
 struct dictionary * predefined_conf_d;
 struct history * commandline_history;
 
-extern graphADT graph;
-
 /*********************************************************************
    MAIN LOOP
  *********************************************************************/
@@ -226,6 +224,7 @@ int main (int argc, char ** argv) {
    END OF MAIN LOOP
  *********************************************************************/
 
+extern graphADT graph;
 
 void create_structures() {
 

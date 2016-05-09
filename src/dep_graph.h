@@ -9,7 +9,7 @@ typedef struct vertexTag {
     struct vertexTag * next;
 } vertexT;
 
-/* For each edge, we need a link to the vertex it connects to and a link to the next edge w.r.t source vertex*/
+/* For each edge, we need a link to the vertex it connects to and a link to the next edge w.r.t source vertex */
 typedef struct edgeTag {
    vertexT * connectsTo;
    struct edgeTag * next;
@@ -34,6 +34,6 @@ void destroy_vertex(struct ent * ent);
 void delete_reference(vertexT * v_cur, vertexT * vc, int back_reference);
 
 void markAllVerticesNotVisited();
-void ents_that_depends_on (graphADT graph, struct ent * ent);
+void ents_that_depends_on (struct ent * ent);
 int GraphIsReachable(vertexT * src, vertexT * dest, int back_dep);
 void rebuild_graph();
