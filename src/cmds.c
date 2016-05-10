@@ -317,11 +317,11 @@ void erase_area(int sr, int sc, int er, int ec, int ignorelock) {
 }
 
 struct enode * copye(register struct enode *e, int Rdelta, int Cdelta, int r1, int c1, int r2, int c2, int transpose) {
-    register struct enode *ret;
-    static struct enode *range = NULL;
+    register struct enode * ret;
+    static struct enode * range = NULL;
 
-    if (e == (struct enode *)0) {
-        ret = (struct enode *)0;
+    if (e == (struct enode *) 0) {
+        ret = (struct enode *) 0;
 
     } else if (e->op & REDUCE) {
         int newrow, newcol;

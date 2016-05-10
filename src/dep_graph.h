@@ -37,3 +37,7 @@ void markAllVerticesNotVisited();
 void ents_that_depends_on (struct ent * ent);
 int GraphIsReachable(vertexT * src, vertexT * dest, int back_dep);
 void rebuild_graph();
+
+void EvalAll();
+void EvalAllVertexs();
+void EvalJustOneVertex(register struct ent * p, int i, int j, int rebuild_graph);

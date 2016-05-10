@@ -71,12 +71,12 @@ struct go_save gs = { .g_type = G_NONE } ;
 
 #define ISVALID(r,c)    ((r)>=0 && (r)<maxrows && (c)>=0 && (c)<maxcols)
 
-jmp_buf fpe_save;
 int exprerr;              /* Set by eval() and seval() if expression errors */
 double prescale = 1.0;    /* Prescale for constants in let() */
 int loading = 0;          /* Set when readfile() is active */
 int gmyrow, gmycol;       /* globals used to implement @myrow, @mycol cmds */
 int rowoffset = 0, coloffset = 0;    /* row & col offsets for range functions */
+jmp_buf fpe_save;
 
 extern bool decimal;      /* Set if there was a decimal point in the number */
 
@@ -86,9 +86,7 @@ extern bool decimal;      /* Set if there was a decimal point in the number */
 double dolookup      (struct enode * val, int minr, int minc, int maxr, int maxc, int offr, int offc);
 double fn1_eval      (double (* fn)(), double arg);
 double fn2_eval      (double (* fn)(), double arg1, double arg2);
-int    RealEvalAll   ();
 int    constant      (register struct enode * e);
-void   RealEvalOne   (register struct ent * p, int i, int j, int * chgct, int rebuild_graph);
 void   copydbuf      (int deltar, int deltac);
 void   decompile     (register struct enode * e, int priority);
 void   index_arg     (char * s, struct enode * e);
@@ -113,7 +111,7 @@ extern int find_range(char * name, int len, struct ent * lmatch, struct ent * rm
 
 #include "dep_graph.h"
 extern graphADT graph;
-extern char valores;
+//extern char valores;
 
 
 
@@ -749,6 +747,8 @@ double eval(register struct ent * ent, register struct enode * e) {
                 e->e.k = (double) 0;
                 cellerror = CELLERROR;
             }
+            //if (ent) GraphAddVertex(graph, ent); //FIXME
+
             return (e->e.k);
     case O_VAR:    {
             struct ent * vp = e->e.v.vp;
@@ -1223,6 +1223,7 @@ char * seval(register struct ent * ent, register struct enode * se) {
     case O_SCONST:
              p = scxmalloc( (size_t) (strlen(se->e.s) + 1));
              (void) strcpy(p, se->e.s);
+             //if (ent) GraphAddVertex(graph, ent); // FIXME
              return (p);
     case O_VAR:
             {
@@ -1302,84 +1303,6 @@ char * seval(register struct ent * ent, register struct enode * se) {
              sc_error("Illegal string expression");
              exprerr = 1;
              return (NULL);
-    }
-}
-
-//int propagation = 10; // max number of times to try calculation
-//int repct = 1;        // Make repct a global variable so that the function @numiter can access it
-
-void EvalAllVertexs() {
-//    int chgct = 0;
-    struct ent * p;
-
-    //(void) signal(SIGFPE, eval_fpe);
-    vertexT * temp = graph->vertices;
-    while (temp != NULL) {
-        if ((p = *ATBL(tbl, temp->ent->row, temp->ent->col)) && p->expr)
-            //RealEvalOne(p, temp->ent->row, temp->ent->col, &chgct, 0);
-            EvalJustOneVertex(p, temp->ent->row, temp->ent->col, 0);
-        temp = temp->next;
-    }
-    //(void) signal(SIGFPE, exit_app);
-}
-
-
-void EvalAll() {
-    EvalAllVertexs();
-    return;
-}
-
-// Evaluate just one vertex
-void EvalJustOneVertex(register struct ent * p, int i, int j, int rebuild_graph) {
-//void RealEvalOne(register struct ent * p, int i, int j, int * chgct, int rebuild_graph) {
-
-
-    //sc_debug("RealEvalOne: %d %d", i, j);
-    gmyrow=i; gmycol=j;
-
-    if (p->flags & is_strexpr) {
-        char * v;
-        if (setjmp(fpe_save)) {
-            sc_error("Floating point exception %s", v_name(i, j));
-            cellerror = CELLERROR;
-            v = "";
-        } else {
-            cellerror = CELLOK;
-            v = rebuild_graph ? seval(p, p->expr) : seval(NULL, p->expr);
-        }
-        p->cellerror = cellerror;
-        if ( !v && !p->label) /* Everything's fine */
-            return;
-        if ( !p->label || !v || strcmp(v, p->label) != 0 || cellerror) {
-            //(*chgct)++;
-            p->flags |= is_changed;
-            changed++;
-        }
-        if (p->label)
-            scxfree(p->label);
-        p->label = v;
-    } else {
-        double v;
-        if (setjmp(fpe_save)) {
-            sc_error("Floating point exception %s", v_name(i, j));
-            cellerror = CELLERROR;
-            v = (double) 0.0;
-        } else {
-            cellerror = CELLOK;
-            v = rebuild_graph ? eval(p, p->expr) : eval(NULL, p->expr);
-
-            if (cellerror == CELLOK && ! finite(v))
-                cellerror = CELLERROR;
-        }
-        if ((cellerror != p->cellerror) || (v != p->v)) {
-            p->cellerror = cellerror;
-            p->v = v;
-
-            //if (! cellerror)    /* don't keep eval'ing an error */
-            //    (*chgct)++;
-            p->flags |= is_changed | is_valid;
-            changed++;
-        }
     }
 }
 

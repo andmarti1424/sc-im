@@ -184,6 +184,7 @@ token S_YANKCOL
 %token S_QUIT
 %token S_REBUILD_GRAPH
 %token S_PRINT_GRAPH
+%token S_SYNCREFS
 %token S_REDO
 %token S_UNDO
 %token S_IMAP
@@ -537,6 +538,7 @@ command:
                                     }
 
     |    S_PRINT_GRAPH              { print_vertexs(); }
+    |    S_SYNCREFS                 { sync_refs(); }
     |    S_UNDO                     {
                                       do_undo();
                                       // sync_refs();

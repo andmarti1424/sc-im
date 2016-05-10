@@ -60,7 +60,7 @@ void shift_cells_down(int deltarows, int deltacols) {
             p = *ATBL(tbl, r - deltarows, c);
             if (p) {
                 n = lookat(r, c);
-                copyent(n, p, 1, 0, 0, 0, r - deltarows, c, 0);
+                copyent(n, p, 0, 0, 0, 0, r - deltarows, c, 0);
                 n->row += deltarows;
                 p = (struct ent *)0;
 
@@ -89,7 +89,7 @@ void shift_cells_left(int deltarows, int deltacols) {
                 p = *ATBL(tbl, r, c + 1);
                 if (p && ( (p->flags & is_valid) || (p->expr && (p->flags & is_strexpr)) || p->label )  ) {
                     n = lookat(r, c);
-                    (void) copyent(n, p, 1, 0, 0, 0, r, c, 0); // copio p a n
+                    (void) copyent(n, p, 0, 0, 0, 0, r, c, 0); // copio p a n
                     n->col--;
                     pp = ATBL(tbl, r, c + 1);
                 } else { // When shifting the cells from the last column
@@ -112,7 +112,7 @@ void shift_cells_right(int deltarows, int deltacols) {
         for (c = maxcol; c >= curcol; c--) {
             if ((p = *ATBL(tbl, r, c))) {
                 n = lookat(r, c + 1);
-                (void) copyent(n, p, 1, 0, 0, 0, r, c, 0);
+                (void) copyent(n, p, 0, 0, 0, 0, r, c, 0);
                 n->col++;
                 pp = ATBL(tbl, r, c);
                 clearent(*pp);
@@ -143,7 +143,7 @@ void shift_cells_up(int deltarows, int deltacols) {
                 if (p && ( (p->flags & is_valid) || (p->expr && (p->flags & is_strexpr)) || p->label )  ) {
                     // Copy below cell
                     n = lookat(r, c);
-                    (void) copyent(n, p, 1, 0, 0, 0, r, c, 0);
+                    (void) copyent(n, p, 0, 0, 0, 0, r, c, 0);
                     n->row--;
                     pp = ATBL(tbl, r+1, c);
                 } else {

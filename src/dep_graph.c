@@ -3,6 +3,14 @@
 #include "dep_graph.h"
 #include "interp.h"
 #include "screen.h"    // for show_text
+#include "sc.h"
+#include <setjmp.h>
+#include "xmalloc.h" // for scxfree
+#include <math.h>
+
+extern jmp_buf fpe_save;
+extern int cellerror;    /* is there an error in this cell */
+
 
 /******************************************************************************
  * This file contains all functions used for maintaining a dependence graph
@@ -62,12 +70,12 @@ vertexT * GraphAddVertex(graphADT graph , struct ent * ent) {
 
     // first element added to the list
     if( graph->vertices == NULL) {
-        graph->vertices = newVertex ;
+        graph->vertices = newVertex;
 
     // append in first position
     } else if (ent->row < graph->vertices->ent->row || (ent->row == graph->vertices->ent->row && ent->col < graph->vertices->ent->col)) {
         newVertex->next = graph->vertices;
-        graph->vertices = newVertex ;
+        graph->vertices = newVertex;
 
     // append in second position or after that
     } else {
@@ -135,19 +143,6 @@ void GraphAddEdge(vertexT * from, vertexT * to) {
   return;
 }
 
-
-void rebuild_graph() {
-    destroy_graph(graph);
-    graph = GraphCreate();
-    int i, j;
-    struct ent * p;
-
-    for (i = 0; i <= maxrow; i++)
-        for (j = 0; j <= maxcol; j++)
-        if ((p = *ATBL(tbl, i, j)) && p->expr)
-            EvalJustOneVertex(p, i, j, 1);
-    return;
-}
 
 
 // iterate through all the vertices. Set visited = false
@@ -322,6 +317,111 @@ void destroy_graph(graphADT graph) {
 }
 
 
+
+void rebuild_graph() {
+    destroy_graph(graph);
+    graph = GraphCreate();
+    int i, j;
+    struct ent * p;
+
+    for (i = 0; i <= maxrow; i++)
+        for (j = 0; j <= maxcol; j++)
+        if ((p = *ATBL(tbl, i, j)) && p->expr)
+            EvalJustOneVertex(p, i, j, 1);
+    return;
+}
+
+
+void EvalAll() {
+    // Eval vertexs of graph
+    EvalAllVertexs();
+
+    // Eval rest of ents that have enodes..
+    // TODO: we might want to add these enodes in orphan vertexs..
+    int i, j;
+    struct ent * p;
+    for (i = 0; i <= maxrow; i++)
+       for (j = 0; j <= maxcol; j++)
+           if (((p = *ATBL(tbl, i, j)) && p->expr) && getVertex(graph, p, 0) == NULL)
+               EvalJustOneVertex(p, i, j, 0);
+
+    return;
+}
+
+void EvalAllVertexs() {
+    struct ent * p;
+
+    //(void) signal(SIGFPE, eval_fpe);
+    vertexT * temp = graph->vertices;
+    //int i = 0;
+    while (temp != NULL) {
+        //sc_info("%d %d %d", temp->ent->row, temp->ent->col, i++);
+        if ((p = *ATBL(tbl, temp->ent->row, temp->ent->col)) && p->expr)
+            EvalJustOneVertex(p, temp->ent->row, temp->ent->col, 0);
+        temp = temp->next;
+    }
+    //(void) signal(SIGFPE, exit_app);
+}
+
+// Evaluate just one vertex
+void EvalJustOneVertex(register struct ent * p, int i, int j, int rebuild_graph) {
+    //sc_debug("EvalJustOneVertex: %d %d", i, j);
+    gmyrow=i; gmycol=j;
+
+    if (p->flags & is_strexpr) {
+        char * v;
+        if (setjmp(fpe_save)) {
+            sc_error("Floating point exception %s", v_name(i, j));
+            cellerror = CELLERROR;
+            v = "";
+        } else {
+            cellerror = CELLOK;
+            v = rebuild_graph ? seval(p, p->expr) : seval(NULL, p->expr);
+        }
+        p->cellerror = cellerror;
+        if ( !v && !p->label) /* Everything's fine */
+            return;
+        if ( !p->label || !v || strcmp(v, p->label) != 0 || cellerror) {
+            //(*chgct)++;
+            p->flags |= is_changed;
+            changed++;
+        }
+        if (p->label)
+            scxfree(p->label);
+        p->label = v;
+    } else {
+        double v;
+        if (setjmp(fpe_save)) {
+            sc_error("Floating point exception %s", v_name(i, j));
+            cellerror = CELLERROR;
+            v = (double) 0.0;
+        } else {
+            cellerror = CELLOK;
+            v = rebuild_graph ? eval(p, p->expr) : eval(NULL, p->expr);
+
+            if (cellerror == CELLOK && ! finite(v))
+                cellerror = CELLERROR;
+        }
+        if ((cellerror != p->cellerror) || (v != p->v)) {
+            p->cellerror = cellerror;
+            p->v = v;
+            //if (! cellerror)    /* don't keep eval'ing an error */
+            //    (*chgct)++;
+            p->flags |= is_changed | is_valid;
+            changed++;
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
 /**********************************************************************************
  * the folowing functions and variables are used for ent_that_depends_on function.
  * the last is used to get the list of ents that depends on an specific ent
@@ -379,3 +479,5 @@ int GraphIsReachable(vertexT * src, vertexT * dest, int back_dep) {
    return 0;
 }
 /*******************************************************************/
+
+
