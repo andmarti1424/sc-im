@@ -44,8 +44,8 @@
 #define EDITION_CMD      1
 #define MOVEMENT_CMD     2
 
-//#include <ncurses.h>
-#include <ncursesw/curses.h>
+#include <ncurses.h>
+//#include <ncursesw/curses.h>
 extern WINDOW * input_win;
 
 /*

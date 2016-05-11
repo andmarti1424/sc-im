@@ -1,5 +1,6 @@
 #include <string.h>
-#include <ncursesw/curses.h>
+#include <ncurses.h>
+//#include <ncursesw/curses.h>
 #include <wchar.h>
 #include <stdlib.h>
 #include <ctype.h>         // for isprint()

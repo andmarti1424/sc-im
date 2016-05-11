@@ -1,4 +1,5 @@
-#include <ncursesw/curses.h>
+//#include <ncursesw/curses.h>
+#include <ncurses.h>
 #include <stdlib.h>
 #include "sc.h"
 #include "marks.h"
@@ -12,7 +13,6 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <unistd.h>
-#include <ncursesw/curses.h>
 
 srange * ranges = NULL;
 

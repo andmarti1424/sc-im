@@ -7,6 +7,7 @@ v0.4.0
 * Added free() call in SORT in gram.y
 * Added rebuild_graph, print_graph, undo and redo to gram.y
 * Added function to remove elements in dep_graph. (specific vertex and linked edges)
+* Fix in shift functions
 
 v0.3.0
 * FIX when importing large CSV files

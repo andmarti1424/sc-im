@@ -1,6 +1,6 @@
-#include <ncursesw/curses.h>
+//#include <ncursesw/curses.h>
+#include <ncurses.h>
 #include <stdlib.h>
-
 #include "screen.h"
 #include "buffer.h"
 #include "marks.h"

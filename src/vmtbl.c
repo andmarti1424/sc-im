@@ -1,5 +1,6 @@
 #include <stdio.h>
-#include <ncursesw/curses.h>
+//#include <ncursesw/curses.h>
+#include <ncurses.h>
 #include <unistd.h>
 #include "vmtbl.h"
 #include "sc.h"

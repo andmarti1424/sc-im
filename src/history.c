@@ -26,7 +26,8 @@ void set_comp(int i) {
 
 #if defined HISTORY_FILE
 
-#include <ncursesw/curses.h>
+//#include <ncursesw/curses.h>
+#include <ncurses.h>
 #include <stdlib.h>
 #include <fcntl.h>
 #include <unistd.h>

@@ -25,7 +25,8 @@
 #include <string.h>
 
 #include <stdlib.h>
-#include <ncursesw/curses.h>
+//#include <ncursesw/curses.h>
+#include <ncurses.h>
 #include "sc.h"
 #include "macros.h"
 #include "color.h"
@@ -747,7 +748,7 @@ double eval(register struct ent * ent, register struct enode * e) {
                 e->e.k = (double) 0;
                 cellerror = CELLERROR;
             }
-            //if (ent) GraphAddVertex(graph, ent); //FIXME
+            if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent); //FIXME
 
             return (e->e.k);
     case O_VAR:    {
@@ -1221,10 +1222,10 @@ char * seval(register struct ent * ent, register struct enode * se) {
     if (se == (struct enode *) 0) return (char *) 0;
     switch (se->op) {
     case O_SCONST:
-             p = scxmalloc( (size_t) (strlen(se->e.s) + 1));
-             (void) strcpy(p, se->e.s);
-             //if (ent) GraphAddVertex(graph, ent); // FIXME
-             return (p);
+            p = scxmalloc( (size_t) (strlen(se->e.s) + 1));
+            (void) strcpy(p, se->e.s);
+            if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent); //FIXME
+            return (p);
     case O_VAR:
             {
             struct ent * vp = se->e.v.vp;

@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <ctype.h>
-#include <ncursesw/curses.h>
+//#include <ncursesw/curses.h>
+#include <ncurses.h>
 #include <string.h>
 #include "maps.h"
 #include "string.h"

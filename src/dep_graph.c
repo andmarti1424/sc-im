@@ -22,6 +22,8 @@ extern int cellerror;    /* is there an error in this cell */
  * The other relationship is "back_edges". This is a pointer to other vertex's and
  * there you will keep linked all the vertex's that use the first vertex in their formulas.
  * In other words, you will keep track of all the vertex's that depends on the first vertex.
+ *
+ * NOTE: an orphan vertex represents an ent that has an enode thats need to be evaluated, but do not depend in another cell.
  *******************************************************************************/
 #define CREATE_NEW(type) (type *) malloc(sizeof(type))
 
@@ -335,16 +337,6 @@ void rebuild_graph() {
 void EvalAll() {
     // Eval vertexs of graph
     EvalAllVertexs();
-
-    // Eval rest of ents that have enodes..
-    // TODO: we might want to add these enodes in orphan vertexs..
-    int i, j;
-    struct ent * p;
-    for (i = 0; i <= maxrow; i++)
-       for (j = 0; j <= maxcol; j++)
-           if (((p = *ATBL(tbl, i, j)) && p->expr) && getVertex(graph, p, 0) == NULL)
-               EvalJustOneVertex(p, i, j, 0);
-
     return;
 }
 
@@ -412,12 +404,6 @@ void EvalJustOneVertex(register struct ent * p, int i, int j, int rebuild_graph)
         }
     }
 }
-
-
-
-
-
-
 
 
 

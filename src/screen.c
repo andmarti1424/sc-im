@@ -3,7 +3,8 @@
     input_win: stdin and state bar window
 */
 #include <string.h>
-#include <ncursesw/curses.h>
+//#include <ncursesw/curses.h>
+#include <ncurses.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>

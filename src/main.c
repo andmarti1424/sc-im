@@ -1,5 +1,6 @@
 #include <signal.h>
-#include <ncursesw/curses.h>
+//#include <ncursesw/curses.h>
+#include <ncurses.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>

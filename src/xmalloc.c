@@ -1,4 +1,5 @@
-#include <ncursesw/curses.h>
+//#include <ncursesw/curses.h>
+#include <ncurses.h>
 #include <stdlib.h>
 #include "sc.h"
 #include "xmalloc.h"
