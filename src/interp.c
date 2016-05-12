@@ -2058,6 +2058,7 @@ void let(struct ent * v, struct enode * e) {
 
     if (locked_cell(v->row, v->col))
         return;
+    //if (getVertex(graph, v, 0) != NULL) destroy_vertex(v);
     if (v->row == currow && v->col == curcol)
         cellassign = 1;
     if (loading && ! isconstant)
@@ -2118,6 +2119,7 @@ void slet(struct ent * v, struct enode * se, int flushdir) {
 
     if (locked_cell(v->row, v->col))
         return;
+    //if (getVertex(graph, v, 0) != NULL) destroy_vertex(v);
     if (v->row == currow && v->col == curcol)
         cellassign = 1;
     exprerr = 0;

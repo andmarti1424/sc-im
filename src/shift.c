@@ -89,7 +89,7 @@ void shift_cells_left(int deltarows, int deltacols) {
                 p = *ATBL(tbl, r, c + 1);
                 if (p && ( (p->flags & is_valid) || (p->expr && (p->flags & is_strexpr)) || p->label )  ) {
                     n = lookat(r, c);
-                    (void) copyent(n, p, 0, 0, 0, 0, r, c, 0); // copio p a n
+                    (void) copyent(n, p, 0, 0, 0, 0, r, c, 0); // copy p a n
                     n->col--;
                     pp = ATBL(tbl, r, c + 1);
                 } else { // When shifting the cells from the last column

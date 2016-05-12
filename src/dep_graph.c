@@ -229,7 +229,10 @@ void destroy_vertex(struct ent * ent) {
    while (e != NULL) {
     //   sc_debug("edge: we follow %d %d", e->connectsTo->ent->row, e->connectsTo->ent->col);
        delete_reference(v_cur, e->connectsTo, 1);
-       if (e->connectsTo->edges == NULL) destroy_vertex(e->connectsTo->ent);
+
+       if (e->connectsTo->edges == NULL && e->connectsTo->back_edges == NULL && !e->connectsTo->ent->expr) destroy_vertex(e->connectsTo->ent);
+//     WARNING: an orphan vertex now represents an ent that has an enode thats
+//     need to be evaluated, but do not depend in another cell.
        e = e->next;
    }
 

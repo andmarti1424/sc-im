@@ -84,8 +84,9 @@ void sync_refs() {
 }
 
 void syncref(register struct enode * e) {
-    if ( e == (struct enode *) 0 ) {
-    //if ( e == NULL || e->op == ERR_ ) {
+    //if ( e == (struct enode *) 0 ) {
+    //    return;
+    if ( e == NULL || e->op == ERR_ ) {
         return;
     } else if (e->op & REDUCE) {
         e->e.r.right.vp = lookat(e->e.r.right.vp->row, e->e.r.right.vp->col);
@@ -94,14 +95,15 @@ void syncref(register struct enode * e) {
         switch (e->op) {
         case 'v':
             //if (e->e.v.vp->flags & iscleared) {
-            /* if (e->e.v.vp->flags & is_deleted) {
+            if (e->e.v.vp->flags & is_deleted) {
+         //     break;
                 e->op = ERR_;
                 //sc_info("%d %d", e->e.v.vp->row, e->e.v.vp->col);
                 e->e.o.left = NULL;
                 e->e.o.right = NULL;
-            } else */
+            } else
                 if (e->e.v.vp->flags & may_sync)
-                e->e.v.vp = lookat(e->e.v.vp->row, e->e.v.vp->col);
+                   e->e.v.vp = lookat(e->e.v.vp->row, e->e.v.vp->col);
             break;
         case 'k':
             break;
@@ -110,7 +112,7 @@ void syncref(register struct enode * e) {
         default:
             syncref(e->e.o.right);
             syncref(e->e.o.left);
-        break;
+            break;
         }
     }
     return;
@@ -306,6 +308,7 @@ void erase_area(int sr, int sc, int er, int ec, int ignorelock) {
         pp = ATBL(tbl, r, c);
         if (*pp && (!((*pp)->flags & is_locked) || ignorelock)) {
 
+            //sc_debug("%d %d", r, c);
             /* delete vertex in graph */
             if (getVertex(graph, *pp, 0) != NULL) destroy_vertex(*pp);
 
@@ -925,7 +928,9 @@ void insert_or_edit_cell() {
     copy_to_undostruct(currow, curcol, currow, curcol, 'd');
     #endif
 
-    // ADD PADDING INTELLIGECE HERE ?
+    if (getVertex(graph, lookat(currow, curcol), 0) != NULL) destroy_vertex(lookat(currow, curcol));
+
+    // ADD PADDING INTELLIGENCE HERE ?
     (void) swprintf(interp_line, BUFFERSIZE, L"%s %s = %ls", ope, v_name(currow, curcol), inputline);
 
     send_to_interp(interp_line); 
