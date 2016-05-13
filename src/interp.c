@@ -753,8 +753,14 @@ double eval(register struct ent * ent, register struct enode * e) {
             return (e->e.k);
     case O_VAR:    {
             struct ent * vp = e->e.v.vp;
+            if (vp && ent && vp->row == ent->row && vp->col == ent->col) {
+                sc_error("Circular reference in eval");
+                e->op = ERR_;
+                e->e.k = (double) 0;
+                cellerror = CELLERROR;
+                return (e->e.k);
+            }
             int row, col;
-
 
             if (vp && (rowoffset || coloffset)) {
                 row = e->e.v.vf & FIX_ROW ? vp->row : vp->row + rowoffset;
@@ -1229,6 +1235,13 @@ char * seval(register struct ent * ent, register struct enode * se) {
     case O_VAR:
             {
             struct ent * vp = se->e.v.vp;
+            if (vp && ent && vp->row == ent->row && vp->col == ent->col) {
+                sc_error("Circular reference in seval");
+                se->op = ERR_;
+                cellerror = CELLERROR;
+                return (NULL);
+            }
+ 
             int row, col;
             if (vp && (rowoffset || coloffset)) {
                 row = se->e.v.vf & FIX_ROW ? vp->row : vp->row + rowoffset;
