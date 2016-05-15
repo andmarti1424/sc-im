@@ -207,7 +207,7 @@ void free_custom_range(srange * sr) {
 // ---------------------------------------------------------
 static struct range * rng_base;
 //void sync_enode(struct enode * e);
-//void fix_enode(struct enode * e, int row1, int col1, int row2, int col2, int delta1, int delta2);
+void fix_enode(struct enode * e, int row1, int col1, int row2, int col2, int delta1, int delta2);
 
 void add_range(char * name, struct ent_ptr left, struct ent_ptr right, int is_range) {
     register char * p;
@@ -388,13 +388,13 @@ void sync_ranges() {
 
 void sync_enode(struct enode *e) {
     if (e) {
-    if ((e->op & REDUCE)) {
-        e->e.r.left.vp = lookat(e->e.r.left.vp->row, e->e.r.left.vp->col);
-        e->e.r.right.vp = lookat(e->e.r.right.vp->row, e->e.r.right.vp->col);
-    } else if (e->op != O_VAR && e->op !=O_CONST && e->op != O_SCONST) {
-        sync_enode(e->e.o.left);
-        sync_enode(e->e.o.right);
-    }
+        if ((e->op & REDUCE)) {
+            e->e.r.left.vp = lookat(e->e.r.left.vp->row, e->e.r.left.vp->col);
+            e->e.r.right.vp = lookat(e->e.r.right.vp->row, e->e.r.right.vp->col);
+        } else if (e->op != O_VAR && e->op !=O_CONST && e->op != O_SCONST) {
+            sync_enode(e->e.o.left);
+            sync_enode(e->e.o.right);
+        }
     }
 }
 
@@ -516,41 +516,40 @@ void fix_ranges(int row1, int col1, int row2, int col2, int delta1, int delta2) 
  //   fix_frames(row1, col1, row2, col2, delta1, delta2);
  //   fix_colors(row1, col1, row2, col2, delta1, delta2);
 }
-
+*/
 void fix_enode(struct enode *e, int row1, int col1, int row2, int col2, int delta1, int delta2) { // NO USADO
     if (e) {
-    if ((e->op & REDUCE)) {
-        int r, c;
-        int r1, c1, r2, c2;
-//        struct frange *fr;
+        if ((e->op & REDUCE)) {
+            int r, c;
+            int r1, c1, r2, c2;
+//          struct frange *fr;
 
-        fr = find_frange(currow, curcol);
-        r1 = e->e.r.left.vp->row;
-        c1 = e->e.r.left.vp->col;
-        r2 = e->e.r.right.vp->row;
-        c2 = e->e.r.right.vp->col;
-        if (r1>r2) r = r2, r2 = r1, r1 = r;
-        if (c1>c2) c = c2, c2 = c1, c1 = c;
+//          fr = find_frange(currow, curcol);
+            r1 = e->e.r.left.vp->row;
+            c1 = e->e.r.left.vp->col;
+            r2 = e->e.r.right.vp->row;
+            c2 = e->e.r.right.vp->col;
+            if (r1>r2) r = r2, r2 = r1, r1 = r;
+            if (c1>c2) c = c2, c2 = c1, c1 = c;
 
-        if (!(fr && (c1 < fr->or_left->col || c1 > fr->or_right->col))) {
-        if (r1 != r2 && r1 >= row1 && r1 <= row2) r1 = row2 - delta1;
-        if (c1 != c2 && c1 >= col1 && c1 <= col2) c1 = col2 - delta1;
+            /*if (!(fr && (c1 < fr->or_left->col || c1 > fr->or_right->col))) {
+            if (r1 != r2 && r1 >= row1 && r1 <= row2) r1 = row2 - delta1;
+            if (c1 != c2 && c1 >= col1 && c1 <= col2) c1 = col2 - delta1;
+            }
+
+            if (!(fr && (c2 < fr->or_left->col || c2 > fr->or_right->col))) {
+            if (r1 != r2 && r2 >= row1 && r2 <= row2) r2 = row1 + delta2;
+            if (c1 != c2 && c2 >= col1 && c2 <= col2) c2 = col1 + delta2;
+            }*/
+            e->e.r.left.vp = lookat(r1, c1);
+            e->e.r.right.vp = lookat(r2, c2);
+        } else if (e->op != O_VAR && e->op !=O_CONST && e->op != O_SCONST) {
+            fix_enode(e->e.o.left, row1, col1, row2, col2, delta1, delta2);
+            fix_enode(e->e.o.right, row1, col1, row2, col2, delta1, delta2);
         }
-
-        if (!(fr && (c2 < fr->or_left->col || c2 > fr->or_right->col))) {
-        if (r1 != r2 && r2 >= row1 && r2 <= row2) r2 = row1 + delta2;
-        if (c1 != c2 && c2 >= col1 && c2 <= col2) c2 = col1 + delta2;
-        }
-        e->e.r.left.vp = lookat(r1, c1);
-        e->e.r.right.vp = lookat(r2, c2);
-
-    } else if (e->op != O_VAR && e->op !=O_CONST && e->op != O_SCONST) {
-        fix_enode(e->e.o.left, row1, col1, row2, col2, delta1, delta2);
-        fix_enode(e->e.o.right, row1, col1, row2, col2, delta1, delta2);
-    }
     }
 }
-
+/*
 void getrange(char * name, int fd) {
     struct range *r;
     char *p;

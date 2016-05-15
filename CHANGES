@@ -8,6 +8,7 @@ v0.4.0
 * Added rebuild_graph, print_graph, undo and redo to gram.y
 * Added function to remove elements in dep_graph. (specific vertex and linked edges)
 * Fix in shift functions
+* Handle circular reference with new Eval structure
 
 v0.3.0
 * FIX when importing large CSV files

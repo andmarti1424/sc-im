@@ -118,6 +118,7 @@ void shift_cells_right(int deltarows, int deltacols) {
                 clearent(*pp);
             }
         }
+    //sync_refs();
     return;
 }
 
