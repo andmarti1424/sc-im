@@ -112,7 +112,7 @@ void shift_cells_right(int deltarows, int deltacols) {
         for (c = maxcol; c >= curcol; c--) {
             if ((p = *ATBL(tbl, r, c))) {
                 n = lookat(r, c + 1);
-                (void) copyent(n, p, 0, 0, 0, 0, r, c, 0);
+                (void) copyent(n, p, 0, 1, r, 0, r, c, 0);
                 n->col++;
                 pp = ATBL(tbl, r, c);
                 clearent(*pp);

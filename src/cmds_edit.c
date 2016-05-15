@@ -1,5 +1,4 @@
 #include <string.h>
-//#include <ncursesw/curses.h>
 #include <ncurses.h>
 #include <wchar.h>
 #include <wctype.h>
@@ -91,7 +90,7 @@ void do_editmode(struct block * sb) {
         return;
 
     } else if (find_val(sb, OKEY_ENTER)) {  // ENTER
-        insert_or_edit_cell(); 
+        insert_or_edit_cell();
         show_header(input_win);
         return;
 

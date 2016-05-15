@@ -279,8 +279,8 @@ void delete_reference(vertexT * v_cur, vertexT * vc, int back_reference) {
     edgeT * e_prev = eb;
     edgeT * e_cur = eb->next;
     while (e_cur != NULL && e_cur->connectsTo != v_cur) {
-        e_prev = eb;
-        e_cur = eb->next;
+        e_prev = e_cur;
+        e_cur = e_cur->next;
     }
     if (e_cur != NULL && e_cur->connectsTo == v_cur) {
         e_prev->next = e_cur->next;
