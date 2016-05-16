@@ -480,9 +480,6 @@ void doformat(int c1, int c2, int w, int p, int r) {
     for (i = c1; i <= c2; i++)
         fwidth[i] = w, precision[i] = p, realfmt[i] = r;
 
-    //rowsinrange = 1;
-    //colsinrange = fwidth[curcol];
-
     modflg++;
     return;
 
@@ -501,8 +498,6 @@ void formatcol(int c) {
                 if (fwidth[i] < 1)
                     fwidth[i] = 1;
             }
-            //rowsinrange = 1;
-            //colsinrange = fwidth[curcol];
             modflg++;
             break;
         case '>':
@@ -513,8 +508,6 @@ void formatcol(int c) {
                 if (fwidth[i] > COLS - rescol - 2)
                     fwidth[i] = COLS - rescol - 2;
             }
-            //rowsinrange = 1;
-            //colsinrange = fwidth[curcol];
             modflg++;
             break;
         case '-':
@@ -628,9 +621,9 @@ void insert_col(int after) {
 
 // delete a row
 void deleterow() {
-    register struct ent **pp;
+    register struct ent ** pp;
     int r, c;
-    struct ent        **tmprow;
+    struct ent ** tmprow;
 
 
     if (any_locked_cells(currow, 0, currow, maxcol)) {
