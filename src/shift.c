@@ -23,7 +23,6 @@ void shift_range(int delta_rows, int delta_cols, int tlrow, int tlcol, int brrow
 // shift cells down
 // TODO rewrite without using copyent
 void shift_cells_down(int deltarows, int deltacols) {
-    /*
     int r, c;
     struct ent **pp;
     //int lim = maxrow - currow + 1;
@@ -34,15 +33,13 @@ void shift_cells_down(int deltarows, int deltacols) {
     lim = maxrow - lim + deltarows - 1;
     if ((maxrow >= maxrows) && !growtbl(GROWROW, maxrow, 0))
         return;
-        */
 
+    /*
     int r, c;
     struct ent **pp;
     register struct ent * p;
     register struct ent *n;
     int lim = maxrow - currow + 1;
-
-    // Move cell content
     if (currow > maxrow) maxrow = currow;
     maxrow += deltarows;
 
@@ -65,28 +62,21 @@ void shift_cells_down(int deltarows, int deltacols) {
         }
     }
     return;
+*/
 
-
-
-    /*
-    for (r=currow; r < currow + deltarows; r++) {
-        pp = ATBL(tbl, r, maxcol);
-        for (c = lim; --c >= deltacols; pp--)
-            if ((pp[0] = pp[-deltacols])) pp[0]->col += deltacols;
-
-        pp = ATBL(tbl, r, curcol);
-        for (c = curcol; c < curcol + deltacols; c++, pp++)
-            *pp = (struct ent *) 0;
-    }*/
-
-/*
-    for (c=curcol; c < curcol + deltacols; c++) {
-        pp = ATBL(tbl, maxrow, c);
-        for (r = lim; --r >= deltarows; pp--)
-            if ((pp[0] = pp[-deltarows])) pp[0]->row += deltarows;
+    for (r = maxrow; r > currow; r--) {
+        for (c = curcol; c < curcol + deltacols; c++) {
+            pp = ATBL(tbl, r, c);
+            pp[0] = *ATBL(tbl, r-deltarows, c);
+            if ( pp[0] ) pp[0]->row += deltarows;
+        }
     }
-    */
-
+    // blank new ents
+    for (c = curcol; c < curcol + deltacols; c++)
+    for (r = currow; r < currow + deltarows; r++) {
+        pp = ATBL(tbl, r, c);
+        *pp = (struct ent *) 0;
+    }
     return;
 }
 
