@@ -4,6 +4,9 @@
 #include "sc.h"
 #include "vmtbl.h"   // for growtbl
 #include "cmds.h"
+#include "dep_graph.h"
+
+extern graphADT graph;
 
 // shift a range of 'ENTS'
 void shift_range(int delta_rows, int delta_cols, int tlrow, int tlcol, int brrow, int brcol) {
@@ -24,10 +27,8 @@ void shift_range(int delta_rows, int delta_cols, int tlrow, int tlcol, int brrow
 void shift_cells_down(int deltarows, int deltacols) {
     int r, c;
     struct ent ** pp;
-    int lim = maxrow - currow + deltarows;
     if (currow > maxrow) maxrow = currow;
     maxrow += deltarows;
-    lim = maxrow - lim + deltarows - 1;
     if ((maxrow >= maxrows) && !growtbl(GROWROW, maxrow, 0))
         return;
 
@@ -75,12 +76,10 @@ void shift_cells_right(int deltarows, int deltacols) {
 }
 
 
-
-
-
 // shift cells up
 // TODO rewrite without using copyent
 void shift_cells_up(int deltarows, int deltacols) {
+    /*
     register struct ent ** pp;
     register struct ent * n;
     register struct ent * p;
@@ -107,6 +106,30 @@ void shift_cells_up(int deltarows, int deltacols) {
                 }
                 clearent(*pp);
             }
+    return;
+    */
+    int r, c;
+    struct ent ** pp;
+    for (r = currow; r <= maxrow; r++) {
+        for (c = curcol; c < curcol + deltacols; c++) {
+            if (r <= maxrow - deltarows) {
+                pp = ATBL(tbl, r, c);
+
+                /* delete vertex in graph */
+                if (*pp && getVertex(graph, *pp, 0) != NULL) destroy_vertex(*pp);
+
+                if (*pp) mark_ent_as_deleted(*pp); //FIXME
+                *pp = NULL; //FIXME
+                pp[0] = *ATBL(tbl, r+deltarows, c);
+                if ( pp[0] ) pp[0]->row -= deltarows;
+            }
+            //blank bottom ents
+            if (r > maxrow - deltarows) {
+                pp = ATBL(tbl, r, c);
+                *pp = (struct ent *) 0;
+            }
+        }
+    }
     return;
 }
 
