@@ -77,50 +77,28 @@ void shift_cells_right(int deltarows, int deltacols) {
 
 
 // shift cells up
-// TODO rewrite without using copyent
 void shift_cells_up(int deltarows, int deltacols) {
-    /*
-    register struct ent ** pp;
-    register struct ent * n;
-    register struct ent * p;
-    int r, c, i;
-    //if (currow + deltarows - 1 > maxrow) return;
-    // Delete cell content
-    for (i = 0; i < deltarows; i++)
-        for (r = currow; r < maxrow; r++)
-            for (c = curcol; c < curcol + deltacols; c++) {
-
-                // Free 'ent' memory
-                pp = ATBL(tbl, r, c);
-                clearent(*pp);
-
-                p = *ATBL(tbl, r+1, c);
-                if (p && ( (p->flags & is_valid) || (p->expr && (p->flags & is_strexpr)) || p->label )  ) {
-                    // Copy below cell
-                    n = lookat(r, c);
-                    (void) copyent(n, p, 0, 0, 0, 0, r, c, 0);
-                    n->row--;
-                    pp = ATBL(tbl, r+1, c);
-                } else {
-                    pp = ATBL(tbl, r, c);
-                }
-                clearent(*pp);
-            }
-    return;
-    */
     int r, c;
     struct ent ** pp;
+
     for (r = currow; r <= maxrow; r++) {
         for (c = curcol; c < curcol + deltacols; c++) {
-            if (r <= maxrow - deltarows) {
+
+            if (r < currow + deltarows) {
                 pp = ATBL(tbl, r, c);
 
-                /* delete vertex in graph */
+                // delete vertex in graph
                 if (*pp && getVertex(graph, *pp, 0) != NULL) destroy_vertex(*pp);
 
-                if (*pp) mark_ent_as_deleted(*pp); //FIXME
-                *pp = NULL; //FIXME
-                pp[0] = *ATBL(tbl, r+deltarows, c);
+                if (*pp) {
+                   clearent(*pp);
+                   free(*pp);
+                   *pp = NULL;
+                }
+            }
+            if (r <= maxrow - deltarows) {
+                pp = ATBL(tbl, r, c);
+                pp[0] = *ATBL(tbl, r + deltarows, c);
                 if ( pp[0] ) pp[0]->row -= deltarows;
             }
             //blank bottom ents
