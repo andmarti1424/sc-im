@@ -308,7 +308,6 @@ void erase_area(int sr, int sc, int er, int ec, int ignorelock) {
         pp = ATBL(tbl, r, c);
         if (*pp && (!((*pp)->flags & is_locked) || ignorelock)) {
 
-            //sc_debug("%d %d", r, c);
             /* delete vertex in graph */
             if (getVertex(graph, *pp, 0) != NULL) destroy_vertex(*pp);
 
@@ -853,14 +852,14 @@ void del_selected_cells() {
        erase_area(r->tlrow, r->tlcol, r->brrow, r->brcol, 0);
        modflg++;
        sync_refs();
-       //flush_saved(); NO DESCOMENTAR. VER ABAJO.
+       //flush_saved(); DO NOT UNCOMMENT! flush_saved shall not be called other than at exit.
 
        #ifdef UNDO
        copy_to_undostruct(r->tlrow, r->tlcol, r->brrow, r->brcol, 'a');
        end_undo_action();
        #endif
 
-    // delete cell
+    // delete just one cell
     } else {
        if (any_locked_cells(currow, curcol, currow, curcol)) {
            sc_error("Locked cells encountered. Nothing changed");
@@ -872,14 +871,35 @@ void del_selected_cells() {
        create_undo_action();
        copy_to_undostruct(currow, curcol, currow, curcol, 'd');
 
-       // TODO: save in undostruct, all the ents that depends on the deleted one
+       // here we save in undostruct, all the ents that depends on the deleted one (before change)
+            extern struct ent_ptr * deps;
+            extern int dep_size;
+            int i, n = 0;
+            dep_size = 0;
+            markAllVerticesNotVisited();
+            ents_that_depends_on(lookat(currow, curcol));
+            if (deps != NULL) {
+                n = deps->vf;
+                for (i = 0; i < n; i++) {
+                    copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'd');
+                }
+            }
+
        #endif
 
        erase_area(currow, curcol, currow, curcol, 0);
        modflg++;
        sync_refs();
 
-       // TODO: here, Eval all ents that depends on the deleted one
+       #ifdef UNDO
+       // here we save in undostruct, all the ents that depends on the deleted one (after the change)
+            for (i = 0; i < n; i++) {
+                copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'a');
+            }
+            if (deps != NULL) free(deps);
+            deps = NULL;
+       #endif
+
        EvalAll();
 
        #ifdef UNDO
@@ -888,7 +908,6 @@ void del_selected_cells() {
        #endif
 
     }
-
     return;
 }
 
