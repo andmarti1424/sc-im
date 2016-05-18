@@ -1,4 +1,3 @@
-//#include <ncursesw/curses.h>
 #include <ncurses.h>
 #include <stdlib.h>
 #include <ctype.h>   // for isdigit
@@ -831,80 +830,73 @@ void chg_mode(char strcmd){
     return;
 }
 
+
 // del selected cells
 // can be a single cell or a range
 void del_selected_cells() {
+    int tlrow = currow;
+    int tlcol = curcol;
+    int brrow = currow;
+    int brcol = curcol;
 
-    // delete range
+    // is we delete a range
     if (is_range_selected() != -1) {
-       srange * r = get_selected_range();
-       if (any_locked_cells(r->tlrow, r->tlcol, r->brrow, r->brcol)) {
-           sc_error("Locked cells encountered. Nothing changed");
-           return;
-       }
-       yank_area(r->tlrow, r->tlcol, r->brrow, r->brcol, 'a', 1);
-
-       #ifdef UNDO
-       create_undo_action();
-       copy_to_undostruct(r->tlrow, r->tlcol, r->brrow, r->brcol, 'd');
-       #endif
-
-       erase_area(r->tlrow, r->tlcol, r->brrow, r->brcol, 0);
-       modflg++;
-       sync_refs();
-       //flush_saved(); DO NOT UNCOMMENT! flush_saved shall not be called other than at exit.
-
-       #ifdef UNDO
-       copy_to_undostruct(r->tlrow, r->tlcol, r->brrow, r->brcol, 'a');
-       end_undo_action();
-       #endif
-
-    // delete just one cell
-    } else {
-       if (any_locked_cells(currow, curcol, currow, curcol)) {
-           sc_error("Locked cells encountered. Nothing changed");
-           return;
-       }
-       yank_area(currow, curcol, currow, curcol, 'e', 1);
-
-       #ifdef UNDO
-       create_undo_action();
-       copy_to_undostruct(currow, curcol, currow, curcol, 'd');
-       // here we save in undostruct, all the ents that depends on the deleted one (before change)
-       extern struct ent_ptr * deps;
-       int i, n = 0;
-       ents_that_depends_on_range(currow, curcol, currow, curcol);
-       if (deps != NULL) {
-           n = deps->vf;
-           for (i = 0; i < n; i++) {
-               copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'd');
-           }
-       }
-       #endif
-
-       erase_area(currow, curcol, currow, curcol, 0);
-       modflg++;
-       sync_refs();
-
-       #ifdef UNDO
-       // here we save in undostruct, all the ents that depends on the deleted one (after the change)
-       for (i = 0; i < n; i++) {
-           copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'a');
-       }
-       if (deps != NULL) free(deps);
-       deps = NULL;
-       #endif
-
-       EvalAll();
-
-       #ifdef UNDO
-       copy_to_undostruct(currow, curcol, currow, curcol, 'a');
-       end_undo_action();
-       #endif
-
+        srange * r = get_selected_range();
+        tlrow = r->tlrow;
+        tlcol = r->tlcol;
+        brrow = r->brrow;
+        brcol = r->brcol;
     }
+
+    if (any_locked_cells(tlrow, tlcol, brrow, brcol)) {
+        sc_error("Locked cells encountered. Nothing changed");
+        return;
+    }
+
+    if (is_range_selected() != -1)
+        yank_area(tlrow, tlcol, brrow, brcol, 'a', 1);
+    else
+        yank_area(tlrow, tlcol, brrow, brcol, 'e', 1);
+
+    #ifdef UNDO
+    create_undo_action();
+    copy_to_undostruct(tlrow, tlcol, brrow, brcol, 'd');
+
+    // here we save in undostruct, all the ents that depends on the deleted one (before change)
+    extern struct ent_ptr * deps;
+    int i, n = 0;
+    ents_that_depends_on_range(tlrow, tlcol, brrow, brcol);
+    if (deps != NULL) {
+        n = deps->vf;
+        for (i = 0; i < n; i++)
+            copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'd');
+    }
+    #endif
+
+    erase_area(tlrow, tlcol, brrow, brcol, 0);
+    modflg++;
+    sync_refs();
+    //flush_saved(); DO NOT UNCOMMENT! flush_saved shall not be called other than at exit.
+
+    #ifdef UNDO
+    // here we save in undostruct, all the ents that depends on the deleted one (after the change)
+    for (i = 0; i < n; i++)
+        copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'a');
+
+    if (deps != NULL) free(deps);
+    deps = NULL;
+    #endif
+
+    EvalAll();
+
+    #ifdef UNDO
+    copy_to_undostruct(tlrow, tlcol, brrow, brcol, 'a');
+    end_undo_action();
+    #endif
+
     return;
 }
+
 
 // Change cell content sending inputline to interpreter
 void insert_or_edit_cell() {
