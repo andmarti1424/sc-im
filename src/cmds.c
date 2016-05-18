@@ -623,11 +623,22 @@ void deleterow() {
     int r, c;
     struct ent ** tmprow;
 
-
     if (any_locked_cells(currow, 0, currow, maxcol)) {
         sc_info("Locked cells encountered. Nothing changed");
 
     } else {
+#ifdef UNDO
+        // here we save in undostruct, all the ents that depends on the deleted one (before change)
+        extern struct ent_ptr * deps;
+        int i, n = 0;
+        ents_that_depends_on_range(currow, 0, currow, maxcol);
+        if (deps != NULL) {
+            n = deps->vf;
+            for (i = 0; i < n; i++)
+                copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'd');
+        }//
+#endif
+
         //flush_saved();
         erase_area(currow, 0, currow, maxcol, 0);
         if (currow > maxrow) return;
@@ -661,6 +672,19 @@ void deleterow() {
         sync_refs();
         //flush_saved(); // we have to flush only at exit. this is in case we want to UNDO
         modflg++;
+
+
+#ifdef UNDO
+        // here we save in undostruct, all the ents that depends on the deleted one (after the change)
+        for (i = 0; i < n; i++)
+            copy_to_undostruct(deps[i].vp->row+1, deps[i].vp->col, deps[i].vp->row+1, deps[i].vp->col, 'a');
+
+        if (deps != NULL) free(deps);
+        deps = NULL;
+
+#endif
+
+
     }
     return;
 }

@@ -41,22 +41,7 @@ void do_normalmode(struct block * buf) {
             break;
 
         case L'Q':
-            {
-            // TEST dependence of specific ent
-            extern struct ent_ptr * deps;
-            extern int dep_size;
-            dep_size = 0;
-            markAllVerticesNotVisited();
-            ents_that_depends_on(lookat(2, 2));
-            if (deps != NULL) {
-                int i, n = deps->vf;
-                for (i = 0; i < n; i++) {
-                    sc_debug("i:%d  n:%d   r:%d c:%d", i, deps->vf, deps[i].vp->row, deps[i].vp->col);
-                }
-            }
-            if (deps != NULL) free(deps);
-            deps = NULL;
-            }
+            rebuild_graph();
             break;
 
 
@@ -633,6 +618,7 @@ void do_normalmode(struct block * buf) {
 #ifdef UNDO
                     copy_to_undostruct(r, c, rf + (rf-r+1) * (cmd_multiplier - 1), cf, 'a');
 #endif
+                    if (atoi(get_conf_value("autocalc")) && ! loading) EvalAll();
                     break;
                 case L'h':
                     fix_marks(0, -(cf - c + 1) * cmd_multiplier, r, rf, c, maxcol);
@@ -645,6 +631,7 @@ void do_normalmode(struct block * buf) {
 #ifdef UNDO
                     copy_to_undostruct(r, c, rf, cf + (cf-c+1) * (cmd_multiplier - 1), 'a');
 #endif
+                    if (atoi(get_conf_value("autocalc")) && ! loading) EvalAll();
                     break;
                 case L'l':
                     fix_marks(0,  (cf - c + 1) * cmd_multiplier, r, rf, c, maxcol);
@@ -715,6 +702,7 @@ void do_normalmode(struct block * buf) {
             } else if (buf->pnext->value == L'd') {
                 del_selected_cells(); 
             }
+            if (atoi(get_conf_value("autocalc")) && ! loading) EvalAll();
             update(TRUE);
             break;
             }
