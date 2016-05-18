@@ -10,6 +10,7 @@ v0.4.0
 * Fix in shift functions
 * Handle circular reference with new Eval structure
 * Fix in shift functions. refs in enodes now update correctly
+* Undo correctly (keeping references) actions that impact in cells on which other cells depends on
 
 v0.3.0
 * FIX when importing large CSV files

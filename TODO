@@ -1,23 +1,17 @@
 TODO
 ----
-25/04/2016
-
-
-Main features to achieve in near future versions
-------------------------------------------------
-
-1. lock / freeze a section of the screen (rows or columns).
-
-2. Export spreadsheet to Latex format.
-
-
+18/05/2016
 
 Main features to achieve before v1.0
 ------------------------------------
 
-1. CALC CHAIN
+1. Complete calc chain and fix known issues regarding undoing
+changes that impact in cells on which other cells depends on.
 
-2. With calc chain already implemented, fix problem when UNDOing actions that change cells equations !!!
+2. lock / freeze a section of the screen (rows or columns).
+
+3. Export spreadsheet to Latex format.
+
 
 
 Long term features
