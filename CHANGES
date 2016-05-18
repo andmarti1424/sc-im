@@ -1,7 +1,7 @@
 v0.4.0
-* Fix de memory leak en funciones que usan seval. ej.: dosval docat. esto tambien sucedia en SC!
-* Chain cells with equations into a new graph structure.
-* Change how cell expressions are evaluated.
+* Fix memory leak in functions that use seval. ex.: dosval docat. this used to happen also in SC !
+* Chain cells with equations into a new graph structure
+* Change how cell expressions are evaluated
 * new function to rebuilt graph
 * Added free() call in GOTO in gram.y
 * Added free() call in SORT in gram.y
@@ -9,6 +9,7 @@ v0.4.0
 * Added function to remove elements in dep_graph. (specific vertex and linked edges)
 * Fix in shift functions
 * Handle circular reference with new Eval structure
+* Fix in shift functions. refs in enodes now update correctly
 
 v0.3.0
 * FIX when importing large CSV files

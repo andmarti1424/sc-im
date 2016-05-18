@@ -22,8 +22,8 @@ void shift_range(int delta_rows, int delta_cols, int tlrow, int tlcol, int brrow
     return;
 }
 
+
 // shift cells down
-// REVISED
 void shift_cells_down(int deltarows, int deltacols) {
     int r, c;
     struct ent ** pp;
@@ -50,7 +50,6 @@ void shift_cells_down(int deltarows, int deltacols) {
 
 
 // shift cells right
-// REVISED
 void shift_cells_right(int deltarows, int deltacols) {
     int r, c;
     struct ent ** pp;
@@ -91,8 +90,9 @@ void shift_cells_up(int deltarows, int deltacols) {
                 if (*pp && getVertex(graph, *pp, 0) != NULL) destroy_vertex(*pp);
 
                 if (*pp) {
-                   clearent(*pp);
-                   free(*pp);
+                   mark_ent_as_deleted(*pp);
+                   //clearent(*pp);
+                   //free(*pp);
                    *pp = NULL;
                 }
             }
@@ -111,31 +111,39 @@ void shift_cells_up(int deltarows, int deltacols) {
     return;
 }
 
+
 // shift cells left
-// TODO rewrite without using copyent
 void shift_cells_left(int deltarows, int deltacols) {
-    int r, j, c;
-    register struct ent * p;
-    register struct ent * n;
+    int r, c;
     struct ent ** pp;
-    for (j = 0; j < deltacols; j++)
-        for (r = currow; r < currow + deltarows; r++)
-            for (c = curcol; c < maxcol; c++) {
 
-                // Free 'ent' memory
+    for (c = curcol; c <= maxcol; c++) {
+        for (r = currow; r < currow + deltarows; r++) {
+
+            if (c < curcol + deltacols) {
                 pp = ATBL(tbl, r, c);
-                clearent(*pp);
 
-                p = *ATBL(tbl, r, c + 1);
-                if (p && ( (p->flags & is_valid) || (p->expr && (p->flags & is_strexpr)) || p->label )  ) {
-                    n = lookat(r, c);
-                    (void) copyent(n, p, 0, -1, r, 0, maxrow, maxcol, 0); // copy p a n
-                    n->col--;
-                    pp = ATBL(tbl, r, c + 1);
-                } else { // When shifting the cells from the last column
-                    pp = ATBL(tbl, r, c);
+                // delete vertex in graph
+                if (*pp && getVertex(graph, *pp, 0) != NULL) destroy_vertex(*pp);
+
+                if (*pp) {
+                   mark_ent_as_deleted(*pp);
+                   //clearent(*pp);
+                   //free(*pp);
+                   *pp = NULL;
                 }
-                clearent(*pp);
             }
+            if (c <= maxcol - deltacols) {
+                pp = ATBL(tbl, r, c);
+                pp[0] = *ATBL(tbl, r, c + deltacols);
+                if ( pp[0] ) pp[0]->col -= deltacols;
+            }
+            //blank bottom ents
+            if (c > maxcol - deltacols) {
+                pp = ATBL(tbl, r, c);
+                *pp = (struct ent *) 0;
+            }
+        }
+    }
     return;
 }

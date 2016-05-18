@@ -991,6 +991,7 @@ struct ent * lookat(int row, int col) {
 
 // cleanent: blank an ent
 void cleanent(struct ent * p) {
+    if (!p) return;
     p->label = (char *) 0;
     p->row = 0;
     p->col = 0;
