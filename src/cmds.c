@@ -870,21 +870,16 @@ void del_selected_cells() {
        #ifdef UNDO
        create_undo_action();
        copy_to_undostruct(currow, curcol, currow, curcol, 'd');
-
        // here we save in undostruct, all the ents that depends on the deleted one (before change)
-            extern struct ent_ptr * deps;
-            extern int dep_size;
-            int i, n = 0;
-            dep_size = 0;
-            markAllVerticesNotVisited();
-            ents_that_depends_on(lookat(currow, curcol));
-            if (deps != NULL) {
-                n = deps->vf;
-                for (i = 0; i < n; i++) {
-                    copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'd');
-                }
-            }
-
+       extern struct ent_ptr * deps;
+       int i, n = 0;
+       ents_that_depends_on_range(currow, curcol, currow, curcol);
+       if (deps != NULL) {
+           n = deps->vf;
+           for (i = 0; i < n; i++) {
+               copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'd');
+           }
+       }
        #endif
 
        erase_area(currow, curcol, currow, curcol, 0);
@@ -893,11 +888,11 @@ void del_selected_cells() {
 
        #ifdef UNDO
        // here we save in undostruct, all the ents that depends on the deleted one (after the change)
-            for (i = 0; i < n; i++) {
-                copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'a');
-            }
-            if (deps != NULL) free(deps);
-            deps = NULL;
+       for (i = 0; i < n; i++) {
+           copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'a');
+       }
+       if (deps != NULL) free(deps);
+       deps = NULL;
        #endif
 
        EvalAll();

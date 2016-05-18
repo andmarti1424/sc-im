@@ -420,21 +420,20 @@ struct ent_ptr * deps = NULL;
 int dep_size = 0;
 
 void ents_that_depends_on (struct ent * ent) {
-   if (graph == NULL) {
-       return;
-   } else {
-       vertexT * v = getVertex(graph, ent, 0);
-       if (v->visited) return;
+   if (graph == NULL) return;
+   vertexT * v = getVertex(graph, ent, 0);
+   //if (v->visited) return;
+   if (v == NULL || v->visited) return;
 
-       struct edgeTag * edges = v->back_edges;
-       while (edges != NULL) {
-           deps = (struct ent_ptr *) realloc(deps, sizeof(struct ent_ptr) * (++dep_size));
-           deps[0].vf = dep_size; // we always keep size of list in the first position !
-           deps[dep_size-1].vp = lookat(edges->connectsTo->ent->row, edges->connectsTo->ent->col);
-           ents_that_depends_on(edges->connectsTo->ent);
-           edges->connectsTo->visited = 1;
-           edges = edges->next;
-       }
+   struct edgeTag * edges = v->back_edges;
+   while (edges != NULL) {
+       // TODO only add ent if it does not exists in deps
+       deps = (struct ent_ptr *) realloc(deps, sizeof(struct ent_ptr) * (++dep_size));
+       deps[0].vf = dep_size; // we always keep size of list in the first position !
+       deps[dep_size-1].vp = lookat(edges->connectsTo->ent->row, edges->connectsTo->ent->col);
+       ents_that_depends_on(edges->connectsTo->ent);
+       edges->connectsTo->visited = 1;
+       edges = edges->next;
    }
    return;
 }
@@ -466,6 +465,29 @@ int GraphIsReachable(vertexT * src, vertexT * dest, int back_dep) {
        }
    }
    return 0;
+}
+
+// this checks dependency of a range of ents
+// keep the ents in "deps" lists
+void ents_that_depends_on_range (int r1, int c1, int r2, int c2) {
+        if (graph == NULL) return;
+
+        int r, c;
+        struct ent * p;
+
+        // at this point deps must be NULL
+        deps = NULL;
+        dep_size = 0;
+
+        for (r = r1; r <= r2; r++) {
+            for (c = c1; c <= c2; c++) {
+                markAllVerticesNotVisited();
+                p = *ATBL(tbl, r, c);
+                if (p == NULL) continue;
+                ents_that_depends_on(p);
+            }
+        }
+        return;
 }
 /*******************************************************************/
 

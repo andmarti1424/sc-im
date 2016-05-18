@@ -35,6 +35,7 @@ void delete_reference(vertexT * v_cur, vertexT * vc, int back_reference);
 
 void markAllVerticesNotVisited();
 void ents_that_depends_on (struct ent * ent);
+void ents_that_depends_on_range (int r1, int c1, int r2, int c2);
 int GraphIsReachable(vertexT * src, vertexT * dest, int back_dep);
 void rebuild_graph();
 
