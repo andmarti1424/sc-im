@@ -422,7 +422,6 @@ int dep_size = 0;
 void ents_that_depends_on (struct ent * ent) {
    if (graph == NULL) return;
    vertexT * v = getVertex(graph, ent, 0);
-   //if (v->visited) return;
    if (v == NULL || v->visited) return;
 
    struct edgeTag * edges = v->back_edges;

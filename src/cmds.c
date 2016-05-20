@@ -83,8 +83,7 @@ void sync_refs() {
 }
 
 void syncref(register struct enode * e) {
-    //if ( e == (struct enode *) 0 ) {
-    //    return;
+    //sc_debug("syncref");
     if ( e == NULL || e->op == ERR_ ) {
         return;
     } else if (e->op & REDUCE) {
@@ -95,9 +94,11 @@ void syncref(register struct enode * e) {
         case 'v':
             //if (e->e.v.vp->flags & iscleared) {
             if (e->e.v.vp->flags & is_deleted) {
-         //     break;
-                e->op = ERR_;
+                sc_debug("syncref is deleted");
+                //FIXME
+                //break;
                 //sc_info("%d %d", e->e.v.vp->row, e->e.v.vp->col);
+                e->op = ERR_;
                 e->e.o.left = NULL;
                 e->e.o.right = NULL;
             } else
@@ -621,7 +622,7 @@ void insert_col(int after) {
 void deleterow() {
     register struct ent ** pp;
     int r, c;
-    struct ent ** tmprow;
+    //struct ent ** tmprow;
 
     if (any_locked_cells(currow, 0, currow, maxcol)) {
         sc_info("Locked cells encountered. Nothing changed");
@@ -634,56 +635,69 @@ void deleterow() {
         ents_that_depends_on_range(currow, 0, currow, maxcol);
         if (deps != NULL) {
             n = deps->vf;
-            for (i = 0; i < n; i++)
+            for (i = 0; i < n; i++) {
                 copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'd');
-        }//
+            }
+        }
 #endif
 
         //flush_saved();
         erase_area(currow, 0, currow, maxcol, 0);
         if (currow > maxrow) return;
-        r = currow;
 
         // Rows are dealt with in numrow groups, each group of rows spaced numrow rows apart.
         // save the first row of the group and empty it out
-        tmprow = tbl[r];
-        pp = ATBL(tbl, r, 0);
-        for (c = maxcol + 1; --c >= 0; pp++) {
-            if (*pp != NULL) {
-                mark_ent_as_deleted(*pp);
-                *pp = NULL;
-                //clearent(*pp);
-                //free(*pp);
+        //r = currow;
+        //tmprow = tbl[r];
+        //pp = ATBL(tbl, r, 0);
+        //for (c = maxcol + 1; --c >= 0; pp++) {
+        //    if (*pp != NULL) {
+        //        sc_debug("is null");
+        //        mark_ent_as_deleted(*pp);
+        //        *pp = NULL;
+        //        //clearent(*pp);
+        //        //free(*pp);
+        //        // *pp = NULL;
+        //    }
+        //}
+        // move the rows, put the deleted, but now empty, row at the end
+        //for (; r + 1 < maxrows - 1; r++) {
+        //    row_hidden[r] = row_hidden[r+1];
+        //    tbl[r] = tbl[r + 1];
+        //    pp = ATBL(tbl, r, 0);
+        //    for (c = 0; c < maxcols; c++, pp++)
+        //        if (*pp) (*pp)->row = r;
+        //}
+        //tbl[r] = tmprow;
+
+        //sc_debug("maxrow:%d maxrows:%d", maxrow, maxrows);
+        for (r = currow; r < maxrows - 1; r++) {
+            for (c = 0; c < maxcols; c++) {
+                if (r <= maxrow - 1) {
+                    pp = ATBL(tbl, r, c);
+                    pp[0] = *ATBL(tbl, r + 1, c);
+                    if ( pp[0] ) pp[0]->row--;
+                }
             }
         }
 
-        // move the rows, put the deleted, but now empty, row at the end
-        for (; r + 1 < maxrows - 1; r++) {
-            row_hidden[r] = row_hidden[r+1];
-            tbl[r] = tbl[r + 1];
-            pp = ATBL(tbl, r, 0);
-            for (c = 0; c < maxcols; c++, pp++)
-                if (*pp) (*pp)->row = r;
-        }
-        tbl[r] = tmprow;
-
         maxrow--;
-
+        //
         sync_refs();
         //flush_saved(); // we have to flush only at exit. this is in case we want to UNDO
         modflg++;
 
-
 #ifdef UNDO
         // here we save in undostruct, all the ents that depends on the deleted one (after the change)
         for (i = 0; i < n; i++)
-            copy_to_undostruct(deps[i].vp->row+1, deps[i].vp->col, deps[i].vp->row+1, deps[i].vp->col, 'a');
+            if (deps[i].vp->row >= currow)
+                copy_to_undostruct(deps[i].vp->row+1, deps[i].vp->col, deps[i].vp->row+1, deps[i].vp->col, 'a');
+            else
+                copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'a');
 
         if (deps != NULL) free(deps);
         deps = NULL;
-
 #endif
-
 
     }
     return;
@@ -986,7 +1000,7 @@ void insert_or_edit_cell() {
 void send_to_interp(wchar_t * oper) {
     //sc_debug("!!%ls!!", oper);
     wcstombs(line, oper, BUFFERSIZE);
-    //sc_debug("enviado a intérprete. line >>%s<<", line);
+    //sc_debug("sent to interpeter. line >>%s<<", line);
     linelim = 0;
     (void) yyparse();
     if (atoi(get_conf_value("autocalc")) && ! loading) EvalAll();

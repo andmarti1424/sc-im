@@ -252,8 +252,11 @@ int len_undo_list() {
 // the 'added' or 'removed' list of undo_item, according to the char type.
 void copy_to_undostruct (int row_desde, int col_desde, int row_hasta, int col_hasta, char type) {
     int c, r;
+    struct ent * p;
     for (r = row_desde; r <= row_hasta; r++)
         for (c = col_desde; c <= col_hasta; c++) {
+            p = *ATBL(tbl, r, c);
+            if (p == NULL) continue;
             struct ent * e = (struct ent *) malloc( (unsigned) sizeof(struct ent) );
             cleanent(e);
             copyent(e, lookat(r, c), 0, 0, 0, 0, r, c, 0);
@@ -435,7 +438,9 @@ void do_undo() {
     struct ent * j = ul->removed;
     while (j != NULL) {
         struct ent * e_now = lookat(j->row, j->col);
-        (void) copyent(e_now, j, 0, 0, 0, 0, j->row, j->col, 0);
+        //(void) copyent(e_now, j, 0, 0, 0, 0, j->row, j->col, 0);
+        (void) copyent(e_now, j, 0, 0, 0, 0, 0, 0, 0);
+        e_now->flags &= ~is_deleted;
         j = j->next;
     }
 
@@ -570,7 +575,9 @@ void do_redo() {
     struct ent * j = ul->added;
     while (j != NULL) {
         struct ent * e_now = lookat(j->row, j->col);
-        (void) copyent(e_now, j, 0, 0, 0, 0, j->row, j->col, 0);
+        //(void) copyent(e_now, j, 0, 0, 0, 0, j->row, j->col, 0);
+        (void) copyent(e_now, j, 0, 0, 0, 0, 0, 0, 0);
+        e_now->flags &= ~is_deleted;
         j = j->next;
     }
 

@@ -36,6 +36,7 @@ void shift_cells_down(int deltarows, int deltacols) {
         for (c = curcol; c < curcol + deltacols; c++) {
             pp = ATBL(tbl, r, c);
             pp[0] = *ATBL(tbl, r-deltarows, c);
+            //sc_debug("delta down");
             if ( pp[0] ) pp[0]->row += deltarows;
         }
     }

@@ -35,6 +35,13 @@ void do_normalmode(struct block * buf) {
     switch (buf->value) {
         // TEST
         case L'A':
+            {
+            struct ent * p = *ATBL(tbl, currow, curcol);
+            if (!p) return;
+            char det[20000] = "";
+            sprintf(det + strlen(det), "r:%d\nc:%d\nenode null:%d\n", p->row, p->col, p->expr == NULL);
+            show_text((char *) &det);
+            }
             break;
 
         case L'W':
@@ -669,6 +676,7 @@ void do_normalmode(struct block * buf) {
                 fix_marks(-ic, 0, currow + ic - 1, maxrow, 0, maxcol);
                 yank_area(currow, 0, currow - 1 + cmd_multiplier, maxcol, 'r', ic);
                 while (ic--) deleterow();
+                EvalAll();
 #ifdef UNDO
                 copy_to_undostruct(currow, 0, currow - 1 + cmd_multiplier, maxcol, 'a');
                 end_undo_action();
@@ -700,7 +708,7 @@ void do_normalmode(struct block * buf) {
                 if (cmd_multiplier > 0) cmd_multiplier = 0;
 
             } else if (buf->pnext->value == L'd') {
-                del_selected_cells(); 
+                del_selected_cells();
             }
             if (atoi(get_conf_value("autocalc")) && ! loading) EvalAll();
             update(TRUE);
