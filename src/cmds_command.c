@@ -489,8 +489,8 @@ void do_commandmode(struct block * sb) {
                 return;
             }
             int l = wcslen(interp_line);
-            swprintf(interp_line + l, BUFFERSIZE, L"%s", inputline);
-            del_range_wchars(interp_line, l, l + 6);
+            swprintf(interp_line + l, BUFFERSIZE, L"%ls", inputline);
+            del_range_wchars(interp_line, l, l + 5);
             #ifdef UNDO
             create_undo_action();
             copy_to_undostruct(r, c, rf, cf, 'd');
