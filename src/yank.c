@@ -195,6 +195,9 @@ int paste_yanked_ents(int above, int type_paste) {
     // if so, just return
     if (type_of_yank == 'a' || type_of_yank == 'e') {
         while (yll != NULL) {
+            int r = yll->row + diffr;
+            int c = yll->col + diffc;
+            checkbounds(&r, &c);
             if (any_locked_cells(yll->row + diffr, yll->col + diffc, yll->row + diffr, yll->col + diffc))
                 return -1;
             yll = yll->next;

@@ -1501,13 +1501,13 @@ int locked_cell(int r, int c) {
 // Check if area contains locked cells
 int any_locked_cells(int r1, int c1, int r2, int c2) {
     int r, c;
-    struct ent *p ;
+    struct ent * p ;
 
     for (r = r1; r <= r2; r++)
     for (c = c1; c <= c2; c++) {
         p = *ATBL(tbl, r, c);
         if (p && (p->flags & is_locked))
-        return 1;
+            return 1;
     }
     return 0;
 }
