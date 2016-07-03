@@ -33,13 +33,25 @@ void do_normalmode(struct block * buf) {
     struct ent * e;
 
     switch (buf->value) {
-        // TEST
+        /* TEST
         case L'A':
             {
             struct ent * p = *ATBL(tbl, currow, curcol);
             if (!p) return;
             char det[20000] = "";
-            sprintf(det + strlen(det), "r:%d\nc:%d\nenode null:%d\n", p->row, p->col, p->expr == NULL);
+            sprintf(det + strlen(det), "r:%d\nc:%d\nexpr null:%d\n", p->row, p->col, p->expr == NULL);
+            if  (p && p->expr != NULL && p->expr->e.v.vp != NULL) {
+                sprintf(det + strlen(det), "vp null:%d\n", p->expr->e.v.vp == NULL);
+                sprintf(det + strlen(det), "vp row:%d\n", p->expr->e.v.vp->row);
+                sprintf(det + strlen(det), "vp col:%d\n", p->expr->e.v.vp->col);
+                //sprintf(det + strlen(det), "vp vf:%f\n", p->expr->e.v.vf);
+            }
+            if (p && p->expr != NULL && p->expr->e.o.right != NULL && p->expr->e.o.right->e.v.vp != NULL) {
+                    sprintf(det + strlen(det), "vp null:%d\n", p->expr->e.o.right->e.v.vp == NULL);
+                    sprintf(det + strlen(det), "vp row:%d\n", p->expr->e.o.right->e.v.vp->row);
+                    sprintf(det + strlen(det), "vp col:%d\n", p->expr->e.o.right->e.v.vp->col);
+                 //   sprintf(det + strlen(det), "vp vf:%f\n", p->expr->e.o.right->e.v.vf);
+            }
             show_text((char *) &det);
             }
             break;
@@ -51,6 +63,7 @@ void do_normalmode(struct block * buf) {
             rebuild_graph();
             break;
 
+        */
 
 
 
@@ -495,7 +508,7 @@ void do_normalmode(struct block * buf) {
 #ifdef UNDO
                 create_undo_action();
 #endif
-                for (c1 = curcol; cmd_multiplier-- && c1 < maxcols; c1++) {
+                for (c1 = curcol; cmd_multiplier-- && cmd_multiplier > -1 && c1 < maxcols; c1++) {
                     if ((n = * ATBL(tbl, currow, c1))) {
                         if (n->flags & is_locked)
                             continue;

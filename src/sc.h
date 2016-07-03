@@ -120,7 +120,6 @@ struct enode {
 
     struct range_s r;    /* op is on a range */
     struct ent_ptr v;    /* ref. another cell on which this enode depends */
-    //struct ent_ptr x;    /* ref to cells that depends on this enode */
     } e;
 };
 
