@@ -1596,6 +1596,7 @@ int is_single_command (struct block * buf, long timeout) {
         else if (buf->value == L'>')        res = MOVEMENT_CMD;
         else if (buf->value == L'=')        res = MOVEMENT_CMD;
         else if (buf->value == L'e')        res = MOVEMENT_CMD;
+        else if (buf->value == L'E')        res = MOVEMENT_CMD;
         else if (buf->value == L'v')        res = MOVEMENT_CMD;
 
         else if (buf->value == L'Q')        res = MOVEMENT_CMD;  //TEST
