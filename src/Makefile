@@ -176,11 +176,11 @@ $(name)qref: sc.h
 
 $(OBJS) : $(YTAB).h experres.h statres.h
 
-$(YTAB).h : gram.y
-
-gram.c $(YTAB).h : gram.y
-	$(YACC) -d $<
+$(YTAB).h : gram.y gram.c
 	test -f $(YTAB).c && mv $(YTAB).c gram.c
+
+gram.c : gram.y
+	$(YACC) -d $<
 
 pvmtbl.o: sc.h pvmtbl.c
 	$(CC) ${CFLAGS} -c -DPSC pvmtbl.c
