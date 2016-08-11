@@ -797,7 +797,7 @@ double eval(register struct ent * ent, register struct enode * e) {
     case LOOKUP:
     case HLOOKUP:
     case VLOOKUP: {
-        int r, c;
+        int r, c, row, col;
         int maxr, maxc;
         int minr, minc;
         maxr = e->e.o.left->e.r.right.vp->row;
@@ -806,6 +806,15 @@ double eval(register struct ent * ent, register struct enode * e) {
         minc = e->e.o.left->e.r.left.vp->col;
         if (minr>maxr) r = maxr, maxr = minr, minr = r;
         if (minc>maxc) c = maxc, maxc = minc, minc = c;
+
+        for (row=minr; row <= maxr; row++) {
+            for (col=minc; col <= maxc; col++) {
+                if (ent == NULL) continue;
+                //sc_debug("r:%d c:%d         %d %d", row, col, ent->row, ent->col);
+                GraphAddEdge(getVertex(graph, lookat(ent->row, ent->col), 1), getVertex(graph, lookat(row, col), 1));
+            }
+        }
+
         switch (e->op) {
             case LOOKUP:
             return dolookup(e->e.o.right, minr, minc, maxr, maxc, 1, minc==maxc);
