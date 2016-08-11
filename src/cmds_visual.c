@@ -127,11 +127,11 @@ void do_visualmode(struct block * buf) {
 
         real_inputline_pos += wcslen(cline);
         inputline_pos = wcswidth(inputline, real_inputline_pos);
+
         char c = visual_submode;
         exit_visualmode();
         chg_mode(c);
 
-        //inputline_pos += wcslen(cline);
         show_header(input_win);
         return;
 
