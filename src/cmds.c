@@ -965,7 +965,7 @@ void insert_or_edit_cell() {
     copy_to_undostruct(currow, curcol, currow, curcol, 'd');
     #endif
 
-    if (getVertex(graph, lookat(currow, curcol), 0) != NULL) destroy_vertex(lookat(currow, curcol));
+    //if (getVertex(graph, lookat(currow, curcol), 0) != NULL) destroy_vertex(lookat(currow, curcol));
 
     // ADD PADDING INTELLIGENCE HERE ?
     (void) swprintf(interp_line, BUFFERSIZE, L"%s %s = %ls", ope, v_name(currow, curcol), inputline);
