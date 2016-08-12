@@ -1,6 +1,7 @@
 //#include <ncursesw/curses.h>
 #include <ncurses.h>
 #include <stdlib.h>
+#include "utils/string.h"
 #include "screen.h"
 #include "buffer.h"
 #include "marks.h"
@@ -119,16 +120,18 @@ void do_visualmode(struct block * buf) {
     // ENTER - ctl(k) - Confirm selection
     if (buf->value == OKEY_ENTER || buf->value == ctl('k')) {
         wchar_t cline [BUFFERSIZE];
-        swprintf(cline, BUFFERSIZE, L"%s%d", coltoa(r->tlcol), r->tlrow);
+        swprintf(cline, BUFFERSIZE, L"%ls%d", coltoa(r->tlcol), r->tlrow);
         if (r->tlrow != r->brrow || r->tlcol != r->brcol)
-            swprintf(cline + wcslen(cline), BUFFERSIZE, L":%s%d", coltoa(r->brcol), r->brrow);
-        swprintf(inputline + wcslen(inputline), BUFFERSIZE, L"%s", cline);
+            swprintf(cline + wcslen(cline), BUFFERSIZE, L":%ls%d", coltoa(r->brcol), r->brrow);
+        swprintf(inputline + wcslen(inputline), BUFFERSIZE, L"%ls", cline);
+
+        real_inputline_pos += wcslen(cline);
+        inputline_pos = wcswidth(inputline, real_inputline_pos);
 
         char c = visual_submode;
         exit_visualmode();
         chg_mode(c);
 
-        inputline_pos += wcslen(cline);
         show_header(input_win);
         return;
 
