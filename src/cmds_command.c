@@ -591,9 +591,26 @@ void do_commandmode(struct block * sb) {
         } else if ( inputline[0] == L'x' ) {
             if ( savefile() == 0 ) shall_quit = 1;
 
+        } else if ( ! wcscmp(inputline, L"sum") ) {
+            int r = currow, c = curcol;
+            struct ent * p;
+
+            if (r > 0 && (*ATBL(tbl, r-1, c) != NULL) && (*ATBL(tbl, r-1, c))->flags & is_valid) {
+                for (r = currow-1, c = curcol; r > 0; r--) {
+                    p = *ATBL(tbl, r, c);
+                    if (p == NULL) break;
+                    if (! (p->flags & is_valid)) break;
+                }
+                if (currow == r + 1) return;
+                swprintf(interp_line, BUFFERSIZE, L"let %s%d = @SUM(", coltoa(curcol), currow);
+                swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%s%d:", coltoa(curcol), r+1);
+                swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%s%d)", coltoa(curcol), currow-1);
+                send_to_interp(interp_line);
+            }
+
         } else if (
-            ! wcsncmp(inputline, L"e csv"  , 5) ||
-            ! wcsncmp(inputline, L"e! csv" , 6) ||
+                ! wcsncmp(inputline, L"e csv"  , 5) ||
+                ! wcsncmp(inputline, L"e! csv" , 6) ||
             ! wcsncmp(inputline, L"e tab"  , 5) ||
             ! wcsncmp(inputline, L"e! tab" , 6) ||
             ! wcsncmp(inputline, L"e txt" , 5) ||
