@@ -573,6 +573,11 @@ Commands for handling cell content:
 
     :autojus    same as previous command, but the columns resized are the columns represented by the selected cell or range.
 
+    :sum        summarize the numeric values of a range.
+                the range is defined by the immediate cell above current cell, in case of vertical ranges,
+                or by the immediate cell at the left of current cell, in case of horizontal ranges.
+                the top / left corner is always limited by the first non numeric cell found.
+
     c-r {char}  Being {char} a mark of a cell or range, the range represented by that char gets inserted in the command line
 
     commandline history is stored in $HOME/.sciminfo
