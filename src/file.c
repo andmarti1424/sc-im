@@ -456,10 +456,8 @@ int readfile(char * fname, int eraseflg) {
     // If file is an xlsx file, we import it
     } else if (len > 5 && ! strcasecmp( & fname[len-5], ".xlsx")){
         #ifndef XLSX
-        if (! atoi(get_conf_value("nocurses"))) {
-            if (loading) loading = 0;
-            sc_error("XLSX import support not compiled in");
-        }
+        if (loading) loading = 0;
+        sc_error("XLSX import support not compiled in");
         #else
         open_xlsx(fname, "UTF-8");
         #endif
@@ -502,7 +500,7 @@ int readfile(char * fname, int eraseflg) {
         modflg = 0;
         return 1;
 
-    } else if (! atoi(get_conf_value("nocurses"))) {
+    } else { // if (! atoi(get_conf_value("nocurses"))) {
         if (loading) loading = 0;
         sc_info("\"%s\" is not a SC-IM compatible file", fname);
         return -1;

@@ -177,7 +177,7 @@ int main (int argc, char ** argv) {
 
     // initiate gui
     if ( ! atoi(get_conf_value("nocurses"))) {
-        start_screen();         // Already done above
+        //start_screen();         // Already done above
 
         // we show welcome screen if no spreadsheet was passed to SC-IM
         // and no input was sent throw pipeline
