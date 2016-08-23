@@ -605,7 +605,6 @@ void do_commandmode(struct block * sb) {
                 swprintf(interp_line, BUFFERSIZE, L"let %s%d = @SUM(", coltoa(curcol), currow);
                 swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%s%d:", coltoa(curcol), r+1);
                 swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%s%d)", coltoa(curcol), currow-1);
-                send_to_interp(interp_line);
             } else if (c > 0 && (*ATBL(tbl, r, c-1) != NULL) && (*ATBL(tbl, r, c-1))->flags & is_valid) {
                 for (c = curcol-1; c >= 0; c--) {
                     p = *ATBL(tbl, r, c);
@@ -616,8 +615,8 @@ void do_commandmode(struct block * sb) {
                 swprintf(interp_line, BUFFERSIZE, L"let %s%d = @SUM(", coltoa(curcol), currow);
                 swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%s%d:", coltoa(c+1), r);
                 swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%s%d)", coltoa(curcol-1), r);
-                send_to_interp(interp_line);
             }
+            if (wcslen(interp_line)) send_to_interp(interp_line);
 
         } else if (
                 ! wcsncmp(inputline, L"e csv"  , 5) ||
