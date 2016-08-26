@@ -238,6 +238,9 @@ void copyent(register struct ent * n, register struct ent * p, int dr, int dc,
         }
     }
 
+    if (special == 'c' && n->expr)
+        EvalJustOneVertex(n, n->row, n->col, 0);
+
     n->flags |= is_changed;
     n->row = p->row;
     n->col = p->col;

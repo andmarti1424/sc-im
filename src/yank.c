@@ -231,8 +231,6 @@ int paste_yanked_ents(int above, int type_paste) {
             (void) copyent(destino, yl, 0, 0, 0, 0, 0, 0, 'v');
         } else if (type_paste == 'c') {
             (void) copyent(destino, yl, diffr, diffc, 0, 0, maxrows, maxcols, 'c');
-            sync_refs();
-            EvalAll();
         }
 
         destino->row += diffr;
@@ -243,6 +241,10 @@ int paste_yanked_ents(int above, int type_paste) {
         #endif
 
         yl = yl->next;
+    }
+    if (type_paste == 'c') {
+        sync_refs();
+        EvalAll();
     }
 
     #ifdef UNDO
