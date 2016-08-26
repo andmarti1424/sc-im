@@ -1,10 +1,14 @@
 /*
-    main_win: window that loads the spreadsheet
+main_win: window that loads the spreadsheetssword:
+
     input_win: stdin and state bar window
 */
+#define _XOPEN_SOURCE_EXTENDED = 1
+
+
 #include <string.h>
-//#include <ncursesw/curses.h>
-#include <ncurses.h>
+#include <ncursesw/curses.h>
+//#include <curses.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -528,6 +532,24 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
                     set_ucolor(win, &ucolors[STRG]); // When a long string does not fit in column.
                     #endif
                 }
+
+                // new implementation for wide char support
+                cchar_t cht[fieldlen];
+                wchar_t w;
+                int i, j;
+                for (i = 0; i < fieldlen; ) {
+                    w = L' ';
+                    j = mvwin_wchnstr (win,  row + 1 - offscr_sc_rows - q_row_hidden, c + i, cht, 1);
+                    if ( j== OK && cht[0].chars != NULL)
+                        w = cht[0].chars[0];
+                    mvwprintw(win, row + 1 - offscr_sc_rows - q_row_hidden, c+i, "%lc", w);
+                    i+= wcwidth(w);
+                }
+
+/*
+                // old implementation for common char and
+                // not wide char
+
                 char caracter;
                 chtype cht[fieldlen];
                 int i;
@@ -541,10 +563,14 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
                     #endif
                     mvwprintw(win, row + 1 - offscr_sc_rows - q_row_hidden, c + i, "%c", caracter);
                 }
+                */
 
             // we print text and number
             } else {
                 pad_and_align(text, num, fwidth[col], align, (*p)->pad, out);
+                if (col == mxcol && wcswidth(out, wcslen(out)) > fwidth[col])
+                    out[ count_width_widestring(out, fwidth[col]) ] = L'\0';
+
                 mvwprintw(win, row + 1 - offscr_sc_rows - q_row_hidden, c, "%ls", out);
                 wclrtoeol(win);
             }
@@ -802,7 +828,7 @@ void pad_and_align (char * str_value, char * numeric_value, int col_width, int a
     }
 
     // If content exceedes column width, outputs n number of '*' needed to fill column width
-    if (str_len + num_len + padding > col_width ) {
+    if (str_len + num_len + padding > col_width && ( (! atoi(get_conf_value("overlap"))) || align == 1) ) {
         if (padding) wmemset(str_out + wcslen(str_out), L'#', padding);
         wmemset(str_out + wcslen(str_out), L'*', col_width - padding);
         return;

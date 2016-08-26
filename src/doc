@@ -634,7 +634,6 @@ Commands for handling cell content:
                 NOTE: USELOCALE has to be enabled during build.
     c-j         auto resize column width to fit its contents.
 
-
 &MAPPING&
     mapping can be done in any SC-IM file or in .scimrc file in current home directory.
     maps can be added with nmap and imap commands, and they can be removed with
@@ -702,6 +701,11 @@ Commands for handling cell content:
 
     - external_functions
     disabled by default, set this variable to enable external functions. see @ext function below.
+
+    - overlap [default off]
+    If cell content exceedes column width it gets cutoff to fill column width.
+    If overlap is set to true, the content continues to show in the following column.
+
 
 &Built-in Range Functions&
     @sum(r)
