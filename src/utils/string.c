@@ -335,3 +335,16 @@ int sc_isprint(int d) {
         return 1;
     return 0;
 }
+
+//return the number of wide chars of
+//wchar_t * s string, needed to fill p column positions.
+int count_width_widestring(const wchar_t * s, int p) {
+    int n;
+    int c_width = 0;
+
+    for (n=0; n<wcslen(s); n++) {
+        c_width += wcwidth( s[n] );
+        if (c_width > p) break;
+    }
+    return n;
+}
