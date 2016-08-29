@@ -434,8 +434,7 @@ int readfile(char * fname, int eraseflg) {
     //agregado el día 29/08/2016
     f = fopen(save, "r");
     if (f == NULL) {
-        sc_error ("Error opening file: %s", save);
-        return -1;
+        return 0;
     }
 
     if (eraseflg) erasedb();

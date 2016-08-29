@@ -1001,10 +1001,10 @@ void insert_or_edit_cell() {
 
 // Send command to interpreter
 void send_to_interp(wchar_t * oper) {
-    //sc_debug("Interp GOT :%ls!!", oper);
-    wprintf(L"Interp GOT: %ls", oper);
+    if (atoi(get_conf_value("nocurses")))
+        //sc_info("Interp GOT :%ls!!", oper);
+        wprintf(L"Interp GOT: %ls", oper);
     wcstombs(line, oper, BUFFERSIZE);
-    //sc_debug("sent to interpeter. line >>%s<<", line);
     linelim = 0;
     (void) yyparse();
     if (atoi(get_conf_value("autocalc")) && ! loading) EvalAll();
