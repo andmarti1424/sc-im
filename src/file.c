@@ -72,25 +72,6 @@ void erasedb() {
     optimize = 0;
     currow = curcol = 0;
 
-//    if (usecurses && has_colors())
-//        color_set(0, NULL);
-
-/*
-    if (mdir) {
-        scxfree(mdir);
-        mdir = NULL;
-    }
-    if (autorun) {
-        scxfree(autorun);
-        autorun = NULL;
-    }
-    for (c = 0; c < FKEYS; c++)
-        if (fkey[c]) {
-            scxfree(fkey[c]);
-            fkey[c] = NULL;
-        }
-*/
-
     // Load $HOME/.scrc if present.
     if ((home = getenv("HOME"))) {
         strcpy(curfile, home);
@@ -164,58 +145,11 @@ int writefile(char * fname, int r0, int c0, int rn, int cn) {
     register FILE *f;
     char save[PATHLEN];
     char tfname[PATHLEN];
-    //long namelen;
-    //char * tpp;
     int pid;
 
-/*
-    if (*fname == '\0') {
-        if (isatty(STDOUT_FILENO) || *curfile != '\0')
-            fname = curfile;
-        else {
-            write_fd(stdout, r0, c0, rn, cn);
-            return 0;
-        }
-    }
-*/
-
-/*
-    if ((tpp = strrchr(fname, '/')) == NULL)
-        namelen = pathconf(".", _PC_NAME_MAX);
-    else {
-        *tpp = '\0';
-        namelen = pathconf(fname, _PC_NAME_MAX);
-        *tpp = '/';
-    }
-*/
-
     (void) strcpy(tfname, fname);
-/*
-    for (tpp = tfname; *tpp != '\0'; tpp++)
-        if (*tpp == '\\' && *(tpp + 1) == '"')
-            (void) memmove(tpp, tpp + 1, strlen(tpp));
-
-        if (scext != NULL) {
-            if (strlen(tfname) > 3 && !strcmp(tfname + strlen(tfname) - 3, ".sc"))
-                tfname[strlen(tfname) - 3] = '\0';
-            else if (strlen(tfname) > strlen(scext) + 1 &&
-            tfname[strlen(tfname) - strlen(scext) - 1] == '.' &&
-            ! strcmp(tfname + strlen(tfname) - strlen(scext), scext))
-                tfname[strlen(tfname) - strlen(scext) - 1] = '\0';
-            tfname[namelen - strlen(scext) - 1] = '\0';
-            strcat(tfname, ".");
-            strcat(tfname, scext);
-        }
-*/
 
     (void) strcpy(save, tfname);
-/*
-    for (tpp = save; *tpp != '\0'; tpp++)
-    if (*tpp == '"') {
-        (void) memmove(tpp + 1, tpp, strlen(tpp) + 1);
-        *tpp++ = '\\';
-    }
-*/
 
     if ((f = openfile(tfname, &pid, NULL)) == NULL) {
         sc_error("Can't create file \"%s\"", save);
@@ -258,16 +192,6 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
 
     //write_ranges(f);
     write_marks(f);
-
-    /*
-    if (mdir)
-        (void) fprintf(f, "mdir \"%s\"\n", mdir);
-    if (autorun)
-        (void) fprintf(f, "autorun \"%s\"\n", autorun);
-
-    for (c = 0; c < FKEYS; c++)
-        if (fkey[c]) (void) fprintf(f, "fkey %d = \"%s\"\n", c + 1, fkey[c]);
-    */
 
     write_cells(f, r0, c0, rn, cn, r0, c0);
 
@@ -437,11 +361,6 @@ void write_cells(register FILE *f, int r0, int c0, int rn, int cn, int dr, int d
                 }
             }
     }
-    /*if (dr != r0 || dc != c0) {
-        currow = rs;
-        curcol = cs;
-        flush_saved();
-    }*/
     modflg = mf;
 }
 
@@ -508,34 +427,9 @@ int readfile(char * fname, int eraseflg) {
 
     register FILE * f;
     char save[PATHLEN];
-    // comentado el día 29/08/2016
-    //int pid = 0;
-    //int rfd = STDOUT_FILENO;//, savefd;
-
-    //if (*fname == '*' && mdir) {
-    //   (void) strcpy(save, mdir);
-    //   (void) strcat(save, fname);
-    //} else {
-        if (*fname == '\0')
-            fname = curfile;
-        (void) strcpy(save, fname);
-    //}
-
-    /* comentado el día 29/08/2016
-    if (fname[0] == '-' && fname[1] == '\0') {
-        f = stdin;
-        *save = '\0';
-    } else {
-        if ((f = openfile(save, &pid, &rfd)) == NULL) {
-            sc_error("Can't read file \"%s\"", save);
-            return 0;
-        } else if (eraseflg) {
-            sc_info("Reading file \"%s\"", save);
-        }
-    }
-    if (*fname == '|')
-        *save = '\0';
-    */
+    if (*fname == '\0')
+        fname = curfile;
+    (void) strcpy(save, fname);
 
     //agregado el día 29/08/2016
     f = fopen(save, "r");
@@ -548,9 +442,6 @@ int readfile(char * fname, int eraseflg) {
 
     loading++;
     while (! brokenpipe && fgets(line, sizeof(line), f)) {
-        //if (line[0] == '|' && pid != 0) {
-        //    line[0] = ' ';
-        //}
         linelim = 0;
         if (line[0] != '#') (void) yyparse();
     }
@@ -559,21 +450,11 @@ int readfile(char * fname, int eraseflg) {
     fclose(f);
 
     loading--;
-    /*comentado el día 29/08/2016
-    closefile(f, pid, rfd);
-    if (f == stdin) {
-        (void) freopen("/dev/tty", "r", stdin);
-    }
-    */
     linelim = -1;
     if (eraseflg) {
         (void) strcpy(curfile, save);
         modflg = 0;
         cellassign = 0;
-        /*if (autorun && ! skipautorun)
-            (void) readfile(autorun, 0);
-        skipautorun = 0;
-        */
         EvalAll();
     }
     return 1;
@@ -743,17 +624,12 @@ void closefile(FILE *f, int pid, int rfd) {
             fflush(stdout);
             cbreak();
             get_key();
-            //goraw();
-            //clear();
         } else {
             close(rfd);
             if (! atoi(get_conf_value("nocurses"))) {
                 cbreak();
                 nonl();
                 noecho ();
-                //kbd_again();
-            //if (color && has_colors())
-            //    bkgdset(COLOR_PAIR(1) | ' ');
             }
         }
     }
@@ -765,10 +641,6 @@ void closefile(FILE *f, int pid, int rfd) {
 
 void print_options(FILE *f) {
     if (
-        // autocalc &&
-        //! autoinsert &&
-        //! autowrap &&
-        //! cslop &&
         ! optimize &&
         ! rndtoeven &&
         calc_order == BYROWS &&
