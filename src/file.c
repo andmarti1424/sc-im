@@ -451,7 +451,7 @@ int readfile(char * fname, int eraseflg) {
     int len = strlen(fname);
     if (! strcmp( & fname[len-3], ".sc") ||
         (len > 6 && ! strcasecmp( & fname[len-7], ".scimrc"))) {
-      // pass
+        // pass
 
     // If file is an xlsx file, we import it
     } else if (len > 5 && ! strcasecmp( & fname[len-5], ".xlsx")){
@@ -500,16 +500,17 @@ int readfile(char * fname, int eraseflg) {
         modflg = 0;
         return 1;
 
-    } else { // if (! atoi(get_conf_value("nocurses"))) {
+    } else {
         if (loading) loading = 0;
         sc_info("\"%s\" is not a SC-IM compatible file", fname);
-        return -1;
+        return 1;
     }
 
     register FILE * f;
     char save[PATHLEN];
-    int pid = 0;
-    int rfd = STDOUT_FILENO;//, savefd;
+    // comentado el día 29/08/2016
+    //int pid = 0;
+    //int rfd = STDOUT_FILENO;//, savefd;
 
     //if (*fname == '*' && mdir) {
     //   (void) strcpy(save, mdir);
@@ -520,6 +521,7 @@ int readfile(char * fname, int eraseflg) {
         (void) strcpy(save, fname);
     //}
 
+    /* comentado el día 29/08/2016
     if (fname[0] == '-' && fname[1] == '\0') {
         f = stdin;
         *save = '\0';
@@ -533,23 +535,36 @@ int readfile(char * fname, int eraseflg) {
     }
     if (*fname == '|')
         *save = '\0';
+    */
+
+    //agregado el día 29/08/2016
+    f = fopen(save, "r");
+    if (f == NULL) {
+        sc_error ("Error opening file: %s", save);
+        return -1;
+    }
 
     if (eraseflg) erasedb();
 
     loading++;
     while (! brokenpipe && fgets(line, sizeof(line), f)) {
-        if (line[0] == '|' && pid != 0) {
-            line[0] = ' ';
-        }
+        //if (line[0] == '|' && pid != 0) {
+        //    line[0] = ' ';
+        //}
         linelim = 0;
         if (line[0] != '#') (void) yyparse();
     }
 
-    --loading;
+    //agregado el día 29/08/2016
+    fclose(f);
+
+    loading--;
+    /*comentado el día 29/08/2016
     closefile(f, pid, rfd);
     if (f == stdin) {
         (void) freopen("/dev/tty", "r", stdin);
     }
+    */
     linelim = -1;
     if (eraseflg) {
         (void) strcpy(curfile, save);
