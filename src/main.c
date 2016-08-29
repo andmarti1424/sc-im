@@ -150,7 +150,6 @@ int main (int argc, char ** argv) {
         }
     }
 
-
     // load sc file
     load_sc();
 
@@ -464,9 +463,9 @@ void sc_error(char * s, ...) {
         wclrtoeol(input_win);
         wrefresh(input_win);
     } else if (get_conf_value("output") != NULL && fdoutput != NULL) {
-        fprintf(fdoutput, "%s\n", t);
+        fwprintf(fdoutput, L"%s\n", t);
     } else
-        printf("%s\n", t);
+        wprintf(L"%s\n", t);
     va_end(args);
     return;
 }
@@ -484,9 +483,9 @@ void sc_info(char * s, ...) {
         wclrtoeol(input_win);
         wrefresh(input_win);
     } else if (get_conf_value("output") != NULL && fdoutput != NULL) {
-        fprintf(fdoutput, "%s\n", t);
+        fwprintf(fdoutput, L"%s\n", t);
     } else
-        printf("%s\n", t);
+        wprintf(L"%s\n", t);
     va_end(args);
     return;
 }
@@ -507,9 +506,9 @@ void sc_debug(char * s, ...) {
         wtimeout(input_win, TIMEOUT_CURSES);
         wrefresh(input_win);
     } else if (get_conf_value("output") != NULL && fdoutput != NULL) {
-        fprintf(fdoutput, "%s\n", t);
+        fwprintf(fdoutput, L"<<< %s\n", t);
     } else {
-        printf("%s\n", t);
+        wprintf(L"<<< %s\n", t);
     }
     va_end(args);
     return;
