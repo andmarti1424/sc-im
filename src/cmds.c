@@ -1001,9 +1001,13 @@ void insert_or_edit_cell() {
 
 // Send command to interpreter
 void send_to_interp(wchar_t * oper) {
-    if (atoi(get_conf_value("nocurses")))
-        //sc_info("Interp GOT :%ls!!", oper);
-        wprintf(L"Interp GOT: %ls", oper);
+    if (atoi(get_conf_value("nocurses"))) {
+        int pos = -1;
+        if ((pos = wstr_in_wstr(oper, L"\n")) != -1)
+            oper[pos] = L'\0';
+        sc_info("Interp GOT: %ls", oper);
+        //wprintf(L"Interp GOT: %ls", oper);
+    }
     wcstombs(line, oper, BUFFERSIZE);
     linelim = 0;
     (void) yyparse();

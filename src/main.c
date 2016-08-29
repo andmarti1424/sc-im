@@ -208,7 +208,8 @@ int main (int argc, char ** argv) {
         // if we are not in ncurses
         } else {
             if (fgetws(nocurses_buffer, BUFFERSIZE, stdin) != NULL) {
-                wprintf(L"Interp will receive: %ls", nocurses_buffer);
+                //wprintf(L"Interp will receive: %ls", nocurses_buffer);
+                sc_info("Interp will receive: %ls", nocurses_buffer);
                 send_to_interp(nocurses_buffer);
             }
         }
