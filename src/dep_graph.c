@@ -7,6 +7,7 @@
 #include <setjmp.h>
 #include "xmalloc.h" // for scxfree
 #include <math.h>
+#include "macros.h"
 
 extern jmp_buf fpe_save;
 extern int cellerror;    /* is there an error in this cell */

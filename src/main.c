@@ -444,72 +444,35 @@ void winchg() {
     return;
 }
 
-
-
 #include <stdlib.h>
 #include <stdarg.h>
 #include "conf.h"
-
-void sc_error(char * s, ...) {
+void sc_msg(char * s, int type, ...) {
     char t[BUFFERSIZE];
     va_list args;
-    va_start(args, s);
+    va_start(args, type);
     vsprintf (t, s, args);
     if ( ! atoi(get_conf_value("nocurses"))) {
 #ifdef USECOLORS
-        set_ucolor(input_win, &ucolors[ERROR_MSG]);
+        if (type == ERROR_MSG)
+            set_ucolor(input_win, &ucolors[ERROR_MSG]);
+        else 
+            set_ucolor(input_win, &ucolors[INFO_MSG]);
 #endif
         mvwprintw(input_win, 1, 0, "%s", t);
         wclrtoeol(input_win);
+
+        if (type == DEBUG_MSG) {
+            wtimeout(input_win, -1);
+            wgetch(input_win);
+            wtimeout(input_win, TIMEOUT_CURSES);
+        }
         wrefresh(input_win);
+
     } else if (get_conf_value("output") != NULL && fdoutput != NULL) {
         fwprintf(fdoutput, L"%s\n", t);
     } else
         wprintf(L"%s\n", t);
-    va_end(args);
-    return;
-}
-
-void sc_info(char * s, ...) {
-    char t[BUFFERSIZE];
-    va_list args;
-    va_start(args, s);
-    vsprintf (t, s, args);
-    if ( ! atoi(get_conf_value("nocurses"))) {
-#ifdef USECOLORS
-        set_ucolor(input_win, &ucolors[INFO_MSG]);
-#endif
-        mvwprintw(input_win, 1, 0, "%s", t);
-        wclrtoeol(input_win);
-        wrefresh(input_win);
-    } else if (get_conf_value("output") != NULL && fdoutput != NULL) {
-        fwprintf(fdoutput, L"%s\n", t);
-    } else
-        wprintf(L"%s\n", t);
-    va_end(args);
-    return;
-}
-
-void sc_debug(char * s, ...) {
-    char t[BUFFERSIZE];
-    va_list args;
-    va_start(args, s);
-    vsprintf (t, s, args);
-    if ( ! atoi(get_conf_value("nocurses"))) {
-#ifdef USECOLORS
-        set_ucolor(input_win, &ucolors[INFO_MSG]);
-#endif
-        mvwprintw(input_win, 1, 0, "%s", t);
-        wclrtoeol(input_win);
-        wtimeout(input_win, -1);
-        wgetch(input_win);
-        wtimeout(input_win, TIMEOUT_CURSES);
-        wrefresh(input_win);
-    } else if (get_conf_value("output") != NULL && fdoutput != NULL) {
-        fwprintf(fdoutput, L"<<< %s\n", t);
-    } else {
-        wprintf(L"<<< %s\n", t);
-    }
     va_end(args);
     return;
 }

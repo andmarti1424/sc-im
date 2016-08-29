@@ -48,14 +48,38 @@
 //#include <ncursesw/curses.h>
 extern WINDOW * input_win;
 
-/*
-#ifdef USECOLORS
-//#define error(...)   if ( ! atoi(get_conf_value("nocurses"))) { set_ucolor(input_win, &ucolors[ERROR_MSG]); wmove(input_win, 1, 0); wprintw(input_win, __VA_ARGS__); wclrtoeol(input_win); wrefresh(input_win); } else { printf(__VA_ARGS__); printf("\n"); }
-//#define info(...)    if ( ! atoi(get_conf_value("nocurses"))) { set_ucolor(input_win, &ucolors[INFO_MSG]); mvwprintw(input_win, 1, 0, __VA_ARGS__); wclrtoeol(input_win); wrefresh(input_win); } else { printf(__VA_ARGS__); printf("\n"); }
-//#define debug(...)   if ( ! atoi(get_conf_value("nocurses"))) { set_ucolor(input_win, &ucolors[INFO_MSG]); mvwprintw(input_win, 1, 0, __VA_ARGS__); wclrtoeol(input_win); wtimeout(input_win, -1); wgetch(input_win); wtimeout(input_win, TIMEOUT_CURSES); wrefresh(input_win); } else { printf(__VA_ARGS__); printf("\n"); }
-#else
-//#define error(...)   if ( ! atoi(get_conf_value("nocurses"))) { wmove(input_win, 1, 0); wprintw(input_win, __VA_ARGS__); wclrtoeol(input_win); wrefresh(input_win); } else { printf(__VA_ARGS__); printf("\n"); }
-//#define info(...)    if ( ! atoi(get_conf_value("nocurses"))) { mvwprintw(input_win, 1, 0, __VA_ARGS__); wclrtoeol(input_win); wrefresh(input_win); } else { printf(__VA_ARGS__); printf("\n"); }
-//#define debug(...)   if ( ! atoi(get_conf_value("nocurses"))) { mvwprintw(input_win, 1, 0, __VA_ARGS__); wclrtoeol(input_win); wtimeout(input_win, -1); wgetch(input_win); wtimeout(input_win, TIMEOUT_CURSES); wrefresh(input_win); } else { printf(__VA_ARGS__); printf("\n"); }
-#endif
-*/
+#define N_INIT_PAIRS      18
+
+#define BLACK             COLOR_BLACK
+#define RED               COLOR_RED
+#define GREEN             COLOR_GREEN
+#define YELLOW            COLOR_YELLOW
+#define BLUE              COLOR_BLUE
+#define MAGENTA           COLOR_MAGENTA
+#define CYAN              COLOR_CYAN
+#define WHITE             COLOR_WHITE
+
+#define HEADINGS          0
+#define WELCOME           1
+#define CELL_SELECTION    2
+#define CELL_SELECTION_SC 3
+#define NUMB              4
+#define STRG              5
+#define DATEF             6
+#define EXPRESSION        7
+#define INFO_MSG          8
+#define ERROR_MSG         9
+#define MODE              10
+#define CELL_ID           11
+#define CELL_FORMAT       12
+#define CELL_CONTENT      13
+#define INPUT             14
+#define NORMAL            15
+#define CELL_ERROR        16
+#define CELL_NEGATIVE     17
+//#define DEFAULT         18
+#define DEBUG_MSG         19
+
+#define sc_error(x, ...)     sc_msg(x, ERROR_MSG, ##__VA_ARGS__)
+#define sc_debug(x, ...)     sc_msg(x, DEBUG_MSG, ##__VA_ARGS__)
+#define sc_info(x, ...)     sc_msg(x, INFO_MSG, ##__VA_ARGS__)
