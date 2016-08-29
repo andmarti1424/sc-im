@@ -449,6 +449,7 @@ void winchg() {
 #include <stdarg.h>
 #include "conf.h"
 void sc_msg(char * s, int type, ...) {
+    if (type == DEBUG_MSG && ! atoi(get_conf_value("debug"))) return;
     char t[BUFFERSIZE];
     va_list args;
     va_start(args, type);

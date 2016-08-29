@@ -211,7 +211,7 @@ void destroy_vertex(struct ent * ent) {
            v_cur = v_cur->next;
        }
        if (v_cur->ent->row != ent->row || v_cur->ent->col != ent->col) {
-           sc_debug("Error while destroying a vertex. Vertex not found! Please rebuild graph");
+           sc_error("Error while destroying a vertex. Vertex not found! Please rebuild graph");
            return;
        }
        v_prev->next = v_cur->next;

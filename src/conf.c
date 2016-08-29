@@ -17,6 +17,7 @@ void store_default_config_values() {
     put(user_conf_d, "numeric_zero", "0");
     put(user_conf_d, "numeric_decimal", "0");
     put(user_conf_d, "overlap", "0");
+    put(user_conf_d, "debug", "1");
 
     // we calc get gmtoffset
     #ifdef USELOCALE

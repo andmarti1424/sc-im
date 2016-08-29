@@ -37,7 +37,7 @@ void getnum(int r0, int c0, int rn, int cn, FILE * fd) {
             //else
 
             //fwrite(fd, line, strlen(line));
-            sc_debug("%s", line);
+            sc_info("%s", line);
             if (brokenpipe) {
                 linelim = -1;
                 return;
@@ -51,7 +51,7 @@ void getnum(int r0, int c0, int rn, int cn, FILE * fd) {
 void getformat(int col, FILE * fd) {
     sprintf(line, "%d %d %d\n", fwidth[col], precision[col], realfmt[col]);
     //write(fd, line, strlen(line));
-    sc_debug("%s", line);
+    sc_info("%s", line);
     linelim = -1;
 }
 
@@ -70,7 +70,7 @@ void getfmt(int r0, int c0, int rn, int cn, FILE * fd) {
             //    strcat(line, "\n");
             //write(fd, line, strlen(line));
 
-            sc_debug("%s", line);
+            sc_info("%s", line);
             if (brokenpipe) {
                 linelim = -1;
                 return;
@@ -95,7 +95,7 @@ void getstring(int r0, int c0, int rn, int cn, FILE * fd) {
             //    strcat(line, "\n");
             //write(fd, line, strlen(line));
 
-            sc_debug("%s", line);
+            sc_info("%s", line);
             if (brokenpipe) {
                 linelim = -1;
                 return;
@@ -127,7 +127,7 @@ void getexp(int r0, int c0, int rn, int cn, FILE * fd) {
             //    strcat(line, "\n");
             //write(fd, line, strlen(line));
 
-            sc_debug("%s", line);
+            sc_info("%s", line);
             if (brokenpipe) {
                 linelim = -1;
                 return;

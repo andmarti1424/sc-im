@@ -1005,7 +1005,7 @@ void send_to_interp(wchar_t * oper) {
         int pos = -1;
         if ((pos = wstr_in_wstr(oper, L"\n")) != -1)
             oper[pos] = L'\0';
-        sc_info("Interp GOT: %ls", oper);
+        sc_debug("Interp GOT: %ls", oper);
         //wprintf(L"Interp GOT: %ls", oper);
     }
     wcstombs(line, oper, BUFFERSIZE);
