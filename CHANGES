@@ -11,6 +11,15 @@ v0.4.0
 * Handle circular reference with new Eval structure
 * Fix in shift functions. refs in enodes now update correctly
 * Undo correctly (keeping references) actions that impact in cells on which other cells depends on
+* New :sum special command
+* New overlap configuration parameter.
+  If overlap is set to true, the cell content that exceedes column width continues to show in the following column.
+* Fix a bug that prevented some info messages to be shown during loading
+* Fix a bug when repaiting a cell that has a wide char size over than one.
+* Changes in readfile function to fix issue that sometimes appeared
+  when working with scripting, that made null output of interpreter
+* Changes in sc_info sc_error and sc_debug functions..
+
 
 v0.3.0
 * FIX when importing large CSV files
