@@ -48,7 +48,7 @@
 //#include <ncursesw/curses.h>
 extern WINDOW * input_win;
 
-#define N_INIT_PAIRS      18
+#define N_INIT_PAIRS      19
 
 #define BLACK             COLOR_BLACK
 #define RED               COLOR_RED
@@ -77,7 +77,7 @@ extern WINDOW * input_win;
 #define NORMAL            15
 #define CELL_ERROR        16
 #define CELL_NEGATIVE     17
-//#define DEFAULT         18
+#define DEFAULT           18
 #define DEBUG_MSG         19
 
 #define sc_error(x, ...)     sc_msg(x, ERROR_MSG, ##__VA_ARGS__)

@@ -38,8 +38,8 @@ void start_default_ucolors() {
     }
 
     // Set some colors attributes
-    //ucolors[ DEFAULT         ].fg = WHITE;
-    //ucolors[ DEFAULT         ].bg = BLACK;
+    ucolors[ DEFAULT         ].fg = WHITE;
+    ucolors[ DEFAULT         ].bg = BLACK;
     ucolors[ HEADINGS        ].fg = WHITE;
     ucolors[ HEADINGS        ].bg = BLUE;
     ucolors[ WELCOME         ].fg = CYAN;
@@ -177,8 +177,8 @@ void set_colors_param_dict() {
     put(d_colors_param, "CELL_ERROR", str);
     sprintf(str, "%d", CELL_NEGATIVE);
     put(d_colors_param, "CELL_NEGATIVE", str);
-    //sprintf(str, "%d", DEFAULT);
-    //put(d_colors_param, "DEFAULT", str);
+    sprintf(str, "%d", DEFAULT);
+    put(d_colors_param, "DEFAULT", str);
 }
 
 void free_colors_param_dict() {

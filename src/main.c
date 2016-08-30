@@ -458,7 +458,7 @@ void sc_msg(char * s, int type, ...) {
 #ifdef USECOLORS
         if (type == ERROR_MSG)
             set_ucolor(input_win, &ucolors[ERROR_MSG]);
-        else 
+        else
             set_ucolor(input_win, &ucolors[INFO_MSG]);
 #endif
         mvwprintw(input_win, 1, 0, "%s", t);
