@@ -165,6 +165,12 @@ void add_to_undolist(struct undo u) {
     return;
 }
 
+// dismiss current undo_item
+void dismiss_undo_item() {
+    free_undo_node(&undo_item);
+    return;
+}
+
 // Cascade free UNDO node memory
 void free_undo_node(struct undo * ul) {
 
