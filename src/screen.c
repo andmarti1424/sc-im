@@ -97,6 +97,11 @@ void do_welcome() {
     char * msg_version = rev;
     char * msg_help = "Press «:help<Enter>» to get help";
 
+    #ifdef USECOLORS
+    wbkgd(main_win, COLOR_PAIR(ucolors[DEFAULT].fg * 8 + ucolors[DEFAULT].bg + 1));
+    wbkgd(input_win, COLOR_PAIR(ucolors[DEFAULT].fg * 8 + ucolors[DEFAULT].bg + 1));
+    #endif
+
     // show headings
     int mxcol = offscr_sc_cols + calc_offscr_sc_cols() - 1;
     int mxrow = offscr_sc_rows + calc_offscr_sc_rows() - 1;
@@ -104,8 +109,6 @@ void do_welcome() {
     show_sc_row_headings(main_win, mxrow);
 
     #ifdef USECOLORS
-    wbkgd(main_win, COLOR_PAIR(ucolors[DEFAULT].fg * 8 + ucolors[DEFAULT].bg + 1));
-    wbkgd(input_win, COLOR_PAIR(ucolors[DEFAULT].fg * 8 + ucolors[DEFAULT].bg + 1));
     set_ucolor(main_win, &ucolors[WELCOME]);
     #endif
 
