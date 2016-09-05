@@ -37,9 +37,9 @@
 #endif                       /* DFLT_PAGER */
 
 
-#ifndef A_CHARTEXT           /* Should be defined in curses.h */
- #define A_CHARTEXT 0xff
-#endif
+//#ifndef A_CHARTEXT           /* Should be defined in curses.h */
+// #define A_CHARTEXT 0xff
+//#endif
 
 #ifndef FALSE
     # define    FALSE   0
