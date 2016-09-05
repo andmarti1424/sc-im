@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <wchar.h>
-//#include <ncursesw/curses.h>
+//#include <curses.h>
 #include <ncurses.h>
 #include <sys/wait.h>
 

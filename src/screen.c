@@ -7,7 +7,7 @@ main_win: window that loads the spreadsheetssword:
 
 
 #include <string.h>
-#include <ncursesw/curses.h>
+#include <curses.h>
 //#include <curses.h>
 #include <stdio.h>
 #include <stdlib.h>

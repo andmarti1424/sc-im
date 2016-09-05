@@ -133,15 +133,16 @@ UNDO := -DUNDO
 # Can be set up to 1048576.
 MAXROWS := 65536
 
+CURSESFLAGS := $(shell pkg-config --cflags --libs ncursesw)
+
 #CFLAGS := -O2 -Wall -pipe -g
-CFLAGS := $(LINUX) $(FREEBSD) $(NETBSD) $(MACOSX) -O2 -Wall -pipe -g -I/usr/include/libxml2
+CFLAGS := $(LINUX) $(FREEBSD) $(NETBSD) $(MACOSX) -O2 -Wall -pipe -g -I/usr/include/libxml2 $(CURSESFLAGS)
 CFLAGS := $(CFLAGS) $(USECOLORS) $(USELOCALE) $(UNDO) $(SIGVOID) $(DFLT_PAGER)
 CFLAGS := $(CFLAGS) $(IEEE_MATH) $(RINT) $(REGEX) $(LIBRARY) -DMAXROWS=$(MAXROWS)
 CFLAGS := $(CFLAGS) $(HELP_PATH) $(SNAME) $(NO_NOTIMEOUT) $(SIMPLE) $(XLS) $(XLSX) $(HISTORY_FILE)
 
-# NOTE: ncursesw library should be used.
-# Not the ncurses library.
-LDLIBS := -lm -lncursesw
+
+LDLIBS := -lm
 #LDLIBS := -lm -lncurses -lxlsreader
 #LDLIBS := -lm -lncurses -lxlsreader -lzip -lxml2
 

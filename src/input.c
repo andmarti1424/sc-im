@@ -1,7 +1,7 @@
 #include <sys/time.h>
 #include <string.h>
 #include <ctype.h>   // for isdigit
-//#include <ncursesw/curses.h>
+//#include <curses.h>
 #include <ncurses.h>
 #include <stdlib.h>
 #include <wchar.h>
