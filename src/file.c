@@ -128,11 +128,11 @@ int savefile() {
         return -1;
     }
 
-    //if (wcslen(inputline) > 2) {
+    if (wcslen(inputline) > 2) {
         strcpy(curfile, name);
-    //}
+    }
 
-    if (str_in_str(curfile, ".") == -1)
+    if (wcslen(inputline) > 2 && str_in_str(curfile, ".") == -1)
         sprintf(curfile + strlen(curfile), ".sc");
 
     if (writefile(curfile, 0, 0, maxrow, maxcol) < 0) {
