@@ -25,7 +25,7 @@
 #include <string.h>
 
 #include <stdlib.h>
-//#include <ncursesw/curses.h>
+//#include <curses.h>
 #include <ncurses.h>
 #include "sc.h"
 #include "macros.h"
