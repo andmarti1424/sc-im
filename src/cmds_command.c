@@ -337,7 +337,7 @@ void do_commandmode(struct block * sb) {
         } else if ( ! wcsncmp(inputline, L"load", 4) ) {
             char cline [BUFFERSIZE];
             int force_rewrite = 0;
-            wcstombs(line, inputline, BUFFERSIZE);
+            wcstombs(cline, inputline, BUFFERSIZE);
 
             if ( ! wcsncmp(inputline, L"load! ", 6) ) {
                 force_rewrite = 1;
