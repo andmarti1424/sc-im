@@ -124,9 +124,9 @@ int main (int argc, char ** argv) {
     if (get_d_colors_param() == NULL) {
             start_default_ucolors();
             // in case we decide to change colors
-            // esto crea un diccionario y guarda en él
-            // la equivalencia entre las macros y los valores
-            // de las claves que se definen en los archivos .sc
+            // this creates a dictionary and stores in it
+            // the relationship between macros and the keys values
+            // that are defined in .sc files
             set_colors_param_dict();
     }
 #endif
