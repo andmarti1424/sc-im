@@ -6,6 +6,7 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn);
 void write_cells(register FILE *f, int r0, int c0, int rn, int cn, int dr, int dc);
 void write_marks(register FILE *f);
 int readfile(char *fname, int eraseflg);
+int file_exists(const char * fname);
 char * findhome(char *path);
 int backup_file(char *path);
 FILE * openfile(char *fname, int *rpid, int *rfd);

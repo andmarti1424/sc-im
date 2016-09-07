@@ -72,7 +72,7 @@ void erasedb() {
     optimize = 0;
     currow = curcol = 0;
 
-    // Load $HOME/.scrc if present.
+    // Load $HOME/.scimrc if present.
     if ((home = getenv("HOME"))) {
         strcpy(curfile, home);
         strcat(curfile, "/.scimrc");

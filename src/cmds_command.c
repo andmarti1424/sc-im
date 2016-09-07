@@ -349,6 +349,8 @@ void do_commandmode(struct block * sb) {
                 sc_error("Path to file to load is missing !");
             } else if ( modflg && ! force_rewrite ) {
                 sc_error("Changes were made since last save. Use '!' to force the load");
+            } else if ( ! file_exists(cline)) {
+                sc_error("File %s does not exists!", cline);
             } else {
                 delete_structures();
                 create_structures();
