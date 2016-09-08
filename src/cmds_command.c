@@ -4,6 +4,7 @@
 #include <wchar.h>
 #include <stdlib.h>
 #include <ctype.h>         // for isprint()
+#include <wordexp.h>
 #include "sc.h"            // for rescol
 #include "color.h"         // for set_ucolor
 #include "conf.h"
@@ -337,28 +338,32 @@ void do_commandmode(struct block * sb) {
         } else if ( ! wcsncmp(inputline, L"load", 4) ) {
             char cline [BUFFERSIZE];
             int force_rewrite = 0;
+            wordexp_t p;
             wcstombs(cline, inputline, BUFFERSIZE);
-
             if ( ! wcsncmp(inputline, L"load! ", 6) ) {
                 force_rewrite = 1;
                 del_range_chars(cline, 4, 4);
             }
 
             del_range_chars(cline, 0, 4);
+            wordexp(cline, &p, 0);
             if ( ! strlen(cline) ) {
                 sc_error("Path to file to load is missing !");
+            } else if ( p.we_wordc < 1 ) {
+                sc_error("Failed expanding filepath");
             } else if ( modflg && ! force_rewrite ) {
                 sc_error("Changes were made since last save. Use '!' to force the load");
-            } else if ( ! file_exists(cline)) {
-                sc_error("File %s does not exists!", cline);
+            } else if ( ! file_exists(p.we_wordv[0])) {
+                sc_error("File %s does not exists!", p.we_wordv[0]);
             } else {
                 delete_structures();
                 create_structures();
-                readfile(cline, 0);
+                readfile(p.we_wordv[0], 0);
                 //EvalAll(); // is it necessary?
                 modflg = 0;
                 update(TRUE);
             }
+            wordfree(&p);
 
         } else if ( ! wcsncmp(inputline, L"hiderow ", 8) ||
                     ! wcsncmp(inputline, L"showrow ", 8) ||

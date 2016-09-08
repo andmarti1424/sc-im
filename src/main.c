@@ -8,6 +8,7 @@
 #include <fcntl.h>   // for F_GETFL O_NONBLOCK F_SETFL
 #include <locale.h>
 #include <wchar.h>
+#include <wordexp.h>
 
 #include "main.h"
 #include "shift.h"
@@ -356,9 +357,12 @@ void load_sc() {
     if (! curfile[0]) {                            // there was no file passed to scim executable
         erasedb();
     } else {
-        if (! readfile(curfile, 1) && ! atoi(get_conf_value("nocurses"))) {
-            sc_info("New file: \"%s\"", curfile);     // file passed to scim executable does not exists
+        wordexp_t p;
+        wordexp(curfile, &p, 0);
+        if (! readfile(p.we_wordv[0], 1) && ! atoi(get_conf_value("nocurses"))) {
+            sc_info("New file: \"%s\"", p.we_wordv[0]);     // file passed to scim executable does not exists
         }
+        wordfree(&p);
         EvalAll();                                 // we eval formulas
     }
     return;
