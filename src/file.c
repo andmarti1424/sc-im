@@ -11,6 +11,7 @@
 //#include <curses.h>
 #include <ncurses.h>
 #include <sys/wait.h>
+#include <wordexp.h>
 
 #include "conf.h"
 #include "maps.h"
@@ -111,6 +112,8 @@ int modcheck() {
 int savefile() {
     int force_rewrite = 0;
     char name[BUFFERSIZE];
+    wordexp_t p;
+
 
     if (! curfile[0] && wcslen(inputline) < 3) { // casos ":w" ":w!" ":x" ":x!"
         sc_error("There is no filename");
@@ -122,14 +125,16 @@ int savefile() {
     wcstombs(name, inputline, BUFFERSIZE);
 
     del_range_chars(name, 0, 1 + force_rewrite);
+    wordexp(name, &p, 0);
 
-    if (! force_rewrite && file_exists(name)) {
+    if (! force_rewrite && file_exists(p.we_wordv[0])) {
         sc_error("File already exists. Use \"!\" to force rewrite.");
+        wordfree(&p);
         return -1;
     }
 
     if (wcslen(inputline) > 2) {
-        strcpy(curfile, name);
+        strcpy(curfile, p.we_wordv[0]);
     }
 
     if (wcslen(inputline) > 2 && str_in_str(curfile, ".") == -1)
@@ -137,8 +142,11 @@ int savefile() {
 
     if (writefile(curfile, 0, 0, maxrow, maxcol) < 0) {
         sc_error("File could not be saved");
+        wordfree(&p);
         return -1;
     }
+
+    wordfree(&p);
     return 0;
 }
 
