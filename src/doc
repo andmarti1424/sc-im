@@ -347,7 +347,13 @@ Commands for handling cell content:
                  the map sequence string1 that takes effect on NORMAL_MODE is removed
 
      :iunmap "string1"
-           the map sequence string1 that takes effect on INSERT_MODE is removed
+                 the map sequence string1 that takes effect on INSERT_MODE is removed
+
+     :fill range initial_number increment_number
+                 fill a range with values. the first cell of the range will have
+                 the initial_number and each row below will increment the <initial_value>
+                 in increments of <increment_number>.
+                 ex.:   :fill A0:A100 1 0.25
 
      :format "string"
            sets current cell format (or cells format of a selected range).
