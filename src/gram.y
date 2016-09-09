@@ -107,6 +107,7 @@ token S_YANKCOL
 %token S_UNDEFINE
 %token S_EVAL
 %token S_SEVAL
+%token S_FILL
 
 /*
  token S_ADDNOTE
@@ -120,7 +121,6 @@ token S_YANKCOL
  token S_MOVE
  token S_ERASE
  token S_YANK
- token S_FILL
  token S_ABBREV
  token S_UNABBREV
  token S_FRAME
@@ -415,6 +415,8 @@ command:
                                           unselect_ranges();
                                           set_range_mark($2 + 97, sr);
                                           }
+
+    |    S_FILL var_or_range num num { fill($2.left.vp, $2.right.vp, $3, $4); }
 
     |    S_SORT range STRING         { sortrange($2.left.vp, $2.right.vp, $3);
                                           //scxfree($3);
