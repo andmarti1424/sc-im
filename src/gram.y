@@ -1,5 +1,5 @@
 %{
-#include <curses.h>
+#include <ncurses.h>
 #include <stdlib.h>
 #include "sc.h"
 #include "cmds.h"
@@ -417,6 +417,7 @@ command:
                                           }
 
     |    S_FILL var_or_range num num { fill($2.left.vp, $2.right.vp, $3, $4); }
+    |    S_FILL num num { sc_error("Not enough parameters for fill command"); }
 
     |    S_SORT range STRING         { sortrange($2.left.vp, $2.right.vp, $3);
                                           //scxfree($3);

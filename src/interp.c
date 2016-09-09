@@ -27,7 +27,6 @@
 #include <string.h>
 
 #include <stdlib.h>
-//#include <curses.h>
 #include <ncurses.h>
 #include "sc.h"
 #include "macros.h"
@@ -1976,9 +1975,16 @@ void fill(struct ent *v1, struct ent *v2, double start, double inc) {
     if (minr < 0) minr = 0;
     if (minc < 0) minc = 0;
 
+    #ifdef UNDO
+    create_undo_action();
+    #endif
+
     if (calc_order == BYROWS) {
         for (r = minr; r<=maxr; r++)
             for (c = minc; c<=maxc; c++) {
+                #ifdef UNDO
+                copy_to_undostruct(r, c, r, c, 'd');
+                #endif
                 n = lookat(r, c);
                 if (n->flags&is_locked) continue;
                 (void) clearent(n);
@@ -1986,23 +1992,36 @@ void fill(struct ent *v1, struct ent *v2, double start, double inc) {
                 start += inc;
                 n->flags |= (is_changed|is_valid);
                 n->flags &= ~(iscleared);
+                #ifdef UNDO
+                copy_to_undostruct(r, c, r, c, 'a');
+                #endif
             }
     }
     else if (calc_order == BYCOLS) {
         for (c = minc; c<=maxc; c++)
             for (r = minr; r<=maxr; r++) {
+                #ifdef UNDO
+                copy_to_undostruct(r, c, r, c, 'd');
+                #endif
                 n = lookat(r, c);
                 (void) clearent(n);
                 n->v = start;
                 start += inc;
                 n->flags |= (is_changed|is_valid);
                 n->flags &= ~(iscleared);
+                #ifdef UNDO
+                copy_to_undostruct(r, c, r, c, 'a');
+                #endif
             }
     }
     else {
         sc_error(" Internal error calc_order");
     }
     changed++;
+
+    #ifdef UNDO
+    end_undo_action();
+    #endif
 }
 
 /* lock a range of cells */

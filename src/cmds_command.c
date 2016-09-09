@@ -1,6 +1,5 @@
 #include <string.h>
 #include <ncurses.h>
-//#include <curses.h>
 #include <wchar.h>
 #include <stdlib.h>
 #include <ctype.h>         // for isprint()
@@ -56,6 +55,7 @@ L"e! txt",
 L"datefmt",
 L"delfilter",
 L"delfilters",
+L"fill",
 L"filteron",
 L"filteroff",
 L"format",
@@ -477,6 +477,30 @@ void do_commandmode(struct block * sb) {
         } else if ( ! wcsncmp(inputline, L"int ", 4) ) { // send cmd to interpreter
             wcscpy(interp_line, inputline);
             del_range_wchars(interp_line, 0, 3);
+            send_to_interp(interp_line);
+
+        } else if ( ! wcsncmp(inputline, L"fill ", 5) ) {
+            interp_line[0]=L'\0';
+            int r = currow, c = curcol, rf = currow, cf = curcol;
+            if (p != -1) {
+                c = sr->tlcol;
+                r = sr->tlrow;
+                rf = sr->brrow;
+                cf = sr->brcol;
+                swprintf(interp_line, BUFFERSIZE, L"fill %s%d:", coltoa(c), r);
+                swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%s%d ", coltoa(cf), rf);
+            }
+
+            if (any_locked_cells(r, c, rf, cf)) {
+                swprintf(interp_line, BUFFERSIZE, L"");
+                sc_error("Locked cells encountered. Nothing changed");
+                return;
+            }
+
+            if (p != -1)
+                swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%ls", &inputline[5]);
+            else
+                swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%ls", inputline);
             send_to_interp(interp_line);
 
         } else if ( ! wcsncmp(inputline, L"format ", 7) ) {
