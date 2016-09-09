@@ -8,7 +8,6 @@ Adaptation of Chuck Martin's code - <nrocinu@myrealbox.com>
 #include <ctype.h>
 #include <stdlib.h>
 #include <unistd.h>
-//#include <curses.h>
 #include <ncurses.h>
 #include "macros.h"
 #include "yank.h"

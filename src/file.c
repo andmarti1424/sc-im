@@ -8,7 +8,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <wchar.h>
-//#include <curses.h>
 #include <ncurses.h>
 #include <sys/wait.h>
 #include <wordexp.h>

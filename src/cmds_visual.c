@@ -1,4 +1,3 @@
-//#include <curses.h>
 #include <ncurses.h>
 #include <stdlib.h>
 #include "utils/string.h"

@@ -1,7 +1,6 @@
 #include <sys/types.h>
 #include <string.h>
 #include <stdlib.h>      // for atoi
-//#include <curses.h>
 #include <ncurses.h>
 #include <ctype.h>
 #include <unistd.h>

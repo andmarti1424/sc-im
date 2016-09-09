@@ -1,6 +1,5 @@
 #include <stdlib.h>
 #include <ctype.h>
-//#include <curses.h>
 #include <ncurses.h>
 #include <string.h>
 #include "maps.h"
