@@ -53,8 +53,9 @@ SC-IM stands for Spreadsheet Calculator Improvised. :-)
 
 ### Donations
 
-Please. I mean, Please.. make a DONATION with PayPal.
-A lot of features are in the roadmap.
+Please make a DONATION with PayPal so I can replace my broken laptop.
+I am currently developing SC-IM connecting to a headless NAS remotely.
+
 If you wish to make a donation, please send money to scim.spreadsheet@gmail.com via PayPal.
 
 Thanks.
