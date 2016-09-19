@@ -57,5 +57,6 @@ Please make a DONATION with PayPal so I can replace my broken laptop.
 I am currently developing SC-IM connecting to a headless NAS remotely.
 
 If you wish to make a donation, please send money to scim.spreadsheet@gmail.com via PayPal.
+By 19/09/2016, we received the amount of 51 USD and 40 euros.
 
 Thanks.
