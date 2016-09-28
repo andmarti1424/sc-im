@@ -125,10 +125,10 @@ void do_welcome() {
 
 // function that refreshes grid of screen
 void update(int header) {
-    #ifdef USECOLORS
+    //#ifdef USECOLORS
     //wbkgd(main_win, COLOR_PAIR(ucolors[DEFAULT].fg * 8 + ucolors[DEFAULT].bg + 1));
     //wbkgd(input_win, COLOR_PAIR(ucolors[DEFAULT].fg * 8 + ucolors[DEFAULT].bg + 1));
-    #endif
+    //#endif
     if (loading) return;
     if (cmd_multiplier > 1) return;
     if (atoi(get_conf_value("nocurses"))) return;

@@ -734,6 +734,7 @@ int import_csv(char * fname, char d) {
             //if (isnumeric(st) && strlen(st) && token[strlen(st)-1] != '-' && token[strlen(st)-1] != '.') { // FIXME do a proper isnumeric function !!
             //    swprintf(line_interp, BUFFERSIZE, L"let %s%d=%s", coltoa(c), r, st);
             //} else {
+                //sc_debug("%s", st);
                 swprintf(line_interp, BUFFERSIZE, L"label %s%d=\"%s\"", coltoa(c), r, st);
             //}
             send_to_interp(line_interp);
