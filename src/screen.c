@@ -126,7 +126,7 @@ void do_welcome() {
 // function that refreshes grid of screen
 void update(int header) {
     #ifdef USECOLORS
-    wbkgd(main_win, COLOR_PAIR(ucolors[DEFAULT].fg * 8 + ucolors[DEFAULT].bg + 1));
+    //wbkgd(main_win, COLOR_PAIR(ucolors[DEFAULT].fg * 8 + ucolors[DEFAULT].bg + 1));
     //wbkgd(input_win, COLOR_PAIR(ucolors[DEFAULT].fg * 8 + ucolors[DEFAULT].bg + 1));
     #endif
     if (loading) return;
@@ -249,7 +249,8 @@ void show_header(WINDOW * win) {
 
     // Print input text
     #ifdef USECOLORS
-    set_ucolor(win, &ucolors[INPUT]);
+    //OJO!!! 28/09/2016
+    //set_ucolor(win, &ucolors[INPUT]);
     #endif
     switch (curmode) {
         case COMMAND_MODE:
@@ -800,13 +801,15 @@ int get_formated_value(struct ent ** p, int col, char * value) {
 }
 
 // get real length of str
-// NOTE: extended ascii chars counts as one char, not bytes.
+/* Not longer used!!
+ * NOTE: extended ascii chars counts as one char, not bytes.
 int scstrlen(char * s) {
     int len = 0;
     if (s == NULL) return len;
     for (; *s; ++s) if ((*s & 0xC0) != 0x80) ++len;
         return len;
 }
+*/
 
 // this function aligns text of a cell (align = 0 center, align = 1 right, align = -1 left)
 // and adds padding between cells.

@@ -33,7 +33,9 @@ void handle_cursor();
 
 void add_cell_detail(char * d, struct ent * p1);
 void write_j(WINDOW * win, const char * word, const unsigned int row, const unsigned int justif);
-int scstrlen(char * s);
+
+// not longer used!
+//int scstrlen(char * s);
 
 void yyerror(char *err);               // error routine for yacc (gram.y)
 void show_text(char * val);
