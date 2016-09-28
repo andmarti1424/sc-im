@@ -1229,7 +1229,7 @@ struct ent * back_row(int arg) {
     int r = currow;
     while (arg--) {
         if (r) r--;
-        else { 
+        else {
             sc_info("At row zero");
             break;
         }
