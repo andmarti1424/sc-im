@@ -558,7 +558,7 @@ void do_commandmode(struct block * sb) {
         } else if ( ! wcsncmp(inputline, L"color ", 6) ) {
             #ifdef USECOLORS
             char line [BUFFERSIZE];
-            wcstombs(line, interp_line, BUFFERSIZE);
+            wcstombs(line, inputline, BUFFERSIZE);
             del_range_chars(line, 0, 5);
             chg_color(line);
             #else
