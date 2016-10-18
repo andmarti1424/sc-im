@@ -926,13 +926,13 @@ double eval(register struct ent * ent, register struct enode * e) {
     case TTS:    return (dotts((int) eval(ent, e->e.o.left),
                     (int)eval(ent, e->e.o.right->e.o.left),
                     (int)eval(ent, e->e.o.right->e.o.right)));
-    case STON:   return (doston(seval(NULL, e->e.o.left)));
-    case ASCII:  return (doascii(seval(NULL, e->e.o.left)));
-    case SLEN:   return (doslen(seval(NULL, e->e.o.left)));
-    case EQS:    return (doeqs(seval(NULL, e->e.o.right), seval(NULL, e->e.o.left)));
+    case STON:   return (doston(seval(ent, e->e.o.left)));
+    case ASCII:  return (doascii(seval(ent, e->e.o.left)));
+    case SLEN:   return (doslen(seval(ent, e->e.o.left)));
+    case EQS:    return (doeqs(seval(ent, e->e.o.right), seval(ent, e->e.o.left)));
     case LMAX:   return dolmax(e);
     case LMIN:   return dolmin(e);
-    case NVAL:   return (donval(seval(NULL, e->e.o.left), eval(ent, e->e.o.right)));
+    case NVAL:   return (donval(seval(ent, e->e.o.left), eval(ent, e->e.o.right)));
     case MYROW:  return ((double) (gmyrow + rowoffset));
     case MYCOL:  return ((double) (gmycol + coloffset));
     case LASTROW: return ((double) maxrow);
@@ -1243,6 +1243,7 @@ char * seval(register struct ent * ent, register struct enode * se) {
     case O_SCONST:
             p = scxmalloc( (size_t) (strlen(se->e.s) + 1));
             (void) strcpy(p, se->e.s);
+
             if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent); //FIXME
             return (p);
     case O_VAR:
@@ -1254,7 +1255,7 @@ char * seval(register struct ent * ent, register struct enode * se) {
                 cellerror = CELLERROR;
                 return (NULL);
             }
- 
+
             int row, col;
             if (vp && (rowoffset || coloffset)) {
                 row = se->e.v.vf & FIX_ROW ? vp->row : vp->row + rowoffset;
@@ -1270,7 +1271,6 @@ char * seval(register struct ent * ent, register struct enode * se) {
             // here we store the cell dependences in a graph
             if (ent && vp) {
                 GraphAddEdge( getVertex(graph, lookat(ent->row, ent->col), 1), getVertex(graph, lookat(vp->row, vp->col), 1) ) ;
-                //sc_debug("sc_seval added ent in graph: %d %d %d %d       repct:%d ", ent->row, ent->col, vp->row, vp->col, repct);
             }
             return (p);
     }
