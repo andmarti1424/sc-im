@@ -197,6 +197,7 @@ token S_YANKCOL
 %token S_CELLCOLOR
 %token S_REDEFINE_COLOR
 %token S_FCOPY
+%token S_FSUM
 
 %token K_ERROR
 %token K_INVALID
@@ -511,6 +512,7 @@ command:
                                          scxfree($2); }
 
     |    S_FCOPY                     { fcopy(); }
+    |    S_FSUM                      { fsum();  }
     |    S_PAD NUMBER COL ':' COL    { pad($2, 0, $3, maxrow, $5); }
     |    S_PAD NUMBER COL            { pad($2, 0, $3, maxrow, $3); }
     |    S_PAD NUMBER var_or_range   { pad($2, $3.left.vp->row, $3.left.vp->col, $3.right.vp->row, $3.right.vp->col); }

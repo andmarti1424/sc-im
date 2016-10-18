@@ -1521,6 +1521,57 @@ int any_locked_cells(int r1, int c1, int r2, int c2) {
 }
 
 // sum special command
+int fsum() {
+    int r = currow, c = curcol;
+    struct ent * p;
+
+#ifdef UNDO
+    create_undo_action();
+    copy_to_undostruct(currow, curcol, currow, curcol, 'd');
+#endif
+    if (r > 0 && (*ATBL(tbl, r-1, c) != NULL) && (*ATBL(tbl, r-1, c))->flags & is_valid) {
+        for (r = currow-1; r >= 0; r--) {
+            p = *ATBL(tbl, r, c);
+            if (p == NULL) break;
+            if (! (p->flags & is_valid)) break;
+        }
+        if (currow == r) {
+#ifdef UNDO
+            dismiss_undo_item();
+            end_undo_action();
+#endif
+        } else {
+            swprintf(interp_line, BUFFERSIZE, L"let %s%d = @SUM(", coltoa(curcol), currow);
+            swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%s%d:", coltoa(curcol), r+1);
+            swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%s%d)", coltoa(curcol), currow-1);
+        }
+    } else if (c > 0 && (*ATBL(tbl, r, c-1) != NULL) && (*ATBL(tbl, r, c-1))->flags & is_valid) {
+        for (c = curcol-1; c >= 0; c--) {
+            p = *ATBL(tbl, r, c);
+            if (p == NULL) break;
+            if (! (p->flags & is_valid)) break;
+        }
+        if (curcol == c) {
+#ifdef UNDO
+            dismiss_undo_item();
+            end_undo_action();
+#endif
+        } else {
+            swprintf(interp_line, BUFFERSIZE, L"let %s%d = @SUM(", coltoa(curcol), currow);
+            swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%s%d:", coltoa(c+1), r);
+            swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%s%d)", coltoa(curcol-1), r);
+        }
+    }
+
+    if ((currow != r || curcol != c) && wcslen(interp_line)) {
+        send_to_interp(interp_line);
+#ifdef UNDO
+        copy_to_undostruct(currow, curcol, currow, curcol, 'a');
+        end_undo_action();
+#endif
+    }
+    return 0;
+}
 
 // fcopy special command
 int fcopy() {
