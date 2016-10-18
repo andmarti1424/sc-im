@@ -94,7 +94,7 @@ void syncref(register struct enode * e) {
         case 'v':
             //if (e->e.v.vp->flags & iscleared) {
             if (e->e.v.vp->flags & is_deleted) {
-                sc_debug("syncref is deleted");
+                //sc_debug("syncref is deleted");
                 //FIXME
                 //break;
                 //sc_info("%d %d", e->e.v.vp->row, e->e.v.vp->col);

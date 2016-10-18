@@ -622,6 +622,27 @@ void do_commandmode(struct block * sb) {
         } else if ( inputline[0] == L'x' ) {
             if ( savefile() == 0 ) shall_quit = 1;
 
+        } else if ( ! wcscmp(inputline, L"fcopy") ) {
+            int r = currow;
+            int c = curcol;
+            struct ent * pdest;
+            struct ent * pact;
+            if (p == -1) { // no range selected
+                pact = *ATBL(tbl, r, c);
+                if ( pact != NULL && pact->flags & is_valid) {
+                    for (r=currow+1; r<maxrow && (*ATBL(tbl, r, c-1)) != NULL && (*ATBL(tbl, r, c-1))->flags & is_valid ; r++) {
+                        pdest = lookat(r, c);
+                        copyent(pdest, pact, r - currow, 0, 0, 0, maxrows, maxcols, 'c');
+                    }
+                }
+            } else { // range is selected
+                pact = *ATBL(tbl, sr->tlrow, sr->tlcol);
+                for (r=sr->tlrow+1; r<=sr->brrow; r++) {
+                    pdest = lookat(r, sr->tlcol);
+                    copyent(pdest, pact, r - sr->tlrow, 0, 0, 0, maxrows, maxcols, 'c');
+                }
+            }
+
         } else if ( ! wcscmp(inputline, L"sum") ) {
             int r = currow, c = curcol;
             struct ent * p;

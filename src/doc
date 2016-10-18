@@ -584,6 +584,11 @@ Commands for handling cell content:
                 or by the immediate cell at the left of current cell, in case of horizontal ranges.
                 the top / left corner is always limited by the first non numeric cell found.
 
+    :fcopy      this command takes the formula of a selected cell, and copies it down a number of rows.
+                the number of rows down to be copied, will be determinated by the first empty cell found
+                in the column at the left of current cell.
+                in case a range is selected, the formula of the top left cell will be copied down to the end of the range.
+
     c-r {char}  Being {char} a mark of a cell or range, the range represented by that char gets inserted in the command line
 
     commandline history is stored in $HOME/.sciminfo

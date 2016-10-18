@@ -28,8 +28,8 @@ v0.4.0
 * Fix :load command
 * Expand filenames using wordexp
 * Restored old SC fill function
-
-
+* Fix in seval calls
+* New :fcopy special command
 
 v0.3.0
 * FIX when importing large CSV files
