@@ -1520,6 +1520,62 @@ int any_locked_cells(int r1, int c1, int r2, int c2) {
     return 0;
 }
 
+// sum special command
+
+// fcopy special command
+int fcopy() {
+    int r, ri, rf, ci, cf;
+    struct ent * pdest;
+    struct ent * pact;
+    int p = is_range_selected();
+    struct srange * sr = NULL;
+    if (p != -1) sr = get_range_by_pos(p);
+
+    if ( ( p == -1 && (*ATBL(tbl, currow, curcol) == NULL || ! (*ATBL(tbl, currow, curcol))->expr))
+            ||   ( p != -1 && (*ATBL(tbl, sr->tlrow, sr->tlcol) == NULL || ! (*ATBL(tbl, sr->tlrow, sr->tlcol))->expr) )
+       ) {
+        sc_error("Formula not found. Nothing changed");
+        return -1;
+    }
+
+    if (p == -1) { // no range selected
+        ri = currow;
+        ci = curcol;
+        cf = curcol;
+        for (r=ri+1; r<maxrow && (*ATBL(tbl, r, cf-1)) != NULL && (*ATBL(tbl, r, cf-1))->flags & is_valid ; r++) {}
+        rf = --r;
+    } else { // range is selected
+        ri = sr->tlrow;
+        ci = sr->tlcol;
+        cf = sr->tlcol;
+        rf = sr->brrow;
+    }
+
+    if (any_locked_cells(ri, ci, rf, cf)) {
+        swprintf(interp_line, BUFFERSIZE, L"");
+        sc_error("Locked cells encountered. Nothing changed");
+        return -1;
+    }
+#ifdef UNDO
+    create_undo_action();
+    copy_to_undostruct(ri, ci, rf, cf, 'd');
+#endif
+
+    //do
+    pact = *ATBL(tbl, ri, ci);
+    for (r=ri+1; r<=rf; r++) {
+        pdest = lookat(r, ci);
+        copyent(pdest, pact, r - ri, 0, 0, 0, maxrows, maxcols, 'c');
+    }
+
+#ifdef UNDO
+    copy_to_undostruct(ri, ci, rf, cf, 'a');
+    end_undo_action();
+#endif
+
+    return 0;
+}
+
 // add padd to cells!
 // this sets n to padding of a range
 int pad(int n, int r1, int c1, int r2, int c2) {
