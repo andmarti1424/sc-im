@@ -32,6 +32,7 @@ v0.4.0
 * New :fcopy special command
 * Added UNDO and LOCK check to fcopy special command. Added fcopy to gram.y
 * sum special command renamed to fsum
+* csv import now use isnumeric function
 
 v0.3.0
 * FIX when importing large CSV files
