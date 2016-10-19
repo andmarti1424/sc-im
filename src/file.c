@@ -699,6 +699,7 @@ int import_csv(char * fname, char d) {
 
     // CSV file traversing
     while ( ! feof(f) && (fgets(line_in, sizeof(line_in), f) != NULL) ) {
+        //sc_debug("%s", line_in);
         // this hack is for importing file that have DOS eol
         int l = strlen(line_in);
         while (l--)
@@ -730,13 +731,17 @@ int import_csv(char * fname, char d) {
                 del_char(token, strlen(token)-1);
             }
             char * st = str_replace (token, "\"", "''"); //replace double quotes inside string
-            // Now every value gets imported as text!
-            //if (isnumeric(st) && strlen(st) && token[strlen(st)-1] != '-' && token[strlen(st)-1] != '.') { // FIXME do a proper isnumeric function !!
-            //    swprintf(line_interp, BUFFERSIZE, L"let %s%d=%s", coltoa(c), r, st);
-            //} else {
+
+            // number import
+            if (isnumeric(st) && strlen(st)
+            //&& token[strlen(st)-1] != '-' && token[strlen(st)-1] != '.'
+            ) {
+                swprintf(line_interp, BUFFERSIZE, L"let %s%d=%s", coltoa(c), r, st);
+            // text import
+            } else {
                 //sc_debug("%s", st);
                 swprintf(line_interp, BUFFERSIZE, L"label %s%d=\"%s\"", coltoa(c), r, st);
-            //}
+            }
             send_to_interp(line_interp);
             c++;
             quote = 0;
