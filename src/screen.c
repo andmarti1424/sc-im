@@ -801,7 +801,7 @@ int get_formated_value(struct ent ** p, int col, char * value) {
 }
 
 // get real length of str
-/* Not longer used!!
+/* No longer used!!
  * NOTE: extended ascii chars counts as one char, not bytes.
 int scstrlen(char * s) {
     int len = 0;
