@@ -26,6 +26,8 @@ Navigation commands:
      j k l h     Move cursor down, up, right or left
      ^           Up to row 0 of the current column.
      #           Down to the last valid row of the current column.
+                 If already in last valid row of the current column, then
+                 it jumps to last valid row of the last valid cell in spreadsheet.
      0           Back to column A.
      $           Forward to the last valid column of the current row.
      b           Back to the previous valid cell.

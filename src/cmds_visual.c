@@ -215,8 +215,10 @@ void do_visualmode(struct block * buf) {
     // #
     } else if (buf->value == L'#') {
         int s = goto_bottom()->row;
-        r->tlrow = r->brrow;
+        if (s == r->brrow) s = go_end()->row;
+        //r->tlrow = r->brrow;
         r->brrow = r->brrow > s ? r->brrow : s;
+        //r->brrow = s;
         currow = r->brrow;
 
     // ctl(a)

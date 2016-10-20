@@ -138,6 +138,7 @@ void do_normalmode(struct block * buf) {
             lastcol = curcol;
             lastrow = currow;
             currow = goto_bottom()->row;
+            if (currow == lastrow && curcol == lastcol) currow = go_end()->row;
             unselect_ranges();
             update(TRUE);
             break;
