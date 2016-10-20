@@ -233,6 +233,7 @@ struct go_save {
 #define ASCII       (OP_BASE + 78)
 #define CHR         (OP_BASE + 79)
 #define SET8BIT     (OP_BASE + 80)
+#define REPLACE     (OP_BASE + 81)
 
 /* flag values */
 #define is_valid      0001

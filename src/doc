@@ -872,6 +872,8 @@ Commands for handling cell content:
            displays the string ``the lazy dog'' in the cell if the value of A0's string is ``the la''.
 
 &Built-in String Functions&
+    String functions can be entered typing \"
+
     @substr(se,e1,e2)
         Extract and return from string expression se the substring indexed by character number  e1  through
         character  number e2 (defaults to the size of se if beyond the end of it).  If e1 is less than 1 or
@@ -888,6 +890,12 @@ Commands for handling cell content:
     @capital(se)
         will  convert the first letter of words in a string into upper case and other letters to lower case
         (the latter if all letters of the string are upper case).
+
+    @replace(se, eold, enew)
+        Replace eold occurences in se string with enew string.
+        For example, having in A1 the string "Extension" and entering in A2 the following:
+        @replace(A1,"n","Z")
+        will result "Extezsioz".
 
     @ext(se,e)
         Call an external function (program or script).  The purpose is to allow arbitrary functions on val‐

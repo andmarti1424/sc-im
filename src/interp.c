@@ -38,6 +38,7 @@
 #include "xmalloc.h" // for scxfree
 #include "lex.h"     // for atocol
 #include "interp.h"
+#include "utils/string.h"
 #include <unistd.h>
 
 #ifdef UNDO
@@ -1147,6 +1148,9 @@ char * dosval(char * colstr, double rowdoub) {
     return (strcpy(scxmalloc( (size_t) (strlen(llabel) + 1)), llabel));
 }
 
+char * doreplace(char * source, char * old, char * new) {
+    return str_replace(source, old, new);
+}
 
 /*
  * Substring:  Note that v1 and v2 are one-based to users, but zero-based
@@ -1311,6 +1315,9 @@ char * seval(register struct ent * ent, register struct enode * se) {
     }
     case EXT:    return (doext(se));
     case SVAL:   return (dosval(seval(ent, se->e.o.left), eval(NULL, se->e.o.right)));
+    case REPLACE: return (doreplace(seval(ent, se->e.o.left),
+                          seval(NULL, se->e.o.right->e.o.left),
+                          seval(NULL, se->e.o.right->e.o.right)));
     case SUBSTR: return (dosubstr(seval(ent, se->e.o.left),
                 (int) eval(NULL, se->e.o.right->e.o.left) - 1,
                 (int) eval(NULL, se->e.o.right->e.o.right) - 1));
@@ -2465,6 +2472,7 @@ void decompile(register struct enode *e, int priority) {
     case SVAL:  two_arg("@sval(", e); break;
     case EXT:   two_arg("@ext(", e); break;
     case SUBSTR:  three_arg("@substr(", e); break;
+    case REPLACE: three_arg("@replace(", e); break;
     case STINDEX: index_arg("@stindex", e); break;
     case INDEX: index_arg("@index", e); break;
     case LOOKUP:  index_arg("@lookup", e); break;

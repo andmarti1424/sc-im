@@ -248,6 +248,7 @@ token S_YANKCOL
 %token K_DTS
 %token K_TTS
 %token K_FMT
+%token K_REPLACE
 %token K_SUBSTR
 %token K_UPPER
 %token K_LOWER
@@ -758,6 +759,8 @@ term:           var                     { $$ = new_var(O_VAR, $1); }
         | '@' K_EXT  '(' e ',' e ')'    { $$ = new(EXT, $4, $6); }
         | '@' K_NVAL '(' e ',' e ')'    { $$ = new(NVAL, $4, $6); }
         | '@' K_SVAL '(' e ',' e ')'    { $$ = new(SVAL, $4, $6); }
+        | '@' K_REPLACE '(' e ',' e ',' e ')'
+                                { $$ = new(REPLACE, $4, new(',', $6, $8)); }
         | '@' K_SUBSTR '(' e ',' e ',' e ')'
                                 { $$ = new(SUBSTR, $4, new(',', $6, $8)); }
         |       '(' e ')'       { $$ = $2; }
