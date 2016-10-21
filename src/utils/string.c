@@ -226,10 +226,23 @@ char * ltrim(char * string, char junk) {
 // returns 1 if that is the case. 0 otherwise
 int isnumeric(char * string) {
     int i, len = strlen(string);
-    int res = 1;
+    int res = true;
+    bool has_dot = false;
+    bool has_dash = false;
     for (i=0; i<len; i++) {
-        if ( string[i] != '.' && string[i] != '-' && ! isdigit(string[i]) ) {
-            res = 0;
+        if ( string[i] == '.' && ! has_dot ) {
+            has_dot = true;
+            continue;
+        }
+        if ( string[i] == '-' && ! has_dash ) {
+            has_dash = true;
+            continue;
+        }
+        if ( isdigit(string[i]) ) {
+            continue;
+        }
+        else {
+            res = false;
             break;
         }
     }
