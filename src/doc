@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------
 This is a simple HELP page. Press ':q<Enter>' to go back to spreadsheet.
 
-You can use <UP> <DOWN> arrows keys, or 'j' 'k' keys to move throw text.
+You can use <UP> <DOWN> arrows keys, or 'j' 'k' keys to move through text.
 <SPACE> key moves forward an entire page, while <C-f> and <C-b> moves half page down or up.
 'G' moves to bottom, and <C-a> to the beginning of the text.
 <ENTER> key scrolls one line down, while <DEL> key scrolls one line up, just like in less.
@@ -18,7 +18,7 @@ COMMAND MODE     ':' key is used for entering this mode. It is used for entering
 VISUAL MODE      'v' key is used for entering this mode. It is used for selecting a range of cells
                  You can also use <C-v> in INSERT and COMMAND MODE for entering this mode.
                  See the section 'Selecting a range' below.
----------------- 
+----------------
 
 &NORMAL MODE&
 
@@ -181,7 +181,7 @@ Commands for handling cell content:
      E           in normal mode, enters edit mode for editing text value of a cell
      h           moves a char left
      l           moves a char right
-     w           moves to beginning of next wor d
+     w           moves to beginning of next word
      e           if in end of a word, moves to end of next word. otherwise, moves to end of word under the cursor
      b           if in beginning of a word, moves to beginning of previous word. otherwise, moves to beginning of word under the cursor
      0           moves to bol
@@ -285,7 +285,7 @@ Commands for handling cell content:
      :e txt      export current spreadsheet to plain text.
                  if a range is selected, only that range is exported.
 
-     :e csv name 
+     :e csv name
                  export current spreadsheet to csv file. 'name' is the name of the file to be generated
 
      :e! csv name
@@ -396,7 +396,7 @@ Commands for handling cell content:
                 in the integer part of the number with numbering beginning
                 from the right end of the integer.
 
-           d    its used to specify a date format that is applied to the numeric
+           d    Specifies a date format that is applied to the numeric
                 value of a cell. (See also the DATE INPUT section below)
                 Date format strings are identified by the presence of a 'd'
                 in the first position. If this is present, the
@@ -522,8 +522,7 @@ Commands for handling cell content:
     :showrows
                 if a range is selected, this command shows the rows hidden that are covered by the range
 
-    :pad n      being n an integer, this command applies a left padding to a column.
-                that padding would be n chars width.
+    :pad n      applies a left padding n chars in width to a column.
                 if a range selected, this command affect the columns inside that range.
 
     :hiddenrows
@@ -983,7 +982,7 @@ Commands for handling cell content:
 
 &External scripts&
 
-    SC-IM can read data from a external script, either throw pipeline or redirection.
+    SC-IM can read data from a external script, either through a pipeline or redirection.
     This enables SC-IM to be used as a non-interactive calculator.
     It also can be run interactive but with no ncurses interface if you set the --nocurses flag.
 
@@ -996,21 +995,21 @@ Commands for handling cell content:
         recalc
         getnum A3
 
-    With the following command, you can send SC-IM that script throw piping, then SC-IM will output to stdout, and then quit:
+    With the following command, you can send SC-IM the script through a pipe, then SC-IM will output to stdout, and then quit:
         cat script | ./scim --nocurses --quit_afterload
 
-    You can also receive data throw piping and output results to a file, with this command:
+    You can also receive data from a pipe and output results to a file, with this command:
         cat script | ./scim --quit_afterload --output=return_file
 
     Other possibilities are:
 
-        - receive data throw piping and continue in non ncurses mode:
+        - receive data from a pipe and continue in non-ncurses mode:
         cat script | ./scim --nocurses
 
         - receive data from a sc file, and output to a file:
         ./scim a.sc --quit_afterload --output=return_file
 
-        - receive data from both a script (throw piping) and from a sc file, and output to file:
+        - receive data from both a piped script and from a sc file, and output to file:
         cat script | ./scim a.sc --quit_afterload --output=return_file
 
         - start interactive but with no ncurses interface:
