@@ -1,182 +1,234 @@
-------------------------------------------------------------------------
-This is a simple HELP page. Press ':q<Enter>' to go back to spreadsheet.
+                         This is the SC-IM help file.
 
-You can use <UP> <DOWN> arrows keys, or 'j' 'k' keys to move through text.
-<SPACE> key moves forward an entire page, while <C-f> and <C-b> moves half page down or up.
+Use the cursor keys to move around, or 'j' to go down and 'k' to go up.
+You can also use the <ENTER> key to go one line down and <DEL> to go up.
+
+<SPACE> moves a page down, while <C-f> and <C-b> move half page down or up.
+
 'G' moves to bottom, and <C-a> to the beginning of the text.
-<ENTER> key scrolls one line down, while <DEL> key scrolls one line up, just like in less.
-You can use the '/' command to search for a pattern in the help.
-------------------------------------------------------------------------
-SC-IM has the following modes:
-NORMAL MODE      For navigation and common commands
-INSERT MODE      For entering new cell content (values and expressions)
-                 Submodes: = < > \
-EDIT MODE        'e' and 'E' keys are used for entering this mode. It is used for single
-                 line -Vi-like- edition of cell content and expressions
-COMMAND MODE     ':' key is used for entering this mode. It is used for entering special
-                 commands and for quitting app and saving files.
-VISUAL MODE      'v' key is used for entering this mode. It is used for selecting a range of cells
-                 You can also use <C-v> in INSERT and COMMAND MODE for entering this mode.
-                 See the section 'Selecting a range' below.
-----------------
 
+Use '/' to search for a pattern in the help.
+
+Use ':q<Enter>' to go back to the spreadsheet.
+
+==============================================================================
+SC-IM has the following modes:
+
+SC-IM has the following modes:
+   NORMAL MODE:  In Normal mode, you can navigate cells and input normal
+                 commands.
+   INSERT MODE:  Use the '=', '<', '>', or '\' to go to Insert mode, where you
+                 can enter new values and expressions into cells.
+     EDIT MODE:  Use the 'e' or 'E' keys to go to Edit mode and enter a single
+                 line, Vi-like, command to modify cell content.
+                 and expressions.  The 'e' and 'E' keys enter this mode.
+  COMMAND MODE:  Use the ':' key to enter Command mode. This is for entering
+                 special commands such as quitting the app and saving files.
+   VISUAL MODE:  Visual mode is used for selecting a range of cells.  See the
+                 section 'Selecting a range' below.
+                 The 'v' key enters this mode from Normal mode, or <C-v> in
+                 Insert and Command modes.
+
+==============================================================================
 &NORMAL MODE&
 
 Navigation commands:
-     j k l h     Move cursor down, up, right or left
-     ^           Up to row 0 of the current column.
-     #           Down to the last valid row of the current column.
-                 If already in last valid row of the current column, then
-                 it jumps to last valid row of the last valid cell in spreadsheet.
-     0           Back to column A.
-     $           Forward to the last valid column of the current row.
-     b           Back to the previous valid cell.
-     w           Forward to the next valid cell.
-     'c          Go to cell or select range marked previously as c. See the m command for details.
-     gab24       Go to AB24 cell (no need to press ENTER).
-     g0          moves to first visible column of screen.
-     g$          moves to last visible column of screen.
-     gM          moves to the middle column shown in screen.
-     H           Go to first row seen on screen.
-     L           Go to last row seen on screen.
-     M           Go to middle row seen on screen.
-     gg  , c-a:  Go to home (first cell of spreadsheet).
-     G           Go to last valid cell of spreadsheet.
-     gG          Go to last valid cell of spreadsheet.
-     gl          moves to last cell position
-     c-f , c-b:  Scrolls down and up full screen.
-                 set variable half_page_scroll to 1 to scroll half page,
-                 instead of full page. see :set command for details.
-     c-e , c-y:  Scrolls down and up a line.
-     zh          Scrolls left one column.
-     zl          Scrolls right one column.
-     zH          Scrolls left half page.
-                 set variable half_page_scroll to '1' to scroll half a page, and set it to '0' to scroll a full page
-     zL          Scrolls right half page.
-                 set variable half_page_scroll to '1' to scroll half a page, and set it to '0' to scroll a full page
-     zz          Scrolls up or down, until the selected cell shows up vertically in the center of screen.
-     zt          Scrolls up or down, until the selected cell shows up vertically in the top of screen.
-     zb          Scrolls up or down, until the selected cell shows up vertically in the bottom of screen.
-     zm          Scrolls left or right, until the selected cell shows up in center of screen.
-     Vir         Selects inner range
+     j k l h     Move cursor down, up, right or left.
+     ^           Go up to row 0 of the current column.
+     #           Go down to the last valid row of the current column.  If
+                 already in last valid row of the current column, then jump to
+                 last valid row of the last valid cell in spreadsheet.
+     0           Go left to column A in the current row.
+     $           Go right to the last valid column of the current row.
+     b           Go back to the previous valid cell.
+     w           Go forward to the next valid cell.
+     'c          Go to the cell or range marked previously as c. See the m
+                 command for details.
+     gab24       Go to cell AB24.  (There is no need to press <ENTER>.)
+     g0          Go to the leftmost column visible on screen.
+     g$          Go to the rightmost column visible on screen.
+     gM          Go to the middle column on the screen.
+     H           Go to the top row visible on screen.
+     L           Go to the lowest row visible on screen.
+     M           Go to the middle row on the screen.
+     gg    c-a   Go to the first cell of sheet.
+     G     gG    Go to last valid cell of sheet.
+     gl          Go to the last (prevously occupied) cell position.
+     c-f   c-b   Scrolls down and up full screen.
+                 :set half_page_scroll=1 to scroll by half a page instead.
+                 half_page_scroll=0 (default) scrolls by a full page.
+                 See :set command for details.
+     c-e   c-y   Scroll a row down and up.
+     zh          Scroll left one column.
+     zl          Scroll right one column.
+     zH          Scroll left half a page.
+     zL          Scroll right half page.
+     zz          Scroll vertically to position the selected cell at the middle
+                 of the screen.
+     zt          Scroll vertically to position the selected cell at the top
+                 of the screen.
+     zb          Scroll vertically to position the selected cell at the bottom
+                 of the screen.
+     zm          Scroll horizontally to position the selected cell at the
+                 center of the screen.
+     Vir         Select the smallest range that covers all valid cells.
 
 
 Commands for handling cell content:
-     x , dd      Deletes the current selected cell or range and save its content in yankbuffer
-     m           Followed by any lowercase letter, marks the current cell or the selected range with that letter.
-                 NOTE: When a mark is changed, all ranges that use that mark are deleted.
-     c           Followed by a lowercase letter that represents a mark, this command copies a marked cell or range
-                 to the current position, adjusting row and column references in its numeric or string expression, if any.
-     R           Followed by two lowercase letters that represent marks of cell, creates a range using those marks and selects it.
-                 NOTE: If a range already exists, its replaced with new values.
-     { } |       align the content of a cell to the left, right or to center. if a range is selected,
-                 every cell of the range gets aligned.
+     x     dd    Delete the current selected cell or range and save its
+                 content in the yankbuffer.
+     m           Followed by any lowercase letter, mark the current cell or
+                 selected range with that letter.
+                 NOTE: When a mark is changed, all ranges that use that mark
+                 are deleted.
+     c           Followed by a lowercase letter that represents a mark, copy a
+                 marked cell or range to the current position, adjusting row
+                 and column references in its numeric or string expression, if
+                 any.
+     R           Followed by two lowercase letters that represent marks of
+                 cell, creates a range using those marks and selects it.
+                 NOTE: If a range already exists, it is replaced with the new
+                 values.
 
-     f+ , fk , f-UP:         Change cell format: Increase decimal precision.
-     f- , fj , f-DOWN:       Change cell format: Decrease decimal precision.
-     f< , fh , f-LEFT:       Change cell format: Decrease column width.
-     f> , fl , f-RIGHT:      Change cell format: Incrementa column width.
-     ir          inserts a row
-     ic          inserts a column
-     or          opens a row - (insert a row after current row)
-     oc          opens a column - (insert a col after current col)
-     sk          shifts up current cell or current range
-     sj          shifts down current cell or current range
-     sh          shifts left current cell or current range
-     sl          shifts right current cell or current range
+     { } |       Align the content of a cell to the left, right or center.  If
+                 a range is selected, every cell of the range gets aligned.
 
-     yy          yanks selected cell
-     y           if a range is selected, it yanks the selected range
-     yr          yanks current row
-     yc          yanks current column
+     f+ , fk , f-UP:         Change cell format: Increment decimal precision.
+     f- , fj , f-DOWN:       Change cell format: Decrement decimal precision.
+     f< , fh , f-LEFT:       Change cell format: Decrement column width.
+     f> , fl , f-RIGHT:      Change cell format: Increment column width.
 
-     p           pastes previous yanked cell/s or range
-                 if yr was used to yank a row, 'p' creates a new row below, and paste content there.
-                 if yc was used to yank a column, 'p' creates a new col at the left of curcol, and paste content there.
-     Pf          works like p command except that only cell formatting information is merged in, leaving the actual data untouched.
-     Pv          works like p command except that only cell values are copied, leaving cell format intact.
-     Pc          works like p command except that all cell references are adjusted in the same way that they are for the copy command.
+     ir          Insert a row.
+     ic          Insert a column.
+     or          Open a row: insert after the current row.
+     oc          Open a column: insert after the current column.
+     sk          Shifts the current cell or range up.
+     sj          Shifts the current cell or range down.
+     sh          Shifts the current cell or range left.
+     sl          Shifts the current cell or range right.
 
-     t           same as 'p' command but if yr was used to yank a row, it creates a new row above, and paste content there.
-                 if yc was used to yank a column, this command creates a new col at the right, and paste there.
-     Tf          works like t command except that only cell formatting information is merged in, leaving the actual data untouched.
-     Tv          works like t command except that only cell values are copied, leaving cell format intact.
-     Tc          works like t command except that all cell references are adjusted in the same way that they are for the copy command.
+     yy          Yank the selected cell.
+     y           If a range is selected, yank the range.
+     yr          Yank current row.
+     yc          Yank current column.
 
+     p           Paste the previously yanked cell or range.
+                 If yr was used to yank a row, create a new row below and
+                 paste content there.
+                 If yc was used to yank a column, create a new column to the
+                 left and paste content there.
+     Pf          Works like 'p' except that only the cell formatting is
+                 merged, leaving cell values intact.
+     Pv          Works like 'p' except that only cell values are copied,
+                 leaving cell formatting intact.
+     Pc          Works like 'p' except that all cell references are adjusted
+                 in the same way that they are for the copy command.
 
-     dr          deletes row under the cursor
-     dc          deletes column under the cursor
-     .           repeats last command
-     -           decrease a numeric value of a cell or range
-     +           increase a numeric value of a cell or range
+     t           Same as 'p' but if yr was used to yank a row, create a new
+                 row above and paste content there.
+                 If yc was used to yank a column, create a new column to the
+                 right and paste content there.
+     Tf          Works like 't' except that only cell formatting information
+                 is merged in, leaving cell values intact.
+     Tv          Works like 't' except that only cell values are copied,
+                 leaving cell formatting intact.
+     Tc          Works like 't' except that all cell references are adjusted
+                 in the same way that they are for the copy command.
+
+     dr          Delete the current row.
+     dc          Deletes the current column.
+     .           Repeat the last normal mode command.
+     -           Decrease a numeric value of the cell or range.
+     +           Increase a numeric value of the cell or range.
 
      u           UNDO last change
      c-f         REDO last change
-                 NOTE: Events implemented for undo / redo:
-                 1. delete of cell or range content
+                 NOTE: Events implemented for undo and redo:
+                 1. cell or range deletion
                  2. cell input
-                 3. cell edition
+                 3. cell editing
                  4. cell or range change in alignment
-                 5. paste of a cell or range
+                 5. pasting a cell or range
                  6. range or cell shift with sh sj sk sl
-                 7. insert row or column
-                 8. delete of a row or column
-                 9. paste of a row or column
-                 10. zap(hide) / show a row or column
-                 11. order of a range
-                 12. change in the format of a range or cell
+                 7. row or column insertion
+                 8. row or column deletion
+                 9. pasting a row or column
+                 10. zap(hide) or show a row or column
+                 11. reordering of a range
+                 12. changing the format of a range or cell
                  13. '-' and '+' commands in normal mode
-                 14. lock and unlock of cells
-                 15. datefmt command
-                 16. cellcolor command
+                 14. locking and unlocking of cells
+                 15. the datefmt command
+                 16. the cellcolor command
 
-     c-d         converts text content of a selected cell or range to a date, using default LOCALE's D_FMT format.
-                 This converts text content to a numeric value that can shown as a date. See DATE INPUT below for more info.
+     c-d         Convert the text content of a selected cell or range to a
+                 date, using default LOCALE's D_FMT format.
+                 This converts text to a numeric value that can be shown as a
+                 date. See DATE INPUT below for more info.
                  NOTE: USELOCALE has to be enabled during build.
 
-     aa          auto resize selected column/s to fit its contents.
+     aa    c-j   Auto-resize the selected column(s) to accommodate the widest
+                 cells.
 
 
  Other commands:
-     ^L          Redraw the screen
-     Zr          zap (hide) current row
-     Zc          zap (hide) current column
-     Sr          if a range is selected, it shows the rows hidden inside the range
-     Sc          if a range is selected, it shows the cols hidden inside the range
-     '/'         is an alias for ':int goto '.
-                 If a number is given, SC-IM will search for a cell containing that number. Searches for either strings or numbers proceed forward from the current cell, wrapping back to a0 at the end of the table, and terminate at the current cell if the string or number is not found.
-                 Ex.: You can type '/4' to look for cells that has the value of 4.
-                 Or you can type '/"value"' to look for cells that has "value" as label content.
-                 You can also quote a regular expression, and SC-IM will search for a cell containing a string matching the regular expression.
-                 You can also search formatted numbers or expressions using regular expressions by preceding the opening quotes of the regular expression with a '#' (for formatted numbers) or a '%' (for expressions).
-                 These are handy for searching for dates within a specified range or cells which reference a given cell, for example, although they are somewhat slower than searching through ordinary strings, since all numbers must be formatted or expressions decompiled on the fly during the search.
-     n           Moves to next search match
-     N           Moves to previous search match
+     ^L          Redraw the screen.
+     Zr          Zap (hide) the current row.
+     Zc          Zap (hide) the current column.
+     Sr          If a range is selected, show the rows hidden in the range.
+     Sc          If a range is selected, show the columns hidden in the range.
+     '/'         Alias for ':int goto '.
 
-     rl          Use this command to lock the current cell or a range of cells, i.e. make them immune to any type of editing. A locked cell can't be changed in any way until it is unlocked.
-     ru          This command is the opposite of the rl command and thus unlocks a locked cell and makes it editable.
-     rv          valueize area: remove expressions from the affected range leaving only the values.
-     c-j         auto resize column width to fit its contents.
+                 If a number is given, SC-IM will search for a cell containing
+                 that number.  Searches for either strings or numbers proceed
+                 forward from the current cell, wrapping back to a0 at the end
+                 of the table, and terminate at the current cell if the string
+                 or number is not found.
 
+                 Ex.: Type '/4' to look for cells containing the value 4.
+                 Or type '/"value"' to look for cells that has "value" as
+                 label content.
+                 You can quote a regular expression, and SC-IM will search for
+                 a cell containing a string matching the regular expression.
+                 You can search for formatted numbers or expressions using
+                 regular expressions by preceding the opening quotes of the
+                 regular expression with a '#' (for formatted numbers) or a
+                 '%' (for expressions).
+                 These are handy for searching for dates within a specified
+                 range or cells which reference a given cell, for example,
+                 although they are somewhat slower than searching through
+                 ordinary strings, since all numbers must be formatted or
+                 expressions decompiled on the fly during the search.
+     n           Move to next search match.
+     N           Move to previous search match.
 
- &INSERT MODE&
+     rl          Lock the current cell or range. Locking makes cells immune to
+                 any type of editing. A locked cell can't be changed in any
+                 way until it is unlocked.
+     ru          Unlock a locked cell, making it editable.
+     rv          Valueize the current cell or range. Valueizing removes
+                 expressions, leaving only the values.
+
+==============================================================================
+&INSERT MODE&
      =           Enter a numeric constant or expression.
      <           Enter a left justified string or string expression.
-     \\          Enter a centered label.
+     \           Enter a centered label.
      >           Enter a right justified string or string expression.
-     <TAB>       in insert mode, goes back to edit mode
+     <TAB>       Return to Edit mode from Insert mode.
      <LEFT>, <RIGHT>
-                 Cursor movement with arrows keys
+                 Move the cursor with the arrow keys.
      Keys <ENTER>
-                 Input of numbers, letters and operators
+                 Input numbers, letters and operators.
      <BS>, <DELETE>
-                 Delete the chars after or before cursor
-     <ESC>       Goes back to NORMAL MODE
-     c-r {char}  Being {char} a mark of a cell or range, the range represented by that char gets inserted in the command line
-     c-v         Starts VISUAL MODE. See C-o and C-k commands in VISUAL MODE.
+                 Delete the character after or before the cursor.
+     <ESC>       Go back to NORMAL MODE.
+     c-r {char}  If {char} is a mark of a cell or range, the range represented
+                 is inserted into the command line.
+     c-v         Enter VISUAL MODE. See C-o and C-k commands in VISUAL MODE.
 
-
- &EDIT MODE&
+==============================================================================
+&EDIT MODE&
      e           in normal mode, enters edit mode for editing numeric value of a cell
      E           in normal mode, enters edit mode for editing text value of a cell
      h           moves a char left
@@ -228,8 +280,8 @@ Commands for handling cell content:
      <SPACE>     adds a space under the cursor
      <ENTER>     confirm changes
 
-
- &COMMAND MODE&
+==============================================================================
+&COMMAND MODE&
      <LEFT>, <RIGHT>
                  moves cursor position with arrow keys
      <ENTER>
@@ -598,9 +650,8 @@ Commands for handling cell content:
     <UP>        goes back in command line history
     <DOWN>      goes forward in command line history
 
-
-
- &VISUAL MODE& - Selecting a range
+==============================================================================
+&VISUAL MODE& - Selecting a range
     This mode is used for selecting a range of cells to do an operation.
     You can enter this mode using the 'v' command in NORMAL_MODE or using <C-v> in INSERT and COMMAND mode.
     When entering to this mode using the 'v' command, top left limit of the selected range, and the bottom right limit
@@ -646,6 +697,7 @@ Commands for handling cell content:
                 NOTE: USELOCALE has to be enabled during build.
     c-j         auto resize column width to fit its contents.
 
+==============================================================================
 &MAPPING&
     mapping can be done in any SC-IM file or in .scimrc file in current home directory.
     maps can be added with nmap and imap commands, and they can be removed with
@@ -666,7 +718,7 @@ Commands for handling cell content:
         nmap "j" ":h<cr>"
     with this, 'a' maps to 'j', and only 'j' maps to ':h<cr>'
 
-
+==============================================================================
 &COMMAND MULTIPLIER&
     Commands in NORMAL MODE, VISUAL MODE or EDIT MODE can be multiplied if a number is previously typed.
     Ex. '4j' in NORMAL MODE, translates to 4 times 'j'.
@@ -674,7 +726,7 @@ Commands for handling cell content:
     NOTE: the 'x' command in VISUAL MODE and shift commands in VISUAL MODE and NORMAL MODE, when a range is
     selected, cannot be multiplied.
 
-
+==============================================================================
 &DATES INPUT&
     Dates are internally stored in SC-IM as numeric values, and they are visually
     seen as dates if a date format is applied to the cells that stores them.
@@ -694,7 +746,7 @@ Commands for handling cell content:
     C-d command can be used in NORMAL and VISUAL modes, and acts as the datefmt described above,
     but considering locale's D_FMT format.
 
-
+==============================================================================
 &Other configuration variables&
     - autocalc
     set variable 'autocalc' to recalculate automatically, or set it to '0' to do it manually upon execution of '@' command
@@ -718,7 +770,7 @@ Commands for handling cell content:
     If cell content exceedes column width it gets cutoff to fill column width.
     If overlap is set to true, the content continues to show in the following column.
 
-
+==============================================================================
 &Built-in Range Functions&
     @sum(r)
     @sum(r,e)
@@ -765,6 +817,7 @@ Commands for handling cell content:
     @cols(r)
         Return the number of columns in the specified range.
 
+==============================================================================
 &Built-in Numeric Functions&
     @exp(e)
         Return the exponential function of e.
@@ -851,6 +904,7 @@ Commands for handling cell content:
     @slen(se)
         Returns the length of string expression se.
 
+==============================================================================
 &String Expressions&
     String expressions are made up of constant strings (characters surrounded by double quotation marks), variables (cell
     names, which refer to the cells's label strings or expressions), and string functions.
@@ -870,6 +924,7 @@ Commands for handling cell content:
 
            displays the string ``the lazy dog'' in the cell if the value of A0's string is ``the la''.
 
+==============================================================================
 &Built-in String Functions&
     String functions can be entered typing \"
 
@@ -935,6 +990,7 @@ Commands for handling cell content:
         Convert numeric (particular 10-base nonnegative integer) to a string (256-base number without digit 0)
         see also @ascii
 
+==============================================================================
 &Built-in Date and Time Functions&
 
     @year(e)
@@ -979,7 +1035,7 @@ Commands for handling cell content:
         --txtdelim=","
         --txtdelim=";"
 
-
+==============================================================================
 &External scripts&
 
     SC-IM can read data from a external script, either through a pipeline or redirection.
@@ -1017,6 +1073,4 @@ Commands for handling cell content:
 
     Note that if you set the --output parameter, the --nocurses flag is assumed to be true.
 
-
---
---
+ vim:tw=78:ts=8:ft=help:norl:
