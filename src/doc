@@ -1,13 +1,14 @@
-------------------------------------------------------------------------
-This is a simple HELP page. Press ':q<Enter>' to go back to spreadsheet.
+This is the SC-IM help page. Press ':q<Enter>' to go back to the spreadsheet.
 
 You can use <UP> <DOWN> arrows keys, or 'j' 'k' keys to move through text.
 <SPACE> key moves forward an entire page, while <C-f> and <C-b> moves half page down or up.
 'G' moves to bottom, and <C-a> to the beginning of the text.
 <ENTER> key scrolls one line down, while <DEL> key scrolls one line up, just like in less.
 You can use the '/' command to search for a pattern in the help.
-------------------------------------------------------------------------
+
+==============================================================================
 SC-IM has the following modes:
+
 NORMAL MODE      For navigation and common commands
 INSERT MODE      For entering new cell content (values and expressions)
                  Submodes: = < > \
@@ -18,8 +19,8 @@ COMMAND MODE     ':' key is used for entering this mode. It is used for entering
 VISUAL MODE      'v' key is used for entering this mode. It is used for selecting a range of cells
                  You can also use <C-v> in INSERT and COMMAND MODE for entering this mode.
                  See the section 'Selecting a range' below.
-----------------
 
+==============================================================================
 &NORMAL MODE&
 
 Navigation commands:
@@ -158,7 +159,7 @@ Commands for handling cell content:
      rv          valueize area: remove expressions from the affected range leaving only the values.
      c-j         auto resize column width to fit its contents.
 
-
+==============================================================================
  &INSERT MODE&
      =           Enter a numeric constant or expression.
      <           Enter a left justified string or string expression.
@@ -175,7 +176,7 @@ Commands for handling cell content:
      c-r {char}  Being {char} a mark of a cell or range, the range represented by that char gets inserted in the command line
      c-v         Starts VISUAL MODE. See C-o and C-k commands in VISUAL MODE.
 
-
+==============================================================================
  &EDIT MODE&
      e           in normal mode, enters edit mode for editing numeric value of a cell
      E           in normal mode, enters edit mode for editing text value of a cell
@@ -228,7 +229,7 @@ Commands for handling cell content:
      <SPACE>     adds a space under the cursor
      <ENTER>     confirm changes
 
-
+==============================================================================
  &COMMAND MODE&
      <LEFT>, <RIGHT>
                  moves cursor position with arrow keys
@@ -598,8 +599,7 @@ Commands for handling cell content:
     <UP>        goes back in command line history
     <DOWN>      goes forward in command line history
 
-
-
+==============================================================================
  &VISUAL MODE& - Selecting a range
     This mode is used for selecting a range of cells to do an operation.
     You can enter this mode using the 'v' command in NORMAL_MODE or using <C-v> in INSERT and COMMAND mode.
@@ -646,6 +646,7 @@ Commands for handling cell content:
                 NOTE: USELOCALE has to be enabled during build.
     c-j         auto resize column width to fit its contents.
 
+==============================================================================
 &MAPPING&
     mapping can be done in any SC-IM file or in .scimrc file in current home directory.
     maps can be added with nmap and imap commands, and they can be removed with
@@ -666,7 +667,7 @@ Commands for handling cell content:
         nmap "j" ":h<cr>"
     with this, 'a' maps to 'j', and only 'j' maps to ':h<cr>'
 
-
+==============================================================================
 &COMMAND MULTIPLIER&
     Commands in NORMAL MODE, VISUAL MODE or EDIT MODE can be multiplied if a number is previously typed.
     Ex. '4j' in NORMAL MODE, translates to 4 times 'j'.
@@ -674,7 +675,7 @@ Commands for handling cell content:
     NOTE: the 'x' command in VISUAL MODE and shift commands in VISUAL MODE and NORMAL MODE, when a range is
     selected, cannot be multiplied.
 
-
+==============================================================================
 &DATES INPUT&
     Dates are internally stored in SC-IM as numeric values, and they are visually
     seen as dates if a date format is applied to the cells that stores them.
@@ -694,7 +695,7 @@ Commands for handling cell content:
     C-d command can be used in NORMAL and VISUAL modes, and acts as the datefmt described above,
     but considering locale's D_FMT format.
 
-
+==============================================================================
 &Other configuration variables&
     - autocalc
     set variable 'autocalc' to recalculate automatically, or set it to '0' to do it manually upon execution of '@' command
@@ -718,7 +719,7 @@ Commands for handling cell content:
     If cell content exceedes column width it gets cutoff to fill column width.
     If overlap is set to true, the content continues to show in the following column.
 
-
+==============================================================================
 &Built-in Range Functions&
     @sum(r)
     @sum(r,e)
@@ -765,6 +766,7 @@ Commands for handling cell content:
     @cols(r)
         Return the number of columns in the specified range.
 
+==============================================================================
 &Built-in Numeric Functions&
     @exp(e)
         Return the exponential function of e.
@@ -851,6 +853,7 @@ Commands for handling cell content:
     @slen(se)
         Returns the length of string expression se.
 
+==============================================================================
 &String Expressions&
     String expressions are made up of constant strings (characters surrounded by double quotation marks), variables (cell
     names, which refer to the cells's label strings or expressions), and string functions.
@@ -870,6 +873,7 @@ Commands for handling cell content:
 
            displays the string ``the lazy dog'' in the cell if the value of A0's string is ``the la''.
 
+==============================================================================
 &Built-in String Functions&
     String functions can be entered typing \"
 
@@ -935,6 +939,7 @@ Commands for handling cell content:
         Convert numeric (particular 10-base nonnegative integer) to a string (256-base number without digit 0)
         see also @ascii
 
+==============================================================================
 &Built-in Date and Time Functions&
 
     @year(e)
@@ -979,7 +984,7 @@ Commands for handling cell content:
         --txtdelim=","
         --txtdelim=";"
 
-
+==============================================================================
 &External scripts&
 
     SC-IM can read data from a external script, either through a pipeline or redirection.
@@ -1017,6 +1022,4 @@ Commands for handling cell content:
 
     Note that if you set the --output parameter, the --nocurses flag is assumed to be true.
 
-
---
---
+ vim:tw=78:ts=8:ft=help:norl:
