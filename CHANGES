@@ -35,6 +35,13 @@ v0.4.0
 * csv import now use isnumeric function
 * change in '#' command
 * new @replace string function
+* Change in lex to handle WORD
+* Fix in yyerror function
+* :set command improvement
+* Added set to gram.y
+* doc improvement
+* Fix when opening files with slash
+
 
 v0.3.0
 * FIX when importing large CSV files
