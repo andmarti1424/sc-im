@@ -359,8 +359,15 @@ void load_sc() {
     } else {
         wordexp_t p;
         wordexp(curfile, &p, 0);
-        if (! readfile(p.we_wordv[0], 1) && ! atoi(get_conf_value("nocurses"))) {
-            sc_info("New file: \"%s\"", p.we_wordv[0]);     // file passed to scim executable does not exists
+
+        int c;
+        char word[PATHLEN] = "";
+        for (c=0; c < p.we_wordc; c++) {
+            if (c) sprintf(word + strlen(word), " ");
+            sprintf(word + strlen(word), "%s", p.we_wordv[c]);
+        }
+        if (! readfile(word, 1) && ! atoi(get_conf_value("nocurses"))) {
+            sc_info("New file: \"%s\"", word);     // file passed to scim executable does not exists
         }
         wordfree(&p);
         EvalAll();                                 // we eval formulas
