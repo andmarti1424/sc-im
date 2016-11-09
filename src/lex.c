@@ -16,6 +16,7 @@
 #include "lex.h"
 #include "sc.h"
 #include "conf.h"
+#include "utils/string.h"
 
 typedef int bool;
 enum { false, true };
@@ -154,16 +155,17 @@ int yylex() {
                     if (*ptr) *ptr = '\0';
 
                     ret = MAPWORD;
-
                 } else {
                     struct range * r;
-                    if (!find_range(tokenst, tokenl, (struct ent *)0, (struct ent *)0, &r)) {
+                    if (! find_range(tokenst, tokenl, (struct ent *)0, (struct ent *)0, &r)) {
                         yylval.rval.left = r->r_left;
                         yylval.rval.right = r->r_right;
                         if (r->r_is_range)
                             ret = RANGE;
                         else
                             ret = VAR;
+                    } else if ( str_in_str(line, ":") == -1) {
+                        yylval.sval = tokenst;
                     } else {
                         linelim = p-line;
                         yyerror("Unintelligible word");
@@ -266,7 +268,7 @@ int yylex() {
         if (*p)
             p++;
         ret = STRING;
- 
+
     } else if (*p=='[') {
         while (*p && *p!=']')
             p++;
@@ -331,7 +333,7 @@ int plugin_exists(char *name, int len, char *path) {
  * length, convert column name ("A"-"Z" or "AA"-"ZZ") to a column number (0-N).
  * Never mind if the column number is illegal (too high).  The procedure's name
  * and function are the inverse of coltoa().
- * 
+ *
  * Case-insensitivity is done crudely, by ignoring the 040 bit.
  */
 

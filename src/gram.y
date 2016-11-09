@@ -19,6 +19,7 @@
 #include "screen.h"
 #include "undo.h"
 #include "dep_graph.h"
+#include "utils/dictionary.h"
 
 void yyerror(char *err);               // error routine for yacc (gram.y)
 int yylex();
@@ -41,7 +42,7 @@ int yylex();
     struct ent_ptr ent;
     struct enode * enode;
     char * sval;
-    struct range_s rval; // no debiera usarse en futuro
+    struct range_s rval;
 }
 
 %type <ent> var
@@ -100,7 +101,6 @@ token S_YANKCOL
 %token S_SORT
 %token S_FILTERON
 %token S_GOTO
-%token S_SET
 %token S_LOCK
 %token S_UNLOCK
 %token S_DEFINE
@@ -196,8 +196,38 @@ token S_YANKCOL
 %token S_COLOR
 %token S_CELLCOLOR
 %token S_REDEFINE_COLOR
+%token S_SET
 %token S_FCOPY
 %token S_FSUM
+
+%token K_AUTOCALC
+%token K_NOAUTOCALC
+%token K_DEBUG
+%token K_NODEBUG
+%token K_EXTERNAL_FUNCTIONS
+%token K_NOEXTERNAL_FUNCTIONS
+%token K_HALF_PAGE_SCROLL
+%token K_NOHALF_PAGE_SCROLL
+%token K_NOCURSES
+%token K_CURSES
+%token K_NUMERIC
+%token K_NONUMERIC
+%token K_NUMERIC_DECIMAL
+%token K_NONUMERIC_DECIMAL
+%token K_NUMERIC_ZERO
+%token K_NONUMERIC_ZERO
+%token K_OVERLAP
+%token K_NOOVERLAP
+%token K_QUIT_AFTERLOAD
+%token K_NOQUIT_AFTERLOAD
+%token K_XLSX_READFORMULAS
+%token K_NOXLSX_READFORMULAS
+
+%token K_TM_GMTOFF
+%token K_NEWLINE_ACTION
+
+
+
 
 %token K_ERROR
 %token K_INVALID
@@ -264,25 +294,24 @@ token S_YANKCOL
 %token K_VLOOKUP
 %token K_INDEX
 %token K_STINDEX
-%token K_AUTO
-%token K_AUTOCALC
-%token K_AUTOINSERT
-%token K_AUTOWRAP
-%token K_CSLOP
-%token K_BYROWS
-%token K_BYCOLS
-%token K_OPTIMIZE
-%token K_ITERATIONS
-%token K_NUMERIC
-%token K_PRESCALE
-%token K_EXTFUN
-%token K_CELLCUR
-%token K_TOPROW
-%token K_COLOR
-%token K_COLORNEG
-%token K_COLORERR
-%token K_BRAILLE
 /*
+token K_AUTO
+token K_AUTOINSERT
+token K_AUTOWRAP
+token K_CSLOP
+token K_BYROWS
+token K_BYCOLS
+token K_OPTIMIZE
+token K_ITERATIONS
+token K_NUMERIC
+token K_PRESCALE
+token K_EXTFUN
+token K_CELLCUR
+token K_TOPROW
+token K_COLOR
+token K_COLORNEG
+token K_COLORERR
+token K_BRAILLE
 token K_BLACK
 token K_RED
 token K_GREEN
@@ -454,7 +483,7 @@ command:
                                    scxfree($3); }
     |    S_GOTO '%' STRING       { str_search($3, 0, 0, maxrow, maxcol, 2, 1);
                                    scxfree($3); }
-    |    S_GOTO WORD             { /* don't repeat last goto on "unintelligible word" */ ; }
+ //   |    S_GOTO WORD             { /* don't repeat last goto on "unintelligible word" */ ; }
 
     |    S_LOCK var_or_range     { lock_cells($2.left.vp, $2.right.vp); }
     |    S_UNLOCK var_or_range   { unlock_cells($2.left.vp, $2.right.vp); }
@@ -518,6 +547,11 @@ command:
     |    S_PAD NUMBER COL            { pad($2, 0, $3, maxrow, $3); }
     |    S_PAD NUMBER var_or_range   { pad($2, $3.left.vp->row, $3.left.vp->col, $3.right.vp->row, $3.right.vp->col); }
 
+/*  |    S_SET STRING                { parse_str(user_conf_d, $2);
+                                       scxfree($2);
+                                     }
+*/
+    |    S_SET setlist               { } //sc_info("INT: Config value changed: %s", $2); }
 /*
     |    S_DEFINE strarg                { struct ent_ptr arg1, arg2;
                                           arg1.vp = lookat(showsr, showsc);
@@ -853,6 +887,7 @@ num:     NUMBER           { $$ = (double) $1; }
     |    '-' num          { $$ = -$2; }
     |    '+' num          { $$ = $2; }
     ;
+
 strarg:  STRING           { $$ = $1; }
     |    var              {
                             char *s, *s1;
@@ -866,118 +901,73 @@ strarg:  STRING           { $$ = $1; }
     ;
 
 
-/* allows >=1 'setitem's to be listed in the same 'set' command
+/* allows >=1 'setitem's to be listed in the same 'set' command */
 setlist :
-    |    setlist    setitem
-    ;
+    |   setlist setitem
+;
 
-// things that you can 'set'
-setitem    :
-        //K_AUTO            { setauto(1); }
-        //|    K_AUTOCALC        { setauto(1); }
-    //|    '~' K_AUTO        { setauto(0); }
-    //|    '~' K_AUTOCALC        { setauto(0); }
-    //|    '!' K_AUTO        { setauto(0); }
-    //|    '!' K_AUTOCALC        { setauto(0); }
-    K_BYCOLS        { setorder(BYCOLS); }
+/* things that you can 'set' */
+setitem :
+         K_OVERLAP '=' NUMBER            {  if ($3 == 0) parse_str(user_conf_d, "overlap=0");
+                                            else         parse_str(user_conf_d, "overlap=1"); }
+    |    K_OVERLAP                       {               parse_str(user_conf_d, "overlap=1"); }
+    |    K_NOOVERLAP                     {               parse_str(user_conf_d, "overlap=0"); }
+    |    K_AUTOCALC                      {               parse_str(user_conf_d, "autocalc=1"); }
+    |    K_AUTOCALC '=' NUMBER           {  if ($3 == 0) parse_str(user_conf_d, "autocalc=0");
+                                            else         parse_str(user_conf_d, "autocalc=1"); }
+    |    K_NOAUTOCALC                    {               parse_str(user_conf_d, "autocalc=0"); }
+    |    K_DEBUG                         {               parse_str(user_conf_d, "debug=1"); }
+    |    K_DEBUG '=' NUMBER              {  if ($3 == 0) parse_str(user_conf_d, "debug=0");
+                                            else         parse_str(user_conf_d, "debug=1"); }
+    |    K_NODEBUG                       {               parse_str(user_conf_d, "debug=0"); }
+    |    K_EXTERNAL_FUNCTIONS            {               parse_str(user_conf_d, "external_functions=1"); }
+    |    K_EXTERNAL_FUNCTIONS '=' NUMBER {  if ($3 == 0) parse_str(user_conf_d, "external_functions=0");
+                                            else         parse_str(user_conf_d, "external_functions=1"); }
+    |    K_NOEXTERNAL_FUNCTIONS          {               parse_str(user_conf_d, "external_functions=0"); }
+    |    K_HALF_PAGE_SCROLL              {               parse_str(user_conf_d, "half_page_scroll=1"); }
+    |    K_HALF_PAGE_SCROLL '=' NUMBER   {  if ($3 == 0) parse_str(user_conf_d, "half_page_scroll=0");
+                                            else         parse_str(user_conf_d, "half_page_scroll=1"); }
+    |    K_NOHALF_PAGE_SCROLL            {               parse_str(user_conf_d, "half_page_scroll=0"); }
+    |    K_QUIT_AFTERLOAD                {               parse_str(user_conf_d, "quit_afterload=1"); }
+    |    K_QUIT_AFTERLOAD '=' NUMBER     {  if ($3 == 0) parse_str(user_conf_d, "quit_afterload=0");
+                                            else         parse_str(user_conf_d, "quit_afterload=1"); }
+    |    K_NOQUIT_AFTERLOAD              {               parse_str(user_conf_d, "quit_afterload=0"); }
+    |    K_XLSX_READFORMULAS             {               parse_str(user_conf_d, "xlsx_readformulas=1"); }
+    |    K_XLSX_READFORMULAS '=' NUMBER  {  if ($3 == 0) parse_str(user_conf_d, "xlsx_readformulas=0");
+                                            else         parse_str(user_conf_d, "xlsx_readformulas=1"); }
+    |    K_NOXLSX_READFORMULAS           {               parse_str(user_conf_d, "xlsx_readformulas=0"); }
+    |    K_NOCURSES                      {               parse_str(user_conf_d, "nocurses=1"); }
+    |    K_NOCURSES '=' NUMBER           {  if ($3 == 0) parse_str(user_conf_d, "nocurses=0");
+                                            else         parse_str(user_conf_d, "nocurses=1"); }
+    |    K_CURSES                        {               parse_str(user_conf_d, "nocurses=0"); }
+    |    K_NUMERIC                       {               parse_str(user_conf_d, "numeric=1"); }
+    |    K_NUMERIC '=' NUMBER            {  if ($3 == 0) parse_str(user_conf_d, "numeric=0");
+                                            else         parse_str(user_conf_d, "numeric=1"); }
+    |    K_NONUMERIC                     {               parse_str(user_conf_d, "numeric=0"); }
+    |    K_NUMERIC_DECIMAL               {               parse_str(user_conf_d, "numeric_decimal=1"); }
+    |    K_NUMERIC_DECIMAL '=' NUMBER    {  if ($3 == 0) parse_str(user_conf_d, "numeric_decimal=0");
+                                            else         parse_str(user_conf_d, "numeric_decimal=1"); }
+    |    K_NONUMERIC_DECIMAL             {               parse_str(user_conf_d, "numeric_decimal=0"); }
+    |    K_NUMERIC_ZERO                  {               parse_str(user_conf_d, "numeric_zero=1"); }
+    |    K_NUMERIC_ZERO '=' NUMBER       {  if ($3 == 0) parse_str(user_conf_d, "numeric_zero=0");
+                                            else         parse_str(user_conf_d, "numeric_zero=1"); }
+    |    K_NONUMERIC_ZERO                {               parse_str(user_conf_d, "numeric_zero=0"); }
+    |    K_NEWLINE_ACTION                {               parse_str(user_conf_d, "newline_action=0"); }
+    |    K_NEWLINE_ACTION '=' WORD       {
+                                           char * s = (char *) $3;
+                                           if (s[0] =='j') parse_str(user_conf_d, "newline_action=j");
+                                           else if (s[0] =='l')
+                                                         parse_str(user_conf_d, "newline_action=l");
+                                         }
+    |    K_NEWLINE_ACTION '=' NUMBER     { if ($3 == 0)  parse_str(user_conf_d, "newline_action=0"); }
+    |    K_TM_GMTOFF                     {               parse_str(user_conf_d, "tm_gmtoff=-10800"); }
+    |    K_TM_GMTOFF '=' num             {
+                                                         char * s = scxmalloc((unsigned) BUFFERSIZE);
+                                                         sprintf(s, "tm_gmtoff=%d", (int) $3);
+                                                         parse_str(user_conf_d, s);
+                                                         scxfree(s);
+                                         }
 
-    |    K_BYROWS        { setorder(BYROWS); }
-    |    K_OPTIMIZE        { optimize = 1; }
-    |    '~' K_OPTIMIZE        { optimize = 0; }
-    |    '!' K_OPTIMIZE        { optimize = 0; }
-    //|    K_NUMERIC        { numeric = 1; }
-    //|    '~' K_NUMERIC        { numeric = 0; }
-    //|    '!' K_NUMERIC        { numeric = 0; }
-    |    K_PRESCALE        { prescale = 0.01; }
-    |    '~' K_PRESCALE        { prescale = 1.0; }
-    |    '!' K_PRESCALE        { prescale = 1.0; }
-    //|    K_CELLCUR        { showcell = 1; }
-    //|    '~' K_CELLCUR        { showcell = 0; }
-    //|    '!' K_CELLCUR        { showcell = 0; }
-    //|    K_TOPROW        { showtop = 1; }
-    //|    '~' K_TOPROW        { showtop = 0; }
-    //|    '!' K_TOPROW        { showtop = 0; }
-    //|    K_AUTOINSERT        { autoinsert = 1; }
-    //|    '~' K_AUTOINSERT    { autoinsert = 0; }
-    //|    '!' K_AUTOINSERT    { autoinsert = 0; }
-    //|    K_AUTOWRAP        { autowrap = 1; }
-    //|    '~' K_AUTOWRAP        { autowrap = 0; }
-    //|    '!' K_AUTOWRAP        { autowrap = 0; }
-    |    K_CSLOP            { cslop = 0; }
-    |    '~' K_CSLOP        { cslop = 1; }
-    |    '!' K_CSLOP        { cslop = 1; }
-    |    K_COLOR            { color = 1;
-                      if (usecurses && has_colors()) {
-                        color_set(1, NULL);
-                        bkgd(COLOR_PAIR(1) | ' ');
-                        FullUpdate++;
-                      }
-                    }
-    |    '!' K_COLOR        { color = 0;
-                      if (usecurses && has_colors()) {
-                        color_set(0, NULL);
-                        bkgd(COLOR_PAIR(0) | ' ');
-                      }
-                    }
-    |    '~' K_COLOR        { color = 0;
-                      if (usecurses && has_colors()) {
-                        color_set(0, NULL);
-                        bkgd(COLOR_PAIR(0) | ' ');
-                      }
-                    }
-    //|    K_COLORNEG        { colorneg = 1; }
-    //|    '!' K_COLORNEG        { colorneg = 0; }
-    //|    '~' K_COLORNEG        { colorneg = 0; }
-    //|    K_COLORERR        { colorerr = 1; }
-    //|    '!' K_COLORERR        { colorerr = 0; }
-    //|    '~' K_COLORERR        { colorerr = 0; }
-    //|    K_BRAILLE        { braille = 1; }
-    //|    '!' K_BRAILLE        { braille = 0; }
-    //|    '~' K_BRAILLE        { braille = 0; }
-    |    K_ITERATIONS '=' NUMBER    { setiterations($3); }
-    |    K_TBLSTYLE '=' NUMBER    { tbl_style = $3; }
-    |    K_TBLSTYLE '=' K_TBL    { tbl_style = TBL; }
-    |    K_TBLSTYLE '=' K_LATEX    { tbl_style = LATEX; }
-    |    K_TBLSTYLE '=' K_SLATEX    { tbl_style = SLATEX; }
-    |    K_TBLSTYLE '=' K_TEX    { tbl_style = TEX; }
-    |    K_TBLSTYLE '=' K_FRAME    { tbl_style = FRAME; }
-    |    K_RNDTOEVEN        { rndtoeven = 1; FullUpdate++; }
-    |    '!' K_RNDTOEVEN        { rndtoeven = 0; FullUpdate++; }
-    |    '~' K_RNDTOEVEN        { rndtoeven = 0; FullUpdate++; }
-    //|    K_CRACTION '=' NUMBER    { craction = $3; }
-    //|    K_ROWLIMIT '=' NUMBER    { rowlimit = $3; }
-    //|    K_COLLIMIT '=' NUMBER    { collimit = $3; }
-    //|    K_PAGESIZE '=' NUMBER    { pagesize = $3; }
-    |    K_LOCALE        {
-#ifdef USELOCALE
-                      struct  lconv *locstruct;
-                      char    *loc;
-
-                      loc = setlocale(LC_ALL, "");
-                      if (loc != NULL) {
-                        locstruct = localeconv();
-                        dpoint = (locstruct->decimal_point)[0];
-                        thsep = (locstruct->thousands_sep)[0];
-                      }
-                      else {
-                        dpoint = '.';
-                        thsep = ',';
-                      }
-                      FullUpdate++;
-#else
-                      error("Locale support not available");
-#endif
-                    }
-    |    '!' K_LOCALE        {
-                      dpoint = '.';
-                      thsep = ',';
-                      FullUpdate++;
-                    }
-    |    '~' K_LOCALE        {
-                      dpoint = '.';
-                      thsep = ',';
-                      FullUpdate++;
-                    }
       ;
 
 /* types of errors, to 'goto'
