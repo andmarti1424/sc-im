@@ -769,10 +769,7 @@ int calc_offscr_sc_cols() {
 }
 
 // error routine for yacc (gram.y)
-int seenerr;
-void yyerror(char *err) {
-    if (seenerr) return;
-    seenerr++;
+void yyerror(char * err) {
     mvwprintw(input_win, 1, 0, "%s: %.*s<=%s", err, linelim, line, line + linelim);
     wrefresh(input_win);
     return;
