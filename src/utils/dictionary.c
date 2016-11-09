@@ -36,7 +36,7 @@ void put(struct dictionary * d, char * k, char * v) {
    } else if ( get(d, k) != '\0' ) {
        nl = get_nl(d, k);
        free(nl->val);
-   
+
    // If the key doesn't exists, Create it.
    } else {
        nl = (struct nlist *) malloc(sizeof(struct nlist));
