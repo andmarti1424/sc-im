@@ -50,6 +50,13 @@ SC-IM stands for Spreadsheet Calculator Improvised. :-)
     make install
 ```
 
+* Build and run from Docker image:
+```
+    docker build -t scim .
+    docker run -it --rm -v $PWD:/work -w /work scim
+    # or edit file.sc in current directory
+    docker run -it --rm -v $PWD:/work -w /work scim scim file.sc
+```
 
 ### Donations
 
