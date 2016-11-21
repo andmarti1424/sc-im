@@ -20,7 +20,7 @@ SC-IM has the following modes:
    INSERT MODE:  Use the '=', '<', '>', or '\' to go to Insert mode, where you
                  can enter new values and expressions into cells.
      EDIT MODE:  Use the 'e' or 'E' keys to go to Edit mode and enter a single
-                 line, Vi-like, command to modify cell content.
+                 line, Vi-like, command to modify cell content
                  and expressions.  The 'e' and 'E' keys enter this mode.
   COMMAND MODE:  Use the ':' key to enter Command mode. This is for entering
                  special commands such as quitting the app and saving files.
@@ -42,8 +42,8 @@ Navigation commands:
      $           Go right to the last valid column of the current row.
      b           Go back to the previous valid cell.
      w           Go forward to the next valid cell.
-     'c          Go to the cell or range marked previously as c. See the m
-                 command for details.
+     '{a-zA-Z}   Go to the cell or range marked previously with the character.
+                 See 'm' for details.
      gab24       Go to cell AB24.  (There is no need to press <ENTER>.)
      g0          Go to the leftmost column visible on screen.
      g$          Go to the rightmost column visible on screen.
@@ -77,16 +77,14 @@ Navigation commands:
 Commands for handling cell content:
      x     dd    Delete the current selected cell or range and save its
                  content in the yankbuffer.
-     m           Followed by any lowercase letter, mark the current cell or
-                 selected range with that letter.
+     m{a-zA-Z}   Mark the current cell or selected range with that letter.
                  NOTE: When a mark is changed, all ranges that use that mark
                  are deleted.
-     c           Followed by a lowercase letter that represents a mark, copy a
-                 marked cell or range to the current position, adjusting row
-                 and column references in its numeric or string expression, if
-                 any.
-     R           Followed by two lowercase letters that represent marks of
-                 cell, creates a range using those marks and selects it.
+     c{a-zA-Z}   Copy the marked cell or range to the current position,
+                 adjusting row and column references in its numeric or string
+                 expression, if any.
+     R{a-zA-Z}{a-zA-Z}
+                 Select the range defined by the two marks.
                  NOTE: If a range already exists, it is replaced with the new
                  values.
 
@@ -185,7 +183,7 @@ Commands for handling cell content:
                  of the table, and terminate at the current cell if the string
                  or number is not found.
 
-                 Ex.: Type '/4' to look for cells containing the value 4.
+                 Example: Type '/4' to look for cells containing the value 4.
                  Or type '/"value"' to look for cells that has "value" as
                  label content.
                  You can quote a regular expression, and SC-IM will search for
@@ -223,199 +221,216 @@ Commands for handling cell content:
      <BS>, <DELETE>
                  Delete the character after or before the cursor.
      <ESC>       Go back to NORMAL MODE.
-     c-r {char}  If {char} is a mark of a cell or range, the range represented
-                 is inserted into the command line.
+     c-r{a-zA-Z}
+                 If the character is a mark of a cell or range, the range
+                 represented is inserted into the field.
      c-v         Enter VISUAL MODE. See C-o and C-k commands in VISUAL MODE.
 
 ==============================================================================
 &EDIT MODE&
-     e           in normal mode, enters edit mode for editing numeric value of a cell
-     E           in normal mode, enters edit mode for editing text value of a cell
-     h           moves a char left
-     l           moves a char right
-     w           moves to beginning of next word
-     e           if in end of a word, moves to end of next word. otherwise, moves to end of word under the cursor
-     b           if in beginning of a word, moves to beginning of previous word. otherwise, moves to beginning of word under the cursor
-     0           moves to bol
-     $           moves to eol
-     f{char}     moves to next occurrence of {char} to the right
-     r{char}     replaces char under the cursor with {char}
-     R{word}     Each character you type replaces an existing character, starting with the character under the cursor.
-                 ESC key or ENTER key must be pressed when finished typing the new word.
+     e           In normal mode, enter Edit mode to edit a numeric value.
+     E           In normal mode, enter Edit mode to edit a text value.
+     h           Move a character left.
+     l           Move a character right.
+     w           Move to the beginning of the next word.
+     e           If at the end of a word, move to the end of the next word.
+                 Otherwise, move to the end of word under the cursor.
+     b           If at the beginning of a word, move to beginning of the
+                 previous word. Otherwise, move to beginning of word under the
+                 cursor.
+     0           Move to the beginning of the line.
+     $           Move to the end of the line.
+     f{char}     Move to the next occurrence of {char} to the right.
+     r{char}     Replaces the character under the cursor with {char}.
+     R{word}     Each character you type replaces an existing character,
+                 starting with the character under the cursor.
+                 ESC key or ENTER key must be pressed when finished typing the
+                 new word.
 
-     de          deletes until end of word
-     dw          deletes until beginning of next word
-     db          if in beginning of a word, deletes until beginning of previous word. otherwise, deletes until beginning of word under the cursor
-     daw         deletes word under the cursor
-     dE          deletes until end of WORD
-     dW          deletes until beginning of next WORD
-     dB          if in beginning of a word, deletes until beginning of previous WORD. otherwise, deletes until beginning of WORD under the cursor
-     daW         deletes WORD under the cursor
-     dl          deletes char under the cursor
-     d<RIGHT>    deletes char under the cursor
-     dh          deletes char before the cursor
-     d<LEFT>     deletes char before the cursor
+     de          Delete until the end of the word.
+     dw          Delete until the beginning of the next word.
+     db          If at the beginning of a word, delete until the beginning of
+                 the previous word. Otherwise, delete until the beginning of
+                 the word under the cursor.
+     daw         Delete the word under the cursor.
+     dE          Delete until the end of WORD.
+     dW          Delete until the beginning of the next WORD.
+     dB          If at the beginning of a word, delete until the beginning of
+                 previous WORD. Otherwise, delete until the beginning of the
+                 WORD under the cursor.
+     daW         Delete the WORD under the cursor.
+     dl          Delete the character under the cursor.
+     d<RIGHT>    Delete the character under the cursor.
+     dh          Delete the character before the cursor.
+     d<LEFT>     Delete the character before the cursor.
 
-     ce          same as de but then enters insert mode
-     cw          same as dw but then enters insert mode
-     cb          same as db but then enters insert mode
-     caw         same as daw but then enters insert mode
-     cE          same as dE but then enters insert mode
-     cW          same as dW but then enters insert mode
-     cB          same as dB but then enters insert mode
-     caW         same as daW but then enters insert mode
-     cl          same as dl but then enters insert mode
-     c<RIGHT>    same as d<RIGHT> but then enters insert mode
-     ch          same as dh but then enters insert mode
-     c<LEFT>     same as d<LEFT> but then enters insert mode
+     ce          Same as "de", then enter Insert mode.
+     cw          Same as "dw", then enter Insert mode.
+     cb          Same as "db", then enter Insert mode.
+     caw         Same as "daw", then enter Insert mode.
+     cE          Same as "dE", then enter Insert mode.
+     cW          Same as "dW", then enter Insert mode.
+     cB          Same as "dB", then enter Insert mode.
+     caW         Same as "daW", then enter Insert mode.
+     cl          Same as "dl", then enter Insert mode.
+     c<RIGHT>    Same as "d<RIGHT>", then enter Insert mode.
+     ch          Same as "dh", then enter Insert mode.
+     c<LEFT>     Same as "d<LEFT>", then enter Insert mode.
 
-     x           deletes char under the cursor
-     X           deletes char before the cursor
-     i or =      goes back to insert mode
-     a           appends a char after the cursor
-     s           deletes a char under the cursor and enters insert mode
-     A           append at eol
-     I           append at bol
-     D           deletes from current cursor position to end of line
-     <SPACE>     adds a space under the cursor
-     <ENTER>     confirm changes
+     x           Delete the character under the cursor.
+     X           Delete the character before the cursor.
+     i or =      Go back to Insert mode.
+     a           Append a character after the cursor.
+     s           Delete a character under the cursor, then enter Insert mode.
+     A           Append at the end of the line.
+     I           Append at the beginning of the line.
+     D           Delete from the current cursor position to end of line.
+     <SPACE>     Add a space under the cursor.
+     <ENTER>     Confirm changes.
 
 ==============================================================================
 &COMMAND MODE&
      <LEFT>, <RIGHT>
-                 moves cursor position with arrow keys
+                 Move the cursor position with the arrow keys.
+
      <ENTER>
-                 confirm a command
+                 Confirm a command.
 
      <DELETE>, <BS>
-                 deletes char under the cursor or before cursor position
+                 Delete the character under the cursor, or before the cursor.
 
      <HOME>, <END>
-                 moves cursor to beginning of line or end of line
+                 Move the cursor to the beginning or end of the line.
 
-     <TAB>       completes a command that begins with the text already entered in the command line
+     <TAB>       Complete a command that begins with the text already entered
+                 in the command line.
 
      <C-w>, <C-b>
-                 moves forward or backwards a word
+                 Move forward or backwards a word.
 
      <C-f>
-                 current cell format (if exists) gets pasted in commandline.
+                 Paste the current cell format (if any) to the command line.
 
      <C-v>       Starts VISUAL MODE. See C-o and C-k commands in VISUAL MODE.
 
-     :w          saves current spreadsheet
-     :w foo      save current spreadsheet with 'foo' filename
-     :w! foo     save current spreadsheet with 'foo' filename, forcing rewrite if 'foo' file already exists
+     :w          Save the current spreadsheet.
+     :w {file}   Save the current spreadsheet as {file}.
+     :w! {file}  Save the current spreadsheet as {file}, forcing an overwrite
+                 if {file} already exists.
 
-     :h          show this help
-     :help       show this help
+     :h          Show this help.
+     :help       Show this help.
 
-     :q          quit
-     :quit       same as the previous
-     :q!         quit ignoring changes since last save
-     :quit!      same as the previous
+     :q[uit]     Quit SC-IM.
+     :q[uit]!    Quit SC-IM, ignoring unsaved changes.
 
-     :load name.sc
-                 load file called 'name.sc' into SC-IM database
-     :load! name.sc
-                 same as previous, but ignoring changes done over the current loaded spreadsheet.
+     :load {file}
+                 Load {file} into the SC-IM database.
+     :load! {file}
+                 Same as previous, but ignore changes done to the current
+                 loaded spreadsheet.
 
-     :x          saves current spreadsheet and quit app
+     :x          Save the current spreadsheet and quit SC-IM.
 
-     :x foo      saves current spreadsheet with 'foo' filename, and quit app
+     :x {file}   Save the current spreadsheet to {file} and quit SC-IM.
 
-     :x! foo     same as previous, but if 'foo' file already exists, it gets overwritten
+     :x! {file}  Like ":x", but overwrite {file} if it exists.
 
-     :e csv      export current spreadsheet to csv format.
-                 the name of the file that is created comes from the current open spreadsheet.
-                 if a range is selected, only that range is exported.
+     :e tab      Export the current spreadsheet to a tab-separated file.
+                 The name of the created file comes from the current
+                 spreadsheet, with ".tab" appended.
+                 If a range is selected, only that range is exported.
 
-     :e tab      export current spreadsheet to tab delimited file.
-                 the name of the file that is created comes from the current open spreadsheet.
-                 if a range is selected, only that range is exported.
+     :e txt      Export current spreadsheet to plain text.
+                 If a range is selected, only that range is exported.
 
-     :e txt      export current spreadsheet to plain text.
-                 if a range is selected, only that range is exported.
+     :e csv {file}
+                 Export the current spreadsheet to comma-separated file {file}.
 
-     :e csv name
-                 export current spreadsheet to csv file. 'name' is the name of the file to be generated
+     :e! csv {file}
+                 Like ":e csv", but overwrite {file} if it exists.
 
-     :e! csv name
-                 same as previous, but forcing the rewrite of file 'name' if it exists
+     :e tab {file}
+                 Export the current spreadsheet to tab-separated file {file}.
 
-     :e tab name
-                 export current spreadsheet to tab delimited file. 'name' is the name of the file to be generated
+     :e! tab {file}
+                 Like ":e tab", but overwrite {file} if it exists.
+                 If a range is selected, only that range is exported.
 
-     :e! tab name
-                 same as previous, but forcing the rewrite of file 'name' if it exists.
-                 NOTE: if a range is selected, its content are exported. if not, the entire spreadsheet is exported
+     :e txt {file}
+                 Export the current spreadsheet to plain text file {file}.
 
-     :e txt name
-                 export current spreadsheet to plain text. 'name' is the name of the file to be generated
+     :e! txt {file}
+                 Like ":e txt", but overwrite {file} if it exists.
 
-     :e! txt name
-                 same as previous, but forcing the rewrite of file 'name' if it exists.
+     :i csv {file}
+                 Import comma-separated file {file} to SC-IM's buffer.
 
-     :i csv name
-                 import a csv delimited file called 'name' to SC-IM.
+     :i tab {file}
+                 Import tab-separated file {file} to SC-IM's buffer.
 
-     :i tab name
-                 import a tab delimited file called 'name' to SC-IM.
+     :i xls {file}
+                 Import xls file {file} to SC-IM's buffer.
 
-     :i xls name
-                 import a xls file called 'name' to SC-IM.
-
-     :i xlsx name
-                 import a xlsx file called 'name' to SC-IM.
-                 You can set xlsx_readformulas variable and SC-IM will try to import formulas,
+     :i xlsx {file}
+                 Import xlsx file {file} to SC-IM's buffer.
+                 If 'xlsx_readformulas' is set, SC-IM tries to import formulas,
                  rather than the final values of a cell.
 
-     :i! xlsx name
-                 same as previous, but ignoring changes since last save.
+     :i! xlsx {file}
+                 Like ":i xlsx", but overwrite changes since last save.
 
-     :version    shows SC-IM version number
+     :version    Show SC-IM version number.
 
-     :refresh    refreshes UI. acts just like C-l command of NORMAL_MODE.
+     :refresh    Refresh the UI. Acts like the <C-l> command of NORMAL_MODE.
 
-     :set        changes a configuration parameter in the format of key value.
-                 example:    :set half_page_scroll=0 other_key=its_value
-                 if no key is specified, shows all configuration variables and its values.
+     :set        Show all configuration options and their values.
 
-     :showmaps   shows all mappings
+     :set {option}={value}
+                 Set a configuration option to {value}. The arguments may be
+                 repeated.
+                 Example:    :set half_page_scroll=0 numeric_zero=1
 
-     :nmap "string1" "string2"
-                 Map the key sequence string1 to string2. This mapping takes effect only in NORMAL_MODE.
-                 ex. :nmap "H" ":h<cr>"
+     :showmaps   Show all key mappings.
 
-     :imap "string1" "string2"
-                 Map the key sequence string1 to string2. This mapping takes effect only in INSERT_MODE.
-                 ex. :imap "<C-f>" "format"
+     :nmap {lhs} {rhs}
+                 Map the key sequence {lhs} to {rhs} This mapping takes effect
+                 only in NORMAL_MODE.
+                 Example:  :nmap "H" ":h<cr>"
 
-     :nnoremap "string1" "string2"
-                 this is the non recursive version of nmap. See NOTES on MAPPING below
+     :imap {lhs} {rhs}
+                 Map the key sequence {lhs} to {rhs} This mapping takes effect
+                 only in INSERT_MODE.
+                 Example:  :imap "<C-f>" "format"
 
-     :inoremap "string1" "string2"
-                 this is the non recursive version of imap. See NOTES on MAPPING below
+     :nnoremap {lhs} {rhs}
+                 This is the non-recursive version of ":nmap". See NOTES on
+                 MAPPING below
 
-     :nunmap "string1"
-                 the map sequence string1 that takes effect on NORMAL_MODE is removed
+     :inoremap {lhs} {rhs}
+                 This is the non-recursive version of ":imap". See NOTES on
+                 MAPPING below
 
-     :iunmap "string1"
-                 the map sequence string1 that takes effect on INSERT_MODE is removed
+     :nunmap {lhs}
+                 Remove the map sequence {lhs} that takes effect in
+                 NORMAL_MODE.
 
-     :fill range initial_number increment_number
-                 fill a range with values. the first cell of the range will have
-                 the initial_number and each row below will increment the <initial_value>
-                 in increments of <increment_number>.
-                 ex.:   :fill A0:A100 1 0.25
+     :iunmap {lhs}
+                 Remove the map sequence {lhs} that takes effect in
+                 INSERT_MODE.
 
-     :format "string"
-           sets current cell format (or cells format of a selected range).
-           string parameter contains the format to use to convert the number,
-           and can be one or more of these:
+     :fill {range} {initial_number} {increment_number}
+                 Fill range {range} with values. The first cell of the range
+                 will have {initial_number} and each successive cell increments
+                 by {increment_number}.
+                 Example:   :fill A0:A100 1 0.25
+
+     :format "{format_string}"
+           Set the numeric format for the selected cell or range.
+           {format_string} can contain one or more of these:
 
            #    Digit placeholder.  If the number has fewer digits on either
-                side of the decimal point than  there are '#' characters in
+                side of the decimal point than there are '#' characters in
                 the format, the extra '#' characters are ignored.  The number
                 is rounded to the number of digit placeholders as there are
                 to the right of the decimal point.  If there are more digits
@@ -438,9 +453,9 @@ Commands for handling cell content:
                 leading zero in decimal formats.
 
            %    Percentage.  For each '%' character in the format, the actual
-                number gets multiplied by 100 (only for purposes of formatting
-                -- the original number is left unmodified) and the '%' character
-                is placed in the same position as it is in the format.
+                number gets multiplied by 100 for the purposes of formatting
+                (the original value is unmodified) and the '%' character is
+                placed in the same position as it is in the format.
 
            ,    Thousands separator.  The presence of a ',' in the format
                 (multiple commas are treated as one) will cause the number
@@ -448,207 +463,234 @@ Commands for handling cell content:
                 in the integer part of the number with numbering beginning
                 from the right end of the integer.
 
-           d    Specifies a date format that is applied to the numeric
-                value of a cell. (See also the DATE INPUT section below)
-                Date format strings are identified by the presence of a 'd'
-                in the first position. If this is present, the
-                remainder of the string is passed to the strftime() function,
-                and therefore uses the same conversion specifiers as strftime().
+           d    Specifies a date format that is applied to the numeric value of
+                a cell. (See also the DATE INPUT section below.) Date format
+                strings are identified by the presence of a 'd' in the first
+                position.  If this is present, the remainder of the string is
+                passed to the strftime() function, and therefore uses the same
+                conversion specifiers as strftime().
                 For more information on conversion specifiers for date format
                 strings, see the man page for strftime(3).
 
            E- E+ e- e+
-                Scientific format.  Causes the number to formatted in scientific
-                notation. The case of the 'E' or 'e' given is preserved. If
-                the format uses a '+', then the sign is always given for the
-                exponent value. If the format uses a '-', then the sign is
-                only given when the exponent value is negative. Note that if
-                there is no digit placeholder following the '+' or '-', then
-                that part of the formatted number is left out. In general,
-                there should be one or more digit placeholders after the '+'
-                or '-'.
+                Scientific format.  Causes the number to formatted in
+                scientific notation.  The case of the 'E' or 'e' given is
+                preserved. If the format uses a '+', then the sign is always
+                given for the exponent value.  If the format uses a '-', then
+                the sign is only given when the exponent value is negative.
+                Note that if there is no digit placeholder following the '+' or
+                '-', then that part of the formatted number is left out. In
+                general, there should be one or more digit placeholders after
+                the '+' or '-'.
 
-           examples:     :format "###,###,000"
+           Examples:     :format "###,###,000"
                          :format "d%d/%m/%Y"
                          :format "####.####E+3"
 
 
-    :datefmt string   See DATE INPUT section below
+    :datefmt "{date_format_string}"   See the DATE INPUT section below.
 
 
-    :sort range string
-                sort a range of cells with a given criteria.
+    :sort {range} "{sort_string}"
+                Sort a range of cells with a given criteria.
                 The rows in the specified range will be sorted according
                 to a criteria given in the form of a string of characters.
                 This string, enclosed in double quotes, may comprise a
                 single criterion or multiple criteria in decreasing order
-                of precedence. Each criterion has three parts, all of which are mandatory.
-                The first part is a single character, which must be either + or - , which specifies
-                whether the sort should be done in ascending or descending order, respectively.
-                The second part, which is also a single character, must be either # or $ ,
-                and is used to specify whether the sort should be based
-                on the numeric portion or the string portion, respectively,
-                of the cells being used for the comparison.
-                The third part may be either one or two characters, and
-                must be alphabetic (case insensitive), and specifies
-                the column to be used when making the comparisons.
-                This column must be in the range being sorted.
-                Any number of criteria may be concatenated using ';', and will be used
-                in the order specified.
+                of precedence. Each criterion has three parts, all of which are
+                mandatory.
 
-                examples:        :sort C10:E13 "+#D"
+                The first part is a single character, either + or -, which
+                specifies whether the sort should be done in ascending or
+                descending order, respectively.
+
+                The second part, also a single character, is either # or $,
+                and specifies whether the sort should be based on the numeric
+                portion or the string portion, respectively, of the cells being
+                used for the comparison.
+
+                The third part is one or two letters (case insensitive) that
+                specify the column used for making the comparisons.  This
+                column must be in the range being sorted.
+
+                Criteria may be concatenated with ';' and are applied in the
+                order specified.
+
+                Examples:        :sort C10:E13 "+#D"
                                  :sort C10:E13 "+#C;-#D"
 
-    :sort string
-                save as the previous but sort is done over a selected range
+    :sort "{sort_string}"
+                Like ":sort {range}", but the sort is performed on the selected
+                range.
 
 
 
-    :addfilter
-    :filteron
+    :addfilter "{filter_string}"
+    :showfilters
+    :filteron {range}
     :filteroff
-    :delfilter
+    :delfilter {filter_number}
     :delfilters
-                These commands are used to filter a range of rows by multiple criteria.
+                These commands filter a range of rows by multiple criteria.
 
-                To apply a filter over a range first is neccesary to add a filter criteria.
-                To define a criteria you have to use the addfilter command, with this format:
+                ":addfilter" defines a filter according to {filter_string} in
+                this format:
 
-                The first part, is a single character, which must be either # or $, and is used to specify whether the expression evaluates
-                over the numeric portion or the string portion of the cell, respectively,",
-                The second part is a column name where its values are evaluated with an expression.
-                The third part is actually the expression used for the evalutation.
-                Multiple criteria can be specified separating them with the ';' character.
+                The first part is either '#' or '$', and specifies whether the
+                expression evaluates the numeric portion or the string portion
+                of the cell.
 
-                These are some examples:
+                The second part specifies the column that contains the values
+                to be evaluated with the expression.
+
+                The third part is the actual expression evaluated.
+
+                Multiple criteria can be separated with the ';' character.
+
+                Examples:
                             :addfilter "#B<8000"
                             :addfilter "#C>1500"
                             :addfilter "@eqs(@substr($B,1,3),'SEP')"
                             :addfilter "#B>3000;#B<5000;#B>@avg(B1:B20)"
 
-                Once filters are added, you can see the details of each filter with :showfilters special command.
-                Each filter is preceded by a number. You can delete a filter typing :delfilter NUMBER. In this
-                example, the first filter defined is removed:
+                Once filters are added, you can see the details of each filter
+                with ":showfilters".
+                Each filter is preceded by a number. You can delete a filter
+                with ":delfilter {filter_number}".
+                For example, to remove the first filter defined:
                             :delfilter 0
 
-                To delete all defined filters, it can be used the :delfilters special command.
+                ":delfilters" deletes all defined filters.
 
-                You can apply those filters to a range with the :filteron special command.
-                Ex.:        :filteron B10:C13
+                ":filteron {range}" applies the filters to the range.
+                Example:        :filteron B10:C13
 
-                If a range is already selected you can simply type :filteron
+                If a range is selected you can simply type ":filteron".
 
-                To turn off the filters you can type:
-                            :filteroff
+                ":filteroff" turns off the filters.
 
-
-    :int string
-                sends a command to the interpreter
-                example:          :int goto B2
+    :int "{string}"
+                Send a command to the interpreter.
+                Example:          :int goto B2
 
 
-    :hidecol C
-                hide column C
+    :hidecol {column}
+    :hidecol {column:column}
+                Hide the column or column range given. (Case insensitive.)
 
-    :hiderow 4
-                hide row 4
+    :hiderow {row}
+    :hiderow {row:row}
+                Hide the row or rows given.
 
-    :showcol C
-                show column C that was previously hidden
+    :showcol {column}
+    :showcol {column:column}
+                Show columns that were previously hidden.
 
-    :showrow 5
-                show row 5 that was previously hidden
-
-    :hidecol A:C
-                hide a range of columns
-
-    :hiderow 4:8
-                hide a range of rows
-
-    :showcol A:C
-                show a range of columns that were previously hidden
-
-    :showrow 5:7
-                show a range of rows that were previously hidden
-
-    :showrows
-                if a range is selected, this command shows the rows hidden that are covered by the range
-
-    :pad n      applies a left padding n chars in width to a column.
-                if a range selected, this command affect the columns inside that range.
+    :showrow {rows}
+    :showrow {row:row}
+                Show rows that were previously hidden.
 
     :hiddenrows
-                show details of hidden rows
+                Show details of hidden rows.
 
     :hiddencols
-                show details of hidden cols
+                Show details of hidden columns.
 
-    :color <str>
-                changes a color definition.
-                example of use:  :color "type=HEADINGS bold=0 fg=BLACK bg=YELLOW"
-                color parameters have to be one of the following:
-                     type, fg, bg, bold, dim, reverse, standout, underline, blink.
-                the first three are mandatory
-                type has to be one of the following:
+    :pad {spaces}
+                Apply a left padding {spaces} characters in width to a column.
+                If a range selected, pad the columns inside that range.
+
+    :color {key}={arg} ..
+                Change a color definition.
+
+                {key} is one of the following:
+                type, fg, bg, bold, dim, reverse, standout, underline, blink
+                Note: The type, fg, and bg keys are mandatory.
+
+                The value of type is one of the following:
                      HEADINGS, MODE, NUMB, STRG, DATEF, EXPRESSION, CELL_ERROR,
                      CELL_NEGATIVE, CELL_SELECTION, CELL_SELECTION_SC,
                      INFO_MSG, ERROR_MSG, CELL_ID, CELL_FORMAT,
                      CELL_CONTENT, WELCOME, NORMAL, INPUT.
-                fg and bg have to be one of the following: WHITE, BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN.
-                other parameters are booleans and its values have to be 1 or 0.
-                Instead of modifing a color at runtime, colors can be specified in:
-                     a. the .scimrc file stored in your $HOME variable
-                     b. in current .sc file.
-                The format is similar:
-                Ex.        :color "type=HEADINGS fg=BLACK bg=YELLOW bold=0"
 
-    :cellcolor <str>
-                changes the color of a cell or a group of cells.
-                Ex.:       :cellcolor "bg=CYAN fg=WHITE"
-                           :cellcolor "fg=RED bold=1 underline=1"
+                The value of fg and bg is one of the following:
+                     WHITE, BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN.
 
-    :redefine_color <str> <number> <number> <number>
-                This command is used for changing RGB values of the colors defined by ncurses.
-                RGB values can vary from 0 to 1000.
-                NOTES: ncurses shall be built with --enable-ext-colors.
-                       your terminal shall support 256 colors. One for example is TERM=xterm-256color.
-                       should link to ncursesw library and not the common ncurses library.
-                Example of use:              :redefine_color "RED" 700 100 100
-                If you want this to take effect every time you start SC-IM, you can store this command in your $HOME/.scimrc adding:
-                       REDEFINE_COLOR "RED" 700 100 100
+                The value of other parameters are booleans, 1 or 0.
 
-                You can also redefine the BLACK color, changing the default background color of SC-IM.
+                Example:  :color type=HEADINGS bold=0 fg=BLACK bg=YELLOW
 
-    :lock       Use this command to lock the current cell or a range of cells, i.e. make them immune to any type of editing. A locked cell can't be changed in any way until it is unlocked.
+                Colors can be set at runtime or specified in:
+                     a. the .scimrc file stored in $HOME
+                     b. the current .sc file.
 
-    :unlock     This command is the opposite of the :lock command and thus unlocks a locked cell and makes it editable.
+    :cellcolor {key}={arg} ..
+                Change the color of the current cell or range.
+                Example:   :cellcolor bg=CYAN fg=WHITE
+                           :cellcolor fg=RED bold=1 underline=1
 
-    :valueize   valueize area: remove expressions from the affected range leaving only the values.
+    :redefine_color "{color}" {R} {G} {B}
+                Change the RGB values of the colors defined by ncurses.
+                RGB values range from 0 to 1000.
 
-    :! cmd      executes command 'cmd' in shell
+                Note: This requires that ncurses is built with
+                --enable-ext-colors, and the terminal must support 256 colors.
+                For example, TERM=xterm-256color.  SC-IM must link to
+                ncursesw library and not the common ncurses library.
 
-    :autojus A:D
-                auto resize columns A to D, to fit its contents.
+                Example:   :redefine_color "RED" 700 100 100
 
-    :autojus    same as previous command, but the columns resized are the columns represented by the selected cell or range.
+                To make this take effect every time SC-IM is started, you can
+                add it to $HOME/.scimrc:
+                            REDEFINE_COLOR "RED" 700 100 100
 
-    :fsum       summarize the numeric values of a range.
-                the range is defined by the immediate cell above current cell, in case of vertical ranges,
-                or by the immediate cell at the left of current cell, in case of horizontal ranges.
-                the top / left corner is always limited by the first non numeric cell found.
+                Redefining the BLACK color is one way to change the default
+                background color of SC-IM.
 
-    :fcopy      this command takes the formula of a selected cell, and copies it down a number of rows.
-                the number of rows down to be copied, will be determinated by the first empty cell found
-                in the column at the left of current cell.
-                in case a range is selected, the formula of the top left cell will be copied down to the end of the range.
+    :lock       Lock the current cell or range. Locked cells are immune to any
+                type of editing and can't be changed in any way until unlocked.
 
-    c-r {char}  Being {char} a mark of a cell or range, the range represented by that char gets inserted in the command line
+    :unlock     Reverses the effect of ":lock", making the current cell or
+                range editable.
 
-    commandline history is stored in $HOME/.sciminfo
-    c-p         goes back in command line history
-    c-n         goes forward in command line history
-    <UP>        goes back in command line history
-    <DOWN>      goes forward in command line history
+    :valueize   Replace expressions in the current cell or range with the
+                values evaluated from the expressions.
+
+    :! {cmd}    Executes shell command {cmd}.
+
+    :autojus {column}
+    :autojus {column}:{column}
+                Auto-resize the column or column range to fit their contents.
+
+    :autojus    Auto-resize the columns covered by the selected cell or range.
+
+    :fsum       Sum the numeric values of a range.
+
+                The range is defined by the immediate cell above the current
+                cell for vertical ranges, or by the immediate cell at the left
+                of the current cell for horizontal ranges.
+
+                The top or left corner is limited by the first non-numeric
+                cell found.
+
+    :fcopy      Copy the formula of a selected cell down a number of rows.
+                The number of rows down is determined by the first empty cell
+                in the column to the left of current cell.
+
+                If a range is selected, the formula in the top left cell will
+                be copied down to the end of the range.
+
+     c-r{a-zA-Z}
+                If the character is a mark of a cell or range, the range
+                represented is inserted into the command line.
+
+                Command line history is stored in $HOME/.sciminfo.
+
+    c-p
+    <UP>        Go back in command line history.
+
+    c-n
+    <DOWN>      Go forward in command line history.
 
 ==============================================================================
 &VISUAL MODE& - Selecting a range
