@@ -140,7 +140,7 @@ Commands for handling cell content:
      +           Increase a numeric value of the cell or range.
 
      u           UNDO last change
-     c-f         REDO last change
+     c-r         REDO last change
                  NOTE: Events implemented for undo and redo:
                  1. cell or range deletion
                  2. cell input
