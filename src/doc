@@ -203,7 +203,7 @@ Commands for handling cell content:
      rl          Lock the current cell or range. Locking makes cells immune to
                  any type of editing. A locked cell can't be changed in any
                  way until it is unlocked.
-     ru          Unlock a locked cell, making it editable.
+     ru          Unlock a locked cell or range, making it editable.
      rv          Valueize the current cell or range. Valueizing removes
                  expressions, leaving only the values.
 
@@ -220,11 +220,11 @@ Commands for handling cell content:
                  Input numbers, letters and operators.
      <BS>, <DELETE>
                  Delete the character after or before the cursor.
-     <ESC>       Go back to NORMAL MODE.
+     <ESC>       Go back to Normal mode.
      c-r{a-zA-Z}
                  If the character is a mark of a cell or range, the range
                  represented is inserted into the field.
-     c-v         Enter VISUAL MODE. See C-o and C-k commands in VISUAL MODE.
+     c-v         Enter Visual mode. See C-o and C-k commands in VISUAL MODE.
 
 ==============================================================================
 &EDIT MODE&
@@ -694,123 +694,155 @@ Commands for handling cell content:
 
 ==============================================================================
 &VISUAL MODE& - Selecting a range
-    This mode is used for selecting a range of cells to do an operation.
-    You can enter this mode using the 'v' command in NORMAL_MODE or using <C-v> in INSERT and COMMAND mode.
-    When entering to this mode using the 'v' command, top left limit of the selected range, and the bottom right limit
-    is set to current row and column.
 
-    If you use <C-v> to enter this mode, you can move the cursor with arrow keys or hjkl keys, and then press <C-o> to begin selection.
-    Once your selection is done, you can press <C-k> and the range will be entered in inputline.
+    Visual mode is used for selecting a range of cells for an operation.
 
-    The following movements commands helps to complete a selection in different ways.
-    j k l h     Move cursor down, up, right or left
-    0           Moves to column A
-    $           Moves forward to the last valid column of the current row.
-    #           Moves down to the last valid row of the current column.
-    ^           Moves up to row 0 of the current column.
-    'a          Moves to cell or select range marked previously as c.
-                See the m command for details.
+    You can enter this mode with 'v' in Normal mode, or with <C-v> in Insert
+    and Command mode.
+
+    When entering Visual mode from Normal mode, the top left and the bottom
+    right limit of the selected range is set to current row and column.
+
+    From Insert or Command mode, press <C-v>, then position the cursor with
+    arrow keys or hjkl keys, and then press <C-o> to begin selection.
+    Move the cursor to complete the selection, then press <C-k> to input
+    the range into the cell.
+
+    The following motion commands move the cursor during selection:
+    j k l h     Move down, up, right or left.
+    0           Move to column A.
+    $           Move forward to the last valid column of the current row.
+    #           Move down to the last valid row of the current column.
+    ^           Move up to row 0 of the current column.
+    '{a-zA-Z}   Move to the cell or select the range marked previously with
+                {a-zA-Z}.  See the 'm' command for details.
     c-f c-b     Increase selection down or up a full screen.
-                set variable half_page_scroll to 1 to scroll half a page, instead of full page. see :set command for details.
+                :set half_page_scroll=1 to scroll by half a page instead.
+                See :set command for details.
     c-a         Moves to first cell of spreadsheet.
 
-    y           yanks selected cell or range and exit VISUAL MODE.
-    x , dd      Deletes the current range and save its content in yankbuffer
-    H           Moves to to first row seen on screen.
-    L           Moves to last row seen on screen.
-    M           Moves to middle row seen on screen.
-    w           Moves forward to the next valid cell.
-    b           Moves back to the previous valid cell.
-    G           Moves to last valid cell of spreadsheet.
+    y           Yank the selected cell or range and exit Visual mode.
+    x , dd      Delete the current range, saving its content to the yankbuffer.
+    H           Move to the first row visible on screen.
+    L           Move to the last row visible on screen.
+    M           Move to the middle row visible on screen.
+    w           Move forward to the next valid cell.
+    b           Move back to the previous valid cell.
+    G           Move to last valid cell of spreadsheet.
 
-    :           Enters COMMAND MODE preserving the range selection, so a special command can be entered.
-    Zr          Zaps (hides) the rows covered by the selected range.
-    Zc          Zaps (hides) the columns covered by the selected range.
-    Sr          Shows rows that are hidden and that get covered by the selected range.
-    Sc          Shows columns that are hidden and that get covered by the selected range.
-    { } |       Aligns the content of the cells covered by the selected range, to right, left or to center.
-    rl          Use this command to lock the current cell or a range of cells, i.e. make them immune to any type of editing. A locked cell can't be changed in any way until it is unlocked.
-    ru          This command is the opposite of the rl command and thus unlocks a locked cell and makes it editable.
-    rv          valueize area: remove expressions from the affected range leaving only the values.
-    m           Followed by any lowercase letter, marks the selected range with that letter.
-                NOTE: When a mark is changed, all ranges that use that mark are deleted.
-    c-d         converts text content of the selected range to a date, using default LOCALE's D_FMT format.
-                This converts text content to a numeric value that can shown as a date. See DATE INPUT below for more info.
+    :           Enters Command mode preserving the range selection, so a
+                special command can be entered.
+    Zr          Zap (hides) the rows covered by the selected range.
+    Zc          Zap (hides) the columns covered by the selected range.
+    Sr          Show rows that are hidden and that are covered by the selected
+                range.
+    Sc          Show columns that are hidden and that are covered by the
+                selected range.
+    { } |       Align the content of the cells covered by the selected range
+                to the right, left or center.
+    rl          Lock the current cell or range. Locking makes cells immune to
+                any type of editing. A locked cell can't be changed in any
+                way until it is unlocked.
+    ru          Unlock a locked cell or range, making it editable.
+    rv          Valueize the current cell or range. Valueizing removes
+                expressions, leaving only the values.
+    m{a-zA-Z}   Mark the current cell or selected range with that letter.
+                NOTE: When a mark is changed, all ranges that use that mark
+                are deleted.
+    c-d         Convert the text content of a selected cell or range to a
+                date, using default LOCALE's D_FMT format.
+                This converts text to a numeric value that can be shown as a
+                date. See DATE INPUT below for more info.
                 NOTE: USELOCALE has to be enabled during build.
-    c-j         auto resize column width to fit its contents.
+    c-j         Auto-resize the selected column(s) to accommodate the widest
+                cells.
 
 ==============================================================================
 &MAPPING&
-    mapping can be done in any SC-IM file or in .scimrc file in current home directory.
-    maps can be added with nmap and imap commands, and they can be removed with
-    nunmap, iunmap commands
-    ex.:
-        nmap "d" ":h<cr>"  ->   d maps to ':help<cr>' in normal mode
-        imap "f" "foo"     ->   f maps to 'foo' string in insert mode
+
+    Mapping can be done in any SC-IM file or in a .scimrc file in the home
+    directory.
+
+    Maps can be added with the :nmap and :imap commands and removed with
+    the :nunmap and :iunmap commands.
+    Example:
+        :nmap "d" ":h<cr>"  ->   Maps d to ':help<cr>' in Normal mode.
+        :imap "f" "foo"     ->   Maps f to the string 'foo' in Insert mode.
 
     Some notes:
-    Left and Right sequence of a mapping cannot contain numbers.
-    <ESC> key cannot be mapped. But other special keys can.
-    Those keys are <CR> <C-x> <TAB> <LEFT> <RIGHT> <DOWN> <UP> <DEL> <BS> <HOME> <END> <PGDOWN> <PGUP>
-    If a map sequence that exists is re-mapped, it gets replaced with the new one.
-    Mapping is recursive by default. The non recursive versions of nmap and imap are
-    the nnoremap and inoremap commands. An example of use:
+    The Left and Right sequence of a mapping cannot contain numbers.
+
+    The <ESC> key cannot be mapped, but other special keys can.  They are:
+    <CR> <C-x> <TAB> <LEFT> <RIGHT> <DOWN> <UP> <DEL> <BS> <HOME> <END>
+    <PGDOWN> <PGUP>
+
+    If an existing map sequence is remapped, it is replaced with the new one.
+    Mapping is recursive by default. The non-recursive versions of :nmap and
+    :imap are :nnoremap and :inoremap.
+    Example:
         nmap "a" "b",
         nnoremap "b" "j"
         nmap "j" ":h<cr>"
-    with this, 'a' maps to 'j', and only 'j' maps to ':h<cr>'
+    With this, 'a' maps to 'j', and only 'j' maps to ':h<cr>'.
 
 ==============================================================================
 &COMMAND MULTIPLIER&
-    Commands in NORMAL MODE, VISUAL MODE or EDIT MODE can be multiplied if a number is previously typed.
-    Ex. '4j' in NORMAL MODE, translates to 4 times 'j'.
-    Ex. '4yr' in NORMAL MODE, yanks current row and the 3 rows below it.
-    NOTE: the 'x' command in VISUAL MODE and shift commands in VISUAL MODE and NORMAL MODE, when a range is
-    selected, cannot be multiplied.
+
+    An optional number may precede commands in Normal, Visual or Edit mode to
+    multiply or iterate the command.
+    Ex. '4j' in Normal mode, translates to 4 times 'j'.
+    Ex. '4yr' in Normal mode, yanks current row and the 3 rows below it.
+
+    NOTE: The 'x' command in Visual mode, and the shift commands in Visual
+    mode and Normal mode when a range is selected, cannot be multiplied.
 
 ==============================================================================
 &DATES INPUT&
-    Dates are internally stored in SC-IM as numeric values, and they are visually
-    seen as dates if a date format is applied to the cells that stores them.
-    They can be entered as a label and then use the :datefmt special command to
-    convert it to a numeric value and apply a format.
-    Other option is to enter the numeric value and apply a format with the
-    :format special command.
+
+    Dates are internally stored in SC-IM as numeric values, and they are
+    displayed as dates if a date format is applied to the cells that store
+    them.  Dates can be entered as a label and then converted to a numeric
+    value with the :datefmt command. Another option is to enter the numeric
+    value and apply a format with the :format special command.
 
     The :datefmt command takes the cell's text content that represents a date,
     and uses a given format to set the numeric value of the cell.
-    Its format is ':datefmt "format"', being format a strftime compatible one.
-    This command then aplies that format to the cell (as it could be done with
-    the :format function) so that it can be visually seen as a date.
+    Its format is ':datefmt "{strftime_format}"', taking a strftime-compatible
+    format string.  The format is applied to the cell (as could be done with
+    the :format function) so that the value is displayed as a date.
 
-    example:      :datefmt "%d/%m/%Y"
+    Example:      :datefmt "%d/%m/%Y"
 
-    C-d command can be used in NORMAL and VISUAL modes, and acts as the datefmt described above,
-    but considering locale's D_FMT format.
+    The c-d command, used in Normal and Visual modes, acts as the :datefmt
+    described above, but uses the locale's D_FMT format.
 
 ==============================================================================
 &Other configuration variables&
-    - autocalc
-    set variable 'autocalc' to recalculate automatically, or set it to '0' to do it manually upon execution of '@' command
 
-    - numeric
-    setting variable 'numeric' to '1', a digit starts a numeric value
-    setting the variable to '0', a digit acts as a command multiplier
+    'autocalc'
+    Set it to recalculate values automatically, or to '0' to do it manually
+    upon execution of a '@' command.
 
-    - numeric_zero
-    - numeric_decimal
-    when these are each set, the corresponding zero and decimal will initiate numeric entry, but only when numeric mode is also set.
+    'numeric'
+    Set it to '1' to make an initial digit start a numeric value.
+    Set it to '0', to make a digit act as a command multiplier.
 
-    - newline_action
-    set variable 'newline_action' to 'j' to move cursor down after an entry.
-    set it to 'l' to move it right, or set it to '0' to expect no action.
+    'numeric_zero'
+    'numeric_decimal'
+    When these are set, the zero digit or decimal point will correspondingly
+    initiate numeric entry, but only when 'numeric' is also set.
 
-    - external_functions
-    disabled by default, set this variable to enable external functions. see @ext function below.
+    'newline_action'
+    Set it to 'j' to move the cursor down after an entry.
+    Set it to 'l' to move right, or set it to '0' to take no action.
 
-    - overlap [default off]
-    If cell content exceedes column width it gets cutoff to fill column width.
-    If overlap is set to true, the content continues to show in the following column.
+    'external_functions' [default off]
+    Disabled by default, set this variable to enable external functions.  See
+    @ext function below.
+
+    'overlap' [default off]
+    If cell content exceedes column width it gets cut off to fit the column
+    width.  If overlap is set, the content overflows into the next column.
 
 ==============================================================================
 &Built-in Range Functions&
