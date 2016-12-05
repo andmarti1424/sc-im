@@ -78,14 +78,14 @@ Commands for handling cell content:
      x     dd    Delete the current selected cell or range and save its
                  content in the yankbuffer.
      m{a-zA-Z}   Mark the current cell or selected range with that letter.
-                 NOTE: When a mark is changed, all ranges that use that mark
+                 Note: When a mark is changed, all ranges that use that mark
                  are deleted.
      c{a-zA-Z}   Copy the marked cell or range to the current position,
                  adjusting row and column references in its numeric or string
                  expression, if any.
      R{a-zA-Z}{a-zA-Z}
                  Select the range defined by the two marks.
-                 NOTE: If a range already exists, it is replaced with the new
+                 Note: If a range already exists, it is replaced with the new
                  values.
 
      { } |       Align the content of a cell to the left, right or center.  If
@@ -141,7 +141,7 @@ Commands for handling cell content:
 
      u           UNDO last change
      c-r         REDO last change
-                 NOTE: Events implemented for undo and redo:
+                 Note: Events implemented for undo and redo:
                  1. cell or range deletion
                  2. cell input
                  3. cell editing
@@ -163,11 +163,10 @@ Commands for handling cell content:
                  date, using default LOCALE's D_FMT format.
                  This converts text to a numeric value that can be shown as a
                  date. See DATE INPUT below for more info.
-                 NOTE: USELOCALE has to be enabled during build.
+                 Note: USELOCALE has to be enabled during build.
 
      aa    c-j   Auto-resize the selected column(s) to accommodate the widest
                  cells.
-
 
  Other commands:
      ^L          Redraw the screen.
@@ -209,6 +208,7 @@ Commands for handling cell content:
 
 ==============================================================================
 &INSERT MODE&
+
      =           Enter a numeric constant or expression.
      <           Enter a left justified string or string expression.
      \           Enter a centered label.
@@ -228,6 +228,7 @@ Commands for handling cell content:
 
 ==============================================================================
 &EDIT MODE&
+
      e           In normal mode, enter Edit mode to edit a numeric value.
      E           In normal mode, enter Edit mode to edit a text value.
      h           Move a character left.
@@ -290,6 +291,7 @@ Commands for handling cell content:
 
 ==============================================================================
 &COMMAND MODE&
+
      <LEFT>, <RIGHT>
                  Move the cursor position with the arrow keys.
 
@@ -345,7 +347,8 @@ Commands for handling cell content:
                  If a range is selected, only that range is exported.
 
      :e csv {file}
-                 Export the current spreadsheet to comma-separated file {file}.
+                 Export the current spreadsheet to comma-separated file
+                 {file}.
 
      :e! csv {file}
                  Like ":e csv", but overwrite {file} if it exists.
@@ -374,8 +377,8 @@ Commands for handling cell content:
 
      :i xlsx {file}
                  Import xlsx file {file} to SC-IM's buffer.
-                 If 'xlsx_readformulas' is set, SC-IM tries to import formulas,
-                 rather than the final values of a cell.
+                 If 'xlsx_readformulas' is set, SC-IM tries to import
+                 formulas, rather than the final values of a cell.
 
      :i! xlsx {file}
                  Like ":i xlsx", but overwrite changes since last save.
@@ -421,8 +424,8 @@ Commands for handling cell content:
 
      :fill {range} {initial_number} {increment_number}
                  Fill range {range} with values. The first cell of the range
-                 will have {initial_number} and each successive cell increments
-                 by {increment_number}.
+                 will have {initial_number} and each successive cell
+                 increments by {increment_number}.
                  Example:   :fill A0:A100 1 0.25
 
      :format "{format_string}"
@@ -463,12 +466,12 @@ Commands for handling cell content:
                 in the integer part of the number with numbering beginning
                 from the right end of the integer.
 
-           d    Specifies a date format that is applied to the numeric value of
-                a cell. (See also the DATE INPUT section below.) Date format
-                strings are identified by the presence of a 'd' in the first
-                position.  If this is present, the remainder of the string is
-                passed to the strftime() function, and therefore uses the same
-                conversion specifiers as strftime().
+           d    Specifies a date format that is applied to the numeric value
+                of a cell. (See also the DATE INPUT section below.) Date
+                format strings are identified by the presence of a 'd' in the
+                first position.  If this is present, the remainder of the
+                string is passed to the strftime() function, and therefore
+                uses the same conversion specifiers as strftime().
                 For more information on conversion specifiers for date format
                 strings, see the man page for strftime(3).
 
@@ -478,8 +481,8 @@ Commands for handling cell content:
                 preserved. If the format uses a '+', then the sign is always
                 given for the exponent value.  If the format uses a '-', then
                 the sign is only given when the exponent value is negative.
-                Note that if there is no digit placeholder following the '+' or
-                '-', then that part of the formatted number is left out. In
+                Note that if there is no digit placeholder following the '+'
+                or '-', then that part of the formatted number is left out. In
                 general, there should be one or more digit placeholders after
                 the '+' or '-'.
 
@@ -497,8 +500,8 @@ Commands for handling cell content:
                 to a criteria given in the form of a string of characters.
                 This string, enclosed in double quotes, may comprise a
                 single criterion or multiple criteria in decreasing order
-                of precedence. Each criterion has three parts, all of which are
-                mandatory.
+                of precedence. Each criterion has three parts, all of which
+                are mandatory.
 
                 The first part is a single character, either + or -, which
                 specifies whether the sort should be done in ascending or
@@ -506,7 +509,8 @@ Commands for handling cell content:
 
                 The second part, also a single character, is either # or $,
                 and specifies whether the sort should be based on the numeric
-                portion or the string portion, respectively, of the cells being
+                portion or the string portion, respectively, of the cells
+                being
                 used for the comparison.
 
                 The third part is one or two letters (case insensitive) that
@@ -520,9 +524,8 @@ Commands for handling cell content:
                                  :sort C10:E13 "+#C;-#D"
 
     :sort "{sort_string}"
-                Like ":sort {range}", but the sort is performed on the selected
-                range.
-
+                Like ":sort {range}", but the sort is performed on the
+                selected range.
 
 
     :addfilter "{filter_string}"
@@ -608,10 +611,10 @@ Commands for handling cell content:
                 Note: The type, fg, and bg keys are mandatory.
 
                 The value of type is one of the following:
-                     HEADINGS, MODE, NUMB, STRG, DATEF, EXPRESSION, CELL_ERROR,
-                     CELL_NEGATIVE, CELL_SELECTION, CELL_SELECTION_SC,
-                     INFO_MSG, ERROR_MSG, CELL_ID, CELL_FORMAT,
-                     CELL_CONTENT, WELCOME, NORMAL, INPUT.
+                     HEADINGS, MODE, NUMB, STRG, DATEF, EXPRESSION,
+                     CELL_ERROR, CELL_NEGATIVE, CELL_SELECTION,
+                     CELL_SELECTION_SC, INFO_MSG, ERROR_MSG, CELL_ID,
+                     CELL_FORMAT, CELL_CONTENT, WELCOME, NORMAL, INPUT.
 
                 The value of fg and bg is one of the following:
                      WHITE, BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN.
@@ -647,8 +650,9 @@ Commands for handling cell content:
                 Redefining the BLACK color is one way to change the default
                 background color of SC-IM.
 
-    :lock       Lock the current cell or range. Locked cells are immune to any
-                type of editing and can't be changed in any way until unlocked.
+    :lock       Lock the current cell or range.  Locked cells are immune to
+                any type of editing and can't be changed in any way until
+                unlocked.
 
     :unlock     Reverses the effect of ":lock", making the current cell or
                 range editable.
@@ -722,7 +726,8 @@ Commands for handling cell content:
     c-a         Moves to first cell of spreadsheet.
 
     y           Yank the selected cell or range and exit Visual mode.
-    x , dd      Delete the current range, saving its content to the yankbuffer.
+    x , dd      Delete the current range, saving its content to the
+                yankbuffer.
     H           Move to the first row visible on screen.
     L           Move to the last row visible on screen.
     M           Move to the middle row visible on screen.
@@ -747,13 +752,13 @@ Commands for handling cell content:
     rv          Valueize the current cell or range. Valueizing removes
                 expressions, leaving only the values.
     m{a-zA-Z}   Mark the current cell or selected range with that letter.
-                NOTE: When a mark is changed, all ranges that use that mark
+                Note: When a mark is changed, all ranges that use that mark
                 are deleted.
     c-d         Convert the text content of a selected cell or range to a
                 date, using default LOCALE's D_FMT format.
                 This converts text to a numeric value that can be shown as a
                 date. See DATE INPUT below for more info.
-                NOTE: USELOCALE has to be enabled during build.
+                Note: USELOCALE has to be enabled during build.
     c-j         Auto-resize the selected column(s) to accommodate the widest
                 cells.
 
@@ -793,7 +798,7 @@ Commands for handling cell content:
     Ex. '4j' in Normal mode, translates to 4 times 'j'.
     Ex. '4yr' in Normal mode, yanks current row and the 3 rows below it.
 
-    NOTE: The 'x' command in Visual mode, and the shift commands in Visual
+    Note: The 'x' command in Visual mode, and the shift commands in Visual
     mode and Normal mode when a range is selected, cannot be multiplied.
 
 ==============================================================================
@@ -987,13 +992,13 @@ Commands for handling cell content:
     by double quotation marks), variables (cell names, which refer to the
     cell's label strings or expressions), and string functions.
 
-    NOTE: String expressions are only allowed when entering a cell's label
+    Note: String expressions are only allowed when entering a cell's label
     string, not its numeric part.  They are entered with a backslash followed
     by a double quote.
                Examples:  \"@coltoa(4)
                           \"A0 # "Plate"
 
-    NOTE: String expression results may be left or right flushed or centered,
+    Note: String expression results may be left or right flushed or centered,
     according to the type of the cell's string label.
 
     #      Concatenate strings.
@@ -1058,7 +1063,7 @@ Commands for handling cell content:
         Example:
             @ston (@ext ("form.sc.ext", a9 + b9))
 
-        NOTE: You can build a command line (including more argument values)
+        Note: You can build a command line (including more argument values)
         from a string expression with concatenation.  You can also "hide" the
         second argument by ending the command line (first argument) with a "#"
         shell comment.
@@ -1130,7 +1135,7 @@ Commands for handling cell content:
     If you pass a .tsb or .tab file to SC-IM, it is imported using the tab
     character as the delimiter.
 
-    NOTE: You can always override the delimiter used passing the --txtdelim
+    Note: You can always override the delimiter used passing the --txtdelim
     parameter to SC-IM.
 
     Example: ./scim --txtdelim="\t" file.txt
@@ -1181,6 +1186,6 @@ Commands for handling cell content:
     Start interactive mode but with no ncurses interface:
         ./scim --nocurses
 
-    NOTE: Setting the --output parameter implies setting the --nocurses flag.
+    Note: Setting the --output parameter implies setting the --nocurses flag.
 
  vim:tw=78:ts=8:ft=help:norl:
