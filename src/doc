@@ -1087,43 +1087,54 @@ Commands for handling cell content:
 ==============================================================================
 &Built-in Date and Time Functions&
 
-    @year(e)
-        Return the year. Valid years begin with 1970, although many systems will return years prior to
-        1970 if e is negative. The last legal year is system dependent.
+    The following functions operate on an expression {date_expr} denoting a
+    UNIX timestamp.
 
-    @month(e)
+    @year({date_expr})
+        Return the year. Valid years begin with 1970, although many systems
+        will return years prior to 1970 if e is negative. The last legal year
+        is system dependent.
+
+    @month({date_expr})
         Return the month, encoded as 1 (January) to 12 (December).
 
-    @day(e)
+    @day({date_expr})
         Return the day of the month, encoded as 1 to 31.
 
-    @hour(e)
+    @hour({date_expr})
         Return the number of hours since midnight, encoded as 0 to 23.
 
-    @minute(e)
-        Return the number of minutes since the last full hour, encoded as 0 to 59.
+    @minute({date_expr})
+        Return the number of minutes since the last full hour, encoded as 0 to
+        59.
 
-    @second(e)
-        Return the number of seconds since the last full minute, encoded as 0 to 59.
+    @second({date_expr})
+        Return the number of seconds since the last full minute, encoded as 0
+        to 59.
 
-
+==============================================================================
 &Supported file formats / File import&
-    SC-IM can handle the following file formats:
-        .sc
-        .xls
-        .xlsx
-        .csv (comma delimited values files)
-        .tsv (tab delimited values files)
-        .tab (tab delimited values files)
-        .txt (simple text files)
 
-    You can pass to SC-IM binary any of the above files.
-    If you pass a csv file to SC-IM, the file will be imported using a comma as the delimiter.
-    If you pass a tsb or tab file to SC-IM, it will be imported using the tab character as the delimiter.
-    If you pass a txt file to SC-IM, it will be imported using a comma as the delimiter.
+    SC-IM can open the following file formats:
+        .sc     SC-IM's native text format
+        .xls    Microsoft Excel Spreadsheet
+        .xlsx   Microsoft Office Open XML Workbook
+        .csv    Comma-separated values
+        .tsv    Tab-separated values
+        .tab    Tab-separated values
+        .txt    Simple text files
 
-    Take note that you can always override the delimiter used passing the --txtdelim parameter to SC-IM.
-    For instance: ./scim --txtdelim="\t" file.txt
+    You can pass files of any of the above formats to SC-IM binary.
+    If you pass a .txt or .csv file to SC-IM, it is imported using a comma as
+    the delimiter.
+    If you pass a .tsb or .tab file to SC-IM, it is imported using the tab
+    character as the delimiter.
+
+    NOTE: You can always override the delimiter used passing the --txtdelim
+    parameter to SC-IM.
+
+    Example: ./scim --txtdelim="\t" file.txt
+
     Possible values are:
         --txtdelim="\t"
         --txtdelim=","
@@ -1132,12 +1143,17 @@ Commands for handling cell content:
 ==============================================================================
 &External scripts&
 
-    SC-IM can read data from a external script, either through a pipeline or redirection.
+    SC-IM can read data from a external script, either through a pipeline or
+    redirection.
     This enables SC-IM to be used as a non-interactive calculator.
-    It also can be run interactive but with no ncurses interface if you set the --nocurses flag.
 
-    You can set the --output parameter if you want results to be saved in a file.
-    If you set the --quit_afterload flag, SC-IM will quit after loading all files, but before becoming interactive.
+    It can also be run interactively without the ncurses interface if you pass
+    the --nocurses flag.
+
+    You can set the --output parameter to save the results to a file.
+
+    If you set the --quit_afterload flag, SC-IM will quit after loading all
+    files, but before becoming interactive.
 
     Suppose you have a file called "script" with the following content:
         let A2=0
@@ -1145,26 +1161,26 @@ Commands for handling cell content:
         recalc
         getnum A3
 
-    With the following command, you can send SC-IM the script through a pipe, then SC-IM will output to stdout, and then quit:
+    The following invocations demonstrate SC-IM's input and output options.
+
+    Output to stdout, then quit:
         cat script | ./scim --nocurses --quit_afterload
 
-    You can also receive data from a pipe and output results to a file, with this command:
+    Receive data from a pipe and output results to a file:
         cat script | ./scim --quit_afterload --output=return_file
 
-    Other possibilities are:
-
-        - receive data from a pipe and continue in non-ncurses mode:
+    Receive data from a pipe and continue in non-ncurses mode:
         cat script | ./scim --nocurses
 
-        - receive data from a sc file, and output to a file:
+    Read data from a script and output to a file:
         ./scim a.sc --quit_afterload --output=return_file
 
-        - receive data from both a piped script and from a sc file, and output to file:
+    Receive data from both a pipe and a script, and output to file:
         cat script | ./scim a.sc --quit_afterload --output=return_file
 
-        - start interactive but with no ncurses interface:
+    Start interactive mode but with no ncurses interface:
         ./scim --nocurses
 
-    Note that if you set the --output parameter, the --nocurses flag is assumed to be true.
+    NOTE: Setting the --output parameter implies setting the --nocurses flag.
 
  vim:tw=78:ts=8:ft=help:norl:
