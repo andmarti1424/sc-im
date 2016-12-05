@@ -78,14 +78,14 @@ Commands for handling cell content:
      x     dd    Delete the current selected cell or range and save its
                  content in the yankbuffer.
      m{a-zA-Z}   Mark the current cell or selected range with that letter.
-                 NOTE: When a mark is changed, all ranges that use that mark
+                 Note: When a mark is changed, all ranges that use that mark
                  are deleted.
      c{a-zA-Z}   Copy the marked cell or range to the current position,
                  adjusting row and column references in its numeric or string
                  expression, if any.
      R{a-zA-Z}{a-zA-Z}
                  Select the range defined by the two marks.
-                 NOTE: If a range already exists, it is replaced with the new
+                 Note: If a range already exists, it is replaced with the new
                  values.
 
      { } |       Align the content of a cell to the left, right or center.  If
@@ -141,7 +141,7 @@ Commands for handling cell content:
 
      u           UNDO last change
      c-r         REDO last change
-                 NOTE: Events implemented for undo and redo:
+                 Note: Events implemented for undo and redo:
                  1. cell or range deletion
                  2. cell input
                  3. cell editing
@@ -163,11 +163,10 @@ Commands for handling cell content:
                  date, using default LOCALE's D_FMT format.
                  This converts text to a numeric value that can be shown as a
                  date. See DATE INPUT below for more info.
-                 NOTE: USELOCALE has to be enabled during build.
+                 Note: USELOCALE has to be enabled during build.
 
      aa    c-j   Auto-resize the selected column(s) to accommodate the widest
                  cells.
-
 
  Other commands:
      ^L          Redraw the screen.
@@ -209,6 +208,7 @@ Commands for handling cell content:
 
 ==============================================================================
 &INSERT MODE&
+
      =           Enter a numeric constant or expression.
      <           Enter a left justified string or string expression.
      \           Enter a centered label.
@@ -228,6 +228,7 @@ Commands for handling cell content:
 
 ==============================================================================
 &EDIT MODE&
+
      e           In normal mode, enter Edit mode to edit a numeric value.
      E           In normal mode, enter Edit mode to edit a text value.
      h           Move a character left.
@@ -290,6 +291,7 @@ Commands for handling cell content:
 
 ==============================================================================
 &COMMAND MODE&
+
      <LEFT>, <RIGHT>
                  Move the cursor position with the arrow keys.
 
@@ -345,7 +347,8 @@ Commands for handling cell content:
                  If a range is selected, only that range is exported.
 
      :e csv {file}
-                 Export the current spreadsheet to comma-separated file {file}.
+                 Export the current spreadsheet to comma-separated file
+                 {file}.
 
      :e! csv {file}
                  Like ":e csv", but overwrite {file} if it exists.
@@ -374,8 +377,8 @@ Commands for handling cell content:
 
      :i xlsx {file}
                  Import xlsx file {file} to SC-IM's buffer.
-                 If 'xlsx_readformulas' is set, SC-IM tries to import formulas,
-                 rather than the final values of a cell.
+                 If 'xlsx_readformulas' is set, SC-IM tries to import
+                 formulas, rather than the final values of a cell.
 
      :i! xlsx {file}
                  Like ":i xlsx", but overwrite changes since last save.
@@ -421,8 +424,8 @@ Commands for handling cell content:
 
      :fill {range} {initial_number} {increment_number}
                  Fill range {range} with values. The first cell of the range
-                 will have {initial_number} and each successive cell increments
-                 by {increment_number}.
+                 will have {initial_number} and each successive cell
+                 increments by {increment_number}.
                  Example:   :fill A0:A100 1 0.25
 
      :format "{format_string}"
@@ -463,12 +466,12 @@ Commands for handling cell content:
                 in the integer part of the number with numbering beginning
                 from the right end of the integer.
 
-           d    Specifies a date format that is applied to the numeric value of
-                a cell. (See also the DATE INPUT section below.) Date format
-                strings are identified by the presence of a 'd' in the first
-                position.  If this is present, the remainder of the string is
-                passed to the strftime() function, and therefore uses the same
-                conversion specifiers as strftime().
+           d    Specifies a date format that is applied to the numeric value
+                of a cell. (See also the DATE INPUT section below.) Date
+                format strings are identified by the presence of a 'd' in the
+                first position.  If this is present, the remainder of the
+                string is passed to the strftime() function, and therefore
+                uses the same conversion specifiers as strftime().
                 For more information on conversion specifiers for date format
                 strings, see the man page for strftime(3).
 
@@ -478,8 +481,8 @@ Commands for handling cell content:
                 preserved. If the format uses a '+', then the sign is always
                 given for the exponent value.  If the format uses a '-', then
                 the sign is only given when the exponent value is negative.
-                Note that if there is no digit placeholder following the '+' or
-                '-', then that part of the formatted number is left out. In
+                Note that if there is no digit placeholder following the '+'
+                or '-', then that part of the formatted number is left out. In
                 general, there should be one or more digit placeholders after
                 the '+' or '-'.
 
@@ -497,8 +500,8 @@ Commands for handling cell content:
                 to a criteria given in the form of a string of characters.
                 This string, enclosed in double quotes, may comprise a
                 single criterion or multiple criteria in decreasing order
-                of precedence. Each criterion has three parts, all of which are
-                mandatory.
+                of precedence. Each criterion has three parts, all of which
+                are mandatory.
 
                 The first part is a single character, either + or -, which
                 specifies whether the sort should be done in ascending or
@@ -506,7 +509,8 @@ Commands for handling cell content:
 
                 The second part, also a single character, is either # or $,
                 and specifies whether the sort should be based on the numeric
-                portion or the string portion, respectively, of the cells being
+                portion or the string portion, respectively, of the cells
+                being
                 used for the comparison.
 
                 The third part is one or two letters (case insensitive) that
@@ -520,9 +524,8 @@ Commands for handling cell content:
                                  :sort C10:E13 "+#C;-#D"
 
     :sort "{sort_string}"
-                Like ":sort {range}", but the sort is performed on the selected
-                range.
-
+                Like ":sort {range}", but the sort is performed on the
+                selected range.
 
 
     :addfilter "{filter_string}"
@@ -608,10 +611,10 @@ Commands for handling cell content:
                 Note: The type, fg, and bg keys are mandatory.
 
                 The value of type is one of the following:
-                     HEADINGS, MODE, NUMB, STRG, DATEF, EXPRESSION, CELL_ERROR,
-                     CELL_NEGATIVE, CELL_SELECTION, CELL_SELECTION_SC,
-                     INFO_MSG, ERROR_MSG, CELL_ID, CELL_FORMAT,
-                     CELL_CONTENT, WELCOME, NORMAL, INPUT.
+                     HEADINGS, MODE, NUMB, STRG, DATEF, EXPRESSION,
+                     CELL_ERROR, CELL_NEGATIVE, CELL_SELECTION,
+                     CELL_SELECTION_SC, INFO_MSG, ERROR_MSG, CELL_ID,
+                     CELL_FORMAT, CELL_CONTENT, WELCOME, NORMAL, INPUT.
 
                 The value of fg and bg is one of the following:
                      WHITE, BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN.
@@ -647,8 +650,9 @@ Commands for handling cell content:
                 Redefining the BLACK color is one way to change the default
                 background color of SC-IM.
 
-    :lock       Lock the current cell or range. Locked cells are immune to any
-                type of editing and can't be changed in any way until unlocked.
+    :lock       Lock the current cell or range.  Locked cells are immune to
+                any type of editing and can't be changed in any way until
+                unlocked.
 
     :unlock     Reverses the effect of ":lock", making the current cell or
                 range editable.
@@ -722,7 +726,8 @@ Commands for handling cell content:
     c-a         Moves to first cell of spreadsheet.
 
     y           Yank the selected cell or range and exit Visual mode.
-    x , dd      Delete the current range, saving its content to the yankbuffer.
+    x , dd      Delete the current range, saving its content to the
+                yankbuffer.
     H           Move to the first row visible on screen.
     L           Move to the last row visible on screen.
     M           Move to the middle row visible on screen.
@@ -747,13 +752,13 @@ Commands for handling cell content:
     rv          Valueize the current cell or range. Valueizing removes
                 expressions, leaving only the values.
     m{a-zA-Z}   Mark the current cell or selected range with that letter.
-                NOTE: When a mark is changed, all ranges that use that mark
+                Note: When a mark is changed, all ranges that use that mark
                 are deleted.
     c-d         Convert the text content of a selected cell or range to a
                 date, using default LOCALE's D_FMT format.
                 This converts text to a numeric value that can be shown as a
                 date. See DATE INPUT below for more info.
-                NOTE: USELOCALE has to be enabled during build.
+                Note: USELOCALE has to be enabled during build.
     c-j         Auto-resize the selected column(s) to accommodate the widest
                 cells.
 
@@ -793,7 +798,7 @@ Commands for handling cell content:
     Ex. '4j' in Normal mode, translates to 4 times 'j'.
     Ex. '4yr' in Normal mode, yanks current row and the 3 rows below it.
 
-    NOTE: The 'x' command in Visual mode, and the shift commands in Visual
+    Note: The 'x' command in Visual mode, and the shift commands in Visual
     mode and Normal mode when a range is selected, cannot be multiplied.
 
 ==============================================================================
@@ -846,264 +851,295 @@ Commands for handling cell content:
 
 ==============================================================================
 &Built-in Range Functions&
-    @sum(r)
-    @sum(r,e)
-        Sum all valid (nonblank) entries in the region whose two corners are defined by the two variable
-        names (e.g.  c5:e14) or the range name specified. The optional second argument is an expression
-        which can be used to determine which cells in the range to sum (see above).
 
-    @prod(r)
-    @prod(r,e)
-        Multiply together all valid (nonblank) entries in the specified region. The optional second argu‐
-        ment is an expression which can be used to determine which cells in the range to multiply (see above).
+    The following functions return the result of performing an operation on
+    all valid (nonblank) entries in the given {range}. The optional expression
+    {expr} restricts which cells in {range} to operate on. (See above.)
 
-    @avg(r)
-    @avg(r,e)
-        Average all valid (nonblank) entries in the specified region. The optional second argument is an
-        expression which can be used to determine which cells in the range to average (see above).
+    @sum({range})
+    @sum({range},{expr})
+        Sum up the values.
 
-    @count(r)
-    @count(r,e)
-        Count all valid (nonblank) entries in the specified region. The optional second argument is an
-        expression which can be used to determine which cells in the range to count (see above).
+    @prod({range})
+    @prod({range},{expr})
+        Multiply the values together.
 
-    @max(r)
-    @max(r,e)
-        Return  the  maximum  value in the specified region.  The optional second argument is an expression
-        which can be used to exclude specific cells in the range when determining this maximum  value  (see
-        above).  See also the multi argument version of @max below.
+    @avg({range})
+    @avg({range},{expr})
+        Average the values.
 
-    @min(r)
-    @min(r,e)
-        Return  the  minimum  value in the specified region.  The optional second argument is an expression
-        which can be used to exclude specific cells in the range when determining this minimum  value  (see
-        above).  See also the multi argument version of @min below.
+    @count({range})
+    @count({range},{expr})
+        Count the values.
 
-    @stddev(r)
-    @stddev(r,e)
-        Return  the  sample  standard  deviation of the cells in the specified region.  The optional second
-        argument is an expression which can be used to exclude specific cells in the range when calculating
-        the standard deviation (see above).
+    @max({range})
+    @max({range},{expr})
+        Find the maximum value.
+        See also the multi-argument version of @max below.
 
-    @rows(r)
-        Return the number of rows in the specified range.
+    @min({range})
+    @min({range},{expr})
+        Find the minimum value.
+        See also the multi-argument version of @min below.
 
-    @cols(r)
-        Return the number of columns in the specified range.
+    @stddev({range})
+    @stddev({range},{expr})
+        Get the sample standard deviation of the values.
+
+    @rows({range})
+    @cols({range})
+        Count the number of rows or columns.
 
 ==============================================================================
 &Built-in Numeric Functions&
-    @exp(e)
-        Return the exponential function of e.
 
-    @ln(e)
-        Return the natural logarithm of e.
+    @exp({expr})
+        Return e (Euler's number) raised to the {expr} power.
 
-    @log(e)
-        Return the base 10 logarithm of e.
+    @ln({expr})
+        Return the natural logarithm of {expr}.
 
-    @floor(e)
-        Return the largest integer not greater than e.
+    @log({expr})
+        Return the base-10 logarithm of {expr}.
 
-    @ceil(e)
-        Return the smallest integer not less than e.
+    @floor({expr})
+        Return the largest integer not greater than {expr}.
 
-    @rnd(e)
-        Round e to the nearest integer. default: *.5 will be rounded up to the next integer;
+    @ceil({expr})
+        Return the smallest integer not less than {expr}.
 
-    @round(e,n)
-        Round e to n decimal places.  n may be positive to round off the right side of the decimal or nega‐
-        tive to round off the left side.  See @rnd(e) above for rounding types.
+    @rnd({expr})
+        Round {expr} to the nearest integer.  Numbers halfway between integers
+        are rounded up.
 
-    @ascii(se)
-        Convert string expr (256-base number without digit 0) se to a numeric (10-base nonnegative integer)
-        see also @chr
+    @round({expr},{n})
+        Round {expr} to {n} decimal places.  {n} may be positive to round off
+        the right side of the decimal point or negative to round off the left
+        side.  See @rnd({expr}) above for rounding types.
 
-    @abs(e)
-    @fabs(e)
-        Return the absolute value of e.
+    @ascii("{se}")
+        Interpret the string expression {se} as a base-256 number without
+        digit 0 and convert to a base-10 nonnegative number.
+        See also @chr.
 
-    @pow(e1,e2)
-        Return e1 raised to the power of e2.
+    @abs({expr})
+    @fabs({expr})
+        Return the absolute value of {expr}.
 
-    @hypot(e1,e2)
-        Return sqrt(e1∗e1+e2∗e2), taking precautions against unwarranted overflows.
+    @pow({expr1},{expr2})
+        Return {expr1} raised to the power of {expr2}.
+
+    @hypot({expr1},{expr2})
+        Return @sqrt({expr1}*{expr1}+{expr1}*{expr1}), taking precautions
+        against overflows.
 
     @pi
-        A constant quite close to pi.
+        Return a constant quite close to pi.
 
-    @dtr(e)
-        Convert e in degrees to radians.
+    @dtr({expr})
+        Convert {expr} from degrees to radians.
 
-    @rtd(e)
-        Convert e in radians to degrees.
+    @rtd({expr})
+        Convert {expr} from radians to degrees.
 
-    @sin(e)
-    @cos(e)
-    @tan(e)
-        Return trigonometric functions of radian arguments. The magnitude of the arguments are not checked
-        to assure meaningful results.
+    @sin({expr})
+    @cos({expr})
+    @tan({expr})
+        Evaluate the trigonometric functions on {expr}, in radians. The
+        magnitude of the arguments are not checked to assure meaningful
+        results.
 
-    @asin(e)
-        Return the arc sine of e in the range -pi/2 to pi/2.
+    @asin({expr})
+        Return the arc sine of {expr} in the range -pi/2 to pi/2.
 
-    @acos(e)
-        Return the arc cosine of e in the range 0 to pi.
+    @acos({expr})
+        Return the arc cosine of {expr} in the range 0 to pi.
 
-    @atan(e)
-        Return the arc tangent of e in the range -pi/2 to pi/2.
+    @atan({expr})
+        Return the arc tangent of {expr} in the range -pi/2 to pi/2.
 
-    @atan2(e1,e2)
+    @atan2({expr1},{expr2})
         Returns the arc tangent of e1/e2 in the range -pi to pi.
 
-    @max(e1,e2,...)
-        Return the maximum of the values of the expressions. Two or more expressions may be specified.
-        See also the range version of @max above.
+    @max({expr1},{expr2},...)
+    @min({expr1},{expr2},...)
+        Return the maximum or minimum of the values of the expressions. Two or
+        more expressions may be specified.
+        See also the range version of @max and @min above.
 
-    @min(e1,e2,...)
-        Return the minimum of the values of the expressions. Two or more expressions may be specified.
-        See also the range version of @min above.
+    @ston("{se}")
+        Convert string expression {se} to a numeric value.
 
-    @ston(se)
-        Convert string expression se to a numeric value.
+    @nval("{se}",{expr})
+        Return the numeric value of a cell selected by name. String expression
+        {se} must evaluate to a column name ("A" - "ZZ") and {expr} must
+        evaluate to a row number (0 - maxrows, by default 65536).
+        If {se} or {expr} is out of bounds, or the cell has no numeric
+        value, the result is 0.
+        You can use this for simple table lookups. See also @sval below.
 
-    @nval(se,e)
-        Return the numeric value of a cell selected by name. String expression se must evaluate to a
-        column  name ("A" - "ZZ") and e must evaluate to a row number (0 - maxrows, by default 65536).
-        If se or e is out of bounds, or the cell has no numeric value, the result is 0.
-        You can use this for simple table lookups. See also @sval() below.
+    @eqs("{se1}","{se2}")
+        Return 1 if string expressions {se1} and {se2} have the same value, 0
+        otherwise.
 
-    @eqs(se1,se2)     Return 1 if string expression se1 has the same value as string expression se2, 0 otherwise.
-
-    @slen(se)
-        Returns the length of string expression se.
+    @slen("{se}")
+        Returns the length of string expression {se}.
 
 ==============================================================================
 &String Expressions&
-    String expressions are made up of constant strings (characters surrounded by double quotation marks), variables (cell
-    names, which refer to the cells's label strings or expressions), and string functions.
 
-    IMPORTANT: PLEASE NOTE THAT STRING EXPRESSIONS ARE ONLY ALLOWED WHEN ENTERING A CELL'S LABEL STRING.
-               NOT ITS NUMERIC PART.
-               THEY ARE ENTERED WITH A BACKSLASH FOLLOWED BY A DOUBLE QUOTE:
-               Ex.:   \"@coltoa(4)
-               Ex.:   \"A0 # "Plate"
+    String expressions are made up of string constants (characters surrounded
+    by double quotation marks), variables (cell names, which refer to the
+    cell's label strings or expressions), and string functions.
 
-    Also note that string expression results
-    may be left or right flushed or centered, according to the type of the cell's string label.
+    Note: String expressions are only allowed when entering a cell's label
+    string, not its numeric part.  They are entered with a backslash followed
+    by a double quote.
+               Examples:  \"@coltoa(4)
+                          \"A0 # "Plate"
 
-    #      Concatenate strings.  For example, the string expression
+    Note: String expression results may be left or right flushed or centered,
+    according to the type of the cell's string label.
+
+    #      Concatenate strings.
+           For example, if the value of A0's string is "the la", then the
+           string expression
 
                A0 # "zy dog"
 
-           displays the string ``the lazy dog'' in the cell if the value of A0's string is ``the la''.
+           returns the string "the lazy dog".
 
 ==============================================================================
 &Built-in String Functions&
+
     String functions can be entered typing \"
 
-    @substr(se,e1,e2)
-        Extract and return from string expression se the substring indexed by character number  e1  through
-        character  number e2 (defaults to the size of se if beyond the end of it).  If e1 is less than 1 or
-        greater than e2, the result is the null string.  For example,
+    @substr("{se}",{expr1},{expr2})
+        Extract from string expression {se} the substring indexed by character
+        number {expr1} through {expr2}. (Defaults to the length of {se} if
+        greater than the length.)  If {expr1} is less than 1 or greater than
+        {expr2}, the result is the null string.  For example,
 
         @substr ("River Plate", 4, 8)
 
         returns the string 'er Pl'.
 
-    @upper(se)
-    @lower(se)
-        will case the string expression to upper or lower.
+    @upper("{se}")
+    @lower("{se}")
+        Convert the string expression {se} to uppercase or lowercase.
 
-    @capital(se)
-        will  convert the first letter of words in a string into upper case and other letters to lower case
-        (the latter if all letters of the string are upper case).
+    @capital("{se}")
+        Convert the initial letter of words in {se} to upper case and other
+        letters to lower case.
 
-    @replace(se, eold, enew)
-        Replace eold occurences in se string with enew string.
-        For example, having in A1 the string "Extension" and entering in A2 the following:
+    @replace("{se}","{eold}","{enew}")
+        Replace occurrences of {eold} in {se} with {enew}.
+        For example, having in A1 the string "Extension" and entering in A2
+        the following:
         @replace(A1,"n","Z")
-        will result "Extezsioz".
+        will result "Extezsioz" in A2.
 
-    @ext(se,e)
-        Call an external function (program or script).  The purpose is to allow arbitrary functions on val‐
-        ues,  e.g.  table lookups and interpolations.  String expression se is a command or command line to
-        call with popen(3).  The value of e is converted to a string and appended to the command line as an
-        argument.   The result of @ext() is a string: the first line printed to standard output by the com‐
-        mand.  The command should emit exactly one output line.  Additional output, or output  to  standard
-        error,  messes  up  the  screen.  @ext() returns a null string and prints an appropriate warning if
-        external functions are disabled, se is null, or the attempt to run the command fails.
+    @ext("{se}",{expr})
+        Call an external program or script.  This allows arbitrary functions
+        on values, e.g. table lookups and interpolations.  String expression
+        {se} is a command or command line to call with popen(3).  {expr} is
+        evaluated, converted to a string, and appended to the command line
+        as an argument.  The result of @ex is a string: the first line printed
+        to standard output by the command.  The command should emit exactly
+        one output line.  Additional output, or output to standard error,
+        messes up th  screen.  @ext returns a null string and prints an
+        appropriate warning if external functions are disabled, {se} is null,
+        or the attempt to run the command fails.
 
-        External functions can be slow to run, and if enabled are called at each screen update, so they are
-        disabled by default. Use the set command to enable it, when you really want them called.
+        External functions can be slow to run, and if enabled are called at
+        each screen update, so they are disabled by default. Use the set
+        command to enable them when needed.
 
-        A simple example:
+        Example:
             @ext ("echo", a1)
 
-            You can use @ston() to convert the @ext() result back to a number.  For example:
+        You can use @ston to convert the @ext result back to a number.
+
+        Example:
             @ston (@ext ("form.sc.ext", a9 + b9))
 
-        Note  that  you  can build a command line (including more argument values) from a string expression
-        with concatenation.  You can also "hide" the second argument by  ending  the  command  line  (first
-        argument) with `` #'' (shell comment).
+        Note: You can build a command line (including more argument values)
+        from a string expression with concatenation.  You can also "hide" the
+        second argument by ending the command line (first argument) with a "#"
+        shell comment.
 
-    @coltoa(e)
-        Returns a string name for a column from the numeric argument.  For example:
+    @coltoa({expr})
+        Return a string name for a column from the numeric result of {expr}.
 
+        Example:
             @coltoa(@mycol-1)      @nval(coltoa(@mycol-1), @myrow+1)
 
-    @sval(se,e)
-        Return the string value of a cell selected by name.  String expression se must evaluate to a column
-        name  (``A''-``AE'')  and e must evaluate to a row number (0-199).  If se or e is out of bounds, or
-        the cell has no string value, the result is the null string.
+    @sval("{se}",{expr})
+        Return the string value of a cell selected by column and row.  String
+        expression {se} must evaluate to a column name (A - AE) and {expr}
+        must evaluate to a row number (0 - 199).  If {se} or {e} is out of
+        bounds, or the cell has no string value, the result is the null
+        string.
 
-    @set8bit(e)
-        Return the string with 8th bit set
+    @set8bit("{se}")
+        Return the string "{se}" with 8th bit set.
 
-    @chr(e)
-        Convert numeric (particular 10-base nonnegative integer) to a string (256-base number without digit 0)
-        see also @ascii
+    @chr({expr})
+        Interpret {expr} as a base-10 nonnegative integer and convert to a
+        string (base-256 number without digit 0).
+        See also @ascii.
 
 ==============================================================================
 &Built-in Date and Time Functions&
 
-    @year(e)
-        Return the year. Valid years begin with 1970, although many systems will return years prior to
-        1970 if e is negative. The last legal year is system dependent.
+    The following functions operate on an expression {date_expr} denoting a
+    UNIX timestamp.
 
-    @month(e)
+    @year({date_expr})
+        Return the year. Valid years begin with 1970, although many systems
+        will return years prior to 1970 if e is negative. The last legal year
+        is system dependent.
+
+    @month({date_expr})
         Return the month, encoded as 1 (January) to 12 (December).
 
-    @day(e)
+    @day({date_expr})
         Return the day of the month, encoded as 1 to 31.
 
-    @hour(e)
+    @hour({date_expr})
         Return the number of hours since midnight, encoded as 0 to 23.
 
-    @minute(e)
-        Return the number of minutes since the last full hour, encoded as 0 to 59.
+    @minute({date_expr})
+        Return the number of minutes since the last full hour, encoded as 0 to
+        59.
 
-    @second(e)
-        Return the number of seconds since the last full minute, encoded as 0 to 59.
+    @second({date_expr})
+        Return the number of seconds since the last full minute, encoded as 0
+        to 59.
 
-
+==============================================================================
 &Supported file formats / File import&
-    SC-IM can handle the following file formats:
-        .sc
-        .xls
-        .xlsx
-        .csv (comma delimited values files)
-        .tsv (tab delimited values files)
-        .tab (tab delimited values files)
-        .txt (simple text files)
 
-    You can pass to SC-IM binary any of the above files.
-    If you pass a csv file to SC-IM, the file will be imported using a comma as the delimiter.
-    If you pass a tsb or tab file to SC-IM, it will be imported using the tab character as the delimiter.
-    If you pass a txt file to SC-IM, it will be imported using a comma as the delimiter.
+    SC-IM can open the following file formats:
+        .sc     SC-IM's native text format
+        .xls    Microsoft Excel Spreadsheet
+        .xlsx   Microsoft Office Open XML Workbook
+        .csv    Comma-separated values
+        .tsv    Tab-separated values
+        .tab    Tab-separated values
+        .txt    Simple text files
 
-    Take note that you can always override the delimiter used passing the --txtdelim parameter to SC-IM.
-    For instance: ./scim --txtdelim="\t" file.txt
+    You can pass files of any of the above formats to SC-IM binary.
+    If you pass a .txt or .csv file to SC-IM, it is imported using a comma as
+    the delimiter.
+    If you pass a .tsb or .tab file to SC-IM, it is imported using the tab
+    character as the delimiter.
+
+    Note: You can always override the delimiter used passing the --txtdelim
+    parameter to SC-IM.
+
+    Example: ./scim --txtdelim="\t" file.txt
+
     Possible values are:
         --txtdelim="\t"
         --txtdelim=","
@@ -1112,12 +1148,17 @@ Commands for handling cell content:
 ==============================================================================
 &External scripts&
 
-    SC-IM can read data from a external script, either through a pipeline or redirection.
+    SC-IM can read data from a external script, either through a pipeline or
+    redirection.
     This enables SC-IM to be used as a non-interactive calculator.
-    It also can be run interactive but with no ncurses interface if you set the --nocurses flag.
 
-    You can set the --output parameter if you want results to be saved in a file.
-    If you set the --quit_afterload flag, SC-IM will quit after loading all files, but before becoming interactive.
+    It can also be run interactively without the ncurses interface if you pass
+    the --nocurses flag.
+
+    You can set the --output parameter to save the results to a file.
+
+    If you set the --quit_afterload flag, SC-IM will quit after loading all
+    files, but before becoming interactive.
 
     Suppose you have a file called "script" with the following content:
         let A2=0
@@ -1125,26 +1166,26 @@ Commands for handling cell content:
         recalc
         getnum A3
 
-    With the following command, you can send SC-IM the script through a pipe, then SC-IM will output to stdout, and then quit:
+    The following invocations demonstrate SC-IM's input and output options.
+
+    Output to stdout, then quit:
         cat script | ./scim --nocurses --quit_afterload
 
-    You can also receive data from a pipe and output results to a file, with this command:
+    Receive data from a pipe and output results to a file:
         cat script | ./scim --quit_afterload --output=return_file
 
-    Other possibilities are:
-
-        - receive data from a pipe and continue in non-ncurses mode:
+    Receive data from a pipe and continue in non-ncurses mode:
         cat script | ./scim --nocurses
 
-        - receive data from a sc file, and output to a file:
+    Read data from a script and output to a file:
         ./scim a.sc --quit_afterload --output=return_file
 
-        - receive data from both a piped script and from a sc file, and output to file:
+    Receive data from both a pipe and a script, and output to file:
         cat script | ./scim a.sc --quit_afterload --output=return_file
 
-        - start interactive but with no ncurses interface:
+    Start interactive mode but with no ncurses interface:
         ./scim --nocurses
 
-    Note that if you set the --output parameter, the --nocurses flag is assumed to be true.
+    Note: Setting the --output parameter implies setting the --nocurses flag.
 
  vim:tw=78:ts=8:ft=help:norl:
