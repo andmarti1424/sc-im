@@ -266,7 +266,7 @@ int etype(register struct enode *e) {
         case O_VAR: {
             register struct ent *p;
             p = e->e.v.vp;
-            if (p->expr) 
+            if (p->expr)
                 return (p->flags & is_strexpr ? STR : NUM);
             else if (p->label)
                 return (STR);
@@ -423,7 +423,7 @@ struct enode * copye(register struct enode *e, int Rdelta, int Cdelta, int r1, i
                     Rdelta = Cdelta = 0;
                 ret->e.o.left = copye(e->e.o.left, Rdelta, Cdelta, r1, c1, r2, c2, transpose);
                 ret->e.o.right = (struct enode *)0;
-                 break;
+                break;
             case '$':
             case EXT:
                 ret->e.s = scxmalloc((unsigned) strlen(e->e.s)+1);
@@ -431,6 +431,12 @@ struct enode * copye(register struct enode *e, int Rdelta, int Cdelta, int r1, i
                 if (e->op == '$')    /* Drop through if ret->op is EXT */
                     break;
             default:
+                if (e->op == ERR_) {
+                    //ret->e.o.left = NULL;
+                    //ret->e.o.right = NULL;
+                    //ret->e.o.right = (struct enode *)0;
+                    break; /* fix #108 */
+                }
                 ret->e.o.left = copye(e->e.o.left, Rdelta, Cdelta, r1, c1, r2, c2, transpose);
                 ret->e.o.right = copye(e->e.o.right, Rdelta, Cdelta, r1, c1, r2, c2, transpose);
                 break;
@@ -1059,7 +1065,7 @@ void cleanent(struct ent * p) {
 }
 
 // clearent: free memory of an ent and its contents
-void clearent(struct ent *v) {
+void clearent(struct ent * v) {
     if (!v) return;
 
     label(v, "", -1);

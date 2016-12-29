@@ -760,6 +760,8 @@ double eval(register struct ent * ent, register struct enode * e) {
                 sc_error("Circular reference in eval");
                 e->op = ERR_;
                 e->e.k = (double) 0;
+                e->e.o.left = NULL;
+                e->e.o.right = NULL;
                 cellerror = CELLERROR;
                 return (e->e.k);
             }
@@ -2125,7 +2127,6 @@ void let(struct ent * v, struct enode * e) {
             cellerror = CELLERROR;
         } else {
             cellerror = CELLOK;
-            //val = eval(NULL, e);
             val = eval(v, e); // JUST NUMERIC VALUE
         }
         if (v->cellerror != cellerror) {
@@ -2213,7 +2214,7 @@ void slet(struct ent * v, struct enode * se, int flushdir) {
     efree(v->expr);
     v->expr = se;
 
-    p = seval(v, se);                 // ADDED - TODO here we store the cell dependences in a graph
+    p = seval(v, se);                 // ADDED - here we store the cell dependences in a graph
     if (p) scxfree(p);                // ADDED
 
     v->flags |= (is_changed|is_strexpr);
@@ -2285,21 +2286,20 @@ int constant(register struct enode *e) {
          && optimize );
 }
 
-void efree(struct enode *e) {
+void efree(struct enode * e) {
     if (e) {
         if (e->op != O_VAR && e->op != O_CONST && e->op != O_SCONST
-        && !(e->op & REDUCE)) {
+        && !(e->op & REDUCE) && e->op != ERR_) {
             efree(e->e.o.left);
             efree(e->e.o.right);
+            e->e.o.right = NULL;
         }
         if (e->op == O_SCONST && e->e.s)
             scxfree(e->e.s);
         else if (e->op == EXT && e->e.o.s)
             scxfree(e->e.o.s);
         e->e.o.left = NULL;
-        // e->e.o.left = freeenodes;
         scxfree((char *) e);
-        //freeenodes = e;
     }
 }
 
