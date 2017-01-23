@@ -343,7 +343,7 @@ void read_argv(int argc, char ** argv) {
             free(s);
             s = NULL;
         } else {                                   // it was passed a file
-            strcpy(curfile, argv[i]);
+            strncpy(curfile, argv[i], PATHLEN-1);
         }
     }
     exepath = argv[0];
