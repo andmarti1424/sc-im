@@ -238,6 +238,9 @@ void copyent(register struct ent * n, register struct ent * p, int dr, int dc,
         }
     }
 
+    // used for undoing / redoing cells that has errors
+    n->cellerror = p->cellerror;
+
     if (special == 'c' && n->expr)
         EvalJustOneVertex(n, n->row, n->col, 0);
 

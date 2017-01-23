@@ -374,7 +374,7 @@ void EvalJustOneVertex(register struct ent * p, int i, int j, int rebuild_graph)
             cellerror = CELLOK;
             v = rebuild_graph ? seval(p, p->expr) : seval(NULL, p->expr);
         }
-        p->cellerror = cellerror;
+        //p->cellerror = cellerror;
         if ( !v && !p->label) /* Everything's fine */
             return;
         if ( !p->label || !v || strcmp(v, p->label) != 0 || cellerror) {
@@ -399,10 +399,8 @@ void EvalJustOneVertex(register struct ent * p, int i, int j, int rebuild_graph)
                 cellerror = CELLERROR;
         }
         if ((cellerror != p->cellerror) || (v != p->v)) {
-            p->cellerror = cellerror;
+            //p->cellerror = cellerror;
             p->v = v;
-            //if (! cellerror)    /* don't keep eval'ing an error */
-            //    (*chgct)++;
             p->flags |= is_changed | is_valid;
             changed++;
         }

@@ -676,6 +676,9 @@ double dolmin(struct enode * ep) {
 }
 
 double eval(register struct ent * ent, register struct enode * e) {
+    if (cellerror == CELLERROR || (ent && ent->cellerror == CELLERROR))
+        return (double) 0;
+
     if (e == (struct enode *) 0) {
         cellerror = CELLINVALID;
         return (double) 0;
@@ -757,13 +760,10 @@ double eval(register struct ent * ent, register struct enode * e) {
     case O_VAR:    {
             struct ent * vp = e->e.v.vp;
             if (vp && ent && vp->row == ent->row && vp->col == ent->col) {
-                sc_error("Circular reference in eval");
-                e->op = ERR_;
-                e->e.k = (double) 0;
-                e->e.o.left = NULL;
-                e->e.o.right = NULL;
-                cellerror = CELLERROR;
-                return (e->e.k);
+                sc_error("Circular reference in eval (cell %s%d)", coltoa(vp->col), vp->row);
+     //         cellerror = CELLERROR;
+                ent->cellerror = CELLERROR;
+                return (double) 0;
             }
             int row, col;
 
@@ -779,15 +779,20 @@ double eval(register struct ent * ent, register struct enode * e) {
                 cellerror = CELLERROR;
                 return (double) 0;
             }
-            if (vp->cellerror) {
-                cellerror = CELLINVALID;
-            }
 
             // here we store the dependences in a graph
             if (ent && vp) {
                 GraphAddEdge( getVertex(graph, lookat(ent->row, ent->col), 1), getVertex(graph, lookat(vp->row, vp->col), 1) ) ;
                 //sc_debug("sc_eval added ent in graph: %d %d %d %d       repct:%d ", ent->row, ent->col, vp->row, vp->col, repct);
             }
+
+            if (vp->cellerror) {
+                cellerror = CELLINVALID;
+            }
+
+            if (vp->cellerror == CELLERROR)
+                return (double) 0;
+
             return (vp->v);
             }
     case SUM:
