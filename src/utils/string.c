@@ -229,22 +229,35 @@ int isnumeric(char * string) {
     int res = true;
     bool has_dot = false;
     bool has_dash = false;
+    bool has_digit = false;
     for (i=0; i<len; i++) {
+
         if ( string[i] == '.' && ! has_dot ) {
             has_dot = true;
             continue;
         }
-        if ( string[i] == '-' && ! has_dash ) {
-            has_dash = true;
+
+        if ( string[i] == '-' ) {
+            if (has_digit) {
+                res = false;
+                break;
+            }
+            if (! has_dash) {
+                has_dash = true;
+            } else {
+                res = false;
+                break;
+            }
             continue;
         }
+
         if ( isdigit(string[i]) ) {
+            has_digit = true;
             continue;
         }
-        else {
-            res = false;
-            break;
-        }
+
+        res = false;
+        break;
     }
     return res;
 }
