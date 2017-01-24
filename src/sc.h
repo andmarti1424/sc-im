@@ -234,6 +234,8 @@ struct go_save {
 #define CHR         (OP_BASE + 79)
 #define SET8BIT     (OP_BASE + 80)
 #define REPLACE     (OP_BASE + 81)
+#define FROW         (OP_BASE + 82)
+#define FCOL         (OP_BASE + 83)
 
 /* flag values */
 #define is_valid      0001

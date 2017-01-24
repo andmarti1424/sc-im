@@ -528,6 +528,14 @@ double dotts(int hr, int min, int sec) {
     return ((double) (sec + min * 60 + hr * 3600));
 }
 
+double dorow(struct enode * ep) {
+    return (double) ep->e.v.vp->row;
+}
+
+double docol(struct enode * ep) {
+    return (double) ep->e.v.vp->col;
+}
+
 double dotime(int which, double when) {
     static time_t t_cache;
     static struct tm tm_cache;
@@ -868,6 +876,13 @@ double eval(register struct ent * ent, register struct enode * e) {
         }
         }
     case ABS:    return (fn1_eval( fabs, eval(ent, e->e.o.left)));
+
+    case FROW:
+                 eval(ent, e->e.o.left);
+                 return (dorow(e->e.o.left));
+    case FCOL:
+                 eval(ent, e->e.o.left);
+                 return (docol(e->e.o.left));
     case ACOS:   return (fn1_eval( acos, eval(ent, e->e.o.left)));
     case ASIN:   return (fn1_eval( asin, eval(ent, e->e.o.left)));
     case ATAN:   return (fn1_eval( atan, eval(ent, e->e.o.left)));
@@ -2423,6 +2438,8 @@ void decompile(register struct enode *e, int priority) {
     case REDUCE | 'R': range_arg("@rows(", e); break;
     case REDUCE | 'C': range_arg("@cols(", e); break;
 
+    case FROW:   one_arg("@frow(", e); break;
+    case FCOL:   one_arg("@fcol(", e); break;
     case ABS:    one_arg("@abs(", e); break;
     case ACOS:   one_arg("@acos(", e); break;
     case ASIN:   one_arg("@asin(", e); break;

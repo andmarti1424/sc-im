@@ -240,6 +240,8 @@ token S_YANKCOL
 %token K_ROWS
 %token K_COLS
 %token K_ABS
+%token K_FROW
+%token K_FCOL
 %token K_ACOS
 %token K_ASIN
 %token K_ATAN
@@ -710,6 +712,8 @@ term:           var                     { $$ = new_var(O_VAR, $1); }
         |       '@' K_COLS '(' var_or_range ')'
                                 { $$ = new_range(REDUCE | 'C', $4); }
         | '@' K_ABS '(' e ')'           { $$ = new(ABS, $4, ENULL); }
+        | '@' K_FROW '(' e ')'          { $$ = new(FROW, $4, ENULL); }
+        | '@' K_FCOL '(' e ')'          { $$ = new(FCOL, $4, ENULL); }
         | '@' K_ACOS '(' e ')'          { $$ = new(ACOS, $4, ENULL); }
         | '@' K_ASIN '(' e ')'          { $$ = new(ASIN, $4, ENULL); }
         | '@' K_ATAN '(' e ')'          { $$ = new(ATAN, $4, ENULL); }
