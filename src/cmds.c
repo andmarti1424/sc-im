@@ -98,9 +98,9 @@ void syncref(register struct enode * e) {
                 //FIXME
                 //break;
                 //sc_info("%d %d", e->e.v.vp->row, e->e.v.vp->col);
-                e->op = ERR_;
-                e->e.o.left = NULL;
-                e->e.o.right = NULL;
+//                e->op = ERR_;
+//                e->e.o.left = NULL;
+//                e->e.o.right = NULL;
             } else
                 if (e->e.v.vp->flags & may_sync)
                    e->e.v.vp = lookat(e->e.v.vp->row, e->e.v.vp->col);

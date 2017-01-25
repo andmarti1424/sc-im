@@ -783,8 +783,12 @@ double eval(register struct ent * ent, register struct enode * e) {
             }
 
             if (! vp || vp->flags & is_deleted) {
-                //sc_debug("eval O_VAR is_deleted");
-                cellerror = CELLERROR;
+                //sc_debug("eval O_VAR - ent referenced in enode was deleted");
+                // FIXME if ent is removed, it should not put zero
+                // as a result of every cell that references it.
+                // just return zero to the removed oned.
+                //cellerror = CELLERROR;
+
                 return (double) 0;
             }
 
@@ -2350,9 +2354,10 @@ void label(register struct ent * v, register char * s, int flushdir) {
 
 void decodev(struct ent_ptr v) {
     struct range * r;
-    if ( ! v.vp || v.vp->flags & is_deleted)
-        (void) sprintf(line + linelim, "@ERR");
-    else if ( !find_range( (char *) 0, 0, v.vp, v.vp, &r) && !r->r_is_range)
+    //if ( ! v.vp || v.vp->flags & is_deleted)
+    //    (void) sprintf(line + linelim, "@ERR");
+    //else
+    if ( !find_range( (char *) 0, 0, v.vp, v.vp, &r) && !r->r_is_range)
         (void) sprintf(line+linelim, "%s", r->r_name);
     else {
         (void) sprintf( line + linelim, "%s%s%s%d", v.vf & FIX_COL ? "$" : "", coltoa(v.vp->col), v.vf & FIX_ROW ? "$" : "", v.vp->row);
