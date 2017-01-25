@@ -105,6 +105,7 @@ token S_YANKCOL
 %token S_UNLOCK
 %token S_DEFINE
 %token S_UNDEFINE
+%token S_DETAIL
 %token S_EVAL
 %token S_SEVAL
 %token S_FILL
@@ -366,6 +367,25 @@ command:
                                     //sc_debug("!! %d %d %d %d", $2.left.vp->row, $2.left.vp->col);
                                     //if ($4->e.v.vp != NULL) {
                                     //    sc_debug("!!! %d %d - %d %d", $2.left.vp->row, $2.left.vp->col, $4->e.v.vp->row, $4->e.v.vp->col);
+                                  }
+    |    S_DETAIL var             {
+                                  char det[20000] = "";
+                                  struct ent * e = $2.vp;
+
+                                  sprintf(det + strlen(det), "row: %d\n", e->row);
+                                  sprintf(det + strlen(det), "col: %d\n", e->col);
+                                  sprintf(det + strlen(det), "cellerror: %d\n"   , e->cellerror);
+                                  sprintf(det + strlen(det), "flags:\n");
+                                  sprintf(det + strlen(det), "is_valid: %d\n"    , e->flags & is_valid );
+                                  sprintf(det + strlen(det), "is_deleted: %d\n"  , e->flags & is_deleted);
+                                  sprintf(det + strlen(det), "is_changed: %d\n"  , e->flags & is_changed);
+                                  sprintf(det + strlen(det), "is_strexpr: %d\n"  , e->flags & is_strexpr);
+                                  sprintf(det + strlen(det), "is_leftflush: %d\n", e->flags & is_leftflush);
+                                  sprintf(det + strlen(det), "is_locked: %d\n"   , e->flags & is_locked);
+                                  sprintf(det + strlen(det), "is_label: %d\n"    , e->flags & is_label);
+                                  sprintf(det + strlen(det), "iscleared: %d\n"   , e->flags & iscleared);
+                                  sprintf(det + strlen(det), "may_sync: %d\n"    , e->flags & may_sync);
+                                  show_text((char *) &det);
                                   }
     |    S_LET var_or_range '='
                                   { $2.left.vp->v = (double) 0.0;
