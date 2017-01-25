@@ -314,8 +314,10 @@ void erase_area(int sr, int sc, int er, int ec, int ignorelock) {
         pp = ATBL(tbl, r, c);
         if (*pp && (!((*pp)->flags & is_locked) || ignorelock)) {
 
-            /* delete vertex in graph */
-            if (getVertex(graph, *pp, 0) != NULL) destroy_vertex(*pp);
+            /* delete vertex in graph
+               unless vertex is referenced by other */
+            vertexT * v = getVertex(graph, *pp, 0);
+            if (v != NULL && v->back_edges == NULL ) destroy_vertex(*pp);
 
             mark_ent_as_deleted(*pp);
             *pp = NULL;

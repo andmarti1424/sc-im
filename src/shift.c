@@ -87,8 +87,10 @@ void shift_cells_up(int deltarows, int deltacols) {
             if (r < currow + deltarows) {
                 pp = ATBL(tbl, r, c);
 
-                // delete vertex in graph
-                if (*pp && getVertex(graph, *pp, 0) != NULL) destroy_vertex(*pp);
+                /* delete vertex in graph
+                   unless vertex is referenced by other */
+                vertexT * v = getVertex(graph, *pp, 0);
+                if (v != NULL && v->back_edges == NULL ) destroy_vertex(*pp);
 
                 if (*pp) {
                    mark_ent_as_deleted(*pp);
@@ -124,8 +126,10 @@ void shift_cells_left(int deltarows, int deltacols) {
             if (c < curcol + deltacols) {
                 pp = ATBL(tbl, r, c);
 
-                // delete vertex in graph
-                if (*pp && getVertex(graph, *pp, 0) != NULL) destroy_vertex(*pp);
+                /* delete vertex in graph
+                   unless vertex is referenced by other */
+                vertexT * v = getVertex(graph, *pp, 0);
+                if (v != NULL && v->back_edges == NULL ) destroy_vertex(*pp);
 
                 if (*pp) {
                    mark_ent_as_deleted(*pp);
