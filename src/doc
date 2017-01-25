@@ -922,6 +922,12 @@ Commands for handling cell content:
         digit 0 and convert to a base-10 nonnegative number.
         See also @chr.
 
+    @frow({var})
+        Return the row of the cell {var}. Ex. @frow(A4) returns 4
+
+    @fcol({var})
+        Return the number of the col of the cell {var}. Ex. @fcol(D4) returns 3
+
     @abs({expr})
     @fabs({expr})
         Return the absolute value of {expr}.
