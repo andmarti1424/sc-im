@@ -677,6 +677,7 @@ void do_normalmode(struct block * buf) {
             if (bs != 2) return;
             int ic = cmd_multiplier; // orig
 
+        // deleterow
             if (buf->pnext->value == L'r') {
                 if (any_locked_cells(currow, 0, currow + cmd_multiplier, maxcol)) {
                     sc_error("Locked cells encountered. Nothing changed");
@@ -690,13 +691,16 @@ void do_normalmode(struct block * buf) {
                 fix_marks(-ic, 0, currow + ic - 1, maxrow, 0, maxcol);
                 yank_area(currow, 0, currow - 1 + cmd_multiplier, maxcol, 'r', ic);
                 while (ic--) deleterow();
-                EvalAll();
+                if (atoi(get_conf_value("autocalc")) && ! loading) EvalAll();
 #ifdef UNDO
                 copy_to_undostruct(currow, 0, currow - 1 + cmd_multiplier, maxcol, 'a');
                 end_undo_action();
 #endif
                 if (cmd_multiplier > 0) cmd_multiplier = 0;
 
+
+
+        // deletecol
             } else if (buf->pnext->value == L'c') {
                 if (any_locked_cells(0, curcol, maxrow, curcol + cmd_multiplier)) {
                     sc_error("Locked cells encountered. Nothing changed");
@@ -709,22 +713,58 @@ void do_normalmode(struct block * buf) {
 #endif
                 fix_marks(0, -ic, 0, maxrow,  curcol - 1 + ic, maxcol); // FIXME
                 yank_area(0, curcol, maxrow, curcol + cmd_multiplier - 1, 'c', ic);
+
+#ifdef UNDO
+                // here we save in undostruct, all the ents that depends on the deleted one (before change)
+                extern struct ent_ptr * deps;
+                int i, n = 0, w=ic;
+                ents_that_depends_on_range(0, curcol, maxrow, curcol - 1 + ic);
+                if (deps != NULL) {
+                    n = deps->vf;
+                    for (i = 0; i < n; i++)
+                        copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'd');
+                }
+#endif
+
                 while (ic--) {
 #ifdef UNDO
                     add_undo_col_format(curcol-ic+1, 'R', fwidth[curcol], precision[curcol], realfmt[curcol]);
 #endif
                     deletecol();
                 }
+
+                // Eval entire graph
+                // TODO it should eval only necessary ents
+                if (atoi(get_conf_value("autocalc")) && ! loading) EvalAll();
+
 #ifdef UNDO
+                while (w--) {
+                    // here we save in undostruct, all the ents that depends on the deleted one (after change)
+                    if (deps != NULL) {
+                        n = deps->vf;
+                        for (i = 0; i < n; i++) {
+                            if (deps[i].vp->col >= curcol)
+                                copy_to_undostruct(deps[i].vp->row, deps[i].vp->col+1, deps[i].vp->row, deps[i].vp->col+1, 'a');
+                            else
+                                copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'a');
+                        }
+                        free(deps);
+                        deps = NULL;
+                    }
+                }
                 copy_to_undostruct(0, curcol, maxrow, curcol + cmd_multiplier - 1, 'a');
                 end_undo_action();
 #endif
                 if (cmd_multiplier > 0) cmd_multiplier = 0;
 
+
+
+
             } else if (buf->pnext->value == L'd') {
                 del_selected_cells();
+                if (atoi(get_conf_value("autocalc")) && ! loading) EvalAll();
             }
-            if (atoi(get_conf_value("autocalc")) && ! loading) EvalAll();
+
             update(TRUE);
             break;
             }

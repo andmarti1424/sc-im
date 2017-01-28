@@ -684,8 +684,9 @@ double dolmin(struct enode * ep) {
 }
 
 double eval(register struct ent * ent, register struct enode * e) {
-    if (cellerror == CELLERROR || (ent && ent->cellerror == CELLERROR))
+    if (cellerror == CELLERROR || (ent && ent->cellerror == CELLERROR)) {
         return (double) 0;
+    }
 
     if (e == (struct enode *) 0) {
         cellerror = CELLINVALID;
@@ -773,8 +774,8 @@ double eval(register struct ent * ent, register struct enode * e) {
                 ent->cellerror = CELLERROR;
                 return (double) 0;
             }
-            int row, col;
 
+            int row, col;
             if (vp && (rowoffset || coloffset)) {
                 row = e->e.v.vf & FIX_ROW ? vp->row : vp->row + rowoffset;
                 col = e->e.v.vf & FIX_COL ? vp->col : vp->col + coloffset;
@@ -782,29 +783,41 @@ double eval(register struct ent * ent, register struct enode * e) {
                 vp = *ATBL(tbl, row, col);
             }
 
-            if (! vp || vp->flags & is_deleted) {
-                //sc_debug("eval O_VAR - ent referenced in enode was deleted");
-                // FIXME if ent is removed, it should not put zero
-                // as a result of every cell that references it.
-                // just return zero to the removed oned.
+            if (vp && vp->flags & iscleared) {
+                e->op = ERR_;
+                return (double) 0;
+            }
+
+            if (!vp) {
+                e->op = REF_;
+                e->e.o.left = NULL;
+                e->e.o.right = NULL;
+                return (double) 0;
+            }
+
+            if (!vp || vp->flags & is_deleted) {
+
+                e->op = REF_;
+                e->e.o.left = NULL;
+                e->e.o.right = NULL;
+
+                if (getVertex(graph, vp, 0) != NULL) destroy_vertex(vp);
                 //cellerror = CELLERROR;
 
                 return (double) 0;
             }
 
             // here we store the dependences in a graph
-            if (ent && vp) {
+            if (ent && vp) 
                 GraphAddEdge( getVertex(graph, lookat(ent->row, ent->col), 1), getVertex(graph, lookat(vp->row, vp->col), 1) ) ;
-                //sc_debug("sc_eval added ent in graph: %d %d %d %d       repct:%d ", ent->row, ent->col, vp->row, vp->col, repct);
-            }
 
             if (vp->cellerror) {
                 cellerror = CELLINVALID;
             }
 
-            if (vp->cellerror == CELLERROR)
+            if (vp->cellerror == CELLERROR) {
                 return (double) 0;
-
+            }
             return (vp->v);
             }
     case SUM:
@@ -831,7 +844,6 @@ double eval(register struct ent * ent, register struct enode * e) {
         for (row=minr; row <= maxr; row++) {
             for (col=minc; col <= maxc; col++) {
                 if (ent == NULL) continue;
-                //sc_debug("r:%d c:%d         %d %d", row, col, ent->row, ent->col);
                 GraphAddEdge(getVertex(graph, lookat(ent->row, ent->col), 1), getVertex(graph, lookat(row, col), 1));
             }
         }
@@ -965,8 +977,10 @@ double eval(register struct ent * ent, register struct enode * e) {
     case LASTROW: return ((double) maxrow);
     case LASTCOL: return ((double) maxcol);
     //case NUMITER: return ((double) repct);
-    case ERR_:    cellerror = CELLERROR;
+    case ERR_:
+                 cellerror = CELLERROR;
                  return ((double) 0);
+    case REF_:   return ((double) 0);
     case PI_:    return ((double) M_PI);
     case BLACK:  return ((double) COLOR_BLACK);
     case RED:    return ((double) COLOR_RED);
@@ -1429,196 +1443,6 @@ struct enode * new_str(char * s) {
     p->e.s = s;
     return (p);
 }
-
-/*
-void copy(struct ent *dv1, struct ent *dv2, struct ent *v1, struct ent *v2) {
-    struct ent *p;
-//    struct ent *n;
-    static int minsr = -1, minsc = -1;
-    static int maxsr = -1, maxsc = -1;
-    int mindr, mindc;
-    int maxdr, maxdc;
-//    int vr, vc;
-    int r, c;
-    int deltar, deltac;
-
-    if (dv1) {
-    mindr = dv1->row;
-    mindc = dv1->col;
-    maxdr = dv2->row;
-    maxdc = dv2->col;
-    if (mindr > maxdr) r = maxdr, maxdr = mindr, mindr = r;
-    if (mindc > maxdc) c = maxdc, maxdc = mindc, mindc = c;
-    } else {
-    //if (showrange) {
-    //    showrange = 0;
-        mindr = showsr < currow ? showsr : currow;
-        mindc = showsc < curcol ? showsc : curcol;
-        maxdr = showsr > currow ? showsr : currow;
-        maxdc = showsc > curcol ? showsc : curcol;
-    } else if (v1) {
-        // Set up the default source range for the "c." command.
-        minsr = maxsr = v1->row;
-        minsc = maxsc = v1->col;
-        return;
-    } else {
-        mindr = maxdr = currow;
-        mindc = maxdc = curcol;
-    }
-    }
-
-    if (v1) {
-    minsr = v1->row;
-    minsc = v1->col;
-    maxsr = v2->row;
-    maxsc = v2->col;
-    if (minsr > maxsr) r = maxsr, maxsr = minsr, minsr = r;
-    if (minsc > maxsc) c = maxsc, maxsc = minsc, minsc = c;
-    } else if (dv1 == NULL || v2 != NULL) {
-//    if (qbuf && delbuf[qbuf]) {
-//        delbuf[++dbidx] = delbuf[qbuf];
-//        delbuffmt[dbidx] = delbuffmt[qbuf];
-//    } else if (dbidx < 0) return;
-//    minsr = maxrow;
-//    minsc = maxcol;
-//    maxsr = 0;
-//    maxsc = 0;
-//    for (p = delbuf[dbidx]; p; p = p->next) {
-//        if (p->row < minsr) minsr = p->row;
-//        if (p->row > maxsr) maxsr = p->row;
-//        if (p->col < minsc) minsc = p->col;
-//        if (p->col > maxsc) maxsc = p->col;
-//    }
-    //} else if (showrange && !(showsr == currow && showsc == curcol &&
-        mindr == currow && mindc == curcol &&
-        maxdr == currow && maxdc == curcol)) {
-    minsr = showsr < currow ? showsr : currow;
-    minsc = showsc < curcol ? showsc : curcol;
-    maxsr = showsr > currow ? showsr : currow;
-    maxsc = showsc > curcol ? showsc : curcol;
-    } else
-    if (minsr == -1) return;
-
-    checkbounds(&maxdr, &maxdc);
-
-    if (maxdr - mindr < maxsr - minsr) maxdr = mindr + (maxsr - minsr);
-    if (maxdc - mindc < maxsc - minsc) maxdc = mindc + (maxsc - minsc);
-    if (dv1 && (v1 || !v2))
-    yank_area(minsr, minsc, maxsr, maxsc);
-    erase_area(mindr, mindc, maxdr, maxdc, 0);
-    sync_refs();
-    flush_saved();
-
-    sc_error("Copying...");
-    if (!loading)
-    refresh();
-//   p = delbuf[dbidx];
-//   if (minsr == maxsr && minsc == maxsc) {
-//    // Source is a single cell
-//    for (deltar = mindr - p->row; deltar <= maxdr - p->row; deltar++)
-//        for (deltac = mindc - p->col; deltac <= maxdc - p->col; deltac++)
-//        copydbuf(deltar, deltac);
-//   } else if (minsr == maxsr) {
-//    // Source is a single row
-//    deltac = mindc - p->col;
-//    for (deltar = mindr - p->row; deltar <= maxdr - p->row; deltar++)
-//        copydbuf(deltar, deltac);
-//   } else if (minsc == maxsc) {
-//    // Source is a single column
-//    deltar = mindr - p->row;
-//    for (deltac = mindc - p->col; deltac <= maxdc - p->col; deltac++)
-//        copydbuf(deltar, deltac);
-//   } else {
-//    // Everything else
-//    deltar = mindr - p->row;
-//    deltac = mindc - p->col;
-//    copydbuf(deltar, deltac);
-//   }
-
-    if (dv1 && (v1 || !v2)) {
-    sync_refs();
-    flush_saved();
-    }
-
-    if (dv1 == NULL) {
-//      if (qbuf && delbuf[qbuf]) {
-//        delbuf[dbidx] = NULL;
-//        delbuffmt[dbidx--] = NULL;
-//    }
-    qbuf = 0;
-    }
-    sc_error("Copy done.");
-}
-
-void copydbuf(int deltar, int deltac) {
-    int vr, vc;
-    struct ent *p = delbuf[dbidx];
-    struct ent *n;
-
-    while (p) {
-    vr = p->row + deltar;
-    vc = p->col + deltac;
-    n = lookat(vr, vc);
-    if (n->flags&is_locked) continue;
-    copyent(n, p, deltar, deltac, 0, 0, maxrow, maxcol, 0);
-    p = p->next;
-    }
-}
-
-// ERASE a Range of cells
-// this function should not be used
-void eraser(struct ent *v1, struct ent *v2) {
-    flush_saved();
-    erase_area(v1->row, v1->col, v2->row, v2->col, 0);
-    sync_refs();
-    modflg++;
-}
-
-// YANK a Range of cells
-void yankr(struct ent *v1, struct ent *v2) {
-    int i, qtmp;
-    struct ent *obuf = NULL;
-
-    if (dbidx < 0) dbidx++;
-    delbuf[dbidx] = delbuf[DELBUFSIZE - 10];
-    delbuf[DELBUFSIZE - 10] = NULL;
-    delbuffmt[dbidx] = delbuffmt[DELBUFSIZE - 10];
-    delbuffmt[DELBUFSIZE - 10] = NULL;
-    for (i = dbidx + 1; i < DELBUFSIZE; i++) {
-    if (delbuf[i] == delbuf[dbidx]) {
-        delbuf[dbidx] = NULL;
-        delbuffmt[dbidx] = NULL;
-        break;
-    }
-    }
-    flush_saved();
-    if (qbuf) {
-    if (dbidx < 0) dbidx++;
-    delbuf[dbidx] = delbuf[qbuf];
-    delbuffmt[dbidx] = delbuffmt[qbuf];
-    flush_saved();
-    obuf = delbuf[qbuf];    // orig. contents of the del. buffer
-    }
-    qtmp = qbuf;
-    qbuf = 0;
-    yank_area(v1->row, v1->col, v2->row, v2->col);
-    qbuf = qtmp;
-    for (i = 0; i < DELBUFSIZE; i++)
-    if ((obuf && delbuf[i] == obuf) || (qbuf && i == qbuf)) {
-        delbuf[i] = delbuf[dbidx];
-        delbuffmt[i] = delbuffmt[dbidx];
-    }
-    qbuf = 0;
-    delbuf[DELBUFSIZE - 10] = delbuf[dbidx];
-    delbuffmt[DELBUFSIZE - 10] = delbuffmt[dbidx];
-}
-
-// MOVE a Range of cells
-void mover(struct ent *d, struct ent *v1, struct ent *v2) {
-    move_area(d->row, d->col, v1->row, v1->col, v2->row, v2->col);
-    sync_refs();
-}
-*/
 
 // Goto subroutines */
 void g_free() {
@@ -2137,7 +1961,9 @@ void let(struct ent * v, struct enode * e) {
 
     if (locked_cell(v->row, v->col))
         return;
+
     //if (getVertex(graph, v, 0) != NULL) destroy_vertex(v);
+
     if (v->row == currow && v->col == curcol)
         cellassign = 1;
     if (loading && ! isconstant)
@@ -2184,7 +2010,7 @@ void let(struct ent * v, struct enode * e) {
 
         v->expr = e;
         v->flags &= ~is_strexpr;
-        eval(v, e); // ADDED - TODO here we store the cell dependences in a graph
+        eval(v, e); // ADDED - here we store the cell dependences in a graph
     }
 
     changed++;
@@ -2525,6 +2351,9 @@ void decompile(register struct enode *e, int priority) {
             linelim--;
             break;
     case ERR_:     for (s = "@err"; (line[linelim++] = *s++); );
+            linelim--;
+            break;
+    case REF_:     for (s = "@ref"; (line[linelim++] = *s++); );
             linelim--;
             break;
     case PI_:      for (s = "@pi"; (line[linelim++] = *s++); );

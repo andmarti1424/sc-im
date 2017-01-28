@@ -213,7 +213,7 @@ int paste_yanked_ents(int above, int type_paste) {
 
         // here we delete current content of "destino" ent
         if (type_paste == 'a' || type_paste == 's')
-            erase_area(yl->row + diffr, yl->col + diffc, yl->row + diffr, yl->col + diffc, ignorelock);
+            erase_area(yl->row + diffr, yl->col + diffc, yl->row + diffr, yl->col + diffc, ignorelock, 0);
 
         /*struct ent **pp = ATBL(tbl, yl->row + diffr, yl->col + diffc);
         if (*pp && ( ! ((*pp)->flags & is_locked) )) {

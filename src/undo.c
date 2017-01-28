@@ -80,6 +80,7 @@ NOT implemented:
 #include "color.h" // for set_ucolor
 #include "marks.h"
 #include "shift.h"
+#include "dep_graph.h"
 
 // undolist
 static struct undo * undo_list = NULL;
@@ -435,6 +436,7 @@ void do_undo() {
         i = i->next;
     }
 
+
     // Change cursor position
     //if (ul->removed != NULL) {
     //    currow = ul->removed->row;
@@ -447,7 +449,6 @@ void do_undo() {
         struct ent * e_now = lookat(j->row, j->col);
         //(void) copyent(e_now, j, 0, 0, 0, 0, j->row, j->col, 0);
         (void) copyent(e_now, j, 0, 0, 0, 0, 0, 0, 0);
-        e_now->flags &= ~is_deleted;
         j = j->next;
     }
 
@@ -496,6 +497,23 @@ void do_undo() {
            }
         }
     }
+
+    // for every ent in added and removed, we reeval expression to update graph
+    struct ent * ie = ul->added;
+    while (ie != NULL) {
+        struct ent * p;
+        if ((p = *ATBL(tbl, ie->row, ie->col)) && p->expr)
+            EvalJustOneVertex(p, ie->row, ie->col, 1);
+        ie = ie->next;
+    }
+    ie = ul->removed;
+    while (ie != NULL) {
+        struct ent * p;
+        if ((p = *ATBL(tbl, ie->row, ie->col)) && p->expr)
+            EvalJustOneVertex(p, ie->row, ie->col, 1);
+        ie = ie->next;
+    }
+
 
     // Restores cursor position
     currow = ori_currow;
@@ -566,6 +584,7 @@ void do_redo() {
     // Remove 'ent' elements
     struct ent * i = ul->removed;
     while (i != NULL) {
+        //sc_debug("redo removed: %d %d", i->row, i->col);
         struct ent * pp = *ATBL(tbl, i->row, i->col);
         clearent(pp);
         cleanent(pp);
@@ -582,9 +601,9 @@ void do_redo() {
     struct ent * j = ul->added;
     while (j != NULL) {
         struct ent * e_now = lookat(j->row, j->col);
+        //sc_debug("redo added: %d %d", j->row, j->col);
         //(void) copyent(e_now, j, 0, 0, 0, 0, j->row, j->col, 0);
         (void) copyent(e_now, j, 0, 0, 0, 0, 0, 0, 0);
-        e_now->flags &= ~is_deleted;
         j = j->next;
     }
 
@@ -633,6 +652,23 @@ void do_redo() {
             }
         }
     }
+
+    // for every ent in added and removed, we reeval expression to update graph
+    struct ent * ie = ul->added;
+    while (ie != NULL) {
+        struct ent * p;
+        if ((p = *ATBL(tbl, ie->row, ie->col)) && p->expr)
+            EvalJustOneVertex(p, ie->row, ie->col, 1);
+        ie = ie->next;
+    }
+    ie = ul->removed;
+    while (ie != NULL) {
+        struct ent * p;
+        if ((p = *ATBL(tbl, ie->row, ie->col)) && p->expr)
+            EvalJustOneVertex(p, ie->row, ie->col, 1);
+        ie = ie->next;
+    }
+
 
     // Restores cursor position
     currow = ori_currow;

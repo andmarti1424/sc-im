@@ -28,11 +28,10 @@ wchar_t interp_line[BUFFERSIZE];
 extern graphADT graph;
 
 
-// mark_ent_as_deleted (free_ents en sc original):
+// mark_ent_as_deleted - this sets is_deleted flag of an ent.
 // This structure is used to keep ent structs around before they
 // are actualy deleted (memory freed) to allow the sync_refs routine a chance to fix the
 // variable references.
-// it sets is_deleted flag of an ent.
 void mark_ent_as_deleted(register struct ent * p) {
     if (p == NULL) return;
     //p->flags |= iscleared;
@@ -83,8 +82,11 @@ void sync_refs() {
 }
 
 void syncref(register struct enode * e) {
-    //sc_debug("syncref");
-    if ( e == NULL || e->op == ERR_ ) {
+    //if (e == (struct enode *)0) {
+    if ( e == NULL || e->op == REF_ || e->op == ERR_ ) {
+        e->op = REF_;
+        e->e.o.left = NULL;
+        e->e.o.right = NULL;
         return;
     } else if (e->op & REDUCE) {
         e->e.r.right.vp = lookat(e->e.r.right.vp->row, e->e.r.right.vp->col);
@@ -94,16 +96,12 @@ void syncref(register struct enode * e) {
         case 'v':
             //if (e->e.v.vp->flags & iscleared) {
             if (e->e.v.vp->flags & is_deleted) {
-                //sc_debug("syncref is deleted");
-                //FIXME
-                //break;
-                //sc_info("%d %d", e->e.v.vp->row, e->e.v.vp->col);
-//                e->op = ERR_;
-//                e->e.o.left = NULL;
-//                e->e.o.right = NULL;
-            } else
-                if (e->e.v.vp->flags & may_sync)
-                   e->e.v.vp = lookat(e->e.v.vp->row, e->e.v.vp->col);
+                //e->op = ERR_;
+                //e->e.o.left = NULL;
+                //e->e.o.right = NULL;
+                break;
+            } else if (e->e.v.vp->flags & may_sync)
+                e->e.v.vp = lookat(e->e.v.vp->row, e->e.v.vp->col);
             break;
         case 'k':
             break;
@@ -128,7 +126,7 @@ void deletecol() {
         return;
     }
 
-    // mark ent of column to erase with isdeleted flag
+    // mark ent of column to erase with is_deleted flag
     for (r = 0; r <= maxrow; r++) {
         pp = ATBL(tbl, r, curcol);
         if ( *pp != NULL ) {
@@ -190,7 +188,10 @@ void copyent(register struct ent * n, register struct ent * p, int dr, int dc,
         return;
     }
 
-    //n->flags = may_sync;
+    n->flags = may_sync;
+    if (p->flags & is_deleted)
+        n->flags |= is_deleted;
+
     if (special != 'f') {
         if (p->flags & is_valid) {
             n->v = p->v;
@@ -284,7 +285,7 @@ int etype(register struct enode *e) {
 }
 
 // ignorelock is used when sorting so that locked cells can still be sorted
-void erase_area(int sr, int sc, int er, int ec, int ignorelock) {
+void erase_area(int sr, int sc, int er, int ec, int ignorelock, int mark_as_deleted) {
     int r, c;
     struct ent **pp;
 
@@ -297,12 +298,12 @@ void erase_area(int sr, int sc, int er, int ec, int ignorelock) {
     }
 
     if (sr < 0)
-        sr = 0; 
+        sr = 0;
     if (sc < 0)
         sc = 0;
     checkbounds(&er, &ec);
 
-    // mark the ent as delete
+    // mark the ent as deleted
     // Do a lookat() for the upper left and lower right cells of the range
     // being erased to make sure they are included in the delete buffer so
     // that pulling cells always works correctly even if the cells at one
@@ -319,7 +320,12 @@ void erase_area(int sr, int sc, int er, int ec, int ignorelock) {
             vertexT * v = getVertex(graph, *pp, 0);
             if (v != NULL && v->back_edges == NULL ) destroy_vertex(*pp);
 
-            mark_ent_as_deleted(*pp);
+            if (mark_as_deleted) {
+                mark_ent_as_deleted(*pp);
+            } else {
+                clearent(*pp);// free memory
+                cleanent(*pp);
+            }
             *pp = NULL;
         }
     }
@@ -636,7 +642,6 @@ void insert_col(int after) {
 void deleterow() {
     register struct ent ** pp;
     int r, c;
-    //struct ent ** tmprow;
 
     if (any_locked_cells(currow, 0, currow, maxcol)) {
         sc_info("Locked cells encountered. Nothing changed");
@@ -656,35 +661,9 @@ void deleterow() {
 #endif
 
         //flush_saved();
-        erase_area(currow, 0, currow, maxcol, 0);
+        erase_area(currow, 0, currow, maxcol, 0, 1);
         if (currow > maxrow) return;
 
-        // Rows are dealt with in numrow groups, each group of rows spaced numrow rows apart.
-        // save the first row of the group and empty it out
-        //r = currow;
-        //tmprow = tbl[r];
-        //pp = ATBL(tbl, r, 0);
-        //for (c = maxcol + 1; --c >= 0; pp++) {
-        //    if (*pp != NULL) {
-        //        sc_debug("is null");
-        //        mark_ent_as_deleted(*pp);
-        //        *pp = NULL;
-        //        //clearent(*pp);
-        //        //free(*pp);
-        //        // *pp = NULL;
-        //    }
-        //}
-        // move the rows, put the deleted, but now empty, row at the end
-        //for (; r + 1 < maxrows - 1; r++) {
-        //    row_hidden[r] = row_hidden[r+1];
-        //    tbl[r] = tbl[r + 1];
-        //    pp = ATBL(tbl, r, 0);
-        //    for (c = 0; c < maxcols; c++, pp++)
-        //        if (*pp) (*pp)->row = r;
-        //}
-        //tbl[r] = tmprow;
-
-        //sc_debug("maxrow:%d maxrows:%d", maxrow, maxrows);
         for (r = currow; r < maxrows - 1; r++) {
             for (c = 0; c < maxcols; c++) {
                 if (r <= maxrow - 1) {
@@ -696,7 +675,6 @@ void deleterow() {
         }
 
         maxrow--;
-        //
         sync_refs();
         //flush_saved(); // we have to flush only at exit. this is in case we want to UNDO
         modflg++;
@@ -801,54 +779,6 @@ void center(int sr, int sc, int er, int ec) {
     return;
 }
 
-/*
-void move_area(int dr, int dc, int sr, int sc, int er, int ec) {
-    struct ent *p;
-    struct ent **pp;
-    int deltar, deltac;
-    int r, c;
-
-    if (sr > er) r = sr;
-    sr = er;
-    er = r;
-    if (sc > ec)
-    c = sc;
-    sc = ec;
-    ec = c;
-    if (sr < 0) sr = 0;
-    if (sc < 0) sc = 0;
-    checkbounds(&er, &ec);
-
-    r = currow;
-    currow = sr;
-    c = curcol;
-    curcol = sc;
-
-    // First we erase the source range, which puts the cells on the delete
-    // buffer stack.
-    erase_area(sr, sc, er, ec, 0);
-
-    currow = r;
-    curcol = c;
-    deltar = dr - sr;
-    deltac = dc - sc;
-
-    // Now we erase the destination range, which adds it to the delete buffer
-    // stack, but then we flush it off.  We then move the original source
-    // range from the stack to the destination range, adjusting the addresses
-    // as we go, leaving the stack in its original state.
-    erase_area(dr, dc, er + deltar, ec + deltac, 0);
-    //flush_saved();
-    for (p = delbuf[dbidx]; p; p = p->next) {
-        pp = ATBL(tbl, p->row + deltar, p->col + deltac);
-        *pp = p;
-        p->row += deltar;
-        p->col += deltac;
-        p->flags &= ~is_deleted;
-    }
-}
-*/
-
 void chg_mode(char strcmd){
     switch (strcmd) {
         case '=': 
@@ -925,10 +855,13 @@ void del_selected_cells() {
     }
     #endif
 
-    erase_area(tlrow, tlcol, brrow, brcol, 0);
+    //erase_area(tlrow, tlcol, brrow, brcol, 0, 0);
+    erase_area(tlrow, tlcol, brrow, brcol, 0, 0);
     modflg++;
     sync_refs();
     //flush_saved(); DO NOT UNCOMMENT! flush_saved shall not be called other than at exit.
+
+    EvalAll();
 
     #ifdef UNDO
     // here we save in undostruct, all the ents that depends on the deleted one (after the change)
@@ -939,7 +872,6 @@ void del_selected_cells() {
     deps = NULL;
     #endif
 
-    EvalAll();
 
     #ifdef UNDO
     copy_to_undostruct(tlrow, tlcol, brrow, brcol, 'a');
@@ -1032,9 +964,15 @@ struct ent * lookat(int row, int col) {
 
     checkbounds(&row, &col);
     pp = ATBL(tbl, row, col);
-    if ( *pp == NULL ) {
-        //*pp = (struct ent *) scxmalloc( (unsigned) sizeof(struct ent) );
-        *pp = (struct ent *) malloc( (unsigned) sizeof(struct ent) );
+    if ( *pp == NULL) {
+        //if (freeents == NULL) {
+            //*pp = (struct ent *) scxmalloc( (unsigned) sizeof(struct ent) );
+            *pp = (struct ent *) malloc( (unsigned) sizeof(struct ent) );
+        //} else {
+        //    sc_debug("lookat. reuse of deleted ent row:%d col:%d", row, col);
+        //    *pp = freeents;
+        //    freeents = freeents->next;
+        //}
         (*pp)->label = (char *) 0;
         (*pp)->flags = may_sync;
         (*pp)->expr = (struct enode *) 0;
@@ -1056,8 +994,8 @@ struct ent * lookat(int row, int col) {
 void cleanent(struct ent * p) {
     if (!p) return;
     p->label = (char *) 0;
-    p->row = 0;
-    p->col = 0;
+    //p->row = 0;
+    //p->col = 0;
     p->flags = may_sync;
     p->expr = (struct enode *) 0;
     p->v = (double) 0.0;

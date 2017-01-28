@@ -59,7 +59,7 @@ void center(int sr, int sc, int er, int ec);
 void doformat(int c1, int c2, int w, int p, int r);
 struct enode;
 int etype(register struct enode *e);
-void erase_area(int sr, int sc, int er, int ec, int ignorelock);
+void erase_area(int sr, int sc, int er, int ec, int ignorelock, int mark_ent_as_deleted);
 void auto_justify(int ci, int cf, int min);
 void valueize_area(int sr, int sc, int er, int ec);
 void sync_refs();

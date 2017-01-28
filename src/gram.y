@@ -347,6 +347,7 @@ token K_WHITE
  token K_NUMITER
 */
 %token K_ERR
+%token K_REF
 %token K_LOCALE
 %token K_SET8BIT
 %token K_ASCII
@@ -841,6 +842,8 @@ term:           var                     { $$ = new_var(O_VAR, $1); }
         | '@' K_CHR '(' e ')'           { $$ = new(CHR, $4, ENULL);}
         | '@' K_ERR             { $$ = new(ERR_, ENULL, ENULL); }
         |     K_ERR             { $$ = new(ERR_, ENULL, ENULL); }
+        | '@' K_REF             { $$ = new(REF_, ENULL, ENULL); }
+        |     K_REF             { $$ = new(REF_, ENULL, ENULL); }
 /*
         | '@' K_NUMITER                 { $$ = new(NUMITER, ENULL, ENULL);}
         | '@' K_BLACK           { $$ = new(BLACK, ENULL, ENULL); }
