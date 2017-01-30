@@ -83,11 +83,13 @@ void sync_refs() {
 
 void syncref(register struct enode * e) {
     //if (e == (struct enode *)0) {
-    if ( e == NULL || e->op == ERR_ ) {
-        //e->e.o.left = NULL;
-        //e->e.o.right = NULL;
+    if ( e == NULL ) {
         return;
-    } else if ( e == NULL || e->op == REF_ ) {
+    } else if ( e->op == ERR_ ) {
+        e->e.o.left = NULL;
+        e->e.o.right = NULL;
+        return;
+    } else if ( e->op == REF_ ) {
         e->op = REF_;
         e->e.o.left = NULL;
         e->e.o.right = NULL;
