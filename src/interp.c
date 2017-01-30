@@ -684,7 +684,8 @@ double dolmin(struct enode * ep) {
 }
 
 double eval(register struct ent * ent, register struct enode * e) {
-    if (cellerror == CELLERROR || (ent && ent->cellerror == CELLERROR)) {
+    //if (cellerror == CELLERROR || (ent && ent->cellerror == CELLERROR)) {
+    if (cellerror == CELLERROR) {
         return (double) 0;
     }
 
