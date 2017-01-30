@@ -102,7 +102,7 @@ vertexT * GraphAddVertex(graphADT graph , struct ent * ent) {
  * else if not found, it returns NULL
  */
 vertexT * getVertex(graphADT graph, struct ent * ent, int create) {
-   if (graph == NULL) return NULL;
+   if (graph == NULL || ent == NULL) return NULL;
    vertexT * temp = graph->vertices;
    while (temp != NULL && (temp->ent->row < ent->row || (temp->ent->row == ent->row && temp->ent->col <= ent->col))) {
        if (temp->ent->row == ent->row && temp->ent->col == ent->col) return temp;
