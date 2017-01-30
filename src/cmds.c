@@ -34,7 +34,6 @@ extern graphADT graph;
 // variable references.
 void mark_ent_as_deleted(register struct ent * p) {
     if (p == NULL) return;
-    //p->flags |= iscleared;
     p->flags |= is_deleted;
 
     p->next = freeents;     /* put this ent on the front of freeents */
@@ -100,7 +99,6 @@ void syncref(register struct enode * e) {
     } else {
         switch (e->op) {
         case 'v':
-            //if (e->e.v.vp->flags & iscleared) {
             if (e->e.v.vp->flags & is_deleted) {
                 //e->op = ERR_;
                 //e->e.o.left = NULL;
@@ -1029,7 +1027,7 @@ void clearent(struct ent * v) {
     if (v->ucolor) free(v->ucolor);
     v->ucolor = NULL;
 
-    v->flags = ( is_changed | iscleared );
+    v->flags = is_changed;
     changed++;
     modflg++;
 
