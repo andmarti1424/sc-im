@@ -1019,7 +1019,7 @@ void do_normalmode(struct block * buf) {
             #ifdef UNDO
             do_undo();
             // sync_refs();
-            EvalAll();
+            //EvalAll();
             update(TRUE);
             break;
             #else
@@ -1031,7 +1031,7 @@ void do_normalmode(struct block * buf) {
             #ifdef UNDO
             do_redo();
             // sync_refs();
-            EvalAll();
+            //EvalAll();
             update(TRUE);
             break;
             #else
