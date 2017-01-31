@@ -525,6 +525,13 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
                strcpy(text, "ERROR");
                num[0]='\0';
             }
+            if ((*p)->cellerror == CELLREF) {
+               (void) mvprintw(row + RESROW + 1 - offscr_sc_rows, c, "%*.*s", fwidth[col], fwidth[col], "REF");
+               align = 0;
+               strcpy(text, "REF");
+               num[0]='\0';
+            }
+
 
             // repaint a blank cell, because of in range, or because we have a coloured empty cell!
             if ( ( !((*p)->flags & is_valid) && !(*p)->label ) && !((*p)->cellerror == CELLERROR) ) {

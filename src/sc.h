@@ -244,6 +244,7 @@ struct go_save {
 #define CELLOK        0
 #define CELLERROR     1
 #define CELLINVALID   2
+#define CELLREF       3
 /* calculation order */
 #define BYCOLS        1
 #define BYROWS        2
