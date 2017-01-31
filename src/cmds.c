@@ -920,7 +920,7 @@ void insert_or_edit_cell() {
     // ADD PADDING INTELLIGENCE HERE ?
     (void) swprintf(interp_line, BUFFERSIZE, L"%s %s = %ls", ope, v_name(currow, curcol), inputline);
 
-    send_to_interp(interp_line); 
+    send_to_interp(interp_line);
 
     #ifdef UNDO
     copy_to_undostruct(currow, curcol, currow, curcol, 'a');
