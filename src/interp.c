@@ -771,8 +771,19 @@ double eval(register struct ent * ent, register struct enode * e) {
             struct ent * vp = e->e.v.vp;
             if (vp && ent && vp->row == ent->row && vp->col == ent->col) {
                 sc_error("Circular reference in eval (cell %s%d)", coltoa(vp->col), vp->row);
-     //         cellerror = CELLERROR;
-                ent->cellerror = CELLERROR;
+                // CELLERROR does not propagate
+                cellerror = CELLERROR;
+                //ent->cellerror = CELLERROR;
+                return (double) 0;
+            }
+
+            if (vp && vp->cellerror == CELLERROR) {
+                //does not change reference to @err in expression
+                //uncomment to do so
+                //e->op = ERR_;
+
+                //does not propagate. uncomment to do so
+                //cellerror = CELLERROR;
                 return (double) 0;
             }
 
@@ -784,32 +795,24 @@ double eval(register struct ent * ent, register struct enode * e) {
                 vp = *ATBL(tbl, row, col);
             }
 
-            if (vp && vp->flags & iscleared) {
-                e->op = ERR_;
-                return (double) 0;
-            }
-
-            if (!vp) {
-                e->op = REF_;
-                e->e.o.left = NULL;
-                e->e.o.right = NULL;
-                return (double) 0;
-            }
-
             if (!vp || vp->flags & is_deleted) {
 
                 e->op = REF_;
+                //if (e->e.o.left != NULL) efree(e->e.o.left);
+                //if (e->e.o.right != NULL) efree(e->e.o.right);
                 e->e.o.left = NULL;
                 e->e.o.right = NULL;
 
-                if (getVertex(graph, vp, 0) != NULL) destroy_vertex(vp);
-                //cellerror = CELLERROR;
+                if (vp != NULL && getVertex(graph, vp, 0) != NULL) destroy_vertex(vp);
+
+                //CELLREF propagates
+                cellerror = CELLREF;
 
                 return (double) 0;
             }
 
             // here we store the dependences in a graph
-            if (ent && vp) 
+            if (ent && vp)
                 GraphAddEdge( getVertex(graph, lookat(ent->row, ent->col), 1), getVertex(graph, lookat(vp->row, vp->col), 1) ) ;
 
             if (vp->cellerror) {
@@ -977,11 +980,12 @@ double eval(register struct ent * ent, register struct enode * e) {
     case MYCOL:  return ((double) (gmycol + coloffset));
     case LASTROW: return ((double) maxrow);
     case LASTCOL: return ((double) maxcol);
-    //case NUMITER: return ((double) repct);
     case ERR_:
                  cellerror = CELLERROR;
                  return ((double) 0);
-    case REF_:   return ((double) 0);
+    case REF_:
+                 cellerror = CELLREF;
+                 return ((double) 0);
     case PI_:    return ((double) M_PI);
     case BLACK:  return ((double) COLOR_BLACK);
     case RED:    return ((double) COLOR_RED);

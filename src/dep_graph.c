@@ -104,7 +104,7 @@ vertexT * GraphAddVertex(graphADT graph , struct ent * ent) {
 vertexT * getVertex(graphADT graph, struct ent * ent, int create) {
    if (graph == NULL || ent == NULL) return NULL;
    vertexT * temp = graph->vertices;
-   while (temp != NULL && (temp->ent->row < ent->row || (temp->ent->row == ent->row && temp->ent->col <= ent->col))) {
+   while (temp != NULL && temp->ent != NULL && (temp->ent->row < ent->row || (temp->ent->row == ent->row && temp->ent->col <= ent->col))) {
        if (temp->ent->row == ent->row && temp->ent->col == ent->col) return temp;
        temp = temp->next;
    }
@@ -202,7 +202,7 @@ void destroy_vertex(struct ent * ent) {
 
    // if is in the middle of the list
    if (v_cur->ent->row != ent->row || v_cur->ent->col != ent->col) {
-       if (v_cur->ent == NULL) sc_error("ERROR");
+       if (v_cur->ent == NULL) sc_error("ERROR destroying vertex");
        v_prev = v_cur;
        v_cur = v_cur->next;
        while (v_cur != NULL && (v_cur->ent->row < ent->row || (v_cur->ent->row == ent->row && v_cur->ent->col <= ent->col))) {
