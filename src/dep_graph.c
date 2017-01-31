@@ -361,7 +361,6 @@ void EvalAllVertexs() {
 
 // Evaluate just one vertex
 void EvalJustOneVertex(register struct ent * p, int i, int j, int rebuild_graph) {
-    //sc_debug("EvalJustOneVertex: %d %d", i, j);
     gmyrow=i; gmycol=j;
 
     if (p->flags & is_strexpr) {
