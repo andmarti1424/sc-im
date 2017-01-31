@@ -525,7 +525,6 @@ void do_undo() {
     if (undo_list->p_ant != NULL) undo_list = undo_list->p_ant;
     undo_list_pos--;
     sc_info("Change: %d of %d", undo_list_pos, len_undo_list());
-
     return;
 }
 
@@ -584,7 +583,6 @@ void do_redo() {
     // Remove 'ent' elements
     struct ent * i = ul->removed;
     while (i != NULL) {
-        //sc_debug("redo removed: %d %d", i->row, i->col);
         struct ent * pp = *ATBL(tbl, i->row, i->col);
         clearent(pp);
         cleanent(pp);
