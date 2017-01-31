@@ -947,6 +947,7 @@ void insert_or_edit_cell() {
 }
 
 // Send command to interpreter
+// wide_char version
 void send_to_interp(wchar_t * oper) {
     if (atoi(get_conf_value("nocurses"))) {
         int pos = -1;
@@ -956,12 +957,24 @@ void send_to_interp(wchar_t * oper) {
         //wprintf(L"Interp GOT: %ls", oper);
     }
     wcstombs(line, oper, BUFFERSIZE);
+
     linelim = 0;
-    (void) yyparse();
+    yyparse();
     if (atoi(get_conf_value("autocalc")) && ! loading) EvalAll();
     return;
 }
 
+// Send command to interpreter
+void send_to_interpp(char * oper) {
+    if (atoi(get_conf_value("nocurses"))) {
+        sc_debug("Interp GOT: %s", oper);
+    }
+    strcpy(line, oper);
+    linelim = 0;
+    yyparse();
+    if (atoi(get_conf_value("autocalc")) && ! loading) EvalAll();
+    return;
+}
 /* return a pointer to a cell's [struct ent *], creating if needed */
 struct ent * lookat(int row, int col) {
     register struct ent **pp;

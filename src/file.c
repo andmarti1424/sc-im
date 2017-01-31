@@ -413,15 +413,15 @@ int readfile(char * fname, int eraseflg) {
 
         char delim = ',';
         if ( ! strcasecmp( & fname[len-4], ".tsv") ||  ! strcasecmp( & fname[len-4], ".tab"))
-            delim = '\t'; 
+            delim = '\t';
 
         if (get_conf_value("txtdelim") != NULL) {
             if (! strcasecmp(get_conf_value("txtdelim"), "\\t")) {
-                delim = '\t'; 
+                delim = '\t';
             } else if (! strcasecmp(get_conf_value("txtdelim"), ",")) {
-                delim = ','; 
+                delim = ',';
             } else if (! strcasecmp(get_conf_value("txtdelim"), ";")) {
-                delim = ';'; 
+                delim = ';';
             }
         }
         import_csv(fname, delim); // csv tsv tab txt delim import
@@ -677,7 +677,7 @@ int import_csv(char * fname, char d) {
     //int pid = 0;
     //int rfd = STDOUT_FILENO;
     int r = 0, c = 0;
-    wchar_t line_interp[FBUFLEN] = L"";
+    //wchar_t line_interp[FBUFLEN] = L"";
 
     char * token;
 
@@ -699,7 +699,6 @@ int import_csv(char * fname, char d) {
 
     // CSV file traversing
     while ( ! feof(f) && (fgets(line_in, sizeof(line_in), f) != NULL) ) {
-        //sc_debug("%s", line_in);
         // this hack is for importing file that have DOS eol
         int l = strlen(line_in);
         while (l--)
@@ -734,15 +733,21 @@ int import_csv(char * fname, char d) {
 
             // number import
             if (isnumeric(st) && strlen(st)
-            //&& token[strlen(st)-1] != '-' && token[strlen(st)-1] != '.'
             ) {
-                swprintf(line_interp, BUFFERSIZE, L"let %s%d=%s", coltoa(c), r, st);
+                //wide char
+                //swprintf(line_interp, BUFFERSIZE, L"let %s%d=%s", coltoa(c), r, st);
+                sprintf(line, "let %s%d=%s", coltoa(c), r, st);
+
             // text import
-            } else {
-                //sc_debug("%s", st);
-                swprintf(line_interp, BUFFERSIZE, L"label %s%d=\"%s\"", coltoa(c), r, st);
+            } else if (strlen(st)){
+                //wide char
+                //swprintf(line_interp, BUFFERSIZE, L"label %s%d=\"%s\"", coltoa(c), r, st);
+                sprintf(line, "label %s%d=\"%s\"", coltoa(c), r, st);
             }
-            send_to_interp(line_interp);
+            //wide char
+            //if (strlen(st)) send_to_interp(line_interp);
+            if (strlen(st)) send_to_interpp(line);
+
             c++;
             quote = 0;
             token = xstrtok(NULL, delim);
@@ -752,14 +757,8 @@ int import_csv(char * fname, char d) {
         r++;
         if (r > MAXROWS - GROWAMT - 1 || c > ABSMAXCOLS - 1) break;
     }
-    //sc_debug("END");
-
     maxrow = r-1;
     maxcol = c-1;
-
-    // to do a test:
-    //swprintf(line_interp, BUFFERSIZE, L"let %s%d=%s", coltoa(maxcol), maxrow, "0");
-    //send_to_interp(line_interp);
 
     auto_justify(0, maxcols, DEFWIDTH);
 

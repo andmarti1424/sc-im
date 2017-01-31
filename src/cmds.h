@@ -12,6 +12,7 @@ void ins_in_line(wint_t d);
 int is_single_command (struct block * buf, long timeout);
 void insert_or_edit_cell();
 void send_to_interp(wchar_t * oper);   // Send command to interpreter
+void send_to_interpp(char * oper);
 void chg_mode(char strcmd);            // Change mode function
 int modcheck();                        // Verify if open file has been modified
 int savefile();                        // Save open file
