@@ -599,7 +599,6 @@ void do_redo() {
     struct ent * j = ul->added;
     while (j != NULL) {
         struct ent * e_now = lookat(j->row, j->col);
-        //sc_debug("redo added: %d %d", j->row, j->col);
         //(void) copyent(e_now, j, 0, 0, 0, 0, j->row, j->col, 0);
         (void) copyent(e_now, j, 0, 0, 0, 0, 0, 0, 0);
         j = j->next;

@@ -782,8 +782,8 @@ double eval(register struct ent * ent, register struct enode * e) {
                 //uncomment to do so
                 //e->op = ERR_;
 
-                //does not propagate. uncomment to do so
-                //cellerror = CELLERROR;
+                //propagate ERR. comment to avoid that behaviour
+                cellerror = CELLERROR;
                 return (double) 0;
             }
 
@@ -2018,9 +2018,9 @@ void let(struct ent * v, struct enode * e) {
         eval(v, e); // ADDED - here we store the cell dependences in a graph
     }
 
+    if (v->cellerror != CELLOK) v->flags |= ( is_changed | is_valid );
     changed++;
     modflg++;
-    v->flags |= ( is_changed | is_valid );
 }
 
 void slet(struct ent * v, struct enode * se, int flushdir) {

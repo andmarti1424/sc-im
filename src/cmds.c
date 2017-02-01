@@ -913,6 +913,16 @@ void insert_or_edit_cell() {
     #ifdef UNDO
     create_undo_action();
     copy_to_undostruct(currow, curcol, currow, curcol, 'd');
+
+    // here we save in undostruct, all the ents that depends on the deleted one (before change)
+    extern struct ent_ptr * deps;
+    int i, n = 0;
+    ents_that_depends_on_range(currow, curcol, currow, curcol);
+    if (deps != NULL) {
+        n = deps->vf;
+        for (i = 0; i < n; i++)
+            copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'd');
+    }
     #endif
 
     //if (getVertex(graph, lookat(currow, curcol), 0) != NULL) destroy_vertex(lookat(currow, curcol));
@@ -924,6 +934,16 @@ void insert_or_edit_cell() {
 
     #ifdef UNDO
     copy_to_undostruct(currow, curcol, currow, curcol, 'a');
+    // here we save in undostruct, all the ents that depends on the deleted one (after change)
+    if (deps != NULL) free(deps);
+    ents_that_depends_on_range(currow, curcol, currow, curcol);
+    if (deps != NULL) {
+        n = deps->vf;
+        for (i = 0; i < n; i++)
+            copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'a');
+        free(deps);
+        deps = NULL;
+    }
     end_undo_action();
     #endif
 
