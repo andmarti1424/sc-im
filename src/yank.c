@@ -113,7 +113,7 @@ void add_ent_to_yanklist(struct ent * item) {
 
 // yank a range of ents
 // ARG: number of rows or columns yanked. Used in commands like `4yr`
-// TYPE: yank type. c=col, r=row, a=range, e=cell, '\0'=no yanking
+// TYPE: yank type. c=col, r=row, a=range, e=cell, '\0'=no yanking, 's' sort
 // This two args are used for pasting.
 void yank_area(int tlrow, int tlcol, int brrow, int brcol, char type, int arg) {
     int r,c;
@@ -123,7 +123,9 @@ void yank_area(int tlrow, int tlcol, int brrow, int brcol, char type, int arg) {
 
     for (r = tlrow; r <= brrow; r++)
         for (c = tlcol; c <= brcol; c++) {
-            struct ent * elm = *ATBL(tbl, r, c);
+            //struct ent * elm = *ATBL(tbl, r, c);
+            struct ent * elm = type == 's' ? lookat(r, c) : *ATBL(tbl, r, c);
+            //if (elm == NULL && type == 's') elm = lookat(r, c);
 
             // Important: each 'ent' element keeps the corresponding row and col
             if (elm != NULL) add_ent_to_yanklist(elm);
