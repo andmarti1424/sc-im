@@ -2018,7 +2018,7 @@ void let(struct ent * v, struct enode * e) {
         eval(v, e); // ADDED - here we store the cell dependences in a graph
     }
 
-    if (v->cellerror != CELLOK) v->flags |= ( is_changed | is_valid );
+    if (v->cellerror == CELLOK) v->flags |= ( is_changed | is_valid );
     changed++;
     modflg++;
 }
