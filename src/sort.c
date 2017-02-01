@@ -105,8 +105,6 @@ void sortrange(struct ent * left, struct ent * right, char * criteria) {
 
     yank_area(minr, minc, maxr, maxc, 's', 1); // save yanklist in the original range
 
-    //sync_ranges();
-
     // Fix the 'ent' elements in the sorted range
     int i, d, move;
     struct ent * p_aux, * yl = get_yanklist();
@@ -131,13 +129,6 @@ void sortrange(struct ent * left, struct ent * right, char * criteria) {
     scxfree((char *) rows);
 
     if (criteria) scxfree(criteria);
-
-    //r = currow;
-    //c = curcol;
-    //pullcells('m'); ?
-    //flush_saved();  ?
-    //currow = r;
-    //curcol = c;
 }
 
 int compare(const void * row1, const void * row2) {
