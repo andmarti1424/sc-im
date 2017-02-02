@@ -54,8 +54,8 @@ MACOSX :=
 # distros report different keycodes for the BACKSPACE key.
 # Arch GNU / Linux would probably should set this.
 # Debian GNU / Linux probably should not.
-BSKEY_HACK := -DBSKEY_HACK
-#BSKEY_HACK :=
+#BSKEY_HACK := -DBSKEY_HACK
+BSKEY_HACK :=
 
 
 # Set SIMPLE for lex.c if you don't want arrow keys or lex.c blows up
