@@ -24,7 +24,7 @@
 #define OKEY_UP          0x103
 #define OKEY_DEL         0x14a
 
-#if ( defined(NETBSD) || defined(MACOSX) )
+#if ( defined(NETBSD) || defined(MACOSX) || defined(BSKEY_HACK) )
 #define OKEY_BS          0x7f
 #else
 #define OKEY_BS          0x107

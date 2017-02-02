@@ -49,6 +49,15 @@ NETBSD :=
 #MACOSX := -DMACOSX
 MACOSX :=
 
+# If you have a problem with your BACKSPACE key in LINUX
+# please set this flag. The problem is that different LINUX
+# distros report different keycodes for the BACKSPACE key.
+# Arch GNU / Linux would probably should set this.
+# Debian GNU / Linux probably should not.
+BSKEY_HACK := -DBSKEY_HACK
+#BSKEY_HACK :=
+
+
 # Set SIMPLE for lex.c if you don't want arrow keys or lex.c blows up
 #SIMPLE := -DSIMPLE
 
@@ -134,7 +143,7 @@ UNDO := -DUNDO
 MAXROWS := 65536
 
 #CFLAGS := -O2 -Wall -pipe -g
-CFLAGS := $(LINUX) $(FREEBSD) $(NETBSD) $(MACOSX) -O2 -Wall -pipe -g -I/usr/include/libxml2 $(shell pkg-config --cflags ncursesw)
+CFLAGS := $(LINUX) $(FREEBSD) $(NETBSD) $(MACOSX) $(BSKEY_HACK) -O2 -Wall -pipe -g -I/usr/include/libxml2 $(shell pkg-config --cflags ncursesw)
 CFLAGS := $(CFLAGS) $(USECOLORS) $(USELOCALE) $(UNDO) $(SIGVOID) $(DFLT_PAGER)
 CFLAGS := $(CFLAGS) $(IEEE_MATH) $(RINT) $(REGEX) $(LIBRARY) -DMAXROWS=$(MAXROWS)
 CFLAGS := $(CFLAGS) $(HELP_PATH) $(SNAME) $(NO_NOTIMEOUT) $(SIMPLE) $(XLS) $(XLSX) $(HISTORY_FILE)
