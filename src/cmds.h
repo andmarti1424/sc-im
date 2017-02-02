@@ -67,4 +67,4 @@ void sync_refs();
 int fcopy();
 int fsum();
 int pad(int n, int r1, int c1, int r2, int c2);
-void mark_ent_as_deleted(register struct ent * p);
+void mark_ent_as_deleted(register struct ent * p, int delete);

@@ -219,7 +219,7 @@ int paste_yanked_ents(int above, int type_paste) {
 
         /*struct ent **pp = ATBL(tbl, yl->row + diffr, yl->col + diffc);
         if (*pp && ( ! ((*pp)->flags & is_locked) )) {
-            mark_ent_as_deleted(*pp);
+            mark_ent_as_deleted(*pp, TRUE);
             *pp = NULL;
         }*/
 

@@ -28,13 +28,14 @@ wchar_t interp_line[BUFFERSIZE];
 extern graphADT graph;
 
 
-// mark_ent_as_deleted - this sets is_deleted flag of an ent.
+// mark_ent_as_deleted
 // This structure is used to keep ent structs around before they
 // are actualy deleted (memory freed) to allow the sync_refs routine a chance to fix the
 // variable references.
-void mark_ent_as_deleted(register struct ent * p) {
+// if delete flag is set, is_deleted flag of an ent is set
+void mark_ent_as_deleted(register struct ent * p, int delete) {
     if (p == NULL) return;
-    p->flags |= is_deleted;
+    if (delete) p->flags |= is_deleted;
 
     p->next = freeents;     /* put this ent on the front of freeents */
     freeents = p;
@@ -82,6 +83,7 @@ void sync_refs() {
 
 void syncref(register struct enode * e) {
     //if (e == (struct enode *)0) {
+    //
     if ( e == NULL ) {
         return;
     } else if ( e->op == ERR_ ) {
@@ -134,7 +136,7 @@ void deletecol() {
     for (r = 0; r <= maxrow; r++) {
         pp = ATBL(tbl, r, curcol);
         if ( *pp != NULL ) {
-            mark_ent_as_deleted(*pp);
+            mark_ent_as_deleted(*pp, TRUE);
             //clearent(*pp);
             //free(*pp);
             *pp = NULL;
@@ -175,7 +177,7 @@ void deletecol() {
     maxcol--;
     sync_refs();
     //flush_saved(); // we have to flush_saved only at exit.
-    //this is because we have to keep ents in case we want to UNDO
+    //this is because we have to keep ents in case we want to UNDO?
     modflg++;
     return;
 }
@@ -325,10 +327,11 @@ void erase_area(int sr, int sc, int er, int ec, int ignorelock, int mark_as_dele
             if (v != NULL && v->back_edges == NULL ) destroy_vertex(*pp);
 
             if (mark_as_deleted) {
-                mark_ent_as_deleted(*pp);
+                mark_ent_as_deleted(*pp, TRUE);
             } else {
                 clearent(*pp);// free memory
                 cleanent(*pp);
+                mark_ent_as_deleted(*pp, FALSE);
             }
             *pp = NULL;
         }
@@ -859,7 +862,6 @@ void del_selected_cells() {
     }
     #endif
 
-    //erase_area(tlrow, tlcol, brrow, brcol, 0, 0);
     erase_area(tlrow, tlcol, brrow, brcol, 0, 0);
     modflg++;
     sync_refs();

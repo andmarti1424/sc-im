@@ -782,7 +782,7 @@ double eval(register struct ent * ent, register struct enode * e) {
                 //uncomment to do so
                 //e->op = ERR_;
 
-                //propagate ERR. comment to avoid that behaviour
+                //ERR propagates. comment to make it not to.
                 cellerror = CELLERROR;
                 return (double) 0;
             }
@@ -797,13 +797,12 @@ double eval(register struct ent * ent, register struct enode * e) {
 
             if (!vp || vp->flags & is_deleted) {
 
+                if (!vp) sc_debug("no vp");
+                if (vp != NULL && getVertex(graph, vp, 0) != NULL) destroy_vertex(vp);
+
                 e->op = REF_;
-                //if (e->e.o.left != NULL) efree(e->e.o.left);
-                //if (e->e.o.right != NULL) efree(e->e.o.right);
                 e->e.o.left = NULL;
                 e->e.o.right = NULL;
-
-                if (vp != NULL && getVertex(graph, vp, 0) != NULL) destroy_vertex(vp);
 
                 //CELLREF propagates
                 cellerror = CELLREF;
@@ -812,8 +811,7 @@ double eval(register struct ent * ent, register struct enode * e) {
             }
 
             // here we store the dependences in a graph
-            if (ent && vp)
-                GraphAddEdge( getVertex(graph, lookat(ent->row, ent->col), 1), getVertex(graph, lookat(vp->row, vp->col), 1) ) ;
+            if (ent && vp) GraphAddEdge( getVertex(graph, lookat(ent->row, ent->col), 1), getVertex(graph, lookat(vp->row, vp->col), 1) ) ;
 
             if (vp->cellerror) {
                 cellerror = CELLINVALID;
