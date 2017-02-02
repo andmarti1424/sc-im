@@ -123,9 +123,7 @@ void yank_area(int tlrow, int tlcol, int brrow, int brcol, char type, int arg) {
 
     for (r = tlrow; r <= brrow; r++)
         for (c = tlcol; c <= brcol; c++) {
-            //struct ent * elm = *ATBL(tbl, r, c);
-            struct ent * elm = type == 's' ? lookat(r, c) : *ATBL(tbl, r, c);
-            //if (elm == NULL && type == 's') elm = lookat(r, c);
+            struct ent * elm = *ATBL(tbl, r, c);
 
             // Important: each 'ent' element keeps the corresponding row and col
             if (elm != NULL) add_ent_to_yanklist(elm);
