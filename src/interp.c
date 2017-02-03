@@ -684,10 +684,10 @@ double dolmin(struct enode * ep) {
 }
 
 double eval(register struct ent * ent, register struct enode * e) {
-    //if (cellerror == CELLERROR || (ent && ent->cellerror == CELLERROR)) {
-    if (cellerror == CELLERROR) {
-        return (double) 0;
-    }
+//    //if (cellerror == CELLERROR || (ent && ent->cellerror == CELLERROR)) {
+//    if (cellerror == CELLERROR) {
+//        return (double) 0;
+//    }
 
     if (e == (struct enode *) 0) {
         cellerror = CELLINVALID;
@@ -771,9 +771,10 @@ double eval(register struct ent * ent, register struct enode * e) {
             struct ent * vp = e->e.v.vp;
             if (vp && ent && vp->row == ent->row && vp->col == ent->col) {
                 sc_error("Circular reference in eval (cell %s%d)", coltoa(vp->col), vp->row);
-                // CELLERROR does not propagate
+                //ERR propagates. comment to make it not to.
                 cellerror = CELLERROR;
                 //ent->cellerror = CELLERROR;
+                GraphAddEdge( getVertex(graph, lookat(ent->row, ent->col), 1), getVertex(graph, lookat(vp->row, vp->col), 1) ) ;
                 return (double) 0;
             }
 

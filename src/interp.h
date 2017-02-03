@@ -36,8 +36,6 @@ char * docapital(char * s);
 char * seval(register struct ent * ent, register struct enode * se);
 void setiterations(int i);
 void EvalAll();
-int RealEvalAll();
-void RealEvalOne(register struct ent * p, int i, int j, int * chgct, int rebuild_graph);
 struct enode * new(int op, struct enode * a1, struct enode * a2);
 struct enode * new_var(int op, struct ent_ptr a1);
 struct enode * new_range(int op, struct range_s a1);

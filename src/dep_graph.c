@@ -323,7 +323,6 @@ void destroy_graph(graphADT graph) {
 }
 
 
-
 void rebuild_graph() {
     destroy_graph(graph);
     graph = GraphCreate();
@@ -353,7 +352,7 @@ void EvalAllVertexs() {
     while (temp != NULL) {
         //sc_info("%d %d %d", temp->ent->row, temp->ent->col, i++);
         if ((p = *ATBL(tbl, temp->ent->row, temp->ent->col)) && p->expr)
-            EvalJustOneVertex(p, temp->ent->row, temp->ent->col, 0);
+            EvalJustOneVertex(p, temp->ent->row, temp->ent->col, 1);
         temp = temp->next;
     }
     //(void) signal(SIGFPE, exit_app);
@@ -377,7 +376,6 @@ void EvalJustOneVertex(register struct ent * p, int i, int j, int rebuild_graph)
         if ( !v && !p->label) /* Everything's fine */
             return;
         if ( !p->label || !v || strcmp(v, p->label) != 0 || cellerror) {
-            //(*chgct)++;
             p->flags |= is_changed;
             changed++;
         }
