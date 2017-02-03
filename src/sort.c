@@ -112,7 +112,6 @@ void sortrange(struct ent * left, struct ent * right, char * criteria) {
     // Traverse 'rows' structure
     for (d = 0; d < (maxr - minr + 1); d++) {
         for (i = 0; i < (maxc - minc + 1); i++) {
-            if (*ATBL(tbl, r, c) == NULL) continue;
             p_aux = yl;
             move = ( rows[d] - minr) * (maxc - minc + 1) + i;
             while (move--) p_aux = p_aux->next;

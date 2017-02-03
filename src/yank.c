@@ -126,7 +126,9 @@ void yank_area(int tlrow, int tlcol, int brrow, int brcol, char type, int arg) {
             struct ent * elm = *ATBL(tbl, r, c);
 
             // Important: each 'ent' element keeps the corresponding row and col
-            if (elm != NULL) add_ent_to_yanklist(elm);
+            if (elm == NULL) elm = lookat(r, c);
+
+            add_ent_to_yanklist(elm);
         }
     return;
 }
