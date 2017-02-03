@@ -2494,7 +2494,7 @@ void editv(int row, int col) {
     p = lookat(row, col);
     (void) sprintf(line, "let %s = ", v_name(row, col));
     linelim = strlen(line);
-    if (p->flags & is_valid) {
+    if (p->flags & is_valid || p->expr) {
         if (p->flags & is_strexpr || p->expr == NULL) {
             (void) sprintf(line+linelim, "%.15g", p->v);
             linelim = strlen(line);
