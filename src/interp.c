@@ -778,6 +778,9 @@ double eval(register struct ent * ent, register struct enode * e) {
             }
 
             if (vp && vp->cellerror == CELLERROR) {
+                // here we store the dependences in a graph
+                if (ent && vp) GraphAddEdge( getVertex(graph, lookat(ent->row, ent->col), 1), getVertex(graph, lookat(vp->row, vp->col), 1) ) ;
+
                 //does not change reference to @err in expression
                 //uncomment to do so
                 //e->op = ERR_;
@@ -795,9 +798,8 @@ double eval(register struct ent * ent, register struct enode * e) {
                 vp = *ATBL(tbl, row, col);
             }
 
-            if (!vp || vp->flags & is_deleted) {
 
-                if (!vp) sc_debug("no vp");
+            if (!vp || vp->flags & is_deleted) {
                 if (vp != NULL && getVertex(graph, vp, 0) != NULL) destroy_vertex(vp);
 
                 e->op = REF_;
