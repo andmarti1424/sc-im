@@ -690,21 +690,22 @@ void do_normalmode(struct block * buf) {
                 yank_area(0, curcol, maxrow, curcol + cmd_multiplier - 1, 'c', ic);
 
 #ifdef UNDO
-                // here we save in undostruct, all the ents that depends on the deleted one (before change)
                 extern struct ent_ptr * deps;
-                int i, n = 0, w=ic;
+                int i;
+                // here we save in undostruct, all the ents that depends on the deleted one (before change)
                 ents_that_depends_on_range(0, curcol, maxrow, curcol - 1 + ic);
-                if (deps != NULL) {
-                    n = deps->vf;
-                    for (i = 0; i < n; i++)
-                        copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'd');
-                }
-
+                for (i = 0; deps != NULL && i < deps->vf; i++)
+                    copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'd');
 #endif
 
                 while (ic--) {
 #ifdef UNDO
                     add_undo_col_format(curcol-ic+1, 'R', fwidth[curcol], precision[curcol], realfmt[curcol]);
+
+                    ents_that_depends_on_range(0, curcol, maxrow, curcol);
+                    for (i = 0; deps != NULL && i < deps->vf; i++)
+                        if (deps[i].vp->col != curcol)
+                             copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'd');
 #endif
 
 
@@ -715,24 +716,23 @@ void do_normalmode(struct block * buf) {
 #ifdef UNDO
 
                     // here we save in undostruct, all the ents that depends on the deleted one (after change)
-                    if (deps != NULL) {
-                        n = deps->vf;
-                        for (i = 0; i < n; i++) {
-                            if (deps[i].vp->col >= curcol)
-                                copy_to_undostruct(deps[i].vp->row, deps[i].vp->col+1, deps[i].vp->row, deps[i].vp->col+1, 'a');
-                            else
-                                copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'a');
-                        }
+                    for (i = 0; deps != NULL && i < deps->vf; i++) {
+                        if (deps[i].vp->col >= curcol)
+                            copy_to_undostruct(deps[i].vp->row, deps[i].vp->col+1, deps[i].vp->row, deps[i].vp->col+1, 'a');
+                        else
+                            copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'a');
                     }
                     if (deps != NULL) free(deps);
                     deps = NULL;
-
-                    copy_to_undostruct(0, curcol, maxrow, curcol + cmd_multiplier - 1, 'a');
-                    end_undo_action();
+//
+                    copy_to_undostruct(0, curcol, maxrow, curcol-ic+1, 'a');
 #endif
                 }
+#ifdef UNDO
+//                copy_to_undostruct(0, curcol, maxrow, curcol + cmd_multiplier - 1, 'a');
+                end_undo_action();
+#endif
                 if (cmd_multiplier > 0) cmd_multiplier = 0;
-
 
 
 
