@@ -35,39 +35,14 @@ void do_normalmode(struct block * buf) {
     switch (buf->value) {
         /* TEST
         case L'A':
-            {
-            struct ent * p = *ATBL(tbl, currow, curcol);
-            if (!p) return;
-            char det[20000] = "";
-            sprintf(det + strlen(det), "r:%d\nc:%d\nexpr null:%d\n", p->row, p->col, p->expr == NULL);
-            if  (p && p->expr != NULL && p->expr->e.v.vp != NULL) {
-                sprintf(det + strlen(det), "vp null:%d\n", p->expr->e.v.vp == NULL);
-                sprintf(det + strlen(det), "vp row:%d\n", p->expr->e.v.vp->row);
-                sprintf(det + strlen(det), "vp col:%d\n", p->expr->e.v.vp->col);
-                //sprintf(det + strlen(det), "vp vf:%f\n", p->expr->e.v.vf);
-            }
-            if (p && p->expr != NULL && p->expr->e.o.right != NULL && p->expr->e.o.right->e.v.vp != NULL) {
-                    sprintf(det + strlen(det), "vp null:%d\n", p->expr->e.o.right->e.v.vp == NULL);
-                    sprintf(det + strlen(det), "vp row:%d\n", p->expr->e.o.right->e.v.vp->row);
-                    sprintf(det + strlen(det), "vp col:%d\n", p->expr->e.o.right->e.v.vp->col);
-                 //   sprintf(det + strlen(det), "vp vf:%f\n", p->expr->e.o.right->e.v.vf);
-            }
-            show_text((char *) &det);
-            }
             break;
 
         case L'W':
             break;
 
         case L'Q':
-            rebuild_graph();
             break;
-
         */
-
-
-
-
 
 
         // MOVEMENT COMMANDS
@@ -724,21 +699,21 @@ void do_normalmode(struct block * buf) {
                     for (i = 0; i < n; i++)
                         copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'd');
                 }
+
 #endif
 
                 while (ic--) {
 #ifdef UNDO
                     add_undo_col_format(curcol-ic+1, 'R', fwidth[curcol], precision[curcol], realfmt[curcol]);
 #endif
+
+
                     deletecol();
-                }
-
-                // Eval entire graph
-                // TODO it should eval only necessary ents
-                if (atoi(get_conf_value("autocalc")) && ! loading) EvalAll();
-
+                    // Eval entire graph
+                    // TODO it should eval only necessary ents
+                    //if (atoi(get_conf_value("autocalc")) && ! loading) EvalAll();
 #ifdef UNDO
-                while (w--) {
+
                     // here we save in undostruct, all the ents that depends on the deleted one (after change)
                     if (deps != NULL) {
                         n = deps->vf;
@@ -748,13 +723,14 @@ void do_normalmode(struct block * buf) {
                             else
                                 copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'a');
                         }
-                        free(deps);
-                        deps = NULL;
                     }
-                }
-                copy_to_undostruct(0, curcol, maxrow, curcol + cmd_multiplier - 1, 'a');
-                end_undo_action();
+                    if (deps != NULL) free(deps);
+                    deps = NULL;
+
+                    copy_to_undostruct(0, curcol, maxrow, curcol + cmd_multiplier - 1, 'a');
+                    end_undo_action();
 #endif
+                }
                 if (cmd_multiplier > 0) cmd_multiplier = 0;
 
 

@@ -769,7 +769,7 @@ double eval(register struct ent * ent, register struct enode * e) {
             return (e->e.k);
     case O_VAR:    {
             struct ent * vp = e->e.v.vp;
-            if (vp && ent && vp->row == ent->row && vp->col == ent->col) {
+            if (vp && ent && vp->row == ent->row && vp->col == ent->col && !(vp->flags & is_deleted) ) {
                 sc_error("Circular reference in eval (cell %s%d)", coltoa(vp->col), vp->row);
                 //ERR propagates. comment to make it not to.
                 cellerror = CELLERROR;
@@ -778,7 +778,7 @@ double eval(register struct ent * ent, register struct enode * e) {
                 return (double) 0;
             }
 
-            if (vp && vp->cellerror == CELLERROR) {
+            if (vp && vp->cellerror == CELLERROR && !(vp->flags & is_deleted)) {
                 // here we store the dependences in a graph
                 if (ent && vp) GraphAddEdge( getVertex(graph, lookat(ent->row, ent->col), 1), getVertex(graph, lookat(vp->row, vp->col), 1) ) ;
 

@@ -143,6 +143,19 @@ void deletecol() {
         }
     }
 
+    /*
+    extern struct ent_ptr * deps;
+    int n = 0;
+    struct ent * p;
+    //ents_that_depends_on_range(0, curcol, maxrow, curcol);
+    if (deps != NULL) {
+         n = deps->vf;
+         for (i = 0; i < n; i++)
+             if ((p = *ATBL(tbl, deps[i].vp->row, deps[i].vp->col)) && p->expr)
+                 EvalJustOneVertex(p, deps[i].vp->row, deps[i].vp->col, 0);
+    }*/
+    EvalAll();
+
     // Copy references from right column cells to left column (which gets removed)
     for (r = 0; r <= maxrow; r++) {
         for (c = curcol; c < maxcol; c++) {
@@ -156,7 +169,6 @@ void deletecol() {
         // Free last column memory (Could also initialize 'ent' to zero with `cleanent`).
         pp = ATBL(tbl, r, maxcol);
         *pp = (struct ent *) 0;
-        // agregado el 06/12/2014
     }
 
     // Fix columns precision and width
@@ -324,7 +336,8 @@ void erase_area(int sr, int sc, int er, int ec, int ignorelock, int mark_as_dele
             /* delete vertex in graph
                unless vertex is referenced by other */
             vertexT * v = getVertex(graph, *pp, 0);
-            if (v != NULL && v->back_edges == NULL ) destroy_vertex(*pp);
+            //if (v != NULL && v->back_edges == NULL )
+            if (v != NULL ) destroy_vertex(*pp);
 
             if (mark_as_deleted) {
                 mark_ent_as_deleted(*pp, TRUE);
@@ -927,7 +940,7 @@ void insert_or_edit_cell() {
     }
     #endif
 
-    //if (getVertex(graph, lookat(currow, curcol), 0) != NULL) destroy_vertex(lookat(currow, curcol));
+    if (getVertex(graph, lookat(currow, curcol), 0) != NULL) destroy_vertex(lookat(currow, curcol));
 
     // ADD PADDING INTELLIGENCE HERE ?
     (void) swprintf(interp_line, BUFFERSIZE, L"%s %s = %ls", ope, v_name(currow, curcol), inputline);
