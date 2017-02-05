@@ -261,10 +261,27 @@ int len_undo_list() {
 void copy_to_undostruct (int row_desde, int col_desde, int row_hasta, int col_hasta, char type) {
     int c, r;
     struct ent * p;
+    int repeated;
+
     for (r = row_desde; r <= row_hasta; r++)
         for (c = col_desde; c <= col_hasta; c++) {
             p = *ATBL(tbl, r, c);
             if (p == NULL) continue;
+
+            // here check that ent to add is not already in the list
+            // if so, avoid to add a duplicate ent
+            struct ent * lista = type == 'a' ? undo_item.added : undo_item.removed;
+            repeated = 0;
+            while (lista != NULL) {
+                if (lista->row == r && lista->col == c) {
+                    repeated = 1;
+                    break;
+                }
+                lista = lista->next;
+            }
+            if (repeated) continue;
+
+            // not repeated - we malloc an ent and add it to list
             struct ent * e = (struct ent *) malloc( (unsigned) sizeof(struct ent) );
             cleanent(e);
             copyent(e, lookat(r, c), 0, 0, 0, 0, r, c, 0);
@@ -436,7 +453,6 @@ void do_undo() {
         i = i->next;
     }
 
-
     // Change cursor position
     //if (ul->removed != NULL) {
     //    currow = ul->removed->row;
@@ -513,7 +529,6 @@ void do_undo() {
             EvalJustOneVertex(p, ie->row, ie->col, 1);
         ie = ie->next;
     }
-
 
     // Restores cursor position
     currow = ori_currow;
@@ -665,7 +680,6 @@ void do_redo() {
             EvalJustOneVertex(p, ie->row, ie->col, 1);
         ie = ie->next;
     }
-
 
     // Restores cursor position
     currow = ori_currow;
