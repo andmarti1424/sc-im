@@ -415,10 +415,11 @@ void signals() {
 
 
 void sig_int() {
-    // REMOVED FOR MAKE DEBUGGING EASIER
-    sc_error("Got SIGINT. Press «:q<Enter>» to quit SC-IM");
+    if ( ! atoi(get_conf_value("debug")))
+        sc_error("Got SIGINT. Press «:q<Enter>» to quit SC-IM");
+    else
+        shall_quit = 2;
 
-    //shall_quit = 2;            // TO MAKE IT EASIER TO DEBUG
     return;
 }
 
