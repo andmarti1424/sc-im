@@ -422,7 +422,7 @@ void ents_that_depends_on (struct ent * ent) {
 
    struct edgeTag * edges = v->back_edges;
    while (edges != NULL) {
-       // TODO only add ent if it does not exists in deps
+       // TODO only add ent if it does not exists in deps ??
        deps = (struct ent_ptr *) realloc(deps, sizeof(struct ent_ptr) * (++dep_size));
        deps[0].vf = dep_size; // we always keep size of list in the first position !
        deps[dep_size-1].vp = lookat(edges->connectsTo->ent->row, edges->connectsTo->ent->col);

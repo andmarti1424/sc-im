@@ -692,16 +692,13 @@ void do_normalmode(struct block * buf) {
 #ifdef UNDO
                 extern struct ent_ptr * deps;
                 int i;
-                // here we save in undostruct, all the ents that depends on the deleted one (before change)
-                ents_that_depends_on_range(0, curcol, maxrow, curcol - 1 + ic);
-                for (i = 0; deps != NULL && i < deps->vf; i++)
-                    copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'd');
 #endif
 
                 while (ic--) {
 #ifdef UNDO
                     add_undo_col_format(curcol-ic+1, 'R', fwidth[curcol], precision[curcol], realfmt[curcol]);
 
+                    // here we save in undostruct, all the ents that depends on the deleted one (before change)
                     ents_that_depends_on_range(0, curcol, maxrow, curcol);
                     for (i = 0; deps != NULL && i < deps->vf; i++)
                         if (deps[i].vp->col != curcol)
