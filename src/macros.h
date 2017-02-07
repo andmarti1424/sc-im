@@ -23,13 +23,8 @@
 #define OKEY_DOWN        0x102
 #define OKEY_UP          0x103
 #define OKEY_DEL         0x14a
-
-#if ( defined(NETBSD) || defined(MACOSX) || defined(BSKEY_HACK) )
-#define OKEY_BS          0x7f
-#else
 #define OKEY_BS          0x107
-#endif
-
+#define OKEY_BS2         0x7f   // some BSDs, Linux distros, SSH/tmux configs
 #define OKEY_HOME        0x106
 #define OKEY_END         0x168
 #define OKEY_PGUP        0x153

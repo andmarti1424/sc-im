@@ -34,7 +34,7 @@ void do_insertmode(struct block * sb) {
             show_header(input_win);
         }
 
-    } else if (sb->value == OKEY_BS) {     // BS
+    } else if (sb->value == OKEY_BS || sb->value == OKEY_BS2) {  // BS
         if ( ! wcslen(inputline) || ! real_inputline_pos ) return;
 
         int l = wcwidth(inputline[real_inputline_pos - 1]);

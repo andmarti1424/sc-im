@@ -116,7 +116,7 @@ void do_commandmode(struct block * sb) {
     //-------------------------------------
     // Normal KEY handlers for this MODE
     //-------------------------------------
-    if (sb->value == OKEY_BS) {            // BS
+    if (sb->value == OKEY_BS || sb->value == OKEY_BS2) {  // BS
         if ( ! wcslen(inputline) || ! real_inputline_pos ) return;
         int l = wcwidth(inputline[real_inputline_pos - 1]);
         real_inputline_pos--;
