@@ -260,7 +260,7 @@ void get_mapstr_buf (struct block * b, char * str) {
             strcat(str, "<UP>");                                 // UP
         } else if (a->value == OKEY_DEL) {
             strcat(str, "<DEL>");                                // DEL
-        } else if (a->value == OKEY_BS) {
+        } else if (a->value == OKEY_BS || a->value == OKEY_BS2) {
             strcat(str, "<BS>");                                 // BS
         } else if (a->value == OKEY_HOME) {
             strcat(str, "<HOME>");                               // HOME

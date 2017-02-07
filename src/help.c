@@ -165,7 +165,7 @@ void help() {
 
             int d = wgetch(input_win);
             while (d != OKEY_ENTER && d != OKEY_ESC) {
-                if (d == OKEY_BS) {
+                if (d == OKEY_BS || d == OKEY_BS2) {
                     del_char(hline, strlen(hline) - 1);
                 } else {
                     sprintf(hline + strlen(hline), "%c", d);
@@ -193,7 +193,7 @@ void help() {
             wrefresh(input_win);
             d = wgetch(input_win);
             while (d != OKEY_ENTER && d != OKEY_ESC) {
-                if (d == OKEY_BS) {
+                if (d == OKEY_BS || d == OKEY_BS2) {
                     del_char(word_looked, strlen(word_looked) - 1);
                 } else {
                     //sprintf(word_looked, "%s%c", word_looked, d);
