@@ -428,19 +428,19 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
                 continue;
             }
 
-            if ( (*p) == NULL) *p = lookat(row, col);
+            //if ( (*p) == NULL) *p = lookat(row, col);
 
             // Clean format
             #ifdef USECOLORS
-            if ((*p)->cellerror) {                                  // cellerror
+            if ((*p) && (*p)->cellerror) {                                  // cellerror
                 set_ucolor(win, &ucolors[CELL_ERROR]);
-            } else if ((*p)->expr) {
+            } else if ((*p) && (*p)->expr) {
                 set_ucolor(win, &ucolors[EXPRESSION]);
-            } else if ((*p)->label) {                               // string
+            } else if ((*p) && (*p)->label) {                               // string
                 set_ucolor(win, &ucolors[STRG]);
-            } else if ((*p)->flags & is_valid && ! (*p)->format) {  // numeric value
+            } else if ((*p) && (*p)->flags & is_valid && ! (*p)->format) {  // numeric value
                 set_ucolor(win, &ucolors[NUMB]);
-            } else if ((*p)->format && (*p)->format[0] == 'd') {    // date format
+            } else if ((*p) && (*p)->format && (*p)->format[0] == 'd') {    // date format
                 set_ucolor(win, &ucolors[DATEF]);
             } else {
                 set_ucolor(win, &ucolors[NORMAL]);
@@ -448,7 +448,7 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
             #endif
 
             // Cell color!
-            if ((*p)->ucolor != NULL) {
+            if ((*p) && (*p)->ucolor != NULL) {
                 set_ucolor(win, (*p)->ucolor);
             }
 
@@ -493,7 +493,7 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
             int align = 1;
 
             // If a numeric value exists
-            if ( (*p)->flags & is_valid) {
+            if ( (*p) && (*p)->flags & is_valid) {
                 //show_numeric_content_of_cell(win, p, col, row + 1 - offscr_sc_rows - q_row_hidden, c);
 
                 res = get_formated_value(p, col, formated_s);
@@ -507,7 +507,7 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
             }
 
             // If a string exists
-            if ((*p)->label) { 
+            if ((*p) && (*p)->label) {
                 strcpy(text, (*p)->label);
                 align = 1;                               // right alignment
                 if ((*p)->flags & is_label) {            // center alignment
@@ -519,13 +519,13 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
                 }
             }
 
-            if ((*p)->cellerror == CELLERROR) {
+            if ((*p) && (*p)->cellerror == CELLERROR) {
                (void) mvprintw(row + RESROW + 1 - offscr_sc_rows, c, "%*.*s", fwidth[col], fwidth[col], "ERROR");
                align = 0;
                strcpy(text, "ERROR");
                num[0]='\0';
             }
-            if ((*p)->cellerror == CELLREF) {
+            if ((*p) && (*p)->cellerror == CELLREF) {
                (void) mvprintw(row + RESROW + 1 - offscr_sc_rows, c, "%*.*s", fwidth[col], fwidth[col], "REF");
                align = 0;
                strcpy(text, "REF");
@@ -534,7 +534,7 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
 
 
             // repaint a blank cell, because of in range, or because we have a coloured empty cell!
-            if ( ( !((*p)->flags & is_valid) && !(*p)->label ) && !((*p)->cellerror == CELLERROR) ) {
+            if ( !(*p) || (( !((*p)->flags & is_valid) && !(*p)->label ) && !((*p)->cellerror == CELLERROR)) ) {
                 if ( (currow == row && curcol == col) ||
                 ( in_range && row >= ranges->tlrow && row <= ranges->brrow &&
                 col >= ranges->tlcol && col <= ranges->brcol ) ) {
@@ -543,7 +543,7 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
                     #else
                     wattron(win, A_REVERSE);
                     #endif
-                } else if ((*p)->ucolor == NULL) {
+                } else if ( !(*p) || (*p)->ucolor == NULL) {
                     #ifdef USECOLORS
                     set_ucolor(win, &ucolors[STRG]); // When a long string does not fit in column.
                     #endif
@@ -561,25 +561,6 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
                     mvwprintw(win, row + 1 - offscr_sc_rows - q_row_hidden, c+i, "%lc", w);
                     i+= wcwidth(w);
                 }
-
-/*
-                // old implementation for common char and
-                // not wide char
-
-                char caracter;
-                chtype cht[fieldlen];
-                int i;
-                mvwinchnstr(win, row + 1 - offscr_sc_rows - q_row_hidden, c, cht, fieldlen);
-                for (i = 0; i < fieldlen; i++) {
-                    caracter = cht[i] & A_CHARTEXT;
-                    #ifdef NETBSD
-                    if ( !caracter ) {
-                        caracter = ' '; // this is for NetBSD compatibility
-                    }
-                    #endif
-                    mvwprintw(win, row + 1 - offscr_sc_rows - q_row_hidden, c + i, "%c", caracter);
-                }
-                */
 
             // we print text and number
             } else {
@@ -649,7 +630,7 @@ void show_celldetails(WINDOW * win) {
     #endif
     sprintf(head, "%s%d ", coltoa(curcol), currow);
     mvwprintw(win, 0, 0 + rescol, "%s", head);
-    inputline_pos += strlen(head) + rescol;  
+    inputline_pos += strlen(head) + rescol;
 
     // show the current cell's format
     #ifdef USECOLORS
@@ -762,7 +743,7 @@ int calc_offscr_sc_cols() {
                 offscr_sc_cols--;
                 if (! col_hidden[i])
                     col -= fwidth[i];
-            } 
+            }
         }
 
         // Now pick up the counts again
@@ -803,17 +784,6 @@ int get_formated_value(struct ent ** p, int col, char * value) {
         return -1;
     }
 }
-
-// get real length of str
-/* No longer used!!
- * NOTE: extended ascii chars counts as one char, not bytes.
-int scstrlen(char * s) {
-    int len = 0;
-    if (s == NULL) return len;
-    for (; *s; ++s) if ((*s & 0xC0) != 0x80) ++len;
-        return len;
-}
-*/
 
 // this function aligns text of a cell (align = 0 center, align = 1 right, align = -1 left)
 // and adds padding between cells.
