@@ -26,6 +26,7 @@ char insert_edit_submode;
 struct ent * freeents = NULL; // keep deleted ents around before sync_refs
 wchar_t interp_line[BUFFERSIZE];
 extern graphADT graph;
+extern int yyparse(void);
 
 
 // mark_ent_as_deleted
