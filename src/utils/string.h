@@ -1,7 +1,5 @@
 #include <wchar.h>
 
-int wcswidth(const wchar_t * s, size_t n);
-int wcwidth(const wchar_t wc);
 int del_char(char * str, int posicion);
 int del_wchar(wchar_t * str, int posicion);
 
