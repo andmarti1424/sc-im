@@ -328,20 +328,17 @@ int exit_app(int status) {
 // we read parameters passed to SC-IM executable
 // and store them in user_conf dictionary
 void read_argv(int argc, char ** argv) {
-    int i, j;
-    for (i = 1; i < argc; i++) {
+    for (int i = 1; i < argc; i++) {
         if ( ! strncmp(argv[i], "--", 2) ) {       // it was passed a parameter
-            char ** s = split(argv[i], '=', 0);
-            if (s[1] != NULL)
-                put(user_conf_d, &s[0][2], s[1]);  // --parameter=value
-            else
-                put(user_conf_d, &s[0][2], "1");   // --parameter
-
-            for (j=0; s[j]; j++) {
-                free(s[j]);
+            char *dup = strdup(argv[i]);
+            char *rest = dup;
+            char *name = strsep(&rest, "=");
+            if (rest) {
+                put(user_conf_d, &name[2], rest);  // --parameter=value
+            } else {
+                put(user_conf_d, &name[2], "1");   // --parameter
             }
-            free(s);
-            s = NULL;
+            free(dup);
         } else {                                   // it was passed a file
             strncpy(curfile, argv[i], PATHLEN-1);
         }

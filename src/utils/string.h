@@ -16,7 +16,6 @@ void subst(char * s, char from, char to);
 int is_idchar (int d);
 int str_in_str(char * s, char * b);
 int wstr_in_wstr(wchar_t * s, wchar_t * b);
-char ** split(char *string, const char delimiter, int lastnull);
 char * ltrim(char *string, char junk);
 char * rtrim(char * string, char junk);
 int isnumeric(char * string);

@@ -42,18 +42,16 @@ int exec_cmd (char * line) {
         close(my_pipe[0]);   // child doesn't read
         dup2(my_pipe[1], 1); // redirect stdout
 
-        char * l = line;
-        int j;
-        l = rtrim(ltrim(line, ' '), ' ');
-        char ** param = split(l, ' ', 1);
-        execvp(param[0], param);
+        int argc = 1;
+        for (char *p = line; *p; p++)
+            argc += (*p == ' ');
+        char **argv = calloc(argc+1, sizeof(char*));
+        for (int i = 0; i < argc; i++)
+            argv[i] = strsep(&line, " ");
 
-        for (j=0; param[j]; j++) {
-            free(param[j]);
-        }
-        free(param);
-        param = NULL;
+        execvp(argv[0], argv);
 
+        free(argv);
         printf("Error executing command. ");
         exit(-1);
 
