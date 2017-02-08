@@ -33,6 +33,8 @@
 
 extern struct ent * freeents;
 
+extern int yyparse(void);
+
 /* erase the database (tbl, etc.) */
 void erasedb() {
     int  r, c;
