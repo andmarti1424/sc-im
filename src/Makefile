@@ -138,6 +138,7 @@ CFLAGS := $(LINUX) $(FREEBSD) $(NETBSD) $(MACOSX) -O2 -Wall -pipe -g -I/usr/incl
 CFLAGS := $(CFLAGS) $(USECOLORS) $(USELOCALE) $(UNDO) $(SIGVOID) $(DFLT_PAGER)
 CFLAGS := $(CFLAGS) $(IEEE_MATH) $(RINT) $(REGEX) $(LIBRARY) -DMAXROWS=$(MAXROWS)
 CFLAGS := $(CFLAGS) $(HELP_PATH) $(SNAME) $(NO_NOTIMEOUT) $(SIMPLE) $(XLS) $(XLSX) $(HISTORY_FILE)
+CFLAGS := $(CFLAGS) -D_GNU_SOURCE  # for wcwidth, wcswidth, tm_gmtoff
 
 LDLIBS := -lm $(shell pkg-config --libs ncursesw)
 #LDLIBS := -lm -lncurses -lxlsreader
