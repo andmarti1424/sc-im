@@ -43,10 +43,12 @@ int exec_cmd (char * line) {
         dup2(my_pipe[1], 1); // redirect stdout
 
         int argc = 1;
-        for (char *p = line; *p; p++)
+        char * p;
+        for (p = line; *p; p++)
             argc += (*p == ' ');
-        char **argv = calloc(argc+1, sizeof(char*));
-        for (int i = 0; i < argc; i++)
+        char ** argv = calloc(argc+1, sizeof(char*));
+        int i;
+        for (i = 0; i < argc; i++)
             argv[i] = strsep(&line, " ");
 
         execvp(argv[0], argv);
