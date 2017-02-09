@@ -61,12 +61,20 @@ int exec_cmd (char * line) {
         close(my_pipe[1]);   // parent doesn't write
         char reading_buf[2];
 
-        while (read(my_pipe[0], reading_buf, 1) > 0)
-            write(1, reading_buf, 1);
+        while (read(my_pipe[0], reading_buf, 1) > 0) {
+            if (!write(1, reading_buf, 1)) {
+                perror(NULL);
+                exit(-1);
+            }
+        }
 
         close(my_pipe[0]);
         wait(&waitres);
-        system("echo -n 'Press ENTER to return.'");
+        if (system("echo -n 'Press ENTER to return.'") == -1) {
+            /* system() call itself failed */
+            perror(NULL);
+            exit(-1);
+        }
 
         getchar();
         reset_prog_mode();

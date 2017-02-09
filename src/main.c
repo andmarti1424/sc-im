@@ -166,7 +166,10 @@ int main (int argc, char ** argv) {
     while (f != NULL && fgetws(stdin_buffer, BUFFERSIZE, f) != NULL) {
         send_to_interp(stdin_buffer);
     }
-    freopen("/dev/tty", "rw", stdin);
+    if (!freopen("/dev/tty", "rw", stdin)) {
+        perror(NULL);
+        exit(-1);
+    }
     flags = fcntl(fd, F_GETFL, 0);
     flags &= ~O_NONBLOCK;
     fcntl(fd, F_SETFL, flags);
