@@ -20,20 +20,25 @@ CFLAGS += -DSNAME=\"$(NAME)\"
 CFLAGS += -D_GNU_SOURCE
 CFLAGS += -DHELP_PATH=\"$(HELPDIR)\"
 CFLAGS += -DLIBDIR=\"$(LIBDIR)\"
-CFLAGS += -DUSECOLORS
+
+# Sets default pager, e.g. 'less' or 'more'
 CFLAGS += -DDFLT_PAGER=\"less\"
+# Comment out to disable color support
+CFLAGS += -DUSECOLORS
+# Command history file, relative to home directory. Comment out to disable.
 CFLAGS += -DHISTORY_FILE=\".$(name)info\"
+# Comment out to disable undo/redo support
 CFLAGS += -DUNDO
-# Up to 1048576
+# Maximum number of rows in spreadsheet. Up to 1048576
 CFLAGS += -DMAXROWS=65536
 # Used for date formatting with C-d shortcut
 CFLAGS += -DUSELOCALE
 
-# Uncomment for basic XLS import
+# Uncomment for basic XLS import. Requires libxlsreader
 #CFLAGS += -DXLS
 #LDLIBS += -lxlsreader
 
-# Uncomment for basic XSL support
+# Uncomment for basic XSL support. Requires libzip and libxml2
 #CFLAGS += -DXLSX -I/usr/include/libxml2
 #LDLIBS += -lzip -lxml2
 
