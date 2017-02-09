@@ -36,23 +36,10 @@
 #include "interp.h"
 #include "utils/string.h"
 #include <unistd.h>
+#include <regex.h>
 
 #ifdef UNDO
 #include "undo.h"
-#endif
-
-#ifdef REGCOMP
-#include <regex.h>
-#endif
-
-#ifdef RE_COMP
-extern char * re_comp(char * s);
-extern char * re_exec(char * s);
-#endif
-
-#ifdef REGCMP
-char * regcmp();
-char * regex();
 #endif
 
 void exit_app();
@@ -1646,14 +1633,11 @@ void str_search(char *s, int firstrow, int firstcol, int lastrow_, int lastcol_,
     int r, c;
     int endr, endc;
     char * tmp;
-#if defined(REGCOMP)
     regex_t preg;
     int errcode;
-#endif
 
     //if (!loading) remember(0);
 
-#if defined(REGCOMP)
     if ((errcode = regcomp(&preg, s, REG_EXTENDED))) {
         scxfree(s);
         tmp = scxmalloc((size_t)160);
@@ -1662,22 +1646,7 @@ void str_search(char *s, int firstrow, int firstcol, int lastrow_, int lastcol_,
         scxfree(tmp);
         return;
     }
-#endif
-#if defined(RE_COMP)
-    if ((tmp = re_comp(s)) != NULL) {
-        scxfree(s);
-        sc_error(tmp);
-        return;
-    }
-#endif
-#if defined(REGCMP)
-    if ((tmp = regcmp(s, NULL)) == NULL) {
-        scxfree(s);
-        cellerror = CELLERROR;
-        sc_error("Invalid search string");
-        return;
-    }
-#endif
+
     g_free();
     gs.g_type = G_STR + num;
     gs.g_s = s;
@@ -1753,50 +1722,19 @@ void str_search(char *s, int firstrow, int firstcol, int lastrow_, int lastcol_,
             }
         }
         if (! col_hidden[c]) {
-            if (gs.g_type == G_STR) {
-                if (p && p->label
-#if defined(REGCOMP)
-                && (regexec(&preg, p->label, 0, NULL, 0) == 0))
-#else
-#if defined(RE_COMP)
-                && (re_exec(p->label) != 0))
-#else
-#if defined(REGCMP)
-                && (regex(tmp, p->label) != (char *)0))
-#else
-                && (strcmp(s, p->label) == 0))
-#endif
-#endif
-#endif
-            break;
+            if (gs.g_type == G_STR && p && p->label &&
+                    regexec(&preg, p->label, 0, NULL, 0) == 0) {
+                break;
+            }
         } else            /* gs.g_type != G_STR */
-        if (*line != '\0'
-#if defined(REGCOMP)
-            && (regexec(&preg, line, 0, NULL, 0) == 0))
-#else
-#if defined(RE_COMP)
-            && (re_exec(line) != 0))
-#else
-#if defined(REGCMP)
-            && (regex(tmp, line) != (char *)0))
-#else
-            && (strcmp(s, line) == 0))
-#endif
-#endif
-#endif
+        if (*line != '\0' && (regexec(&preg, line, 0, NULL, 0) == 0))
             break;
     }
     if (r == endr && c == endc) {
         sc_error("String not found");
-#if defined(REGCOMP)
         regfree(&preg);
-#endif
-#if defined(REGCMP)
-        free(tmp);
-#endif
         linelim = -1;
         return;
-    }
     }
     linelim = -1;
     lastrow = currow;
@@ -1805,12 +1743,7 @@ void str_search(char *s, int firstrow, int firstcol, int lastrow_, int lastcol_,
     curcol = c;
     rowsinrange = 1;
     colsinrange = fwidth[curcol];
-#if defined(REGCOMP)
     regfree(&preg);
-#endif
-#if defined(REGCMP)
-    free(tmp);
-#endif
     if (loading) {
         //update(1);
         changed = 0;
