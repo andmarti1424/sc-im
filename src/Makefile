@@ -30,7 +30,7 @@ CFLAGS += -DMAXROWS=65536
 CFLAGS += -DUSELOCALE
 
 # Uncomment for basic XLS import
-#CFLAGS += -DXML
+#CFLAGS += -DXLS
 #LDLIBS += -lxlsreader
 
 # Uncomment for basic XSL support
