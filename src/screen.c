@@ -3,9 +3,6 @@ main_win: window that loads the spreadsheetssword:
 
     input_win: stdin and state bar window
 */
-#define _XOPEN_SOURCE_EXTENDED = 1
-
-
 #include <string.h>
 #include <ncurses.h>
 #include <stdio.h>
