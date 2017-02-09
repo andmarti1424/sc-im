@@ -207,7 +207,8 @@ int yylex() {
                     yylval.ival = (int)v;
                     dateflag = 2;
                 } else if (*p == 'e' || *p == 'E') {
-                    while (isdigit(*++p)) /* */;
+                    while (isdigit(*++p))
+                        ;
                         if (isalpha(*p) || *p == '_') {
                             linelim = p - line;
                             return (yylex());
