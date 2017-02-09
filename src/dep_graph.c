@@ -392,7 +392,7 @@ void EvalJustOneVertex(register struct ent * p, int i, int j, int rebuild_graph)
             cellerror = CELLOK;
             v = rebuild_graph ? eval(p, p->expr) : eval(NULL, p->expr);
 
-            if (cellerror == CELLOK && ! finite(v))
+            if (cellerror == CELLOK && ! isfinite(v))
                 cellerror = CELLERROR;
         }
         if ((cellerror != p->cellerror) || (v != p->v)) {

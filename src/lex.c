@@ -229,7 +229,7 @@ int yylex() {
             if ((!dateflag && *p=='.') || ret == FNUMBER) {
                 ret = FNUMBER;
                 yylval.fval = strtod(nstart, &p);
-                if (!finite(yylval.fval))
+                if (!isfinite(yylval.fval))
                     ret = K_ERR;
                 else
                     decimal = TRUE;
