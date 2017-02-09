@@ -1,10 +1,16 @@
-name = scim
 NAME = SC-IM
 
+# Specify the name of the resulting executable file
+name = scim
+
+# The base directory where everything should be installed.
 prefix  = /usr/local
+
 EXDIR   = $(prefix)/bin
 HELPDIR = $(prefix)/share/$(name)
 LIBDIR  = $(prefix)/share/doc/$(name)
+
+# This is where the man page goes.
 MANDIR  = $(prefix)/man/man1
 
 # Change these to your liking or use `make CC=gcc` etc
@@ -25,20 +31,20 @@ CFLAGS += -DLIBDIR=\"$(LIBDIR)\"
 CFLAGS += -DDFLT_PAGER=\"less\"
 # Comment out to disable color support
 CFLAGS += -DUSECOLORS
-# Command history file, relative to home directory. Comment out to disable.
+# Command history file, relative to home directory. Comment out to disable commandline history
 CFLAGS += -DHISTORY_FILE=\".$(name)info\"
 # Comment out to disable undo/redo support
 CFLAGS += -DUNDO
 # Maximum number of rows in spreadsheet. Up to 1048576
 CFLAGS += -DMAXROWS=65536
-# Used for date formatting with C-d shortcut
+# Used for date formatting with C-d shortcut using you local d_fmt
 CFLAGS += -DUSELOCALE
 
 # Uncomment for basic XLS import. Requires libxlsreader
 #CFLAGS += -DXLS
 #LDLIBS += -lxlsreader
 
-# Uncomment for basic XSL support. Requires libzip and libxml2
+# Uncomment for basic XLSX support. Requires libzip and libxml2
 #CFLAGS += -DXLSX -I/usr/include/libxml2
 #LDLIBS += -lzip -lxml2
 
@@ -55,7 +61,6 @@ install :
 	install doc $(DESTDIR)$(HELPDIR)/$(name)_help
 	install -d $(DESTDIR)$(prefix)/share/man/man1
 	install -m 644 sc-im.1 $(DESTDIR)$(prefix)/share/man/man1/$(name).1
-
 
 uninstall :
 	-rm $(DESTDIR)$(prefix)/bin/$(name)
