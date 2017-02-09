@@ -22,8 +22,8 @@ LDLIBS += -lm $(shell pkg-config --libs ncursesw)
 
 CFLAGS += -Wall -g
 CFLAGS += $(shell pkg-config --cflags ncursesw)
+CFLAGS += -D_XOPEN_SOURCE_EXTENDED
 CFLAGS += -DSNAME=\"$(NAME)\"
-CFLAGS += -D_GNU_SOURCE
 CFLAGS += -DHELP_PATH=\"$(HELPDIR)\"
 CFLAGS += -DLIBDIR=\"$(LIBDIR)\"
 
