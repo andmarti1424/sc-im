@@ -1,10 +1,6 @@
 #include <sys/types.h>
 #include <string.h>
 
-#ifdef IEEE_MATH
- #include <ieeefp.h>
-#endif /* IEEE_MATH */
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <signal.h>
@@ -32,10 +28,6 @@ void fpe_trap(int signo) {
 #if defined(i386)
     asm("    fnclex");
     asm("    fwait");
-#else
- #ifdef IEEE_MATH
-    (void)fpsetsticky((fp_except)0);    /* Clear exception */
- #endif /* IEEE_MATH */
 #endif
     longjmp(fpe_buf, 1);
 }
