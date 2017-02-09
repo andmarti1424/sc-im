@@ -553,7 +553,7 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
                 for (i = 0; i < fieldlen; ) {
                     w = L' ';
                     j = mvwin_wchnstr (win,  row + 1 - offscr_sc_rows - q_row_hidden, c + i, cht, 1);
-                    if ( j== OK && cht[0].chars != NULL)
+                    if (j == OK && cht[0].chars[0] != L'\0')
                         w = cht[0].chars[0];
                     mvwprintw(win, row + 1 - offscr_sc_rows - q_row_hidden, c+i, "%lc", w);
                     i+= wcwidth(w);
