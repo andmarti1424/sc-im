@@ -74,8 +74,7 @@ void load_history(struct history * h) {
             f = fopen(infofile, "r");
             if (f == NULL) return;
             while ( feof(f) == 0 ) {
-
-                fgetws(linea, sizeof(linea), f);
+                if (!fgetws(linea, sizeof(linea) / sizeof(*linea), f)) break;
                 int s = wcslen(linea)-1;
                 del_range_wchars(linea, s, s);
 

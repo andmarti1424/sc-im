@@ -540,7 +540,10 @@ int backup_file(char *path) {
         umask(oldumask);
         if (outfd < 0)
             return (0);
-        (void) chown(tpath, statbuf.st_uid, statbuf.st_gid);
+
+        if (!chown(tpath, statbuf.st_uid, statbuf.st_gid)) {
+            /* not fatal */
+        }
 
         while ((count = read(infd, buf, sizeof(buf))) > 0) {
             if (write(outfd, buf, count) != count) {

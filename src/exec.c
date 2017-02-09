@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <sys/wait.h> // for wait
+#include <errno.h>
 
 #include "macros.h"
 #include "conf.h"
@@ -11,6 +12,7 @@
 #include "utils/string.h"
 #include "screen.h"
 #include "sc.h"
+#include "main.h"     // exit_app
 
 int exec_cmd (char * line) {
     int waitres;
@@ -54,19 +56,26 @@ int exec_cmd (char * line) {
         execvp(argv[0], argv);
 
         free(argv);
-        printf("Error executing command. ");
-        exit(-1);
+        sc_error("Error executing command. ");
+        exit_app(-1);
 
     } else {                 // we are in parent process
         close(my_pipe[1]);   // parent doesn't write
         char reading_buf[2];
 
-        while (read(my_pipe[0], reading_buf, 1) > 0)
-            write(1, reading_buf, 1);
+        while (read(my_pipe[0], reading_buf, 1) > 0) {
+            if (!write(1, reading_buf, 1)) {
+                sc_error("Failed to read command output: %s", strerror(errno));
+                exit_app(-1);
+            }
+        }
 
         close(my_pipe[0]);
         wait(&waitres);
-        system("echo -n 'Press ENTER to return.'");
+        if (system("echo -n 'Press ENTER to return.'") == -1) {
+            sc_error("Failed to show ENTER prompt: %s", strerror(errno));
+            exit_app(-1);
+        }
 
         getchar();
         reset_prog_mode();
