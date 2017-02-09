@@ -19,10 +19,6 @@
 #include <ctype.h>
 #include <errno.h>
 
-#ifndef __USE_XOPEN
-#define __USE_XOPEN
-#endif
-//#define _GNU_SOURCE 1
 #include <time.h>
 #include <string.h>
 
