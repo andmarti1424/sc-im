@@ -759,7 +759,7 @@ double eval(register struct ent * ent, register struct enode * e) {
     case ';':    return (((int) eval(ent, e->e.o.left) & 7) +
                 (((int) eval(ent, e->e.o.right) & 7) << 3));
     case O_CONST:
-            if (! finite(e->e.k)) {
+            if (! isfinite(e->e.k)) {
                 e->op = ERR_;
                 e->e.k = (double) 0;
                 cellerror = CELLERROR;
