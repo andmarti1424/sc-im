@@ -342,22 +342,22 @@ int redefine_color(char * color, int r, int g, int b) {
 #ifdef USECOLORS
     if (
         ! atoi(get_conf_value("nocurses")) &&
-        has_colors() &&
-        can_change_color()
+        has_colors() && can_change_color()
        ) {
-           int c = atoi(get(d_colors_param, color));
-           int res = init_color(c, r, g, b);
-           if (res == 0) {
+           char * s = get(d_colors_param, color);
+           if (s == NULL) {
+               sc_error("Color not found");
+               return -1;
+           }
+           if (init_color(atoi(s), r, g, b) == 0) {
                winchg();
-               if (! loading)
-                   sc_info("Color %s redefined to %d %d %d.", color, r, g, b);
+               if (! loading) sc_info("Color %s redefined to %d %d %d.", color, r, g, b);
                return 0;
            }
        }
 
 #endif
-       if (! loading)
-           sc_error("Could not redefine color");
+       if (! loading) sc_error("Could not redefine color");
        return -1;
 }
 
