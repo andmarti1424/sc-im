@@ -29,7 +29,7 @@ endif
 LDLIBS += -lm $(NCURSES_LIBS)
 
 CFLAGS += -Wall -g
-CFLAGS += $(shell pkg-config --cflags ncursesw)
+CFLAGS += $(NCURSES_CFLAGS)
 CFLAGS += -D_XOPEN_SOURCE_EXTENDED
 CFLAGS += -D_GNU_SOURCE
 CFLAGS += -DSNAME=\"$(NAME)\"
