@@ -299,24 +299,22 @@ void do_commandmode(struct block * sb) {
         return;
 
 
-
-
     //-------------------------------------
     // CONFIRM A COMMAND PRESSING ENTER
     //-------------------------------------
     } else if (find_val(sb, OKEY_ENTER)) {
 
-        if ( ! wcscmp(inputline, L"q") || ! wcscmp(inputline, L"quit") ) {
-            shall_quit = 1;
-
-        } else if ( ! wcscmp(inputline, L"refresh")) {
+        if ( ! wcscmp(inputline, L"refresh")) {
             winchg();
+
+        } else if ( ! wcscmp(inputline, L"help") || ! wcscmp(inputline, L"h") ) {
+            help();
 
         } else if ( ! wcscmp(inputline, L"q!") || ! wcscmp(inputline, L"quit!") ) {
             shall_quit = 2;
 
-        } else if ( ! wcscmp(inputline, L"help") || ! wcscmp(inputline, L"h") ) {
-            help();
+        } else if ( ! wcscmp(inputline, L"q") || ! wcscmp(inputline, L"quit") ) {
+            shall_quit = 1;
 
         } else if ( ! wcsncmp(inputline, L"autojus", 7) ) {
             wchar_t cline [BUFFERSIZE];
@@ -361,7 +359,7 @@ void do_commandmode(struct block * sb) {
                 readfile(p.we_wordv[0], 0);
                 //EvalAll(); // is it necessary?
                 modflg = 0;
-                update(TRUE);
+                //update(TRUE);
             }
             wordfree(&p);
 
@@ -551,8 +549,8 @@ void do_commandmode(struct block * sb) {
             sc_error("Color support not compiled in");
             chg_mode('.');
             inputline[0] = L'\0';
-            update(TRUE);
-            return;
+            //update(TRUE);
+            //return;
             #endif
 
         } else if ( ! wcsncmp(inputline, L"color ", 6) ) {
@@ -565,8 +563,8 @@ void do_commandmode(struct block * sb) {
             sc_error("Color support not compiled in");
             chg_mode('.');
             inputline[0] = '\0';
-            update(TRUE);
-            return;
+            //update(TRUE);
+            //return;
             #endif
 
         } else if ( ! wcsncmp(inputline, L"set ", 4) ) {
@@ -667,8 +665,8 @@ void do_commandmode(struct block * sb) {
                 sc_error("XLS import support not compiled in");
                 chg_mode('.');
                 inputline[0] = L'\0';
-                update(TRUE);
-                return;
+                //update(TRUE);
+                //return;
                 #endif
                 delim = 'x';
             } else if ( ! strncmp(cline, "i xlsx", 6) ) {
@@ -676,8 +674,8 @@ void do_commandmode(struct block * sb) {
                 sc_error("XLSX import support not compiled in");
                 chg_mode('.');
                 inputline[0]= L'\0';
-                update(TRUE);
-                return;
+                //update(TRUE);
+                //return;
                 #endif
                 delim = 'y';
             }
@@ -706,16 +704,17 @@ void do_commandmode(struct block * sb) {
                 modflg = 0;
                 update(TRUE);
             }
-        } else {
+       } else {
             sc_error("COMMAND NOT FOUND !");
         }
 
 #ifdef HISTORY_FILE
-        del_item_from_history(commandline_history, 0);
-        // si hay en historial algun item con texto igual al del comando que se ejecuta
-        // a partir de la posicion 2, se lo coloca al comiendo de la lista (indica que es lo mas reciente ejecutado).
+        // if exists in history an item with same text to the command typed
+        // (counting from the second position) it is moved to the beginning of list.
+        // (first element in list means last command executed)
         int moved = move_item_from_history_by_str(commandline_history, inputline, -1);
         if (! moved) add(commandline_history, inputline);
+        del_item_from_history(commandline_history, 0);
         commandline_history->pos = 0;
 #endif
 
