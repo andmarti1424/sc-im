@@ -39,8 +39,8 @@ void start_default_ucolors() {
     // Set some colors attributes
     ucolors[ DEFAULT         ].fg = WHITE;
     ucolors[ DEFAULT         ].bg = BLACK;
-    ucolors[ HEADINGS        ].fg = WHITE;
-    ucolors[ HEADINGS        ].bg = RED;
+    ucolors[ HEADINGS        ].fg = BLACK;
+    ucolors[ HEADINGS        ].bg = CYAN;
     ucolors[ WELCOME         ].fg = CYAN;
     ucolors[ WELCOME         ].bg = BLACK;
     ucolors[ CELL_SELECTION  ].fg = BLUE;         // cell selection in headings
@@ -74,10 +74,10 @@ void start_default_ucolors() {
     ucolors[ MODE            ].bg = BLACK;
     ucolors[ MODE            ].bold = 1;
 
-    ucolors[ CELL_ID         ].fg = BLUE;
+    ucolors[ CELL_ID         ].fg = RED;
     ucolors[ CELL_ID         ].bg = BLACK;
     ucolors[ CELL_ID         ].bold = 1;
-    ucolors[ CELL_FORMAT     ].fg = GREEN;
+    ucolors[ CELL_FORMAT     ].fg = RED;
     ucolors[ CELL_FORMAT     ].bg = BLACK;
     ucolors[ CELL_CONTENT    ].fg = CYAN;
     ucolors[ CELL_CONTENT    ].bg = BLACK;
