@@ -1,0 +1,11 @@
+# Build objects
+src/*.o
+
+# Binary
+src/scim
+
+# Bison generated stuff
+src/experres.h
+src/gram.c
+src/statres.h
+src/y.tab.h

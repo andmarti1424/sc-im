@@ -37,64 +37,66 @@ void start_default_ucolors() {
     }
 
     // Set some colors attributes
-    ucolors[ DEFAULT         ].fg = WHITE;
-    ucolors[ DEFAULT         ].bg = BLACK;
-    ucolors[ HEADINGS        ].fg = WHITE;
-    ucolors[ HEADINGS        ].bg = RED;
-    ucolors[ WELCOME         ].fg = CYAN;
-    ucolors[ WELCOME         ].bg = BLACK;
-    ucolors[ CELL_SELECTION  ].fg = BLUE;         // cell selection in headings
-    ucolors[ CELL_SELECTION  ].bg = WHITE;
+    ucolors[ DEFAULT         ].fg = get_config_color("color.default.fg", WHITE);
+    ucolors[ DEFAULT         ].bg = get_config_color("color.default.bg", BLACK);
+    ucolors[ HEADINGS        ].fg = get_config_color("color.headings.fg", WHITE);
+    ucolors[ HEADINGS        ].bg = get_config_color("color.headings.bg", RED);
+    fprintf(stderr, "headings fg: %d\n", ucolors[HEADINGS].fg);
+    fprintf(stderr, "headings bg: %d\n", ucolors[HEADINGS].bg);
+    ucolors[ WELCOME         ].fg = get_config_color("color.welcome.fg", CYAN);
+    ucolors[ WELCOME         ].bg = get_config_color("color.welcome.bg", BLACK);
+    ucolors[ CELL_SELECTION  ].fg = get_config_color("color.cell_selection.fg", BLUE);         // cell selection in headings
+    ucolors[ CELL_SELECTION  ].bg = get_config_color("color.cell_selection.bg", WHITE);
 
-    ucolors[ CELL_SELECTION_SC ].fg = BLACK;      // cell selection in spreadsheet
-    ucolors[ CELL_SELECTION_SC ].bg = WHITE;
+    ucolors[ CELL_SELECTION_SC ].fg = get_config_color("color.cell_selection_sc.fg", BLACK);      // cell selection in spreadsheet
+    ucolors[ CELL_SELECTION_SC ].bg = get_config_color("color.cell_selection_sc.bg", WHITE);
 
-    ucolors[ NUMB            ].fg = CYAN;
-    ucolors[ NUMB            ].bg = BLACK;
+    ucolors[ NUMB            ].fg = get_config_color("color.numb.fg", CYAN);
+    ucolors[ NUMB            ].bg = get_config_color("color.numb.bg", BLACK);
 
-    ucolors[ STRG            ].fg = RED;
-    ucolors[ STRG            ].bg = BLACK;
+    ucolors[ STRG            ].fg = get_config_color("color.strg.fg", RED);
+    ucolors[ STRG            ].bg = get_config_color("color.strg.bg", BLACK);
     ucolors[ STRG            ].bold = 1;
 
-    ucolors[ DATEF           ].fg = YELLOW;
-    ucolors[ DATEF           ].bg = BLACK;
+    ucolors[ DATEF           ].fg = get_config_color("color.datef.fg", YELLOW);
+    ucolors[ DATEF           ].bg = get_config_color("color.datef.bg", BLACK);
 
-    ucolors[ EXPRESSION      ].fg = YELLOW;
-    ucolors[ EXPRESSION      ].bg = BLACK;
+    ucolors[ EXPRESSION      ].fg = get_config_color("color.expression.fg", YELLOW);
+    ucolors[ EXPRESSION      ].bg = get_config_color("color.expression.bg", BLACK);
 
-    ucolors[ INFO_MSG        ].fg = CYAN;
-    ucolors[ INFO_MSG        ].bg = BLACK;
+    ucolors[ INFO_MSG        ].fg = get_config_color("color.info_msg.fg", CYAN);
+    ucolors[ INFO_MSG        ].bg = get_config_color("color.info_msg.bg", BLACK);
     ucolors[ INFO_MSG        ].bold = 1;
-    ucolors[ ERROR_MSG       ].fg = RED;
-    ucolors[ ERROR_MSG       ].bg = WHITE;
+    ucolors[ ERROR_MSG       ].fg = get_config_color("color.error_msg.fg", RED);
+    ucolors[ ERROR_MSG       ].bg = get_config_color("color.error_msg.bg", WHITE);
     ucolors[ ERROR_MSG       ].reverse = 1;
     ucolors[ ERROR_MSG       ].bold = 1;
 
-    ucolors[ MODE            ].fg = WHITE;
-    ucolors[ MODE            ].bg = BLACK;
+    ucolors[ MODE            ].fg = get_config_color("color.mode.fg", WHITE);
+    ucolors[ MODE            ].bg = get_config_color("color.mode.bg", BLACK);
     ucolors[ MODE            ].bold = 1;
 
-    ucolors[ CELL_ID         ].fg = BLUE;
-    ucolors[ CELL_ID         ].bg = BLACK;
+    ucolors[ CELL_ID         ].fg = get_config_color("color.cell_id.fg", BLUE);
+    ucolors[ CELL_ID         ].bg = get_config_color("color.cell_id.bg", BLACK);
     ucolors[ CELL_ID         ].bold = 1;
-    ucolors[ CELL_FORMAT     ].fg = GREEN;
-    ucolors[ CELL_FORMAT     ].bg = BLACK;
-    ucolors[ CELL_CONTENT    ].fg = CYAN;
-    ucolors[ CELL_CONTENT    ].bg = BLACK;
+    ucolors[ CELL_FORMAT     ].fg = get_config_color("color.cell_format.fg", GREEN);
+    ucolors[ CELL_FORMAT     ].bg = get_config_color("color.cell_format.bg", BLACK);
+    ucolors[ CELL_CONTENT    ].fg = get_config_color("color.cell_content.fg", CYAN);
+    ucolors[ CELL_CONTENT    ].bg = get_config_color("color.cell_content.bg", BLACK);
     ucolors[ CELL_CONTENT    ].bold = 1;
 
-    ucolors[ INPUT           ].fg = WHITE;
-    ucolors[ INPUT           ].bg = BLACK;
+    ucolors[ INPUT           ].fg = get_config_color("color.input.fg", WHITE);
+    ucolors[ INPUT           ].bg = get_config_color("color.input.bg", BLACK);
 
-    ucolors[ NORMAL          ].fg = WHITE;
-    ucolors[ NORMAL          ].bg = BLACK;
+    ucolors[ NORMAL          ].fg = get_config_color("color.normal.fg", WHITE);
+    ucolors[ NORMAL          ].bg = get_config_color("color.normal.bg", BLACK);
 
-    ucolors[ CELL_ERROR      ].fg = RED;
-    ucolors[ CELL_ERROR      ].bg = BLACK;
+    ucolors[ CELL_ERROR      ].fg = get_config_color("color.cell_error.fg", RED);
+    ucolors[ CELL_ERROR      ].bg = get_config_color("color.cell_error.bg", BLACK);
     ucolors[ CELL_ERROR      ].bold = 1;
 
-    ucolors[ CELL_NEGATIVE   ].fg = GREEN;
-    ucolors[ CELL_NEGATIVE   ].bg = BLACK;
+    ucolors[ CELL_NEGATIVE   ].fg = get_config_color("color.cell_negative.fg", GREEN);
+    ucolors[ CELL_NEGATIVE   ].bg = get_config_color("color.cell_negative.bg", BLACK);
 
     // Initialize all possible 64 init pairs
     for (i=0; i < 8; i++)      // fg

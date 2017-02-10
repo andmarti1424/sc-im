@@ -96,7 +96,7 @@ int main (int argc, char ** argv) {
     // start configuration dictionaries
     user_conf_d = (struct dictionary *) create_dictionary();
     predefined_conf_d = (struct dictionary *) create_dictionary();
-    store_default_config_values();
+    setup_user_conf();
 
     // create command line history structure
 #ifdef HISTORY_FILE
@@ -378,7 +378,7 @@ void load_sc() {
 
 
 
-// set the calculation order 
+// set the calculation order
 void setorder(int i) {
     if ((i == BYROWS) || (i == BYCOLS)) calc_order = i;
     return;
