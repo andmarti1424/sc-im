@@ -18,7 +18,15 @@ MANDIR  = $(prefix)/man/man1
 #YACC = bison -y
 #SED  = sed
 
-LDLIBS += -lm $(shell pkg-config --libs ncursesw)
+ifeq ($(shell pkg-config --exists ncursesw || echo 'no'),no)
+NCURSES_CFLAGS ?=
+NCURSES_LIBS ?= -lncursesw
+else
+NCURSES_CFLAGS := $(shell pkg-config --cflags ncursesw)
+NCURSES_LIBS := $(shell pkg-config --libs ncursesw)
+endif
+
+LDLIBS += -lm $(NCURSES_LIBS)
 
 CFLAGS += -Wall -g
 CFLAGS += $(shell pkg-config --cflags ncursesw)
