@@ -19,6 +19,6 @@ void set_ucolor(WINDOW * w, struct ucolor * uc);
 void color_cell(int r, int c, int rf, int cf, char * detail);
 void set_colors_param_dict();
 void free_colors_param_dict();
-void chg_color(char* str);
+void chg_color(char * str);
 int same_ucolor(struct ucolor * u, struct ucolor * v);
 int redefine_color(char * color, int r, int g, int b);
