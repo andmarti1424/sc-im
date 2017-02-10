@@ -18,20 +18,22 @@ MANDIR  = $(prefix)/man/man1
 #YACC = bison -y
 #SED  = sed
 
-ifeq ($(shell pkg-config --exists ncursesw || echo 'no'),no)
-NCURSES_CFLAGS ?=
-NCURSES_LIBS ?= -lncursesw
+ifeq ($(shell uname -s),Darwin)
+  NCURSES_CFLAGS ?=
+  NCURSES_LIBS   ?= -lncurses
+else ifeq ($(shell pkg-config --exists ncursesw || echo 'no'),no)
+  NCURSES_CFLAGS ?=
+  NCURSES_LIBS   ?= -lncursesw
 else
-NCURSES_CFLAGS := $(shell pkg-config --cflags ncursesw)
-NCURSES_LIBS := $(shell pkg-config --libs ncursesw)
+  NCURSES_CFLAGS ?= $(shell pkg-config --cflags ncursesw)
+  NCURSES_LIBS   ?= $(shell pkg-config --libs ncursesw)
 endif
 
 LDLIBS += -lm $(NCURSES_LIBS)
 
 CFLAGS += -Wall -g
-CFLAGS += $(shell pkg-config --cflags ncursesw)
-CFLAGS += -D_XOPEN_SOURCE_EXTENDED
-CFLAGS += -D_GNU_SOURCE
+CFLAGS += $(NCURSES_CFLAGS)
+CFLAGS += -D_XOPEN_SOURCE_EXTENDED -D_GNU_SOURCE
 CFLAGS += -DSNAME=\"$(NAME)\"
 CFLAGS += -DHELP_PATH=\"$(HELPDIR)\"
 CFLAGS += -DLIBDIR=\"$(LIBDIR)\"
