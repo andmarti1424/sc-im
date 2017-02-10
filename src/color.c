@@ -41,8 +41,6 @@ void start_default_ucolors() {
     ucolors[ DEFAULT         ].bg = get_config_color("color.default.bg", BLACK);
     ucolors[ HEADINGS        ].fg = get_config_color("color.headings.fg", WHITE);
     ucolors[ HEADINGS        ].bg = get_config_color("color.headings.bg", RED);
-    fprintf(stderr, "headings fg: %d\n", ucolors[HEADINGS].fg);
-    fprintf(stderr, "headings bg: %d\n", ucolors[HEADINGS].bg);
     ucolors[ WELCOME         ].fg = get_config_color("color.welcome.fg", CYAN);
     ucolors[ WELCOME         ].bg = get_config_color("color.welcome.bg", BLACK);
     ucolors[ CELL_SELECTION  ].fg = get_config_color("color.cell_selection.fg", BLUE);         // cell selection in headings
