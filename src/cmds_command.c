@@ -625,7 +625,7 @@ void do_commandmode(struct block * sb) {
         } else if ( ! wcscmp(inputline, L"fcopy") ) {
             fcopy();
 
-        } else if ( ! wcscmp(inputline, L"sum") ) {
+        } else if ( ! wcscmp(inputline, L"fsum") ) {
             fsum();
 
         } else if (
