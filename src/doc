@@ -638,8 +638,8 @@ Commands for handling cell content:
                            :cellcolor fg=RED bold=1 underline=1
 
                 Note that the arguments to the cellcolor command, when specified
-                in a file, must be fully quoted and must include a cell or
-                cell range specification, i.e.:
+                in a file, must include a cell or cell range specification, and
+                the color specification must be fully quoted, i.e.:
 
                 cellcolor A0 "type=HEADINGS fg=WHITE bg=CYAN"
 
