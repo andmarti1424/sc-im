@@ -627,10 +627,21 @@ Commands for handling cell content:
                      a. the .scimrc file stored in $HOME
                      b. the current .sc file.
 
+                Note that the arguments to the color command, when specified
+                in a file, must be fully quoted, i.e.:
+
+                color "type=HEADINGS fg=WHITE bg=CYAN"
+
     :cellcolor {key}={arg} ..
                 Change the color of the current cell or range.
                 Example:   :cellcolor bg=CYAN fg=WHITE
                            :cellcolor fg=RED bold=1 underline=1
+
+                Note that the arguments to the cellcolor command, when specified
+                in a file, must be fully quoted and must include a cell or
+                cell range specification, i.e.:
+
+                cellcolor A0 "type=HEADINGS fg=WHITE bg=CYAN"
 
     :redefine_color "{color}" {R} {G} {B}
                 Change the RGB values of the colors defined by ncurses.
