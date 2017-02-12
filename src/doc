@@ -939,7 +939,7 @@ Commands for handling cell content:
         Return {expr1} raised to the power of {expr2}.
 
     @hypot({expr1},{expr2})
-        Return @sqrt({expr1}*{expr1}+{expr1}*{expr1}), taking precautions
+        Return @sqrt({expr1}*{expr1}+{expr2}*{expr2}), taking precautions
         against overflows.
 
     @pi
@@ -1046,7 +1046,7 @@ Commands for handling cell content:
         For example, having in A1 the string "Extension" and entering in A2
         the following:
         @replace(A1,"n","Z")
-        will result "Extezsioz" in A2.
+        will result "ExteZsioZ" in A2.
 
     @ext("{se}",{expr})
         Call an external program or script.  This allows arbitrary functions
