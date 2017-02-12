@@ -641,7 +641,7 @@ Commands for handling cell content:
                 in a file, must include a cell or cell range specification, and
                 the color specification must be fully quoted, i.e.:
 
-                cellcolor A0 "type=HEADINGS fg=WHITE bg=CYAN"
+                cellcolor A0 "fg=WHITE bg=CYAN"
 
     :redefine_color "{color}" {R} {G} {B}
                 Change the RGB values of the colors defined by ncurses.
