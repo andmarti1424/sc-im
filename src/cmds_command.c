@@ -532,25 +532,21 @@ void do_commandmode(struct block * sb) {
 
         } else if ( ! wcsncmp(inputline, L"cellcolor ", 10) ) {
             #ifdef USECOLORS
-            int r = currow, c = curcol, rf = currow, cf = curcol;
+            interp_line[0]=L'\0';
+            wchar_t line [BUFFERSIZE];
+            wcscpy(line, inputline);
+            del_range_wchars(line, 0, 9);
+            swprintf(interp_line, BUFFERSIZE, L"cellcolor ");
             if (p != -1) {
-                c = sr->tlcol;
-                r = sr->tlrow;
-                rf = sr->brrow;
-                cf = sr->brcol;
+                swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L" %s%d:", coltoa(sr->tlcol), sr->tlrow);
+                swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%s%d ", coltoa(sr->brcol), sr->brrow);
             }
-
-            wcscpy(interp_line, inputline);
-            del_range_wchars(interp_line, 0, 9);
-            char line [BUFFERSIZE];
-            wcstombs(line, interp_line, BUFFERSIZE);
-            color_cell(r, c, rf, cf, line);
+            swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%ls", line);
+            send_to_interp(interp_line);
             #else
             sc_error("Color support not compiled in");
             chg_mode('.');
             inputline[0] = L'\0';
-            //update(TRUE);
-            //return;
             #endif
 
         } else if ( ! wcsncmp(inputline, L"color ", 6) ) {
@@ -563,8 +559,6 @@ void do_commandmode(struct block * sb) {
             sc_error("Color support not compiled in");
             chg_mode('.');
             inputline[0] = '\0';
-            //update(TRUE);
-            //return;
             #endif
 
         } else if ( ! wcsncmp(inputline, L"set ", 4) ) {
@@ -719,17 +713,15 @@ void do_commandmode(struct block * sb) {
 #endif
 
         chg_mode('.');
-        // clr_header(input_win); // COMENTADO el dia 22/06
         inputline[0]='\0';
         set_comp(0); // unmark tab completion
         update(TRUE);
     }
-    //show_header(input_win); // NO DESCOMENTAR.
+    //show_header(input_win); // DO NOT UNCOMMENT
     return;
 }
 
 void ins_in_line(wint_t d) {
-    //sc_info("3: %d %lc", d, d);
     add_wchar(inputline, (wchar_t) d, real_inputline_pos++);
     inputline_pos += wcwidth((wchar_t) d);
     return;

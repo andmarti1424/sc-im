@@ -560,6 +560,15 @@ command:
                                           scxfree($3);
                                         }
 
+    |    S_CELLCOLOR STRING {
+#ifdef USECOLORS
+                                          if ( ! atoi(get_conf_value("nocurses")))
+                                              color_cell(currow, curcol, currow, curcol, $2);
+#endif
+                                          scxfree($2);
+                                        }
+
+
     |    S_REDEFINE_COLOR STRING NUMBER NUMBER NUMBER {
                                          redefine_color($2, $3, $4, $5);
                                          scxfree($2); }

@@ -629,8 +629,9 @@ Commands for handling cell content:
 
     :cellcolor {key}={arg} ..
                 Change the color of the current cell or range.
-                Example:   :cellcolor bg=CYAN fg=WHITE
-                           :cellcolor fg=RED bold=1 underline=1
+                Example:   :cellcolor "bg=CYAN fg=WHITE"
+                           :cellcolor "fg=RED bold=1 underline=1"
+                           :cellcolor A2:A6 "fg=CYAN bold=1 underline=1"
 
     :redefine_color "{color}" {R} {G} {B}
                 Change the RGB values of the colors defined by ncurses.
