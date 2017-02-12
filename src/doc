@@ -5,7 +5,7 @@ You can also use the <ENTER> key to go one line down and <DEL> to go up.
 
 <SPACE> moves a page down, while <C-f> and <C-b> move half page down or up.
 
-'G' moves to bottom, and <C-a> to the beginning of the text.
+'G' moves to bottom, and <C-a> or 'gg' to the beginning of the text.
 
 Use '/' to search for a pattern in the help.
 

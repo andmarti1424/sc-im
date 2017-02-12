@@ -59,8 +59,7 @@ int open_xls(char * fname, char * encoding) {
     for (r = 0; r <= pWS->rows.lastrow; r++) { // rows
         for (c = 0; c <= pWS->rows.lastcol; c++) { // cols
             xlsCell * cell = xls_cell(pWS, r, c);
-            //if ((! cell) || (cell->isHidden)) continue;
-            if ((! cell) || (cell->ishiden)) continue; // Unfortunately libxls spells this "ishiden"
+            if ((! cell) || (cell->isHidden)) continue;
 
             // TODO enable rowspan ?
             //if (cell->rowspan > 1) continue;
