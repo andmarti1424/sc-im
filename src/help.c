@@ -181,7 +181,7 @@ void help() {
                 wrefresh(input_win);
                 d = wgetch(input_win);
             }
-            if (d == OKEY_ENTER && ( strcmp(hline, "q") == 0 || strcmp(hline, "quit") == 0 )) {
+            if (d == OKEY_ENTER && ( ! strcmp(hline, "q") || ! strcmp(hline, "quit") || ! strcmp(hline, "q!") )) {
                 quit_help_now = TRUE;
             } else if (d == OKEY_ESC) {
                 wmove(input_win, 0, rescol);
