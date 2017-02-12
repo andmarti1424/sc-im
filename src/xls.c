@@ -117,7 +117,7 @@ int open_xls(char * fname, char * encoding) {
         }
     }
     xls_close_WS(pWS);
-    xls_close(pWB);
+    xls_close_WB(pWB);
     auto_justify(0, maxcols, DEFWIDTH);
     return 0;
 #else
