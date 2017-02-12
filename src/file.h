@@ -1,4 +1,5 @@
 void erasedb();
+void loadrc(void);
 int modcheck();
 int savefile();
 int writefile(char *fname, int r0, int c0, int rn, int cn);
