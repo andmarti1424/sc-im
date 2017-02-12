@@ -143,6 +143,12 @@ void help() {
             delta = max - LINES + RESROW;
             break;
 
+        case 'g':
+            wtimeout(input_win, TIMEOUT_CURSES);
+            char c = wgetch(input_win);
+            wtimeout(input_win, -1);
+            if (c != 'g') break;
+
         case ctl('a'):
             delta = 0;
             break;
