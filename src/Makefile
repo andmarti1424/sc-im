@@ -1,5 +1,3 @@
-NAME = SC-IM
-
 # Specify the name of the resulting executable file
 name = scim
 
@@ -34,7 +32,7 @@ LDLIBS += -lm $(NCURSES_LIBS)
 CFLAGS += -Wall -g
 CFLAGS += $(NCURSES_CFLAGS)
 CFLAGS += -D_XOPEN_SOURCE_EXTENDED -D_GNU_SOURCE
-CFLAGS += -DSNAME=\"$(NAME)\"
+CFLAGS += -DSNAME=\"$(name)\"
 CFLAGS += -DHELP_PATH=\"$(HELPDIR)\"
 CFLAGS += -DLIBDIR=\"$(LIBDIR)\"
 
@@ -83,7 +81,7 @@ $(name) : $(OBJS)
 	$(CC) $(LDFLAGS) $^ -o $@ $(LDLIBS) 
 
 $(name)qref: sc.h
-	$(CC) $(CFLAGS) $(LDFLAGS) -DQREF $(QREF_FMT) -DSCNAME=\"$(NAME)\" -o $(name)qref help.c $(LDLIBS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -DQREF $(QREF_FMT) -DSCNAME=\"$(name)\" -o $(name)qref help.c $(LDLIBS)
 
 $(OBJS) : y.tab.h experres.h statres.h
 
