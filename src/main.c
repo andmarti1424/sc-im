@@ -372,6 +372,7 @@ void load_sc() {
         }
         wordfree(&p);
         EvalAll();                                 // we eval formulas
+        loadrc();
     }
     return;
 }

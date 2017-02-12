@@ -38,7 +38,6 @@ extern int yyparse(void);
 /* erase the database (tbl, etc.) */
 void erasedb() {
     int  r, c;
-    char * home;
 
     for (c = 0; c <= maxcol; c++) {
         fwidth[c] = DEFWIDTH;
@@ -74,17 +73,21 @@ void erasedb() {
     optimize = 0;
     currow = curcol = 0;
 
-    // Load $HOME/.scimrc if present.
-    if ((home = getenv("HOME"))) {
-        strcpy(curfile, home);
-        strcat(curfile, "/.scimrc");
-        if ((c = open(curfile, O_RDONLY)) > -1) {
-            close(c);
-            (void) readfile(curfile, 0);
-        }
-    }
+    loadrc();
 
     *curfile = '\0';
+}
+
+void loadrc(void) {
+    char rcpath[PATHLEN];
+    char * home;
+
+    if ((home = getenv("HOME"))) {
+        memset(rcpath, 0, sizeof(rcpath));
+        strncpy(rcpath, home, sizeof(rcpath) - (sizeof("/.scimrc") + 1));
+        strcat(rcpath, "/.scimrc");
+        (void) readfile(rcpath, 0);
+    }
 }
 
 // function that checks if a file exists.
