@@ -422,6 +422,13 @@ Commands for handling cell content:
                  Remove the map sequence {lhs} that takes effect in
                  INSERT_MODE.
 
+     :file [{file}]
+                 If {file} is given, expand {file}, and set the current file
+                 name to the result of the expansion.
+
+                 If {file} is not given, display the current file name on
+                 the status line.
+
      :fill {range} {initial_number} {increment_number}
                  Fill range {range} with values. The first cell of the range
                  will have {initial_number} and each successive cell

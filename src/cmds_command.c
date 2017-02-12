@@ -55,6 +55,7 @@ L"e! txt",
 L"datefmt",
 L"delfilter",
 L"delfilters",
+L"file",
 L"fill",
 L"filteron",
 L"filteroff",
@@ -612,6 +613,32 @@ void do_commandmode(struct block * sb) {
 
         } else if ( inputline[0] == L'w' ) {
             savefile();
+
+        } else if ( ! wcsncmp(inputline, L"file ", 5) ) {
+
+            char cline [BUFFERSIZE];
+            wordexp_t p;
+
+            wcstombs(cline, inputline, BUFFERSIZE);
+            del_range_chars(cline, 0, 4);
+            wordexp(cline, &p, 0);
+
+            if ( p.we_wordc < 1 ) {
+                sc_error("Failed to expand filename");
+            } else {
+                strncpy(curfile, p.we_wordv[0], PATHLEN - 1);
+                sc_info("File name set to \"%s\"", curfile);
+            }
+
+            wordfree(&p);
+
+        } else if ( ! wcscmp(inputline, L"file") ) {
+
+            if( ! *curfile ) {
+                sc_info("Current file has no name");
+            } else {
+                sc_info("Current file: \"%s\"", curfile);
+            }
 
         } else if ( inputline[0] == L'x' ) {
             if ( savefile() == 0 ) shall_quit = 1;
