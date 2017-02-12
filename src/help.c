@@ -130,15 +130,18 @@ void help() {
             break;
 
         case ctl('b'):
+        case OKEY_PGUP:
             if (delta - LINES/2 > 0) delta -= LINES/2;
             else if (delta) delta = 0;
             break;
 
         case ctl('f'):
+        case OKEY_PGDOWN:
             if (delta + LINES + LINES/2 < max) delta += LINES/2;
             else if (max > delta + LINES) delta = max - 1 - LINES;
             break;
 
+        case OKEY_END:
         case 'G':
             delta = max - LINES + RESROW;
             break;
@@ -150,6 +153,7 @@ void help() {
             if (c != 'g') break;
 
         case ctl('a'):
+        case OKEY_HOME:
             delta = 0;
             break;
 
