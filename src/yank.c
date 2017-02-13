@@ -8,6 +8,7 @@
 #include "stdlib.h"
 #include "marks.h"
 #include "cmds.h"
+#include "dep_graph.h"
 #include "xmalloc.h" // for scxfree
 
 #ifdef UNDO
@@ -238,16 +239,18 @@ int paste_yanked_ents(int above, int type_paste) {
         destino->row += diffr;
         destino->col += diffc;
 
+        if (type_paste == 'c' && destino->expr) {
+            EvalJustOneVertex(destino, destino->row, destino->col, 1);
+        }
+
         #ifdef UNDO
         copy_to_undostruct(yl->row + diffr, yl->col + diffc, yl->row + diffr, yl->col + diffc, 'a');
         #endif
 
         yl = yl->next;
     }
-    if (type_paste == 'c') {
-        sync_refs();
-        EvalAll();
-    }
+    //EvalAll();
+    sync_refs();
 
     #ifdef UNDO
     end_undo_action();

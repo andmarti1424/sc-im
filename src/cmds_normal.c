@@ -504,7 +504,9 @@ void do_normalmode(struct block * buf) {
                     n->row += currow - get_mark(buf->pnext->value)->row;
                     n->col += c1 - get_mark(buf->pnext->value)->col;
 
+
                     n->flags |= is_changed;
+                    if (n->expr) EvalJustOneVertex(n, n->row, n->col, 1);
 #ifdef UNDO
                     copy_to_undostruct(currow, c1, currow, c1, 'a');
 #endif
@@ -514,7 +516,7 @@ void do_normalmode(struct block * buf) {
 #endif
             }
 
-            if (atoi(get_conf_value("autocalc"))) EvalAll();
+            //if (atoi(get_conf_value("autocalc"))) EvalAll();
             update(TRUE);
             break;
             }
