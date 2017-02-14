@@ -1,0 +1,4 @@
+src/*.y linguist-vendored
+src/*.sed linguist-vendored
+src/doc linguist-documentation
+src/*akefile linguist-vendored
