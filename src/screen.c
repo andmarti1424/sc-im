@@ -20,6 +20,7 @@ main_win: window that loads the spreadsheetssword:
 #include "version.h"
 #include "file.h"
 #include "format.h"
+#include "freeze.h"
 #include "utils/string.h"
 
 extern struct dictionary * d_colors_param;
@@ -35,6 +36,9 @@ WINDOW * input_win;
 
 // off screen spreadsheet rows and columns
 int offscr_sc_rows = 0, offscr_sc_cols = 0;
+
+int center_hidden_cols = 0;
+int pos_center_hidden_cols;
 
 srange * ranges;
 
@@ -101,7 +105,7 @@ void do_welcome() {
     // show headings
     int mxcol = offscr_sc_cols + calc_offscr_sc_cols() - 1;
     int mxrow = offscr_sc_rows + calc_offscr_sc_rows() - 1;
-    show_sc_col_headings(main_win, mxcol, mxrow);
+    show_sc_col_headings(main_win, mxcol);
     show_sc_row_headings(main_win, mxrow);
 
     #ifdef USECOLORS
@@ -155,7 +159,8 @@ void update(int header) {
     show_content(main_win, mxrow, mxcol);
 
     // Show sc_col headings: A, B, C, D..
-    show_sc_col_headings(main_win, mxcol, mxrow);
+    //sc_debug("mxcol:%d", mxcol);
+    show_sc_col_headings(main_win, mxcol);
 
     // Show sc_row headings: 0, 1, 2, 3..
     show_sc_row_headings(main_win, mxrow);
@@ -362,7 +367,8 @@ void show_sc_row_headings(WINDOW * win, int mxrow) {
 }
 
 // Show sc_col headings: A, B, C, D...
-void show_sc_col_headings(WINDOW * win, int mxcol, int mxrow) {
+// mxcol is last col printed in screen
+void show_sc_col_headings(WINDOW * win, int mxcol) {
     int i, col = rescol;
 
     #ifdef USECOLORS
@@ -372,10 +378,25 @@ void show_sc_col_headings(WINDOW * win, int mxcol, int mxrow) {
     wmove(win, 0, 0);
     wclrtoeol(win);
 
-    for (i = offscr_sc_cols; i <= mxcol; i++) {
-        if (col_hidden[i]) continue;
-        int k = fwidth[i] / 2;
+    for (i = 0; i <= mxcol; i++) {
+        // print cols in case freezen columns are before offscr_sc_cols
+        if (i < offscr_sc_cols
+        && !(freeze_ranges
+        && i >= freeze_ranges->tl->col
+        && i <= freeze_ranges->br->col)) continue;
 
+        if (col_hidden[i]) continue;
+
+        // skip center_hidden_cols
+        if (freeze_ranges &&
+                (
+                (curcol >= freeze_ranges->br->col && i > freeze_ranges->br->col && i <= freeze_ranges->br->col + center_hidden_cols)
+                ||
+                (curcol <= freeze_ranges->tl->col && i < freeze_ranges->tl->col && i >= freeze_ranges->tl->col - center_hidden_cols)
+                )
+        ) continue;
+
+        int k = fwidth[i] / 2;
         srange * s = get_selected_range();
         if ( (s != NULL && i >= s->tlcol && i <= s->brcol) || i == curcol ) {
             #ifdef USECOLORS
@@ -384,8 +405,8 @@ void show_sc_col_headings(WINDOW * win, int mxcol, int mxrow) {
             wattron(win, A_REVERSE);
             #endif
         }
+        // if i between
         (void) mvwprintw(win, 0, col, "%*s%-*s", k-1, " ", fwidth[i] - k + 1, coltoa(i));
-
         wclrtoeol(win);
 
         #ifdef USECOLORS
@@ -413,17 +434,63 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
         register int c = rescol;
         int nextcol;
         int fieldlen;
-        col = offscr_sc_cols;
+        //col = offscr_sc_cols;
+        col = 0;
 
-        for (p = ATBL(tbl, row, offscr_sc_cols); col <= mxcol;
+        //for (p = ATBL(tbl, row, offscr_sc_cols); col <= mxcol;
+        for (p = ATBL(tbl, row, 0); col <= mxcol;
         p += nextcol - col, col = nextcol, c += fieldlen) {
 
             nextcol = col + 1;
             fieldlen = fwidth[col];
+
+
+            // ===================> agregado
+            // print cols in case freezen columns are before offscr_sc_cols
+            if (col < offscr_sc_cols
+                && !(freeze_ranges
+                && col >= freeze_ranges->tl->col
+                && col <= freeze_ranges->br->col)) {
+                c -= fieldlen;
+                continue;
+            }
+            // <=================== agregado
+
+
+
+
+
             if (col_hidden[col]) {
                 c -= fieldlen;
                 continue;
             }
+
+
+
+
+
+
+
+
+
+            // ===================> agregado
+            // skip center_hidden_cols
+            if (freeze_ranges &&
+                    (
+                     (col >= freeze_ranges->br->col && col > freeze_ranges->br->col && col <= freeze_ranges->br->col + center_hidden_cols)
+                     ||
+                     (col <= freeze_ranges->tl->col && col < freeze_ranges->tl->col && col >= freeze_ranges->tl->col - center_hidden_cols)
+                    )
+               ) {
+                c -= fieldlen;
+                continue;
+            }
+            // <=================== agregado
+
+
+
+
+
 
             //if ( (*p) == NULL) *p = lookat(row, col);
 
@@ -721,36 +788,90 @@ int calc_offscr_sc_rows() {
 // Calculate number of hidden columns in the left
 int calc_offscr_sc_cols() {
     int i, cols = 0, col = 0;
+
     // pick up col counts
-    if (offscr_sc_cols <= curcol)
-        for (i = offscr_sc_cols, cols = 0, col = rescol; i < maxcols && col + fwidth[i] - 1 < COLS - 1; i++) {
+    if (offscr_sc_cols <= curcol + 1) {
+        for (i = 0, cols = 0, col = rescol; i < maxcols && col + fwidth[i] - 1 < COLS - 1; i++) {
+            if (i < offscr_sc_cols
+            && ! (freeze_ranges && i >= freeze_ranges->tl->col && i <= freeze_ranges->br->col)) continue;
+
+            else if (freeze_ranges && i > freeze_ranges->br->col && i < freeze_ranges->br->col + center_hidden_cols) continue;
+            else if (freeze_ranges && i < freeze_ranges->tl->col && i > freeze_ranges->tl->col - center_hidden_cols) continue;
+
             cols++;
-            if (! col_hidden[i])
-                col += fwidth[i];
+            if (! col_hidden[i]) col += fwidth[i];
         }
-    // get off screen cols
-    while ( offscr_sc_cols + cols - 1 < curcol || curcol < offscr_sc_cols ) {
-        if (offscr_sc_cols - 1 == curcol) offscr_sc_cols--;
-        else if (offscr_sc_cols + cols == curcol) offscr_sc_cols++;
-        else {
+    }
+
+    // get  off screen cols
+    while ( offscr_sc_cols + center_hidden_cols + cols - 1 < curcol || curcol < offscr_sc_cols
+          || (freeze_ranges && curcol < freeze_ranges->tl->col &&
+              curcol >= freeze_ranges->tl->col - center_hidden_cols
+            // && curcol <= cols - center_hidden_cols
+             )
+        ) {
+
+        if (offscr_sc_cols + center_hidden_cols - 1 == curcol && ( !freeze_ranges || (offscr_sc_cols <= freeze_ranges->tl->col))) {
+            if (freeze_ranges && offscr_sc_cols + cols >= freeze_ranges->br->col && freeze_ranges->br->col - cols - offscr_sc_cols + 2 > 0)
+                center_hidden_cols = freeze_ranges->br->col - cols - offscr_sc_cols + 2;
+            offscr_sc_cols--;
+
+        } else if (offscr_sc_cols + center_hidden_cols - 1 == curcol) {
+            center_hidden_cols--;
+
+        } else if (offscr_sc_cols + center_hidden_cols + cols == curcol &&
+            (! freeze_ranges
+             || (curcol > freeze_ranges->br->col && offscr_sc_cols < freeze_ranges->tl->col)
+             || (curcol >= cols && offscr_sc_cols < freeze_ranges->tl->col))) {
+            offscr_sc_cols++;
+
+        } else if (offscr_sc_cols + center_hidden_cols + cols == curcol) {
+            center_hidden_cols++;
+
+        } else if (freeze_ranges && curcol < freeze_ranges->tl->col && curcol >= freeze_ranges->tl->col - center_hidden_cols) {
+            center_hidden_cols--;
+            offscr_sc_cols++;
+
+        } else {
             // Try to put the cursor in the center of the screen
             col = (COLS - rescol - fwidth[curcol]) / 2 + rescol;
-            offscr_sc_cols = curcol;
+                if (freeze_ranges) center_hidden_cols = curcol;
+                else offscr_sc_cols = curcol;
+
             for (i=curcol-1; i >= 0 && col-fwidth[i] - 1 > rescol; i--) {
-                offscr_sc_cols--;
-                if (! col_hidden[i])
+                if (freeze_ranges) center_hidden_cols--;
+                else offscr_sc_cols--;
+
+                // if its shown, we count it, else continue.
+                if (! col_hidden[i] && !freeze_ranges)
+                    col -= fwidth[i];
+
+                else if (!col_hidden[i] && !(
+                       (i > freeze_ranges->br->col && i < freeze_ranges->br->col + center_hidden_cols) ||
+                       (i < freeze_ranges->tl->col && i > freeze_ranges->tl->col - center_hidden_cols)
+                       ))
                     col -= fwidth[i];
             }
         }
 
         // Now pick up the counts again
-        for (i = offscr_sc_cols, cols = 0, col = rescol; i < maxcols && col + fwidth[i] - 1  < COLS - 1; i++) {
+        for (i = 0, cols = 0, col = rescol; i < maxcols && col + fwidth[i] - 1  < COLS - 1; i++) {
+            if (i < offscr_sc_cols
+            && ! (freeze_ranges && i >= freeze_ranges->tl->col && i <= freeze_ranges->br->col)) continue;
+
+            else if (freeze_ranges && i > freeze_ranges->br->col && i < freeze_ranges->br->col + center_hidden_cols) continue;
+            else if (freeze_ranges && i < freeze_ranges->tl->col && i > freeze_ranges->tl->col - center_hidden_cols) continue;
             cols++;
-            if (! col_hidden[i])
-                col += fwidth[i];
+            if (! col_hidden[i]) col += fwidth[i];
         }
     }
-    return cols;
+
+    while (freeze_ranges && curcol > freeze_ranges->br->col &&
+    curcol <= freeze_ranges->br->col + center_hidden_cols) {
+        center_hidden_cols--;
+    }
+
+    return cols + center_hidden_cols;
 }
 
 // error routine for yacc (gram.y)

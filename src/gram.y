@@ -17,6 +17,7 @@
 #include "pipe.h"
 #include "main.h"
 #include "screen.h"
+#include "freeze.h"
 #include "undo.h"
 #include "dep_graph.h"
 #include "utils/dictionary.h"
@@ -109,6 +110,7 @@ token S_YANKCOL
 %token S_EVAL
 %token S_SEVAL
 %token S_FILL
+%token S_FREEZE
 
 /*
  token S_ADDNOTE
@@ -472,7 +474,10 @@ command:
                                           }
 
     |    S_FILL var_or_range num num { fill($2.left.vp, $2.right.vp, $3, $4); }
+
     |    S_FILL num num { sc_error("Not enough parameters for fill command"); }
+
+    |    S_FREEZE range              { add_frange($2.left.vp, $2.right.vp); }
 
     |    S_SORT range STRING         { sortrange($2.left.vp, $2.right.vp, $3);
                                           //scxfree($3);

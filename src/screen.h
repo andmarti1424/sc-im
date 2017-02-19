@@ -14,7 +14,7 @@ void update(int header);
 
 void show_content(WINDOW * win, int mxrow, int mxcol);
 void show_sc_row_headings(WINDOW * win, int mxrow);
-void show_sc_col_headings(WINDOW * win, int mxcol, int mxrow);
+void show_sc_col_headings(WINDOW * win, int mxcol);
 void show_celldetails(WINDOW * win);
 
 void pad_and_align (char * str_value, char * numeric_value, int col_width, int align, int padding, wchar_t * str_out);
@@ -33,9 +33,6 @@ void handle_cursor();
 
 void add_cell_detail(char * d, struct ent * p1);
 void write_j(WINDOW * win, const char * word, const unsigned int row, const unsigned int justif);
-
-// not longer used!
-//int scstrlen(char * s);
 
 void yyerror(char *err);               // error routine for yacc (gram.y)
 void show_text(char * val);

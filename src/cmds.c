@@ -16,6 +16,7 @@
 #include "utils/string.h" // for add_char
 #include "y.tab.h"   // for yyparse
 #include "dep_graph.h"
+#include "freeze.h"
 #ifdef UNDO
 #include "undo.h"
 #endif
@@ -1169,7 +1170,9 @@ struct ent * goto_bottom() {
 
 // moves curcol back one displayed column
 struct ent * back_col(int arg) {
+    extern int center_hidden_cols;
     int c = curcol;
+
     while (--arg >= 0) {
     if (c)
         c--;
@@ -1177,32 +1180,32 @@ struct ent * back_col(int arg) {
         sc_info ("At column A");
         break; 
     }
-    while( col_hidden[c] && c )
+    while ((col_hidden[c] || (freeze_ranges && c >= freeze_ranges->br->col
+    && c < freeze_ranges->br->col + center_hidden_cols)) && c)
         c--;
     }
-    //rowsinrange = 1;
-    //colsinrange = fwidth[curcol];
+
     return lookat(currow, c);
 }
 
 /* moves curcol forward one displayed column */
 struct ent * forw_col(int arg) {
     int c = curcol;
+    extern int center_hidden_cols;
     while (--arg >= 0) {
         if (c < maxcols - 1)
             c++;
         else
             if (! growtbl(GROWCOL, 0, arg)) {    /* get as much as needed */
-                //sc_error("cannot grow");
+                sc_error("cannot grow");
                 return lookat(currow, curcol);
-                //break;
             } else
                 c++;
-        while (col_hidden[c] && (c < maxcols - 1))
+        while ((col_hidden[c] || (freeze_ranges && c >= freeze_ranges->br->col
+            && c < freeze_ranges->br->col + center_hidden_cols)) && (c < maxcols - 1))
             c++;
+
     }
-    //rowsinrange = 1;
-    //colsinrange = fwidth[curcol];
     return lookat(currow, c);
 }
 

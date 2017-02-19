@@ -12,6 +12,7 @@
 #include "shift.h"
 #include "main.h"    // for winchg
 #include "interp.h"
+#include "freeze.h"
 #include "utils/extra.h"
 #ifdef UNDO
 #include "undo.h"
@@ -33,10 +34,15 @@ void do_normalmode(struct block * buf) {
     struct ent * e;
 
     switch (buf->value) {
-        /* TEST
         case L'A':
+            //add_frange(lookat(0, 0), lookat(0, 3));
+            //add_frange(lookat(0, 1), lookat(0, 3));
+            //add_frange(lookat(0, 4), lookat(0, 6));
+            //add_frange(lookat(0, 7), lookat(0, 8));
+            //update(FALSE);
             break;
 
+        /* TEST
         case L'W':
             break;
 
