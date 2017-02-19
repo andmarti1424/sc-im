@@ -17,10 +17,8 @@ v0.5.0
     1. a dr dc sh sk command,
     is_deleted flag is set on those ents.
     eval return 0 for those cases, and CELLREF is put in e->op.
-
     2. 'x' command, flag is_deleted is not set.
     eval return 0 for those cases as well.
-
  REF and ERR errors propagate to other ENDS. 
  Another change: Now when deleting a cell, if they are referenced by others, vertex is not removed.
  (is_deleted ents shall always go to freeents to be reused..)
