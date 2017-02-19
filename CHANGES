@@ -1,3 +1,44 @@
+v0.5.0
+*new @frow / @fcol functions.
+*Added :file special command.
+*:cellcolor command now can take a range as an argument.
+*Added gg command and HOME, END, PAGEUP and PAGEDOWN keys handling in help screen.
+*CSV load/import time improvements (noticeable in large files).
+*Fix error when ordering a range that had empty cells.
+*Fix in csv import (isnumeric function).
+*Fix when circular reference occurs:
+ Before it put @ERR in expression.
+ Now it preserves the var that makes the circular reference in the formula,
+ but keeps the "ERROR" label in the ent.
+ ERR errors propagate to other ents.
+*Changes when an ent referenced by other ents is removed:
+ Before, @ERR was set whereever the reference to a removed ent exists.
+ Now, if an ent is removed because of:
+    1. a dr dc sh sk command,
+    is_deleted flag is set on those ents.
+    eval return 0 for those cases, and CELLREF is put in e->op.
+
+    2. 'x' command, flag is_deleted is not set.
+    eval return 0 for those cases as well.
+
+ REF and ERR errors propagate to other ENDS. 
+ Another change: Now when deleting a cell, if they are referenced by others, vertex is not removed.
+ (is_deleted ents shall always go to freeents to be reused..)
+*Added check for not to copy duplicate ents in copy_to_undostruct.
+*Removed split function.
+*Removed unnecesary lookat in screen.c that made unneeded mallocs.
+*With "debug" configuration parameter set, now SC-IM quits after SIGINT.
+
+*Fix bug that prevented cells with "ERROR" get saved to file and loaded later on.
+*Fix BackSpace issue with some GNU/Linux distros.
+*Fix bug that create duplicates in commandline history, if the command recently typed was the latest used as well.
+*Fix bug that avoid processing $HOME/.scimrc after loading a file via commandline.
+*Fix bug with 'Pc' and 'c' commands of normal mode, not doing autocalc after paste.
+*Fix in possible buffer overflow in main.c.
+*Some fixes in xml files import.
+*Various fixes to avoid warnings during build.
+
+
 v0.4.0
 * Fix memory leak in functions that use seval. ex.: dosval docat. this used to happen also in SC !
 * Chain cells with equations into a new graph structure
@@ -53,6 +94,7 @@ v0.3.0
   Change in format of a column as a result of the 'f' command
   Change in format of a column as a result of auto_jus
   Change format of columns as a result of ic dc
+
 
 v0.2.2
 * Added plain text export.
