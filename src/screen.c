@@ -807,31 +807,45 @@ int calc_offscr_sc_cols() {
     while ( offscr_sc_cols + center_hidden_cols + cols - 1 < curcol || curcol < offscr_sc_cols
           || (freeze_ranges && curcol < freeze_ranges->tl->col &&
               curcol >= freeze_ranges->tl->col - center_hidden_cols
-            // && curcol <= cols - center_hidden_cols
              )
         ) {
 
-        if (offscr_sc_cols + center_hidden_cols - 1 == curcol && ( !freeze_ranges || (offscr_sc_cols <= freeze_ranges->tl->col))) {
-            if (freeze_ranges && offscr_sc_cols + cols >= freeze_ranges->br->col && freeze_ranges->br->col - cols - offscr_sc_cols + 2 > 0)
+    //if (freeze_ranges) sc_debug("IN  coltoa:%s, i:%d, cols:%d, center:%d, off:%d, curcol:%d, tl:%d, br:%d",
+    //coltoa(i), i, cols, center_hidden_cols, offscr_sc_cols, curcol, freeze_ranges->tl->col, freeze_ranges->br->col);
+
+        //izq
+        if (offscr_sc_cols - 1 == curcol) {
+
+            if (freeze_ranges && offscr_sc_cols + cols + center_hidden_cols >= freeze_ranges->br->col
+                  && freeze_ranges->br->col - cols - offscr_sc_cols + 2 > 0
+            ) {
                 center_hidden_cols = freeze_ranges->br->col - cols - offscr_sc_cols + 2;
+            }
             offscr_sc_cols--;
 
-        } else if (offscr_sc_cols + center_hidden_cols - 1 == curcol) {
-            center_hidden_cols--;
-
+        // derecha
         } else if (offscr_sc_cols + center_hidden_cols + cols == curcol &&
             (! freeze_ranges
              || (curcol > freeze_ranges->br->col && offscr_sc_cols < freeze_ranges->tl->col)
              || (curcol >= cols && offscr_sc_cols < freeze_ranges->tl->col))) {
             offscr_sc_cols++;
 
+        // derecha con freeze cols a la izq.
         } else if (offscr_sc_cols + center_hidden_cols + cols == curcol) {
             center_hidden_cols++;
 
-        } else if (freeze_ranges && curcol < freeze_ranges->tl->col && curcol >= freeze_ranges->tl->col - center_hidden_cols) {
+        // derecha con freeze a la derecha
+        } else if (freeze_ranges && curcol < freeze_ranges->tl->col && curcol >= freeze_ranges->tl->col - center_hidden_cols ) {
             center_hidden_cols--;
             offscr_sc_cols++;
 
+/*        } else if (offscr_sc_cols + center_hidden_cols - 1 == curcol) {
+            center_hidden_cols--;
+
+          } else if (freeze_ranges && curcol < freeze_ranges->tl->col && curcol >= freeze_ranges->tl->col - center_hidden_cols ) {
+              center_hidden_cols++;
+              offscr_sc_cols--;
+*/
         } else {
             // Try to put the cursor in the center of the screen
             col = (COLS - rescol - fwidth[curcol]) / 2 + rescol;
