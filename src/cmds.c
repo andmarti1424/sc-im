@@ -1171,6 +1171,7 @@ struct ent * goto_bottom() {
 // moves curcol back one displayed column
 struct ent * back_col(int arg) {
     extern int center_hidden_cols;
+    int freeze = freeze_ranges && (freeze_ranges->type == 'c' ||  freeze_ranges->type == 'a') ? 2 : 0;
     int c = curcol;
 
     while (--arg >= 0) {
@@ -1180,7 +1181,7 @@ struct ent * back_col(int arg) {
             sc_info ("At column A");
             break;
         }
-        while ((col_hidden[c] || (freeze_ranges && c >= freeze_ranges->br->col
+        while ((col_hidden[c] || (freeze && c >= freeze_ranges->br->col
         && c < freeze_ranges->br->col + center_hidden_cols)) && c)
             c--;
     }
@@ -1192,6 +1193,8 @@ struct ent * back_col(int arg) {
 struct ent * forw_col(int arg) {
     int c = curcol;
     extern int center_hidden_cols;
+    int freeze = freeze_ranges && (freeze_ranges->type == 'c' ||  freeze_ranges->type == 'a') ? 1 : 0;
+
     while (--arg >= 0) {
         if (c < maxcols - 1)
             c++;
@@ -1201,7 +1204,7 @@ struct ent * forw_col(int arg) {
                 return lookat(currow, curcol);
             } else
                 c++;
-        while ((col_hidden[c] || (freeze_ranges && c >= freeze_ranges->br->col
+        while ((col_hidden[c] || (freeze && c >= freeze_ranges->br->col
             && c < freeze_ranges->br->col + center_hidden_cols)) && (c < maxcols - 1))
             c++;
 
@@ -1213,6 +1216,8 @@ struct ent * forw_col(int arg) {
 struct ent * forw_row(int arg) {
     int r = currow;
     extern int center_hidden_rows;
+    int freeze = freeze_ranges && (freeze_ranges->type == 'r' ||  freeze_ranges->type == 'a') ? 1 : 0;
+
     while (arg--) {
         if (r < maxrows - 1)
             r++;
@@ -1223,7 +1228,7 @@ struct ent * forw_row(int arg) {
             } else
                 r++;
         }
-        while ((row_hidden[r] || (freeze_ranges && r >= freeze_ranges->br->row
+        while ((row_hidden[r] || (freeze && r >= freeze_ranges->br->row
             && r < freeze_ranges->br->row + center_hidden_rows)) && (r < maxrows - 1))
             r++;
     }
@@ -1234,13 +1239,15 @@ struct ent * forw_row(int arg) {
 struct ent * back_row(int arg) {
     int r = currow;
     extern int center_hidden_rows;
+    int freeze = freeze_ranges && (freeze_ranges->type == 'r' ||  freeze_ranges->type == 'a') ? 1 : 0;
+
     while (arg--) {
         if (r) r--;
         else {
             sc_info("At row zero");
             break;
         }
-        while ((row_hidden[r] || (freeze_ranges && r >= freeze_ranges->br->row
+        while ((row_hidden[r] || (freeze && r >= freeze_ranges->br->row
         && r < freeze_ranges->br->row + center_hidden_rows)) && r)
             r--;
     }

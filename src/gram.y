@@ -77,6 +77,7 @@ int yylex();
 %token S_HIDEROW
 %token S_SHOWCOL
 %token S_HIDECOL
+%token S_FREEZE
 %token S_MARK
 %token S_AUTOJUS
 %token S_PAD
@@ -110,7 +111,6 @@ token S_YANKCOL
 %token S_EVAL
 %token S_SEVAL
 %token S_FILL
-%token S_FREEZE
 
 /*
  token S_ADDNOTE
@@ -477,7 +477,11 @@ command:
 
     |    S_FILL num num { sc_error("Not enough parameters for fill command"); }
 
-    |    S_FREEZE range              { add_frange($2.left.vp, $2.right.vp); }
+    |    S_FREEZE range              { add_frange($2.left.vp, $2.right.vp, 'a'); }
+    |    S_FREEZE NUMBER ':' NUMBER  { add_frange(lookat($2, 0), lookat($4, 0), 'r'); }
+    |    S_FREEZE NUMBER             { add_frange(lookat($2, 0), lookat($2, 0), 'r'); }
+    |    S_FREEZE COL ':' COL        { add_frange(lookat(0, $2), lookat(0, $4), 'c'); }
+    |    S_FREEZE COL                { add_frange(lookat(0, $2), lookat(0, $2), 'c'); }
 
     |    S_SORT range STRING         { sortrange($2.left.vp, $2.right.vp, $3);
                                           //scxfree($3);
