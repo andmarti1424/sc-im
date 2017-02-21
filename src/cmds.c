@@ -1902,7 +1902,12 @@ int is_single_command (struct block * buf, long timeout) {
                  buf->pnext->value == L'k' ||
                  buf->pnext->value == OKEY_UP ||
                  buf->pnext->value == L'-' ||
-                 buf->pnext->value == L'+' )) res = EDITION_CMD;
+                 buf->pnext->value == L'+' ||
+                 buf->pnext->value == L'r' ||         // Freeze row / col / area
+                 buf->pnext->value == L'c' ||
+                 buf->pnext->value == L'a'
+                 )
+               ) res = EDITION_CMD;
 
     } else if (curmode == VISUAL_MODE && bs == 1) {
              if (buf->value == L'j' ||

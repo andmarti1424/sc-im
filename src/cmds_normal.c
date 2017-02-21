@@ -443,9 +443,32 @@ void do_normalmode(struct block * buf) {
             update(TRUE);
             break;
 
-        // format col
+        // format col or freeze range
         case L'f':
             if (bs != 2) return;
+
+            // freeze row / column or area
+            if (buf->pnext->value == 'r' || buf->pnext->value == 'c' || buf->pnext->value == 'a') {
+                int p = is_range_selected(), r = currow, c = curcol, rf = currow, cf = curcol;
+
+                if (p != -1) { // mark range
+                    struct srange * sr = get_range_by_pos(p);
+                    r = sr->tlrow;
+                    c = sr->tlcol;
+                    rf = sr->brrow;
+                    cf = sr->brcol;
+                }
+
+                if (buf->pnext->value == 'r') {
+                    add_frange(lookat(r, c), lookat(rf, cf), 'r');
+                } else if (buf->pnext->value == 'c') {
+                    add_frange(lookat(r, c), lookat(rf, cf), 'c');
+                } else if (buf->pnext->value == 'a') {
+                    add_frange(lookat(r, c), lookat(rf, cf), 'a');
+                }
+
+            // change in format
+            } else {
 #ifdef UNDO
 
             create_undo_action();
@@ -456,6 +479,7 @@ void do_normalmode(struct block * buf) {
             add_undo_col_format(curcol, 'A', fwidth[curcol], precision[curcol], realfmt[curcol]);
             end_undo_action();
 #endif
+            }
             break;
 
         // mark cell or range
@@ -465,7 +489,7 @@ void do_normalmode(struct block * buf) {
             if (p != -1) { // mark range
                 struct srange * sr = get_range_by_pos(p);
                 set_range_mark(buf->pnext->value, sr);
-            } else         // mark cell 
+            } else         // mark cell
                 set_cell_mark(buf->pnext->value, currow, curcol);
             modflg++;
             break;
