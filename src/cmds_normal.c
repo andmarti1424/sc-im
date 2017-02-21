@@ -38,7 +38,11 @@ void do_normalmode(struct block * buf) {
             //add_frange(lookat(0, 0), lookat(0, 3));
             //add_frange(lookat(0, 1), lookat(0, 3));
             //add_frange(lookat(0, 4), lookat(0, 6));
-            //add_frange(lookat(0, 7), lookat(0, 8));
+            //add_frange(lookat(0, 27), lookat(0, 28));
+            //add_frange(lookat(0, 0), lookat(4, 0));
+            //add_frange(lookat(14, 0), lookat(18, 0));
+            //add_frange(lookat(24, 0), lookat(24, 0));
+            //add_frange(lookat(24, 0), lookat(26, 0));
             //update(FALSE);
             break;
 

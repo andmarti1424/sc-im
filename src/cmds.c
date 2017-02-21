@@ -1174,15 +1174,15 @@ struct ent * back_col(int arg) {
     int c = curcol;
 
     while (--arg >= 0) {
-    if (c)
-        c--;
-    else {
-        sc_info ("At column A");
-        break; 
-    }
-    while ((col_hidden[c] || (freeze_ranges && c >= freeze_ranges->br->col
-    && c < freeze_ranges->br->col + center_hidden_cols)) && c)
-        c--;
+        if (c)
+            c--;
+        else {
+            sc_info ("At column A");
+            break;
+        }
+        while ((col_hidden[c] || (freeze_ranges && c >= freeze_ranges->br->col
+        && c < freeze_ranges->br->col + center_hidden_cols)) && c)
+            c--;
     }
 
     return lookat(currow, c);
@@ -1212,19 +1212,20 @@ struct ent * forw_col(int arg) {
 /* moves currow forward one displayed row */
 struct ent * forw_row(int arg) {
     int r = currow;
+    extern int center_hidden_rows;
     while (arg--) {
         if (r < maxrows - 1)
             r++;
         else {
             if (! growtbl(GROWROW, arg, 0)) {
-                //sc_error("cannot grow");
+                sc_error("cannot grow");
                 return lookat(currow, curcol);
-            } else 
+            } else
                 r++;
         }
-        while (row_hidden[r] && (r < maxrows - 1)) {
+        while ((row_hidden[r] || (freeze_ranges && r >= freeze_ranges->br->row
+            && r < freeze_ranges->br->row + center_hidden_rows)) && (r < maxrows - 1))
             r++;
-        }
     }
     return lookat(r, curcol);
 }
@@ -1232,13 +1233,15 @@ struct ent * forw_row(int arg) {
 /* moves currow backward one displayed row */
 struct ent * back_row(int arg) {
     int r = currow;
+    extern int center_hidden_rows;
     while (arg--) {
         if (r) r--;
         else {
             sc_info("At row zero");
             break;
         }
-        while (row_hidden[r] && r)
+        while ((row_hidden[r] || (freeze_ranges && r >= freeze_ranges->br->row
+        && r < freeze_ranges->br->row + center_hidden_rows)) && r)
             r--;
     }
     return lookat(r, curcol);
@@ -1309,7 +1312,7 @@ struct ent * go_backward() {
     int r_ori = r, c_ori = c;
     register struct ent * p;
     do {
-        if (c) 
+        if (c)
             c--;
         else {
             if (r) {
@@ -1429,7 +1432,7 @@ void valueize_area(int sr, int sc, int er, int ec) {
     }
 
     if (sr < 0)
-        sr = 0; 
+        sr = 0;
     if (sc < 0)
         sc = 0;
     checkbounds(&er, &ec);
