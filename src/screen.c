@@ -445,8 +445,28 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
     int freezer = freeze_ranges && (freeze_ranges->type == 'r' ||  freeze_ranges->type == 'a') ? 1 : 0;
     int freezec = freeze_ranges && (freeze_ranges->type == 'c' ||  freeze_ranges->type == 'a') ? 1 : 0;
 
-    for (row = offscr_sc_rows; row < mxrow; row++) {
+    //for (row = offscr_sc_rows; row < mxrow; row++) {
+    for (row = 0; row < mxrow; row++) {
+        if (row < offscr_sc_rows
+            && !(freezer
+            && row >= freeze_ranges->tl->row
+            && row <= freeze_ranges->br->row)) {
+            //q_row_hidden++;
+            continue;
+        }
         if (row_hidden[row]) {
+            q_row_hidden++;
+            continue;
+        }
+
+        // skip center_hidden_cols
+        if (freezer &&
+        (
+        (row >= freeze_ranges->br->row && row > freeze_ranges->br->row && row <= freeze_ranges->br->row + center_hidden_rows)
+        ||
+        (row <= freeze_ranges->tl->row && row < freeze_ranges->tl->row && row >= freeze_ranges->tl->row - center_hidden_rows)
+        )
+        ) {
             q_row_hidden++;
             continue;
         }
@@ -454,18 +474,14 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
         register int c = rescol;
         int nextcol;
         int fieldlen;
-        //col = offscr_sc_cols;
         col = 0;
 
-        //for (p = ATBL(tbl, row, offscr_sc_cols); col <= mxcol;
         for (p = ATBL(tbl, row, 0); col <= mxcol;
         p += nextcol - col, col = nextcol, c += fieldlen) {
 
             nextcol = col + 1;
             fieldlen = fwidth[col];
 
-
-            // ===================> agregado
             // print cols in case freezen columns are before offscr_sc_cols
             if (col < offscr_sc_cols
                 && !(freezec
@@ -474,26 +490,12 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
                 c -= fieldlen;
                 continue;
             }
-            // <=================== agregado
-
-
-
-
 
             if (col_hidden[col]) {
                 c -= fieldlen;
                 continue;
             }
 
-
-
-
-
-
-
-
-
-            // ===================> agregado
             // skip center_hidden_cols
             if (freezec &&
                     (
@@ -505,12 +507,6 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
                 c -= fieldlen;
                 continue;
             }
-            // <=================== agregado
-
-
-
-
-
 
             //if ( (*p) == NULL) *p = lookat(row, col);
 
