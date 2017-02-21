@@ -445,7 +445,6 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
     int freezer = freeze_ranges && (freeze_ranges->type == 'r' ||  freeze_ranges->type == 'a') ? 1 : 0;
     int freezec = freeze_ranges && (freeze_ranges->type == 'c' ||  freeze_ranges->type == 'a') ? 1 : 0;
 
-    //for (row = offscr_sc_rows; row < mxrow; row++) {
     for (row = 0; row < mxrow; row++) {
         if (row < offscr_sc_rows
             && !(freezer
