@@ -606,6 +606,20 @@ Commands for handling cell content:
     :hiddencols
                 Show details of hidden columns.
 
+    :freeze {column}
+    :freeze {column:column}
+                Freeze the column or column range given. (Case insensitive).
+                (the rest of the screen scrolls but the column/s stays fixed on the screen).
+
+    :freeze {row}
+    :freeze {row:row}
+                Freeze the row or row range given.  (Case insensitive).
+                (the rest of the screen scrolls but the row/s stays fixed on the screen).
+
+    :freeze {range}
+                Freeze a range given.  (Case insensitive).
+                (the rest of the screen scrolls but the range stays fixed on the screen).
+
     :pad {spaces}
                 Apply a left padding {spaces} characters in width to a column.
                 If a range selected, pad the columns inside that range.
