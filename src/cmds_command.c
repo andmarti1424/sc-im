@@ -60,6 +60,7 @@ L"fill",
 L"filteron",
 L"filteroff",
 L"format",
+L"freeze",
 L"h",
 L"help",
 L"hiddencols",
@@ -421,6 +422,21 @@ void do_commandmode(struct block * sb) {
                 if (found == -1) return;
                 del_range_wchars(cline, 0, found-1);
                 swprintf(interp_line, BUFFERSIZE, L"sort %s%d:", coltoa(sr->tlcol), sr->tlrow);
+                swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%s%d %ls", coltoa(sr->brcol), sr->brrow, cline);
+            }
+            send_to_interp(interp_line);
+
+        } else if ( ! wcsncmp(inputline, L"freeze ", 7) ) {
+            wcscpy(interp_line, inputline);
+            send_to_interp(interp_line);
+
+        } else if ( ! wcsncmp(inputline, L"freeze", 6) ) {
+            wcscpy(interp_line, inputline);
+            if (p != -1) {
+                wchar_t cline [BUFFERSIZE];
+                wcscpy(cline, interp_line);
+                del_range_wchars(cline, 0, 5);
+                swprintf(interp_line, BUFFERSIZE, L"freeze %s%d:", coltoa(sr->tlcol), sr->tlrow);
                 swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%s%d %ls", coltoa(sr->brcol), sr->brrow, cline);
             }
             send_to_interp(interp_line);

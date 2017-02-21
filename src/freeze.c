@@ -15,6 +15,6 @@ void add_frange(struct ent * tl_ent, struct ent * br_ent, char type) {
     f->next = freeze_ranges;
     freeze_ranges = f;
 
-    sc_debug("freeze range: %d %d %d %d - type:%c", freeze_ranges->tl->row, freeze_ranges->tl->col, freeze_ranges->br->row, freeze_ranges->br->col, type);
+    //sc_debug("freeze range: %d %d %d %d - type:%c", freeze_ranges->tl->row, freeze_ranges->tl->col, freeze_ranges->br->row, freeze_ranges->br->col, type);
     return;
 }
