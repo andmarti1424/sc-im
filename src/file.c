@@ -205,8 +205,8 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
         if (row_hidden[r])
             (void) fprintf(f, "hide %d\n", r);
 
-    //write_ranges(f);
     write_marks(f);
+    write_franges(f);
 
     write_cells(f, r0, c0, rn, cn, r0, c0);
 
@@ -318,6 +318,23 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
     fprintf(f, "goto %s", v_name(currow, curcol));
     //fprintf(f, " %s\n", v_name(strow, stcol));
     fprintf(f, "\n");
+}
+
+void write_franges(register FILE *f) {
+    if (! freeze_ranges) return;
+    if (freeze_ranges->type == 'a') {
+        fprintf(f, "freeze %s%d", coltoa(freeze_ranges->tl->col), freeze_ranges->tl->row);
+        fprintf(f, ":%s%d\n", coltoa(freeze_ranges->br->col), freeze_ranges->br->row);
+    } else if (freeze_ranges->type == 'c' && freeze_ranges->tl->col == freeze_ranges->br->col) {
+        fprintf(f, "freeze %s\n", coltoa(freeze_ranges->tl->col));
+    } else if (freeze_ranges->type == 'c') {
+        fprintf(f, "freeze %s:", coltoa(freeze_ranges->tl->col));
+        fprintf(f, "%s\n", coltoa(freeze_ranges->br->col));
+    } else if (freeze_ranges->type == 'r' && freeze_ranges->tl->row == freeze_ranges->br->row) {
+        fprintf(f, "freeze %d\n", freeze_ranges->tl->row);
+    } else if (freeze_ranges->type == 'r') {
+        fprintf(f, "freeze %d:%d\n", freeze_ranges->tl->row, freeze_ranges->br->row);
+    }
 }
 
 void write_marks(register FILE *f) {

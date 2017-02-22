@@ -147,7 +147,7 @@ void update(int header) {
     int off_rows = calc_offscr_sc_rows();
     int mxcol = offscr_sc_cols + off_cols - 1;
     int mxrow = offscr_sc_rows + off_rows - 1;
-    sc_info("off_rows:%d, mxrow:%d, offscr_sc_rows:%d maxrows:%d", off_rows, mxrow, offscr_sc_rows, maxrows);
+    //sc_info("off_rows:%d, mxrow:%d, offscr_sc_rows:%d maxrows:%d", off_rows, mxrow, offscr_sc_rows, maxrows);
     //sc_info("");
 
     /* You can't hide the last row or col */
