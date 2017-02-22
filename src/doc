@@ -96,6 +96,12 @@ Commands for handling cell content:
      f< , fh , f-LEFT:       Change cell format: Decrement column width.
      f> , fl , f-RIGHT:      Change cell format: Increment column width.
 
+     fr          Freeze a row or the rows selected.
+                 If none is selected it freezes the current row.
+     fc          Freeze a col or the cols selected.
+                 If none is selected it freezes the current col.
+     fa          Freeze the area selected.
+
      ir          Insert a row.
      ic          Insert a column.
      or          Open a row: insert after the current row.
