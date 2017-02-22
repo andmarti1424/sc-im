@@ -976,7 +976,7 @@ int calc_offscr_sc_rows() {
             if (i < offscr_sc_rows && freeze && i >= tlrow && i <= brrow) q++;
             rows++;
             //if (i == maxrows - 1) return rows+1;
-            if (i == maxrows - 1) return rows + center_hidden_rows - q + 1;
+            if (i == maxrows - 1) return rows + center_hidden_rows - q + 1 > maxrows ? maxrows - 1 : rows + center_hidden_rows - q;
             if (! row_hidden[i]) row++;
         }
     // get off screen rows
@@ -1035,7 +1035,7 @@ int calc_offscr_sc_rows() {
             if (i < offscr_sc_rows && freeze && i >= tlrow && i <= brrow) q++;
             rows++;
             //if (i == maxrows - 1) return rows+1;
-            if (i == maxrows - 1) return rows + center_hidden_rows - q + 1;
+            if (i == maxrows - 1) return rows + center_hidden_rows - q + 1 > maxrows ? maxrows - 1 : rows + center_hidden_rows - q;
             if (! row_hidden[i]) row++;
         }
     }
@@ -1043,7 +1043,5 @@ int calc_offscr_sc_rows() {
     while (freeze && currow > brrow && currow <= brrow + center_hidden_rows) {
         center_hidden_rows--;
     }
-    //if (freeze) rows -= brrow - tlrow;
-    //sc_debug("%d %d", q, row);
-    return rows + center_hidden_rows - q;
+    return rows + center_hidden_rows - q > maxrows ? maxrows: rows + center_hidden_rows - q;
 }
