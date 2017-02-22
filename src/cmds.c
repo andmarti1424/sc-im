@@ -1084,90 +1084,6 @@ void clearent(struct ent * v) {
     return;
 }
 
-void scroll_left(int n) {
-    while (n--) {
-        if (! offscr_sc_cols ) {
-            break;
-        }
-        int a = 1;
-        int b = 0;
-        offscr_sc_cols--;
-        while (a != b && curcol) {
-            a = offscr_sc_cols;
-            calc_offscr_sc_cols();
-            b = offscr_sc_cols;
-            if (a != b) {
-                curcol --;
-                offscr_sc_cols = a;
-            }
-        }
-    }
-    return;
-}
-
-void scroll_right(int n) {
-    while (n--) {
-        // This while statement allow the cursor to shift to the right when the
-        // las visible column is reached in the screen
-        while (curcol < offscr_sc_cols + 1) {
-            curcol++;
-        }
-        offscr_sc_cols++;
-    }
-    return;
-}
-
-void scroll_down(int n) {
-    while (n--) {
-        if (currow == offscr_sc_rows) {
-            forw_row(1);
-            unselect_ranges();
-        }
-        offscr_sc_rows++;
-    }
-    return;
-}
-
-void scroll_up(int n) {
-    while (n--) {
-        if (offscr_sc_rows)
-            offscr_sc_rows--;
-        else
-            break;
-        if (currow == offscr_sc_rows + LINES - RESROW - 1) {
-            back_row(1);
-            unselect_ranges();
-        }
-    }
-    return;
-}
-
-struct ent * left_limit() {
-    int c = 0;
-    while ( col_hidden[c] && c < curcol ) c++; 
-    return lookat(currow, c);
-}
-
-struct ent * right_limit() {
-    register struct ent *p;
-    int c = maxcols - 1;
-    while ( (! VALID_CELL(p, currow, c) && c > 0) || col_hidden[c]) c--;
-    return lookat(currow, c);
-}
-
-struct ent * goto_top() {
-    int r = 0;
-    while ( row_hidden[r] && r < currow ) r++; 
-    return lookat(r, curcol);
-}
-
-struct ent * goto_bottom() {
-    register struct ent *p;
-    int r = maxrows - 1;
-    while ( (! VALID_CELL(p, r, curcol) && r > 0) || row_hidden[r]) r--;
-    return lookat(r, curcol);
-}
-
 // moves curcol back one displayed column
 struct ent * back_col(int arg) {
     extern int center_hidden_cols;
@@ -1200,7 +1116,7 @@ struct ent * forw_col(int arg) {
             c++;
         else
             if (! growtbl(GROWCOL, 0, arg)) {    /* get as much as needed */
-                sc_error("cannot grow");
+                sc_debug("cannot grow");
                 return lookat(currow, curcol);
             } else
                 c++;
@@ -1223,14 +1139,14 @@ struct ent * forw_row(int arg) {
             r++;
         else {
             if (! growtbl(GROWROW, arg, 0)) {
-                sc_error("cannot grow");
+                sc_debug("cannot grow");
                 return lookat(currow, curcol);
             } else
                 r++;
         }
-        while ((row_hidden[r] || (freeze && r >= freeze_ranges->br->row
-            && r < freeze_ranges->br->row + center_hidden_rows)) && (r < maxrows - 1))
+        while ((row_hidden[r] && (freeze && r >= freeze_ranges->br->row && r < freeze_ranges->br->row + center_hidden_rows)) && (r < maxrows - 1)) {
             r++;
+        }
     }
     return lookat(r, curcol);
 }
@@ -1254,6 +1170,123 @@ struct ent * back_row(int arg) {
     return lookat(r, curcol);
 }
 
+struct ent * go_home() {
+    return lookat(0, 0);
+}
+
+// if ticks a cell, returns struct ent *
+// if ticks a range, return struct ent * to top left cell
+struct ent * tick(char c) {
+    //tick cell
+    int r = get_mark(c)->row;
+    if (r != -1)
+        return lookat(r, get_mark(c)->col);
+
+    // tick range
+    if (curmode != VISUAL_MODE) {
+        get_mark(c)->rng->selected = 1;
+        return lookat(get_mark(c)->rng->tlrow, get_mark(c)->rng->tlcol);
+    }
+    return NULL;
+}
+
+
+
+
+
+// FIXME to handle freeze rows/cols
+void scroll_left(int n) {
+    while (n--) {
+        if (! offscr_sc_cols ) {
+            break;
+        }
+        int a = 1;
+        int b = 0;
+        offscr_sc_cols--;
+        while (a != b && curcol) {
+            a = offscr_sc_cols;
+            calc_offscr_sc_cols();
+            b = offscr_sc_cols;
+            if (a != b) {
+                curcol --;
+                offscr_sc_cols = a;
+            }
+        }
+    }
+    return;
+}
+
+// FIXME to handle freeze rows/cols
+void scroll_right(int n) {
+    while (n--) {
+        // This while statement allow the cursor to shift to the right when the
+        // las visible column is reached in the screen
+        while (curcol < offscr_sc_cols + 1) {
+            curcol++;
+        }
+        offscr_sc_cols++;
+    }
+    return;
+}
+
+// FIXME to handle freeze rows/cols
+void scroll_down(int n) {
+    while (n--) {
+        if (currow == offscr_sc_rows) {
+            forw_row(1);
+            unselect_ranges();
+        }
+        offscr_sc_rows++;
+    }
+    return;
+}
+
+// FIXME to handle freeze rows/cols
+void scroll_up(int n) {
+    while (n--) {
+        if (offscr_sc_rows)
+            offscr_sc_rows--;
+        else
+            break;
+        if (currow == offscr_sc_rows + LINES - RESROW - 1) {
+            back_row(1);
+            unselect_ranges();
+        }
+    }
+    return;
+}
+
+// FIXME to handle freeze rows/cols
+struct ent * left_limit() {
+    int c = 0;
+    while ( col_hidden[c] && c < curcol ) c++; 
+    return lookat(currow, c);
+}
+
+// FIXME to handle freeze rows/cols
+struct ent * right_limit() {
+    register struct ent *p;
+    int c = maxcols - 1;
+    while ( (! VALID_CELL(p, currow, c) && c > 0) || col_hidden[c]) c--;
+    return lookat(currow, c);
+}
+
+// FIXME to handle freeze rows/cols
+struct ent * goto_top() {
+    int r = 0;
+    while ( row_hidden[r] && r < currow ) r++;
+    return lookat(r, curcol);
+}
+
+// FIXME to handle freeze rows/cols
+struct ent * goto_bottom() {
+    register struct ent *p;
+    int r = maxrows - 1;
+    while ( (! VALID_CELL(p, r, curcol) && r > 0) || row_hidden[r]) r--;
+    return lookat(r, curcol);
+}
+
+// FIXME to handle freeze rows/cols
 struct ent * go_end() {
     int r = currow, c = curcol;
     int raux = r, caux = c;
@@ -1274,26 +1307,7 @@ struct ent * go_end() {
     return NULL;
 }
 
-struct ent * go_home() {
-    return lookat(0, 0);
-}
-
-// if ticks a cell, returns struct ent *
-// if ticks a range, return struct ent * to top left cell
-struct ent * tick(char c) {
-    //tick cell
-    int r = get_mark(c)->row;
-    if (r != -1)
-        return lookat(r, get_mark(c)->col);
-
-    // tick range
-    if (curmode != VISUAL_MODE) {
-        get_mark(c)->rng->selected = 1; 
-        return lookat(get_mark(c)->rng->tlrow, get_mark(c)->rng->tlcol);
-    }
-    return NULL;
-}
-
+// FIXME to handle freeze rows/cols
 struct ent * go_forward() {
     int r = currow, c = curcol;
     int r_ori = r, c_ori = c;
@@ -1314,6 +1328,7 @@ struct ent * go_forward() {
     return lookat(r_ori, c_ori);
 }
 
+// FIXME to handle freeze rows/cols
 struct ent * go_backward() {
     int r = currow, c = curcol;
     int r_ori = r, c_ori = c;
@@ -1334,30 +1349,36 @@ struct ent * go_backward() {
     return lookat(r_ori, c_ori);
 }
 
+// FIXME to handle freeze rows/cols
 struct ent * vert_top() {
     return currow < LINES - RESROW - 1 ? lookat(0, curcol) : lookat(offscr_sc_rows, curcol);
 }
 
+// FIXME to handle freeze rows/cols
 struct ent * vert_middle() {
     int bottom = offscr_sc_rows + LINES - RESROW - 2;
     if (bottom > maxrow) bottom = maxrow;
     return lookat( ((currow < LINES - RESROW - 1 ? 0 : offscr_sc_rows) + bottom) / 2, curcol);
 }
 
+// FIXME to handle freeze rows/cols
 struct ent * vert_bottom() {
     int c = offscr_sc_rows + LINES - RESROW - 2;
     if (c > maxrow) c = maxrow;
     return lookat(c, curcol);
 }
 
+// FIXME to handle freeze rows/cols
 struct ent * go_bol() {
     return lookat(currow, offscr_sc_cols);
 }
 
+// FIXME to handle freeze rows/cols
 struct ent * go_eol() {
     return lookat(currow, offscr_sc_cols + calc_offscr_sc_cols() - 1);
 }
 
+// FIXME to handle freeze rows/cols
 struct ent * horiz_middle() {
     int i;
     int ancho = rescol;
@@ -1370,6 +1391,21 @@ struct ent * horiz_middle() {
     }
     return NULL;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 void auto_justify(int ci, int cf, int min) {
     // column width is not set below the min value
