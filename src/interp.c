@@ -1677,8 +1677,9 @@ void str_search(char *s, int firstrow, int firstcol, int lastrow_, int lastcol_,
                     while (++r < lastrow_ && row_hidden[r]) /* */;
                     c = firstcol;
                 } else {
-                    r = firstrow;
-                    c = firstcol;
+                    r = endr;
+                    c = endc;
+                    break;
                 }
             }
         } else { // search backwards
@@ -1689,8 +1690,9 @@ void str_search(char *s, int firstrow, int firstcol, int lastrow_, int lastcol_,
                     while (--r > firstrow && row_hidden[r]) /* */;
                     c = lastcol_;
                 } else {
-                    r = lastrow_;
-                    c = lastcol_;
+                    r = endr;
+                    c = endc;
+                    break;
                 }
             }
         }
