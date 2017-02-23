@@ -1668,7 +1668,6 @@ void str_search(char *s, int firstrow, int firstcol, int lastrow_, int lastcol_,
     c = endc;
 
     while (1) {
-
         if (flow) { // search forward
             if (c < lastcol_)
                 c++;
@@ -1677,8 +1676,9 @@ void str_search(char *s, int firstrow, int firstcol, int lastrow_, int lastcol_,
                     while (++r < lastrow_ && row_hidden[r]) /* */;
                     c = firstcol;
                 } else {
-                    r = firstrow;
-                    c = firstcol;
+                    r = endr;
+                    c = endc;
+                    break;
                 }
             }
         } else { // search backwards
@@ -1689,8 +1689,9 @@ void str_search(char *s, int firstrow, int firstcol, int lastrow_, int lastcol_,
                     while (--r > firstrow && row_hidden[r]) /* */;
                     c = lastcol_;
                 } else {
-                    r = lastrow_;
-                    c = lastcol_;
+                    r = endr;
+                    c = endc;
+                    break;
                 }
             }
         }
@@ -1724,10 +1725,8 @@ void str_search(char *s, int firstrow, int firstcol, int lastrow_, int lastcol_,
             }
         }
         if (! col_hidden[c]) {
-            if (gs.g_type == G_STR && p && p->label &&
-                    regexec(&preg, p->label, 0, NULL, 0) == 0) {
+            if (gs.g_type == G_STR && p && p->label && regexec(&preg, p->label, 0, NULL, 0) == 0)
                 break;
-            }
         } else            /* gs.g_type != G_STR */
         if (*line != '\0' && (regexec(&preg, line, 0, NULL, 0) == 0))
             break;
@@ -1747,9 +1746,8 @@ void str_search(char *s, int firstrow, int firstcol, int lastrow_, int lastcol_,
     colsinrange = fwidth[curcol];
     regfree(&preg);
     if (loading) {
-        //update(1);
         changed = 0;
-    } //else remember(1);
+    }
 }
 
 /* fill a range with constants */

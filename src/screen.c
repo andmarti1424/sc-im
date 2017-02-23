@@ -20,7 +20,6 @@ main_win: window that loads the spreadsheetssword:
 #include "version.h"
 #include "file.h"
 #include "format.h"
-#include "freeze.h"
 #include "utils/string.h"
 
 extern struct dictionary * d_colors_param;
