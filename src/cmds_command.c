@@ -751,9 +751,9 @@ void do_commandmode(struct block * sb) {
         // if exists in history an item with same text to the command typed
         // (counting from the second position) it is moved to the beginning of list.
         // (first element in list means last command executed)
+        del_item_from_history(commandline_history, 0);
         int moved = move_item_from_history_by_str(commandline_history, inputline, -1);
         if (! moved) add(commandline_history, inputline);
-        del_item_from_history(commandline_history, 0);
         commandline_history->pos = 0;
 #endif
 
