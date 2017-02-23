@@ -608,7 +608,9 @@ void do_commandmode(struct block * sb) {
         } else if ( ! wcsncmp(inputline, L"!", 1) ) {
             char line [BUFFERSIZE];
             wcstombs(line, inputline, BUFFERSIZE);
-            del_range_chars(line, 0, 0);
+            int found = str_in_str(line, " ");
+            if (found == -1) found++;
+            del_range_chars(line, 0, found);
             exec_cmd(line);
 
         } else if ( inputline[0] == L'w' ) {
