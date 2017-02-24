@@ -752,19 +752,19 @@ void show_celldetails(WINDOW * win) {
 
 // Calculate number of hidden columns in the left
 int calc_offscr_sc_cols() {
-    int i, cols = 0, col = 0;
+    int q, i, cols = 0, col = 0;
     int freeze = freeze_ranges && (freeze_ranges->type == 'c' ||  freeze_ranges->type == 'a') ? 1 : 0;
     int tlcol = freeze ? freeze_ranges->tl->col : 0;
     int brcol = freeze ? freeze_ranges->br->col : 0;
 
     // pick up col counts
     if (offscr_sc_cols <= curcol + 1) {
-        for (i = 0, cols = 0, col = rescol; i < maxcols && col + fwidth[i] - 1 < COLS - 1; i++) {
+        for (i = 0, q = 0, cols = 0, col = rescol; i < maxcols && col + fwidth[i] - 1 < COLS - 1; i++) {
             if (i < offscr_sc_cols && ! (freeze && i >= tlcol && i <= brcol)) continue;
-
             else if (freeze && i > brcol && i < brcol + center_hidden_cols) continue;
             else if (freeze && i < tlcol && i > tlcol - center_hidden_cols) continue;
 
+            if (i < offscr_sc_cols && freeze && i >= tlcol && i <= brcol && !col_hidden[i]) q += fwidth[i];
             cols++;
             if (! col_hidden[i]) col += fwidth[i];
         }
@@ -790,6 +790,8 @@ int calc_offscr_sc_cols() {
 
         // derecha con freeze cols a la izq.
         } else if (offscr_sc_cols + center_hidden_cols + cols == curcol) {
+    if (freeze) sc_debug("IN  coltoa:%s, i:%d, cols:%d, center:%d, off:%d, curcol:%d, tl:%d, br:%d",
+    coltoa(i), i, cols, center_hidden_cols, offscr_sc_cols, curcol, tlcol, brcol);
             center_hidden_cols++;
 
         // derecha con freeze a la derecha
@@ -823,6 +825,7 @@ int calc_offscr_sc_cols() {
             if (i < offscr_sc_cols && ! (freeze && i >= tlcol && i <= brcol)) continue;
             else if (freeze && i > brcol && i < brcol + center_hidden_cols) continue;
             else if (freeze && i < tlcol && i > tlcol - center_hidden_cols) continue;
+            if (i < offscr_sc_cols && freeze && i >= tlcol && i <= brcol && !col_hidden[i]) q += fwidth[i];
             cols++;
             if (! col_hidden[i]) col += fwidth[i];
         }
@@ -832,7 +835,8 @@ int calc_offscr_sc_cols() {
         center_hidden_cols--;
     }
 
-    return cols + center_hidden_cols;
+    //return cols + center_hidden_cols;
+    return cols + center_hidden_cols - q;
 }
 
 // error routine for yacc (gram.y)
