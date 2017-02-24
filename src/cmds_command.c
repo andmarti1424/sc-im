@@ -579,11 +579,7 @@ void do_commandmode(struct block * sb) {
             #endif
 
         } else if ( ! wcsncmp(inputline, L"set ", 4) ) {
-            //char line [BUFFERSIZE];
-            //wcstombs(line, inputline, BUFFERSIZE);
-            //del_range_chars(line, 0, 3);
-            //parse_str(user_conf_d, line);
-            wcscpy(interp_line, inputline); // pad 5
+            wcscpy(interp_line, inputline);
             send_to_interp(interp_line);
             sc_info("Config value changed: %s", line);
 

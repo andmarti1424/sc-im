@@ -1638,9 +1638,12 @@ void str_search(char *s, int firstrow, int firstcol, int lastrow_, int lastcol_,
     regex_t preg;
     int errcode;
 
-    //if (!loading) remember(0);
+    if ( atoi(get_conf_value("ignorecase")))
+        errcode = regcomp(&preg, s, REG_EXTENDED | REG_ICASE);
+    else
+        errcode = regcomp(&preg, s, REG_EXTENDED);
 
-    if ((errcode = regcomp(&preg, s, REG_EXTENDED))) {
+    if (errcode) {
         scxfree(s);
         tmp = scxmalloc((size_t)160);
         regerror(errcode, &preg, tmp, sizeof(tmp));

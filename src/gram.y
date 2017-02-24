@@ -225,6 +225,8 @@ token S_YANKCOL
 %token K_NOQUIT_AFTERLOAD
 %token K_XLSX_READFORMULAS
 %token K_NOXLSX_READFORMULAS
+%token K_IGNORECASE
+%token K_NOIGNORECASE
 
 %token K_TM_GMTOFF
 %token K_NEWLINE_ACTION
@@ -989,6 +991,10 @@ setitem :
     |    K_NUMERIC '=' NUMBER            {  if ($3 == 0) parse_str(user_conf_d, "numeric=0");
                                             else         parse_str(user_conf_d, "numeric=1"); }
     |    K_NONUMERIC                     {               parse_str(user_conf_d, "numeric=0"); }
+    |    K_IGNORECASE                    {               parse_str(user_conf_d, "ignorecase=1"); }
+    |    K_IGNORECASE '=' NUMBER         {  if ($3 == 0) parse_str(user_conf_d, "ignorecase=0");
+                                            else         parse_str(user_conf_d, "ignorecase=1"); }
+    |    K_NOIGNORECASE                  {               parse_str(user_conf_d, "ignorecase=0"); }
     |    K_NUMERIC_DECIMAL               {               parse_str(user_conf_d, "numeric_decimal=1"); }
     |    K_NUMERIC_DECIMAL '=' NUMBER    {  if ($3 == 0) parse_str(user_conf_d, "numeric_decimal=0");
                                             else         parse_str(user_conf_d, "numeric_decimal=1"); }
