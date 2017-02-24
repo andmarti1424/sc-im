@@ -290,6 +290,12 @@ void do_normalmode(struct block * buf) {
             curcol = e->col;
             currow = e->row;
             unselect_ranges();
+            extern int center_hidden_rows;
+            extern int center_hidden_cols;
+            center_hidden_rows=0;
+            center_hidden_cols=0;
+            offscr_sc_rows = 0;
+            offscr_sc_cols = 0;
             update(TRUE);
             break;
 
@@ -310,6 +316,12 @@ void do_normalmode(struct block * buf) {
                 lastrow = currow;
                 curcol = e->col;
                 currow = e->row;
+                extern int center_hidden_rows;
+                extern int center_hidden_cols;
+                center_hidden_rows=0;
+                center_hidden_cols=0;
+                offscr_sc_rows = 0;
+                offscr_sc_cols = 0;
 
             } else if (buf->pnext->value == L'G') {                        // gG
                 e = go_end();
