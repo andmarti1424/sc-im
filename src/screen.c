@@ -469,7 +469,7 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
         int fieldlen;
         col = 0;
 
-        for (p = ATBL(tbl, row, 0); col < mxcol;
+        for (p = ATBL(tbl, row, 0); col <= mxcol;
         p += nextcol - col, col = nextcol, c += fieldlen) {
 
             nextcol = col + 1;
