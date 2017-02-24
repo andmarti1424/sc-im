@@ -279,7 +279,7 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
                 int r_aux = r;
                 if ( (*pp)->pad  && r <= maxrow && ( r == 0 || (*ATBL(tbl, r-1, c) == NULL) ||
                     (*ATBL(tbl, r-1, c) != NULL && ((*ATBL(tbl, r-1, c))->pad != (*pp)->pad)) )) {
-                    while (r_aux < maxrow && *ATBL(tbl, r_aux, c) != NULL && (*pp)->pad == (*ATBL(tbl, r_aux, c))->pad )
+                    while (r_aux <= maxrow && *ATBL(tbl, r_aux, c) != NULL && (*pp)->pad == (*ATBL(tbl, r_aux, c))->pad )
                         r_aux++;
                     fprintf(f, "pad %d %s%d", (*pp)->pad, coltoa((*pp)->col), (*pp)->row);
                     if (r_aux-1 != (*pp)->row)
@@ -297,7 +297,7 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
                 // new implementation
                 int c_aux = c;
                 if ( (*pp)->flags & is_locked && c <= maxcol && ( c == 0 || ( *ATBL(tbl, r, c-1) != NULL && ! ((*ATBL(tbl, r, c-1))->flags & is_locked) ) )) {
-                    while (c_aux < maxcol && *ATBL(tbl, r, c_aux) != NULL && (*ATBL(tbl, r, c_aux))->flags & is_locked )
+                    while (c_aux <= maxcol && *ATBL(tbl, r, c_aux) != NULL && (*ATBL(tbl, r, c_aux))->flags & is_locked )
                         c_aux++;
                     fprintf(f, "lock %s%d", coltoa((*pp)->col), (*pp)->row);
                     if (c_aux-1 != (*pp)->col)
