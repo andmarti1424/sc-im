@@ -524,7 +524,8 @@ void do_normalmode(struct block * buf) {
 
             // if m represents just one cell
             } else {
-                struct ent * p = *ATBL(tbl, get_mark(buf->pnext->value)->row, get_mark(buf->pnext->value)->col);
+                struct mark * m = get_mark(buf->pnext->value);
+                struct ent * p = lookat(m->row, m->col);
                 struct ent * n;
                 int c1;
 
