@@ -414,16 +414,17 @@ void show_sc_col_headings(WINDOW * win, int mxcol) {
             wattron(win, A_REVERSE);
             #endif
         }
-        // if i between
         (void) mvwprintw(win, 0, col, "%*s%-*s", k-1, " ", fwidth[i] - k + 1, coltoa(i));
-        wclrtoeol(win);
+
+        col += fwidth[i];
+        if (i == mxcol && COLS - col > 0)
+            wclrtoeol(win);
 
         #ifdef USECOLORS
         if (has_colors()) set_ucolor(win, &ucolors[HEADINGS]);
         #else
         wattroff(win, A_REVERSE);
         #endif
-        col += fwidth[i];
     }
 }
 
@@ -469,8 +470,7 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
         int fieldlen;
         col = 0;
 
-        for (p = ATBL(tbl, row, 0); col <= mxcol;
-        p += nextcol - col, col = nextcol, c += fieldlen) {
+        for (p = ATBL(tbl, row, col); col <= mxcol; p += nextcol - col, col = nextcol, c += fieldlen) {
 
             nextcol = col + 1;
             fieldlen = fwidth[col];
@@ -759,7 +759,7 @@ int calc_offscr_sc_cols() {
 
     // pick up col counts
     if (offscr_sc_cols <= curcol + 1) {
-        for (i = 0, q = 0, cols = 0, col = rescol; i < maxcols && col + fwidth[i] - 1 < COLS - 1; i++) {
+        for (i = 0, q = 0, cols = 0, col = rescol; i < maxcols && col + fwidth[i] <= COLS; i++) {
             if (i < offscr_sc_cols && ! (freeze && i >= tlcol && i <= brcol)) continue;
             else if (freeze && i > brcol && i < brcol + center_hidden_cols) continue;
             else if (freeze && i < tlcol && i > tlcol - center_hidden_cols) continue;
@@ -790,8 +790,8 @@ int calc_offscr_sc_cols() {
 
         // derecha con freeze cols a la izq.
         } else if (offscr_sc_cols + center_hidden_cols + cols == curcol) {
-    if (freeze) sc_debug("IN  coltoa:%s, i:%d, cols:%d, center:%d, off:%d, curcol:%d, tl:%d, br:%d",
-    coltoa(i), i, cols, center_hidden_cols, offscr_sc_cols, curcol, tlcol, brcol);
+//    if (freeze) sc_debug("IN  coltoa:%s, i:%d, cols:%d, center:%d, off:%d, curcol:%d, tl:%d, br:%d",
+//    coltoa(i), i, cols, center_hidden_cols, offscr_sc_cols, curcol, tlcol, brcol);
             center_hidden_cols++;
 
         // derecha con freeze a la derecha
@@ -821,7 +821,7 @@ int calc_offscr_sc_cols() {
         }
 
         // Now pick up the counts again
-        for (i = 0, cols = 0, col = rescol; i < maxcols && col + fwidth[i] - 1  < COLS - 1; i++) {
+        for (i = 0, cols = 0, col = rescol; i < maxcols && col + fwidth[i] < COLS; i++) {
             if (i < offscr_sc_cols && ! (freeze && i >= tlcol && i <= brcol)) continue;
             else if (freeze && i > brcol && i < brcol + center_hidden_cols) continue;
             else if (freeze && i < tlcol && i > tlcol - center_hidden_cols) continue;
