@@ -761,9 +761,8 @@ int calc_offscr_sc_cols() {
     if (offscr_sc_cols <= curcol + 1) {
         for (i = 0, q = 0, cols = 0, col = rescol; i < maxcols && col + fwidth[i] <= COLS; i++) {
             if (i < offscr_sc_cols && ! (freeze && i >= tlcol && i <= brcol)) continue;
-            else if (freeze && i > brcol && i < brcol + center_hidden_cols) continue;
-            else if (freeze && i < tlcol && i > tlcol - center_hidden_cols) continue;
-
+            else if (freeze && i > brcol && i <= brcol + center_hidden_cols) continue;
+            else if (freeze && i < tlcol && i >= tlcol - center_hidden_cols) continue;
             if (i < offscr_sc_cols && freeze && i >= tlcol && i <= brcol && !col_hidden[i]) q += fwidth[i];
             cols++;
             if (! col_hidden[i]) col += fwidth[i];
@@ -821,10 +820,11 @@ int calc_offscr_sc_cols() {
         }
 
         // Now pick up the counts again
+        //for (i = 0, q = 0, cols = 0, col = rescol; i < maxcols && col + fwidth[i] <= COLS; i++) {
         for (i = 0, cols = 0, col = rescol; i < maxcols && col + fwidth[i] <= COLS; i++) {
             if (i < offscr_sc_cols && ! (freeze && i >= tlcol && i <= brcol)) continue;
-            else if (freeze && i > brcol && i < brcol + center_hidden_cols) continue;
-            else if (freeze && i < tlcol && i > tlcol - center_hidden_cols) continue;
+            else if (freeze && i > brcol && i <= brcol + center_hidden_cols) continue;
+            else if (freeze && i < tlcol && i >= tlcol - center_hidden_cols) continue;
             if (i < offscr_sc_cols && freeze && i >= tlcol && i <= brcol && !col_hidden[i]) q += fwidth[i];
             cols++;
             if (! col_hidden[i]) col += fwidth[i];
@@ -835,7 +835,7 @@ int calc_offscr_sc_cols() {
         center_hidden_cols--;
     }
 
-    //return cols + center_hidden_cols;
+    //sc_info("cols:%d center:%d q:%d total:%d", cols, center_hidden_cols, q, cols + center_hidden_cols - q);
     return cols + center_hidden_cols - q;
 }
 
