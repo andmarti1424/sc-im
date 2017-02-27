@@ -821,7 +821,7 @@ int calc_offscr_sc_cols() {
         }
 
         // Now pick up the counts again
-        for (i = 0, cols = 0, col = rescol; i < maxcols && col + fwidth[i] < COLS; i++) {
+        for (i = 0, cols = 0, col = rescol; i < maxcols && col + fwidth[i] <= COLS; i++) {
             if (i < offscr_sc_cols && ! (freeze && i >= tlcol && i <= brcol)) continue;
             else if (freeze && i > brcol && i < brcol + center_hidden_cols) continue;
             else if (freeze && i < tlcol && i > tlcol - center_hidden_cols) continue;
