@@ -40,7 +40,7 @@ void do_normalmode(struct block * buf) {
             //add_frange(lookat(0, 4), lookat(0, 6), 'c');
             //add_frange(lookat(0, 27), lookat(0, 28), 'c');
             //add_frange(lookat(0, 0), lookat(4, 0), 'r');
-            add_frange(lookat(4, 0), lookat(8, 0), 'r');
+            //add_frange(lookat(4, 0), lookat(8, 0), 'r');
             //add_frange(lookat(14, 0), lookat(18, 0), 'r');
             //add_frange(lookat(24, 0), lookat(24, 0), 'r');
             //add_frange(lookat(24, 0), lookat(26, 0), 'r');
@@ -203,10 +203,9 @@ void do_normalmode(struct block * buf) {
             {
             int n = LINES - RESROW - 1;
             if (atoi(get_conf_value("half_page_scroll"))) n = n / 2;
-            struct ent * e = forw_row(n);
             lastcol = curcol;
             lastrow = currow;
-            currow = e->row;
+            currow = forw_row(n)->row;
             unselect_ranges();
             scroll_down(n);
             update(TRUE);

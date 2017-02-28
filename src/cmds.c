@@ -1116,7 +1116,7 @@ struct ent * forw_col(int arg) {
             c++;
         else
             if (! growtbl(GROWCOL, 0, arg)) {    /* get as much as needed */
-                sc_debug("cannot grow");
+                sc_error("cannot grow");
                 return lookat(currow, curcol);
             } else
                 c++;
@@ -1139,7 +1139,7 @@ struct ent * forw_row(int arg) {
             r++;
         else {
             if (! growtbl(GROWROW, arg, 0)) {
-                sc_debug("cannot grow");
+                sc_error("cannot grow");
                 return lookat(currow, curcol);
             } else
                 r++;
@@ -1155,7 +1155,7 @@ struct ent * forw_row(int arg) {
 struct ent * back_row(int arg) {
     int r = currow;
     extern int center_hidden_rows;
-    int freeze = freeze_ranges && (freeze_ranges->type == 'r' ||  freeze_ranges->type == 'a') ? 1 : 0;
+    //int freeze = freeze_ranges && (freeze_ranges->type == 'r' ||  freeze_ranges->type == 'a') ? 1 : 0;
 
     while (arg--) {
         if (r) r--;
@@ -1163,11 +1163,52 @@ struct ent * back_row(int arg) {
             sc_info("At row zero");
             break;
         }
-        while ((row_hidden[r] || (freeze && r >= freeze_ranges->br->row
-        && r < freeze_ranges->br->row + center_hidden_rows)) && r)
+        //while ((row_hidden[r] || (freeze && r >= freeze_ranges->tl->row && r < freeze_ranges->tl->row + center_hidden_rows)) && r)
+        while ((row_hidden[r] && r))
             r--;
+        //sc_debug("backrow - r:%d currow:%d off:%d center:%d", r, currow, offscr_sc_rows, center_hidden_rows);
+
     }
     return lookat(r, curcol);
+}
+
+// FIXME to handle freeze rows/cols
+void scroll_down(int n) {
+    extern int center_hidden_rows;
+    int freezer = freeze_ranges && (freeze_ranges->type == 'r' ||  freeze_ranges->type == 'a') ? 1 : 0;
+    while (n--) {
+        if (currow == offscr_sc_rows) {
+            forw_row(1);
+            unselect_ranges();
+        }
+        if (freezer && offscr_sc_rows == freeze_ranges->tl->row) {
+            center_hidden_rows++;
+        } else {
+            offscr_sc_rows++;
+        }
+    }
+    return;
+}
+
+// FIXME to handle freeze rows/cols
+void scroll_up(int n) {
+    extern int center_hidden_rows;
+    int freezer = freeze_ranges && (freeze_ranges->type == 'r' ||  freeze_ranges->type == 'a') ? 1 : 0;
+    while (n--) {
+        //sc_debug("currow:%d off:%d center:%d", currow, offscr_sc_rows, center_hidden_rows);
+        if (freezer && center_hidden_rows) {
+            center_hidden_rows--;
+        } else if (offscr_sc_rows) {
+            offscr_sc_rows--;
+        } else {
+            break;
+        }
+        if (currow == offscr_sc_rows + LINES - RESROW - 1) {
+            back_row(1);
+            unselect_ranges();
+        }
+    }
+    return;
 }
 
 struct ent * go_home() {
@@ -1225,33 +1266,6 @@ void scroll_right(int n) {
             curcol++;
         }
         offscr_sc_cols++;
-    }
-    return;
-}
-
-// FIXME to handle freeze rows/cols
-void scroll_down(int n) {
-    while (n--) {
-        if (currow == offscr_sc_rows) {
-            forw_row(1);
-            unselect_ranges();
-        }
-        offscr_sc_rows++;
-    }
-    return;
-}
-
-// FIXME to handle freeze rows/cols
-void scroll_up(int n) {
-    while (n--) {
-        if (offscr_sc_rows)
-            offscr_sc_rows--;
-        else
-            break;
-        if (currow == offscr_sc_rows + LINES - RESROW - 1) {
-            back_row(1);
-            unselect_ranges();
-        }
     }
     return;
 }
