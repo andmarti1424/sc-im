@@ -1176,7 +1176,7 @@ struct ent * back_row(int arg) {
 void scroll_down(int n) {
     extern int center_hidden_rows;
     int freezer = freeze_ranges && (freeze_ranges->type == 'r' ||  freeze_ranges->type == 'a') ? 1 : 0;
-    while (n--) {
+    while (currow < maxrows && n--) {
         if (currow == offscr_sc_rows) {
             forw_row(1);
             unselect_ranges();
