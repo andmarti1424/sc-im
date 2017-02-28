@@ -1172,7 +1172,6 @@ struct ent * back_row(int arg) {
     return lookat(r, curcol);
 }
 
-// FIXME to handle freeze rows/cols
 void scroll_down(int n) {
     extern int center_hidden_rows;
     int freezer = freeze_ranges && (freeze_ranges->type == 'r' ||  freeze_ranges->type == 'a') ? 1 : 0;
@@ -1190,7 +1189,6 @@ void scroll_down(int n) {
     return;
 }
 
-// FIXME to handle freeze rows/cols
 void scroll_up(int n) {
     extern int center_hidden_rows;
     int freezer = freeze_ranges && (freeze_ranges->type == 'r' ||  freeze_ranges->type == 'a') ? 1 : 0;
@@ -1215,6 +1213,46 @@ struct ent * go_home() {
     return lookat(0, 0);
 }
 
+struct ent * vert_top() {
+    extern int center_hidden_rows;
+    int freezer = freeze_ranges && (freeze_ranges->type == 'r' ||  freeze_ranges->type == 'a') ? 1 : 0;
+    int brrow = freezer ? freeze_ranges->br->row : 0;
+    int tlrow = freezer ? freeze_ranges->tl->row : 0;
+
+    if (freezer && center_hidden_rows)
+         return lookat(offscr_sc_rows + center_hidden_rows + brrow - tlrow + 1, curcol);
+    return lookat(offscr_sc_rows, curcol);
+}
+
+struct ent * vert_bottom() {
+    extern int center_hidden_rows;
+    int c = offscr_sc_rows + center_hidden_rows + LINES - RESROW - 2;
+    if (c > maxrow) c = maxrow;
+    return lookat(c, curcol);
+}
+
+struct ent * vert_middle() {
+    extern int center_hidden_rows;
+    int freezer = freeze_ranges && (freeze_ranges->type == 'r' ||  freeze_ranges->type == 'a') ? 1 : 0;
+    int brrow = freezer ? freeze_ranges->br->row : 0;
+    int tlrow = freezer ? freeze_ranges->tl->row : 0;
+    int top, bottom = offscr_sc_rows + center_hidden_rows + LINES - RESROW - 2;
+    if (freezer && center_hidden_rows)
+        top = offscr_sc_rows + center_hidden_rows + brrow - tlrow + 1;
+    else
+        top = offscr_sc_rows;
+
+    if (bottom > maxrow) bottom = maxrow;
+    return lookat( (bottom + top) / 2, curcol);
+}
+
+
+
+
+
+
+
+
 // if ticks a cell, returns struct ent *
 // if ticks a range, return struct ent * to top left cell
 struct ent * tick(char c) {
@@ -1230,9 +1268,6 @@ struct ent * tick(char c) {
     }
     return NULL;
 }
-
-
-
 
 
 // FIXME to handle freeze rows/cols
@@ -1361,25 +1396,6 @@ struct ent * go_backward() {
     } while ( currow || curcol );
 
     return lookat(r_ori, c_ori);
-}
-
-// FIXME to handle freeze rows/cols
-struct ent * vert_top() {
-    return currow < LINES - RESROW - 1 ? lookat(0, curcol) : lookat(offscr_sc_rows, curcol);
-}
-
-// FIXME to handle freeze rows/cols
-struct ent * vert_middle() {
-    int bottom = offscr_sc_rows + LINES - RESROW - 2;
-    if (bottom > maxrow) bottom = maxrow;
-    return lookat( ((currow < LINES - RESROW - 1 ? 0 : offscr_sc_rows) + bottom) / 2, curcol);
-}
-
-// FIXME to handle freeze rows/cols
-struct ent * vert_bottom() {
-    int c = offscr_sc_rows + LINES - RESROW - 2;
-    if (c > maxrow) c = maxrow;
-    return lookat(c, curcol);
 }
 
 // FIXME to handle freeze rows/cols
