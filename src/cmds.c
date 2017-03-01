@@ -1175,9 +1175,12 @@ struct ent * back_row(int arg) {
 void scroll_down(int n) {
     extern int center_hidden_rows;
     int freezer = freeze_ranges && (freeze_ranges->type == 'r' ||  freeze_ranges->type == 'a') ? 1 : 0;
+    int brrow = freezer ? freeze_ranges->br->row : 0;
+    int tlrow = freezer ? freeze_ranges->tl->row : 0;
     while (currow < maxrows && n--) {
-        if (currow == offscr_sc_rows) {
-            forw_row(1);
+        if ((freezer && currow == offscr_sc_rows + center_hidden_rows + brrow - tlrow + 1) ||
+           (!freezer && currow == offscr_sc_rows)) {
+            currow = forw_row(1)->row;
             unselect_ranges();
         }
         if (freezer && offscr_sc_rows == freeze_ranges->tl->row) {
@@ -1193,7 +1196,6 @@ void scroll_up(int n) {
     extern int center_hidden_rows;
     int freezer = freeze_ranges && (freeze_ranges->type == 'r' ||  freeze_ranges->type == 'a') ? 1 : 0;
     while (n--) {
-        //sc_debug("currow:%d off:%d center:%d", currow, offscr_sc_rows, center_hidden_rows);
         if (freezer && center_hidden_rows) {
             center_hidden_rows--;
         } else if (offscr_sc_rows) {
@@ -1201,8 +1203,8 @@ void scroll_up(int n) {
         } else {
             break;
         }
-        if (currow == offscr_sc_rows + LINES - RESROW - 1) {
-            back_row(1);
+        if (currow == offscr_sc_rows + LINES - RESROW - 1 + center_hidden_rows) {
+            currow = back_row(1)->row;
             unselect_ranges();
         }
     }
