@@ -53,7 +53,7 @@ Navigation commands:
      M           Go to the middle row on the screen.
      gg    c-a   Go to the first cell of sheet.
      G     gG    Go to last valid cell of sheet.
-     gl          Go to the last (prevously occupied) cell position.
+     gl          Go to the last (previously occupied) cell position.
      c-f   c-b   Scrolls down and up full screen.
                  :set half_page_scroll=1 to scroll by half a page instead.
                  half_page_scroll=0 (default) scrolls by a full page.
