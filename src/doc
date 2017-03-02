@@ -397,8 +397,10 @@ Commands for handling cell content:
 
      :set {option}={value}
                  Set a configuration option to {value}. The arguments may be
-                 repeated.
+                 repeated. 
                  Example:    :set half_page_scroll=0 numeric_zero=1
+                             :set numeric          (same as :set numeric=1)
+                             :set nonumeric        (same as :set numeric=0)
 
      :showmaps   Show all key mappings.
 
@@ -862,12 +864,12 @@ Commands for handling cell content:
     Set it to '1' to make an initial digit start a numeric value.
     Set it to '0', to make a digit act as a command multiplier.
 
-    'numeric_zero'
-    'numeric_decimal'
+    'numeric_zero' [default off]
+    'numeric_decimal' [default off]
     When these are set, the zero digit or decimal point will correspondingly
     initiate numeric entry, but only when 'numeric' is also set.
 
-    'newline_action'
+    'newline_action' [default 0]
     Set it to 'j' to move the cursor down after an entry.
     Set it to 'l' to move right, or set it to '0' to take no action.
 
@@ -878,6 +880,22 @@ Commands for handling cell content:
     'overlap' [default off]
     If cell content exceedes column width it gets cut off to fit the column
     width.  If overlap is set, the content overflows into the next column.
+
+    'debug' [default off]
+    set this to see debug messages in screen
+
+    'half_page_scroll' [default off]
+    set this to scroll by half a page instead of full page.
+
+    'xlsx_readformulas' [default off]
+    If 'xlsx_readformulas' is set, SC-IM tries to import formulas, rather than
+    the final values of a cell.
+
+    'tm_gmtoff' [default -10800 seconds]
+    set gmtoffset used for converting datetimes to localtime. default value is
+
+    'ignorecase' [default off]
+    set this to ignore case in searches done with '/' command.
 
 ==============================================================================
 &Built-in Range Functions&
@@ -1152,6 +1170,13 @@ Commands for handling cell content:
     @second({date_expr})
         Return the number of seconds since the last full minute, encoded as 0
         to 59.
+
+==============================================================================
+&Other functions&
+    @if({expr}, {expr}, {expr})
+        Conditional:   If the  first  expression  is  true  then  the  value  of
+        the  second  is  returned,  otherwise the  value  of  the  third.
+        example of use: @if(@eqs(A1,"a"),B1,0)
 
 ==============================================================================
 &Supported file formats / File import&
