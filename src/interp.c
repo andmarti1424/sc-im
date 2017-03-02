@@ -2093,14 +2093,14 @@ void efree(struct enode * e) {
 
 void label(register struct ent * v, register char * s, int flushdir) {
     if (v) {
-        if (flushdir == 0 && v->flags & is_valid) {
+        /*if (flushdir == 0 && v->flags & is_valid) {
             register struct ent * tv;
             if (v->col > 0 && ((tv=lookat(v->row, v->col-1))->flags & is_valid) == 0)
             v = tv, flushdir = 1;
             else if (((tv=lookat(v->row, v->col+1))->flags & is_valid) == 0)
             v = tv, flushdir = -1;
             else flushdir = -1;
-        }
+        }*/
         if (v->label)
             scxfree((char *)(v->label));
         if (s && s[0]) {
