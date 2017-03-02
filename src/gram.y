@@ -110,6 +110,7 @@ token S_YANKCOL
 %token S_DETAIL
 %token S_EVAL
 %token S_SEVAL
+%token S_ERROR
 %token S_FILL
 
 /*
@@ -170,7 +171,6 @@ token S_YANKCOL
  token S_GETRANGE
  token S_QUERY
  token S_GETKEY
- token S_ERROR
  token S_REDRAW
  token S_STATUS
  token S_RUN
@@ -661,9 +661,9 @@ command:
     |    S_SEVAL e                  { seval_result = seval(NULL, $2); // TODO make sure this seval_result is always freed afterwards
                                       efree($2);
                                     }
-/*
-    |    S_ERROR STRING        { error($2); }
+    |    S_ERROR STRING             { sc_error($2); }
 
+/*
     |    S_REDRAW        { if (usecurses) {
                         clearok(stdscr, TRUE);
                         linelim = -1;
@@ -696,8 +696,15 @@ command:
                       scxfree($1); }
 
 */
-    |    // nothing
-    |    error;
+      |    // nothing
+      |    error {
+                     sc_error("syntax error");
+                     line[0]='\0';
+                     linelim = 0;
+                     yyparse();
+                     linelim = -1;
+                     yyerrok;
+                 };
 term:           var                     { $$ = new_var(O_VAR, $1); }
         |       '@' K_FIXED term        { $$ = new('f', $3, ENULL); }
         |       '(' '@' K_FIXED ')' term
@@ -794,6 +801,7 @@ term:           var                     { $$ = new_var(O_VAR, $1); }
                                 new_const(O_CONST, (double) $1),
                                 new(',', new_const(O_CONST, (double) $3),
                                 new_const(O_CONST, (double) $5)));}
+
         | '@' K_TTS '(' e ',' e ',' e ')'
                                         { $$ = new(TTS, $4, new(',', $6, $8));}
         | '@' K_STON '(' e ')'          { $$ = new(STON, $4, ENULL); }
