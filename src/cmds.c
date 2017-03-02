@@ -1296,9 +1296,13 @@ void scroll_left(int n) {
 
 // FIXME to handle freeze rows/cols
 void scroll_right(int n) {
+    //extern int center_hidden_cols;
+    //int freezec = freeze_ranges && (freeze_ranges->type == 'c' ||  freeze_ranges->type == 'a') ? 1 : 0;
+    //int brcol = freezer ? freeze_ranges->br->col : 0;
+    //int tlcol = freezer ? freeze_ranges->tl->col : 0;
     while (n--) {
         // This while statement allow the cursor to shift to the right when the
-        // las visible column is reached in the screen
+        // last visible column is reached in the screen
         while (curcol < offscr_sc_cols + 1) {
             curcol++;
         }

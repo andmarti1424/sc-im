@@ -831,6 +831,7 @@ int calc_offscr_sc_cols() {
             else if (freeze && i < tlcol && i >= tlcol - center_hidden_cols) continue;
             if (i < offscr_sc_cols && freeze && i >= tlcol && i <= brcol && !col_hidden[i]) q += fwidth[i];
             cols++;
+            //if (i == maxcols - 1) return cols + center_hidden_cols - q + 1;
             if (! col_hidden[i]) col += fwidth[i];
         }
     }
@@ -886,6 +887,10 @@ void pad_and_align (char * str_value, char * numeric_value, int col_width, int a
     const char * mbsptr;
     mbsptr = str_value;
 
+    // Here we handle \" and replace them with "
+    int pos;
+    while ((pos = str_in_str(str_value, "\\\"")) != -1)
+        del_char(str_value, pos);
 
     // create wcs string based on multibyte string..
     memset( &state, '\0', sizeof state );
