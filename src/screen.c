@@ -737,7 +737,7 @@ void show_celldetails(WINDOW * win) {
         mvwprintw(win, 0, inputline_pos, "%s", head);
         inputline_pos += strlen(head);
     }
-    // add cell content to head string 
+    // add cell content to head string
     head[0] = '\0';
     add_cell_detail(head, p1);
 
