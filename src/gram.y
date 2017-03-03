@@ -852,7 +852,7 @@ term:           var                     { $$ = new_var(O_VAR, $1); }
                                 { $$ = new(SUBSTR, $4, new(',', $6, $8)); }
         |       '(' e ')'       { $$ = $2; }
         |       '+' term        { $$ = $2; }
-        |       '-' term        { $$ = new('m', $2, ENULL); }
+    //    |       '-' term        { $$ = new('m', $2, ENULL); }
         |       NUMBER          { $$ = new_const(O_CONST, (double) $1); }
         |       FNUMBER         { $$ = new_const(O_CONST, $1); }
         | '@'   K_PI            { $$ = new(PI_, ENULL, ENULL); }
@@ -891,6 +891,7 @@ e:       e '+' e        { $$ = new('+', $1, $3); }
     |    e '*' e        { $$ = new('*', $1, $3); }
     |    e '/' e        { $$ = new('/', $1, $3); }
     |    e '%' e        { $$ = new('%', $1, $3); }
+    |      '-' e        { $$ = new('m', $2, ENULL); }
     |    e '^' e        { $$ = new('^', $1, $3); }
     |    term
     |    e '?' e ':' e    { $$ = new('?', $1, new(':', $3, $5)); }

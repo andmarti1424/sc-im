@@ -2185,8 +2185,10 @@ void decompile(register struct enode *e, int priority) {
             decompile(e->e.o.left, 30);
             break;
     case 'm':
+            if (priority != 0) line[linelim++] = '(';
             line[linelim++] = '-';
             decompile(e->e.o.left, 30);
+            if (priority != 0) line[linelim++] = ')';
             break;
     case '!':
             line[linelim++] = '!';
