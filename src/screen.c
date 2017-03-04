@@ -146,7 +146,7 @@ void update(int header) {
     int off_rows = calc_offscr_sc_rows();
     int mxcol = offscr_sc_cols + off_cols - 1;
     int mxrow = offscr_sc_rows + off_rows - 1;
-    //sc_info("off_rows:%d, mxrow:%d, offscr_sc_rows:%d maxrows:%d", off_rows, mxrow, offscr_sc_rows, maxrows);
+    sc_info("off_cols:%d -- center:%d, mxcol:%d, offscr_sc_cols:%d maxcols:%d", off_cols, center_hidden_cols, mxcol, offscr_sc_cols, maxcols);
     //sc_info("");
 
     /* You can't hide the last row or col */
@@ -356,14 +356,9 @@ void show_sc_row_headings(WINDOW * win, int mxrow) {
         if (row_hidden[i]) continue;
 
         // skip center_hidden_rows
-        if (freeze && (
-        (
-         //currow >= freeze_ranges->br->row &&
-         i > freeze_ranges->br->row && i <= freeze_ranges->br->row + center_hidden_rows) ||
-        (
-         //currow <= freeze_ranges->tl->row &&
-         i < freeze_ranges->tl->row && i >= freeze_ranges->tl->row - center_hidden_rows))
-        ) continue;
+        if (freeze && ((
+         i > freeze_ranges->br->row && i <= freeze_ranges->br->row + center_hidden_rows) || (
+         i < freeze_ranges->tl->row && i >= freeze_ranges->tl->row - center_hidden_rows))) continue;
 
         srange * s = get_selected_range();
         if ( (s != NULL && i >= s->tlrow && i <= s->brrow) || i == currow ) {
@@ -404,10 +399,9 @@ void show_sc_col_headings(WINDOW * win, int mxcol) {
         if (col_hidden[i]) continue;
 
         // skip center_hidden_cols
-        if (freeze && (
-        (curcol >= freeze_ranges->br->col && i > freeze_ranges->br->col && i <= freeze_ranges->br->col + center_hidden_cols) ||
-        (curcol <= freeze_ranges->tl->col && i < freeze_ranges->tl->col && i >= freeze_ranges->tl->col - center_hidden_cols))
-        ) continue;
+        if (freeze && ((
+         i > freeze_ranges->br->col && i <= freeze_ranges->br->col + center_hidden_cols) || (
+         i < freeze_ranges->tl->col && i >= freeze_ranges->tl->col - center_hidden_cols))) continue;
 
         int k = fwidth[i] / 2;
         srange * s = get_selected_range();
