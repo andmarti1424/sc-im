@@ -1502,10 +1502,9 @@ void go_last() {
 void moveto(int row, int col, int lastrow_, int lastcol_, int cornerrow, int cornercol) {
     register int i;
 
-    //if ( !loading && row != -1 && (row != currow || col != curcol )) remember(0);
-
     lastrow = currow;
     lastcol = curcol;
+    //checkbounds(&row, &col);
     currow = row;
     curcol = col;
     g_free();
@@ -1514,11 +1513,7 @@ void moveto(int row, int col, int lastrow_, int lastcol_, int cornerrow, int cor
     gs.g_col = curcol;
     gs.g_lastrow = lastrow_;
     gs.g_lastcol = lastcol_;
-    //gs.strow = cornerrow;
-    //gs.stcol = cornercol;
     if (cornerrow >= 0) {
-        //strow = cornerrow;
-        //stcol = cornercol;
         gs.stflag = 1;
     } else
         gs.stflag = 0;
@@ -1538,10 +1533,7 @@ void moveto(int row, int col, int lastrow_, int lastcol_, int cornerrow, int cor
         }
         colsinrange += fwidth[i];
     }
-    if (loading) {
-        //update(1);
-        changed = 0;
-    } //else remember(1);
+    if (loading) changed = 0;
 }
 
 /*
