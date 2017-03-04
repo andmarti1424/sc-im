@@ -1277,16 +1277,24 @@ void scroll_left(int n) {
 
 // if ticks a cell, returns struct ent *
 // if ticks a range, return struct ent * to top left cell
-struct ent * tick(char c) {
+struct ent * tick(char ch) {
+    int r, c;
+    struct mark * m = get_mark(ch);
     //tick cell
-    int r = get_mark(c)->row;
-    if (r != -1)
-        return lookat(r, get_mark(c)->col);
+    r = m->row;
+
+    if (r != -1) {
+        checkbounds(&r, &curcol);
+        return lookat(r, m->col);
+    }
 
     // tick range
     if (curmode != VISUAL_MODE) {
-        get_mark(c)->rng->selected = 1;
-        return lookat(get_mark(c)->rng->tlrow, get_mark(c)->rng->tlcol);
+        r = m->rng->tlrow;
+        c = m->rng->tlcol;
+        m->rng->selected = 1;
+        checkbounds(&r, &c);
+        return lookat(r, c);
     }
     return NULL;
 }
@@ -1817,28 +1825,28 @@ int is_single_command (struct block * buf, long timeout) {
         else if (buf->value == L'l')        res = MOVEMENT_CMD;
         else if (buf->value == L'0')        res = MOVEMENT_CMD;
         else if (buf->value == L'$')        res = MOVEMENT_CMD;
-        else if (buf->value == OKEY_HOME)  res = MOVEMENT_CMD;
-        else if (buf->value == OKEY_END)   res = MOVEMENT_CMD;
+        else if (buf->value == OKEY_HOME)   res = MOVEMENT_CMD;
+        else if (buf->value == OKEY_END)    res = MOVEMENT_CMD;
         else if (buf->value == L'#')        res = MOVEMENT_CMD;
         else if (buf->value == L'^')        res = MOVEMENT_CMD;
-        else if (buf->value == OKEY_LEFT)  res = MOVEMENT_CMD;
-        else if (buf->value == OKEY_RIGHT) res = MOVEMENT_CMD;
-        else if (buf->value == OKEY_DOWN)  res = MOVEMENT_CMD;
-        else if (buf->value == OKEY_UP)    res = MOVEMENT_CMD;
-        else if (buf->value == OKEY_PGUP)  res = MOVEMENT_CMD;
-        else if (buf->value == OKEY_PGDOWN)  res = MOVEMENT_CMD;
-        else if (buf->value == ctl('f'))   res = MOVEMENT_CMD;
-        else if (buf->value == ctl('j'))   res = EDITION_CMD;
-        else if (buf->value == ctl('d'))   res = EDITION_CMD;
-        else if (buf->value == ctl('b'))   res = MOVEMENT_CMD;
-        else if (buf->value == ctl('a'))   res = MOVEMENT_CMD;
+        else if (buf->value == OKEY_LEFT)   res = MOVEMENT_CMD;
+        else if (buf->value == OKEY_RIGHT)  res = MOVEMENT_CMD;
+        else if (buf->value == OKEY_DOWN)   res = MOVEMENT_CMD;
+        else if (buf->value == OKEY_UP)     res = MOVEMENT_CMD;
+        else if (buf->value == OKEY_PGUP)   res = MOVEMENT_CMD;
+        else if (buf->value == OKEY_PGDOWN) res = MOVEMENT_CMD;
+        else if (buf->value == ctl('f'))    res = MOVEMENT_CMD;
+        else if (buf->value == ctl('j'))    res = EDITION_CMD;
+        else if (buf->value == ctl('d'))    res = EDITION_CMD;
+        else if (buf->value == ctl('b'))    res = MOVEMENT_CMD;
+        else if (buf->value == ctl('a'))    res = MOVEMENT_CMD;
         else if (buf->value == L'G')        res = MOVEMENT_CMD;
         else if (buf->value == L'H')        res = MOVEMENT_CMD;
         else if (buf->value == L'M')        res = MOVEMENT_CMD;
         else if (buf->value == L'L')        res = MOVEMENT_CMD;
-        else if (buf->value == ctl('y'))   res = MOVEMENT_CMD;
-        else if (buf->value == ctl('e'))   res = MOVEMENT_CMD;
-        else if (buf->value == ctl('l'))   res = MOVEMENT_CMD;
+        else if (buf->value == ctl('y'))    res = MOVEMENT_CMD;
+        else if (buf->value == ctl('e'))    res = MOVEMENT_CMD;
+        else if (buf->value == ctl('l'))    res = MOVEMENT_CMD;
         else if (buf->value == L'w')        res = MOVEMENT_CMD;
         else if (buf->value == L'b')        res = MOVEMENT_CMD;
         else if (buf->value == L'/')        res = MOVEMENT_CMD; // search
@@ -1859,7 +1867,7 @@ int is_single_command (struct block * buf, long timeout) {
         else if (buf->value == L'+')        res = EDITION_CMD;
 
         else if (isdigit(buf->value) && atoi(get_conf_value("numeric")) )
-                                           res = MOVEMENT_CMD; // repeat last command
+                                            res = MOVEMENT_CMD; // repeat last command
 
         else if (buf->value == L'.')        res = MOVEMENT_CMD; // repeat last command
         else if (buf->value == L'y' && is_range_selected() != -1) 
