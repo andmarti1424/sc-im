@@ -146,8 +146,6 @@ void update(int header) {
     int off_rows = calc_offscr_sc_rows();
     int mxcol = offscr_sc_cols + off_cols - 1;
     int mxrow = offscr_sc_rows + off_rows - 1;
-    sc_info("off_cols:%d -- center:%d, mxcol:%d, offscr_sc_cols:%d maxcols:%d", off_cols, center_hidden_cols, mxcol, offscr_sc_cols, maxcols);
-    //sc_info("");
 
     /* You can't hide the last row or col */
     while (row_hidden[currow])
@@ -347,7 +345,6 @@ void show_sc_row_headings(WINDOW * win, int mxrow) {
     int i;
     int freeze = freeze_ranges && (freeze_ranges->type == 'r' ||  freeze_ranges->type == 'a') ? 1 : 0;
 
-    //FIXME
     //for (i = 0; i < mxrow && i < maxrows; i++) {
     for (i = 0; i < mxrow; i++) {
         // print rows in case freezen rows are before offscr_sc_rows
