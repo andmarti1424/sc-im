@@ -1248,6 +1248,26 @@ struct ent * vert_middle() {
     return lookat( (bottom + top) / 2, curcol);
 }
 
+void scroll_left(int n) {
+    while (n--) {
+        if (! offscr_sc_cols ) {
+            break;
+        }
+        int a = 1;
+        int b = 0;
+        offscr_sc_cols--;
+        while (a != b && curcol) {
+            a = offscr_sc_cols;
+            calc_offscr_sc_cols();
+            b = offscr_sc_cols;
+            if (a != b) {
+                curcol --;
+                offscr_sc_cols = a;
+            }
+        }
+    }
+    return;
+}
 
 
 
@@ -1272,41 +1292,26 @@ struct ent * tick(char c) {
 }
 
 
-// FIXME to handle freeze rows/cols
-void scroll_left(int n) {
-    while (n--) {
-        if (! offscr_sc_cols ) {
-            break;
-        }
-        int a = 1;
-        int b = 0;
-        offscr_sc_cols--;
-        while (a != b && curcol) {
-            a = offscr_sc_cols;
-            calc_offscr_sc_cols();
-            b = offscr_sc_cols;
-            if (a != b) {
-                curcol --;
-                offscr_sc_cols = a;
-            }
-        }
-    }
-    return;
-}
 
 // FIXME to handle freeze rows/cols
 void scroll_right(int n) {
-    //extern int center_hidden_cols;
-    //int freezec = freeze_ranges && (freeze_ranges->type == 'c' ||  freeze_ranges->type == 'a') ? 1 : 0;
-    //int brcol = freezer ? freeze_ranges->br->col : 0;
-    //int tlcol = freezer ? freeze_ranges->tl->col : 0;
-    while (n--) {
-        // This while statement allow the cursor to shift to the right when the
-        // last visible column is reached in the screen
-        while (curcol < offscr_sc_cols + 1) {
-            curcol++;
+    extern int center_hidden_cols;
+    int freezec = freeze_ranges && (freeze_ranges->type == 'c' ||  freeze_ranges->type == 'a') ? 1 : 0;
+    int brcol = freezec ? freeze_ranges->br->col : 0;
+    int tlcol = freezec ? freeze_ranges->tl->col : 0;
+
+    while (curcol < maxcols && n--) {
+        if ((freezec && curcol == offscr_sc_cols + center_hidden_cols + brcol - tlcol + 1) ||
+           (!freezec && curcol == offscr_sc_cols)) {
+            curcol = forw_col(1)->col;
+            unselect_ranges();
         }
-        offscr_sc_cols++;
+        if (freezec && offscr_sc_cols == freeze_ranges->tl->col) {
+            center_hidden_cols++;
+        } else {
+            offscr_sc_cols++;
+        }
+        while (curcol < offscr_sc_cols) curcol++;
     }
     return;
 }
