@@ -1247,32 +1247,25 @@ struct ent * vert_middle() {
     return lookat( (bottom + top) / 2, curcol);
 }
 
-void scroll_left(int n) {
-    while (n--) {
-        if (! offscr_sc_cols ) {
-            break;
+struct ent * go_end() {
+    int r = currow, c = curcol;
+    int raux = r, caux = c;
+    register struct ent *p;
+    do {
+        if (c < maxcols - 1)
+            c++;
+        else {
+            if (r < maxrows - 1) {
+                r++;
+                c = 0;
+            } else break;
         }
-        int a = 1;
-        int b = 0;
-        offscr_sc_cols--;
-        while (a != b && curcol) {
-            a = offscr_sc_cols;
-            calc_offscr_sc_cols();
-            b = offscr_sc_cols;
-            if (a != b) {
-                curcol --;
-                offscr_sc_cols = a;
-            }
-        }
-    }
-    return;
+        if (VALID_CELL(p, r, c) && ! col_hidden[c] && ! row_hidden[r]) { raux = r; caux = c; }
+    } while ( r < maxrows || c < maxcols );
+    if ( ! VALID_CELL(p, r, c) && ! col_hidden[c] && ! row_hidden[r] )
+        return lookat(raux, caux);
+    return NULL;
 }
-
-
-
-
-
-
 
 // if ticks a cell, returns struct ent *
 // if ticks a range, return struct ent * to top left cell
@@ -1298,9 +1291,6 @@ struct ent * tick(char ch) {
     return NULL;
 }
 
-
-
-// FIXME to handle freeze rows/cols
 void scroll_right(int n) {
     extern int center_hidden_cols;
     int freezec = freeze_ranges && (freeze_ranges->type == 'c' ||  freeze_ranges->type == 'a') ? 1 : 0;
@@ -1322,6 +1312,32 @@ void scroll_right(int n) {
     }
     return;
 }
+
+// FIXME to handle freeze rows/cols
+void scroll_left(int n) {
+    while (n--) {
+        if (! offscr_sc_cols ) {
+            break;
+        }
+        int a = 1;
+        int b = 0;
+        offscr_sc_cols--;
+        while (a != b && curcol) {
+            a = offscr_sc_cols;
+            calc_offscr_sc_cols();
+            b = offscr_sc_cols;
+            if (a != b) {
+                curcol --;
+                offscr_sc_cols = a;
+            }
+        }
+    }
+    return;
+}
+
+
+
+
 
 // FIXME to handle freeze rows/cols
 struct ent * left_limit() {
@@ -1351,27 +1367,6 @@ struct ent * goto_bottom() {
     int r = maxrows - 1;
     while ( (! VALID_CELL(p, r, curcol) && r > 0) || row_hidden[r]) r--;
     return lookat(r, curcol);
-}
-
-// FIXME to handle freeze rows/cols
-struct ent * go_end() {
-    int r = currow, c = curcol;
-    int raux = r, caux = c;
-    register struct ent *p;
-    do {
-        if (c < maxcols - 1)
-            c++;
-        else {
-            if (r < maxrows - 1) {
-                r++;
-                c = 0;
-            } else break;
-        }
-        if (VALID_CELL(p, r, c) && ! col_hidden[c] && ! row_hidden[r]) { raux = r; caux = c; }
-    } while ( r < maxrows || c < maxcols );
-    if ( ! VALID_CELL(p, r, c) && ! col_hidden[c] && ! row_hidden[r] )
-        return lookat(raux, caux);
-    return NULL;
 }
 
 // FIXME to handle freeze rows/cols
