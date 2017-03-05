@@ -35,7 +35,6 @@ WINDOW * input_win;
 
 // off screen spreadsheet rows and columns
 int offscr_sc_rows = 0, offscr_sc_cols = 0;
-
 int center_hidden_cols = 0;
 int center_hidden_rows = 0;
 
@@ -158,7 +157,6 @@ void update(int header) {
     show_content(main_win, mxrow, mxcol);
 
     // Show sc_col headings: A, B, C, D..
-    //sc_debug("mxcol:%d", mxcol);
     show_sc_col_headings(main_win, mxcol);
 
     // Show sc_row headings: 0, 1, 2, 3..
@@ -747,7 +745,7 @@ void show_celldetails(WINDOW * win) {
 
 // Calculate number of hidden columns in the left
 int calc_offscr_sc_cols() {
-    int q, i, cols = 0, col = 0;
+    int q = 0, i, cols = 0, col = 0;
     int freeze = freeze_ranges && (freeze_ranges->type == 'c' ||  freeze_ranges->type == 'a') ? 1 : 0;
     int tlcol = freeze ? freeze_ranges->tl->col : 0;
     int brcol = freeze ? freeze_ranges->br->col : 0;
@@ -768,8 +766,7 @@ int calc_offscr_sc_cols() {
     while ( offscr_sc_cols + center_hidden_cols + cols - 1 < curcol || curcol < offscr_sc_cols
             || (freeze && curcol < tlcol && curcol >= tlcol - center_hidden_cols)) {
 
-    //if (freeze) sc_debug("w  coltoa:%s, cols:%d, center:%d, off:%d, curcol:%d, tl:%d, br:%d",
-    //coltoa(i), cols, center_hidden_cols, offscr_sc_cols, curcol, tlcol, brcol);
+//    sc_debug("w  cols:%d, center:%d, off:%d, curcol:%d, tl:%d, br:%d", cols, center_hidden_cols, offscr_sc_cols, curcol, tlcol, brcol);
 
         //izq
         if (offscr_sc_cols - 1 == curcol) {
@@ -829,7 +826,6 @@ int calc_offscr_sc_cols() {
         center_hidden_cols--;
     }
 
-    //sc_info("cols:%d center:%d q:%d total:%d", cols, center_hidden_cols, q, cols + center_hidden_cols - q);
     return cols + center_hidden_cols - q;
 }
 
@@ -971,12 +967,12 @@ int calc_offscr_sc_rows() {
 
     // pick up row counts
     if (offscr_sc_rows - 1 <= currow) {
-        for (i = 0, q = 0, rows = 0, row=RESROW; i < maxrows && row < LINES; i++) {
+        for (i = 0, q = 0, rows = 0, row=RESROW; i < maxrows -1 && row < LINES; i++) {
             if (i < offscr_sc_rows && ! (freeze && i >= tlrow && i <= brrow)) continue;
             else if (freeze && i > brrow && i < brrow + center_hidden_rows) continue;
             else if (freeze && i < tlrow && i > tlrow - center_hidden_rows) continue;
 
-            if (i < offscr_sc_rows && freeze && i >= tlrow && i <= brrow) q++;
+            if (i < offscr_sc_rows && freeze && i >= tlrow && i <= brrow && ! row_hidden[i] ) q++;
             rows++;
             //if (i == maxrows - 1) return rows+1;
             //if (i == maxrows - 1 && !freeze) return rows + center_hidden_rows - q + 1 > maxrows ? maxrows - 1 : rows + center_hidden_rows - q;
@@ -1040,7 +1036,7 @@ int calc_offscr_sc_rows() {
             else if (freeze && i > brrow && i < brrow + center_hidden_rows) continue;
             else if (freeze && i < tlrow && i > tlrow - center_hidden_rows) continue;
 
-            if (i < offscr_sc_rows && freeze && i >= tlrow && i <= brrow) q++;
+            if (i < offscr_sc_rows && freeze && i >= tlrow && i <= brrow && ! row_hidden[i] ) q++;
             rows++;
             //if (i == maxrows - 1) return rows+1;
             //if (i == maxrows - 1 && !freeze) return rows + center_hidden_rows - q + 1 > maxrows ? maxrows - 1 : rows + center_hidden_rows - q;
