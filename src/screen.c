@@ -346,7 +346,7 @@ void show_sc_row_headings(WINDOW * win, int mxrow) {
     int freeze = freeze_ranges && (freeze_ranges->type == 'r' ||  freeze_ranges->type == 'a') ? 1 : 0;
 
     //for (i = 0; i < mxrow && i < maxrows; i++) {
-    for (i = 0; i < mxrow; i++) {
+    for (i = 0; i <= mxrow; i++) {
         // print rows in case freezen rows are before offscr_sc_rows
         if (i < offscr_sc_rows && !(freeze && i >= freeze_ranges->tl->row && i <= freeze_ranges->br->row)) continue;
 
@@ -432,7 +432,7 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
     int freezec = freeze_ranges && (freeze_ranges->type == 'c' ||  freeze_ranges->type == 'a') ? 1 : 0;
 
     //FIXME
-    for (row = 0; row < mxrow && row < maxrows; row++) {
+    for (row = 0; row <= mxrow && row < maxrows; row++) {
     //for (row = 0; row < mxrow; row++) {
         if (row < offscr_sc_rows
             && (freezer
@@ -768,8 +768,8 @@ int calc_offscr_sc_cols() {
     while ( offscr_sc_cols + center_hidden_cols + cols - 1 < curcol || curcol < offscr_sc_cols
             || (freeze && curcol < tlcol && curcol >= tlcol - center_hidden_cols)) {
 
-    //if (freeze) sc_debug("IN  coltoa:%s, i:%d, cols:%d, center:%d, off:%d, curcol:%d, tl:%d, br:%d",
-    //coltoa(i), i, cols, center_hidden_cols, offscr_sc_cols, curcol, tlcol, brcol);
+    //if (freeze) sc_debug("w  coltoa:%s, cols:%d, center:%d, off:%d, curcol:%d, tl:%d, br:%d",
+    //coltoa(i), cols, center_hidden_cols, offscr_sc_cols, curcol, tlcol, brcol);
 
         //izq
         if (offscr_sc_cols - 1 == curcol) {
@@ -783,9 +783,7 @@ int calc_offscr_sc_cols() {
             offscr_sc_cols++;
 
         // derecha con freeze cols a la izq.
-        } else if (offscr_sc_cols + center_hidden_cols + cols <= curcol) {
-//    if (freeze) sc_debug("IN  coltoa:%s, i:%d, cols:%d, center:%d, off:%d, curcol:%d, tl:%d, br:%d",
-//    coltoa(i), i, cols, center_hidden_cols, offscr_sc_cols, curcol, tlcol, brcol);
+        } else if (offscr_sc_cols + center_hidden_cols + cols == curcol) {
             center_hidden_cols++;
 
         // derecha con freeze a la derecha
@@ -994,7 +992,7 @@ int calc_offscr_sc_rows() {
           || (freeze && currow < tlrow && currow >= tlrow - center_hidden_rows)
           ) {
 
-        //if (freeze) sc_debug("IN x:%d, rows:%d, center:%d, off:%d, currow:%d, tl:%d, br:%d", offscr_sc_rows + center_hidden_rows + brrow - tlrow - 2, rows, center_hidden_rows, offscr_sc_rows, currow, tlrow, brrow);
+        //if (freeze) sc_debug("W x:%d, rows:%d, center:%d, off:%d, currow:%d, tl:%d, br:%d", offscr_sc_rows + center_hidden_rows + brrow - tlrow - 2, rows, center_hidden_rows, offscr_sc_rows, currow, tlrow, brrow);
 
         // move up
         if (offscr_sc_rows - 1 == currow) {
