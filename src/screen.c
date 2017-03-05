@@ -967,7 +967,7 @@ int calc_offscr_sc_rows() {
 
     // pick up row counts
     if (offscr_sc_rows - 1 <= currow) {
-        for (i = 0, q = 0, rows = 0, row=RESROW; i < maxrows -1 && row < LINES; i++) {
+        for (i = 0, q = 0, rows = 0, row=RESROW; i < maxrows && row < LINES; i++) {
             if (i < offscr_sc_rows && ! (freeze && i >= tlrow && i <= brrow)) continue;
             else if (freeze && i > brrow && i < brrow + center_hidden_rows) continue;
             else if (freeze && i < tlrow && i > tlrow - center_hidden_rows) continue;
@@ -977,6 +977,7 @@ int calc_offscr_sc_rows() {
             //if (i == maxrows - 1) return rows+1;
             //if (i == maxrows - 1 && !freeze) return rows + center_hidden_rows - q + 1 > maxrows ? maxrows - 1 : rows + center_hidden_rows - q;
             //if (i == maxrows - 1) return rows + center_hidden_rows - q + 1 > maxrows ? maxrows - 1 : rows + center_hidden_rows - q;
+            if (i == maxrows - 1) return rows + center_hidden_rows - q;
             if (! row_hidden[i]) row++;
         }
     }
@@ -1040,7 +1041,8 @@ int calc_offscr_sc_rows() {
             rows++;
             //if (i == maxrows - 1) return rows+1;
             //if (i == maxrows - 1 && !freeze) return rows + center_hidden_rows - q + 1 > maxrows ? maxrows - 1 : rows + center_hidden_rows - q;
-            if (i == maxrows - 1) return rows + center_hidden_rows - q + 1 > maxrows ? maxrows - 1 : rows + center_hidden_rows - q;
+            //if (i == maxrows - 1) return rows + center_hidden_rows - q + 1 > maxrows ? maxrows - 1 : rows + center_hidden_rows - q;
+            if (i == maxrows - 1) return rows + center_hidden_rows - q;
             if (! row_hidden[i]) row++;
         }
     }
@@ -1050,5 +1052,6 @@ int calc_offscr_sc_rows() {
     }
 
     //sc_debug("OU rows:%d, center:%d, off:%d, currow:%d mxrow:%d", rows, center_hidden_rows, offscr_sc_rows, currow, offscr_sc_rows + rows + center_hidden_rows-q -1);
-    return rows + center_hidden_rows - q > maxrows ? maxrows: rows + center_hidden_rows - q;
+    //return rows + center_hidden_rows - q > maxrows ? maxrows: rows + center_hidden_rows - q;
+    return rows + center_hidden_rows - q;
 }
