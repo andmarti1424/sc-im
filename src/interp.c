@@ -1504,7 +1504,6 @@ void moveto(int row, int col, int lastrow_, int lastcol_, int cornerrow, int cor
 
     lastrow = currow;
     lastcol = curcol;
-    //checkbounds(&row, &col);
     currow = row;
     curcol = col;
     g_free();
