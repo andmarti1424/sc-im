@@ -1200,6 +1200,7 @@ void scroll_up(int n) {
         } else if (offscr_sc_rows) {
             offscr_sc_rows--;
         } else {
+            sc_info("cannot scroll no longer");
             break;
         }
         if (currow == offscr_sc_rows + LINES - RESROW - 1 + center_hidden_rows) {
@@ -1315,8 +1316,10 @@ void scroll_right(int n) {
 
 // FIXME to handle freeze rows/cols
 void scroll_left(int n) {
+    extern int center_hidden_cols;
+    /*
     while (n--) {
-        if (! offscr_sc_cols ) {
+        if (! offscr_sc_cols && ! center_hidden_cols) {
             break;
         }
         int a = 1;
@@ -1330,6 +1333,24 @@ void scroll_left(int n) {
                 curcol --;
                 offscr_sc_cols = a;
             }
+        }
+    }*/
+
+    int off_cols = calc_offscr_sc_cols();
+    int mxcol = offscr_sc_cols + off_cols - 1;
+    int freezec = freeze_ranges && (freeze_ranges->type == 'c' ||  freeze_ranges->type == 'a') ? 1 : 0;
+    while (n--) {
+        if (freezec && center_hidden_cols) {
+            center_hidden_cols--;
+        } else if (offscr_sc_cols) {
+            offscr_sc_cols--;
+        } else {
+            sc_info("cannot scroll no longer");
+            break;
+        }
+        if (curcol == mxcol) {
+            curcol = back_col(1)->col;
+            unselect_ranges();
         }
     }
     return;
