@@ -145,6 +145,7 @@ void update(int header) {
     int off_rows = calc_offscr_sc_rows();
     int mxcol = offscr_sc_cols + off_cols - 1;
     int mxrow = offscr_sc_rows + off_rows - 1;
+    //sc_debug("mxcol:%d %s, maxcols:%d", mxcol, coltoa(mxcol), maxcols);
 
     /* You can't hide the last row or col */
     while (row_hidden[currow])
@@ -756,7 +757,7 @@ int calc_offscr_sc_cols() {
             if (i < offscr_sc_cols && ! (freeze && i >= tlcol && i <= brcol)) continue;
             else if (freeze && i > brcol && i < brcol + center_hidden_cols) continue;
             else if (freeze && i < tlcol && i > tlcol - center_hidden_cols) continue;
-            if (i < offscr_sc_cols && freeze && i >= tlcol && i <= brcol && !col_hidden[i]) q += fwidth[i];
+            if (i < offscr_sc_cols && freeze && i >= tlcol && i <= brcol && ! col_hidden[i]) q++;
             cols++;
             if (! col_hidden[i]) col += fwidth[i];
         }
@@ -766,7 +767,7 @@ int calc_offscr_sc_cols() {
     while ( offscr_sc_cols + center_hidden_cols + cols - 1 < curcol || curcol < offscr_sc_cols
             || (freeze && curcol < tlcol && curcol >= tlcol - center_hidden_cols)) {
 
-//    sc_debug("w  cols:%d, center:%d, off:%d, curcol:%d, tl:%d, br:%d", cols, center_hidden_cols, offscr_sc_cols, curcol, tlcol, brcol);
+    //sc_debug("w  cols:%d, center:%d, off:%d, curcol:%d, tl:%d, br:%d", cols, center_hidden_cols, offscr_sc_cols, curcol, tlcol, brcol);
 
         //izq
         if (offscr_sc_cols - 1 == curcol) {
@@ -801,7 +802,7 @@ int calc_offscr_sc_cols() {
                 offscr_sc_cols--;
 
                 // if its shown, we count it, else continue.
-                if (! col_hidden[i] && !freeze)
+                if (! col_hidden[i]  && !freeze)
                     col -= fwidth[i];
 
                 else if (!col_hidden[i] && !((i > brcol && i < brcol + center_hidden_cols) || (i < tlcol && i > tlcol - center_hidden_cols)))
@@ -815,7 +816,7 @@ int calc_offscr_sc_cols() {
             if (i < offscr_sc_cols && ! (freeze && i >= tlcol && i <= brcol)) continue;
             else if (freeze && i > brcol && i < brcol + center_hidden_cols) continue;
             else if (freeze && i < tlcol && i > tlcol - center_hidden_cols) continue;
-            if (i < offscr_sc_cols && freeze && i >= tlcol && i <= brcol && !col_hidden[i]) q += fwidth[i];
+            if (i < offscr_sc_cols && freeze && i >= tlcol && i <= brcol && ! col_hidden[i]) q++;
             cols++;
             //if (i == maxcols - 1) return cols + center_hidden_cols - q + 1;
             if (! col_hidden[i]) col += fwidth[i];
