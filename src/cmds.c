@@ -1356,24 +1356,21 @@ void scroll_left(int n) {
     return;
 }
 
-
-
-
-
-// FIXME to handle freeze rows/cols
 struct ent * left_limit() {
     int c = 0;
-    while ( col_hidden[c] && c < curcol ) c++; 
+    while ( col_hidden[c] && c < curcol ) c++;
     return lookat(currow, c);
 }
 
-// FIXME to handle freeze rows/cols
 struct ent * right_limit() {
     register struct ent *p;
     int c = maxcols - 1;
     while ( (! VALID_CELL(p, currow, c) && c > 0) || col_hidden[c]) c--;
     return lookat(currow, c);
 }
+
+
+
 
 // FIXME to handle freeze rows/cols
 struct ent * goto_top() {
@@ -1411,6 +1408,37 @@ struct ent * go_forward() {
     return lookat(r_ori, c_ori);
 }
 
+struct ent * go_bol() {
+    return lookat(currow, offscr_sc_cols);
+}
+
+struct ent * go_eol() {
+    return lookat(currow, offscr_sc_cols + calc_offscr_sc_cols() - 1);
+}
+
+struct ent * horiz_middle() {
+    int i;
+    int ancho = rescol;
+    int visibles = calc_offscr_sc_cols();
+    int freeze = freeze_ranges && (freeze_ranges->type == 'c' ||  freeze_ranges->type == 'a') ? 1 : 0;
+    int tlcol = freeze ? freeze_ranges->tl->col : 0;
+    int brcol = freeze ? freeze_ranges->br->col : 0;
+    extern int center_hidden_cols;
+
+    for (i = offscr_sc_cols; i < offscr_sc_cols + visibles; i++) {
+        //if not shown, continue
+        if (col_hidden[i]) continue;
+        else if (freeze && i > brcol && i < brcol + center_hidden_cols) continue;
+        else if (freeze && i < tlcol && i > tlcol - center_hidden_cols) continue;
+
+        ancho += fwidth[i];
+        if (ancho >= (COLS-rescol)/2) {
+            return lookat(currow, i);
+        }
+    }
+    return NULL;
+}
+
 // FIXME to handle freeze rows/cols
 struct ent * go_backward() {
     int r = currow, c = curcol;
@@ -1430,30 +1458,6 @@ struct ent * go_backward() {
     } while ( currow || curcol );
 
     return lookat(r_ori, c_ori);
-}
-
-// FIXME to handle freeze rows/cols
-struct ent * go_bol() {
-    return lookat(currow, offscr_sc_cols);
-}
-
-// FIXME to handle freeze rows/cols
-struct ent * go_eol() {
-    return lookat(currow, offscr_sc_cols + calc_offscr_sc_cols() - 1);
-}
-
-// FIXME to handle freeze rows/cols
-struct ent * horiz_middle() {
-    int i;
-    int ancho = rescol;
-    int visibles = calc_offscr_sc_cols();
-    for (i = offscr_sc_cols; i < offscr_sc_cols + visibles; i++) {
-        ancho += fwidth[i];
-        if (ancho >= (COLS-rescol)/2) {
-            return lookat(currow, i);
-        }
-    }
-    return NULL;
 }
 
 
