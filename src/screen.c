@@ -388,7 +388,9 @@ void show_sc_col_headings(WINDOW * win, int mxcol) {
     wmove(win, 0, 0);
     wclrtoeol(win);
 
-    for (i = 0; i <= mxcol; i++) {
+    //FIXME
+    for (i = 0; i <= mxcol && i < maxcols; i++) {
+    //for (i = 0; i <= mxcol; i++) {
         // print cols in case freezen columns are before offscr_sc_cols
         if (i < offscr_sc_cols && !(freeze && i >= freeze_ranges->tl->col && i <= freeze_ranges->br->col)) continue;
 
@@ -464,7 +466,9 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
         int fieldlen;
         col = 0;
 
-        for (p = ATBL(tbl, row, col); col <= mxcol; p += nextcol - col, col = nextcol, c += fieldlen) {
+        //FIXME
+        //for (p = ATBL(tbl, row, col); col <= mxcol; p += nextcol - col, col = nextcol, c += fieldlen) {
+        for (p = ATBL(tbl, row, col); col <= mxcol && col < maxcols; p += nextcol - col, col = nextcol, c += fieldlen) {
 
             nextcol = col + 1;
             fieldlen = fwidth[col];
@@ -744,92 +748,6 @@ void show_celldetails(WINDOW * win) {
     wclrtoeol(win);
 }
 
-// Calculate number of hidden columns in the left
-int calc_offscr_sc_cols() {
-    int q = 0, i, cols = 0, col = 0;
-    int freeze = freeze_ranges && (freeze_ranges->type == 'c' ||  freeze_ranges->type == 'a') ? 1 : 0;
-    int tlcol = freeze ? freeze_ranges->tl->col : 0;
-    int brcol = freeze ? freeze_ranges->br->col : 0;
-
-    // pick up col counts
-    if (offscr_sc_cols <= curcol + 1) {
-        for (i = 0, q = 0, cols = 0, col = rescol; i < maxcols && col + fwidth[i] <= COLS; i++) {
-            if (i < offscr_sc_cols && ! (freeze && i >= tlcol && i <= brcol)) continue;
-            else if (freeze && i > brcol && i < brcol + center_hidden_cols) continue;
-            else if (freeze && i < tlcol && i > tlcol - center_hidden_cols) continue;
-            if (i < offscr_sc_cols && freeze && i >= tlcol && i <= brcol && ! col_hidden[i]) q++;
-            cols++;
-            if (! col_hidden[i]) col += fwidth[i];
-        }
-    }
-
-    // get  off screen cols
-    while ( offscr_sc_cols + center_hidden_cols + cols - 1 < curcol || curcol < offscr_sc_cols
-            || (freeze && curcol < tlcol && curcol >= tlcol - center_hidden_cols)) {
-
-    //sc_debug("w  cols:%d, center:%d, off:%d, curcol:%d, tl:%d, br:%d", cols, center_hidden_cols, offscr_sc_cols, curcol, tlcol, brcol);
-
-        //izq
-        if (offscr_sc_cols - 1 == curcol) {
-            if (freeze && offscr_sc_cols + cols + center_hidden_cols >= brcol && brcol - cols - offscr_sc_cols + 2 > 0)
-                center_hidden_cols = brcol - cols - offscr_sc_cols + 2;
-            offscr_sc_cols--;
-
-        // derecha
-        } else if (offscr_sc_cols + center_hidden_cols + cols == curcol &&
-          (! freeze || (curcol > brcol && offscr_sc_cols < tlcol) || (curcol >= cols && offscr_sc_cols < tlcol))) {
-            offscr_sc_cols++;
-
-        // derecha con freeze cols a la izq.
-        } else if (offscr_sc_cols + center_hidden_cols + cols == curcol) {
-            center_hidden_cols++;
-
-        // derecha con freeze a la derecha
-        } else if (freeze && curcol < tlcol && curcol >= tlcol - center_hidden_cols ) {
-            center_hidden_cols--;
-            offscr_sc_cols++;
-
-        } else {
-            // Try to put the cursor in the center of the screen
-            col = (COLS - rescol - fwidth[curcol]) / 2 + rescol;
-                //if (freeze) center_hidden_cols = curcol;
-                //else
-                offscr_sc_cols = curcol;
-
-            for (i=curcol-1; i >= 0 && col-fwidth[i] - 1 > rescol; i--) {
-                //if (freeze) center_hidden_cols--;
-                //else
-                offscr_sc_cols--;
-
-                // if its shown, we count it, else continue.
-                if (! col_hidden[i]  && !freeze)
-                    col -= fwidth[i];
-
-                else if (!col_hidden[i] && !((i > brcol && i < brcol + center_hidden_cols) || (i < tlcol && i > tlcol - center_hidden_cols)))
-                    col -= fwidth[i];
-            }
-        }
-
-        // Now pick up the counts again
-        //for (i = 0, q = 0, cols = 0, col = rescol; i < maxcols && col + fwidth[i] <= COLS; i++) {
-        for (i = 0, cols = 0, col = rescol; i < maxcols && col + fwidth[i] <= COLS; i++) {
-            if (i < offscr_sc_cols && ! (freeze && i >= tlcol && i <= brcol)) continue;
-            else if (freeze && i > brcol && i < brcol + center_hidden_cols) continue;
-            else if (freeze && i < tlcol && i > tlcol - center_hidden_cols) continue;
-            if (i < offscr_sc_cols && freeze && i >= tlcol && i <= brcol && ! col_hidden[i]) q++;
-            cols++;
-            //if (i == maxcols - 1) return cols + center_hidden_cols - q + 1;
-            if (! col_hidden[i]) col += fwidth[i];
-        }
-    }
-
-    while (freeze && curcol > brcol && curcol <= brcol + center_hidden_cols) {
-        center_hidden_cols--;
-    }
-
-    return cols + center_hidden_cols - q;
-}
-
 // error routine for yacc (gram.y)
 void yyerror(char * err) {
     mvwprintw(input_win, 1, 0, "%s: %.*s<=%s", err, linelim, line, line + linelim);
@@ -955,6 +873,102 @@ void show_text(char * val) {
     reset_prog_mode();
     refresh();
     update(TRUE);
+}
+
+// Calculate number of hidden columns in the left
+int calc_offscr_sc_cols() {
+    int q = 0, i, cols = 0, col = 0;
+    int freeze = freeze_ranges && (freeze_ranges->type == 'c' ||  freeze_ranges->type == 'a') ? 1 : 0;
+    int tlcol = freeze ? freeze_ranges->tl->col : 0;
+    int brcol = freeze ? freeze_ranges->br->col : 0;
+
+    // pick up col counts
+    if (offscr_sc_cols <= curcol + 1) {
+        for (i = 0, q = 0, cols = 0, col = rescol; i < maxcols && col + fwidth[i] <= COLS; i++) {
+            if (i < offscr_sc_cols && ! (freeze && i >= tlcol && i <= brcol)) continue;
+            else if (freeze && i > brcol && i < brcol + center_hidden_cols) continue;
+            else if (freeze && i < tlcol && i > tlcol - center_hidden_cols) continue;
+            if (i < offscr_sc_cols && freeze && i >= tlcol && i <= brcol && ! col_hidden[i]) q++;
+            cols++;
+            if (! col_hidden[i]) col += fwidth[i];
+        }
+    }
+
+    // get  off screen cols
+    while ( offscr_sc_cols + center_hidden_cols + cols - 1 < curcol || curcol < offscr_sc_cols
+            || (freeze && curcol < tlcol && curcol >= tlcol - center_hidden_cols)) {
+
+    //sc_debug("w  cols:%d, center:%d, off:%d, curcol:%d, tl:%d, br:%d", cols, center_hidden_cols, offscr_sc_cols, curcol, tlcol, brcol);
+
+        //izq
+        if (offscr_sc_cols - 1 == curcol) {
+            if (freeze && offscr_sc_cols + cols + center_hidden_cols >= brcol && brcol - cols - offscr_sc_cols + 2 > 0)
+                center_hidden_cols = brcol - cols - offscr_sc_cols + 2;
+            offscr_sc_cols--;
+
+        // derecha
+        } else if (offscr_sc_cols + center_hidden_cols + cols == curcol &&
+          (! freeze || (curcol > brcol && offscr_sc_cols < tlcol) || (curcol >= cols && offscr_sc_cols < tlcol))) {
+            offscr_sc_cols++;
+
+        // derecha con freeze cols a la izq.
+        } else if (offscr_sc_cols + center_hidden_cols + cols == curcol) {
+            center_hidden_cols++;
+
+        // derecha con freeze a la derecha
+        } else if (freeze && curcol < tlcol && curcol >= tlcol - center_hidden_cols ) {
+            center_hidden_cols--;
+            offscr_sc_cols++;
+
+        } else {
+            //sc_debug("5a off:%d, center:%d, cols:%d, curcol:%d, tl:%d, br:%d", offscr_sc_cols, center_hidden_cols, cols, curcol, tlcol, brcol);
+
+            // Try to put the cursor in the center of the screen
+            col = (COLS - rescol - fwidth[curcol]) / 2 + rescol;
+                if (freeze) {
+                    offscr_sc_cols = tlcol;
+                    center_hidden_cols = curcol - 2;
+                } else offscr_sc_cols = curcol;
+
+            for (i=curcol-1; i >= 0 && col-fwidth[i] - 1 > rescol; i--) {
+
+                if (freeze) center_hidden_cols--;
+                else offscr_sc_cols--;
+                if (! col_hidden[i]) col -= fwidth[i];
+
+                /* if column its shown, we decrease its width in col, else continue.
+                if (! col_hidden[i]  && !freeze)
+                    col -= fwidth[i];
+
+                else if (!col_hidden[i] && !((i > brcol && i < brcol + center_hidden_cols) || (i < tlcol && i > tlcol - center_hidden_cols)))
+                    col -= fwidth[i];
+                */
+            }
+        }
+
+        // Now pick up the counts again
+        for (i = 0, q = 0, cols = 0, col = rescol; i < maxcols && col + fwidth[i] <= COLS; i++) {
+        //for (i = 0, cols = 0, col = rescol; i < maxcols && col + fwidth[i] <= COLS; i++) {
+            if (i < offscr_sc_cols && ! (freeze && i >= tlcol && i <= brcol)) continue;
+            else if (freeze && i > brcol && i < brcol + center_hidden_cols) continue;
+            else if (freeze && i < tlcol && i > tlcol - center_hidden_cols) continue;
+            if (i < offscr_sc_cols && freeze && i >= tlcol && i <= brcol && ! col_hidden[i]) q++;
+            cols++;
+            //if (i == maxcols - 1) return cols + center_hidden_cols - q;
+            if (! col_hidden[i]) col += fwidth[i];
+        }
+    }
+
+    while (freeze && curcol > brcol && curcol <= brcol + center_hidden_cols) {
+        center_hidden_cols--;
+    }
+
+
+    //sc_debug("5F cols:%d, center:%d, q:%d - return:%d     mxcol:%d %s    maxcols:%d", cols, center_hidden_cols, q, cols+center_hidden_cols-q,
+    //        offscr_sc_cols+cols+center_hidden_cols-q-1,
+    //        coltoa(offscr_sc_cols+cols+center_hidden_cols-q-1),
+    //        maxcols);
+    return cols + center_hidden_cols - q;
 }
 
 // Calculate number of hide rows above
