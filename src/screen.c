@@ -886,11 +886,12 @@ int calc_offscr_sc_cols() {
     if (offscr_sc_cols <= curcol + 1) {
         for (i = 0, q = 0, cols = 0, col = rescol; i < maxcols && col + fwidth[i] <= COLS; i++) {
             if (i < offscr_sc_cols && ! (freeze && i >= tlcol && i <= brcol)) continue;
-            else if (freeze && i > brcol && i < brcol + center_hidden_cols) continue;
-            else if (freeze && i < tlcol && i > tlcol - center_hidden_cols) continue;
+            else if (freeze && i > brcol && i <= brcol + center_hidden_cols) continue;
+            else if (freeze && i < tlcol && i >= tlcol - center_hidden_cols) continue;
             if (i < offscr_sc_cols && freeze && i >= tlcol && i <= brcol && ! col_hidden[i]) q++;
             cols++;
             if (! col_hidden[i]) col += fwidth[i];
+            //sc_debug("I i:%d %s -  col:%d fwidth:%d COLS:%d", i, coltoa(i), col, fwidth[i+1], COLS);
         }
     }
 
@@ -925,37 +926,33 @@ int calc_offscr_sc_cols() {
 
             // Try to put the cursor in the center of the screen
             col = (COLS - rescol - fwidth[curcol]) / 2 + rescol;
-                if (freeze) {
+                if (freeze && curcol > brcol) {
                     offscr_sc_cols = tlcol;
                     center_hidden_cols = curcol - 2;
-                } else offscr_sc_cols = curcol;
+                } else {
+                    offscr_sc_cols = curcol;
+                    center_hidden_cols = 0;
+                }
 
             for (i=curcol-1; i >= 0 && col-fwidth[i] - 1 > rescol; i--) {
-
-                if (freeze) center_hidden_cols--;
+                if (freeze && curcol > brcol) center_hidden_cols--;
                 else offscr_sc_cols--;
                 if (! col_hidden[i]) col -= fwidth[i];
-
-                /* if column its shown, we decrease its width in col, else continue.
-                if (! col_hidden[i]  && !freeze)
-                    col -= fwidth[i];
-
-                else if (!col_hidden[i] && !((i > brcol && i < brcol + center_hidden_cols) || (i < tlcol && i > tlcol - center_hidden_cols)))
-                    col -= fwidth[i];
-                */
             }
+            //sc_debug("5c off:%d, center:%d, cols:%d, curcol:%d, tl:%d, br:%d", offscr_sc_cols, center_hidden_cols, cols, curcol, tlcol, brcol);
         }
 
         // Now pick up the counts again
         for (i = 0, q = 0, cols = 0, col = rescol; i < maxcols && col + fwidth[i] <= COLS; i++) {
         //for (i = 0, cols = 0, col = rescol; i < maxcols && col + fwidth[i] <= COLS; i++) {
             if (i < offscr_sc_cols && ! (freeze && i >= tlcol && i <= brcol)) continue;
-            else if (freeze && i > brcol && i < brcol + center_hidden_cols) continue;
-            else if (freeze && i < tlcol && i > tlcol - center_hidden_cols) continue;
+            else if (freeze && i > brcol && i <= brcol + center_hidden_cols) continue;
+            else if (freeze && i < tlcol && i >= tlcol - center_hidden_cols) continue;
             if (i < offscr_sc_cols && freeze && i >= tlcol && i <= brcol && ! col_hidden[i]) q++;
             cols++;
             //if (i == maxcols - 1) return cols + center_hidden_cols - q;
             if (! col_hidden[i]) col += fwidth[i];
+            //sc_debug("F i:%d %s -  col:%d fwidth:%d COLS:%d", i, coltoa(i), col, fwidth[i+1], COLS);
         }
     }
 

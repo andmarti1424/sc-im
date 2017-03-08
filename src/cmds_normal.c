@@ -96,9 +96,16 @@ void do_normalmode(struct block * buf) {
         case L'0':
             if (atoi(get_conf_value("numeric_zero")) == 1) goto numeric;
         case OKEY_HOME:
+            ;
+            int freeze = freeze_ranges && (freeze_ranges->type == 'c' ||  freeze_ranges->type == 'a') ? 1 : 0;
+            int tlcol = freeze ? freeze_ranges->tl->col : 0;
+            int brcol = freeze ? freeze_ranges->br->col : 0;
+            extern int center_hidden_cols;
             lastrow = currow;
             lastcol = curcol;
-            curcol = left_limit()->col;
+            if (freeze && curcol > brcol && tlcol >= offscr_sc_cols && curcol != brcol + center_hidden_cols + 1) curcol = brcol + center_hidden_cols + 1;
+            else curcol = left_limit()->col;
+
             unselect_ranges();
             update(TRUE);
             break;
