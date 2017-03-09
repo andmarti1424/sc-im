@@ -1322,6 +1322,7 @@ void scroll_left(int n) {
     while (n--) {
         if (freezec && center_hidden_cols) {
             center_hidden_cols--;
+            sc_debug("n:%d   center:%d", n, center_hidden_cols);
         } else if (offscr_sc_cols) {
             offscr_sc_cols--;
         } else {
@@ -1331,6 +1332,8 @@ void scroll_left(int n) {
         if (curcol == mxcol) {
             curcol = back_col(1)->col;
             unselect_ranges();
+            //off_cols = calc_offscr_sc_cols();
+            //mxcol = offscr_sc_cols + off_cols - 1;
         }
     }
     return;

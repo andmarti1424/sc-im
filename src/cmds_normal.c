@@ -966,26 +966,22 @@ void do_normalmode(struct block * buf) {
             switch (buf->pnext->value) {
                 case L'l':
                     scroll_right(1);
-                    //unselect_ranges();
                     break;
 
                 case L'h':
                     scroll_left(1);
-                    //unselect_ranges();
                     break;
 
                 case L'H':
-                    scroll = calc_offscr_sc_cols();
+                    scroll = calc_offscr_sc_cols() - center_hidden_cols;
                     if (atoi(get_conf_value("half_page_scroll"))) scroll /= 2;
                     scroll_left(scroll);
-                    //unselect_ranges();
                     break;
 
                 case L'L':
-                    scroll = calc_offscr_sc_cols();
+                    scroll = calc_offscr_sc_cols() - center_hidden_cols;
                     if (atoi(get_conf_value("half_page_scroll"))) scroll /= 2;
                     scroll_right(scroll);
-                    //unselect_ranges();
                     break;
 
                 case L'm':
