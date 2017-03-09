@@ -7,6 +7,8 @@
 #include <curses.h>
 #include <unistd.h>
 #include "sc.h"
+#include "cmds.h"
+
 
 
 static  lua_State *L;
@@ -84,6 +86,28 @@ static int l_setstr (lua_State *L) {
 
  }
 
+
+static int l_setform (lua_State *L) {
+  int r,c;
+  char * val;
+  struct ent **pp;
+  struct ent *p;
+  char buf[256];
+      r = lua_tointeger(L, 1);  /* get argument */
+      c = lua_tointeger(L, 2);
+      val=lua_tostring(L,3);
+      //  printf("setstr !!\n");
+     
+    sprintf(buf,"LET %s%d=%s",coltoa(c),r,val);
+     send_to_interpp(buf);
+     
+
+
+      return 0;
+
+ }
+
+
 static int l_query (lua_State *L) {
   char * val;
   val=lua_tostring(L,1);
@@ -110,6 +134,7 @@ doLuainit()
 
     lua_register(L,"lgetnum",l_getnum);
     lua_register(L,"lsetnum",l_setnum);
+    lua_register(L,"lsetform",l_setform);
     lua_register(L,"lsetstr",l_setstr);
     lua_register(L,"lquery",l_query);
 

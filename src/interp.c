@@ -645,8 +645,7 @@ double dolmax(struct enode * ep) {
     cellerror = CELLOK;
     for (p = ep; p; p = p->e.o.left) {
         v = eval(NULL, p->e.o.right);
-        if ( !count || v > maxval) maxval = v;
-        count++;
+        if ( !count || v > maxval) maxval = v; count++;
     }
     if (count) return maxval;
     else return (double)0;
@@ -661,8 +660,7 @@ double dolmin(struct enode * ep) {
     cellerror = CELLOK;
     for (p = ep; p; p = p->e.o.left) {
         v = eval(NULL, p->e.o.right);
-        if ( !count || v < minval) minval = v;
-        count++;
+        if ( !count || v < minval) minval = v; count++;
     }
     if (count) return minval;
     else return (double)0;
@@ -1345,6 +1343,7 @@ char * seval(register struct ent * ent, register struct enode * se) {
         return dostindex(minr, minc, maxr, maxc, se->e.o.right);
     }
     case EXT:    return (doext(se));
+    case LUA:    return (doLUA(se));
     case SVAL:   return (dosval(seval(ent, se->e.o.left), eval(NULL, se->e.o.right)));
     case REPLACE: return (doreplace(seval(ent, se->e.o.left),
                           seval(NULL, se->e.o.right->e.o.left),
@@ -1677,9 +1676,8 @@ void str_search(char *s, int firstrow, int firstcol, int lastrow_, int lastcol_,
                     while (++r < lastrow_ && row_hidden[r]) /* */;
                     c = firstcol;
                 } else {
-                    r = endr;
-                    c = endc;
-                    break;
+                    r = firstrow;
+                    c = firstcol;
                 }
             }
         } else { // search backwards
@@ -1690,9 +1688,8 @@ void str_search(char *s, int firstrow, int firstcol, int lastrow_, int lastcol_,
                     while (--r > firstrow && row_hidden[r]) /* */;
                     c = lastcol_;
                 } else {
-                    r = endr;
-                    c = endc;
-                    break;
+                    r = lastrow_;
+                    c = lastcol_;
                 }
             }
         }
@@ -1955,6 +1952,7 @@ void let(struct ent * v, struct enode * e) {
     if (v->cellerror == CELLOK) v->flags |= ( is_changed | is_valid );
     changed++;
     modflg++;
+   if (atoi(get_conf_value("lua_trigger"))) doLuaTriger2(v->row,v->col,v->flags);
 }
 
 void slet(struct ent * v, struct enode * se, int flushdir) {
@@ -2063,6 +2061,7 @@ int constant(register struct enode *e) {
          && constant(e->e.o.left)
          && constant(e->e.o.right)
          && e->op != EXT     /* functions look like constants but aren't */
+         && e->op != LUA     /* functions look like constants but aren't */
          && e->op != NVAL
          && e->op != SVAL
          && e->op != NOW
@@ -2175,33 +2174,26 @@ void decompile(register struct enode *e, int priority) {
     }
     if (mypriority<priority) line[linelim++] = '(';
     switch (e->op) {
-    case 'f':
-            for (s="@fixed "; (line[linelim++] = *s++); );
+    case 'f':    for (s="@fixed "; (line[linelim++] = *s++); );
             linelim--;
             decompile(e->e.o.left, 30);
             break;
-    case 'F':
-            for (s="(@fixed)"; (line[linelim++] = *s++); );
+    case 'F':    for (s="(@fixed)"; (line[linelim++] = *s++); );
             linelim--;
             decompile(e->e.o.left, 30);
             break;
-    case 'm':
-            line[linelim++] = '-';
+    case 'm':    line[linelim++] = '-';
             decompile(e->e.o.left, 30);
             break;
-    case '!':
-            line[linelim++] = '!';
+    case '!':    line[linelim++] = '!';
             decompile(e->e.o.left, 30);
             break;
-    case O_VAR:
-            decodev(e->e.v);
+    case O_VAR:    decodev(e->e.v);
             break;
-    case O_CONST:
-            (void) sprintf(line+linelim, "%.15g", e->e.k);
+    case O_CONST:    (void) sprintf(line+linelim, "%.15g", e->e.k);
             linelim += strlen(line+linelim);
             break;
-    case O_SCONST:
-            (void) sprintf(line+linelim, "\"%s\"", e->e.s);
+    case O_SCONST:    (void) sprintf(line+linelim, "\"%s\"", e->e.s);
             linelim += strlen(line+linelim);
             break;
 
@@ -2244,12 +2236,10 @@ void decompile(register struct enode *e, int priority) {
     case MONTH:  one_arg("@month(", e); break;
     case DAY:    one_arg("@day(", e); break;
     case YEAR:   one_arg("@year(", e); break;
-    case NOW:
-            for (s = "@now"; (line[linelim++] = *s++); );
+    case NOW:    for (s = "@now"; (line[linelim++] = *s++); );
             linelim--;
             break;
-    case DATE:
-            if (e->e.o.right)
+    case DATE: if (e->e.o.right)
                 two_arg("@date(", e);
             else
                 one_arg("@date(", e);
@@ -2272,6 +2262,7 @@ void decompile(register struct enode *e, int priority) {
     case NVAL:  two_arg("@nval(", e); break;
     case SVAL:  two_arg("@sval(", e); break;
     case EXT:   two_arg("@ext(", e); break;
+    case LUA:       two_arg("@lua(", e); break;
     case SUBSTR:  three_arg("@substr(", e); break;
     case REPLACE: three_arg("@replace(", e); break;
     case STINDEX: index_arg("@stindex", e); break;
@@ -2280,75 +2271,58 @@ void decompile(register struct enode *e, int priority) {
     case HLOOKUP: two_arg_index("@hlookup", e); break;
     case VLOOKUP: two_arg_index("@vlookup", e); break;
     case IF:    three_arg("@if(", e); break;
-    case MYROW:
-            for (s = "@myrow"; (line[linelim++] = *s++); );
+    case MYROW:    for (s = "@myrow"; (line[linelim++] = *s++); );
             linelim--;
             break;
-    case MYCOL:
-            for (s = "@mycol"; (line[linelim++] = *s++); );
+    case MYCOL:    for (s = "@mycol"; (line[linelim++] = *s++); );
             linelim--;
             break;
-    case LASTROW:
-            for (s = "@lastrow"; (line[linelim++] = *s++); );
+    case LASTROW:  for (s = "@lastrow"; (line[linelim++] = *s++); );
             linelim--;
             break;
-    case LASTCOL:
-            for (s = "@lastcol"; (line[linelim++] = *s++); );
+    case LASTCOL:  for (s = "@lastcol"; (line[linelim++] = *s++); );
             linelim--;
             break;
     case COLTOA:   one_arg( "@coltoa(", e); break;
-    case CHR:      one_arg( "@chr(", e); break;
+    case CHR: one_arg( "@chr(", e); break;
     case FILENAME: one_arg( "@filename(", e); break;
-    case NUMITER:
-            for (s = "@numiter"; (line[linelim++] = *s++); );
+    case NUMITER:  for (s = "@numiter"; (line[linelim++] = *s++); );
             linelim--;
             break;
-    case ERR_:
-            for (s = "@err"; (line[linelim++] = *s++); );
+    case ERR_:     for (s = "@err"; (line[linelim++] = *s++); );
             linelim--;
             break;
-    case REF_:
-            for (s = "@ref"; (line[linelim++] = *s++); );
+    case REF_:     for (s = "@ref"; (line[linelim++] = *s++); );
             linelim--;
             break;
-    case PI_:
-            for (s = "@pi"; (line[linelim++] = *s++); );
+    case PI_:      for (s = "@pi"; (line[linelim++] = *s++); );
             linelim--;
             break;
-    case BLACK:
-            for (s = "@black"; (line[linelim++] = *s++); );
+    case BLACK:    for (s = "@black"; (line[linelim++] = *s++); );
             linelim--;
             break;
-    case RED:
-            for (s = "@red"; (line[linelim++] = *s++); );
+    case RED:      for (s = "@red"; (line[linelim++] = *s++); );
             linelim--;
             break;
-    case GREEN:
-            for (s = "@green"; (line[linelim++] = *s++); );
+    case GREEN:    for (s = "@green"; (line[linelim++] = *s++); );
             linelim--;
             break;
-    case YELLOW:
-            for (s = "@yellow"; (line[linelim++] = *s++); );
+    case YELLOW:   for (s = "@yellow"; (line[linelim++] = *s++); );
             linelim--;
             break;
-    case BLUE:
-            for (s = "@blue"; (line[linelim++] = *s++); );
+    case BLUE:     for (s = "@blue"; (line[linelim++] = *s++); );
             linelim--;
             break;
-    case MAGENTA:
-            for (s = "@magenta"; (line[linelim++] = *s++); );
+    case MAGENTA:  for (s = "@magenta"; (line[linelim++] = *s++); );
             linelim--;
             break;
-    case CYAN:
-            for (s = "@cyan"; (line[linelim++] = *s++); );
+    case CYAN:     for (s = "@cyan"; (line[linelim++] = *s++); );
             linelim--;
             break;
-    case WHITE:
-            for (s = "@white"; (line[linelim++] = *s++); );
+    case WHITE:    for (s = "@white"; (line[linelim++] = *s++); );
             linelim--;
             break;
-    default:
-            decompile(e->e.o.left, mypriority);
+    default:    decompile(e->e.o.left, mypriority);
             line[linelim++] = e->op;
             decompile(e->e.o.right, mypriority+1);
             break;

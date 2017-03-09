@@ -340,6 +340,7 @@ void rebuild_graph() {
 void EvalAll() {
     // Eval vertexs of graph
     EvalAllVertexs();
+    doLuaTriger();
     return;
 }
 
@@ -352,7 +353,10 @@ void EvalAllVertexs() {
     while (temp != NULL) {
         //sc_info("%d %d %d", temp->ent->row, temp->ent->col, i++);
         if ((p = *ATBL(tbl, temp->ent->row, temp->ent->col)) && p->expr)
+	  {
             EvalJustOneVertex(p, temp->ent->row, temp->ent->col, 1);
+	    if (atoi(get_conf_value("lua_trigger"))) doLuaTriger2(p->row,p->col,p->flags);
+	  }
         temp = temp->next;
     }
     //(void) signal(SIGFPE, exit_app);
@@ -400,7 +404,9 @@ void EvalJustOneVertex(register struct ent * p, int i, int j, int rebuild_graph)
             p->v = v;
             p->flags |= is_changed | is_valid;
             changed++;
+	    
         }
+	
     }
 }
 

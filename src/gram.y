@@ -205,6 +205,8 @@ token S_YANKCOL
 %token K_NOAUTOCALC
 %token K_DEBUG
 %token K_NODEBUG
+%token K_LUATRG
+%token K_NOLUATRG
 %token K_EXTERNAL_FUNCTIONS
 %token K_NOEXTERNAL_FUNCTIONS
 %token K_HALF_PAGE_SCROLL
@@ -290,6 +292,7 @@ token S_YANKCOL
 %token K_SLEN
 %token K_EQS
 %token K_EXT
+%token K_LUA
 %token K_NVAL
 %token K_SVAL
 %token K_LOOKUP
@@ -501,17 +504,11 @@ command:
     |    S_GOTO var_or_range     { moveto($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col, -1, -1); }
     |    S_GOTO num              { num_search($2, 0, 0, maxrow, maxcol, 0, 1); }
     |    S_GOTO STRING           { str_search($2, 0, 0, maxrow, maxcol, 0, 1);
-                                   //scxfree($2);
-                                   // shall not free string here
-                                 }
+                                   scxfree($2); }
     |    S_GOTO '#' STRING       { str_search($3, 0, 0, maxrow, maxcol, 1, 1);
-                                   // shall not free string here
-                                   //scxfree($3);
-                                 }
+                                   scxfree($3); }
     |    S_GOTO '%' STRING       { str_search($3, 0, 0, maxrow, maxcol, 2, 1);
-                                   // scxfree($3);
-                                   // shall not free string here
-                                 }
+                                   scxfree($3); }
  //   |    S_GOTO WORD             { /* don't repeat last goto on "unintelligible word" */ ; }
 
     |    S_LOCK var_or_range     { lock_cells($2.left.vp, $2.right.vp); }
@@ -565,15 +562,6 @@ command:
 #endif
                                           scxfree($3);
                                         }
-
-    |    S_CELLCOLOR STRING {
-#ifdef USECOLORS
-                                          if ( ! atoi(get_conf_value("nocurses")))
-                                              color_cell(currow, curcol, currow, curcol, $2);
-#endif
-                                          scxfree($2);
-                                        }
-
 
     |    S_REDEFINE_COLOR STRING NUMBER NUMBER NUMBER {
                                          redefine_color($2, $3, $4, $5);
@@ -831,6 +819,7 @@ term:           var                     { $$ = new_var(O_VAR, $1); }
                  { $$ = new(STINDEX, new_range(REDUCE | STINDEX, $4),
                     new(',', $6, $8)); }
         | '@' K_EXT  '(' e ',' e ')'    { $$ = new(EXT, $4, $6); }
+	| '@' K_LUA  '(' e ',' e ')'    { $$ = new(LUA, $4, $6); }
         | '@' K_NVAL '(' e ',' e ')'    { $$ = new(NVAL, $4, $6); }
         | '@' K_SVAL '(' e ',' e ')'    { $$ = new(SVAL, $4, $6); }
         | '@' K_REPLACE '(' e ',' e ',' e ')'
@@ -962,6 +951,10 @@ setitem :
     |    K_DEBUG '=' NUMBER              {  if ($3 == 0) parse_str(user_conf_d, "debug=0");
                                             else         parse_str(user_conf_d, "debug=1"); }
     |    K_NODEBUG                       {               parse_str(user_conf_d, "debug=0"); }
+    |    K_LUATRG                         {               parse_str(user_conf_d, "lua_trigger=1"); }
+    |    K_LUATRG '=' NUMBER              {  if ($3 == 0) parse_str(user_conf_d, "lua_trigger=0");
+                                            else         parse_str(user_conf_d, "lua_trigger=1"); }
+    |    K_NOLUATRG                       {               parse_str(user_conf_d, "lua_trigger=0"); }
     |    K_EXTERNAL_FUNCTIONS            {               parse_str(user_conf_d, "external_functions=1"); }
     |    K_EXTERNAL_FUNCTIONS '=' NUMBER {  if ($3 == 0) parse_str(user_conf_d, "external_functions=0");
                                             else         parse_str(user_conf_d, "external_functions=1"); }

@@ -150,6 +150,9 @@ int main (int argc, char ** argv) {
         }
     }
 
+
+   doLuainit();
+
     // load sc file
     load_sc();
 
@@ -372,7 +375,6 @@ void load_sc() {
         }
         wordfree(&p);
         EvalAll();                                 // we eval formulas
-        loadrc();
     }
     return;
 }

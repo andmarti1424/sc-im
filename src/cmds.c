@@ -276,7 +276,7 @@ int etype(register struct enode *e) {
     switch (e->op) {
         case UPPER: case LOWER: case CAPITAL:
         case O_SCONST: case '#': case DATE: case FMT: case STINDEX:
-        case EXT: case SVAL: case SUBSTR:
+        case EXT: case LUA: case SVAL: case SUBSTR:
             return (STR);
 
         case '?':

@@ -1,3 +1,5 @@
+NAME = SC-IM
+
 # Specify the name of the resulting executable file
 name = scim
 
@@ -16,25 +18,15 @@ MANDIR  = $(prefix)/man/man1
 #YACC = bison -y
 #SED  = sed
 
-ifeq ($(shell uname -s),Darwin)
-  NCURSES_CFLAGS ?=
-  NCURSES_LIBS   ?= -lncurses
-else ifeq ($(shell pkg-config --exists ncursesw || echo 'no'),no)
-  NCURSES_CFLAGS ?=
-  NCURSES_LIBS   ?= -lncursesw
-else
-  NCURSES_CFLAGS ?= $(shell pkg-config --cflags ncursesw)
-  NCURSES_LIBS   ?= $(shell pkg-config --libs ncursesw)
-endif
-
-LDLIBS += -lm $(NCURSES_LIBS)
+LDLIBS += -lm -llua5.1 $(shell pkg-config --libs ncursesw)
 
 CFLAGS += -Wall -g
-CFLAGS += $(NCURSES_CFLAGS)
-CFLAGS += -D_XOPEN_SOURCE_EXTENDED -D_GNU_SOURCE
-CFLAGS += -DSNAME=\"$(name)\"
+CFLAGS += $(shell pkg-config --cflags ncursesw)
+CFLAGS += -DSNAME=\"$(NAME)\"
+CFLAGS += -D_GNU_SOURCE
 CFLAGS += -DHELP_PATH=\"$(HELPDIR)\"
 CFLAGS += -DLIBDIR=\"$(LIBDIR)\"
+CFLAGS += -I /usr/include/lua5.1/
 
 # Sets default pager, e.g. 'less' or 'more'
 CFLAGS += -DDFLT_PAGER=\"less\"
@@ -53,11 +45,9 @@ CFLAGS += -DUSELOCALE
 #CFLAGS += -DXLS
 #LDLIBS += -lxlsreader
 
-# NOTE: libxml and libzip are required for xlsx format support
-ifneq ($(shell pkg-config --exists libzip libxml-2.0 || echo 'no'),no)
-CFLAGS += -DXLSX $(shell pkg-config --cflags libxml-2.0 libzip)
-LDLIBS += $(shell pkg-config --libs libxml-2.0 libzip)
-endif
+# Uncomment for basic XLSX support. Requires libzip and libxml2
+CFLAGS += -DXLSX -I/usr/include/libxml2
+LDLIBS += -lzip -lxml2
 
 OBJS = $(patsubst %.c, %.o, $(wildcard *.c) $(wildcard utils/*.c)) gram.o
 
@@ -82,7 +72,7 @@ $(name) : $(OBJS)
 	$(CC) $(LDFLAGS) $^ -o $@ $(LDLIBS) 
 
 $(name)qref: sc.h
-	$(CC) $(CFLAGS) $(LDFLAGS) -DQREF $(QREF_FMT) -DSCNAME=\"$(name)\" -o $(name)qref help.c $(LDLIBS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -DQREF $(QREF_FMT) -DSCNAME=\"$(NAME)\" -o $(name)qref help.c $(LDLIBS)
 
 $(OBJS) : y.tab.h experres.h statres.h
 
