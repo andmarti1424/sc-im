@@ -107,20 +107,56 @@ static int l_setform (lua_State *L) {
 
  }
 
+char * query(char * initial_msg) {
+    curs_set(1);
+    char * hline = malloc(sizeof(char) * BUFFERSIZE);
+    hline[0]='\0';
+
+    // show initial message
+    if (strlen(initial_msg)) sc_info(initial_msg);
+
+    // ask for input
+    wmove(input_win, 0, rescol);
+    wclrtoeol(input_win);
+    wtimeout(input_win, -1);
+    int d = wgetch(input_win);
+    while (d != OKEY_ENTER && d != OKEY_ESC) {
+        if (d == OKEY_BS || d == OKEY_BS2) {
+            del_char(hline, strlen(hline) - 1);
+       } else {
+            sprintf(hline + strlen(hline), "%c", d);
+        }
+
+        mvwprintw(input_win, 0, rescol, "%s", hline);
+        wclrtoeol(input_win);
+        wrefresh(input_win);
+        d = wgetch(input_win);
+    }
+    if (d == OKEY_ESC) hline[0]='\0';
+
+    // go back to spreadsheet
+    noecho();
+    curs_set(0);
+    wtimeout(input_win, TIMEOUT_CURSES);
+    wmove(input_win, 0,0);
+    wclrtoeol(input_win);
+
+    if (strlen(hline)) return hline;
+    else return NULL;
+}
+
 
 static int l_query (lua_State *L) {
   char * val;
+  char * ret;
   val=lua_tostring(L,1);
 
   //  goraw();
-  //query(val,NULL);
+  ret=query(val);
   // deraw(0);
-  if(strlen(line) ==0) return 0;
-  lua_pushstring(L,line);
-  line[0] = '\0';
-    linelim = -1;
-    //sc_error("");
-    update(0);
+  if(ret == NULL)  return 0;
+  lua_pushstring(L,ret);
+  free(ret);
 
   return 1;
 }

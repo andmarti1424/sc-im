@@ -5,7 +5,6 @@ set extfun
 let A0 = @ston(@lua("macro.lua",0))
 leftstring B1 = "Roman"
 let F1 = @sum(A6:A8)
-let H1 = @ston(@lua("macro.lua",0))
 let A6 = 5
 let A7 = 5
 let A8 = 5

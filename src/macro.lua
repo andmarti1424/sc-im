@@ -5,8 +5,8 @@
 --a=lgetnum(1,2)
 --print("Message from LUA "..a)
 
---tmp=lquery("Test")
---lsetstr(0,0,tmp)
+tmp=lquery("Info from Lua, type in your input: ")
+lsetstr(0,0,tmp)
 lsetstr(1,1,"Roman")
 
 for a=10,20,1 do
