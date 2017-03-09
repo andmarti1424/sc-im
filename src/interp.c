@@ -645,8 +645,10 @@ double dolmax(struct enode * ep) {
     cellerror = CELLOK;
     for (p = ep; p; p = p->e.o.left) {
         v = eval(NULL, p->e.o.right);
-        if ( !count || v > maxval) maxval = v;
-        count++;
+        if ( !count || v > maxval) {
+            maxval = v;
+            count++;
+        }
     }
     if (count) return maxval;
     else return (double)0;
@@ -661,8 +663,10 @@ double dolmin(struct enode * ep) {
     cellerror = CELLOK;
     for (p = ep; p; p = p->e.o.left) {
         v = eval(NULL, p->e.o.right);
-        if ( !count || v < minval) minval = v;
-        count++;
+        if ( !count || v < minval) {
+            minval = v;
+            count++;
+        }
     }
     if (count) return minval;
     else return (double)0;
