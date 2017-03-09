@@ -34,27 +34,17 @@ void do_normalmode(struct block * buf) {
     struct ent * e;
 
     switch (buf->value) {
+        /* FOR TEST PURPOSES
         case L'A':
-            //add_frange(lookat(0, 0), lookat(0, 3), 'c');
-            //add_frange(lookat(0, 1), lookat(0, 3), 'c');
-            //add_frange(lookat(0, 4), lookat(0, 6), 'c');
-            //add_frange(lookat(0, 27), lookat(0, 28), 'c');
-            //add_frange(lookat(0, 0), lookat(4, 0), 'r');
-            //add_frange(lookat(4, 0), lookat(8, 0), 'r');
-            //add_frange(lookat(14, 0), lookat(18, 0), 'r');
-            //add_frange(lookat(24, 0), lookat(24, 0), 'r');
-            //add_frange(lookat(24, 0), lookat(26, 0), 'r');
             update(FALSE);
             break;
 
-        /* TEST
         case L'W':
             break;
 
         case L'Q':
             break;
         */
-
 
         // MOVEMENT COMMANDS
         case L'j':

@@ -1373,7 +1373,6 @@ struct ent * goto_bottom() {
     return lookat(r, curcol);
 }
 
-// FIXME to handle freeze rows/cols
 struct ent * go_forward() {
     int r = currow, c = curcol;
     int r_ori = r, c_ori = c;
@@ -1425,7 +1424,6 @@ struct ent * horiz_middle() {
     return NULL;
 }
 
-// FIXME to handle freeze rows/cols
 struct ent * go_backward() {
     int r = currow, c = curcol;
     int r_ori = r, c_ori = c;
