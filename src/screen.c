@@ -346,6 +346,10 @@ void show_sc_row_headings(WINDOW * win, int mxrow) {
 
     //for (i = 0; i < mxrow && i < maxrows; i++) {
     for (i = 0; i <= mxrow; i++) {
+        if (i >= maxrows) {
+            sc_error("i >= maxrows in show_sc_row_headings. please check calc_offscr_sc_rows.");
+            break;
+        }
         // print rows in case freezen rows are before offscr_sc_rows
         if (i < offscr_sc_rows && !(freeze && i >= freeze_ranges->tl->row && i <= freeze_ranges->br->row)) continue;
 
@@ -389,8 +393,12 @@ void show_sc_col_headings(WINDOW * win, int mxcol) {
     wclrtoeol(win);
 
     //FIXME
-    for (i = 0; i <= mxcol && i < maxcols; i++) {
-    //for (i = 0; i <= mxcol; i++) {
+    //for (i = 0; i <= mxcol && i < maxcols; i++) {
+    for (i = 0; i <= mxcol; i++) {
+        if (i >= maxcols) {
+            sc_error("i >= maxcols in show_sc_col_headings. please check calc_offscr_sc_cols.");
+            break;
+        }
         // print cols in case freezen columns are before offscr_sc_cols
         if (i < offscr_sc_cols && !(freeze && i >= freeze_ranges->tl->col && i <= freeze_ranges->br->col)) continue;
 
@@ -433,8 +441,14 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
     int freezec = freeze_ranges && (freeze_ranges->type == 'c' ||  freeze_ranges->type == 'a') ? 1 : 0;
 
     //FIXME
-    for (row = 0; row <= mxrow && row < maxrows; row++) {
+    //for (row = 0; row <= mxrow && row < maxrows; row++) {
     //for (row = 0; row < mxrow; row++) {
+    for (row = 0; row <= mxrow; row++) {
+        if (row >= maxrows) {
+            sc_error("i >= maxrows in show_content. please check calc_offscr_sc_rows.");
+            break;
+        }
+
         if (row < offscr_sc_rows
             && (freezer
             && row >= freeze_ranges->tl->row
@@ -467,8 +481,12 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
         col = 0;
 
         //FIXME
-        //for (p = ATBL(tbl, row, col); col <= mxcol; p += nextcol - col, col = nextcol, c += fieldlen) {
-        for (p = ATBL(tbl, row, col); col <= mxcol && col < maxcols; p += nextcol - col, col = nextcol, c += fieldlen) {
+        for (p = ATBL(tbl, row, col); col <= mxcol; p += nextcol - col, col = nextcol, c += fieldlen) {
+        //for (p = ATBL(tbl, row, col); col <= mxcol && col < maxcols; p += nextcol - col, col = nextcol, c += fieldlen) {
+            if (col >= maxcols) {
+                sc_error("i >= maxcols in show_content. please check calc_offscr_sc_cols.");
+                break;
+            }
 
             nextcol = col + 1;
             fieldlen = fwidth[col];
@@ -888,7 +906,7 @@ int calc_offscr_sc_cols() {
             if (i < offscr_sc_cols && ! (freeze && i >= tlcol && i <= brcol)) continue;
             else if (freeze && i > brcol && i <= brcol + center_hidden_cols) continue;
             else if (freeze && i < tlcol && i >= tlcol - center_hidden_cols) continue;
-            if (i < offscr_sc_cols && freeze && i >= tlcol && i <= brcol && ! col_hidden[i]) q++;
+            if (i < offscr_sc_cols && freeze && i >= tlcol && i <= brcol && ! col_hidden[i] ) q++;
             cols++;
             if (! col_hidden[i]) col += fwidth[i];
             //sc_debug("I i:%d %s -  col:%d fwidth:%d COLS:%d", i, coltoa(i), col, fwidth[i+1], COLS);
@@ -909,7 +927,7 @@ int calc_offscr_sc_cols() {
 
         // derecha
         } else if (offscr_sc_cols + center_hidden_cols + cols == curcol &&
-          (! freeze || (curcol > brcol && offscr_sc_cols < tlcol) || (curcol >= cols && offscr_sc_cols < tlcol))) {
+            (! freeze || (curcol > brcol && offscr_sc_cols < tlcol) || (curcol >= cols && offscr_sc_cols < tlcol))) {
             offscr_sc_cols++;
 
         // derecha con freeze cols a la izq.
@@ -923,21 +941,20 @@ int calc_offscr_sc_cols() {
 
         } else {
             //sc_debug("5a off:%d, center:%d, cols:%d, curcol:%d, tl:%d, br:%d", offscr_sc_cols, center_hidden_cols, cols, curcol, tlcol, brcol);
-
             // Try to put the cursor in the center of the screen
             col = (COLS - rescol - fwidth[curcol]) / 2 + rescol;
-                if (freeze && curcol > brcol) {
-                    offscr_sc_cols = tlcol;
-                    center_hidden_cols = curcol - 2;
-                } else {
-                    offscr_sc_cols = curcol;
-                    center_hidden_cols = 0;
-                }
+            if (freeze && curcol > brcol) {
+                offscr_sc_cols = tlcol;
+                center_hidden_cols = curcol - 2; //FIXME
+            } else {
+                offscr_sc_cols = curcol;
+                center_hidden_cols = 0;
+            }
 
             for (i=curcol-1; i >= 0 && col-fwidth[i] - 1 > rescol; i--) {
                 if (freeze && curcol > brcol) center_hidden_cols--;
                 else offscr_sc_cols--;
-                if (! col_hidden[i]) col -= fwidth[i];
+                if ( ! col_hidden[i]) col -= fwidth[i];
             }
             //sc_debug("5c off:%d, center:%d, cols:%d, curcol:%d, tl:%d, br:%d", offscr_sc_cols, center_hidden_cols, cols, curcol, tlcol, brcol);
         }
@@ -981,9 +998,8 @@ int calc_offscr_sc_rows() {
     if (offscr_sc_rows - 1 <= currow) {
         for (i = 0, q = 0, rows = 0, row=RESROW; i < maxrows && row < LINES; i++) {
             if (i < offscr_sc_rows && ! (freeze && i >= tlrow && i <= brrow)) continue;
-            else if (freeze && i > brrow && i < brrow + center_hidden_rows) continue;
-            else if (freeze && i < tlrow && i > tlrow - center_hidden_rows) continue;
-
+            else if (freeze && i > brrow && i <= brrow + center_hidden_rows) continue;
+            else if (freeze && i < tlrow && i >= tlrow - center_hidden_rows) continue;
             if (i < offscr_sc_rows && freeze && i >= tlrow && i <= brrow && ! row_hidden[i] ) q++;
             rows++;
             //if (i == maxrows - 1) return rows+1;
@@ -1005,9 +1021,8 @@ int calc_offscr_sc_rows() {
 
         // move up
         if (offscr_sc_rows - 1 == currow) {
-            if (freeze && offscr_sc_rows + rows + center_hidden_rows >= brrow && brrow - rows - offscr_sc_rows + 3 > 0) {
+            if (freeze && offscr_sc_rows + rows + center_hidden_rows >= brrow && brrow - rows - offscr_sc_rows + 3 > 0)
                 center_hidden_rows = brrow - rows - offscr_sc_rows + 3;
-            }
             offscr_sc_rows--;
 
         // move down
@@ -1027,28 +1042,26 @@ int calc_offscr_sc_rows() {
         } else {
             // Try to put the cursor in the center of the screen
             row = (LINES - RESROW) / 2 + RESROW;
-
-            //if (freeze) center_hidden_rows = currow;
-            //else
-            offscr_sc_rows = currow;
+            if (freeze && currow > brrow) {
+                offscr_sc_rows = tlrow;
+                center_hidden_rows = currow - 2; //FIXME
+            } else {
+                offscr_sc_rows = currow;
+                center_hidden_rows = 0;
+            }
 
             for (i=currow-1; i >= 0 && row - 1 > RESROW && i < maxrows; i--) {
-                //if (freeze)
-                //center_hidden_rows--;
-                //else
-                offscr_sc_rows--;
-
-                // if its shown, we count it, else continue.
-                if (!row_hidden[i] && !freeze) row--;
-                else if (!row_hidden[i] && !( (i > brrow && i < brrow + center_hidden_rows) || (i < tlrow && i > tlrow - center_hidden_rows))) row--;
+                if (freeze && currow > brrow) center_hidden_rows--;
+                else offscr_sc_rows--;
+                //if ( ! row_hidden[i] && !freeze) row--;
+                if ( ! row_hidden[i]) row--;
             }
         }
         // Now pick up the counts again
         for (i = 0, rows = 0, row=RESROW, q = 0; i < maxrows && row < LINES; i++) {
             if (i < offscr_sc_rows && ! (freeze && i >= tlrow && i <= brrow)) continue;
-            else if (freeze && i > brrow && i < brrow + center_hidden_rows) continue;
-            else if (freeze && i < tlrow && i > tlrow - center_hidden_rows) continue;
-
+            else if (freeze && i > brrow && i <= brrow + center_hidden_rows) continue;
+            else if (freeze && i < tlrow && i >= tlrow - center_hidden_rows) continue;
             if (i < offscr_sc_rows && freeze && i >= tlrow && i <= brrow && ! row_hidden[i] ) q++;
             rows++;
             //if (i == maxrows - 1) return rows+1;
