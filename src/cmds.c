@@ -1316,24 +1316,30 @@ void scroll_right(int n) {
 
 void scroll_left(int n) {
     extern int center_hidden_cols;
-    int off_cols = calc_offscr_sc_cols();
-    int mxcol = offscr_sc_cols + off_cols - 1;
     int freezec = freeze_ranges && (freeze_ranges->type == 'c' ||  freeze_ranges->type == 'a') ? 1 : 0;
+
     while (n--) {
+        int a = 1;
+        int b = 0, c = 0, d = 0;
         if (freezec && center_hidden_cols) {
             center_hidden_cols--;
-            sc_debug("n:%d   center:%d", n, center_hidden_cols);
         } else if (offscr_sc_cols) {
             offscr_sc_cols--;
         } else {
             sc_info("cannot scroll no longer");
             break;
         }
-        if (curcol == mxcol) {
-            curcol = back_col(1)->col;
-            unselect_ranges();
-            //off_cols = calc_offscr_sc_cols();
-            //mxcol = offscr_sc_cols + off_cols - 1;
+        while (a != b && curcol) {
+            a = offscr_sc_cols;
+            c = center_hidden_cols;
+            calc_offscr_sc_cols();
+            b = offscr_sc_cols;
+            d = center_hidden_cols;
+            if (a != b || c != d) {
+                curcol = back_col(1)->col;
+                offscr_sc_cols = a;
+                center_hidden_cols = c;
+            }
         }
     }
     return;
@@ -1798,9 +1804,9 @@ int is_single_command (struct block * buf, long timeout) {
         else if (buf->value == L'E')        res = MOVEMENT_CMD;
         else if (buf->value == L'v')        res = MOVEMENT_CMD;
 
-        else if (buf->value == L'Q')        res = MOVEMENT_CMD;  //TEST
-        else if (buf->value == L'A')        res = MOVEMENT_CMD;  //TEST
-        else if (buf->value == L'W')        res = MOVEMENT_CMD;  //TEST
+        else if (buf->value == L'Q')        res = MOVEMENT_CMD;  /* FOR TEST PURPOSES */
+        else if (buf->value == L'A')        res = MOVEMENT_CMD;  /* FOR TEST PURPOSES */
+        else if (buf->value == L'W')        res = MOVEMENT_CMD;  /* FOR TEST PURPOSES */
 
         // movement commands
         else if (buf->value == L'j')        res = MOVEMENT_CMD;
@@ -1870,7 +1876,7 @@ int is_single_command (struct block * buf, long timeout) {
 
         else if (buf->value == L'g' && bs > 2 && timeout >= COMPLETECMDTIMEOUT)
                  res = MOVEMENT_CMD; // goto cell
-                 // TODO add validation: buf->pnext->value debe ser letra
+                 // TODO add validation: buf->pnext->value must be a letter
 
         else if (buf->value == L'P' && bs == 2 && (
             buf->pnext->value == L'v' || 
