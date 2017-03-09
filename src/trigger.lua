@@ -6,6 +6,8 @@ function trigger()
 file=io.open("/tmp/test.sctrg", "a+")
 
 file:write("test"..a)
+file:write("test1 "..sc.maxcols())
+file:write("test1 "..sc.maxrows())
 a=a+1
 file:close()
 

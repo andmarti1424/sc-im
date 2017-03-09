@@ -10,8 +10,15 @@
 #include "cmds.h"
 
 
+#define LC_NUMBER2(n,v)                     \
+    static int l_ ## n(lua_State *L)       \
+    {                                       \
+        lua_pushnumber(L, v);               \
+        return 1;                           \
+    }
 
-static  lua_State *L;
+
+  lua_State *L;
 
 
 
@@ -172,6 +179,12 @@ static int l_query (lua_State *L) {
 }
 
 
+LC_NUMBER2(currow,currow)
+LC_NUMBER2(curcol,curcol)
+LC_NUMBER2(maxcols,maxcols)
+LC_NUMBER2(maxrows,maxrows)
+
+
 
 static const luaL_reg sclib[] =
 {
@@ -180,6 +193,10 @@ static const luaL_reg sclib[] =
  { "lsetform", l_setform },
  { "lsetstr", l_setstr },
  { "lquery", l_query },
+ { "currow", l_currow },
+ { "curcol", l_curcol },
+ { "maxcols", l_maxcols },
+ { "maxrows", l_maxrows },
  {NULL,NULL}
 };
   

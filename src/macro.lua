@@ -18,3 +18,6 @@ end
 
 sc.lsetform(1,5,"@sum(a5:a7)")
 
+sc.lsetnum(1,4,sc.maxcols)
+
+
