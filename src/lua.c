@@ -108,6 +108,15 @@ static int l_setform (lua_State *L) {
  }
 
 char * query(char * initial_msg) {
+
+   int loading_o;
+   
+    if(loading) {
+		loading_o=loading;
+		loading=0;
+   		update(0);
+		loading=loading_o;
+		}
     curs_set(1);
     char * hline = malloc(sizeof(char) * BUFFERSIZE);
     hline[0]='\0';
@@ -118,6 +127,7 @@ char * query(char * initial_msg) {
     // ask for input
     wmove(input_win, 0, rescol);
     wclrtoeol(input_win);
+    wrefresh(input_win);
     wtimeout(input_win, -1);
     int d = wgetch(input_win);
     while (d != OKEY_ENTER && d != OKEY_ESC) {
@@ -233,10 +243,10 @@ doLuaTriger()
     lua_getglobal(L, "trigger");                 /* Tell what function to run */
 
     /* BELOW HERE IS THE HELLO WORLD CODE */
-    printf("In C, calling Lua\n");
+    //printf("In C, calling Lua\n");
     if (lua_pcall(L, 0, 0, 0))                  /* Run the function */
 	bail(L, "lua_pcall() failed");          /* Error out if Lua file has an error */
-    printf("Back in C again\n");
+    //printf("Back in C again\n");
 
 
 
@@ -263,10 +273,10 @@ doLuaTriger2(int row, int col, int flags)
     lua_pushinteger(L,col);
     lua_pushinteger(L, flags);
     /* BELOW HERE IS THE HELLO WORLD CODE */
-    printf("In C, calling Lua\n");
+    //printf("In C, calling Lua\n");
     if (lua_pcall(L, 3, 0, 0))                  /* Run the function */
 	bail(L, "lua_pcall() failed");          /* Error out if Lua file has an error */
-    printf("Back in C again\n");
+    //printf("Back in C again\n");
 
 
 
