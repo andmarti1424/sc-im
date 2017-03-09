@@ -17,7 +17,7 @@ function trigger_cell(row,col, flags)
 
 file=io.open("/tmp/test.sctrg", "a+")
 
-res=lgetnum(row,col)
+res=sc.lgetnum(row,col)
 if res then
 file:write("Trigger cell called for "..row..":"..col.." value is "..res.." flags = "..flags.."\n")
 else

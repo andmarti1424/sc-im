@@ -172,17 +172,34 @@ static int l_query (lua_State *L) {
 }
 
 
+
+static const luaL_reg sclib[] =
+{
+ { "lgetnum", l_getnum },
+ { "lsetnum", l_setnum },
+ { "lsetform", l_setform },
+ { "lsetstr", l_setstr },
+ { "lquery", l_query },
+ {NULL,NULL}
+};
+  
+
+
 doLuainit()
 {
   
  L = luaL_newstate();                        /* Create Lua state variable */
     luaL_openlibs(L);                           /* Load Lua libraries */
 
+/*
     lua_register(L,"lgetnum",l_getnum);
     lua_register(L,"lsetnum",l_setnum);
     lua_register(L,"lsetform",l_setform);
     lua_register(L,"lsetstr",l_setstr);
     lua_register(L,"lquery",l_query);
+*/
+
+ luaL_register(L, "sc", sclib);
 
     if (luaL_loadfile(L, "init.lua")) /* Load but don't run the Lua script */
 	bail(L, "luaL_loadfile() failed");      /* Error out if file can't be read */
