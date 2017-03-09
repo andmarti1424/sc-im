@@ -1314,28 +1314,8 @@ void scroll_right(int n) {
     return;
 }
 
-// FIXME to handle freeze rows/cols
 void scroll_left(int n) {
     extern int center_hidden_cols;
-    /*
-    while (n--) {
-        if (! offscr_sc_cols && ! center_hidden_cols) {
-            break;
-        }
-        int a = 1;
-        int b = 0;
-        offscr_sc_cols--;
-        while (a != b && curcol) {
-            a = offscr_sc_cols;
-            calc_offscr_sc_cols();
-            b = offscr_sc_cols;
-            if (a != b) {
-                curcol --;
-                offscr_sc_cols = a;
-            }
-        }
-    }*/
-
     int off_cols = calc_offscr_sc_cols();
     int mxcol = offscr_sc_cols + off_cols - 1;
     int freezec = freeze_ranges && (freeze_ranges->type == 'c' ||  freeze_ranges->type == 'a') ? 1 : 0;
@@ -1368,9 +1348,6 @@ struct ent * right_limit() {
     while ( (! VALID_CELL(p, currow, c) && c > 0) || col_hidden[c]) c--;
     return lookat(currow, c);
 }
-
-
-
 
 // FIXME to handle freeze rows/cols
 struct ent * goto_top() {
@@ -1428,8 +1405,8 @@ struct ent * horiz_middle() {
     for (i = offscr_sc_cols; i < offscr_sc_cols + visibles; i++) {
         //if not shown, continue
         if (col_hidden[i]) continue;
-        else if (freeze && i > brcol && i < brcol + center_hidden_cols) continue;
-        else if (freeze && i < tlcol && i > tlcol - center_hidden_cols) continue;
+        else if (freeze && i > brcol && i <= brcol + center_hidden_cols) continue;
+        else if (freeze && i < tlcol && i >= tlcol - center_hidden_cols) continue;
 
         ancho += fwidth[i];
         if (ancho >= (COLS-rescol)/2) {
@@ -1459,21 +1436,6 @@ struct ent * go_backward() {
 
     return lookat(r_ori, c_ori);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 void auto_justify(int ci, int cf, int min) {
     // column width is not set below the min value
