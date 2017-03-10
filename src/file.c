@@ -195,15 +195,40 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
     for (c = 0; c < COLFORMATS; c++)
         if (colformat[c])
             (void) fprintf (f, "format %d = \"%s\"\n", c, colformat[c]);
+
     for (c = c0; c <= cn; c++)
         if (fwidth[c] != DEFWIDTH || precision[c] != DEFPREC || realfmt[c] != DEFREFMT)
             (void) fprintf (f, "format %s %d %d %d\n", coltoa(c), fwidth[c], precision[c], realfmt[c]);
-    for (c = c0; c <= cn; c++)
-        if (col_hidden[c])
-            (void) fprintf(f, "hide %s\n", coltoa(c));
-    for (r = r0; r <= rn; r++)
-        if (row_hidden[r])
-            (void) fprintf(f, "hide %d\n", r);
+
+    // new implementation of hidecol. group by ranges
+    for (c = c0; c <= cn; c++) {
+        int c_aux = c;
+        if ( col_hidden[c] && c <= maxcol && ( c == 0 || !col_hidden[c-1] )) {
+            while (c_aux <= maxcol && col_hidden[c_aux])
+                c_aux++;
+            fprintf(f, "hidecol %s", coltoa(c));
+            if (c_aux-1 != c) {
+                fprintf(f, ":%s\n", coltoa(c_aux-1));
+                c = c_aux-1;
+            } else
+                fprintf(f, "\n");
+        }
+    }
+
+    // new implementation of hiderow. group by ranges
+    for (r = r0; r <= rn; r++) {
+        int r_aux = r;
+        if ( row_hidden[r] && r <= maxrow && ( r == 0 || !row_hidden[r-1] )) {
+            while (r_aux <= maxrow && row_hidden[r_aux])
+                r_aux++;
+            fprintf(f, "hiderow %d", r);
+            if (r_aux-1 != r) {
+                fprintf(f, ":%d\n", r_aux-1);
+                r = r_aux-1;
+            } else
+                fprintf(f, "\n");
+        }
+    }
 
     write_marks(f);
     write_franges(f);
