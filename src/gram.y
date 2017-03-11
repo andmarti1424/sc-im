@@ -201,6 +201,7 @@ token S_YANKCOL
 %token S_FCOPY
 %token S_FSUM
 %token S_TRIGGER
+%token S_UNTRIGGER
 
 %token K_AUTOCALC
 %token K_NOAUTOCALC
@@ -569,6 +570,13 @@ command:
                                               set_trigger($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col, $3);
                                           scxfree($3);
                                         }
+     |    S_UNTRIGGER var_or_range     {
+       del_trigger($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col);
+      
+
+				       
+                                  	}
+
 
     |    S_REDEFINE_COLOR STRING NUMBER NUMBER NUMBER {
                                          redefine_color($2, $3, $4, $5);

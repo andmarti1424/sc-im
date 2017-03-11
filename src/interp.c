@@ -1920,7 +1920,7 @@ void let(struct ent * v, struct enode * e) {
             changed++;
             modflg++;
             v->cellerror = cellerror;
-   if (atoi(get_conf_value("lua_trigger"))) doLuaTriger2(v->row,v->col,1);
+   //if (atoi(get_conf_value("lua_trigger"))) doLuaTriger2(v->row,v->col,1);
         }
         (void) signal(SIGFPE, exit_app);
         if (exprerr) {
@@ -1936,7 +1936,7 @@ void let(struct ent * v, struct enode * e) {
         decimal = FALSE;
 
         v->v = val;
-   if (atoi(get_conf_value("lua_trigger"))) doLuaTriger2(v->row,v->col,0);
+   //if (atoi(get_conf_value("lua_trigger"))) doLuaTriger2(v->row,v->col,0);
 
         if ( !(v->flags & is_strexpr) ) {
             efree(v->expr);
@@ -1949,7 +1949,7 @@ void let(struct ent * v, struct enode * e) {
         v->expr = e;
         v->flags &= ~is_strexpr;
         eval(v, e); // ADDED - here we store the cell dependences in a graph
-   if (atoi(get_conf_value("lua_trigger"))) doLuaTriger2(v->row,v->col,2);
+   //if (atoi(get_conf_value("lua_trigger"))) doLuaTriger2(v->row,v->col,2);
     }
 
     if (v->cellerror == CELLOK) v->flags |= ( is_changed | is_valid );

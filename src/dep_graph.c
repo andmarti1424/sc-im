@@ -356,7 +356,7 @@ void EvalAllVertexs() {
         if ((p = *ATBL(tbl, temp->ent->row, temp->ent->col)) && p->expr)
 	  {
             EvalJustOneVertex(p, temp->ent->row, temp->ent->col, 1);
-	    	if (atoi(get_conf_value("lua_trigger"))) doLuaTriger2(p->row,p->col,3);
+	    //	if (atoi(get_conf_value("lua_trigger"))) doLuaTriger2(p->row,p->col,3);
 	  }
         temp = temp->next;
     }

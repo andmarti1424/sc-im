@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <memory.h>
 
-#define ATBL(tbl, row, col)    (*(tbl + row) + (col))
+//#define ATBL(tbl, row, col)    (*(tbl + row) + (col)) 
 #define MINROWS      100     /* minimum size at startup */
 
 /* MAX rows size of sheet. Default 65536.   */
@@ -45,6 +45,9 @@
     # define    FALSE   0
     # define    TRUE    1
 #endif
+
+
+extern struct ent **ATBL(struct ent ***,int ,int );
 
 /*
  * Some not too obvious things about the flags:

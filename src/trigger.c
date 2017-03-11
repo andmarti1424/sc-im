@@ -92,16 +92,63 @@ void set_trigger(int r, int c, int rf, int cf, char * str) {
 
 
 
+void del_trigger(int r, int c, int rf, int cf )
+{
+  if (any_locked_cells(r, c, rf, cf)) {
+        sc_error("Locked cells encountered. Nothing changed");
+        return;
+    }  
+
+      struct ent * n;
+    int i, j;
+    for (i=r; i<=rf; i++) {
+        for (j=c; j<=cf; j++) {
+
+	   // action
+            n = lookat(i, j);
+	    if (n->trigger != NULL )
+	      {
+		free(n->trigger->file);
+		free(n->trigger->function);
+		free(n->trigger);
+		  n->trigger=NULL;  
+
+	      }
+	}
+    }
+
+}
+
+
+
+
+struct ent ** ATBL(struct ent ***tbl, int row, int col)
+{
+
+  struct ent **ent=(*(tbl+row)+(col));
+  struct ent *v= *ent;
+  
+  if((v) && (v->trigger) && ((v->trigger->flag & TRG_READ) == TRG_READ))
+    do_trigger(v,TRG_READ);
+
+  return ent;
+
+}
+
+static in_trigger=0;
+
 do_trigger( struct ent *p , int rw)
 {
 
+  
   struct trigger *trigger = p->trigger;
-
+  if(in_trigger) return;
+  in_trigger=1;
   if ((trigger->flag & TRG_LUA ) == TRG_LUA)
     doLuaTrigger_cell(p,rw);
    if ((trigger->flag & TRG_C ) == TRG_C)
     do_C_Trigger_cell(p,rw);
-
+   in_trigger=0;
 }
 
 
