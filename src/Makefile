@@ -18,7 +18,7 @@ MANDIR  = $(prefix)/man/man1
 #YACC = bison -y
 #SED  = sed
 
-LDLIBS += -lm -llua5.1 $(shell pkg-config --libs ncursesw)
+LDLIBS +=  -Wl,--export-dynamic -lm -llua5.1 -ldl $(shell pkg-config --libs ncursesw)
 
 CFLAGS += -Wall -g
 CFLAGS += $(shell pkg-config --cflags ncursesw)

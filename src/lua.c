@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include "sc.h"
 #include "cmds.h"
+#include "trigger.h"
 
 
 #define LC_NUMBER2(n,v)                     \
@@ -302,6 +303,43 @@ doLuaTriger2(int row, int col, int flags)
 
    
     lua_getglobal(L, "trigger_cell");                 /* Tell what function to run */
+
+    lua_pushinteger(L,row);
+    lua_pushinteger(L,col);
+    lua_pushinteger(L, flags);
+    /* BELOW HERE IS THE HELLO WORLD CODE */
+    //printf("In C, calling Lua\n");
+    if (lua_pcall(L, 3, 0, 0))                  /* Run the function */
+	bail(L, "lua_pcall() failed");          /* Error out if Lua file has an error */
+    //printf("Back in C again\n");
+
+
+
+}
+
+/*
+Lua trigger on a particular cell
+we assume file and function ist correct other lua throught an error
+*/ 
+doLuaTrigger_cell(struct ent *p, int flags)
+{
+  int row,col;
+  struct trigger *trigger=p->trigger;
+
+  row=p->row;
+  col=p->col;
+ 
+
+   if (luaL_loadfile(L, trigger->file)) /* Load but don't run the Lua script */
+     return;
+     //bail(L, "luaL_loadfile() failed");      /* Error out if file can't be read */
+
+
+   if (lua_pcall(L, 0, 0, 0))                  /* PRIMING RUN. FORGET THIS AND YOU'RE TOAST */
+        bail(L, "lua_pcall() failed");          /* Error out if Lua file has an error */
+
+   
+    lua_getglobal(L, trigger->function);                 /* Tell what function to run */
 
     lua_pushinteger(L,row);
     lua_pushinteger(L,col);

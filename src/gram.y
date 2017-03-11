@@ -200,6 +200,7 @@ token S_YANKCOL
 %token S_SET
 %token S_FCOPY
 %token S_FSUM
+%token S_TRIGGER
 
 %token K_AUTOCALC
 %token K_NOAUTOCALC
@@ -560,6 +561,12 @@ command:
                                           if ( ! atoi(get_conf_value("nocurses")))
                                               color_cell($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col, $3);
 #endif
+                                          scxfree($3);
+                                        }
+
+   |    S_TRIGGER var_or_range STRING {
+
+                                              set_trigger($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col, $3);
                                           scxfree($3);
                                         }
 

@@ -72,6 +72,7 @@ struct ent {
     char * format;        /* printf format for this cell */
     char cellerror;       /* error in a cell? */
     struct ucolor * ucolor;
+    struct trigger * trigger;
     int pad;              // padding between other cells
 };
 

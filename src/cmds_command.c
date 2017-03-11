@@ -46,6 +46,7 @@ L"addfilter",
 L"autojus",
 L"cellcolor",
 L"color",
+L"trigger",
 L"e csv",
 L"e tab",
 L"e txt",
@@ -562,7 +563,27 @@ void do_commandmode(struct block * sb) {
             inputline[0] = '\0';
             #endif
 
-        } else if ( ! wcsncmp(inputline, L"set ", 4) ) {
+        }  else if ( ! wcsncmp(inputline, L"trigger ", 8) ) {
+            #ifdef USECOLORS
+            interp_line[0]=L'\0';
+            wchar_t line [BUFFERSIZE];
+            wcscpy(line, inputline);
+            del_range_wchars(line, 0, 7);
+            swprintf(interp_line, BUFFERSIZE, L"trigger ");
+            if (p != -1) {
+                swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L" %s%d:", coltoa(sr->tlcol), sr->tlrow);
+                swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%s%d ", coltoa(sr->brcol), sr->brrow);
+            }
+            swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%ls", line);
+            send_to_interp(interp_line);
+            #else
+            sc_error("Color support not compiled in");
+            chg_mode('.');
+            inputline[0] = L'\0';
+            #endif
+
+        } 
+	 else if ( ! wcsncmp(inputline, L"set ", 4) ) {
             //char line [BUFFERSIZE];
             //wcstombs(line, inputline, BUFFERSIZE);
             //del_range_chars(line, 0, 3);

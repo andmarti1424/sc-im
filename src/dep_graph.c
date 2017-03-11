@@ -8,6 +8,7 @@
 #include "xmalloc.h" // for scxfree
 #include <math.h>
 #include "macros.h"
+#include "trigger.h"
 
 extern jmp_buf fpe_save;
 extern int cellerror;    /* is there an error in this cell */
@@ -355,7 +356,7 @@ void EvalAllVertexs() {
         if ((p = *ATBL(tbl, temp->ent->row, temp->ent->col)) && p->expr)
 	  {
             EvalJustOneVertex(p, temp->ent->row, temp->ent->col, 1);
-	    if (atoi(get_conf_value("lua_trigger"))) doLuaTriger2(p->row,p->col,3);
+	    	if (atoi(get_conf_value("lua_trigger"))) doLuaTriger2(p->row,p->col,3);
 	  }
         temp = temp->next;
     }
@@ -404,10 +405,13 @@ void EvalJustOneVertex(register struct ent * p, int i, int j, int rebuild_graph)
             p->v = v;
             p->flags |= is_changed | is_valid;
             changed++;
+	    if (( p->trigger  ) && ((p->trigger->flag & TRG_WRITE) == TRG_WRITE))
+		do_trigger(p,TRG_WRITE);
+	}
 	    
-        }
-	
     }
+	
+ 
 }
 
 
