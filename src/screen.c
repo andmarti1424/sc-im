@@ -123,6 +123,7 @@ void do_welcome() {
 
 
 // function that refreshes grid of screen
+// if header flag is set, it refresh the first column of screen.
 void update(int header) {
     //#ifdef USECOLORS
     //wbkgd(main_win, COLOR_PAIR(ucolors[DEFAULT].fg * 8 + ucolors[DEFAULT].bg + 1));

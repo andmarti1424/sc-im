@@ -3,6 +3,7 @@
 extern struct frange * freeze_ranges;
 
 void add_frange(struct ent * tl_ent, struct ent * br_ent, char type);
+void remove_frange();
 
 // freeze ranges
 struct frange {

@@ -82,6 +82,7 @@ L"iunmap",
 L"load",
 L"load!",
 L"lock",
+L"unfreeze",
 L"unlock",
 L"nmap",
 L"nnoremap",
@@ -439,6 +440,10 @@ void do_commandmode(struct block * sb) {
                 swprintf(interp_line, BUFFERSIZE, L"freeze %s%d:", coltoa(sr->tlcol), sr->tlrow);
                 swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%s%d %ls", coltoa(sr->brcol), sr->brrow, cline);
             }
+            send_to_interp(interp_line);
+
+        } else if ( ! wcsncmp(inputline, L"unfreeze", 8) ) {
+            wcscpy(interp_line, inputline);
             send_to_interp(interp_line);
 
         } else if ( ! wcsncmp(inputline, L"addfilter", 9) ) {

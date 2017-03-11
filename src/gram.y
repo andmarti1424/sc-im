@@ -78,6 +78,7 @@ int yylex();
 %token S_SHOWCOL
 %token S_HIDECOL
 %token S_FREEZE
+%token S_UNFREEZE
 %token S_MARK
 %token S_AUTOJUS
 %token S_PAD
@@ -479,6 +480,7 @@ command:
 
     |    S_FILL num num { sc_error("Not enough parameters for fill command"); }
 
+    |    S_UNFREEZE                  { remove_frange(); }
     |    S_FREEZE range              { add_frange($2.left.vp, $2.right.vp, 'a'); }
     |    S_FREEZE NUMBER ':' NUMBER  { add_frange(lookat($2, 0), lookat($4, 0), 'r'); }
     |    S_FREEZE NUMBER             { add_frange(lookat($2, 0), lookat($2, 0), 'r'); }

@@ -628,6 +628,9 @@ Commands for handling cell content:
                 Freeze a range given.  (Case insensitive).
                 (the rest of the screen scrolls but the range stays fixed on the screen).
 
+    :unfreeze
+                Remove a previous frozen row / col or range.
+
     :pad {spaces}
                 Apply a left padding {spaces} characters in width to a column.
                 If a range selected, pad the columns inside that range.
