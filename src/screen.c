@@ -138,14 +138,26 @@ void update(int header) {
         wclrtobot(main_win);
     }
 
-    // Calculate hidden rows and columns
-    //   mxcol-1: 'sc_col' in the screen
-    //   mxrow-1: 'sc_row' in the screen
+    /* Calculate offscreen rows and columns
+     *
+     * mxcol is the last visible column in screen grid.
+     * for instance, if mxcol is 8, last visible column would be I
+     * mxrow is the last visible row in screen grid
+     *
+     * offscr_sc_cols are the number of columns left at the left of start of grid.
+     * for instance, if offscr_sc_cols is 4. the first visible column in grid would be column E.
+     *
+     * there is a special behaviour when frozen columns or rows exists.
+     * center_hidden_rows and center_hidden_columns are the number of rows and columns between
+     * a frozen range and the first column or row visible.
+     * example: if columns A and B are frozen, and center_hidden_cols is 4,
+     * your grid would start with columns A, B, G, H..
+     */
     int off_cols = calc_offscr_sc_cols();
     int off_rows = calc_offscr_sc_rows();
     int mxcol = offscr_sc_cols + off_cols - 1;
     int mxrow = offscr_sc_rows + off_rows - 1;
-    //sc_debug("mxcol:%d %s, maxcols:%d", mxcol, coltoa(mxcol), maxcols);
+    //sc_debug("out: off:%d, center:%d, mxcol:%d %s, maxcols:%d", offscr_sc_cols, center_hidden_cols, mxcol, coltoa(mxcol), maxcols);
 
     /* You can't hide the last row or col */
     while (row_hidden[currow])
@@ -392,7 +404,6 @@ void show_sc_col_headings(WINDOW * win, int mxcol) {
     wmove(win, 0, 0);
     wclrtoeol(win);
 
-    //FIXME
     //for (i = 0; i <= mxcol && i < maxcols; i++) {
     for (i = 0; i <= mxcol; i++) {
         if (i >= maxcols) {
@@ -440,9 +451,7 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
     int freezer = freeze_ranges && (freeze_ranges->type == 'r' ||  freeze_ranges->type == 'a') ? 1 : 0;
     int freezec = freeze_ranges && (freeze_ranges->type == 'c' ||  freeze_ranges->type == 'a') ? 1 : 0;
 
-    //FIXME
     //for (row = 0; row <= mxrow && row < maxrows; row++) {
-    //for (row = 0; row < mxrow; row++) {
     for (row = 0; row <= mxrow; row++) {
         if (row >= maxrows) {
             sc_error("i >= maxrows in show_content. please check calc_offscr_sc_rows.");
@@ -480,7 +489,6 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
         int fieldlen;
         col = 0;
 
-        //FIXME
         for (p = ATBL(tbl, row, col); col <= mxcol; p += nextcol - col, col = nextcol, c += fieldlen) {
         //for (p = ATBL(tbl, row, col); col <= mxcol && col < maxcols; p += nextcol - col, col = nextcol, c += fieldlen) {
             if (col >= maxcols) {
@@ -894,11 +902,13 @@ void show_text(char * val) {
 }
 
 // Calculate number of hidden columns in the left
+// q are the number of columns that are before offscr_sc_cols that are shown because they are frozen.
 int calc_offscr_sc_cols() {
     int q = 0, i, cols = 0, col = 0;
     int freeze = freeze_ranges && (freeze_ranges->type == 'c' ||  freeze_ranges->type == 'a') ? 1 : 0;
     int tlcol = freeze ? freeze_ranges->tl->col : 0;
     int brcol = freeze ? freeze_ranges->br->col : 0;
+    //int k, counth = 0;
 
     // pick up col counts
     if (offscr_sc_cols <= curcol + 1) {
@@ -913,13 +923,14 @@ int calc_offscr_sc_cols() {
         }
     }
 
+
     // get  off screen cols
     while ( offscr_sc_cols + center_hidden_cols + cols - 1 < curcol || curcol < offscr_sc_cols
             || (freeze && curcol < tlcol && curcol >= tlcol - center_hidden_cols)) {
 
     //sc_debug("w  cols:%d, center:%d, off:%d, curcol:%d, tl:%d, br:%d", cols, center_hidden_cols, offscr_sc_cols, curcol, tlcol, brcol);
 
-        //izq
+        // izq
         if (offscr_sc_cols - 1 == curcol) {
             if (freeze && offscr_sc_cols + cols + center_hidden_cols >= brcol && brcol - cols - offscr_sc_cols + 2 > 0)
                 center_hidden_cols = brcol - cols - offscr_sc_cols + 2;
@@ -945,7 +956,7 @@ int calc_offscr_sc_cols() {
             col = (COLS - rescol - fwidth[curcol]) / 2 + rescol;
             if (freeze && curcol > brcol) {
                 offscr_sc_cols = tlcol;
-                center_hidden_cols = curcol - 2; //FIXME
+                center_hidden_cols = curcol - brcol; //FIXME
             } else {
                 offscr_sc_cols = curcol;
                 center_hidden_cols = 0;
@@ -956,18 +967,24 @@ int calc_offscr_sc_cols() {
                 else offscr_sc_cols--;
                 if ( ! col_hidden[i]) col -= fwidth[i];
             }
+
+            //sc_debug("5c center:%d off:%d i:%d", center_hidden_cols, offscr_sc_cols, i);
+            /* count hidden cols after brcol and before curcol
+            for (k=brcol+1; freeze && curcol > brcol && k <= i; k++) {
+                if (col_hidden[k]) counth++;
+            }*/
+
             //sc_debug("5c off:%d, center:%d, cols:%d, curcol:%d, tl:%d, br:%d", offscr_sc_cols, center_hidden_cols, cols, curcol, tlcol, brcol);
         }
 
         // Now pick up the counts again
         for (i = 0, q = 0, cols = 0, col = rescol; i < maxcols && col + fwidth[i] <= COLS; i++) {
-        //for (i = 0, cols = 0, col = rescol; i < maxcols && col + fwidth[i] <= COLS; i++) {
             if (i < offscr_sc_cols && ! (freeze && i >= tlcol && i <= brcol)) continue;
             else if (freeze && i > brcol && i <= brcol + center_hidden_cols) continue;
             else if (freeze && i < tlcol && i >= tlcol - center_hidden_cols) continue;
             if (i < offscr_sc_cols && freeze && i >= tlcol && i <= brcol && ! col_hidden[i]) q++;
-            cols++;
             //if (i == maxcols - 1) return cols + center_hidden_cols - q;
+            cols++;
             if (! col_hidden[i]) col += fwidth[i];
             //sc_debug("F i:%d %s -  col:%d fwidth:%d COLS:%d", i, coltoa(i), col, fwidth[i+1], COLS);
         }
@@ -976,12 +993,10 @@ int calc_offscr_sc_cols() {
     while (freeze && curcol > brcol && curcol <= brcol + center_hidden_cols) {
         center_hidden_cols--;
     }
+    //center_hidden_cols-=counth;
+    //cols-=counth;
 
-
-    //sc_debug("5F cols:%d, center:%d, q:%d - return:%d     mxcol:%d %s    maxcols:%d", cols, center_hidden_cols, q, cols+center_hidden_cols-q,
-    //        offscr_sc_cols+cols+center_hidden_cols-q-1,
-    //        coltoa(offscr_sc_cols+cols+center_hidden_cols-q-1),
-    //        maxcols);
+    //sc_debug("5F cols:%d, center:%d, q:%d - counth:%d, return:%d     ", cols, center_hidden_cols, q, counth, cols+center_hidden_cols-q);
     return cols + center_hidden_cols - q;
 }
 
