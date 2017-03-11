@@ -1536,7 +1536,7 @@ void moveto(int row, int col, int lastrow_, int lastcol_, int cornerrow, int cor
         }
         colsinrange += fwidth[i];
     }
-    if (loading) changed = 0;
+    //if (loading) changed = 0;
 }
 
 /*
@@ -1554,11 +1554,13 @@ void num_search(double n, int firstrow, int firstcol, int lastrow_, int lastcol_
     gs.g_type = G_NUM;
     gs.g_n = n;
     gs.g_row = firstrow;
+
+
+
     gs.g_col = firstcol;
     gs.g_lastrow = lastrow_;
     gs.g_lastcol = lastcol_;
     gs.errsearch = errsearch;
-
     if (currow >= firstrow && currow <= lastrow_ && curcol >= firstcol && curcol <= lastcol_) {
         endr = currow;
         endc = curcol;
@@ -1568,8 +1570,8 @@ void num_search(double n, int firstrow, int firstcol, int lastrow_, int lastcol_
     }
     r = endr;
     c = endc;
-    while (1) {
 
+    while (1) {
         if (flow) { // search forward
             if (c < lastcol_)
                 c++;
@@ -1615,10 +1617,10 @@ void num_search(double n, int firstrow, int firstcol, int lastrow_, int lastcol_
     curcol = c;
     rowsinrange = 1;
     colsinrange = fwidth[curcol];
-    if (loading) {
+    //if (loading) {
         //update(1);
-        changed = 0;
-    } //else remember(1);
+    //    changed = 0;
+    //} //else remember(1);
 }
 
 /* 'goto' a cell containing a matching string
@@ -1654,8 +1656,8 @@ void str_search(char *s, int firstrow, int firstcol, int lastrow_, int lastcol_,
     gs.g_col = firstcol;
     gs.g_lastrow = lastrow_;
     gs.g_lastcol = lastcol_;
-    if (currow >= firstrow && currow <= lastrow_ &&
-        curcol >= firstcol && curcol <= lastcol_) {
+
+    if (currow >= firstrow && currow <= lastrow_ && curcol >= firstcol && curcol <= lastcol_) {
         endr = currow;
         endc = curcol;
     } else {
@@ -1743,9 +1745,9 @@ void str_search(char *s, int firstrow, int firstcol, int lastrow_, int lastcol_,
     rowsinrange = 1;
     colsinrange = fwidth[curcol];
     regfree(&preg);
-    if (loading) {
-        changed = 0;
-    }
+    //if (loading) {
+    //    changed = 0;
+    //}
 }
 
 /* fill a range with constants */
@@ -1807,7 +1809,7 @@ void fill(struct ent *v1, struct ent *v2, double start, double inc) {
     else {
         sc_error(" Internal error calc_order");
     }
-    changed++;
+    //changed++;
 
     #ifdef UNDO
     end_undo_action();
@@ -1914,7 +1916,7 @@ void let(struct ent * v, struct enode * e) {
         }
         if (v->cellerror != cellerror) {
             v->flags |= is_changed;
-            changed++;
+            //changed++;
             modflg++;
             v->cellerror = cellerror;
         }
@@ -1947,7 +1949,7 @@ void let(struct ent * v, struct enode * e) {
     }
 
     if (v->cellerror == CELLOK) v->flags |= ( is_changed | is_valid );
-    changed++;
+    //changed++;
     modflg++;
 }
 
@@ -1972,7 +1974,7 @@ void slet(struct ent * v, struct enode * se, int flushdir) {
     }
     if (v->cellerror != cellerror) {
         v->flags |= is_changed;
-        changed++;
+        //changed++;
         modflg++;
         v->cellerror = cellerror;
     }
@@ -2008,7 +2010,7 @@ void slet(struct ent * v, struct enode * se, int flushdir) {
     else
         v->flags &= ~is_label;
 
-    changed++;
+    //changed++;
     modflg++;
 }
 

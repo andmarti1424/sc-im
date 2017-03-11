@@ -737,7 +737,7 @@ void ljustify(int sr, int sc, int er, int ec) {
             if (p && p->label) {
                 p->flags &= ~is_label;
                 p->flags |= is_leftflush | is_changed;
-                changed++;
+                //changed++;
                 modflg++;
             }
         }
@@ -765,7 +765,7 @@ void rjustify(int sr, int sc, int er, int ec) {
             if (p && p->label) {
                 p->flags &= ~(is_label | is_leftflush);
                 p->flags |= is_changed;
-                changed++;
+                //changed++;
                 modflg++;
             }
         }
@@ -793,7 +793,7 @@ void center(int sr, int sc, int er, int ec) {
             if (p && p->label) {
                 p->flags &= ~is_leftflush;
                 p->flags |= is_label | is_changed;
-                changed++;
+                //changed++;
                 modflg++;
             }
         }
@@ -1078,7 +1078,7 @@ void clearent(struct ent * v) {
     v->ucolor = NULL;
 
     v->flags = is_changed;
-    changed++;
+    //changed++;
     modflg++;
 
     return;

@@ -377,7 +377,7 @@ void EvalJustOneVertex(register struct ent * p, int i, int j, int rebuild_graph)
             return;
         if ( !p->label || !v || strcmp(v, p->label) != 0 || cellerror) {
             p->flags |= is_changed;
-            changed++;
+            //changed++;
         }
         if (p->label)
             scxfree(p->label);
@@ -399,7 +399,7 @@ void EvalJustOneVertex(register struct ent * p, int i, int j, int rebuild_graph)
             p->cellerror = cellerror;
             p->v = v;
             p->flags |= is_changed | is_valid;
-            changed++;
+            //changed++;
         }
     }
 }
