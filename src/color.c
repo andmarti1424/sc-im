@@ -319,6 +319,55 @@ void color_cell(int r, int c, int rf, int cf, char * str) {
     return;
 }
 
+void unformat(int r, int c, int rf, int cf) {
+    if (any_locked_cells(r, c, rf, cf)) {
+        sc_error("Locked cells encountered. Nothing changed");
+        return;
+    }
+
+    // if we are not loading the file
+    if (! loading) {
+        modflg++;
+        #ifdef UNDO
+        create_undo_action();
+        #endif
+    }
+
+    // we remove format in the range
+    struct ent * n;
+    int i, j;
+    for (i=r; i<=rf; i++) {
+        for (j=c; j<=cf; j++) {
+
+            // action
+            if ( (n = *ATBL(tbl, i, j)) && n->ucolor != NULL) {
+                if (! loading) {
+                    #ifdef UNDO
+                    copy_to_undostruct(i, j, i, j, 'd');
+                    #endif
+                }
+
+                free(n->ucolor);
+                n->ucolor = NULL;
+
+                if (! loading) {
+                    #ifdef UNDO
+                    copy_to_undostruct(i, j, i, j, 'a');
+                    #endif
+                }
+            }
+
+       }
+    }
+    if (! loading) {
+        #ifdef UNDO
+        end_undo_action();
+        #endif
+        update(TRUE);
+    }
+    return;
+}
+
 // this function receives two ucolors variables and returns 1 if both have the same values
 // returns 0 otherwise
 int same_ucolor(struct ucolor * u, struct ucolor * v) {

@@ -667,6 +667,11 @@ Commands for handling cell content:
                            :cellcolor "fg=RED bold=1 underline=1"
                            :cellcolor A2:A6 "fg=CYAN bold=1 underline=1"
 
+    :unformat
+    :unformat {range}
+                Removes a previous format set over a range.
+                If not range is specified, it removes the format over current cell.
+
     :redefine_color "{color}" {R} {G} {B}
                 Change the RGB values of the colors defined by ncurses.
                 RGB values range from 0 to 1000.

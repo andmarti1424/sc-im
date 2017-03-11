@@ -199,6 +199,7 @@ token S_YANKCOL
 %token S_IUNMAP
 %token S_COLOR
 %token S_CELLCOLOR
+%token S_UNFORMAT
 %token S_REDEFINE_COLOR
 %token S_SET
 %token S_FCOPY
@@ -581,6 +582,17 @@ command:
                                           scxfree($2);
                                         }
 
+    |    S_UNFORMAT var_or_range        {
+#ifdef USECOLORS
+                                          if ( ! atoi(get_conf_value("nocurses"))) unformat($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col);
+#endif
+                                        }
+
+    |    S_UNFORMAT                     {
+#ifdef USECOLORS
+                                          if ( ! atoi(get_conf_value("nocurses"))) unformat(currow, curcol, currow, curcol);
+#endif
+                                        }
 
     |    S_REDEFINE_COLOR STRING NUMBER NUMBER NUMBER {
                                          redefine_color($2, $3, $4, $5);

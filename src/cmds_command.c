@@ -101,6 +101,7 @@ L"showmaps",
 L"showrow",
 L"showrows",
 L"sort",
+L"unformat",
 L"version",
 L"w",
 L"x",
@@ -559,6 +560,25 @@ void do_commandmode(struct block * sb) {
             wcscpy(line, inputline);
             del_range_wchars(line, 0, 9);
             swprintf(interp_line, BUFFERSIZE, L"cellcolor ");
+            if (p != -1) {
+                swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L" %s%d:", coltoa(sr->tlcol), sr->tlrow);
+                swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%s%d ", coltoa(sr->brcol), sr->brrow);
+            }
+            swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%ls", line);
+            send_to_interp(interp_line);
+            #else
+            sc_error("Color support not compiled in");
+            chg_mode('.');
+            inputline[0] = L'\0';
+            #endif
+
+        } else if ( ! wcsncmp(inputline, L"unformat", 8) ) {
+            #ifdef USECOLORS
+            interp_line[0]=L'\0';
+            wchar_t line [BUFFERSIZE];
+            wcscpy(line, inputline);
+            del_range_wchars(line, 0, 7);
+            swprintf(interp_line, BUFFERSIZE, L"unformat");
             if (p != -1) {
                 swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L" %s%d:", coltoa(sr->tlcol), sr->tlrow);
                 swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%s%d ", coltoa(sr->brcol), sr->brrow);
