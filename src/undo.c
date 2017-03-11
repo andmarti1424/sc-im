@@ -63,9 +63,11 @@ Implemented actions for UNDO/REDO:
 17. Change in format of a column as a result of auto_jus
 18. Change format of columns as a result of ic dc
 19. fill command
+20. unformat
 
 NOT implemented:
 1. Recover equations after redo of changes over ents that have equations on them.
+2. undo of freeze / unfreeze command
 
 ----------------------------------------------------------------------------------------
 */
