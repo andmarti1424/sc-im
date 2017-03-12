@@ -8,6 +8,7 @@
 #include <locale.h>
 #include <wchar.h>
 #include <wordexp.h>
+#include <stropts.h> // for ioctl
 
 #include "main.h"
 #include "shift.h"
@@ -79,6 +80,7 @@ struct dictionary * user_conf_d;
 struct dictionary * predefined_conf_d;
 struct history * commandline_history;
 
+void read_stdin();
 /*********************************************************************
    MAIN LOOP
  *********************************************************************/
@@ -150,43 +152,28 @@ int main (int argc, char ** argv) {
         }
     }
 
-    // load sc file
+    //doLuainit();
+
+    wchar_t stdin_buffer[BUFFERSIZE] = { L'\0' };
+
+    // there was no file passed to scim executable
+    // erase db
+    if (! curfile[0]) erasedb();
+
+    // check input from stdin (pipeline)
+    // and send it to interp
+    read_stdin();
+
+    // read sc file passed as argv
     load_sc();
 
-    // handle input from stdin (pipeline) in sc format
-    // and send it to interp
-    //FILE * f = fopen("/dev/stdin", "r");
-    FILE * f = stdin;
-    int fd = fileno(f);
-    int flags;
-    flags = fcntl(fd, F_GETFL, 0);
-    flags |= O_NONBLOCK;
-    fcntl(fd, F_SETFL, flags);
-    wchar_t stdin_buffer[BUFFERSIZE] = { L'\0' };
-    while (f != NULL && fgetws(stdin_buffer, BUFFERSIZE, f) != NULL) {
-        send_to_interp(stdin_buffer);
-    }
-    if (!freopen("/dev/tty", "rw", stdin)) {
-        perror(NULL);
-        exit(-1);
-    }
-    flags = fcntl(fd, F_GETFL, 0);
-    flags &= ~O_NONBLOCK;
-    fcntl(fd, F_SETFL, flags);
-
-    // Enable this for message debugging
-    // wtimeout(input_win, 1000);
-
     // initiate gui
+    FILE * f;
     if ( ! atoi(get_conf_value("nocurses"))) {
-        //start_screen();         // Already done above
-
         // we show welcome screen if no spreadsheet was passed to SC-IM
         // and no input was sent throw pipeline
         do_welcome();
         if ( ! curfile[0] && ! wcslen(stdin_buffer)) {
-            //do_welcome();
-
             // show mode and cell's details in status bar
             show_celldetails(input_win);
             print_mode(input_win);
@@ -194,40 +181,45 @@ int main (int argc, char ** argv) {
         } else {
             update(TRUE);
         }
+    } else {
+        f = fopen("/dev/tty", "rw");
+        if (f == NULL) sc_error("fatal error loading stdin");
     }
 
     // handle input from keyboard
     buffer = (struct block *) create_buf(); // TODO: this should only take place if curses ui
-    // Enable for debugging purposes
-    // wtimeout(input_win, TIMEOUT_CURSES);
 
     wchar_t nocurses_buffer[BUFFERSIZE];
 
     while ( ! shall_quit && ! atoi(get_conf_value("quit_afterload"))) {
+
         // if we are in ncurses
         if (! atoi(get_conf_value("nocurses"))) {
             handle_input(buffer);
 
-
         // if we are not in ncurses
-        } else {
-            if (fgetws(nocurses_buffer, BUFFERSIZE, stdin) != NULL) {
-                //wprintf(L"Interp will receive: %ls", nocurses_buffer);
-                sc_info("Interp will receive: %ls", nocurses_buffer);
-                send_to_interp(nocurses_buffer);
-            }
+        } else if (fgetws(nocurses_buffer, BUFFERSIZE, f) != NULL) {
+            sc_info("Interp will receive: %ls", nocurses_buffer);
+            send_to_interp(nocurses_buffer);
         }
 
         /* shall_quit=1 means :q
            shall_quit=2 means :q! */
         if (shall_quit == 1 && modcheck()) shall_quit = 0;
     }
+    if (atoi(get_conf_value("nocurses")) && f != NULL) fclose(f);
 
     return shall_quit == -1 ? exit_app(-1) : exit_app(0);
 }
 /*********************************************************************
    END OF MAIN LOOP
  *********************************************************************/
+
+
+
+
+
+
 
 extern graphADT graph;
 
@@ -250,6 +242,40 @@ void create_structures() {
 
     // init calc chain graph
     graph = GraphCreate();
+}
+
+void read_stdin() {
+    //sc_debug("reading stdin from pipeline");
+    fd_set readfds;
+    FD_ZERO(&readfds);
+    FD_SET(STDIN_FILENO, &readfds);
+    fd_set savefds = readfds;
+    struct timeval timeout;
+    timeout.tv_sec = 0;
+    timeout.tv_usec = 0;
+    FILE * f = stdin;
+    //FILE * f = fopen("/dev/tty", "rw");
+    wchar_t stdin_buffer[BUFFERSIZE] = { L'\0' };
+
+    if (select(1, &readfds, NULL, NULL, &timeout)) {
+        //sc_debug("there is data");
+        while (f != NULL && fgetws(stdin_buffer, BUFFERSIZE, f) != NULL) {
+            sc_info("Interp will receive: %ls", stdin_buffer);
+            send_to_interp(stdin_buffer);
+        }
+        fflush(f);
+    } else {
+        //sc_debug("there is NO data");
+    }
+    readfds = savefds;
+    if (f != NULL) fclose(f);
+
+    if ( ! freopen("/dev/tty", "rw", stdin)) {
+        perror(NULL);
+        exit(-1);
+    }
+
+    //sc_debug("finish reading");
 }
 
 
@@ -355,25 +381,22 @@ void read_argv(int argc, char ** argv) {
 
 // we try to load a file
 void load_sc() {
-    if (! curfile[0]) {                            // there was no file passed to scim executable
-        erasedb();
-    } else {
-        wordexp_t p;
-        wordexp(curfile, &p, 0);
+    //sc_debug("start reading file");
+    wordexp_t p;
+    wordexp(curfile, &p, 0);
 
-        int c;
-        char word[PATHLEN] = "";
-        for (c=0; c < p.we_wordc; c++) {
-            if (c) sprintf(word + strlen(word), " ");
-            sprintf(word + strlen(word), "%s", p.we_wordv[c]);
-        }
-        if (! readfile(word, 1) && ! atoi(get_conf_value("nocurses"))) {
-            sc_info("New file: \"%s\"", word);     // file passed to scim executable does not exists
-        }
-        wordfree(&p);
-        EvalAll();                                 // we eval formulas
-        loadrc();
+    int c;
+    char word[PATHLEN] = "";
+    for (c=0; c < p.we_wordc; c++) {
+        if (c) sprintf(word + strlen(word), " ");
+        sprintf(word + strlen(word), "%s", p.we_wordv[c]);
     }
+    if (! readfile(word, 0) && ! atoi(get_conf_value("nocurses"))) {
+        sc_info("New file: \"%s\"", word);     // file passed to scim executable does not exists
+    }
+    wordfree(&p);
+    EvalAll();                                 // we eval formulas
+    //sc_debug("finished reading file");
     return;
 }
 
@@ -487,8 +510,13 @@ void sc_msg(char * s, int type, ...) {
 
     } else if (get_conf_value("output") != NULL && fdoutput != NULL) {
         fwprintf(fdoutput, L"%s\n", t);
-    } else
-        wprintf(L"%s\n", t);
+    } else {
+        if (fwide(stdout, 0) >0)
+            wprintf(L"%s\n", t);
+        else
+            printf("%s\n", t);
+        fflush(stdout);
+    }
     va_end(args);
     return;
 }
