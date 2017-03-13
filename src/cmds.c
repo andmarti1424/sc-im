@@ -1553,8 +1553,7 @@ int fsum() {
         }
         if (currow == r) {
 #ifdef UNDO
-            dismiss_undo_item();
-            end_undo_action();
+            dismiss_undo_item(NULL);
 #endif
         } else {
             swprintf(interp_line, BUFFERSIZE, L"let %s%d = @SUM(", coltoa(curcol), currow);
@@ -1569,8 +1568,7 @@ int fsum() {
         }
         if (curcol == c) {
 #ifdef UNDO
-            dismiss_undo_item();
-            end_undo_action();
+            dismiss_undo_item(NULL);
 #endif
         } else {
             swprintf(interp_line, BUFFERSIZE, L"let %s%d = @SUM(", coltoa(curcol), currow);

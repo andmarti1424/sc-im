@@ -34,11 +34,16 @@ void do_normalmode(struct block * buf) {
     struct ent * e;
 
     switch (buf->value) {
-        /* FOR TEST PURPOSES
+        // FOR TEST PURPOSES
         case L'A':
+            create_undo_action();
+            copy_to_undostruct(currow, curcol, currow, curcol, 'd');
+
+            copy_to_undostruct(currow, curcol, currow, curcol, 'a');
+            dismiss_undo_item(NULL);
             update(FALSE);
             break;
-
+/*
         case L'W':
             break;
 

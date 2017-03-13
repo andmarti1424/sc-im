@@ -49,4 +49,4 @@ void clear_undo_list ();
 void clear_from_current_pos();
 int len_undo_list();
 void free_undo_node(struct undo * ul);
-void dismiss_undo_item();
+void dismiss_undo_item(struct undo * ul);

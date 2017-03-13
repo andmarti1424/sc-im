@@ -1935,8 +1935,7 @@ void let(struct ent * v, struct enode * e) {
         if (exprerr) {
             efree(e);
             #ifdef UNDO
-            dismiss_undo_item();
-            end_undo_action();
+            dismiss_undo_item(NULL);
             #endif
             return;
         }

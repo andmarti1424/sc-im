@@ -170,46 +170,54 @@ void add_to_undolist(struct undo u) {
 }
 
 // dismiss current undo_item
-void dismiss_undo_item() {
-    free_undo_node(&undo_item);
+// this functions free memory of and struct undo.
+// its used in function free_undo_node for that purpose.
+//
+// but as well, this function shall be called instead of end_undo_action
+// in case we want to cancel a previous create_undo_action
+// if called for this purpose argument shall be NULL
+void dismiss_undo_item(struct undo * ul) {
+    struct ent * en;
+    struct ent * de;
+
+    if (ul == NULL) ul = &undo_item;
+
+    en = ul->added;
+    while (en != NULL) {
+        de = en->next;
+        clearent(en);
+        free(en);
+        en = de;
+    }
+    en = ul->removed;
+    while (en != NULL) {
+        de = en->next;
+        clearent(en);
+        free(en);
+        en = de;
+    }
+    if (ul->range_shift != NULL) free(ul->range_shift); // Free undo_range_shift memory
+    if (ul->cols_format != NULL) {                      // Free cols_format memory
+        free(ul->cols_format->cols);
+        free(ul->cols_format);
+    }
+    if (ul->row_hidded  != NULL) free(ul->row_hidded); // Free hidden row memory
+    if (ul->col_hidded  != NULL) free(ul->col_hidded); // Free hidden col memory
+    if (ul->row_showed  != NULL) free(ul->row_showed); // Free showed row memory
+    if (ul->col_showed  != NULL) free(ul->col_showed); // Free showed col memory
+
     return;
 }
 
 // Cascade free UNDO node memory
 void free_undo_node(struct undo * ul) {
-
-    struct ent * de;
-    struct ent * en;
     struct undo * e;
 
     // Remove from current position
     while (ul != NULL) {
-        en = ul->added;
-        while (en != NULL) {
-            de = en->next;
-            clearent(en);
-            free(en);
-            en = de;
-        }
-        en = ul->removed;
-        while (en != NULL) {
-            de = en->next;
-            clearent(en);
-            free(en);
-            en = de;
-        }
+        dismiss_undo_item(ul);
+
         e = ul->p_sig;
-
-        if (ul->range_shift != NULL) free(ul->range_shift); // Free undo_range_shift memory
-        if (ul->cols_format != NULL) {                      // Free cols_format memory
-                free(ul->cols_format->cols);
-                free(ul->cols_format);
-        }
-        if (ul->row_hidded  != NULL) free(ul->row_hidded); // Free hidden row memory
-        if (ul->col_hidded  != NULL) free(ul->col_hidded); // Free hidden col memory
-        if (ul->row_showed  != NULL) free(ul->row_showed); // Free showed row memory
-        if (ul->col_showed  != NULL) free(ul->col_showed); // Free showed col memory
-
         free(ul);
         undo_list_len--;
         ul = e;
