@@ -391,7 +391,7 @@ void load_sc() {
         if (c) sprintf(word + strlen(word), " ");
         sprintf(word + strlen(word), "%s", p.we_wordv[c]);
     }
-    if (! readfile(word, 0) && ! atoi(get_conf_value("nocurses"))) {
+    if (strlen(word) && ! readfile(word, 0) && ! atoi(get_conf_value("nocurses"))) {
         sc_info("New file: \"%s\"", word);     // file passed to scim executable does not exists
     }
     wordfree(&p);
