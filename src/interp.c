@@ -1890,15 +1890,27 @@ void unlock_cells(struct ent * v1, struct ent * v2) {
 
 /* set the numeric part of a cell */
 void let(struct ent * v, struct enode * e) {
+    if (locked_cell(v->row, v->col)) return;
+
+    #ifdef UNDO
+    create_undo_action();
+    copy_to_undostruct(v->row, v->col, v->row, v->col, 'd');
+
+    // here we save in undostruct, all the ents that depends on the deleted one (before change)
+    extern struct ent_ptr * deps;
+    int i, n = 0;
+    ents_that_depends_on_range(v->row, v->col, v->row, v->col);
+    if (deps != NULL) {
+        n = deps->vf;
+        for (i = 0; i < n; i++)
+            copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'd');
+    }
+    #endif
+    if (getVertex(graph, lookat(v->row, v->col), 0) != NULL) destroy_vertex(lookat(v->row, v->col));
+
 
     double val;
     unsigned isconstant = constant(e);
-
-    if (locked_cell(v->row, v->col))
-        return;
-
-    //if (getVertex(graph, v, 0) != NULL) destroy_vertex(v);
-
     if (v->row == currow && v->col == curcol)
         cellassign = 1;
     if (loading && ! isconstant)
@@ -1916,13 +1928,16 @@ void let(struct ent * v, struct enode * e) {
         }
         if (v->cellerror != cellerror) {
             v->flags |= is_changed;
-            //changed++;
             modflg++;
             v->cellerror = cellerror;
         }
         (void) signal(SIGFPE, exit_app);
         if (exprerr) {
             efree(e);
+            #ifdef UNDO
+            dismiss_undo_item();
+            end_undo_action();
+            #endif
             return;
         }
     }
@@ -1940,27 +1955,57 @@ void let(struct ent * v, struct enode * e) {
             v->expr = (struct enode *) 0;
         }
         efree(e);
-    } else {
+    } else if (! exprerr) {
         efree(v->expr);
 
         v->expr = e;
         v->flags &= ~is_strexpr;
         eval(v, e); // ADDED - here we store the cell dependences in a graph
     }
-
     if (v->cellerror == CELLOK) v->flags |= ( is_changed | is_valid );
-    //changed++;
     modflg++;
+
+
+    #ifdef UNDO
+    copy_to_undostruct(v->row, v->col, v->row, v->col, 'a');
+    // here we save in undostruct, all the ents that depends on the deleted one (after change)
+    if (deps != NULL) free(deps);
+    ents_that_depends_on_range(v->row, v->col, v->row, v->col);
+    if (deps != NULL) {
+        n = deps->vf;
+        for (i = 0; i < n; i++)
+            copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'a');
+        free(deps);
+        deps = NULL;
+    }
+    end_undo_action();
+    #endif
+
+    return;
 }
 
 void slet(struct ent * v, struct enode * se, int flushdir) {
-    char * p;
+    if (locked_cell(v->row, v->col)) return;
 
-    if (locked_cell(v->row, v->col))
-        return;
-    //if (getVertex(graph, v, 0) != NULL) destroy_vertex(v);
-    if (v->row == currow && v->col == curcol)
-        cellassign = 1;
+    #ifdef UNDO
+    create_undo_action();
+    copy_to_undostruct(v->row, v->col, v->row, v->col, 'd');
+
+    // here we save in undostruct, all the ents that depends on the deleted one (before change)
+    extern struct ent_ptr * deps;
+    int i, n = 0;
+    ents_that_depends_on_range(v->row, v->col, v->row, v->col);
+    if (deps != NULL) {
+        n = deps->vf;
+        for (i = 0; i < n; i++)
+            copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'd');
+    }
+    #endif
+    if (getVertex(graph, lookat(v->row, v->col), 0) != NULL) destroy_vertex(lookat(v->row, v->col));
+
+
+    char * p;
+    if (v->row == currow && v->col == curcol) cellassign = 1;
     exprerr = 0;
     (void) signal(SIGFPE, eval_fpe);
     if (setjmp(fpe_save)) {
@@ -1970,20 +2015,16 @@ void slet(struct ent * v, struct enode * se, int flushdir) {
     } else {
         cellerror = CELLOK;
         p = seval(NULL, se);
-        //p = seval(v, se);
     }
     if (v->cellerror != cellerror) {
         v->flags |= is_changed;
-        //changed++;
         modflg++;
         v->cellerror = cellerror;
     }
     (void) signal(SIGFPE, exit_app);
     if (exprerr) {
         efree(se);
-        return;
-    }
-    if (constant(se)) {
+    } else if (constant(se)) {
         label(v, p, flushdir);
         if (p) scxfree(p);
         efree(se);
@@ -1992,26 +2033,41 @@ void slet(struct ent * v, struct enode * se, int flushdir) {
             v->expr = (struct enode *) 0;
             v->flags &= ~is_strexpr;
         }
-        return;
+    } else {
+        if (p) free(p);                   // ADDED for 2267 leak!
+
+        efree(v->expr);
+        v->expr = se;
+
+        p = seval(v, se);                 // ADDED - here we store the cell dependences in a graph
+        if (p) scxfree(p);                // ADDED
+
+        v->flags |= (is_changed|is_strexpr);
+        if (flushdir < 0) v->flags |= is_leftflush;
+
+        if (flushdir == 0)
+            v->flags |= is_label;
+        else
+            v->flags &= ~is_label;
     }
-    if (p) free(p);                   // ADDED for 2267 leak!
-
-    efree(v->expr);
-    v->expr = se;
-
-    p = seval(v, se);                 // ADDED - here we store the cell dependences in a graph
-    if (p) scxfree(p);                // ADDED
-
-    v->flags |= (is_changed|is_strexpr);
-    if (flushdir < 0) v->flags |= is_leftflush;
-
-    if (flushdir == 0)
-        v->flags |= is_label;
-    else
-        v->flags &= ~is_label;
-
-    //changed++;
     modflg++;
+
+    #ifdef UNDO
+    copy_to_undostruct(v->row, v->col, v->row, v->col, 'a');
+    // here we save in undostruct, all the ents that depends on the deleted one (after change)
+    if (deps != NULL) free(deps);
+    ents_that_depends_on_range(v->row, v->col, v->row, v->col);
+    if (deps != NULL) {
+        n = deps->vf;
+        for (i = 0; i < n; i++)
+            copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'a');
+        free(deps);
+        deps = NULL;
+    }
+    end_undo_action();
+    #endif
+
+    return;
 }
 
 void format_cell(struct ent *v1, struct ent *v2, char *s) {

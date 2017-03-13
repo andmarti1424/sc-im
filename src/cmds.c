@@ -902,85 +902,13 @@ void del_selected_cells() {
     return;
 }
 
-
-// Change cell content sending inputline to interpreter
-void insert_or_edit_cell() {
-    char ope[BUFFERSIZE] = "";
-    switch (insert_edit_submode) {
-        case '=':
-            strcpy(ope, "let");
-            break;
-        case '<':
-            strcpy(ope, "leftstring");
-            break;
-        case '>':
-            strcpy(ope, "rightstring");
-            break;
-        case '\\':
-            strcpy(ope, "label");
-            break;
-    }
-    if (inputline[0] == L'"') {
-        del_wchar(inputline, 0);
-    } else if (insert_edit_submode != '=' && inputline[0] != L'"') {
-        add_wchar(inputline, L'\"', 0);
-        add_wchar(inputline, L'\"', wcslen(inputline));
-    }
-
-    #ifdef UNDO
-    create_undo_action();
-    copy_to_undostruct(currow, curcol, currow, curcol, 'd');
-
-    // here we save in undostruct, all the ents that depends on the deleted one (before change)
-    extern struct ent_ptr * deps;
-    int i, n = 0;
-    ents_that_depends_on_range(currow, curcol, currow, curcol);
-    if (deps != NULL) {
-        n = deps->vf;
-        for (i = 0; i < n; i++)
-            copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'd');
-    }
-    #endif
-
-    if (getVertex(graph, lookat(currow, curcol), 0) != NULL) destroy_vertex(lookat(currow, curcol));
-
-    // ADD PADDING INTELLIGENCE HERE ?
-    (void) swprintf(interp_line, BUFFERSIZE, L"%s %s = %ls", ope, v_name(currow, curcol), inputline);
-
+/* Enter cell content on a cell.
+   Covers commands LET, LABEL, LEFTSTRING and RIGHTSTRING
+ */
+void enter_cell_content(int r, int c, char * submode,  wchar_t * content) {
+    // TODO - ADD PADDING INTELLIGENCE HERE ??
+    (void) swprintf(interp_line, BUFFERSIZE, L"%s %s = %ls", submode, v_name(r, c), content);
     send_to_interp(interp_line);
-
-    #ifdef UNDO
-    copy_to_undostruct(currow, curcol, currow, curcol, 'a');
-    // here we save in undostruct, all the ents that depends on the deleted one (after change)
-    if (deps != NULL) free(deps);
-    ents_that_depends_on_range(currow, curcol, currow, curcol);
-    if (deps != NULL) {
-        n = deps->vf;
-        for (i = 0; i < n; i++)
-            copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'a');
-        free(deps);
-        deps = NULL;
-    }
-    end_undo_action();
-    #endif
-
-    inputline[0] = L'\0';
-    inputline_pos = 0;
-    real_inputline_pos = 0;
-    chg_mode('.');
-    clr_header(input_win, 0);
-
-    char * opt = get_conf_value("newline_action");
-    switch (opt[0]) {
-        case 'j':
-            currow = forw_row(1)->row;
-            break;
-        case 'l':
-            curcol = forw_col(1)->col;
-            break;
-    }
-    update(TRUE);
-    return;
 }
 
 // Send command to interpreter

@@ -10,6 +10,7 @@
 #include "utils/string.h"
 #include "interp.h"
 #include "marks.h"
+#include "conf.h"
 
 // this macro is used to determinate a word over a WORD
 #define istext(a)    (iswalnum(a) || ((a) == L'_'))
@@ -90,8 +91,50 @@ void do_editmode(struct block * sb) {
         return;
 
     } else if (find_val(sb, OKEY_ENTER)) {  // ENTER
-        insert_or_edit_cell();
-        show_header(input_win);
+        char ope[BUFFERSIZE] = "";
+        wchar_t content[BUFFERSIZE] = L"";
+        wcscpy(content, inputline);
+
+        switch (insert_edit_submode) {
+            case '=':
+                strcpy(ope, "let");
+                break;
+            case '<':
+                strcpy(ope, "leftstring");
+                break;
+            case '>':
+                strcpy(ope, "rightstring");
+                break;
+            case '\\':
+                strcpy(ope, "label");
+                break;
+        }
+
+        if (content[0] == L'"') {
+            del_wchar(content, 0);
+        } else if (insert_edit_submode != '=' && content[0] != L'"') {
+            add_wchar(content, L'\"', 0);
+            add_wchar(content, L'\"', wcslen(content));
+        }
+
+        enter_cell_content(currow, curcol, ope, content);
+
+        inputline[0] = L'\0';
+        inputline_pos = 0;
+        real_inputline_pos = 0;
+        chg_mode('.');
+        clr_header(input_win, 0);
+
+        char * opt = get_conf_value("newline_action");
+        switch (opt[0]) {
+            case 'j':
+                currow = forw_row(1)->row;
+                break;
+            case 'l':
+                curcol = forw_col(1)->col;
+                break;
+        }
+        update(TRUE);
         return;
 
     } else if (sb->value == L'a') {         // a
