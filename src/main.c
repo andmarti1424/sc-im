@@ -214,11 +214,20 @@ int main (int argc, char ** argv) {
 
         // if we are not in ncurses
         } else {
+	        char rpbuff[BUFFERSIZE];
+	/*
             if (fgetws(nocurses_buffer, BUFFERSIZE, stdin) != NULL) {
                 //wprintf(L"Interp will receive: %ls", nocurses_buffer);
                 sc_info("Interp will receive: %ls", nocurses_buffer);
                 send_to_interp(nocurses_buffer);
             }
+	*/
+	   if(fgets(rpbuff,BUFFERSIZE,stdin) != NULL ) {
+		fprintf(stderr,"\n Interpreter receive %s",rpbuff);
+                sc_info("Interp will receive: %s", rpbuff);
+                send_to_interpp(rpbuff);
+
+		}	
         }
 
         /* shall_quit=1 means :q
@@ -489,8 +498,13 @@ void sc_msg(char * s, int type, ...) {
 
     } else if (get_conf_value("output") != NULL && fdoutput != NULL) {
         fwprintf(fdoutput, L"%s\n", t);
+	fflush(fdoutput);
     } else
-        wprintf(L"%s\n", t);
+	if (fwide(stdout,0) > 0)
+        wprintf(L"wide %s\n", t);
+ 	else 
+	 printf("nowide %s\n",t);
+	fflush(stdout);
     va_end(args);
     return;
 }

@@ -20,7 +20,7 @@ function trigger_cell(row,col, flags)
 file=io.open("/tmp/test.sctrg", "a+")
 
 print (file)
-res=sc.lgetnum(row,col)
+res=sc.lgetnum(col,row)
 if res then
 --print(res)
 file:write("Trigger cell called for "..row..":"..col.." value is "..res.." flags = "..flags.."\n")

@@ -70,6 +70,11 @@ void set_trigger(int r, int c, int rf, int cf, char * str) {
             n = lookat(i, j);
             if (n->trigger == NULL) 
                 n->trigger = (struct trigger *) malloc(sizeof(struct trigger));
+	    else
+		{
+		    free(n->trigger->file);
+		    free(n->trigger->function);
+		}
 	    n->trigger->file = strdup(get(d,"file"));
 	    n->trigger->function=strdup(get(d,"function"));
 		int tmp;
@@ -77,7 +82,21 @@ void set_trigger(int r, int c, int rf, int cf, char * str) {
 		if (strcmp(get(d,"mode"), "W") == 0) tmp=TRG_WRITE;
 	        if (strcmp(get(d,"mode"), "RW")== 0) tmp=TRG_READ | TRG_WRITE;
 	        if (strcmp(get(d,"type"), "LUA")== 0) tmp|=TRG_LUA;
-		if (strcmp(get(d,"type"), "C")== 0) tmp|=TRG_C;
+		if (strcmp(get(d,"type"), "C")== 0)
+		  {
+		    char * error;
+		    tmp|=TRG_C;
+		    n->trigger->handle=dlopen(n->trigger->file,RTLD_LAZY);
+		    if(!n->trigger->handle) {
+		       fputs (dlerror(), stderr);
+		       exit(1);
+		      }
+		    n->trigger->c_function = dlsym(n->trigger->handle, n->trigger->function);
+		    if ((error = dlerror()) != NULL)  {
+		          fputs(error, stderr);
+			  exit(1);
+		        }
+		  }
 	    n->trigger->flag=tmp;
 		
 		
@@ -108,6 +127,10 @@ void del_trigger(int r, int c, int rf, int cf )
             n = lookat(i, j);
 	    if (n->trigger != NULL )
 	      {
+		if((n->trigger->flag & TRG_C) == TRG_C)
+		  {
+		    dlclose(n->trigger->handle);
+		  }
 		free(n->trigger->file);
 		free(n->trigger->function);
 		free(n->trigger);
@@ -156,23 +179,10 @@ do_trigger( struct ent *p , int rw)
 
 do_C_Trigger_cell(struct ent * p, int rw) {
   
-        struct trigger * trigger=p->trigger;
-        void *handle;
+        
         int (*function)(struct ent *, int );
-        char *error;
-
-        handle = dlopen (trigger->file, RTLD_LAZY);
-        if (!handle) {
-            fputs (dlerror(), stderr);
-            exit(1);
-        }
-
-        function = dlsym(handle, trigger->function);
-        if ((error = dlerror()) != NULL)  {
-            fputs(error, stderr);
-            exit(1);
-        }
-
+        
+	function=p->trigger->c_function;
         printf ("%d\n", (*function)(p,rw ));
-        dlclose(handle);
+        
     }

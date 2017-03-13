@@ -35,6 +35,7 @@
 #include "lex.h"     // for atocol
 #include "interp.h"
 #include "utils/string.h"
+#include "trigger.h"
 #include <unistd.h>
 #include <regex.h>
 
@@ -1955,6 +1956,9 @@ void let(struct ent * v, struct enode * e) {
     if (v->cellerror == CELLOK) v->flags |= ( is_changed | is_valid );
     changed++;
     modflg++;
+     if (( v->trigger  ) && ((v->trigger->flag & TRG_WRITE) == TRG_WRITE))
+                do_trigger(v,TRG_WRITE);
+
 }
 
 void slet(struct ent * v, struct enode * se, int flushdir) {

@@ -21,3 +21,8 @@ sc.lsetform(1,5,"@sum(a5:a7)")
 sc.lsetnum(1,4,sc.maxcols)
 
 
+c,r=sc.a2colrow("c5")
+print("column "..c.." row "..r)
+print("        and the asci is "..sc.colrow2a(c,r))
+
+sc.sc("LET C22=B5*5")

@@ -12,6 +12,8 @@ struct trigger {
 	int flag;	/* Read + Write + interface */
 	char *file;
 	char *function;
+        void * handle;  /*this is only for C Triggers */
+	int (*c_function)(struct ent *, int);
 	};
 
 

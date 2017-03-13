@@ -341,7 +341,7 @@ void rebuild_graph() {
 void EvalAll() {
     // Eval vertexs of graph
     EvalAllVertexs();
-    doLuaTriger();
+    //doLuaTriger();
     return;
 }
 

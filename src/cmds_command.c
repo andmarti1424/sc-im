@@ -564,7 +564,6 @@ void do_commandmode(struct block * sb) {
             #endif
 
         }  else if ( ! wcsncmp(inputline, L"trigger ", 8) ) {
-            #ifdef USECOLORS
             interp_line[0]=L'\0';
             wchar_t line [BUFFERSIZE];
             wcscpy(line, inputline);
@@ -576,11 +575,6 @@ void do_commandmode(struct block * sb) {
             }
             swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%ls", line);
             send_to_interp(interp_line);
-            #else
-            sc_error("Color support not compiled in");
-            chg_mode('.');
-            inputline[0] = L'\0';
-            #endif
 
         } 
 	 else if ( ! wcsncmp(inputline, L"set ", 4) ) {

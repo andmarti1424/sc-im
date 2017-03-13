@@ -11,6 +11,8 @@
 #include "trigger.h"
 
 
+extern FILE * fdoutput;
+
 #define LC_NUMBER2(n,v)                     \
     static int l_ ## n(lua_State *L)       \
     {                                       \
@@ -35,8 +37,8 @@ static int l_getnum (lua_State *L) {
   int r,c;
   struct ent **pp;
   struct ent *p;
-      r = lua_tointeger(L, 1);  /* get argument */
-      c = lua_tointeger(L, 2);
+      c = lua_tointeger(L, 1);  /* get argument */
+      r = lua_tointeger(L, 2);
       // printf("getnum !!\n");
       pp=ATBL(tbl,r,c);
      
@@ -57,8 +59,8 @@ static int l_setnum (lua_State *L) {
   double val;
   struct ent **pp;
   struct ent *p;
-      r = lua_tointeger(L, 1);  /* get argument */
-      c = lua_tointeger(L, 2);
+      c = lua_tointeger(L, 1);  /* get argument */
+      r = lua_tointeger(L, 2);
       val=lua_tonumber(L,3);
       //printf("getnum !!\n");
       
@@ -82,8 +84,8 @@ static int l_setstr (lua_State *L) {
   char * val;
   struct ent **pp;
   struct ent *p;
-      r = lua_tointeger(L, 1);  /* get argument */
-      c = lua_tointeger(L, 2);
+      c = lua_tointeger(L, 1);  /* get argument */
+      r = lua_tointeger(L, 2);
       val=lua_tostring(L,3);
       //  printf("setstr !!\n");
        
@@ -101,19 +103,157 @@ static int l_setform (lua_State *L) {
   struct ent **pp;
   struct ent *p;
   char buf[256];
-      r = lua_tointeger(L, 1);  /* get argument */
-      c = lua_tointeger(L, 2);
+      c = lua_tointeger(L, 1);  /* get argument */
+      r = lua_tointeger(L, 2);
       val=lua_tostring(L,3);
       //  printf("setstr !!\n");
      
     sprintf(buf,"LET %s%d=%s",coltoa(c),r,val);
      send_to_interpp(buf);
      
-
-
       return 0;
+}
 
- }
+static int l_sc (lua_State *L) {
+  int r,c;
+  char * val;
+  struct ent **pp;
+  struct ent *p;
+  char buf[256];
+      
+      val=lua_tostring(L,1);
+      //  printf("setstr !!\n");
+     
+      send_to_interpp(val);
+     
+      return 0;
+}
+
+
+static int l_colrow2a(lua_State *L) {
+  int c,r;
+  char buf[16];
+  
+  c = lua_tointeger(L, 1);  /* get argument */
+  r = lua_tointeger(L, 2);
+  sprintf(buf,"%s%d", coltoa(c),r);
+  lua_pushstring(L,buf);
+  return 1;
+  
+}
+
+
+static int l_colrow(lua_State *L) {
+
+  char buf[16];
+  char *val;
+  int c,r;
+  int ret,len;
+  val=lua_tostring(L,1);
+  printf("\n %s ", val);
+  ret=sscanf(val,"%49[a-za-Z]%d",&buf,&r);
+  printf("\scanf ret %d",ret);
+  len=strlen(buf);	
+  c = (toupper((int)buf[0])) - 'A';
+  if (len == 2)               /* has second char */
+  c = ((c + 1) * 26) + ((toupper((int)buf[1])) - 'A');
+  lua_pushnumber(L,c);
+  lua_pushnumber(L,r);
+  return 2;
+  
+}
+
+
+#if 1
+
+char * query(char * initial_msg) {
+    char * hline = (char *) malloc(sizeof(char) * BUFFERSIZE);
+    hline[0]='\0';
+
+    // curses is not enabled
+    if ( atoi(get_conf_value("nocurses"))) {
+        if (strlen(initial_msg)) wprintf(L"%s", initial_msg);
+
+        if (fgetws(hline, BUFFERSIZE-1, stdin) == NULL)
+            hline[0]='\0';
+
+        clean_carrier(hline);
+        return hline;
+    }
+
+    // curses is enabled
+    int loading_o;
+    if (loading) {
+        loading_o=loading;
+        loading=0;
+        update(0);
+        loading=loading_o;
+    }
+    curs_set(1);
+
+    // show initial message
+    if (strlen(initial_msg)) sc_info(initial_msg);
+
+    // ask for input
+    wtimeout(input_win, -1);
+    wmove(input_win, 0, rescol);
+    wclrtoeol(input_win);
+    wrefresh(input_win);
+    int d = wgetch(input_win);
+
+    while (d != OKEY_ENTER && d != OKEY_ESC) {
+        if (d == ERR) {
+            d = wgetch(input_win);
+            continue;
+        }
+
+        if (d == OKEY_BS || d == OKEY_BS2) {
+            del_char(hline, strlen(hline) - 1);
+        } else {
+            sprintf(hline + strlen(hline), "%c", d);
+        }
+
+        mvwprintw(input_win, 0, rescol, "%s", hline);
+        wclrtoeol(input_win);
+        wrefresh(input_win);
+        d = wgetch(input_win);
+    }
+    if (d == OKEY_ESC) hline[0]='\0';
+
+    // go back to spreadsheet
+    noecho();
+    curs_set(0);
+    wtimeout(input_win, TIMEOUT_CURSES);
+    wmove(input_win, 0,0);
+    wclrtoeol(input_win);
+
+    return hline;
+}
+
+int l_query (lua_State *L) {
+    char * val;
+    char * ret;
+
+    val = lua_tostring(L,1);
+
+    ret = query(val);
+    printf("return of query:%s.\n", ret);
+    /*
+    if (ret == NULL)  return 0;
+    lua_pushstring(L,ret);
+    free(ret);
+                        replace that with...
+    */
+    if (ret == '\0') {
+        free(ret);
+        return 0;
+    }
+    lua_pushstring(L,ret);
+    free(ret);
+    return 1;
+}
+
+#else
 
 char * query(char * initial_msg) {
 
@@ -180,6 +320,8 @@ static int l_query (lua_State *L) {
 }
 
 
+#endif
+
 LC_NUMBER2(currow,currow)
 LC_NUMBER2(curcol,curcol)
 LC_NUMBER2(maxcols,maxcols)
@@ -198,6 +340,9 @@ static const luaL_reg sclib[] =
  { "curcol", l_curcol },
  { "maxcols", l_maxcols },
  { "maxrows", l_maxrows },
+ { "a2colrow", l_colrow},
+ { "colrow2a", l_colrow2a},
+ { "sc", l_sc},
  {NULL,NULL}
 };
   
