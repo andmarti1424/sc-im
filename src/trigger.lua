@@ -1,18 +1,6 @@
 
 
 
-function trigger()
-
-file=io.open("/tmp/test1.sctrg", "a+")
-
-file:write("test"..a)
-file:write("test1 "..sc.maxcols())
-file:write("test1 "..sc.maxrows())
-a=a+1
-file:close()
-
-
-end
 
 
 function trigger_cell(row,col, flags)

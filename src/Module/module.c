@@ -1,3 +1,15 @@
+/* 
+  R.Pollak 
+  Trigger example in C
+  to compile 
+	gcc -shared -fPIC -o module.so -g -Wall module.c
+
+  on the trigger the ent structure is passed and whether the trigger was on Write or on Read. Write trigger, when it was written to selected cells,
+  or Read from selected cells.
+  
+
+*/
+
 #include <stdio.h>
 
 #include "sc.h"
@@ -20,7 +32,6 @@ extern char * query(char * );
 int do_c_call(struct ent *p , int rw)
 {
 
-char * str = query("Call from C");
 
 
 FILE *fd = fopen("/tmp/modul.txt","a+");

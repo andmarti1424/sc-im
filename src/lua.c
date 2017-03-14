@@ -1,3 +1,18 @@
+/* 
+  R.Pollak
+  Lua Support for sc 
+  called from sc via "@lua(file,0)" command 
+  and interface for Lua Triggers  
+
+  how to use it see macro.lua or trigger.lua
+  At initialization of LUA, init.lua is called, this way global variables could be set.
+  Those are then accessible also  when called via @lua cmd or in triggers.
+  
+
+*/
+
+
+
 #include <lua.h>                                /* Always include this when calling Lua */
 #include <lauxlib.h>                            /* Always include this when calling Lua */
 #include <lualib.h>                             /* Prototype for luaL_openlibs(), */
@@ -115,11 +130,8 @@ static int l_setform (lua_State *L) {
 }
 
 static int l_sc (lua_State *L) {
-  int r,c;
+
   char * val;
-  struct ent **pp;
-  struct ent *p;
-  char buf[256];
       
       val=lua_tostring(L,1);
       //  printf("setstr !!\n");
@@ -354,13 +366,6 @@ doLuainit()
  L = luaL_newstate();                        /* Create Lua state variable */
     luaL_openlibs(L);                           /* Load Lua libraries */
 
-/*
-    lua_register(L,"lgetnum",l_getnum);
-    lua_register(L,"lsetnum",l_setnum);
-    lua_register(L,"lsetform",l_setform);
-    lua_register(L,"lsetstr",l_setstr);
-    lua_register(L,"lquery",l_query);
-*/
 
  luaL_register(L, "sc", sclib);
 
@@ -449,16 +454,14 @@ doLuaTriger2(int row, int col, int flags)
    
     lua_getglobal(L, "trigger_cell");                 /* Tell what function to run */
 
-    lua_pushinteger(L,row);
     lua_pushinteger(L,col);
+    lua_pushinteger(L,row);
     lua_pushinteger(L, flags);
     /* BELOW HERE IS THE HELLO WORLD CODE */
     //printf("In C, calling Lua\n");
     if (lua_pcall(L, 3, 0, 0))                  /* Run the function */
 	bail(L, "lua_pcall() failed");          /* Error out if Lua file has an error */
     //printf("Back in C again\n");
-
-
 
 }
 
@@ -486,8 +489,8 @@ doLuaTrigger_cell(struct ent *p, int flags)
    
     lua_getglobal(L, trigger->function);                 /* Tell what function to run */
 
-    lua_pushinteger(L,row);
     lua_pushinteger(L,col);
+    lua_pushinteger(L,row);
     lua_pushinteger(L, flags);
     /* BELOW HERE IS THE HELLO WORLD CODE */
     //printf("In C, calling Lua\n");
