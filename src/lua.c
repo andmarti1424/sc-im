@@ -51,8 +51,8 @@ static int l_getnum (lua_State *L) {
     int r,c;
     struct ent **pp;
     struct ent *p;
-    c = lua_tointeger(L, 1);      /* get argument */
-    r = lua_tointeger(L, 2);
+    r = lua_tointeger(L, 1);      /* get argument */
+    c = lua_tointeger(L, 2);
     // sc_debug("getnum !!");
     pp = ATBL(tbl,r,c);
 
@@ -69,8 +69,8 @@ static int l_setnum (lua_State *L) {
     double val;
     //struct ent ** pp;
     struct ent *p;
-    c = lua_tointeger(L, 1);  /* get argument */
-    r = lua_tointeger(L, 2);
+    r = lua_tointeger(L, 1);  /* get argument */
+    c = lua_tointeger(L, 2);
     val=lua_tonumber(L,3);
     sc_debug("getnum !!");
 
@@ -89,8 +89,8 @@ static int l_setstr (lua_State *L) {
     char * val;
     //struct ent ** pp;
     struct ent *p;
-    c = lua_tointeger(L, 1);  /* get argument */
-    r = lua_tointeger(L, 2);
+    r = lua_tointeger(L, 1);  /* get argument */
+    c = lua_tointeger(L, 2);
     val=(char *) lua_tostring(L,3);
     //sc_debug("setstr !!");
 
@@ -106,8 +106,8 @@ static int l_setform (lua_State *L) {
     //struct ent ** pp;
     //struct ent * p;
     char buf[256];
-    c = lua_tointeger(L, 1);  /* get argument */
-    r = lua_tointeger(L, 2);
+    r = lua_tointeger(L, 1);  /* get argument */
+    c = lua_tointeger(L, 2);
     val = (char *) lua_tostring(L,3);
     //sc_debug("setstr !!");
 
@@ -133,8 +133,8 @@ static int l_colrow2a(lua_State *L) {
     int c, r;
     char buf[16];
 
-    c = lua_tointeger(L, 1);  /* get argument */
-    r = lua_tointeger(L, 2);
+    r = lua_tointeger(L, 1);  /* get argument */
+    c = lua_tointeger(L, 2);
     sprintf(buf,"%s%d", coltoa(c),r);
     lua_pushstring(L,buf);
     return 1;
