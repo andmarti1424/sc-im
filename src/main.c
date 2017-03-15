@@ -156,7 +156,9 @@ int main (int argc, char ** argv) {
         }
     }
 
+#ifdef XLUA
     doLuainit();
+#endif
 
     wchar_t stdin_buffer[BUFFERSIZE] = { L'\0' };
 

@@ -91,7 +91,7 @@ static int l_setstr (lua_State *L) {
     struct ent *p;
     c = lua_tointeger(L, 1);  /* get argument */
     r = lua_tointeger(L, 2);
-    val=lua_tostring(L,3);
+    val=(char *) lua_tostring(L,3);
     //  printf("setstr !!\n");
 
     p=lookat(r,c);
@@ -108,7 +108,7 @@ static int l_setform (lua_State *L) {
     char buf[256];
     c = lua_tointeger(L, 1);  /* get argument */
     r = lua_tointeger(L, 2);
-    val = lua_tostring(L,3);
+    val = (char *) lua_tostring(L,3);
     //  printf("setstr !!\n");
 
     sprintf(buf,"LET %s%d=%s",coltoa(c),r,val);
@@ -120,7 +120,7 @@ static int l_setform (lua_State *L) {
 static int l_sc (lua_State *L) {
     char * val;
 
-    val=lua_tostring(L,1);
+    val=(char *) lua_tostring(L,1);
     //  printf("setstr !!\n");
 
     send_to_interpp(val);
@@ -146,9 +146,9 @@ static int l_colrow(lua_State *L) {
     char *val;
     int c, r;
     int ret, len;
-    val = lua_tostring(L,1);
+    val = (char *) lua_tostring(L,1);
     printf("\n %s ", val);
-    ret = sscanf(val,"%49[a-za-Z]%d",&buf,&r);
+    ret = sscanf(val,"%49[a-za-Z]%d",buf,&r);
     printf("scanf ret %d",ret);
     len=strlen(buf);
     c = (toupper((int)buf[0])) - 'A';
@@ -228,7 +228,7 @@ int l_query (lua_State *L) {
     char * val;
     char * ret;
 
-    val = lua_tostring(L,1);
+    val = (char *)  lua_tostring(L,1);
 
     ret = query(val);
     printf("return of query:%s.\n", ret);

@@ -38,8 +38,8 @@
 #include <unistd.h>
 #include <regex.h>
 
+#include "trigger.h"   
 #ifdef XLUA
-#include "trigger.h"
 //void do_trigger( struct ent *p , int rw);
 #include "lua.h"
 #endif
@@ -1352,7 +1352,9 @@ char * seval(register struct ent * ent, register struct enode * se) {
         return dostindex(minr, minc, maxr, maxc, se->e.o.right);
     }
     case EXT:    return (doext(se));
+#ifdef XLUA
     case LUA:    return (doLUA(se));
+#endif
     case SVAL:   return (dosval(seval(ent, se->e.o.left), eval(NULL, se->e.o.right)));
     case REPLACE: return (doreplace(seval(ent, se->e.o.left),
                           seval(NULL, se->e.o.right->e.o.left),
@@ -2120,7 +2122,9 @@ int constant(register struct enode *e) {
          && constant(e->e.o.left)
          && constant(e->e.o.right)
          && e->op != EXT     /* functions look like constants but aren't */
+#ifdef XLUA
          && e->op != LUA
+#endif
          && e->op != NVAL
          && e->op != SVAL
          && e->op != NOW
@@ -2332,7 +2336,9 @@ void decompile(register struct enode *e, int priority) {
     case NVAL:  two_arg("@nval(", e); break;
     case SVAL:  two_arg("@sval(", e); break;
     case EXT:   two_arg("@ext(", e); break;
+#ifdef XLUA
     case LUA:   two_arg("@lua(", e); break;
+#endif
     case SUBSTR:  three_arg("@substr(", e); break;
     case REPLACE: three_arg("@replace(", e); break;
     case STINDEX: index_arg("@stindex", e); break;

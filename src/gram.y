@@ -212,8 +212,8 @@ token S_YANKCOL
 %token K_NOAUTOCALC
 %token K_DEBUG
 %token K_NODEBUG
-%token K_LUATRG
-%token K_NOLUATRG
+%token K_TRG
+%token K_NOTRG
 %token K_EXTERNAL_FUNCTIONS
 %token K_NOEXTERNAL_FUNCTIONS
 %token K_HALF_PAGE_SCROLL
@@ -873,7 +873,11 @@ term:           var                     { $$ = new_var(O_VAR, $1); }
                  { $$ = new(STINDEX, new_range(REDUCE | STINDEX, $4),
                     new(',', $6, $8)); }
         | '@' K_EXT  '(' e ',' e ')'    { $$ = new(EXT, $4, $6); }
-        | '@' K_LUA  '(' e ',' e ')'    { $$ = new(LUA, $4, $6); }
+        | '@' K_LUA  '(' e ',' e ')'    { 
+					#ifdef XLUA
+						$$ = new(LUA, $4, $6); 
+					#endif
+					}
         | '@' K_NVAL '(' e ',' e ')'    { $$ = new(NVAL, $4, $6); }
         | '@' K_SVAL '(' e ',' e ')'    { $$ = new(SVAL, $4, $6); }
         | '@' K_REPLACE '(' e ',' e ',' e ')'
@@ -1006,10 +1010,10 @@ setitem :
     |    K_DEBUG '=' NUMBER              {  if ($3 == 0) parse_str(user_conf_d, "debug=0");
                                             else         parse_str(user_conf_d, "debug=1"); }
     |    K_NODEBUG                       {               parse_str(user_conf_d, "debug=0"); }
-    |    K_LUATRG                        {               parse_str(user_conf_d, "lua_trigger=1"); }
-    |    K_LUATRG '=' NUMBER             {  if ($3 == 0) parse_str(user_conf_d, "lua_trigger=0");
-                                            else         parse_str(user_conf_d, "lua_trigger=1"); }
-    |    K_NOLUATRG                      {               parse_str(user_conf_d, "lua_trigger=0"); }
+    |    K_TRG                        	 {               parse_str(user_conf_d, "trigger=1"); }
+    |    K_TRG '=' NUMBER             	 {  if ($3 == 0) parse_str(user_conf_d, "trigger=0");
+                                            else         parse_str(user_conf_d, "trigger=1"); }
+    |    K_NOTRG                      {               parse_str(user_conf_d, "trigger=0"); }
     |    K_EXTERNAL_FUNCTIONS            {               parse_str(user_conf_d, "external_functions=1"); }
     |    K_EXTERNAL_FUNCTIONS '=' NUMBER {  if ($3 == 0) parse_str(user_conf_d, "external_functions=0");
                                             else         parse_str(user_conf_d, "external_functions=1"); }

@@ -75,7 +75,9 @@ void set_trigger(int r, int c, int rf, int cf, char * str) {
             if (strcmp(get(d,"mode"), "R") == 0) tmp=TRG_READ;
             if (strcmp(get(d,"mode"), "W") == 0) tmp=TRG_WRITE;
             if (strcmp(get(d,"mode"), "RW")== 0) tmp=TRG_READ | TRG_WRITE;
+#ifdef XLUA
             if (strcmp(get(d,"type"), "LUA")== 0) tmp|=TRG_LUA;
+#endif
             if (strcmp(get(d,"type"), "C")== 0) {
                 char * error;
                 tmp|=TRG_C;
@@ -139,8 +141,10 @@ void do_trigger( struct ent *p , int rw) {
     struct trigger *trigger = p->trigger;
     if(in_trigger) return;
     in_trigger = 1;
+#ifdef XLUA
     if ((trigger->flag & TRG_LUA ) == TRG_LUA)
         doLuaTrigger_cell(p,rw);
+#endif
     if ((trigger->flag & TRG_C ) == TRG_C)
         do_C_Trigger_cell(p,rw);
     in_trigger = 0;

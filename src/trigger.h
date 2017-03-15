@@ -15,3 +15,4 @@ struct trigger {
 void do_trigger( struct ent *p , int rw);
 void set_trigger(int r, int c, int rf, int cf, char * str);
 void del_trigger(int r, int c, int rf, int cf );
+void do_C_Trigger_cell(struct ent * p, int rw);
