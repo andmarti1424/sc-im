@@ -42,9 +42,8 @@ extern WINDOW * input_win;
 lua_State *L;
 
 void bail(lua_State *L, char *msg){
-    sc_debug("FATAL ERROR: %s: %s",
-    msg, lua_tostring(L, -1));
-    exit_app(1);
+    sc_debug("FATAL ERROR: %s: %s", msg, lua_tostring(L, -1));
+    //exit(1); shall exit here?
 }
 
 static int l_getnum (lua_State *L) {
