@@ -34,6 +34,10 @@
 #include "undo.h"
 #endif
 
+#ifdef XLUA
+#include "lua.h"
+#endif
+
 int currow = 0, curcol = 0;
 int lastrow = 0, lastcol = 0;
 int maxrows, maxcols;
@@ -152,7 +156,7 @@ int main (int argc, char ** argv) {
         }
     }
 
-    //doLuainit();
+    doLuainit();
 
     wchar_t stdin_buffer[BUFFERSIZE] = { L'\0' };
 
@@ -512,9 +516,9 @@ void sc_msg(char * s, int type, ...) {
         fwprintf(fdoutput, L"%s\n", t);
     } else {
         if (fwide(stdout, 0) >0)
-            wprintf(L"%s\n", t);
+            wprintf(L"wide %s\n", t);
         else
-            printf("%s\n", t);
+            printf("nowide %s\n", t);
         fflush(stdout);
     }
     va_end(args);

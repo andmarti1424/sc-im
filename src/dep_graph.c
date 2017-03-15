@@ -8,6 +8,7 @@
 #include "xmalloc.h" // for scxfree
 #include <math.h>
 #include "macros.h"
+#include "trigger.h"
 
 extern jmp_buf fpe_save;
 extern int cellerror;    /* is there an error in this cell */
@@ -377,7 +378,6 @@ void EvalJustOneVertex(register struct ent * p, int i, int j, int rebuild_graph)
             return;
         if ( !p->label || !v || strcmp(v, p->label) != 0 || cellerror) {
             p->flags |= is_changed;
-            //changed++;
         }
         if (p->label)
             scxfree(p->label);
@@ -399,7 +399,8 @@ void EvalJustOneVertex(register struct ent * p, int i, int j, int rebuild_graph)
             p->cellerror = cellerror;
             p->v = v;
             p->flags |= is_changed | is_valid;
-            //changed++;
+            if (( p->trigger  ) && ((p->trigger->flag & TRG_WRITE) == TRG_WRITE))
+                do_trigger(p,TRG_WRITE);
         }
     }
 }

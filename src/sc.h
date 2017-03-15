@@ -4,7 +4,9 @@
 #include <stdio.h>
 #include <memory.h>
 
-#define ATBL(tbl, row, col)    (*(tbl + row) + (col))
+//#define ATBL(tbl, row, col)    (*(tbl + row) + (col))
+extern struct ent ** ATBL(struct ent ***,int ,int );
+
 #define MINROWS      100     /* minimum size at startup */
 
 /* MAX rows size of sheet. Default 65536.   */
@@ -72,6 +74,7 @@ struct ent {
     char * format;        /* printf format for this cell */
     char cellerror;       /* error in a cell? */
     struct ucolor * ucolor;
+    struct trigger * trigger;
     int pad;              // padding between other cells
 };
 
@@ -227,8 +230,9 @@ struct go_save {
 #define CHR         (OP_BASE + 79)
 #define SET8BIT     (OP_BASE + 80)
 #define REPLACE     (OP_BASE + 81)
-#define FROW         (OP_BASE + 82)
-#define FCOL         (OP_BASE + 83)
+#define FROW        (OP_BASE + 82)
+#define FCOL        (OP_BASE + 83)
+#define LUA         (OP_BASE + 84)
 
 /* flag values */
 #define is_valid      0001

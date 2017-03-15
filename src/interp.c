@@ -38,6 +38,12 @@
 #include <unistd.h>
 #include <regex.h>
 
+#ifdef XLUA
+#include "trigger.h"
+//void do_trigger( struct ent *p , int rw);
+#include "lua.h"
+#endif
+
 #ifdef UNDO
 #include "undo.h"
 #endif
@@ -94,12 +100,9 @@ int    cellerror = CELLOK;    /* is there an error in this cell */
 
 extern int find_range(char * name, int len, struct ent * lmatch, struct ent * rmatch, struct range ** rng);
 
-
 #include "dep_graph.h"
 extern graphADT graph;
 //extern char valores;
-
-
 
 
 double finfunc(int fun, double v1, double v2, double v3) {
@@ -1349,6 +1352,7 @@ char * seval(register struct ent * ent, register struct enode * se) {
         return dostindex(minr, minc, maxr, maxc, se->e.o.right);
     }
     case EXT:    return (doext(se));
+    case LUA:    return (doLUA(se));
     case SVAL:   return (dosval(seval(ent, se->e.o.left), eval(NULL, se->e.o.right)));
     case REPLACE: return (doreplace(seval(ent, se->e.o.left),
                           seval(NULL, se->e.o.right->e.o.left),
@@ -1963,6 +1967,8 @@ void let(struct ent * v, struct enode * e) {
     }
     if (v->cellerror == CELLOK) v->flags |= ( is_changed | is_valid );
     modflg++;
+    if (( v->trigger  ) && ((v->trigger->flag & TRG_WRITE) == TRG_WRITE))
+        do_trigger(v,TRG_WRITE);
 
 
     #ifdef UNDO
@@ -2114,6 +2120,7 @@ int constant(register struct enode *e) {
          && constant(e->e.o.left)
          && constant(e->e.o.right)
          && e->op != EXT     /* functions look like constants but aren't */
+         && e->op != LUA
          && e->op != NVAL
          && e->op != SVAL
          && e->op != NOW
@@ -2325,6 +2332,7 @@ void decompile(register struct enode *e, int priority) {
     case NVAL:  two_arg("@nval(", e); break;
     case SVAL:  two_arg("@sval(", e); break;
     case EXT:   two_arg("@ext(", e); break;
+    case LUA:   two_arg("@lua(", e); break;
     case SUBSTR:  three_arg("@substr(", e); break;
     case REPLACE: three_arg("@replace(", e); break;
     case STINDEX: index_arg("@stindex", e); break;

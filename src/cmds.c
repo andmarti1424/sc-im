@@ -277,7 +277,7 @@ int etype(register struct enode *e) {
     switch (e->op) {
         case UPPER: case LOWER: case CAPITAL:
         case O_SCONST: case '#': case DATE: case FMT: case STINDEX:
-        case EXT: case SVAL: case SUBSTR:
+        case EXT: case LUA: case SVAL: case SUBSTR:
             return (STR);
 
         case '?':
@@ -958,6 +958,7 @@ struct ent * lookat(int row, int col) {
         (*pp)->label = (char *) 0;
         (*pp)->flags = may_sync;
         (*pp)->expr = (struct enode *) 0;
+        (*pp)->trigger = (struct trigger *) 0;
         (*pp)->v = (double) 0.0;
         (*pp)->format = (char *) 0;
         (*pp)->cellerror = CELLOK;

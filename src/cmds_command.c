@@ -101,6 +101,7 @@ L"showmaps",
 L"showrow",
 L"showrows",
 L"sort",
+L"trigger",
 L"unformat",
 L"version",
 L"w",
@@ -603,6 +604,18 @@ void do_commandmode(struct block * sb) {
             inputline[0] = '\0';
             #endif
 
+        }  else if ( ! wcsncmp(inputline, L"trigger ", 8) ) {
+            interp_line[0]=L'\0';
+            wchar_t line [BUFFERSIZE];
+            wcscpy(line, inputline);
+            del_range_wchars(line, 0, 7);
+            swprintf(interp_line, BUFFERSIZE, L"trigger ");
+            if (p != -1) {
+                swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L" %s%d:", coltoa(sr->tlcol), sr->tlrow);
+                swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%s%d ", coltoa(sr->brcol), sr->brrow);
+            }
+            swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%ls", line);
+            send_to_interp(interp_line);
         } else if ( ! wcsncmp(inputline, L"set ", 4) ) {
             wcscpy(interp_line, inputline);
             send_to_interp(interp_line);

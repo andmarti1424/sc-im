@@ -59,6 +59,13 @@ CFLAGS += -DXLSX $(shell pkg-config --cflags libxml-2.0 libzip)
 LDLIBS += $(shell pkg-config --libs libxml-2.0 libzip)
 endif
 
+# NOTE: lua support
+ifneq ($(shell pkg-config --exists lua51 || echo 'no'),no)
+CFLAGS += -DXLUA $(shell pkg-config --cflags lua51)
+LDLIBS += $(shell pkg-config --libs lua51) -Wl,--export-dynamic -ldl
+endif
+
+
 OBJS = $(patsubst %.c, %.o, $(wildcard *.c) $(wildcard utils/*.c)) gram.o
 
 .PHONY : all clean install
