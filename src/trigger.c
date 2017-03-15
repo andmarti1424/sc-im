@@ -55,7 +55,7 @@ void set_trigger(int r, int c, int rf, int cf, char * str) {
         (get(d,"type") == NULL) ||
         (get(d,"file") == NULL) ||
         (get(d,"function") == NULL )) {
-            sc_error("One of the values specified is wrong. Please check the values of type, fg and bg.");
+            sc_error("One of the values specified is wrong. Please parameters of the trigger to be set.");
             destroy_dictionary(d);
             return;
     }
