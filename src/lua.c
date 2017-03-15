@@ -42,7 +42,7 @@ extern WINDOW * input_win;
 lua_State *L;
 
 void bail(lua_State *L, char *msg){
-    sc_error("FATAL ERROR: %s: %s",
+    sc_debug("FATAL ERROR: %s: %s",
     msg, lua_tostring(L, -1));
     exit_app(1);
 }
@@ -91,7 +91,7 @@ static int l_setstr (lua_State *L) {
     struct ent *p;
     c = lua_tointeger(L, 1);  /* get argument */
     r = lua_tointeger(L, 2);
-    val=lua_tostring(L,3);
+    val=(char *) lua_tostring(L,3);
     //sc_debug("setstr !!");
 
     p=lookat(r,c);
@@ -196,11 +196,6 @@ char * query(char * initial_msg) {
     int d = wgetch(input_win);
 
     while (d != OKEY_ENTER && d != OKEY_ESC) {
-        if (d == ERR) {
-            d = wgetch(input_win);
-            continue;
-        }
-
         if (d == OKEY_BS || d == OKEY_BS2) {
             del_char(hline, strlen(hline) - 1);
         } else {
