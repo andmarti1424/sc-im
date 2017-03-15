@@ -11,6 +11,8 @@
 
 //LINUX - PSC not def
 
+#define ATBL_P(tbl, row, col)    (*(tbl + row) + (col))
+
 /*
  * check to see if *rowp && *colp are currently allocated, if not expand the
  * current size if we can.
@@ -167,7 +169,7 @@ int growtbl(int rowcol, int toprow, int topcol) {
                 sc_error(nowider);
                 return(FALSE);
             }
-            for (nullit = ATBL(tbl, i, maxcols), cnt = 0; cnt < newcols - maxcols; cnt++, nullit++)
+            for (nullit = ATBL_P(tbl, i, maxcols), cnt = 0; cnt < newcols - maxcols; cnt++, nullit++)
                 *nullit = (struct ent *)NULL;
         /*        memset((char *) ATBL(tbl,i, maxcols), 0, (newcols - maxcols) * sizeof(struct ent **)); */
         }
