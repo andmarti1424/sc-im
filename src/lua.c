@@ -42,7 +42,7 @@ extern WINDOW * input_win;
 lua_State *L;
 
 void bail(lua_State *L, char *msg){
-    fprintf(stderr, "\nFATAL ERROR:\n  %s: %s\n\n",
+    sc_error("FATAL ERROR: %s: %s",
     msg, lua_tostring(L, -1));
     exit_app(1);
 }
@@ -53,7 +53,7 @@ static int l_getnum (lua_State *L) {
     struct ent *p;
     c = lua_tointeger(L, 1);      /* get argument */
     r = lua_tointeger(L, 2);
-    // printf("getnum !!\n");
+    // sc_debug("getnum !!");
     pp = ATBL(tbl,r,c);
 
     p = *pp;
@@ -72,7 +72,7 @@ static int l_setnum (lua_State *L) {
     c = lua_tointeger(L, 1);  /* get argument */
     r = lua_tointeger(L, 2);
     val=lua_tonumber(L,3);
-    //printf("getnum !!\n");
+    sc_debug("getnum !!");
 
     p=lookat(r,c);
     p->v=val;
@@ -91,8 +91,8 @@ static int l_setstr (lua_State *L) {
     struct ent *p;
     c = lua_tointeger(L, 1);  /* get argument */
     r = lua_tointeger(L, 2);
-    val=(char *) lua_tostring(L,3);
-    //  printf("setstr !!\n");
+    val=lua_tostring(L,3);
+    //sc_debug("setstr !!");
 
     p=lookat(r,c);
     label(p,val,-1);
@@ -109,7 +109,7 @@ static int l_setform (lua_State *L) {
     c = lua_tointeger(L, 1);  /* get argument */
     r = lua_tointeger(L, 2);
     val = (char *) lua_tostring(L,3);
-    //  printf("setstr !!\n");
+    //sc_debug("setstr !!");
 
     sprintf(buf,"LET %s%d=%s",coltoa(c),r,val);
     send_to_interpp(buf);
@@ -121,7 +121,7 @@ static int l_sc (lua_State *L) {
     char * val;
 
     val=(char *) lua_tostring(L,1);
-    //  printf("setstr !!\n");
+    //sc_debug("setstr !!");
 
     send_to_interpp(val);
 
@@ -147,9 +147,9 @@ static int l_colrow(lua_State *L) {
     int c, r;
     int ret, len;
     val = (char *) lua_tostring(L,1);
-    printf("\n %s ", val);
+    sc_debug(" %s ", val);
     ret = sscanf(val,"%49[a-za-Z]%d",buf,&r);
-    printf("scanf ret %d",ret);
+    sc_debug("scanf ret %d",ret);
     len=strlen(buf);
     c = (toupper((int)buf[0])) - 'A';
     if (len == 2)               /* has second char */
@@ -231,7 +231,7 @@ int l_query (lua_State *L) {
     val = (char *)  lua_tostring(L,1);
 
     ret = query(val);
-    printf("return of query:%s.\n", ret);
+    sc_debug("return of query:%s.\n", ret);
     if (ret == '\0') {
         free(ret);
         return 0;
@@ -314,10 +314,10 @@ void doLuaTriger() {
 
     lua_getglobal(L, "trigger");                /* Tell what function to run */
 
-    //printf("In C, calling Lua\n");
+    //sc_debug("In C, calling Lua");
     if (lua_pcall(L, 0, 0, 0))                  /* Run the function */
         bail(L, "lua_pcall() failed");          /* Error out if Lua file has an error */
-    //printf("Back in C again\n");
+    //sc_debug("Back in C again");
     return;
 }
 
@@ -334,10 +334,10 @@ void doLuaTriger2(int row, int col, int flags) {
     lua_pushinteger(L,col);
     lua_pushinteger(L,row);
     lua_pushinteger(L, flags);
-    //printf("In C, calling Lua\n");
+    //sc_debug("In C, calling Lua");
     if (lua_pcall(L, 3, 0, 0))                  /* Run the function */
         bail(L, "lua_pcall() failed");          /* Error out if Lua file has an error */
-    //printf("Back in C again\n");
+    //sc_debug("Back in C again");
     return;
 }
 
@@ -365,10 +365,10 @@ void doLuaTrigger_cell(struct ent *p, int flags) {
     lua_pushinteger(L,col);
     lua_pushinteger(L,row);
     lua_pushinteger(L, flags);
-    //printf("In C, calling Lua\n");
+    //sc_debug("In C, calling Lua");
     if (lua_pcall(L, 3, 0, 0))                  /* Run the function */
         bail(L, "lua_pcall() failed");          /* Error out if Lua file has an error */
-    //printf("Back in C again\n");
+    //sc_debug("Back in C again");
     return;
 }
 #endif
