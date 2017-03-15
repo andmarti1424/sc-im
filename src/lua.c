@@ -226,7 +226,7 @@ int l_query (lua_State *L) {
     val = (char *)  lua_tostring(L,1);
 
     ret = query(val);
-    sc_debug("return of query:%s.\n", ret);
+    //sc_debug("return of query:%s.\n", ret);
     if (ret == '\0') {
         free(ret);
         return 0;
