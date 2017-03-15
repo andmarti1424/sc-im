@@ -129,15 +129,6 @@ void del_trigger(int r, int c, int rf, int cf ) {
     return;
 }
 
-struct ent ** ATBL(struct ent ***tbl, int row, int col) {
-    struct ent **ent=(*(tbl+row)+(col));
-    struct ent *v= *ent;
-
-    if ((v) && (v->trigger) && ((v->trigger->flag & TRG_READ) == TRG_READ))
-          do_trigger(v,TRG_READ);
-    return ent;
-}
-
 static int in_trigger = 0;
 
 void do_trigger( struct ent *p , int rw) {

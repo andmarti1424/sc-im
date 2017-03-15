@@ -6,6 +6,7 @@
 #include "macros.h"
 #include "color.h"  // for set_ucolor
 #include "conf.h"   // for set_ucolor
+#include "trigger.h"
 #include <stdlib.h> // for atoi
 
 //LINUX - PSC not def
@@ -196,3 +197,14 @@ int growtbl(int rowcol, int toprow, int topcol) {
     maxcols = newcols;
     return (TRUE);
 }
+
+struct ent ** ATBL(struct ent ***tbl, int row, int col) {
+    struct ent **ent=(*(tbl+row)+(col));
+    struct ent *v= *ent;
+
+    if ((v) && (v->trigger) && ((v->trigger->flag & TRG_READ) == TRG_READ))
+          do_trigger(v,TRG_READ);
+    return ent;
+}
+
+
