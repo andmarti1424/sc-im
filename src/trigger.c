@@ -30,6 +30,9 @@ Triggers need mode,type,file,function flags
 #include "conf.h"
 #include "cmds.h"
 #include "trigger.h"
+#ifdef XLUA
+#include "lua.h"
+#endif
 
 void set_trigger(int r, int c, int rf, int cf, char * str) {
     if (any_locked_cells(r, c, rf, cf)) {
