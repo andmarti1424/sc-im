@@ -266,14 +266,12 @@ void doLuainit() {
 
     luaL_register(L, "sc", sclib);
 
-    
-    if (luaL_loadfile(L, "init.lua"))           /* Load but don't run the Lua script */
-	{
-	fprintf(stderr, "\nWarning :\n  Couldn't load init.lua: %s\n\n", lua_tostring(L,-1));
-	return;
-	}
+    if (luaL_loadfile(L, "init.lua")) {         /* Load but don't run the Lua script */
+        fprintf(stderr, "\nWarning :\n  Couldn't load init.lua: %s\n\n", lua_tostring(L,-1));
+        return;
+    }
     if (lua_pcall(L, 0, 0, 0))                  /* PRIMING RUN. FORGET THIS AND YOU'RE TOAST */
-	fprintf(stderr, "\nFATAL ERROR:\n  Couldn't initialized Lua: %s\n\n", lua_tostring(L,-1));
+        fprintf(stderr, "\nFATAL ERROR:\n  Couldn't initialized Lua: %s\n\n", lua_tostring(L,-1));
 
     return;
 }
