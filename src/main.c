@@ -8,7 +8,9 @@
 #include <locale.h>
 #include <wchar.h>
 #include <wordexp.h>
+#ifdef __APPLE__
 #include <stropts.h> // for ioctl
+#endif
 
 #include "main.h"
 #include "shift.h"
