@@ -10,7 +10,7 @@
 #include <wordexp.h>
 
 #ifndef __APPLE__
-	#include <stropts.h> // for ioctl
+#include <stropts.h> // for ioctl
 #endif
 
 #include "main.h"
@@ -223,12 +223,6 @@ int main (int argc, char ** argv) {
 /*********************************************************************
    END OF MAIN LOOP
  *********************************************************************/
-
-
-
-
-
-
 
 extern graphADT graph;
 
