@@ -214,7 +214,9 @@ char * query(char * initial_msg) {
     wtimeout(input_win, TIMEOUT_CURSES);
     wmove(input_win, 0,0);
     wclrtoeol(input_win);
-
+    wmove(input_win, 1,0);
+    wclrtoeol(input_win);
+    wrefresh(input_win);
     return hline;
 }
 
