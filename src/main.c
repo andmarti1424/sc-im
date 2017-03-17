@@ -8,7 +8,10 @@
 #include <locale.h>
 #include <wchar.h>
 #include <wordexp.h>
+
+#ifndef __APPLE__
 #include <stropts.h> // for ioctl
+#endif
 
 #include "main.h"
 #include "shift.h"
@@ -220,12 +223,6 @@ int main (int argc, char ** argv) {
 /*********************************************************************
    END OF MAIN LOOP
  *********************************************************************/
-
-
-
-
-
-
 
 extern graphADT graph;
 
