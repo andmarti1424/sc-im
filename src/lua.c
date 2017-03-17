@@ -298,6 +298,7 @@ char * doLUA( struct enode * se) {
        /* Tell what function to run */
        //    lua_getglobal(L, "tellme");
     }
+    if (cmd != NULL) free(cmd);
     return 0;
 }
 
