@@ -83,13 +83,13 @@ void set_trigger(int r, int c, int rf, int cf, char * str) {
 #endif
             if (strcmp(get(d,"type"), "C")== 0) {
                 char * error;
-		char buffer[PATHLEN];
-		char buffer1[PATHLEN];
-                tmp|=TRG_C;
-		sprintf(buffer,"module/%s",n->trigger->file);
-		
-		if(plugin_exists(buffer,strlen(buffer),buffer1))
-                n->trigger->handle=dlopen(buffer1,RTLD_LAZY);
+                char buffer[PATHLEN];
+                char buffer1[PATHLEN];
+                tmp |= TRG_C;
+                sprintf(buffer,"module/%s",n->trigger->file);
+
+                if(plugin_exists(buffer,strlen(buffer),buffer1))
+                    n->trigger->handle=dlopen(buffer1,RTLD_LAZY);
                 if(!n->trigger->handle) {
                     fputs (dlerror(), stderr);
                     exit(1);
@@ -161,8 +161,7 @@ void do_C_Trigger_cell(struct ent * p, int rw) {
 
 
 
-int plugin_exists(char *name, int len, char *path)
-{
+int plugin_exists(char *name, int len, char *path) {
     FILE *fp;
     static char *HomeDir;
 
