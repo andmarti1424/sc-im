@@ -708,6 +708,38 @@ Commands for handling cell content:
 
     :autojus    Auto-resize the columns covered by the selected cell or range.
 
+    :trigger	Trigger action on cell or range. Trigger can be Read or Write
+    		or Both. On Read, trigger is executed before evaluating cells
+		value, on Write, after the evaluation. Type of Trigger can be
+		Lua or C. In Lua there are scim specific function available
+		accessing cells, more in "files/lua* directory.
+
+		Example:
+		:trigger a5 "mode=R type=LUA file=trg.lua function=trg"
+
+		Triggers when ever cell a5 is read and calls function
+		trg() in file trg.lua. In Lua column, row and mode is
+		passed as parameter to the function. Mode is whether
+		it was a READ or WRITE trigger.
+
+		:trigger b10 "mode=W type=C file=trg.so function=wr2mysql"
+
+		Function "wr2mysql" in trg.so is called when to 
+		cell b10 is writen a new value. 
+		See "files/Module/module.c" for more Infos.
+		Adding "-Wl,--export-dynamic" in Makefile for linking
+		sc-im, will export all symbols from sc-im, making it
+		available for dynamic linking with modules.
+		
+		The search patch for LUA trigger files is 
+		$HOME/.scim/lua/ or /usr/local/share/scim/lua
+		(in that order) and for C Trigger 
+		$HOME/.scim/module or /usr/local/share/scim/module
+
+		
+
+    :untrigger  Delete Trigger action on cell. Use with care.
+    
     :fsum       Sum the numeric values of a range.
 
                 The range is defined by the immediate cell above the current
