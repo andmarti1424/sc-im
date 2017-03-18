@@ -1960,7 +1960,8 @@ void let(struct ent * v, struct enode * e) {
             v->expr = (struct enode *) 0;
         }
         efree(e);
-    } else if (! exprerr && ! already_eval) {
+    //} else if (! exprerr && ! already_eval) {
+    } else if (! exprerr ) {
         efree(v->expr);
 
         v->expr = e;
