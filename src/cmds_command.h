@@ -1,4 +1,6 @@
+#ifdef HISTORY_FILE
 #include "history.h"
+#endif
 #include "buffer.h"
 
 extern int shall_quit;
