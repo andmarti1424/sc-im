@@ -781,7 +781,7 @@ void do_commandmode(struct block * sb) {
                 modflg = 0;
                 update(TRUE);
             }
-       } else {
+        } else {
             sc_error("COMMAND NOT FOUND !");
         }
 
@@ -796,7 +796,7 @@ void do_commandmode(struct block * sb) {
 #endif
 
         chg_mode('.');
-        inputline[0]='\0';
+        inputline[0]=L'\0';
         set_comp(0); // unmark tab completion
         update(TRUE);
     }
