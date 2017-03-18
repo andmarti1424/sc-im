@@ -42,7 +42,11 @@ extern WINDOW * input_win;
 lua_State *L;
 
 void bail(lua_State *L, char *msg){
-    sc_debug("FATAL ERROR: %s: %s", msg, lua_tostring(L, -1));
+    //sc_debug("FATAL ERROR: %s: %s", msg, lua_tostring(L, -1));
+    volatile char *error=lua_tostring(L,-1);
+    fprintf(stderr,"%s",error);
+	
+    fprintf(stderr,"FATAL ERROR: %s: %s", msg, lua_tostring(L, -1));
     //exit(1); shall exit here?
 }
 
@@ -50,8 +54,8 @@ static int l_getnum (lua_State *L) {
     int r,c;
     struct ent **pp;
     struct ent *p;
-    r = lua_tointeger(L, 1);      /* get argument */
-    c = lua_tointeger(L, 2);
+    c = lua_tointeger(L, 1);      /* get argument */
+    r = lua_tointeger(L, 2);
     // sc_debug("getnum !!");
     pp = ATBL(tbl,r,c);
 
