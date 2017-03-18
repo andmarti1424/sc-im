@@ -1914,7 +1914,6 @@ void let(struct ent * v, struct enode * e) {
 
 
     double val;
-    short already_eval = FALSE;
     unsigned isconstant = constant(e);
     if (v->row == currow && v->col == curcol)
         cellassign = 1;
@@ -1930,7 +1929,6 @@ void let(struct ent * v, struct enode * e) {
         } else {
             cellerror = CELLOK;
             val = eval(v, e); // JUST NUMERIC VALUE
-            already_eval = TRUE;
         }
         if (v->cellerror != cellerror) {
             v->flags |= is_changed;
@@ -1960,7 +1958,7 @@ void let(struct ent * v, struct enode * e) {
             v->expr = (struct enode *) 0;
         }
         efree(e);
-    } else if (! exprerr && ! already_eval) {
+    } else if (! exprerr) {
         efree(v->expr);
 
         v->expr = e;
