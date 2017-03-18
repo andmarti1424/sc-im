@@ -8,22 +8,22 @@
  */
 
 #include <sys/types.h>
-
-#ifdef IEEE_MATH
-#include <ieeefp.h>
-#endif
-
 #include <math.h>
 #include <signal.h>
 #include <setjmp.h>
 #include <ctype.h>
 #include <errno.h>
-
 #include <time.h>
 #include <string.h>
-
 #include <stdlib.h>
 #include <ncurses.h>
+#include <unistd.h>
+#include <regex.h>
+
+#ifdef IEEE_MATH
+#include <ieeefp.h>
+#endif
+
 #include "sc.h"
 #include "macros.h"
 #include "color.h"
@@ -35,12 +35,9 @@
 #include "lex.h"     // for atocol
 #include "interp.h"
 #include "utils/string.h"
-#include <unistd.h>
-#include <regex.h>
+#include "trigger.h"
 
-#include "trigger.h"   
 #ifdef XLUA
-//void do_trigger( struct ent *p , int rw);
 #include "lua.h"
 #endif
 
