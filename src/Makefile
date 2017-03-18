@@ -42,6 +42,8 @@ CFLAGS += -DDFLT_PAGER=\"less\"
 CFLAGS += -DUSECOLORS
 # Command history file, relative to home directory. Comment out to disable commandline history
 CFLAGS += -DHISTORY_FILE=\".$(name)info\"
+# Input mode history. Same as previous, but for insert mode commands
+#CFLAGS += -DINS_HISTORY_FILE=\".$(name)info\"
 # Comment out to disable undo/redo support
 CFLAGS += -DUNDO
 # Maximum number of rows in spreadsheet. Up to 1048576

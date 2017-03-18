@@ -13,8 +13,8 @@ struct hlist {
 
 struct history * create_history(char mode);
 void destroy_history(struct history * h);
-void load_history();
-int save_history(struct history * h);
+void load_history(struct history * h, wchar_t mode);
+int save_history(struct history * h, char * mode);
 void del_item_from_history(struct history * h, int pos);
 int move_item_from_history_by_str(struct history * h, wchar_t * item, int pos);
 void add(struct history * h, wchar_t * line);

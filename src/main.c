@@ -8,7 +8,10 @@
 #include <locale.h>
 #include <wchar.h>
 #include <wordexp.h>
+
+#ifndef __APPLE__
 #include <stropts.h> // for ioctl
+#endif
 
 #include "main.h"
 #include "shift.h"
@@ -83,6 +86,7 @@ struct block * lastcmd_buffer;
 struct dictionary * user_conf_d;
 struct dictionary * predefined_conf_d;
 struct history * commandline_history;
+struct history * insert_history;
 
 void read_stdin();
 /*********************************************************************
@@ -105,12 +109,16 @@ int main (int argc, char ** argv) {
     store_default_config_values();
 
     // create command line history structure
-#ifdef HISTORY_FILE
     if (! atoi(get_conf_value("nocurses"))) {
+#ifdef HISTORY_FILE
         commandline_history = (struct history *) create_history(':');
-        load_history(commandline_history);
-    }
+        load_history(commandline_history, ':');
 #endif
+#ifdef INS_HISTORY_FILE
+        insert_history = (struct history *) create_history('=');
+        load_history(insert_history, '=');
+#endif
+    }
 
     // create basic structures that will depend on the loaded file
     create_structures();
@@ -128,12 +136,12 @@ int main (int argc, char ** argv) {
 #ifdef USECOLORS
     //if (has_colors() && get_d_colors_param() == NULL) {
     if (get_d_colors_param() == NULL) {
-            start_default_ucolors();
-            // in case we decide to change colors
-            // this creates a dictionary and stores in it
-            // the relationship between macros and the keys values
-            // that are defined in .sc files
-            set_colors_param_dict();
+        start_default_ucolors();
+        // in case we decide to change colors
+        // this creates a dictionary and stores in it
+        // the relationship between macros and the keys values
+        // that are defined in .sc files
+        set_colors_param_dict();
     }
 #endif
 
@@ -193,7 +201,8 @@ int main (int argc, char ** argv) {
     }
 
     // handle input from keyboard
-    buffer = (struct block *) create_buf(); // TODO: this should only take place if curses ui
+    if (! atoi(get_conf_value("nocurses")))
+        buffer = (struct block *) create_buf(); // this should only take place if curses ui
 
     wchar_t nocurses_buffer[BUFFERSIZE];
 
@@ -220,12 +229,6 @@ int main (int argc, char ** argv) {
 /*********************************************************************
    END OF MAIN LOOP
  *********************************************************************/
-
-
-
-
-
-
 
 extern graphADT graph;
 
@@ -280,7 +283,6 @@ void read_stdin() {
         perror(NULL);
         exit(-1);
     }
-
     //sc_debug("finish reading");
 }
 
@@ -325,10 +327,12 @@ int exit_app(int status) {
 
     // free history
 #ifdef HISTORY_FILE
-    if (! atoi(get_conf_value("nocurses")) && save_history(commandline_history) != 0 ) {
-        sc_error("Cannot save command line history");
-    }
+    if (! save_history(commandline_history, "w")) sc_error("Could not save commandline history");
     if (commandline_history != NULL) destroy_history(commandline_history);
+#endif
+#ifdef INS_HISTORY_FILE
+    if (! save_history(insert_history, "a")) sc_error("Could not save input mode history");
+    if (insert_history != NULL) destroy_history(insert_history);
 #endif
 
     // erase structures

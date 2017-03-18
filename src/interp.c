@@ -8,22 +8,22 @@
  */
 
 #include <sys/types.h>
-
-#ifdef IEEE_MATH
-#include <ieeefp.h>
-#endif
-
 #include <math.h>
 #include <signal.h>
 #include <setjmp.h>
 #include <ctype.h>
 #include <errno.h>
-
 #include <time.h>
 #include <string.h>
-
 #include <stdlib.h>
 #include <ncurses.h>
+#include <unistd.h>
+#include <regex.h>
+
+#ifdef IEEE_MATH
+#include <ieeefp.h>
+#endif
+
 #include "sc.h"
 #include "macros.h"
 #include "color.h"
@@ -35,12 +35,9 @@
 #include "lex.h"     // for atocol
 #include "interp.h"
 #include "utils/string.h"
-#include <unistd.h>
-#include <regex.h>
+#include "trigger.h"
 
-#include "trigger.h"   
 #ifdef XLUA
-//void do_trigger( struct ent *p , int rw);
 #include "lua.h"
 #endif
 
@@ -1896,6 +1893,7 @@ void unlock_cells(struct ent * v1, struct ent * v2) {
 
 /* set the numeric part of a cell */
 void let(struct ent * v, struct enode * e) {
+
     if (locked_cell(v->row, v->col)) return;
 
     #ifdef UNDO
@@ -1916,6 +1914,7 @@ void let(struct ent * v, struct enode * e) {
 
 
     double val;
+    short already_eval = FALSE;
     unsigned isconstant = constant(e);
     if (v->row == currow && v->col == curcol)
         cellassign = 1;
@@ -1931,6 +1930,7 @@ void let(struct ent * v, struct enode * e) {
         } else {
             cellerror = CELLOK;
             val = eval(v, e); // JUST NUMERIC VALUE
+            already_eval = TRUE;
         }
         if (v->cellerror != cellerror) {
             v->flags |= is_changed;
@@ -1960,7 +1960,7 @@ void let(struct ent * v, struct enode * e) {
             v->expr = (struct enode *) 0;
         }
         efree(e);
-    } else if (! exprerr) {
+    } else if (! exprerr && ! already_eval) {
         efree(v->expr);
 
         v->expr = e;
@@ -2014,6 +2014,8 @@ void slet(struct ent * v, struct enode * se, int flushdir) {
     char * p;
     if (v->row == currow && v->col == curcol) cellassign = 1;
     exprerr = 0;
+    short already_eval = FALSE;
+
     (void) signal(SIGFPE, eval_fpe);
     if (setjmp(fpe_save)) {
         sc_error ("Floating point exception in cell %s", v_name(v->row, v->col));
@@ -2040,7 +2042,7 @@ void slet(struct ent * v, struct enode * se, int flushdir) {
             v->expr = (struct enode *) 0;
             v->flags &= ~is_strexpr;
         }
-    } else {
+    } else if ( ! already_eval ) {
         if (p) free(p);                   // ADDED for 2267 leak!
 
         efree(v->expr);
@@ -2049,7 +2051,7 @@ void slet(struct ent * v, struct enode * se, int flushdir) {
         p = seval(v, se);                 // ADDED - here we store the cell dependences in a graph
         if (p) scxfree(p);                // ADDED
 
-        v->flags |= (is_changed|is_strexpr);
+        v->flags |= (is_changed | is_strexpr);
         if (flushdir < 0) v->flags |= is_leftflush;
 
         if (flushdir == 0)

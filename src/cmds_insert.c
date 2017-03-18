@@ -11,6 +11,10 @@
 #include "cmds_visual.h"
 #include "conf.h"
 
+#ifdef INS_HISTORY_FILE
+char ori_insert_edit_submode;
+#endif
+
 void do_insertmode(struct block * sb) {
 
     if (sb->value == ctl('v') ) {  // VISUAL SUBMODE
@@ -35,6 +39,41 @@ void do_insertmode(struct block * sb) {
             show_header(input_win);
         }
 
+#ifdef INS_HISTORY_FILE
+    } else if (sb->value == OKEY_UP || sb->value == ctl('p') ||         // UP
+               sb->value == OKEY_DOWN || sb->value == ctl('n')) {       // DOWN
+
+        int delta = 0;
+        if (sb->value == OKEY_UP || sb->value == ctl('p')) {            // up
+            if (insert_history->len <= - insert_history->pos + 1) return;
+            delta = -1;
+        }
+        if (sb->value == OKEY_DOWN || sb->value == ctl('n')) {          // down
+            if ( - insert_history->pos == 0) return;
+            delta = 1;
+        }
+        insert_history->pos += delta;
+
+        wchar_t word [COLS];
+        wcscpy(word, get_line_from_history(insert_history, insert_history->pos));
+        if (insert_history->pos == 0)
+            insert_edit_submode = ori_insert_edit_submode;
+        else {
+            insert_edit_submode = word[0];
+            del_wchar(word, 0);
+        }
+        wcscpy(inputline, word);
+        inputline_pos = wcswidth(inputline, real_inputline_pos);
+
+        chg_mode(insert_edit_submode);
+        clr_header(input_win, 0);
+        print_mode(input_win);
+        wrefresh(input_win);
+        show_header(input_win);
+
+        return;
+#endif
+
     } else if (sb->value == OKEY_BS || sb->value == OKEY_BS2) {  // BS
         if ( ! wcslen(inputline) || ! real_inputline_pos ) return;
 
@@ -43,11 +82,19 @@ void do_insertmode(struct block * sb) {
         del_wchar(inputline, real_inputline_pos);
         inputline_pos -= l;
         show_header(input_win);
+#ifdef INS_HISTORY_FILE
+        if (insert_history->pos == 0)
+            del_wchar(get_line_from_history(insert_history, insert_history->pos), real_inputline_pos); // Clean history
+#endif
 
     } else if (sb->value == OKEY_DEL) {    // DEL
         int max = wcswidth(inputline, wcslen(inputline));
         if (inputline_pos > max) return;
         del_wchar(inputline, real_inputline_pos);
+#ifdef INS_HISTORY_FILE
+        if (insert_history->pos == 0)
+            del_wchar(get_line_from_history(insert_history, insert_history->pos), real_inputline_pos); // Clean history
+#endif
         show_header(input_win);
 
     } else if (sb->value == OKEY_TAB) {    // TAB
@@ -83,6 +130,19 @@ void do_insertmode(struct block * sb) {
 
         enter_cell_content(currow, curcol, ope, content);
 
+#ifdef INS_HISTORY_FILE
+        // if exists in history an item with same text to the command typed
+        // (counting from the second position) it is moved to the beginning of list.
+        // (first element in list means last command executed)
+        del_item_from_history(insert_history, 0);
+        wchar_t copy[BUFFERSIZE];
+
+        swprintf(copy, BUFFERSIZE, L"%c%ls", insert_edit_submode, inputline);
+        int moved = move_item_from_history_by_str(insert_history, copy, -1);
+        if (! moved) add(insert_history, copy);
+        insert_history->pos = 0;
+#endif
+
         inputline[0] = L'\0';
         inputline_pos = 0;
         real_inputline_pos = 0;
@@ -101,6 +161,7 @@ void do_insertmode(struct block * sb) {
         update(TRUE);
         return;
 
+
     } else if (sb->value == OKEY_HOME) {   // HOME
         real_inputline_pos = 0;
         inputline_pos = wcswidth(inputline, real_inputline_pos);
@@ -118,20 +179,33 @@ void do_insertmode(struct block * sb) {
         //DEBUG sc_info("2: %d %lc", sb->value, sb->value);
         ins_in_line(sb->value);
         show_header(input_win);
+#ifdef INS_HISTORY_FILE
+        if (insert_history->pos == 0) {          // Only if editing the new command
+            wchar_t * sl = get_line_from_history(insert_history, 0);
+            add_wchar(sl, sb->value, real_inputline_pos-1); // Insert into history
+        }
+#endif
 
-    } else if (sb->value == ctl('r') && get_bufsize(sb) == 2 && // C-r
-        (sb->pnext->value - ('a' - 1) < 1 || sb->pnext->value > 26)) {
-        char cline [BUFFERSIZE];
+    } else if (sb->value == ctl('r') && get_bufsize(sb) == 2 &&        // C-r      // FIXME ???
+        (sb->pnext->value - (L'a' - 1) < 1 || sb->pnext->value > 26)) {
+        wchar_t cline [BUFFERSIZE];
         int i, r = get_mark(sb->pnext->value)->row;
         if (r != -1) {
-            sprintf(cline, "%s%d", coltoa(get_mark(sb->pnext->value)->col), r);
+            swprintf(cline, BUFFERSIZE, L"%s%d", coltoa(get_mark(sb->pnext->value)->col), r);
         } else {
-            sprintf(cline, "%s%d:", coltoa(get_mark(sb->pnext->value)->rng->tlcol), get_mark(sb->pnext->value)->rng->tlrow);
-            sprintf(cline + strlen(cline), "%s%d", coltoa(get_mark(sb->pnext->value)->rng->brcol), get_mark(sb->pnext->value)->rng->brrow);
+            swprintf(cline, BUFFERSIZE, L"%s%d:", coltoa(get_mark(sb->pnext->value)->rng->tlcol), get_mark(sb->pnext->value)->rng->tlrow);
+            swprintf(cline + wcslen(cline), BUFFERSIZE, L"%s%d", coltoa(get_mark(sb->pnext->value)->rng->brcol), get_mark(sb->pnext->value)->rng->brrow);
         }
-        for(i = 0; i < strlen(cline); i++) ins_in_line(cline[i]);
-        show_header(input_win);
+        for(i = 0; i < wcslen(cline); i++) ins_in_line(cline[i]);
 
+#ifdef INS_HISTORY_FILE
+        if (commandline_history->pos == 0) {          // Only if editing the new command
+            wchar_t * sl = get_line_from_history(commandline_history, 0);
+            wcscat(sl, cline);                        // Insert into history
+        }
+#endif
+        show_header(input_win);
+        return;
     }
     return;
 }

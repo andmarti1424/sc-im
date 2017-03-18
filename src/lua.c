@@ -28,7 +28,6 @@
 #include "screen.h"
 #include "conf.h"
 
-
 extern FILE * fdoutput;
 extern WINDOW * input_win;
 
@@ -131,7 +130,6 @@ static int l_sc (lua_State *L) {
     return 0;
 }
 
-
 static int l_colrow2a(lua_State *L) {
     int c, r;
     char buf[16];
@@ -142,7 +140,6 @@ static int l_colrow2a(lua_State *L) {
     lua_pushstring(L,buf);
     return 1;
 }
-
 
 static int l_colrow(lua_State *L) {
     char buf[16];
@@ -218,7 +215,9 @@ char * query(char * initial_msg) {
     wtimeout(input_win, TIMEOUT_CURSES);
     wmove(input_win, 0,0);
     wclrtoeol(input_win);
-
+    wmove(input_win, 1,0);
+    wclrtoeol(input_win);
+    wrefresh(input_win);
     return hline;
 }
 
@@ -244,8 +243,6 @@ LC_NUMBER2(curcol,curcol)
 LC_NUMBER2(maxcols,maxcols)
 LC_NUMBER2(maxrows,maxrows)
 
-
-
 static const luaL_reg sclib[] = {
     { "lgetnum", l_getnum },
     { "lsetnum", l_setnum },
@@ -262,27 +259,24 @@ static const luaL_reg sclib[] = {
     {NULL,NULL}
 };
 
-
-
 void doLuainit() {
-  char buffer[PATHLEN];
-  char buffer1[PATHLEN];
-  
-    L = luaL_newstate();                        /* Create Lua state variable */
-    luaL_openlibs(L);                           /* Load Lua libraries */
+    char buffer[PATHLEN];
+    char buffer1[PATHLEN];
+
+    L = luaL_newstate();                            /* Create Lua state variable */
+    luaL_openlibs(L);                               /* Load Lua libraries */
 
     sprintf(buffer,"lua/init.lua");
-    if(plugin_exists(buffer,strlen(buffer),buffer1))
-      {
-	if (luaL_loadfile(L, buffer1)) {         /* Load but don't run the Lua script */
-	  fprintf(stderr, "\nWarning :\n  Couldn't load init.lua: %s\n\n", lua_tostring(L,-1));
-	  return;
-	}
-	if (lua_pcall(L, 0, 0, 0))                  /* PRIMING RUN. FORGET THIS AND YOU'RE TOAST */
-	  fprintf(stderr, "\nFATAL ERROR:\n  Couldn't initialized Lua: %s\n\n", lua_tostring(L,-1));
-      }
-    luaL_register(L, "sc", sclib);             /* Load SC specific LUA commands after init.lua exec*/
-    
+    if(plugin_exists(buffer,strlen(buffer),buffer1)) {
+        if (luaL_loadfile(L, buffer1)) {            /* Load but don't run the Lua script */
+            fprintf(stderr, "\nWarning :\n  Couldn't load init.lua: %s\n\n", lua_tostring(L,-1));
+            return;
+        }
+        if (lua_pcall(L, 0, 0, 0))                  /* PRIMING RUN. FORGET THIS AND YOU'RE TOAST */
+            fprintf(stderr, "\nFATAL ERROR:\n  Couldn't initialized Lua: %s\n\n", lua_tostring(L,-1));
+    }
+    luaL_register(L, "sc", sclib);                  /* Load SC specific LUA commands after init.lua exec*/
+
     return;
 }
 
@@ -298,31 +292,30 @@ char * doLUA( struct enode * se) {
     cmd = seval(NULL, se->e.o.left);
 
     sprintf(buffer,"lua/%s",cmd);
-    if(plugin_exists(buffer,strlen(buffer),buffer1))
-      {
-	if (luaL_loadfile(L, buffer1))                  /* Load but don't run the Lua script */
-	  bail(L, "luaL_loadfile() failed");      /* Error out if file can't be read */
+    if(plugin_exists(buffer,strlen(buffer),buffer1)) {
+        if (luaL_loadfile(L, buffer1))              /* Load but don't run the Lua script */
+            bail(L, "luaL_loadfile() failed");      /* Error out if file can't be read */
 
-	if (lua_pcall(L, 0, 0, 0))                  /* PRIMING RUN. FORGET THIS AND YOU'RE TOAST */
-	  bail(L, "lua_pcall() failed");          /* Error out if Lua file has an error */
+        if (lua_pcall(L, 0, 0, 0))                  /* PRIMING RUN. FORGET THIS AND YOU'RE TOAST */
+            bail(L, "lua_pcall() failed");          /* Error out if Lua file has an error */
 
-	/* Tell what function to run */
-	//    lua_getglobal(L, "tellme");
-      }
+       /* Tell what function to run */
+       //    lua_getglobal(L, "tellme");
+    }
+    if (cmd != NULL) free(cmd);
     return 0;
 }
 
-
 void doLuaTriger() {
-   if (luaL_loadfile(L, "trigger.lua"))         /* Load but don't run the Lua script */
-       return;
-   //bail(L, "luaL_loadfile() failed");         /* Error out if file can't be read */
+    if (luaL_loadfile(L, "trigger.lua"))         /* Load but don't run the Lua script */
+        return;
+    //bail(L, "luaL_loadfile() failed");         /* Error out if file can't be read */
 
-   if (lua_pcall(L, 0, 0, 0))                   /* PRIMING RUN. FORGET THIS AND YOU'RE TOAST */
-       bail(L, "lua_pcall() failed");           /* Error out if Lua file has an error */
+    if (lua_pcall(L, 0, 0, 0))                   /* PRIMING RUN. FORGET THIS AND YOU'RE TOAST */
+        bail(L, "lua_pcall() failed");           /* Error out if Lua file has an error */
 
 
-    lua_getglobal(L, "trigger");                /* Tell what function to run */
+    lua_getglobal(L, "trigger");                 /* Tell what function to run */
 
     //sc_debug("In C, calling Lua");
     if (lua_pcall(L, 0, 0, 0))                  /* Run the function */
@@ -360,32 +353,30 @@ void doLuaTrigger_cell(struct ent *p, int flags) {
     struct trigger *trigger = p->trigger;
     char buffer[PATHLEN];
     char buffer1[PATHLEN];
-    
+
     row = p->row;
     col = p->col;
 
     sprintf(buffer,"lua/%s",trigger->file);
-     if(plugin_exists(buffer,strlen(buffer),buffer1))
-      {
-	if (luaL_loadfile(L, buffer1))        /* Load but don't run the Lua script */
-	  return;
-	//bail(L, "luaL_loadfile() failed");        /* Error out if file can't be read */
+    if(plugin_exists(buffer,strlen(buffer),buffer1)) {
+        if (luaL_loadfile(L, buffer1))        /* Load but don't run the Lua script */
+            return;
+        //bail(L, "luaL_loadfile() failed");        /* Error out if file can't be read */
 
 
-	if (lua_pcall(L, 0, 0, 0))                  /* PRIMING RUN. FORGET THIS AND YOU'RE TOAST */
-	  bail(L, "lua_pcall() failed");          /* Error out if Lua file has an error */
+        if (lua_pcall(L, 0, 0, 0))                  /* PRIMING RUN. FORGET THIS AND YOU'RE TOAST */
+            bail(L, "lua_pcall() failed");          /* Error out if Lua file has an error */
 
-	lua_getglobal(L, trigger->function);        /* Tell what function to run */
+        lua_getglobal(L, trigger->function);        /* Tell what function to run */
 
-	lua_pushinteger(L,col);
-	lua_pushinteger(L,row);
-	lua_pushinteger(L, flags);
-	//sc_debug("In C, calling Lua");
-	if (lua_pcall(L, 3, 0, 0))                  /* Run the function */
-	  bail(L, "lua_pcall() failed");          /* Error out if Lua file has an error */
-	//sc_debug("Back in C again");
-      }
-     
+        lua_pushinteger(L,col);
+        lua_pushinteger(L,row);
+        lua_pushinteger(L, flags);
+        //sc_debug("In C, calling Lua");
+        if (lua_pcall(L, 3, 0, 0))                  /* Run the function */
+            bail(L, "lua_pcall() failed");          /* Error out if Lua file has an error */
+        //sc_debug("Back in C again");
+   }
    return;
 }
 #endif

@@ -22,12 +22,18 @@
 #include "dep_graph.h"
 extern graphADT graph;
 extern char valores;
-
-
 extern int cmd_multiplier;
-extern struct history * commandline_history;
 extern void start_visualmode(int tlrow, int tlcol, int brrow, int brcol);
 wchar_t interp_line[BUFFERSIZE];
+
+#ifdef HISTORY_FILE
+extern struct history * commandline_history;
+#endif
+
+#ifdef INS_HISTORY_FILE
+extern struct history * insert_history;
+extern char ori_insert_edit_submode;
+#endif
 
 void do_normalmode(struct block * buf) {
     int bs = get_bufsize(buf);
@@ -418,6 +424,10 @@ void do_normalmode(struct block * buf) {
             if (locked_cell(currow, curcol)) return;
             insert_edit_submode = buf->value;
             chg_mode(insert_edit_submode);
+#ifdef INS_HISTORY_FILE
+            ori_insert_edit_submode = buf->value;
+            add(insert_history, L"");
+#endif
             clr_header(input_win, 0);
             print_mode(input_win);
             wrefresh(input_win);
