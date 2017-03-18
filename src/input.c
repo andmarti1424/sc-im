@@ -148,6 +148,11 @@ void break_waitcmd_loop(struct block * buffer) {
         commandline_history->pos = 0;
         set_comp(0);
 #endif
+    } else if (curmode == INSERT_MODE) {
+#ifdef INS_HISTORY_FILE
+        del_item_from_history(insert_history, 0);
+        insert_history->pos = 0;
+#endif
     } else if (curmode == VISUAL_MODE) {
         exit_visualmode();
     }

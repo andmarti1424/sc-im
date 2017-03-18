@@ -6,7 +6,12 @@ extern int multiplier;                                                // Multipl
 extern int command_pending;                                           // Command pending
 extern WINDOW * input_win;
 extern struct block * lastcmd_buffer;
+#ifdef HISTORY_FILE
 extern struct history * commandline_history;
+#endif
+#ifdef INS_HISTORY_FILE
+extern struct history * insert_history;
+#endif
 
 void fix_timeout(struct timeval * start_tv);                          // Handle timeout of stdin
 void handle_input(struct block * buffer);
