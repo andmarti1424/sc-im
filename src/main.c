@@ -361,7 +361,7 @@ int exit_app(int status) {
 
     // close fdoutput
     if (get_conf_value("output") != '\0' && fdoutput != NULL) {
-       fclose(fdoutput);
+        fclose(fdoutput);
     }
 
     // delete user and predefined config dictionaries

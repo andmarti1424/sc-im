@@ -50,7 +50,7 @@ void bail(lua_State *L, char * msg){
     fprintf(stderr,"%s",error);
     */
 
-    fprintf(stderr,"FATAL ERROR: %s: %s", msg, lua_tostring(L, -1));
+    fprintf(stderr,"FATAL ERROR: %s: %s\n", msg, lua_tostring(L, -1));
 
     move(0, 0);
     clrtobot();
