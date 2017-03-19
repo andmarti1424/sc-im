@@ -41,6 +41,7 @@ extern WINDOW * input_win;
 lua_State *L;
 extern SCREEN * sstderr;
 extern SCREEN * sstdout;
+extern WINDOW * input_win;
 extern char stderr_buffer[1024];
 
 void bail(lua_State *L, char * msg){
@@ -68,6 +69,7 @@ void bail(lua_State *L, char * msg){
 
     set_term(sstdout);
     clearok(stdscr, TRUE);
+    show_header(input_win);
     refresh();
     update(TRUE);
 }
