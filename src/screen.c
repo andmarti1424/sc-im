@@ -38,10 +38,15 @@ int offscr_sc_rows = 0, offscr_sc_cols = 0;
 int center_hidden_cols = 0;
 int center_hidden_rows = 0;
 
+SCREEN * sstderr;
+SCREEN * sstdout;
 srange * ranges;
 
 void start_screen() {
-    initscr();
+    sstderr = newterm(NULL, stderr, NULL);
+    noecho();
+    sstdout = newterm(NULL, stdout, stdin);
+    set_term(sstdout);
 
     main_win = newwin(LINES - RESROW, COLS, RESROW, 0);
     input_win = newwin(RESROW, COLS, 0, 0); // just 2 rows (RESROW = 2)
@@ -83,6 +88,9 @@ void stop_screen() {
     clrtobot();
     refresh();
 
+    set_term(sstdout);
+    endwin();
+    set_term(sstderr);
     endwin();
     return;
 }
@@ -125,6 +133,8 @@ void do_welcome() {
 // function that refreshes grid of screen
 // if header flag is set, it refresh the first column of screen.
 void update(int header) {
+
+
     //#ifdef USECOLORS
     //wbkgd(main_win, COLOR_PAIR(ucolors[DEFAULT].fg * 8 + ucolors[DEFAULT].bg + 1));
     //wbkgd(input_win, COLOR_PAIR(ucolors[DEFAULT].fg * 8 + ucolors[DEFAULT].bg + 1));
