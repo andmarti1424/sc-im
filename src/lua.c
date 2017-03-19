@@ -40,6 +40,8 @@ extern WINDOW * input_win;
 
 lua_State *L;
 extern SCREEN * sstderr;
+extern SCREEN * sstdout;
+extern char stderr_buffer[1024];
 
 void bail(lua_State *L, char * msg){
     /*
