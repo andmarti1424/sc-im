@@ -87,21 +87,28 @@ struct dictionary * user_conf_d;
 struct dictionary * predefined_conf_d;
 struct history * commandline_history;
 struct history * insert_history;
+char stderr_buffer[1024] = "";
 
 void read_stdin();
+
+
 /*********************************************************************
    MAIN LOOP
  *********************************************************************/
 int main (int argc, char ** argv) {
+
+    // setup stderr buffer
+    freopen("/dev/stderr", "w", stderr);
+    setvbuf(stderr, stderr_buffer, _IOFBF, 1024);
+
+    // set up signals so we can catch them
+    signals();
 
 #ifdef USELOCALE
     // pass LC_CTYPE env variable to libraries
     //setlocale(LC_ALL, "");
     setlocale(LC_CTYPE, "");
 #endif
-
-    // set up signals so we can catch them
-    signals();
 
     // start configuration dictionaries
     user_conf_d = (struct dictionary *) create_dictionary();
@@ -145,7 +152,6 @@ int main (int argc, char ** argv) {
     }
 #endif
 
-
     // If the 'output' parameter is defined, SC-IM saves its output to that file.
     // To achieve that, we open the output file and keep it open until exit.
     // otherwise, SC-IM will output to stdout.
@@ -171,8 +177,11 @@ int main (int argc, char ** argv) {
     wchar_t stdin_buffer[BUFFERSIZE] = { L'\0' };
 
     // there was no file passed to scim executable
-    // erase db
+    // erase db !
     if (! curfile[0]) erasedb();
+
+    // loadrc
+    loadrc();
 
     // check input from stdin (pipeline)
     // and send it to interp
@@ -352,7 +361,7 @@ int exit_app(int status) {
 
     // close fdoutput
     if (get_conf_value("output") != '\0' && fdoutput != NULL) {
-       fclose(fdoutput);
+        fclose(fdoutput);
     }
 
     // delete user and predefined config dictionaries

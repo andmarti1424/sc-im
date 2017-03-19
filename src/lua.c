@@ -39,14 +39,39 @@ extern WINDOW * input_win;
     }
 
 lua_State *L;
+extern SCREEN * sstderr;
+extern SCREEN * sstdout;
+extern WINDOW * input_win;
+extern char stderr_buffer[1024];
 
-void bail(lua_State *L, char *msg){
-    //sc_debug("FATAL ERROR: %s: %s", msg, lua_tostring(L, -1));
+void bail(lua_State *L, char * msg){
+    /*
     volatile char *error=lua_tostring(L,-1);
     fprintf(stderr,"%s",error);
-	
-    fprintf(stderr,"FATAL ERROR: %s: %s", msg, lua_tostring(L, -1));
-    //exit(1); shall exit here?
+    */
+
+    fprintf(stderr,"FATAL ERROR: %s: %s\n", msg, lua_tostring(L, -1));
+
+    move(0, 0);
+    clrtobot();
+    wrefresh(stdscr);
+
+    set_term(sstderr);
+    move(0, 0);
+    clrtobot();
+    clearok(stdscr, TRUE);
+    mvprintw(0, 0, "%s", stderr_buffer);
+    stderr_buffer[0]='\0';
+    fseek(stderr, 0, SEEK_END);
+
+    refresh();
+    getch();
+
+    set_term(sstdout);
+    clearok(stdscr, TRUE);
+    show_header(input_win);
+    refresh();
+    update(TRUE);
 }
 
 static int l_getnum (lua_State *L) {
