@@ -1079,6 +1079,8 @@ Commands for handling cell content:
     @slen("{se}")
         Returns the length of string expression {se}.
 
+
+
 ==============================================================================
 &String Expressions&
 
@@ -1183,6 +1185,14 @@ Commands for handling cell content:
         string (base-256 number without digit 0).
         See also @ascii.
 
+    @lua("luascript",0)
+        Executes a "luascript". Using Lua script scim can be extend with lot 
+        new functionality, such as complex programming, accessing databases etc.
+        The search patch for LUA scripts files is 
+        $HOME/.scim/lua/ or /usr/local/share/scim/lua (in that order)
+	Always use it only with @ston see example:
+	@ston(@lua("luascript",0)) 
+
 ==============================================================================
 &Built-in Date and Time Functions&
 
@@ -1217,6 +1227,38 @@ Commands for handling cell content:
         Conditional:   If the  first  expression  is  true  then  the  value  of
         the  second  is  returned,  otherwise the  value  of  the  third.
         example of use: @if(@eqs(A1,"a"),B1,0)
+
+==============================================================================
+&LUA Scripts and Triggers&
+     SC-IM was extended with LUA capabilities and also provided with helper
+     Function for manipulate SC-IM data with Lua at runtime. Since it is a
+     fully functional Lua, you can use all Lua packages also for sc-im lua 
+     scripts. Use luarocks to install additional packages. 
+
+     Function provided to lua script/triggers :
+
+     sc.lgetnum (c, r)       - get nummeric value of cell c,r (c/r is number column/row)
+                               returns value
+     sc.lsetnum (c, r, val)  - set nummeric value to a cell c,t
+     sc.lsetform (c, r, str) - set formula to a cell. Basically it does "let cell= str"
+     sc.setstr(c, r, str)    - set string to a cell
+     sc.query(str)           - query input from user, but first prints str. Use with care!!
+                               Dont use this function within triggers!!
+                               returns string 
+     sc.sc(str)              - send str to sc-im parser
+     sc.a2colrow(str)        - convert ascii cell representation to nummeric column/row
+                               returns column, row example:
+                               c,r=sc.a2colrow("c5")
+     sc.colrow2a(c,r)        - returns ascii representation of nummeric column/row
+     sc.maxcols()            - return current maximum columns
+     sc.maxrows()            - return current maximum rows
+     sc.curcol()             - return current column
+     sc.currow()             - return current row
+     
+     The search patch for LUA scripts files is 
+     $HOME/.scim/lua/ or /usr/local/share/scim/lua (in that order)     
+     Example can be found in sc-im/files/lua in source code tree.
+
 
 ==============================================================================
 &Supported file formats / File import&
