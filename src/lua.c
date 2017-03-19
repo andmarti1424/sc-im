@@ -59,7 +59,7 @@ void bail(lua_State *L, char * msg){
     move(0, 0);
     clrtobot();
     clearok(stdscr, TRUE);
-    mvprintw(10, 0, "*%s*", stderr_buffer);
+    mvprintw(0, 0, "%s", stderr_buffer);
     stderr_buffer[0]='\0';
     fseek(stderr, 0, SEEK_END);
 
