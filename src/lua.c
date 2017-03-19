@@ -39,6 +39,7 @@ extern WINDOW * input_win;
     }
 
 lua_State *L;
+extern SCREEN * sstderr;
 
 void bail(lua_State *L, char * msg){
     /*
