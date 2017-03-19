@@ -73,8 +73,6 @@ void erasedb() {
     optimize = 0;
     currow = curcol = 0;
 
-    loadrc();
-
     *curfile = '\0';
 }
 

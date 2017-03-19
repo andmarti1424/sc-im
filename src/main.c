@@ -180,6 +180,9 @@ int main (int argc, char ** argv) {
     // erase db !
     if (! curfile[0]) erasedb();
 
+    // loadrc
+    loadrc();
+
     // check input from stdin (pipeline)
     // and send it to interp
     read_stdin();
