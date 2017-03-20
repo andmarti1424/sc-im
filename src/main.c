@@ -177,17 +177,17 @@ int main (int argc, char ** argv) {
     wchar_t stdin_buffer[BUFFERSIZE] = { L'\0' };
 
     // there was no file passed to scim executable
-    // erase db !
+    // 1. erase db !
     if (! curfile[0]) erasedb();
 
-    // loadrc
+    // 2. loadrc
     loadrc();
 
-    // check input from stdin (pipeline)
+    // 3. check input from stdin (pipeline)
     // and send it to interp
     read_stdin();
 
-    // read sc file passed as argv
+    // 4. read sc file passed as argv
     load_sc();
 
     // initiate gui
@@ -414,7 +414,7 @@ void load_sc() {
         sc_info("New file: \"%s\"", word);     // file passed to scim executable does not exists
     }
     wordfree(&p);
-    EvalAll();                                 // we eval formulas
+    //EvalAll();                                 // we eval formulas (already evaluated in readfile
     //sc_debug("finished reading file");
     return;
 }

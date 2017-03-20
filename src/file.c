@@ -381,10 +381,11 @@ void write_marks(register FILE *f) {
 
 void write_cells(register FILE *f, int r0, int c0, int rn, int cn, int dr, int dc) {
     register struct ent **pp;
-    int r, c, mf;
+    int r, c;
+    //int r, c, mf;
     char *dpointptr;
 
-    mf = modflg;
+    //mf = modflg;
     if (dr != r0 || dc != c0) {
         //yank_area(r0, c0, rn, cn);
         rn += dr - r0;
@@ -416,7 +417,7 @@ void write_cells(register FILE *f, int r0, int c0, int rn, int cn, int dr, int d
                 }
             }
     }
-    modflg = mf;
+    //modflg = mf;
 }
 
 int readfile(char * fname, int eraseflg) {
@@ -470,7 +471,6 @@ int readfile(char * fname, int eraseflg) {
             }
         }
         import_csv(fname, delim); // csv tsv tab txt delim import
-
         modflg = 0;
         return 1;
 
@@ -507,10 +507,10 @@ int readfile(char * fname, int eraseflg) {
     linelim = -1;
     if (eraseflg) {
         (void) strcpy(curfile, save);
-        modflg = 0;
         cellassign = 0;
-        EvalAll();
     }
+    EvalAll();
+    modflg = 0;
     return 1;
 }
 
