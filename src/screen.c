@@ -921,8 +921,8 @@ int calc_offscr_sc_cols() {
     int brcol = freeze ? freeze_ranges->br->col : 0;
 
     // pick up col counts
-    while (freeze && curcol > brcol && curcol <= brcol + center_hidden_cols)
-        center_hidden_cols--;
+    while (freeze && ((curcol > brcol && curcol <= brcol + center_hidden_cols) ||
+           (col_hidden[offscr_sc_cols + q + center_hidden_cols]))) center_hidden_cols--;
 
     if (offscr_sc_cols - 1 <= curcol) {
         for (i = 0, q = 0, cols = 0, col = rescol; i < maxcols && col + fwidth[i] <= COLS; i++) {
@@ -934,19 +934,16 @@ int calc_offscr_sc_cols() {
             if (! col_hidden[i]) col += fwidth[i];
         }
     }
-    //sc_debug("%s cols:%d center:%d q:%d", coltoa(curcol), cols, center_hidden_cols, q);
-    //sc_debug("I i:%d %s -  col:%d fwidth:%d COLS:%d maxcols:%d", i-1, coltoa(i-1), col, fwidth[i-1], COLS, maxcols);
-    //sc_info("I offscr_sc_cols:%d, center:%d, cols:%d   q:%d", offscr_sc_cols, center_hidden_cols, cols, q);
 
     // get  off screen cols
     while ( offscr_sc_cols + center_hidden_cols + cols - 1 < curcol || curcol < offscr_sc_cols
             || (freeze && curcol < tlcol && curcol >= tlcol - center_hidden_cols)) {
 
-        //sc_debug("w  cols:%d, center:%d, off:%d, curcol:%d, tl:%d, br:%d", cols, center_hidden_cols, offscr_sc_cols, curcol, tlcol, brcol);
         // izq
         if (offscr_sc_cols - 1 == curcol) {
-            if (freeze && offscr_sc_cols + cols + center_hidden_cols >= brcol && brcol - cols - offscr_sc_cols + 2 > 0)
+            if (freeze && offscr_sc_cols + cols + center_hidden_cols >= brcol && brcol - cols - offscr_sc_cols + 2 > 0) {
                 center_hidden_cols = brcol - cols - offscr_sc_cols + 2;
+            }
             offscr_sc_cols--;
 
         // derecha
@@ -964,30 +961,20 @@ int calc_offscr_sc_cols() {
             offscr_sc_cols++;
 
         } else {
-            //sc_debug("5a off:%d, center:%d, cols:%d, curcol:%d, tl:%d, br:%d", offscr_sc_cols, center_hidden_cols, cols, curcol, tlcol, brcol);
             // Try to put the cursor in the center of the screen
             col = (COLS - rescol - fwidth[curcol]) / 2 + rescol;
             if (freeze && curcol > brcol) {
                 offscr_sc_cols = tlcol;
-                center_hidden_cols = curcol - brcol; //FIXME
+                center_hidden_cols = curcol - brcol; //FIXME shall we count frozen cols to center??
             } else {
                 offscr_sc_cols = curcol;
                 center_hidden_cols = 0;
             }
-
             for (i=curcol-1; i >= 0 && col-fwidth[i] - 1 > rescol; i--) {
                 if (freeze && curcol > brcol) center_hidden_cols--;
                 else offscr_sc_cols--;
                 if ( ! col_hidden[i]) col -= fwidth[i];
             }
-
-            //sc_debug("5c center:%d off:%d i:%d", center_hidden_cols, offscr_sc_cols, i);
-            /* count hidden cols after brcol and before curcol
-            for (k=brcol+1; freeze && curcol > brcol && k <= i; k++) {
-                if (col_hidden[k]) counth++;
-            }*/
-
-            //sc_debug("5c off:%d, center:%d, cols:%d, curcol:%d, tl:%d, br:%d", offscr_sc_cols, center_hidden_cols, cols, curcol, tlcol, brcol);
         }
 
         // Now pick up the counts again
@@ -999,14 +986,10 @@ int calc_offscr_sc_cols() {
             //if (i == maxcols - 1) return cols + center_hidden_cols - q;
             cols++;
             if (! col_hidden[i]) col += fwidth[i];
-            //sc_debug("F i:%d %s -  col:%d fwidth:%d COLS:%d", i, coltoa(i), col, fwidth[i+1], COLS);
         }
     }
-
-    while (freeze && curcol > brcol && curcol <= brcol + center_hidden_cols)
-        center_hidden_cols--;
-    //sc_debug("I i:%d %s -  col:%d fwidth:%d COLS:%d maxcols:%d", i-1, coltoa(i-1), col, fwidth[i-1], COLS, maxcols);
-    //sc_debug("5F cols:%d, center:%d, q:%d - return:%d     ", cols, center_hidden_cols, q, cols+center_hidden_cols-q);
+    while (freeze && ((curcol > brcol && curcol <= brcol + center_hidden_cols) ||
+           (col_hidden[offscr_sc_cols + q + center_hidden_cols]))) center_hidden_cols--;
     return cols + center_hidden_cols - q;
 }
 
