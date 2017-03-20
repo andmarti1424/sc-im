@@ -250,14 +250,12 @@ void do_normalmode(struct block * buf) {
 
         case L'H':
             lastrow = currow;
-            lastcol = curcol;
             currow = vert_top()->row;
             unselect_ranges();
             update(TRUE);
             break;
 
         case L'M':
-            lastcol = curcol;
             lastrow = currow;
             currow = vert_middle()->row;
             unselect_ranges();
@@ -266,7 +264,6 @@ void do_normalmode(struct block * buf) {
 
         case L'L':
             lastrow = currow;
-            lastcol = curcol;
             currow = vert_bottom()->row;
             unselect_ranges();
             update(TRUE);

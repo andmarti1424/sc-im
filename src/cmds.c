@@ -1148,18 +1148,30 @@ struct ent * vert_top() {
     extern int center_hidden_rows;
     int freezer = freeze_ranges && (freeze_ranges->type == 'r' ||  freeze_ranges->type == 'a') ? 1 : 0;
     int brrow = freezer ? freeze_ranges->br->row : 0;
-    int tlrow = freezer ? freeze_ranges->tl->row : 0;
 
-    if (freezer && center_hidden_rows)
-         return lookat(offscr_sc_rows + center_hidden_rows + brrow - tlrow + 1, curcol);
-    return lookat(offscr_sc_rows, curcol);
+    int r = offscr_sc_rows;
+    while ( row_hidden[r] && r < currow ) r++;
+    if (freezer && currow > brrow + center_hidden_rows + 1) while (row_hidden[r] || r <= brrow + center_hidden_rows) r++;
+    return lookat(r, curcol);
 }
 
 struct ent * vert_bottom() {
     extern int center_hidden_rows;
-    int c = offscr_sc_rows + center_hidden_rows + LINES - RESROW - 2;
-    if (c > maxrow) c = maxrow;
-    return lookat(c, curcol);
+    int freezer = freeze_ranges && (freeze_ranges->type == 'r' ||  freeze_ranges->type == 'a') ? 1 : 0;
+    int brrow = freezer ? freeze_ranges->br->row : 0;
+    int tlrow = freezer ? freeze_ranges->tl->row : 0;
+
+    int i = 0, r = offscr_sc_rows-1;
+    while (i < LINES - RESROW - 1) {
+        r++;
+        if (row_hidden[r]) continue;
+        else if (r < offscr_sc_rows && ! (freezer && r >= tlrow && r <= brrow)) continue;
+        else if (freezer && r > brrow && r <= brrow + center_hidden_rows) continue;
+        else if (freezer && r < tlrow && r >= tlrow - center_hidden_rows) continue;
+        i++;
+    }
+    if (r > maxrows) r = maxrows;
+    return lookat(r, curcol);
 }
 
 struct ent * vert_middle() {
@@ -1167,14 +1179,14 @@ struct ent * vert_middle() {
     int freezer = freeze_ranges && (freeze_ranges->type == 'r' ||  freeze_ranges->type == 'a') ? 1 : 0;
     int brrow = freezer ? freeze_ranges->br->row : 0;
     int tlrow = freezer ? freeze_ranges->tl->row : 0;
-    int top, bottom = offscr_sc_rows + center_hidden_rows + LINES - RESROW - 2;
-    if (freezer && center_hidden_rows)
-        top = offscr_sc_rows + center_hidden_rows + brrow - tlrow + 1;
-    else
-        top = offscr_sc_rows;
 
-    if (bottom > maxrow) bottom = maxrow;
-    return lookat( (bottom + top) / 2, curcol);
+    int top = offscr_sc_rows;
+    while ( (row_hidden[top] && top < currow) || (freezer && top >= tlrow && top <= brrow) ||
+        (freezer && top > brrow && top <= brrow + center_hidden_rows) ||
+        (freezer && top < tlrow && top >= tlrow - center_hidden_rows)) top++;
+    int mid = (vert_bottom()->row + top) / 2;
+    while ( row_hidden[mid] && mid < currow ) mid++; // just in case mid is hidden
+    return lookat(mid, curcol);
 }
 
 struct ent * go_end() {
