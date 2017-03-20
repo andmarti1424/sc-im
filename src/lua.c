@@ -96,8 +96,8 @@ static int l_setnum (lua_State *L) {
     double val;
     //struct ent ** pp;
     struct ent *p;
-    r = lua_tointeger(L, 1);  /* get argument */
-    c = lua_tointeger(L, 2);
+    c = lua_tointeger(L, 1);  /* get argument */
+    r = lua_tointeger(L, 2);
     val=lua_tonumber(L,3);
     sc_debug("getnum !!");
 
@@ -116,14 +116,35 @@ static int l_setstr (lua_State *L) {
     char * val;
     //struct ent ** pp;
     struct ent *p;
-    r = lua_tointeger(L, 1);  /* get argument */
-    c = lua_tointeger(L, 2);
+    c = lua_tointeger(L, 1);  /* get argument */
+    r = lua_tointeger(L, 2);
     val=(char *) lua_tostring(L,3);
     //sc_debug("setstr !!");
 
     p=lookat(r,c);
     label(p,val,-1);
 
+    return 0;
+}
+
+
+static int l_getstr (lua_State *L) {
+    int r,c;
+    
+    //struct ent ** pp;
+    struct ent *p;
+    c = lua_tointeger(L, 1);  /* get argument */
+    r = lua_tointeger(L, 2);
+   
+    //sc_debug("setstr !!");
+
+    p=lookat(r,c);
+    if(p == 0) return 0;
+    if(p->label !=0) {
+	lua_pushstring(L,p->label);
+	return 1;
+    }
+    
     return 0;
 }
 
@@ -273,6 +294,7 @@ static const luaL_reg sclib[] = {
     { "lsetnum", l_setnum },
     { "lsetform", l_setform },
     { "lsetstr", l_setstr },
+    { "lgetstr", l_getstr },
     { "lquery", l_query },
     { "currow", l_currow },
     { "curcol", l_curcol },
