@@ -98,6 +98,7 @@ Commands for handling cell content:
 
      fr          Freeze a row or the rows selected.
                  If none is selected it freezes the current row.
+                 NOTE: there can be only just one frozen range defined.
      fc          Freeze a col or the cols selected.
                  If none is selected it freezes the current col.
      fa          Freeze the area selected.
@@ -618,10 +619,11 @@ Commands for handling cell content:
     :freeze {column:column}
                 Freeze the column or column range given. (Case insensitive).
                 (the rest of the screen scrolls but the column/s stays fixed on the screen).
+                NOTE: there can be only just one frozen range defined.
 
     :freeze {row}
     :freeze {row:row}
-                Freeze the row or row range given.  (Case insensitive).
+                Freeze the row or row range given.
                 (the rest of the screen scrolls but the row/s stays fixed on the screen).
 
     :freeze {range}
