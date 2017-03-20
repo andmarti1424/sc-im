@@ -106,6 +106,7 @@ L"untrigger",
 L"unformat",
 L"version",
 L"w",
+L"wq",
 L"x",
 L"valueize",
 (wchar_t *) 0
@@ -668,7 +669,7 @@ void do_commandmode(struct block * sb) {
             exec_cmd(line);
 
         } else if ( inputline[0] == L'w' ) {
-            savefile();
+            if (savefile() == 0 && ! wcscmp(inputline, L"wq")) shall_quit = 1;
 
         } else if ( ! wcsncmp(inputline, L"file ", 5) ) {
 

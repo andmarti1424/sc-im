@@ -340,6 +340,7 @@ Commands for handling cell content:
                  loaded spreadsheet.
 
      :x          Save the current spreadsheet and quit SC-IM.
+     :wq
 
      :x {file}   Save the current spreadsheet to {file} and quit SC-IM.
 

@@ -129,7 +129,7 @@ int savefile() {
     del_range_chars(name, 0, 1 + force_rewrite);
     wordexp(name, &p, 0);
 
-    if (! force_rewrite && file_exists(p.we_wordv[0])) {
+    if (! force_rewrite && p.we_wordv[0] && file_exists(p.we_wordv[0])) {
         sc_error("File already exists. Use \"!\" to force rewrite.");
         wordfree(&p);
         return -1;
@@ -139,6 +139,7 @@ int savefile() {
         strcpy(curfile, p.we_wordv[0]);
     }
 
+    // add sc extension if not present
     if (wcslen(inputline) > 2 && str_in_str(curfile, ".") == -1)
         sprintf(curfile + strlen(curfile), ".sc");
 
