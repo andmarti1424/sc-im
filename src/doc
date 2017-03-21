@@ -63,14 +63,14 @@ Navigation commands:
      zl          Scroll right one column.
      zH          Scroll left half a page.
      zL          Scroll right half page.
-     zz          Scroll vertically to position the selected cell at the middle
+     zm          Scroll horizontally to position the selected cell at the
+                 center of the screen.
+     zz or z.    Scroll vertically to position the selected cell at the middle
                  of the screen.
      zt          Scroll vertically to position the selected cell at the top
                  of the screen.
      zb          Scroll vertically to position the selected cell at the bottom
                  of the screen.
-     zm          Scroll horizontally to position the selected cell at the
-                 center of the screen.
      Vir         Select the smallest range that covers all valid cells.
 
 
