@@ -921,9 +921,7 @@ int calc_offscr_sc_cols() {
     int brcol = freeze ? freeze_ranges->br->col : 0;
 
     // pick up col counts
-    while (freeze && ((curcol > brcol && curcol <= brcol + center_hidden_cols) ||
-           (col_hidden[offscr_sc_cols + q + center_hidden_cols]))) center_hidden_cols--;
-
+    while (freeze && curcol > brcol && curcol <= brcol + center_hidden_cols) center_hidden_cols--;
     if (offscr_sc_cols - 1 <= curcol) {
         for (i = 0, q = 0, cols = 0, col = rescol; i < maxcols && col + fwidth[i] <= COLS; i++) {
             if (i < offscr_sc_cols && ! (freeze && i >= tlcol && i <= brcol)) continue;
@@ -931,19 +929,19 @@ int calc_offscr_sc_cols() {
             else if (freeze && i < tlcol && i >= tlcol - center_hidden_cols) continue;
             if (i < offscr_sc_cols && freeze && i >= tlcol && i <= brcol && ! col_hidden[i] ) q++;
             cols++;
+
             if (! col_hidden[i]) col += fwidth[i];
         }
     }
 
     // get  off screen cols
-    while ( offscr_sc_cols + center_hidden_cols + cols - 1 < curcol || curcol < offscr_sc_cols
+    while ( offscr_sc_cols + center_hidden_cols + cols - 1      < curcol || curcol < offscr_sc_cols
             || (freeze && curcol < tlcol && curcol >= tlcol - center_hidden_cols)) {
 
         // izq
         if (offscr_sc_cols - 1 == curcol) {
-            if (freeze && offscr_sc_cols + cols + center_hidden_cols >= brcol && brcol - cols - offscr_sc_cols + 2 > 0) {
+            if (freeze && offscr_sc_cols + cols + center_hidden_cols >= brcol && brcol - cols - offscr_sc_cols + 2 > 0)
                 center_hidden_cols = brcol - cols - offscr_sc_cols + 2;
-            }
             offscr_sc_cols--;
 
         // derecha
@@ -976,20 +974,18 @@ int calc_offscr_sc_cols() {
                 if ( ! col_hidden[i]) col -= fwidth[i];
             }
         }
-
         // Now pick up the counts again
-        for (i = 0, q = 0, cols = 0, col = rescol; i < maxcols && col + fwidth[i] <= COLS; i++) {
+        for (i = 0, cols = 0, col = rescol, q = 0; i < maxcols && col + fwidth[i] <= COLS; i++) {
             if (i < offscr_sc_cols && ! (freeze && i >= tlcol && i <= brcol)) continue;
             else if (freeze && i > brcol && i <= brcol + center_hidden_cols) continue;
             else if (freeze && i < tlcol && i >= tlcol - center_hidden_cols) continue;
             if (i < offscr_sc_cols && freeze && i >= tlcol && i <= brcol && ! col_hidden[i]) q++;
-            //if (i == maxcols - 1) return cols + center_hidden_cols - q;
             cols++;
+
             if (! col_hidden[i]) col += fwidth[i];
         }
     }
-    while (freeze && ((curcol > brcol && curcol <= brcol + center_hidden_cols) ||
-           (col_hidden[offscr_sc_cols + q + center_hidden_cols]))) center_hidden_cols--;
+    while (freeze && curcol > brcol && curcol <= brcol + center_hidden_cols) center_hidden_cols--;
     return cols + center_hidden_cols - q;
 }
 
@@ -1000,12 +996,8 @@ int calc_offscr_sc_rows() {
     int tlrow = freeze ? freeze_ranges->tl->row : 0;
     int brrow = freeze ? freeze_ranges->br->row : 0;
 
-    //if (freeze) sc_debug("cc rows:%d, center:%d, off:%d, currow:%d, tl:%d, br:%d", rows, center_hidden_rows, offscr_sc_rows, currow, tlrow, brrow);
-
     // pick up row counts
-    while (freeze && currow > brrow && currow <= brrow + center_hidden_rows)
-        center_hidden_rows--;
-
+    while (freeze && currow > brrow && currow <= brrow + center_hidden_rows) center_hidden_rows--;
     if (offscr_sc_rows - 1 <= currow) {
         for (i = 0, q = 0, rows = 0, row=RESROW; i < maxrows && row < LINES; i++) {
             if (i < offscr_sc_rows && ! (freeze && i >= tlrow && i <= brrow)) continue;
@@ -1013,22 +1005,14 @@ int calc_offscr_sc_rows() {
             else if (freeze && i < tlrow && i >= tlrow - center_hidden_rows) continue;
             if (i < offscr_sc_rows && freeze && i >= tlrow && i <= brrow && ! row_hidden[i] ) q++;
             rows++;
-            //if (i == maxrows - 1) return rows+1;
-            //if (i == maxrows - 1 && !freeze) return rows + center_hidden_rows - q + 1 > maxrows ? maxrows - 1 : rows + center_hidden_rows - q;
-            //if (i == maxrows - 1) return rows + center_hidden_rows - q + 1 > maxrows ? maxrows - 1 : rows + center_hidden_rows - q;
             if (i == maxrows - 1) return rows + center_hidden_rows - q;
             if (! row_hidden[i]) row++;
         }
     }
 
-    //sc_debug("IN rows:%d, center:%d, off:%d, currow:%d mxrow:%d", rows, center_hidden_rows, offscr_sc_rows, currow, offscr_sc_rows + rows + center_hidden_rows-q -1);
-
     // get off screen rows
     while ( offscr_sc_rows + center_hidden_rows + rows - RESROW < currow || currow < offscr_sc_rows
-          || (freeze && currow < tlrow && currow >= tlrow - center_hidden_rows)
-          ) {
-
-        //if (freeze) sc_debug("W x:%d, rows:%d, center:%d, off:%d, currow:%d, tl:%d, br:%d", offscr_sc_rows + center_hidden_rows + brrow - tlrow - 2, rows, center_hidden_rows, offscr_sc_rows, currow, tlrow, brrow);
+            || (freeze && currow < tlrow && currow >= tlrow - center_hidden_rows)) {
 
         // move up
         if (offscr_sc_rows - 1 == currow) {
@@ -1060,34 +1044,24 @@ int calc_offscr_sc_rows() {
                 offscr_sc_rows = currow;
                 center_hidden_rows = 0;
             }
-
             for (i=currow-1; i >= 0 && row - 1 > RESROW && i < maxrows; i--) {
                 if (freeze && currow > brrow) center_hidden_rows--;
                 else offscr_sc_rows--;
-                //if ( ! row_hidden[i] && !freeze) row--;
                 if ( ! row_hidden[i]) row--;
             }
         }
         // Now pick up the counts again
-        for (i = 0, rows = 0, row=RESROW, q = 0; i < maxrows && row < LINES; i++) {
+        for (i = 0, rows = 0, row=RESROW,   q = 0; i < maxrows && row < LINES; i++) {
             if (i < offscr_sc_rows && ! (freeze && i >= tlrow && i <= brrow)) continue;
             else if (freeze && i > brrow && i <= brrow + center_hidden_rows) continue;
             else if (freeze && i < tlrow && i >= tlrow - center_hidden_rows) continue;
             if (i < offscr_sc_rows && freeze && i >= tlrow && i <= brrow && ! row_hidden[i] ) q++;
             rows++;
-            //if (i == maxrows - 1) return rows+1;
-            //if (i == maxrows - 1 && !freeze) return rows + center_hidden_rows - q + 1 > maxrows ? maxrows - 1 : rows + center_hidden_rows - q;
-            //if (i == maxrows - 1) return rows + center_hidden_rows - q + 1 > maxrows ? maxrows - 1 : rows + center_hidden_rows - q;
             if (i == maxrows - 1) return rows + center_hidden_rows - q;
             if (! row_hidden[i]) row++;
         }
     }
 
-    while (freeze && currow > brrow && currow <= brrow + center_hidden_rows) {
-        center_hidden_rows--;
-    }
-
-    //sc_debug("OU rows:%d, center:%d, off:%d, currow:%d mxrow:%d", rows, center_hidden_rows, offscr_sc_rows, currow, offscr_sc_rows + rows + center_hidden_rows-q -1);
-    //return rows + center_hidden_rows - q > maxrows ? maxrows: rows + center_hidden_rows - q;
+    while (freeze && currow > brrow && currow <= brrow + center_hidden_rows) center_hidden_rows--;
     return rows + center_hidden_rows - q;
 }
