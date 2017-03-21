@@ -1092,15 +1092,22 @@ struct ent * back_row(int arg) {
     //int freeze = freeze_ranges && (freeze_ranges->type == 'r' ||  freeze_ranges->type == 'a') ? 1 : 0;
 
     while (arg--) {
-        if (r) r--;
-        else {
+        if (r) {
+            // need to update curcol here so center_hidden_cols
+            // get update correctly after calc_offscr_sc_cols
+            currow = --r;
+            calc_offscr_sc_rows();
+        } else {
             sc_info("At row zero");
             break;
         }
-        //while ((row_hidden[r] || (freeze && r >= freeze_ranges->tl->row && r < freeze_ranges->tl->row + center_hidden_rows)) && r)
-        while ((row_hidden[r] && r))
-            r--;
-        //sc_debug("backrow - r:%d currow:%d off:%d center:%d", r, currow, offscr_sc_rows, center_hidden_rows);
+        //while ((row_hidden[r] || (freeze && r > freeze_ranges->br->row && r < freeze_ranges->br->row + center_hidden_rows)) && r)
+        while ((row_hidden[r] && r)) {
+            // need to update curcol here so center_hidden_cols
+            // get update correctly after calc_offscr_sc_cols
+            currow = --r;
+            calc_offscr_sc_rows();
+        }
 
     }
     return lookat(r, curcol);
