@@ -488,8 +488,11 @@ void sig_term() {
 // SIGWINCH signal !!!!
 // resize of terminal
 void winchg() {
+    extern SCREEN * sstdout;
     endwin();
-    start_screen();
+    set_term(sstdout);
+
+    //start_screen();
     clearok(stdscr, TRUE);
     update(TRUE);
     flushinp();
