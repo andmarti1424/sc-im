@@ -1016,19 +1016,26 @@ void clearent(struct ent * v) {
 // moves curcol back one displayed column
 struct ent * back_col(int arg) {
     extern int center_hidden_cols;
-    int freeze = freeze_ranges && (freeze_ranges->type == 'c' ||  freeze_ranges->type == 'a') ? 2 : 0;
+    int freeze = freeze_ranges && (freeze_ranges->type == 'c' ||  freeze_ranges->type == 'a') ? 1 : 0;
     int c = curcol;
 
     while (--arg >= 0) {
-        if (c)
-            c--;
-        else {
+        if (c) {
+            // need to update curcol here so center_hidden_cols
+            // get update correctly after calc_offscr_sc_cols
+            curcol = --c;
+            calc_offscr_sc_cols();
+        } else {
             sc_info ("At column A");
             break;
         }
-        while ((col_hidden[c] || (freeze && c >= freeze_ranges->br->col
-        && c < freeze_ranges->br->col + center_hidden_cols)) && c)
-            c--;
+        while ((col_hidden[c] || (freeze && c > freeze_ranges->br->col
+        && c < freeze_ranges->br->col + center_hidden_cols)) && c) {
+            // need to update curcol here so center_hidden_cols
+            // get update correctly after calc_offscr_sc_cols
+            curcol = --c;
+            calc_offscr_sc_cols();
+        }
     }
 
     return lookat(currow, c);

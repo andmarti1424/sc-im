@@ -921,8 +921,7 @@ int calc_offscr_sc_cols() {
     int brcol = freeze ? freeze_ranges->br->col : 0;
 
     // pick up col counts
-    while (freeze && ((curcol > brcol && curcol <= brcol + center_hidden_cols) ||
-           (col_hidden[offscr_sc_cols + q + center_hidden_cols]))) center_hidden_cols--;
+    while (freeze && ((curcol > brcol && curcol <= brcol + center_hidden_cols)))center_hidden_cols--;
 
     if (offscr_sc_cols - 1 <= curcol) {
         for (i = 0, q = 0, cols = 0, col = rescol; i < maxcols && col + fwidth[i] <= COLS; i++) {
@@ -988,8 +987,7 @@ int calc_offscr_sc_cols() {
             if (! col_hidden[i]) col += fwidth[i];
         }
     }
-    while (freeze && ((curcol > brcol && curcol <= brcol + center_hidden_cols) ||
-           (col_hidden[offscr_sc_cols + q + center_hidden_cols]))) center_hidden_cols--;
+    while (freeze && ((curcol > brcol && curcol <= brcol + center_hidden_cols)))center_hidden_cols--;
     return cols + center_hidden_cols - q;
 }
 
