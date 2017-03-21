@@ -377,9 +377,6 @@ token K_WHITE
 %%
 command:
          S_LET var_or_range '=' e { let($2.left.vp, $4);
-                                    //sc_debug("!! %d %d %d %d", $2.left.vp->row, $2.left.vp->col);
-                                    //if ($4->e.v.vp != NULL) {
-                                    //    sc_debug("!!! %d %d - %d %d", $2.left.vp->row, $2.left.vp->col, $4->e.v.vp->row, $4->e.v.vp->col);
                                   }
     |    S_DETAIL var             {
                                   char det[20000] = "";
@@ -401,24 +398,52 @@ command:
                                   show_text((char *) &det);
                                   }
     |    S_LET var_or_range '='
-                                  { $2.left.vp->v = (double) 0.0;
+                                  {
+                                  // TODO get this code out of gram.y
+                                  extern graphADT graph;
+                                  #ifdef UNDO
+                                  create_undo_action();
+                                  copy_to_undostruct($2.left.vp->row, $2.left.vp->col, $2.left.vp->row, $2.left.vp->col, 'd');
+                                  // here we save in undostruct, all the ents that depends on the deleted one (before change)
+                                  extern struct ent_ptr * deps;
+                                  int i, n = 0;
+                                  ents_that_depends_on_range($2.left.vp->row, $2.left.vp->col, $2.left.vp->row, $2.left.vp->col);
+                                  if (deps != NULL) {
+                                      for (i = 0, n = deps->vf; i < n; i++)
+                                          copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'd');
+                                  }
+                                  #endif
+                                  if (getVertex(graph, lookat($2.left.vp->row, $2.left.vp->col), 0) != NULL) destroy_vertex(lookat($2.left.vp->row, $2.left.vp->col));
+
+                                  $2.left.vp->v = (double) 0.0;
                                   if ($2.left.vp->expr && !($2.left.vp->flags & is_strexpr)) {
-                                    efree($2.left.vp->expr);
-                                    $2.left.vp->expr = NULL;
+                                      efree($2.left.vp->expr);
+                                      $2.left.vp->expr = NULL;
                                   }
                                   $2.left.vp->cellerror = CELLOK;
                                   $2.left.vp->flags &= ~is_valid;
                                   $2.left.vp->flags |= is_changed;
-                                  changed++;
+                                  //changed++;
                                   modflg++;
+
+                                  #ifdef UNDO
+                                  copy_to_undostruct($2.left.vp->row, $2.left.vp->col, $2.left.vp->row, $2.left.vp->col, 'a');
+                                  // here we save in undostruct, all the ents that depends on the deleted one (after change)
+                                  if (deps != NULL) free(deps);
+                                  ents_that_depends_on_range($2.left.vp->row, $2.left.vp->col, $2.left.vp->row, $2.left.vp->col);
+                                  if (deps != NULL) {
+                                      for (i = 0, n = deps->vf; i < n; i++)
+                                          copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'a');
+                                      free(deps);
+                                      deps = NULL;
+                                  }
+                                  end_undo_action();
+                                  #endif
                                   }
 
     |    S_LABEL var_or_range '=' e       { slet($2.left.vp, $4, 0); }
     |    S_LEFTSTRING var_or_range '=' e  { slet($2.left.vp, $4, -1); }
     |    S_RIGHTSTRING var_or_range '=' e { slet($2.left.vp, $4, 1); }
-
-
-
     |    S_LEFTJUSTIFY var_or_range  { ljustify($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col); }
     |    S_RIGHTJUSTIFY var_or_range { rjustify($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col); }
     |    S_CENTER var_or_range       { center($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col); }

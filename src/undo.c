@@ -410,7 +410,7 @@ void undo_hide_show(int row, int col, char type, int arg) {
 // 'ent' elements from 'removed' and remove those from 'added'
 void do_undo() {
     if (undo_list == NULL || undo_list_pos == 0) {
-        sc_error("Not UNDO's left");
+        sc_error("No UNDO's left");
         return;
     }
     //sc_info("%d %d", undo_list_pos, len_undo_list());
@@ -558,7 +558,7 @@ void do_undo() {
 // 'ent' elements from 'added' and remove those from 'removed'
 void do_redo() {
     if ( undo_list == NULL || undo_list_pos == len_undo_list()  ) {
-        sc_error("Not REDO's left");
+        sc_error("No REDO's left");
         return;
     }
     //sc_info("%d %d", undo_list_pos, len_undo_list());
