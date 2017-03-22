@@ -389,3 +389,27 @@ int open_xlsx(char * fname, char * encoding) {
     return 0;
 }
 #endif
+
+#ifdef XLSX_EXPORT
+#include "xlsxwriter.h"
+int export_xlsx(char * filename, int r0, int c0, int rn, int cn) {
+    int row, col;
+    register struct ent ** pp;
+
+    lxw_workbook  * workbook  = workbook_new(filename);
+    lxw_worksheet * worksheet = workbook_add_worksheet(workbook, NULL);
+
+    for (row = r0; row <= rn; row++)
+        for (pp = ATBL(tbl, row, col = c0); col <= cn; col++, pp++)
+            if (*pp) {
+                // If a numeric value exists
+                if ( (*pp)->flags & is_valid) {
+                    worksheet_write_number(worksheet, row, col, (*pp)->v, NULL);
+
+                } else if ((*pp)->label) {
+                    worksheet_write_string(worksheet, row, col, (*pp)->label, NULL);
+                }
+            }
+    return workbook_close(workbook);
+}
+#endif

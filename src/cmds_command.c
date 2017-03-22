@@ -716,6 +716,48 @@ void do_commandmode(struct block * sb) {
                 p == -1 ? maxrow : sr->brrow, p == -1 ? maxcol : sr->brcol);
 
         } else if (
+                ! wcsncmp(inputline, L"e xlsx"  , 6) ||
+                ! wcsncmp(inputline, L"e! xlsx" , 7)) {
+                #ifndef XLSX_EXPORT
+                sc_error("XLSX export support not compiled in");
+                chg_mode('.');
+                inputline[0] = L'\0';
+                update(TRUE);
+                return;
+                #endif
+
+                char linea[BUFFERSIZE];
+                char filename[PATHLEN];
+                int force_rewrite = 0;
+                if (inputline[1] == L'!') force_rewrite = 1;
+                wcstombs(linea, inputline, BUFFERSIZE); // Use new variable to keep command history untouched
+                del_range_chars(linea, 0, 1 + force_rewrite); // Remove 'e' or 'e!' from inputline
+
+                // Get path and file name to write.
+                // Use parameter if any.
+                if (strlen(linea) > 5) {   // ex. 'xlsx '
+                    del_range_chars(linea, 0, 4); // remove 'xlsx'
+                    strcpy(filename, linea);
+                    // Use curfile name and '.xlsx' extension
+                    // Remove current '.sc' extension if necessary
+                } else if (curfile[0]) {
+                    strcpy(filename, curfile);
+                    char * ext = strrchr(filename, '.');
+                    if (ext != NULL) del_range_chars(filename, strlen(filename) - strlen(ext), strlen(filename)-1);
+                    sprintf(filename + strlen(filename), ".xlsx");
+                } else {
+                    sc_error("No filename specified !");
+                    chg_mode('.');
+                    inputline[0] = L'\0';
+                    update(TRUE);
+                    return;
+                }
+
+                if (export_xlsx(filename, p == -1 ? 0 : sr->tlrow, p == -1 ? 0 : sr->tlcol,
+                p == -1 ? maxrow : sr->brrow, p == -1 ? maxcol : sr->brcol) == 0)
+                    sc_info("Export completed. File %s was created.", filename);
+
+        } else if (
             ! wcsncmp(inputline, L"i csv " , 6) ||
             ! wcsncmp(inputline, L"i! csv ", 7) ||
             ! wcsncmp(inputline, L"i xlsx" , 6) ||

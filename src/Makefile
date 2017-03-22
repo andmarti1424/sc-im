@@ -55,10 +55,16 @@ CFLAGS += -DUSELOCALE
 #CFLAGS += -DXLS
 #LDLIBS += -lxlsreader
 
-# NOTE: libxml and libzip are required for xlsx format support
+# NOTE: libxml and libzip are required for xlsx file import support
 ifneq ($(shell pkg-config --exists libzip libxml-2.0 || echo 'no'),no)
 CFLAGS += -DXLSX $(shell pkg-config --cflags libxml-2.0 libzip)
 LDLIBS += $(shell pkg-config --libs libxml-2.0 libzip)
+endif
+
+# NOTE: libxlsxwriter is required for xlsx file export support
+ifneq (,$(wildcard /usr/include/xlsxwriter.h))
+CFLAGS += -DXLSX_EXPORT
+LDLIBS += -lxlsxwriter
 endif
 
 # NOTE: lua support
