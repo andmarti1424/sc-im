@@ -638,8 +638,7 @@ void do_commandmode(struct block * sb) {
             send_to_interp(interp_line);
 
         } else if ( ! wcscmp(inputline, L"set") ) {
-            int d = user_conf_d->len;
-            char valores[20 * d];
+            char valores[ (get_maxkey_length(user_conf_d) + get_maxvalue_length(user_conf_d) + 1) * user_conf_d->len ];
             get_conf_values(valores);
             show_text(valores);
 
