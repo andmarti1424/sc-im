@@ -720,14 +720,9 @@ void do_commandmode(struct block * sb) {
                 ! wcsncmp(inputline, L"e! xlsx" , 7)) {
                 #ifndef XLSX_EXPORT
                 sc_error("XLSX export support not compiled in");
-                chg_mode('.');
-                inputline[0] = L'\0';
-                update(TRUE);
-                return;
-                #endif
-
+                #else
                 char linea[BUFFERSIZE];
-                char filename[PATHLEN];
+                char filename[PATHLEN] = "";
                 int force_rewrite = 0;
                 if (inputline[1] == L'!') force_rewrite = 1;
                 wcstombs(linea, inputline, BUFFERSIZE); // Use new variable to keep command history untouched
@@ -747,15 +742,15 @@ void do_commandmode(struct block * sb) {
                     sprintf(filename + strlen(filename), ".xlsx");
                 } else {
                     sc_error("No filename specified !");
-                    chg_mode('.');
-                    inputline[0] = L'\0';
-                    update(TRUE);
-                    return;
                 }
 
-                if (export_xlsx(filename, p == -1 ? 0 : sr->tlrow, p == -1 ? 0 : sr->tlcol,
-                p == -1 ? maxrow : sr->brrow, p == -1 ? maxcol : sr->brcol) == 0)
-                    sc_info("Export completed. File %s was created.", filename);
+                if (strlen(filename) > 0 && ! force_rewrite && file_exists(filename)) {
+                    sc_error("File %s already exists. Use \"!\" to force rewrite.", filename);
+                } else if (strlen(filename) && export_xlsx(
+                    filename, p == -1 ? 0 : sr->tlrow, p == -1 ? 0 : sr->tlcol,
+                    p == -1 ? maxrow : sr->brrow, p == -1 ? maxcol : sr->brcol) == 0)
+                    sc_info("File \"%s\" written", filename);
+                #endif
 
         } else if (
             ! wcsncmp(inputline, L"i csv " , 6) ||
