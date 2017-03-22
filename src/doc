@@ -374,6 +374,12 @@ Commands for handling cell content:
      :e! txt {file}
                  Like ":e txt", but overwrite {file} if it exists.
 
+     :e xlsx {file}
+                 Export the current spreadsheet to xlsx file {file}.
+
+     :e! xlsx {file}
+                 Like ":e xlsx", but overwrite {file} if it exists.
+
      :i csv {file}
                  Import comma-separated file {file} to SC-IM's buffer.
 
