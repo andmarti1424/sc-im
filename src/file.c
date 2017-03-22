@@ -723,10 +723,7 @@ void print_options(FILE *f) {
 int import_csv(char * fname, char d) {
 
     register FILE * f;
-    //int pid = 0;
-    //int rfd = STDOUT_FILENO;
     int r = 0, c = 0;
-    //wchar_t line_interp[FBUFLEN] = L"";
 
     char * token;
 
@@ -734,7 +731,6 @@ int import_csv(char * fname, char d) {
     char delim[2] = ""; //strtok receives a char *, not a char
     add_char(delim, d, 0);
 
-    //if ((f = openfile(fname, & pid, & rfd)) == NULL) {
     if ((f = fopen(fname , "r")) == NULL) {
         sc_error("Can't read file \"%s\"", fname);
         return -1;
