@@ -379,7 +379,7 @@ command:
          S_LET var_or_range '=' e { let($2.left.vp, $4);
                                   }
     |    S_DETAIL var             {
-                                  char det[20000] = "";
+                                  char det[BUFFERSIZE] = "";
                                   struct ent * e = $2.vp;
 
                                   sprintf(det + strlen(det), "row: %d\n", e->row);

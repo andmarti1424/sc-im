@@ -160,34 +160,66 @@ void markAllVerticesNotVisited () {
 }
 
 
-// print vertices
+// print vertexs
 void print_vertexs() {
-   char det[20000] = ""; // TODO: - improve: malloc, remalloc and free dinamically
+   char det[BUFFERSIZE] = "";
    if (graph == NULL) {
        strcpy(det, "Graph is empty");
        show_text((char *) &det);
        return;
    }
-
    vertexT * temp = graph->vertices;
    edgeT * etemp;
    det[0]='\0';
+   int msg_size = BUFFERSIZE;
+   char * msg = (char *) malloc(msg_size);
+   msg[0]='\0';
+   strcpy(msg, "Content of graph:\n");
+
    while (temp != NULL) {
       sprintf(det + strlen(det), "%d %d\n", temp->ent->row, temp->ent->col);
       etemp = temp->edges;
+
+      /* check not overflow msg size. if so, just realloc. */
+      if (strlen(det) + strlen(msg) > msg_size) {
+          sc_debug("realloc"),
+          msg_size += BUFFERSIZE;
+          msg = (char *) realloc(msg, msg_size);
+      }
+      sprintf(msg + strlen(msg), "%s", det);
+      det[0]='\0';
+      /**/
       while (etemp != NULL) {
           sprintf(det + strlen(det), "    \\-> depends on the following ents: %d %d\n", etemp->connectsTo->ent->row, etemp->connectsTo->ent->col);
           etemp = etemp->next;
+
+          /* check not overflow msg size. if so, just realloc. */
+          if (strlen(det) + strlen(msg) > msg_size) {
+              msg_size += BUFFERSIZE;
+              msg = (char *) realloc(msg, msg_size);
+          }
+          sprintf(msg + strlen(msg), "%s", det);
+          det[0]='\0';
+          /**/
       }
       etemp = temp->back_edges;
       while (etemp != NULL) {
           sprintf(det + strlen(det), "edges that depend on that ent: \\-> %d %d\n", etemp->connectsTo->ent->row, etemp->connectsTo->ent->col);
           etemp = etemp->next;
-      }
 
+          /* check not overflow msg size. if so, just realloc. */
+          if (strlen(det) + strlen(msg) > msg_size) {
+              msg_size += BUFFERSIZE;
+              msg = (char *) realloc(msg, msg_size);
+          }
+          sprintf(msg + strlen(msg), "%s", det);
+          det[0]='\0';
+          /**/
+      }
       temp = temp->next;
    }
-   show_text((char *) &det);
+   show_text((char *) msg);
+   free(msg);
    return;
 }
 

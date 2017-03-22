@@ -119,7 +119,7 @@ void show_filters() {
     }
 
     int i, size = 0;
-    char init_msg[100];
+    char init_msg[BUFFERSIZE];
     sprintf(init_msg, "Filters status: %s\nFilters:\n", active == 1 ? "ON" : "OFF");
 
     size += sizeof(init_msg);
