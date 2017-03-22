@@ -101,6 +101,32 @@ struct nlist * get_nl(struct dictionary * d, char * key) {
    return nl; // just in case d->list == NULL
 }
 
+// Get max length of keys in a dictionary
+int get_maxkey_length(struct dictionary * d) {
+   int i = 0, len, count = 0;
+   if (d == NULL || d->list == NULL) return count;
+
+   struct nlist * nl = d->list;
+   while ( i++ < d->len ) {
+       if ((len = strlen(nl->key)) > count) count = len;
+       nl = nl->next;
+   }
+   return count;
+}
+
+// Get max length of value of a dictionary
+int get_maxvalue_length(struct dictionary * d) {
+   int i = 0, len, count = 0;
+   if (d == NULL || d->list == NULL) return count;
+
+   struct nlist * nl = d->list;
+   while ( i++ < d->len ) {
+       if ((len = strlen(nl->val)) > count) count = len;
+       nl = nl->next;
+   }
+   return count;
+}
+
 // Get the value for KEY
 char * get(struct dictionary * d, char * key) {
    int i=0;

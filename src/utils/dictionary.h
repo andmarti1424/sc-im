@@ -16,3 +16,5 @@ char * get(struct dictionary * d, char * key);
 //char * get_key_name(struct dictionary * d, char * value);
 struct nlist * get_nl(struct dictionary * d, char * key);
 void parse_str(struct dictionary * d, char * str);
+int get_maxkey_length(struct dictionary * d);
+int get_maxvalue_length(struct dictionary * d);
