@@ -98,8 +98,14 @@ void read_stdin();
 int main (int argc, char ** argv) {
 
     // setup stderr buffer
-    freopen("/dev/stderr", "w", stderr);
-    setvbuf(stderr, stderr_buffer, _IOFBF, 1024);
+    if (freopen("/dev/stderr", "w", stderr) == NULL) {
+        fprintf(stderr, "Error opening stderr\n");
+        return -1;
+    }
+    if (setvbuf(stderr, stderr_buffer, _IOFBF, STDERRBUF) != 0) {
+        fprintf(stderr, "Error setting stderr buffer\n");
+        return -1;
+    }
 
     // set up signals so we can catch them
     signals();
