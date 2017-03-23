@@ -406,11 +406,11 @@ int export_xlsx(char * filename, int r0, int c0, int rn, int cn) {
                 lxw_format * format = workbook_add_format(workbook);
 
                 // handle alignment
-                if ((*pp)->label && (*pp)->flags & is_label)          //center align
+                if ((*pp)->label && (*pp)->flags & is_label)          // center align
                     format_set_align(format, LXW_ALIGN_CENTER);
                 else if ((*pp)->label && (*pp)->flags & is_leftflush) // left align
                     format_set_align(format, LXW_ALIGN_LEFT);
-                else if ((*pp)->label)                               // right align
+                else if ((*pp)->label)                                // right align
                     format_set_align(format, LXW_ALIGN_RIGHT);
 
                 // handle bold and underline
@@ -448,7 +448,6 @@ int export_xlsx(char * filename, int r0, int c0, int rn, int cn) {
                             fgcolor = LXW_COLOR_WHITE;
                             break;
                     }
-                    //format_set_fg_color(format, fgcolor);
                     format_set_font_color(format, fgcolor);
                 }
 
@@ -483,17 +482,38 @@ int export_xlsx(char * filename, int r0, int c0, int rn, int cn) {
                     }
                     format_set_bg_color(format, bgcolor);
                 }
+
+                // dateformat
+                if ((*pp) && (*pp)->format && (*pp)->format[0] == 'd') {
+                    char sc_format[BUFFERSIZE];
+                    char * st = NULL;
+                    strcpy(sc_format, &((*pp)->format[1]));
+
+                    st = str_replace(sc_format, "%Y", "yyyy");
+                    strcpy(sc_format, st);
+                    free(st);
+                    st = str_replace(sc_format, "%y", "yy");
+                    strcpy(sc_format, st);
+                    free(st);
+                    st = str_replace(sc_format, "%m", "mm");
+                    strcpy(sc_format, st);
+                    free(st);
+                    st = str_replace(sc_format, "%d", "dd");
+                    strcpy(sc_format, st);
+                    free(st);
+                    format_set_num_format(format, sc_format);
+                    worksheet_write_number(worksheet, row, col, (((*pp)->v + atoi(get_conf_value("tm_gmtoff"))) / 86400 + 25569) , format);
+                }
+
                 // If a numeric value exists
-                if ( (*pp)->flags & is_valid) {
+                else if ( (*pp)->flags & is_valid) {
                     worksheet_write_number(worksheet, row, col, (*pp)->v, format);
 
                 } else if ((*pp)->label) {
                     worksheet_write_string(worksheet, row, col, (*pp)->label, format);
                 }
-                /* TODO: handle dates
-                         handle hidden rows and columns?
-                         basic expression and formulas?
-                 */
+                /* TODO: handle basic expression and formulas?
+                         handle hidden rows and columns?  */
             }
     return workbook_close(workbook);
 }
