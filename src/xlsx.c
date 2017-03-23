@@ -402,13 +402,98 @@ int export_xlsx(char * filename, int r0, int c0, int rn, int cn) {
     for (row = r0; row <= rn; row++)
         for (pp = ATBL(tbl, row, col = c0); col <= cn; col++, pp++)
             if (*pp) {
+                // Check format here
+                lxw_format * format = workbook_add_format(workbook);
+
+                // handle alignment
+                if ((*pp)->label && (*pp)->flags & is_label)          //center align
+                    format_set_align(format, LXW_ALIGN_CENTER);
+                else if ((*pp)->label && (*pp)->flags & is_leftflush) // left align
+                    format_set_align(format, LXW_ALIGN_LEFT);
+                else if ((*pp)->label)                               // right align
+                    format_set_align(format, LXW_ALIGN_RIGHT);
+
+                // handle bold and underline
+                if ((*pp)->ucolor != NULL && (*pp)->ucolor->bold)
+                    format_set_bold(format);
+                else if ((*pp)->ucolor != NULL && (*pp)->ucolor->underline)
+                    format_set_underline(format, LXW_UNDERLINE_SINGLE);
+
+                // handle fg color
+                if ((*pp)->ucolor != NULL && (*pp)->ucolor->fg) {
+                    int fgcolor;
+                    switch ((*pp)->ucolor->fg) {
+                        case BLACK:
+                            fgcolor = LXW_COLOR_BLACK;
+                            break;
+                        case RED:
+                            fgcolor = LXW_COLOR_RED;
+                            break;
+                        case GREEN:
+                            fgcolor = LXW_COLOR_GREEN;
+                            break;
+                        case YELLOW:
+                            fgcolor = LXW_COLOR_YELLOW;
+                            break;
+                        case BLUE:
+                            fgcolor = LXW_COLOR_BLUE;
+                            break;
+                        case MAGENTA:
+                            fgcolor = LXW_COLOR_MAGENTA;
+                            break;
+                        case CYAN:
+                            fgcolor = LXW_COLOR_CYAN;
+                            break;
+                        case WHITE:
+                            fgcolor = LXW_COLOR_WHITE;
+                            break;
+                    }
+                    //format_set_fg_color(format, fgcolor);
+                    format_set_font_color(format, fgcolor);
+                }
+
+                // handle bg color
+                if ((*pp)->ucolor != NULL && (*pp)->ucolor->bg) {
+                    int bgcolor;
+                    switch ((*pp)->ucolor->bg) {
+                        case BLACK:
+                            bgcolor = LXW_COLOR_BLACK;
+                            break;
+                        case RED:
+                            bgcolor = LXW_COLOR_RED;
+                            break;
+                        case GREEN:
+                            bgcolor = LXW_COLOR_GREEN;
+                            break;
+                        case YELLOW:
+                            bgcolor = LXW_COLOR_YELLOW;
+                            break;
+                        case BLUE:
+                            bgcolor = LXW_COLOR_BLUE;
+                            break;
+                        case MAGENTA:
+                            bgcolor = LXW_COLOR_MAGENTA;
+                            break;
+                        case CYAN:
+                            bgcolor = LXW_COLOR_CYAN;
+                            break;
+                        case WHITE:
+                            bgcolor = LXW_COLOR_WHITE;
+                            break;
+                    }
+                    format_set_bg_color(format, bgcolor);
+                }
                 // If a numeric value exists
                 if ( (*pp)->flags & is_valid) {
-                    worksheet_write_number(worksheet, row, col, (*pp)->v, NULL);
+                    worksheet_write_number(worksheet, row, col, (*pp)->v, format);
 
                 } else if ((*pp)->label) {
-                    worksheet_write_string(worksheet, row, col, (*pp)->label, NULL);
+                    worksheet_write_string(worksheet, row, col, (*pp)->label, format);
                 }
+                /* TODO: handle dates
+                         handle hidden rows and columns?
+                         basic expression and formulas?
+                 */
             }
     return workbook_close(workbook);
 }
