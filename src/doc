@@ -940,7 +940,7 @@ Commands for handling cell content:
     the final values of a cell.
 
     'tm_gmtoff' [default -10800 seconds]
-    set gmtoffset used for converting datetimes to localtime. default value is
+    set gmtoffset used for converting datetimes to localtime.
 
     'ignorecase' [default off]
     set this to ignore case in searches done with '/' command.
