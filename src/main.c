@@ -97,11 +97,11 @@ void read_stdin();
  *********************************************************************/
 int main (int argc, char ** argv) {
 
-    // setup stderr buffer
+    /* setup stderr buffer
     if (freopen("/dev/stderr", "w", stderr) == NULL) {
         fprintf(stderr, "Error opening stderr\n");
         return -1;
-    }
+    }*/
     if (setvbuf(stderr, stderr_buffer, _IOFBF, STDERRBUF) != 0) {
         fprintf(stderr, "Error setting stderr buffer\n");
         return -1;
