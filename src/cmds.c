@@ -688,7 +688,7 @@ void deleterow() {
 
         for (r = currow; r < maxrows - 1; r++) {
             for (c = 0; c < maxcols; c++) {
-                if (r <= maxrow - 1) {
+                if (r <= maxrow) {
                     pp = ATBL(tbl, r, c);
                     pp[0] = *ATBL(tbl, r + 1, c);
                     if ( pp[0] ) pp[0]->row--;
