@@ -376,6 +376,8 @@ Commands for handling cell content:
 
      :e xlsx {file}
                  Export the current spreadsheet to xlsx file {file}.
+                 If 'xlsx_readformulas' is set, SC-IM tries to export
+                 formulas, rather than the final values of a cell.
 
      :e! xlsx {file}
                  Like ":e xlsx", but overwrite {file} if it exists.
