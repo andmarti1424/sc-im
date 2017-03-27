@@ -22,6 +22,7 @@
 #include "dep_graph.h"
 #include "utils/dictionary.h"
 #include "trigger.h"
+#include "shift.h"
 
 void yyerror(char *err);               // error routine for yacc (gram.y)
 int yylex();
@@ -180,6 +181,7 @@ token S_YANKCOL
  token S_PLUGOUT
 */
 
+%token S_SHIFT
 %token S_GETNUM
 %token S_GETSTRING
 %token S_GETEXP
@@ -498,6 +500,17 @@ command:
                                        }
                                        hide_row($2, arg);
                                        currow = r < currow ? r : r < currow + arg ? currow : r - arg;
+                                     }
+
+    |    S_SHIFT var_or_range STRING {
+                                       if (strlen($3) != 1 || ($3[0] != 'h' && $3[0] != 'j' && $3[0] != 'k' && $3[0] != 'l')) {
+                                           sc_error("wrong parameter for shift command");
+                                       } else {
+                                           wchar_t wstr[2] = L"";
+                                           swprintf(wstr, BUFFERSIZE, L"%c", $3[0]);
+                                           shift($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col, wstr[0]);
+                                       }
+                                       scxfree($3);
                                      }
 
     |    S_MARK COL var_or_range     { set_cell_mark($2 + 97, $3.left.vp->row, $3.left.vp->col); }
