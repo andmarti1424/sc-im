@@ -101,7 +101,7 @@ void shift_cells_down(int deltarows, int deltacols) {
     if ((maxrow >= maxrows) && !growtbl(GROWROW, maxrow, 0))
         return;
 
-    for (r = maxrow; r > currow; r--) {
+    for (r = maxrow; r > currow + deltarows - 1; r--) {
         for (c = curcol; c < curcol + deltacols; c++) {
             pp = ATBL(tbl, r, c);
             pp[0] = *ATBL(tbl, r-deltarows, c);
@@ -131,10 +131,10 @@ void shift_cells_right(int deltarows, int deltacols) {
     if ((maxcol >= maxcols) && !growtbl(GROWCOL, 0, maxcol))
         return;
 
-    int lim = maxcol - curcol + deltacols;
+    int lim = maxcol - curcol + deltacols - 1;
     for (r=currow; r < currow + deltarows; r++) {
         pp = ATBL(tbl, r, maxcol);
-        for (c = lim; --c >= deltacols; pp--)
+        for (c = lim; --c > deltacols; pp--)
             if ((pp[0] = pp[-deltacols])) pp[0]->col += deltacols;
 
         pp = ATBL(tbl, r, curcol);
