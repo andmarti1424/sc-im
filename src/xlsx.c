@@ -399,7 +399,11 @@ int export_xlsx(char * filename, int r0, int c0, int rn, int cn) {
     lxw_workbook  * workbook  = workbook_new(filename);
     lxw_worksheet * worksheet = workbook_add_worksheet(workbook, NULL);
 
-    for (row = r0; row <= rn; row++)
+    int bkp_currow = currow;
+    currow = 0;
+    insert_row(0); //add a row so that scim formulas apply to excel
+
+    for (row = r0; row <= rn+1; row++)
         for (pp = ATBL(tbl, row, col = c0); col <= cn; col++, pp++)
             if (*pp) {
                 // Check format here
@@ -502,19 +506,65 @@ int export_xlsx(char * filename, int r0, int c0, int rn, int cn) {
                     strcpy(sc_format, st);
                     free(st);
                     format_set_num_format(format, sc_format);
-                    worksheet_write_number(worksheet, row, col, (((*pp)->v + atoi(get_conf_value("tm_gmtoff"))) / 86400 + 25569) , format);
-                }
+                    worksheet_write_number(worksheet, row-1, col, (((*pp)->v + atoi(get_conf_value("tm_gmtoff"))) / 86400 + 25569) , format);
+
+                // formula
+                } else if ((*pp) && (*pp)->expr && atoi(get_conf_value("xlsx_readformulas")))  {
+                    linelim = 0;
+                    editexp((*pp)->row, (*pp)->col);
+                    linelim = -1;
+
+                    char * strf;
+                    char formula[BUFFERSIZE];
+                    strcpy(formula, line);
+
+                    strf = str_replace (formula, "@COUNT","COUNT");
+                    strcpy(formula, strf);
+                    free(strf);
+
+                    strf = str_replace (formula, "@SUM","SUM");
+                    strcpy(formula, strf);
+                    free(strf);
+
+                    strf = str_replace (formula, "@PROD","PRODUCT");
+                    strcpy(formula, strf);
+                    free(strf);
+
+                    strf = str_replace (formula, "@AVG","AVERAGE");
+                    strcpy(formula, strf);
+                    free(strf);
+
+                    strf = str_replace (formula, "@MIN","MIN");
+                    strcpy(formula, strf);
+                    free(strf);
+
+                    strf = str_replace (formula, "@MAX","MAX");
+                    strcpy(formula, strf);
+                    free(strf);
+
+                    strf = str_replace (formula, "@ABS","ABS");
+                    strcpy(formula, strf);
+                    free(strf);
+
+                    strf = str_replace (formula, "@STDDEV","STDEV");
+                    strcpy(formula, strf);
+                    free(strf);
+
+                    add_char(formula, '=', 0);
+                    worksheet_write_formula(worksheet, row-1, col, formula, NULL);
 
                 // If a numeric value exists
-                else if ( (*pp)->flags & is_valid) {
-                    worksheet_write_number(worksheet, row, col, (*pp)->v, format);
+                } else if ( (*pp)->flags & is_valid) {
+                    worksheet_write_number(worksheet, row-1, col, (*pp)->v, format);
 
                 } else if ((*pp)->label) {
-                    worksheet_write_string(worksheet, row, col, (*pp)->label, format);
+                    worksheet_write_string(worksheet, row-1, col, (*pp)->label, format);
                 }
-                /* TODO: handle basic expression and formulas?
-                         handle hidden rows and columns?  */
+                /* TODO: handle hidden rows and columns? */
             }
+    deleterow(); /* delete the added row */
+    currow = bkp_currow;
+
     return workbook_close(workbook);
 }
 #endif
