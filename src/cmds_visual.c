@@ -438,60 +438,7 @@ void do_visualmode(struct block * buf) {
 
     // shift range
     } else if (buf->value == L's') {
-        int ic = cmd_multiplier + 1;
-        if ( any_locked_cells(r->tlrow, r->tlcol, r->brrow, r->brcol) &&
-           (buf->pnext->value == L'h' || buf->pnext->value == L'k') ) {
-            sc_error("Locked cells encountered. Nothing changed");
-            return;
-        }
-#ifdef UNDO
-        create_undo_action();
-#endif
-        switch (buf->pnext->value) {
-            case L'j':
-                    fix_marks(  (r->brrow - r->tlrow + 1) * cmd_multiplier, 0, r->tlrow, maxrow, r->tlcol, r->brcol);
-#ifdef UNDO
-                    save_undo_range_shift(cmd_multiplier, 0, r->tlrow, r->tlcol, r->brrow + (r->brrow-r->tlrow+1) * (cmd_multiplier - 1), r->brcol);
-#endif
-                    while (ic--) shift_range(ic, 0, r->tlrow, r->tlcol, r->brrow, r->brcol);
-                    break;
-            case L'k':
-                    fix_marks( -(r->brrow - r->tlrow + 1) * cmd_multiplier, 0, r->tlrow, maxrow, r->tlcol, r->brcol);
-                    yank_area(r->tlrow, r->tlcol, r->brrow + (r->brrow-r->tlrow+1) * (cmd_multiplier - 1), r->brcol, 'a', cmd_multiplier); // keep ents in yanklist for sk
-#ifdef UNDO
-                    copy_to_undostruct(r->tlrow, r->tlcol, r->brrow + (r->brrow-r->tlrow+1) * (cmd_multiplier - 1), r->brcol, 'd');
-                    save_undo_range_shift(-cmd_multiplier, 0, r->tlrow, r->tlcol, r->brrow + (r->brrow-r->tlrow+1) * (cmd_multiplier - 1), r->brcol);
-#endif
-                    while (ic--) shift_range(-ic, 0, r->tlrow, r->tlcol, r->brrow, r->brcol);
-#ifdef UNDO
-                    copy_to_undostruct(r->tlrow, r->tlcol, r->brrow + (r->brrow-r->tlrow+1) * (cmd_multiplier - 1), r->brcol, 'a');
-#endif
-                    break;
-            case L'h':
-                    fix_marks(0, -(r->brcol - r->tlcol + 1) * cmd_multiplier, r->tlrow, r->brrow, r->tlcol, maxcol);
-                    yank_area(r->tlrow, r->tlcol, r->brrow, r->brcol + (r->brcol-r->tlcol+1) * (cmd_multiplier - 1), 'a', cmd_multiplier); // keep ents in yanklist for sk
-#ifdef UNDO
-                    copy_to_undostruct(r->tlrow, r->tlcol, r->brrow, r->brcol + (r->brcol-r->tlcol+1) * (cmd_multiplier - 1), 'd');
-                    save_undo_range_shift(0, -cmd_multiplier, r->tlrow, r->tlcol, r->brrow, r->brcol + (r->brcol-r->tlcol+1) * (cmd_multiplier - 1));
-#endif
-                    while (ic--) shift_range(0, -ic, r->tlrow, r->tlcol, r->brrow, r->brcol);
-#ifdef UNDO
-                    copy_to_undostruct(r->tlrow, r->tlcol, r->brrow, r->brcol + (r->brcol-r->tlcol+1) * (cmd_multiplier - 1), 'a');
-#endif
-                    break;
-            case L'l':
-                    fix_marks(0,  (r->brcol - r->tlcol + 1) * cmd_multiplier, r->tlrow, r->brrow, r->tlcol, maxcol);
-#ifdef UNDO
-                    save_undo_range_shift(0, cmd_multiplier, r->tlrow, r->tlcol, r->brrow, r->brcol + (r->brcol-r->tlcol+1) * (cmd_multiplier - 1));
-#endif
-                    while (ic--) shift_range(0, ic, r->tlrow, r->tlcol, r->brrow, r->brcol);
-                    break;
-        }
-        cmd_multiplier = 0;
-#ifdef UNDO
-        end_undo_action();
-#endif
-
+        shift(r->tlrow, r->tlcol, r->brrow, r->brcol, buf->pnext->value);
         exit_visualmode();
         curmode = NORMAL_MODE;
         clr_header(input_win, 0);

@@ -5,8 +5,77 @@
 #include "vmtbl.h"   // for growtbl
 #include "cmds.h"
 #include "dep_graph.h"
+#include "undo.h"
+#include "marks.h"
+#include "yank.h"
+#include "conf.h"
 
 extern graphADT graph;
+extern int cmd_multiplier;
+
+/* shift function - handles undo
+   should also be called from GRAM.Y
+*/
+void shift(int r, int c, int rf, int cf, wchar_t type) {
+    if ( any_locked_cells(r, c, rf, cf) && (type == L'h' || type == L'k') ) {
+        sc_error("Locked cells encountered. Nothing changed");
+        return;
+    }
+#ifdef UNDO
+    create_undo_action();
+#endif
+    int ic = cmd_multiplier + 1;
+    switch (type) {
+        case L'j':
+            fix_marks(  (rf - r + 1) * cmd_multiplier, 0, r, maxrow, c, cf);
+#ifdef UNDO
+            save_undo_range_shift(cmd_multiplier, 0, r, c, rf + (rf-r+1) * (cmd_multiplier - 1), cf);
+#endif
+            while (ic--) shift_range(ic, 0, r, c, rf, cf);
+            break;
+
+        case L'k':
+            fix_marks( -(rf - r + 1) * cmd_multiplier, 0, r, maxrow, c, cf);
+            yank_area(r, c, rf + (rf-r+1) * (cmd_multiplier - 1), cf, 'a', cmd_multiplier); // keep ents in yanklist for sk
+#ifdef UNDO
+            copy_to_undostruct(r, c, rf + (rf-r+1) * (cmd_multiplier - 1), cf, 'd');
+            save_undo_range_shift(-cmd_multiplier, 0, r, c, rf + (rf-r+1) * (cmd_multiplier - 1), cf);
+#endif
+            while (ic--) shift_range(-ic, 0, r, c, rf, cf);
+            if (atoi(get_conf_value("autocalc")) && ! loading) EvalAll();
+#ifdef UNDO
+            copy_to_undostruct(r, c, rf + (rf-r+1) * (cmd_multiplier - 1), cf, 'a');
+#endif
+            break;
+
+        case L'h':
+            fix_marks(0, -(cf - c + 1) * cmd_multiplier, r, rf, c, maxcol);
+            yank_area(r, c, rf, cf + (cf-c+1) * (cmd_multiplier - 1), 'a', cmd_multiplier); // keep ents in yanklist for sk
+#ifdef UNDO
+            copy_to_undostruct(r, c, rf, cf + (cf-c+1) * (cmd_multiplier - 1), 'd');
+            save_undo_range_shift(0, -cmd_multiplier, r, c, rf, cf + (cf-c+1) * (cmd_multiplier - 1));
+#endif
+            while (ic--) shift_range(0, -ic, r, c, rf, cf);
+            if (atoi(get_conf_value("autocalc")) && ! loading) EvalAll();
+#ifdef UNDO
+            copy_to_undostruct(r, c, rf, cf + (cf-c+1) * (cmd_multiplier - 1), 'a');
+#endif
+            break;
+
+        case L'l':
+            fix_marks(0,  (cf - c + 1) * cmd_multiplier, r, rf, c, maxcol);
+#ifdef UNDO
+            save_undo_range_shift(0, cmd_multiplier, r, c, rf, cf + (cf-c+1) * (cmd_multiplier - 1));
+#endif
+            while (ic--) shift_range(0, ic, r, c, rf, cf);
+            break;
+    }
+#ifdef UNDO
+    end_undo_action();
+#endif
+    cmd_multiplier = 0;
+    return;
+}
 
 // shift a range of 'ENTS'
 void shift_range(int delta_rows, int delta_cols, int tlrow, int tlcol, int brrow, int brcol) {

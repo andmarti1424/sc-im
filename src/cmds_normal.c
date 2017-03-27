@@ -638,60 +638,7 @@ void do_normalmode(struct block * buf) {
                 rf = sr->brrow;
                 cf = sr->brcol;
             }
-            if ( any_locked_cells(r, c, rf, cf) && (buf->pnext->value == L'h' || buf->pnext->value == L'k') ) {
-                sc_error("Locked cells encountered. Nothing changed");
-                return;
-            }
-#ifdef UNDO
-            create_undo_action();
-#endif
-            int ic = cmd_multiplier + 1;
-            switch (buf->pnext->value) {
-                case L'j':
-                    fix_marks(  (rf - r + 1) * cmd_multiplier, 0, r, maxrow, c, cf);
-#ifdef UNDO
-                    save_undo_range_shift(cmd_multiplier, 0, r, c, rf + (rf-r+1) * (cmd_multiplier - 1), cf);
-#endif
-                    while (ic--) shift_range(ic, 0, r, c, rf, cf);
-                    break;
-                case L'k':
-                    fix_marks( -(rf - r + 1) * cmd_multiplier, 0, r, maxrow, c, cf);
-                    yank_area(r, c, rf + (rf-r+1) * (cmd_multiplier - 1), cf, 'a', cmd_multiplier); // keep ents in yanklist for sk
-#ifdef UNDO
-                    copy_to_undostruct(r, c, rf + (rf-r+1) * (cmd_multiplier - 1), cf, 'd');
-                    save_undo_range_shift(-cmd_multiplier, 0, r, c, rf + (rf-r+1) * (cmd_multiplier - 1), cf);
-#endif
-                    while (ic--) shift_range(-ic, 0, r, c, rf, cf);
-#ifdef UNDO
-                    copy_to_undostruct(r, c, rf + (rf-r+1) * (cmd_multiplier - 1), cf, 'a');
-#endif
-                    if (atoi(get_conf_value("autocalc")) && ! loading) EvalAll();
-                    break;
-                case L'h':
-                    fix_marks(0, -(cf - c + 1) * cmd_multiplier, r, rf, c, maxcol);
-                    yank_area(r, c, rf, cf + (cf-c+1) * (cmd_multiplier - 1), 'a', cmd_multiplier); // keep ents in yanklist for sk
-#ifdef UNDO
-                    copy_to_undostruct(r, c, rf, cf + (cf-c+1) * (cmd_multiplier - 1), 'd');
-                    save_undo_range_shift(0, -cmd_multiplier, r, c, rf, cf + (cf-c+1) * (cmd_multiplier - 1));
-#endif
-                    while (ic--) shift_range(0, -ic, r, c, rf, cf);
-#ifdef UNDO
-                    copy_to_undostruct(r, c, rf, cf + (cf-c+1) * (cmd_multiplier - 1), 'a');
-#endif
-                    if (atoi(get_conf_value("autocalc")) && ! loading) EvalAll();
-                    break;
-                case L'l':
-                    fix_marks(0,  (cf - c + 1) * cmd_multiplier, r, rf, c, maxcol);
-#ifdef UNDO
-                    save_undo_range_shift(0, cmd_multiplier, r, c, rf, cf + (cf-c+1) * (cmd_multiplier - 1));
-#endif
-                    while (ic--) shift_range(0, ic, r, c, rf, cf);
-                    break;
-            }
-#ifdef UNDO
-            end_undo_action();
-#endif
-            cmd_multiplier = 0;
+            shift(r, c, rf, cf, buf->pnext->value);
             unselect_ranges();
             update(TRUE);
             break;
