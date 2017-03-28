@@ -23,8 +23,13 @@ void shift(int r, int c, int rf, int cf, wchar_t type) {
     }
 #ifdef UNDO
     create_undo_action();
+
+    // here we save in undostruct, all the ents that depends on the deleted one (before change)
+    extern struct ent_ptr * deps;
+    int i;
 #endif
     int ic = cmd_multiplier + 1;
+
     switch (type) {
         case L'j':
             fix_marks(  (rf - r + 1) * cmd_multiplier, 0, r, maxrow, c, cf);
@@ -40,11 +45,17 @@ void shift(int r, int c, int rf, int cf, wchar_t type) {
 #ifdef UNDO
             copy_to_undostruct(r, c, rf + (rf-r+1) * (cmd_multiplier - 1), cf, 'd');
             save_undo_range_shift(-cmd_multiplier, 0, r, c, rf + (rf-r+1) * (cmd_multiplier - 1), cf);
+
+            ents_that_depends_on_range(r, c, rf + (rf-r+1) * (cmd_multiplier - 1), cf);
+            for (i = 0; deps != NULL && i < deps->vf; i++)
+                copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'd');
 #endif
             while (ic--) shift_range(-ic, 0, r, c, rf, cf);
             if (atoi(get_conf_value("autocalc")) && ! loading) EvalAll();
 #ifdef UNDO
             copy_to_undostruct(r, c, rf + (rf-r+1) * (cmd_multiplier - 1), cf, 'a');
+            for (i = 0; deps != NULL && i < deps->vf; i++)
+                copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'a');
 #endif
             break;
 
@@ -54,11 +65,17 @@ void shift(int r, int c, int rf, int cf, wchar_t type) {
 #ifdef UNDO
             copy_to_undostruct(r, c, rf, cf + (cf-c+1) * (cmd_multiplier - 1), 'd');
             save_undo_range_shift(0, -cmd_multiplier, r, c, rf, cf + (cf-c+1) * (cmd_multiplier - 1));
+
+            ents_that_depends_on_range(r, c, rf, cf + (cf-c+1) * (cmd_multiplier - 1));
+            for (i = 0; deps != NULL && i < deps->vf; i++)
+                copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'd');
 #endif
             while (ic--) shift_range(0, -ic, r, c, rf, cf);
             if (atoi(get_conf_value("autocalc")) && ! loading) EvalAll();
 #ifdef UNDO
             copy_to_undostruct(r, c, rf, cf + (cf-c+1) * (cmd_multiplier - 1), 'a');
+            for (i = 0; deps != NULL && i < deps->vf; i++)
+                copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'a');
 #endif
             break;
 
@@ -72,6 +89,8 @@ void shift(int r, int c, int rf, int cf, wchar_t type) {
     }
 #ifdef UNDO
     end_undo_action();
+    if (deps != NULL) free(deps);
+    deps = NULL;
 #endif
     cmd_multiplier = 0;
     return;
