@@ -472,6 +472,8 @@ void do_undo() {
     // Append 'ent' elements from the removed ones
     struct ent * j = ul->removed;
     while (j != NULL) {
+        struct ent * h;
+        if ((h = *ATBL(tbl, j->row, j->col))) clearent(h);
         struct ent * e_now = lookat(j->row, j->col);
         //(void) copyent(e_now, j, 0, 0, 0, 0, j->row, j->col, 0);
         (void) copyent(e_now, j, 0, 0, 0, 0, 0, 0, 0);
@@ -623,6 +625,8 @@ void do_redo() {
     // Append 'ent' elements
     struct ent * j = ul->added;
     while (j != NULL) {
+        struct ent * h;
+        if ((h = *ATBL(tbl, j->row, j->col))) clearent(h);
         struct ent * e_now = lookat(j->row, j->col);
         //(void) copyent(e_now, j, 0, 0, 0, 0, j->row, j->col, 0);
         (void) copyent(e_now, j, 0, 0, 0, 0, 0, 0, 0);
