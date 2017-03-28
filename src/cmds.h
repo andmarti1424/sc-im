@@ -21,7 +21,9 @@ void copyent(struct ent * n, struct ent * p, int dr, int dc, int r1, int c1, int
 void flush_saved();
 void insert_row(int after);
 void insert_col(int after);
-void deleterow();
+//void deleterow();
+void deleterow(int row, int mult);
+void int_deleterow(int row, int multi);
 void deletecol();
 void formatcol(int c);
 void del_selected_cells();

@@ -652,6 +652,7 @@ void do_normalmode(struct block * buf) {
 
         // deleterow
             if (buf->pnext->value == L'r') {
+                /*
                 if (any_locked_cells(currow, 0, currow + cmd_multiplier, maxcol)) {
                     sc_error("Locked cells encountered. Nothing changed");
                     return;
@@ -669,6 +670,8 @@ void do_normalmode(struct block * buf) {
                 copy_to_undostruct(currow, 0, currow - 1 + cmd_multiplier, maxcol, 'a');
                 end_undo_action();
 #endif
+*/
+                deleterow(currow, ic);
                 if (cmd_multiplier > 0) cmd_multiplier = 0;
 
 

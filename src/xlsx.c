@@ -385,7 +385,7 @@ int open_xlsx(char * fname, char * encoding) {
     }
 
     auto_justify(0, maxcols, DEFWIDTH);
-    deleterow();
+    deleterow(currow, 1);
     return 0;
 }
 #endif
@@ -562,7 +562,7 @@ int export_xlsx(char * filename, int r0, int c0, int rn, int cn) {
                 }
                 /* TODO: handle hidden rows and columns? */
             }
-    deleterow(); /* delete the added row */
+    deleterow(currow, 1); /* delete the added row */
     currow = bkp_currow;
 
     return workbook_close(workbook);

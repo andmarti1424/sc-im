@@ -204,7 +204,7 @@ void deletecol() {
 void copyent(register struct ent * n, register struct ent * p, int dr, int dc,
              int r1, int c1, int r2, int c2, int special) {
     if (!n || !p) {
-        sc_error("internal error");
+        sc_error("copyent: internal error");
         return;
     }
 
@@ -660,7 +660,7 @@ void insert_col(int after) {
     return;
 }
 
-// delete a row
+/* delete a row
 void deleterow() {
     register struct ent ** pp;
     int r, c;
@@ -716,7 +716,76 @@ void deleterow() {
     }
     return;
 }
+*/
 
+void deleterow(int row, int mult) {
+    if (any_locked_cells(row, 0, row + mult - 1, maxcol)) {
+        sc_error("Locked cells encountered. Nothing changed");
+        return;
+    }
+#ifdef UNDO
+    create_undo_action();
+    copy_to_undostruct(row, 0, row + mult - 1, maxcol, 'd');
+    save_undo_range_shift(-mult, 0, row, 0, row - 1 + mult, maxcol);
+
+    // here we save in undostruct, all the ents that depends on the deleted one (before change)
+    extern struct ent_ptr * deps;
+    int i;
+    ents_that_depends_on_range(row, 0, row + mult - 1, maxcol);
+    for (i = 0; deps != NULL && i < deps->vf; i++)
+        copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'd');
+#endif
+
+    fix_marks(-mult, 0, row + mult - 1, maxrow, 0, maxcol);
+    if (!loading) yank_area(row, 0, row + mult - 1, maxcol, 'r', mult);
+
+    // do the job
+    int_deleterow(row, mult);
+
+    //flush_saved(); // we have to flush only at exit. this is in case we want to UNDO
+
+    if (!loading) modflg++;
+
+#ifdef UNDO
+    // here we save in undostruct, all the ents that depends on the deleted one (after the change)
+    for (i = 0; deps != NULL && i < deps->vf; i++)
+        copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'a');
+
+    if (deps != NULL) free(deps);
+    deps = NULL;
+
+    copy_to_undostruct(row, 0, row - 1 + mult, maxcol, 'a');
+    end_undo_action();
+#endif
+    return;
+}
+
+// row = row to delete
+// multi = cmds multiplier. commonly 1
+void int_deleterow(int row, int mult) {
+    register struct ent ** pp;
+    int r, c;
+
+    //if (currow > maxrow) return;
+
+    while (mult--) {
+        erase_area(row, 0, row, maxcol, 0, 1);
+        for (r = row; r < maxrows - 1; r++) {
+            for (c = 0; c < maxcols; c++) {
+                if (r <= maxrow) {
+                    pp = ATBL(tbl, r, c);
+                    pp[0] = *ATBL(tbl, r + 1, c);
+                    if ( pp[0] ) pp[0]->row--;
+                }
+            }
+        }
+        sync_refs();
+        //if (atoi(get_conf_value("autocalc")) && ! loading) EvalAll();
+        EvalAll();
+        maxrow--;
+    }
+    return;
+}
 void ljustify(int sr, int sc, int er, int ec) {
     struct ent *p;
     int i, j;
