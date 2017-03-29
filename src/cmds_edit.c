@@ -11,9 +11,14 @@
 #include "interp.h"
 #include "marks.h"
 #include "conf.h"
+#include "history.h"
 
 // this macro is used to determinate a word over a WORD
 #define istext(a)    (iswalnum(a) || ((a) == L'_'))
+
+#ifdef INS_HISTORY_FILE
+extern char ori_insert_edit_submode;
+#endif
 
 wint_t get_key() {
      static wint_t wi;                      // char read from stdin
@@ -63,11 +68,19 @@ void do_editmode(struct block * sb) {
     } else if (sb->value == L'I') {         // I
         inputline_pos = 0;
         real_inputline_pos = 0;
+#ifdef INS_HISTORY_FILE
+        ori_insert_edit_submode = insert_edit_submode;
+        add(insert_history, L"");
+#endif
         chg_mode(insert_edit_submode);
         show_header(input_win);
         return;
 
     } else if (sb->value == L'i' ||  sb->value == L'=') {         // i o =
+#ifdef INS_HISTORY_FILE
+        ori_insert_edit_submode = insert_edit_submode;
+        add(insert_history, L"");
+#endif
         chg_mode(insert_edit_submode);
         show_header(input_win);
         return;
@@ -140,6 +153,10 @@ void do_editmode(struct block * sb) {
     } else if (sb->value == L'a') {         // a
         real_inputline_pos++;
         inputline_pos = wcswidth(inputline, real_inputline_pos);
+#ifdef INS_HISTORY_FILE
+        ori_insert_edit_submode = insert_edit_submode;
+        add(insert_history, L"");
+#endif
         chg_mode(insert_edit_submode);
         show_header(input_win);
         return;
@@ -147,6 +164,10 @@ void do_editmode(struct block * sb) {
     } else if (sb->value == L'A') {         // A
         real_inputline_pos = wcslen(inputline);
         inputline_pos = wcswidth(inputline, real_inputline_pos);
+#ifdef INS_HISTORY_FILE
+        ori_insert_edit_submode = insert_edit_submode;
+        add(insert_history, L"");
+#endif
         chg_mode(insert_edit_submode);
         show_header(input_win);
         return;
@@ -159,6 +180,10 @@ void do_editmode(struct block * sb) {
 
     } else if (sb->value == L's') {         // s
         del_back_char();
+#ifdef INS_HISTORY_FILE
+        ori_insert_edit_submode = insert_edit_submode;
+        add(insert_history, L"");
+#endif
         chg_mode(insert_edit_submode);
         show_header(input_win);
         return;
@@ -289,7 +314,13 @@ void do_editmode(struct block * sb) {
                  }
                  break;
              }
-             if (sb->value == L'c') chg_mode(insert_edit_submode);
+             if (sb->value == L'c') {
+#ifdef INS_HISTORY_FILE
+                 ori_insert_edit_submode = insert_edit_submode;
+                 add(insert_history, L"");
+#endif
+                 chg_mode(insert_edit_submode);
+             }
         }
 
     }
