@@ -183,7 +183,7 @@ void shift_cells_up(int deltarows, int deltacols) {
                 if (v != NULL && v->back_edges == NULL ) destroy_vertex(*pp);
 
                 if (*pp) {
-                   mark_ent_as_deleted(*pp, TRUE);
+                   mark_ent_as_deleted(*pp, TRUE); //important: this mark the ents as deleted
                    //clearent(*pp);
                    //free(*pp);
                    *pp = NULL;
@@ -222,7 +222,7 @@ void shift_cells_left(int deltarows, int deltacols) {
                 if (v != NULL && v->back_edges == NULL ) destroy_vertex(*pp);
 
                 if (*pp) {
-                   mark_ent_as_deleted(*pp, TRUE);
+                   mark_ent_as_deleted(*pp, TRUE); //important: this mark the ents as deleted
                    //clearent(*pp);
                    //free(*pp);
                    *pp = NULL;

@@ -709,7 +709,7 @@ void int_deleterow(int row, int mult) {
     //if (currow > maxrow) return;
 
     while (mult--) {
-        erase_area(row, 0, row, maxcol, 0, 1);
+        erase_area(row, 0, row, maxcol, 0, 1); //important: this mark the ents as deleted
         for (r = row; r < maxrows - 1; r++) {
             for (c = 0; c < maxcols; c++) {
                 if (r <= maxrow) {
@@ -887,7 +887,7 @@ void del_selected_cells() {
     }
     #endif
 
-    erase_area(tlrow, tlcol, brrow, brcol, 0, 0);
+    erase_area(tlrow, tlcol, brrow, brcol, 0, 0); //important: this erases the ents, but does NOT mark them as deleted
     modflg++;
     sync_refs();
     //flush_saved(); DO NOT UNCOMMENT! flush_saved shall not be called other than at exit.
