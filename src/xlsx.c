@@ -518,35 +518,35 @@ int export_xlsx(char * filename, int r0, int c0, int rn, int cn) {
                     char formula[BUFFERSIZE];
                     strcpy(formula, line);
 
-                    strf = str_replace (formula, "@COUNT","COUNT");
+                    strf = str_replace(formula, "@count","count");
                     strcpy(formula, strf);
                     free(strf);
 
-                    strf = str_replace (formula, "@SUM","SUM");
+                    strf = str_replace(formula, "@sum","sum");
                     strcpy(formula, strf);
                     free(strf);
 
-                    strf = str_replace (formula, "@PROD","PRODUCT");
+                    strf = str_replace(formula, "@prod","product");
                     strcpy(formula, strf);
                     free(strf);
 
-                    strf = str_replace (formula, "@AVG","AVERAGE");
+                    strf = str_replace(formula, "@avg","average");
                     strcpy(formula, strf);
                     free(strf);
 
-                    strf = str_replace (formula, "@MIN","MIN");
+                    strf = str_replace(formula, "@min","min");
                     strcpy(formula, strf);
                     free(strf);
 
-                    strf = str_replace (formula, "@MAX","MAX");
+                    strf = str_replace(formula, "@max","max");
                     strcpy(formula, strf);
                     free(strf);
 
-                    strf = str_replace (formula, "@ABS","ABS");
+                    strf = str_replace(formula, "@abs","abs");
                     strcpy(formula, strf);
                     free(strf);
 
-                    strf = str_replace (formula, "@STDDEV","STDEV");
+                    strf = str_replace(formula, "@stddev","stdev");
                     strcpy(formula, strf);
                     free(strf);
 
