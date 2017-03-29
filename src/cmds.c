@@ -73,13 +73,11 @@ void flush_saved() {
 void sync_refs() {
     int i, j;
     register struct ent * p;
-    // sync_ranges();
     for (i=0; i <= maxrow; i++)
     for (j=0; j <= maxcol; j++)
         if ( (p = *ATBL(tbl, i, j)) && p->expr ) {
-               syncref(p->expr);
-               //sc_info("%d %d %d", i, j, ++k);
-            }
+            syncref(p->expr);
+        }
     return;
 }
 
@@ -660,64 +658,6 @@ void insert_col(int after) {
     return;
 }
 
-/* delete a row
-void deleterow() {
-    register struct ent ** pp;
-    int r, c;
-
-    if (any_locked_cells(currow, 0, currow, maxcol)) {
-        sc_info("Locked cells encountered. Nothing changed");
-
-    } else {
-#ifdef UNDO
-        // here we save in undostruct, all the ents that depends on the deleted one (before change)
-        extern struct ent_ptr * deps;
-        int i, n = 0;
-        ents_that_depends_on_range(currow, 0, currow, maxcol);
-        if (deps != NULL) {
-            n = deps->vf;
-            for (i = 0; i < n; i++) {
-                copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'd');
-            }
-        }
-#endif
-
-        //flush_saved();
-        erase_area(currow, 0, currow, maxcol, 0, 1);
-        if (currow > maxrow) return;
-
-        for (r = currow; r < maxrows - 1; r++) {
-            for (c = 0; c < maxcols; c++) {
-                if (r <= maxrow) {
-                    pp = ATBL(tbl, r, c);
-                    pp[0] = *ATBL(tbl, r + 1, c);
-                    if ( pp[0] ) pp[0]->row--;
-                }
-            }
-        }
-
-        maxrow--;
-        sync_refs();
-        //flush_saved(); // we have to flush only at exit. this is in case we want to UNDO
-        modflg++;
-
-#ifdef UNDO
-        // here we save in undostruct, all the ents that depends on the deleted one (after the change)
-        for (i = 0; i < n; i++)
-            if (deps[i].vp->row >= currow)
-                copy_to_undostruct(deps[i].vp->row+1, deps[i].vp->col, deps[i].vp->row+1, deps[i].vp->col, 'a');
-            else
-                copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'a');
-
-        if (deps != NULL) free(deps);
-        deps = NULL;
-#endif
-
-    }
-    return;
-}
-*/
-
 void deleterow(int row, int mult) {
     if (any_locked_cells(row, 0, row + mult - 1, maxcol)) {
         sc_error("Locked cells encountered. Nothing changed");
@@ -728,12 +668,13 @@ void deleterow(int row, int mult) {
     copy_to_undostruct(row, 0, row + mult - 1, maxcol, 'd');
     save_undo_range_shift(-mult, 0, row, 0, row - 1 + mult, maxcol);
 
-    // here we save in undostruct, all the ents that depends on the deleted one (before change)
+    /* here we save in undostruct, all the ents that depends on the deleted one (before change)
     extern struct ent_ptr * deps;
     int i;
     ents_that_depends_on_range(row, 0, row + mult - 1, maxcol);
     for (i = 0; deps != NULL && i < deps->vf; i++)
         copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'd');
+        */
 #endif
 
     fix_marks(-mult, 0, row + mult - 1, maxrow, 0, maxcol);
@@ -747,12 +688,12 @@ void deleterow(int row, int mult) {
     if (!loading) modflg++;
 
 #ifdef UNDO
-    // here we save in undostruct, all the ents that depends on the deleted one (after the change)
+    /* here we save in undostruct, all the ents that depends on the deleted one (after the change)
     for (i = 0; deps != NULL && i < deps->vf; i++)
         copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'a');
 
     if (deps != NULL) free(deps);
-    deps = NULL;
+    deps = NULL;*/
 
     copy_to_undostruct(row, 0, row - 1 + mult, maxcol, 'a');
     end_undo_action();
@@ -779,6 +720,7 @@ void int_deleterow(int row, int mult) {
                 }
             }
         }
+        rebuild_graph(); //TODO CHECK HERE WHY REBUILD IS NEEDED. See NOTE1 in shift.c
         sync_refs();
         //if (atoi(get_conf_value("autocalc")) && ! loading) EvalAll();
         EvalAll();

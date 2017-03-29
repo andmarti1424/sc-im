@@ -39,10 +39,11 @@ void start_default_ucolors() {
     // Set some colors attributes
     ucolors[ DEFAULT         ].fg = WHITE;
     ucolors[ DEFAULT         ].bg = BLACK;
-    ucolors[ HEADINGS        ].fg = BLACK;
-    ucolors[ HEADINGS        ].bg = CYAN;
-    ucolors[ WELCOME         ].fg = MAGENTA;
+    ucolors[ HEADINGS        ].fg = WHITE;
+    ucolors[ HEADINGS        ].bg = RED;
+    ucolors[ WELCOME         ].fg = RED;
     ucolors[ WELCOME         ].bg = BLACK;
+    ucolors[ WELCOME         ].bold = 1;
     ucolors[ CELL_SELECTION  ].fg = BLUE;         // cell selection in headings
     ucolors[ CELL_SELECTION  ].bg = WHITE;
 
@@ -65,9 +66,8 @@ void start_default_ucolors() {
     ucolors[ INFO_MSG        ].fg = CYAN;
     ucolors[ INFO_MSG        ].bg = BLACK;
     ucolors[ INFO_MSG        ].bold = 1;
-    ucolors[ ERROR_MSG       ].fg = RED;
-    ucolors[ ERROR_MSG       ].bg = WHITE;
-    ucolors[ ERROR_MSG       ].reverse = 1;
+    ucolors[ ERROR_MSG       ].bg = RED;
+    ucolors[ ERROR_MSG       ].fg = WHITE;
     ucolors[ ERROR_MSG       ].bold = 1;
 
     ucolors[ MODE            ].fg = WHITE;

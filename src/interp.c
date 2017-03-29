@@ -972,9 +972,11 @@ double eval(register struct ent * ent, register struct enode * e) {
     case LASTCOL: return ((double) maxcol);
     case ERR_:
                  cellerror = CELLERROR;
+                 if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
                  return ((double) 0);
     case REF_:
                  cellerror = CELLREF;
+                 if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
                  return ((double) 0);
     case PI_:    return ((double) M_PI);
     case BLACK:  return ((double) COLOR_BLACK);
@@ -1902,11 +1904,10 @@ void let(struct ent * v, struct enode * e) {
 
     // here we save in undostruct, all the ents that depends on the deleted one (before change)
     extern struct ent_ptr * deps;
-    int i, n = 0;
+    int i;
     ents_that_depends_on_range(v->row, v->col, v->row, v->col);
     if (deps != NULL) {
-        n = deps->vf;
-        for (i = 0; i < n; i++)
+        for (i = 0; i < deps->vf; i++)
             copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'd');
     }
     #endif
@@ -1977,8 +1978,7 @@ void let(struct ent * v, struct enode * e) {
     if (deps != NULL) free(deps);
     ents_that_depends_on_range(v->row, v->col, v->row, v->col);
     if (deps != NULL) {
-        n = deps->vf;
-        for (i = 0; i < n; i++)
+        for (i = 0; i < deps->vf; i++)
             copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'a');
         free(deps);
         deps = NULL;
@@ -1998,13 +1998,10 @@ void slet(struct ent * v, struct enode * se, int flushdir) {
 
     // here we save in undostruct, all the ents that depends on the deleted one (before change)
     extern struct ent_ptr * deps;
-    int i, n = 0;
+    int i;
     ents_that_depends_on_range(v->row, v->col, v->row, v->col);
-    if (deps != NULL) {
-        n = deps->vf;
-        for (i = 0; i < n; i++)
-            copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'd');
-    }
+    for (i = 0; deps != NULL && i < deps->vf; i++)
+        copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'd');
     #endif
     if (getVertex(graph, lookat(v->row, v->col), 0) != NULL) destroy_vertex(lookat(v->row, v->col));
 
@@ -2065,8 +2062,7 @@ void slet(struct ent * v, struct enode * se, int flushdir) {
     if (deps != NULL) free(deps);
     ents_that_depends_on_range(v->row, v->col, v->row, v->col);
     if (deps != NULL) {
-        n = deps->vf;
-        for (i = 0; i < n; i++)
+        for (i = 0; i < deps->vf; i++)
             copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'a');
         free(deps);
         deps = NULL;

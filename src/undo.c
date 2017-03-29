@@ -135,37 +135,37 @@ void end_undo_action() {
 // allocate memory for undo struct,
 // fill variable with undo_item value and append it to the list
 void add_to_undolist(struct undo u) {
-        // If not at the end of the list, remove from the end
-        if ( undo_list != NULL && undo_list_pos != len_undo_list() )
-            clear_from_current_pos();
+    // If not at the end of the list, remove from the end
+    if ( undo_list != NULL && undo_list_pos != len_undo_list() )
+        clear_from_current_pos();
 
-        struct undo * ul = (struct undo *) malloc (sizeof(struct undo));
-        ul->p_sig = NULL;
+    struct undo * ul = (struct undo *) malloc (sizeof(struct undo));
+    ul->p_sig = NULL;
 
-        // Add 'ent' elements
-        ul->added = u.added;
-        ul->removed = u.removed;
-        ul->range_shift = u.range_shift;
-        ul->cols_format = u.cols_format;
-        ul->row_hidded = u.row_hidded;
-        ul->col_hidded = u.col_hidded;
-        ul->row_showed = u.row_showed;
-        ul->col_showed = u.col_showed;
+    // Add 'ent' elements
+    ul->added = u.added;
+    ul->removed = u.removed;
+    ul->range_shift = u.range_shift;
+    ul->cols_format = u.cols_format;
+    ul->row_hidded = u.row_hidded;
+    ul->col_hidded = u.col_hidded;
+    ul->row_showed = u.row_showed;
+    ul->col_showed = u.col_showed;
 
-        if (undo_list == NULL) {
-            ul->p_ant = NULL;
-            undo_list = ul;
-        } else {
-            ul->p_ant = undo_list;
+    if (undo_list == NULL) {
+        ul->p_ant = NULL;
+        undo_list = ul;
+    } else {
+        ul->p_ant = undo_list;
 
-            // Voy hasta el final de la lista
-            while (undo_list->p_sig != NULL) undo_list = undo_list->p_sig;
+        // Voy hasta el final de la lista
+        while (undo_list->p_sig != NULL) undo_list = undo_list->p_sig;
 
-            undo_list->p_sig = ul;
-            undo_list = undo_list->p_sig;
-        }
-        undo_list_pos++;
-        undo_list_len++;
+        undo_list->p_sig = ul;
+        undo_list = undo_list->p_sig;
+    }
+    undo_list_pos++;
+    undo_list_len++;
     return;
 }
 
@@ -242,7 +242,7 @@ void clear_from_current_pos() {
 }
 
 // Remove undolist content
-void clear_undo_list () {
+void clear_undo_list() {
     if (undo_list == NULL) return;
 
     // Go to the beginning of the list
@@ -295,6 +295,7 @@ void copy_to_undostruct (int row_desde, int col_desde, int row_hasta, int col_ha
             struct ent * e = (struct ent *) malloc( (unsigned) sizeof(struct ent) );
             cleanent(e);
             copyent(e, lookat(r, c), 0, 0, 0, 0, r, c, 0);
+            //copyent(e, lookat(r, c), 0, 0, 0, 0, 0, 0, 0);
 
             // Append 'ent' element at the beginning
             if (type == 'a') {
@@ -475,8 +476,8 @@ void do_undo() {
         struct ent * h;
         if ((h = *ATBL(tbl, j->row, j->col))) clearent(h);
         struct ent * e_now = lookat(j->row, j->col);
-        //(void) copyent(e_now, j, 0, 0, 0, 0, j->row, j->col, 0);
-        (void) copyent(e_now, j, 0, 0, 0, 0, 0, 0, 0);
+        (void) copyent(e_now, j, 0, 0, 0, 0, j->row, j->col, 0);
+        //(void) copyent(e_now, j, 0, 0, 0, 0, 0, 0, 0);
         j = j->next;
     }
 
@@ -559,7 +560,9 @@ void do_undo() {
 // Shift a range of an undo shift range to the original position, if any, append
 // 'ent' elements from 'added' and remove those from 'removed'
 void do_redo() {
-    if ( undo_list == NULL || undo_list_pos == len_undo_list()  ) {
+    //if ( undo_list == NULL || undo_list_pos == len_undo_list()  ) {
+    //FIXME check why undo_list_pos can sometimes be > len_undo_list(). it shouldnt!!
+    if ( undo_list == NULL || undo_list_pos >= len_undo_list()  ) {
         sc_error("No REDO's left");
         return;
     }
@@ -628,8 +631,8 @@ void do_redo() {
         struct ent * h;
         if ((h = *ATBL(tbl, j->row, j->col))) clearent(h);
         struct ent * e_now = lookat(j->row, j->col);
-        //(void) copyent(e_now, j, 0, 0, 0, 0, j->row, j->col, 0);
-        (void) copyent(e_now, j, 0, 0, 0, 0, 0, 0, 0);
+        (void) copyent(e_now, j, 0, 0, 0, 0, j->row, j->col, 0);
+        //(void) copyent(e_now, j, 0, 0, 0, 0, 0, 0, 0);
         j = j->next;
     }
 

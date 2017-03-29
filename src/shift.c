@@ -51,6 +51,7 @@ void shift(int r, int c, int rf, int cf, wchar_t type) {
                 copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'd');
 #endif
             while (ic--) shift_range(-ic, 0, r, c, rf, cf);
+            rebuild_graph(); // FIXME check why have to rebuild graph here. See NOTE1 below.
             if (atoi(get_conf_value("autocalc")) && ! loading) EvalAll();
 #ifdef UNDO
             copy_to_undostruct(r, c, rf + (rf-r+1) * (cmd_multiplier - 1), cf, 'a');
@@ -71,6 +72,7 @@ void shift(int r, int c, int rf, int cf, wchar_t type) {
                 copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'd');
 #endif
             while (ic--) shift_range(0, -ic, r, c, rf, cf);
+            rebuild_graph(); // FIXME check why have to rebuild graph here.
             if (atoi(get_conf_value("autocalc")) && ! loading) EvalAll();
 #ifdef UNDO
             copy_to_undostruct(r, c, rf, cf + (cf-c+1) * (cmd_multiplier - 1), 'a');
@@ -176,7 +178,7 @@ void shift_cells_up(int deltarows, int deltacols) {
                 pp = ATBL(tbl, r, c);
 
                 /* delete vertex in graph
-                   unless vertex is referenced by other */
+                   unless vertex is referenced by other. Shall comment this? See NOTE1 above */
                 vertexT * v = getVertex(graph, *pp, 0);
                 if (v != NULL && v->back_edges == NULL ) destroy_vertex(*pp);
 
