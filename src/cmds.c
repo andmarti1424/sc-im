@@ -668,13 +668,12 @@ void deleterow(int row, int mult) {
     copy_to_undostruct(row, 0, row + mult - 1, maxcol, 'd');
     save_undo_range_shift(-mult, 0, row, 0, row - 1 + mult, maxcol);
 
-    /* here we save in undostruct, all the ents that depends on the deleted one (before change)
+    // here we save in undostruct, all the ents that depends on the deleted one (before change)
     extern struct ent_ptr * deps;
     int i;
     ents_that_depends_on_range(row, 0, row + mult - 1, maxcol);
     for (i = 0; deps != NULL && i < deps->vf; i++)
         copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'd');
-        */
 #endif
 
     fix_marks(-mult, 0, row + mult - 1, maxrow, 0, maxcol);
@@ -688,12 +687,12 @@ void deleterow(int row, int mult) {
     if (!loading) modflg++;
 
 #ifdef UNDO
-    /* here we save in undostruct, all the ents that depends on the deleted one (after the change)
+    // here we save in undostruct, all the ents that depends on the deleted one (after the change)
     for (i = 0; deps != NULL && i < deps->vf; i++)
         copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'a');
 
     if (deps != NULL) free(deps);
-    deps = NULL;*/
+    deps = NULL;
 
     copy_to_undostruct(row, 0, row - 1 + mult, maxcol, 'a');
     end_undo_action();
