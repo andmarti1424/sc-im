@@ -54,17 +54,17 @@ void start_screen() {
     #ifdef USECOLORS
     if (has_colors()) {
         start_color();
+        start_nucolors();
 
         if (get_d_colors_param() == NULL) {
-            start_default_ucolors();
 
             // in case we decide to change colors
             // Create a dictionary and save equivalences between macros and
             // values defined in '.sc' files
             set_colors_param_dict();
         }
-        wbkgd(main_win, COLOR_PAIR(ucolors[DEFAULT].fg * 8 + ucolors[DEFAULT].bg + 1));
-        wbkgd(input_win, COLOR_PAIR(ucolors[DEFAULT].fg * 8 + ucolors[DEFAULT].bg + 1));
+        wbkgd(main_win, COLOR_PAIR(0));
+        wbkgd(input_win, COLOR_PAIR(0));
     }
     #endif
 
@@ -104,8 +104,8 @@ void do_welcome() {
     char * msg_help = "Press «:help<Enter>» to get help";
 
     #ifdef USECOLORS
-    wbkgd(main_win, COLOR_PAIR(ucolors[DEFAULT].fg * 8 + ucolors[DEFAULT].bg + 1));
-    wbkgd(input_win, COLOR_PAIR(ucolors[DEFAULT].fg * 8 + ucolors[DEFAULT].bg + 1));
+    wbkgd(main_win, COLOR_PAIR(0));
+    wbkgd(input_win, COLOR_PAIR(0));
     #endif
 
     // show headings
@@ -115,7 +115,7 @@ void do_welcome() {
     show_sc_row_headings(main_win, mxrow);
 
     #ifdef USECOLORS
-    set_ucolor(main_win, &ucolors[WELCOME]);
+    set_nucolor(main_win, WELCOME);
     #endif
 
     // show message
@@ -236,7 +236,7 @@ void print_mult_pend(WINDOW * win) {
     getyx(win, row_orig, col_orig);
 
     #ifdef USECOLORS
-    set_ucolor(win, &ucolors[MODE]);
+    set_nucolor(win, MODE);
     #endif
     // Show multiplier and pending operator
     char strm[COLS];
@@ -273,7 +273,7 @@ void show_header(WINDOW * win) {
     // Print input text
     #ifdef USECOLORS
     //OJO!!! 28/09/2016
-    //set_ucolor(win, &ucolors[INPUT]);
+    //set_nucolor(win, INPUT);
     #endif
     switch (curmode) {
         case COMMAND_MODE:
@@ -315,7 +315,7 @@ void print_mode(WINDOW * win) {
     char strm[22] = "";
 
     #ifdef USECOLORS
-    set_ucolor(win, &ucolors[MODE]);
+    set_nucolor(win, MODE);
     #endif
 
     if (curmode == NORMAL_MODE) {
@@ -327,7 +327,7 @@ void print_mode(WINDOW * win) {
         write_j(win, strm, row, RIGHT);
 
         #ifdef USECOLORS
-        set_ucolor(win, &ucolors[INPUT]);
+        set_nucolor(win, INPUT);
         #endif
         // Show submode (INSERT)
         mvwprintw(win, 0, 0 + rescol, "%c", insert_edit_submode);
@@ -348,7 +348,7 @@ void print_mode(WINDOW * win) {
 
         write_j(win, strm, row, RIGHT);
         #ifdef USECOLORS
-        set_ucolor(win, &ucolors[INPUT]);
+        set_nucolor(win, INPUT);
         #endif
         // muestro ':'
         mvwprintw(win, 0, 0 + rescol, ":");
@@ -362,7 +362,7 @@ void print_mode(WINDOW * win) {
 void show_sc_row_headings(WINDOW * win, int mxrow) {
     int row = 0;
     #ifdef USECOLORS
-    if (has_colors()) set_ucolor(win, &ucolors[HEADINGS]);
+    if (has_colors()) set_nucolor(win, HEADINGS);
     #endif
     int i;
     int freeze = freeze_ranges && (freeze_ranges->type == 'r' ||  freeze_ranges->type == 'a') ? 1 : 0;
@@ -386,7 +386,7 @@ void show_sc_row_headings(WINDOW * win, int mxrow) {
         srange * s = get_selected_range();
         if ( (s != NULL && i >= s->tlrow && i <= s->brrow) || i == currow ) {
             #ifdef USECOLORS
-            if (has_colors()) set_ucolor(win, &ucolors[CELL_SELECTION]);
+            if (has_colors()) set_nucolor(win, CELL_SELECTION);
             #else
             wattron(win, A_REVERSE);
             #endif
@@ -394,7 +394,7 @@ void show_sc_row_headings(WINDOW * win, int mxrow) {
         mvwprintw (win, row+1, 0, "%*d ", rescol-1, i);
 
         #ifdef USECOLORS
-        if (has_colors()) set_ucolor(win, &ucolors[HEADINGS]);
+        if (has_colors()) set_nucolor(win, HEADINGS);
         #else
         wattroff(win, A_REVERSE);
         #endif
@@ -409,7 +409,7 @@ void show_sc_col_headings(WINDOW * win, int mxcol) {
     int freeze = freeze_ranges && (freeze_ranges->type == 'c' ||  freeze_ranges->type == 'a') ? 1 : 0;
 
     #ifdef USECOLORS
-    if (has_colors()) set_ucolor(win, &ucolors[HEADINGS]);
+    if (has_colors()) set_nucolor(win, HEADINGS);
     #endif
 
     wmove(win, 0, 0);
@@ -435,7 +435,7 @@ void show_sc_col_headings(WINDOW * win, int mxcol) {
         srange * s = get_selected_range();
         if ( (s != NULL && i >= s->tlcol && i <= s->brcol) || i == curcol ) {
             #ifdef USECOLORS
-            if (has_colors()) set_ucolor(win, &ucolors[CELL_SELECTION]);
+            if (has_colors()) set_nucolor(win, CELL_SELECTION);
             #else
             wattron(win, A_REVERSE);
             #endif
@@ -447,7 +447,7 @@ void show_sc_col_headings(WINDOW * win, int mxcol) {
             wclrtoeol(win);
 
         #ifdef USECOLORS
-        if (has_colors()) set_ucolor(win, &ucolors[HEADINGS]);
+        if (has_colors()) set_nucolor(win, HEADINGS);
         #else
         wattroff(win, A_REVERSE);
         #endif
@@ -537,17 +537,17 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
             // Clean format
             #ifdef USECOLORS
             if ((*p) && (*p)->cellerror) {                                  // cellerror
-                set_ucolor(win, &ucolors[CELL_ERROR]);
+                set_nucolor(win, CELL_ERROR);
             } else if ((*p) && (*p)->expr) {
-                set_ucolor(win, &ucolors[EXPRESSION]);
+                set_nucolor(win, EXPRESSION);
             } else if ((*p) && (*p)->label) {                               // string
-                set_ucolor(win, &ucolors[STRG]);
+                set_nucolor(win, STRG);
             } else if ((*p) && (*p)->flags & is_valid && ! (*p)->format) {  // numeric value
-                set_ucolor(win, &ucolors[NUMB]);
+                set_nucolor(win, NUMB);
             } else if ((*p) && (*p)->format && (*p)->format[0] == 'd') {    // date format
-                set_ucolor(win, &ucolors[DATEF]);
+                set_nucolor(win, DATEF);
             } else {
-                set_ucolor(win, &ucolors[NORMAL]);
+                set_nucolor(win, NORMAL);
             }
             #endif
 
@@ -559,7 +559,7 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
             // Color selected cell
             if ((currow == row) && (curcol == col)) {
                 #ifdef USECOLORS
-                    if (has_colors()) set_ucolor(win, &ucolors[CELL_SELECTION_SC]);
+                    if (has_colors()) set_nucolor(win, CELL_SELECTION_SC);
                 #else
                     wattron(win, A_REVERSE);
                 #endif
@@ -570,7 +570,7 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
             srange * s = get_selected_range();
             if (s != NULL && row >= s->tlrow && row <= s->brrow && col >= s->tlcol && col <= s->brcol ) {
                 #ifdef USECOLORS
-                    set_ucolor(win, &ucolors[CELL_SELECTION_SC]);
+                    set_nucolor(win, CELL_SELECTION_SC);
                 #else
                     wattron(win, A_REVERSE);
                 #endif
@@ -582,7 +582,7 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
                  col >= ranges->tlcol && col <= ranges->brcol
                ) {
                 #ifdef USECOLORS
-                    set_ucolor(win, &ucolors[CELL_SELECTION_SC]);
+                    set_nucolor(win, CELL_SELECTION_SC);
                 #else
                     wattron(win, A_REVERSE);
                 #endif
@@ -642,13 +642,13 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
                 ( in_range && row >= ranges->tlrow && row <= ranges->brrow &&
                 col >= ranges->tlcol && col <= ranges->brcol ) ) {
                     #ifdef USECOLORS
-                    if (has_colors()) set_ucolor(win, &ucolors[CELL_SELECTION_SC]);
+                    if (has_colors()) set_nucolor(win, CELL_SELECTION_SC);
                     #else
                     wattron(win, A_REVERSE);
                     #endif
                 } else if ( !(*p) || (*p)->ucolor == NULL) {
                     #ifdef USECOLORS
-                    set_ucolor(win, &ucolors[STRG]); // When a long string does not fit in column.
+                    set_nucolor(win, STRG); // When a long string does not fit in column.
                     #endif
                 }
 
@@ -729,7 +729,7 @@ void show_celldetails(WINDOW * win) {
 
     // show cell in header
     #ifdef USECOLORS
-        set_ucolor(win, &ucolors[CELL_ID]);
+        set_nucolor(win, CELL_ID);
     #endif
     sprintf(head, "%s%d ", coltoa(curcol), currow);
     mvwprintw(win, 0, 0 + rescol, "%s", head);
@@ -737,7 +737,7 @@ void show_celldetails(WINDOW * win) {
 
     // show the current cell's format
     #ifdef USECOLORS
-        set_ucolor(win, &ucolors[CELL_FORMAT]);
+        set_nucolor(win, CELL_FORMAT);
     #endif
 
     register struct ent *p1 = *ATBL(tbl, currow, curcol);
@@ -758,7 +758,7 @@ void show_celldetails(WINDOW * win) {
 
     // show expr
     #ifdef USECOLORS
-        set_ucolor(win, &ucolors[CELL_CONTENT]);
+        set_nucolor(win, CELL_CONTENT);
     #endif
     if (p1 && p1->expr) {
         linelim = 0;
