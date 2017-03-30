@@ -22,7 +22,7 @@ struct dictionary * get_d_colors_param() {
     return d_colors_param;
 }
 
-// Generate DEFAULT 'initcolor' colors
+// Generate DEFAULT 'initcolor' colors (deprecated)
 void start_default_ucolors() {
 
     // Initialize colors attributes
@@ -103,16 +103,60 @@ void start_default_ucolors() {
 
 }
 
-// Set a color
+
+// Initialize empty COLOR_LIST. (GLOBAL!!)
+// This holds all available colors and attributes.
+int COLOR_LIST[20][3] = {
+    {-1,-1,A_NORMAL},{-1,-1,A_NORMAL},{-1,-1,A_NORMAL},{-1,-1,A_NORMAL},
+    {-1,-1,A_NORMAL},{-1,-1,A_NORMAL},{-1,-1,A_NORMAL},{-1,-1,A_NORMAL},
+    {-1,-1,A_NORMAL},{-1,-1,A_NORMAL},{-1,-1,A_NORMAL},{-1,-1,A_NORMAL},
+    {-1,-1,A_NORMAL},{-1,-1,A_NORMAL},{-1,-1,A_NORMAL},{-1,-1,A_NORMAL},
+    {-1,-1,A_NORMAL},{-1,-1,A_NORMAL},{-1,-1,A_NORMAL},{-1,-1,A_NORMAL},
+};
+
+void start_nucolors() {
+
+    // Manually set selected default colors
+    COLOR_LIST  [HEADINGS]           [BG]    = RED;
+    COLOR_LIST  [WELCOME]            [ATTR]  = A_BOLD;
+    COLOR_LIST  [CELL_SELECTION_SC]  [ATTR]  = A_REVERSE;
+    COLOR_LIST  [NUMB]               [FG]    = CYAN;
+    COLOR_LIST  [STRG]               [FG]    = MAGENTA;
+    COLOR_LIST  [DATEF]              [FG]    = YELLOW;
+    COLOR_LIST  [EXPRESSION]         [FG]    = YELLOW;
+    COLOR_LIST  [INFO_MSG]           [FG]    = CYAN;
+    COLOR_LIST  [INFO_MSG]           [ATTR]  = A_BOLD;
+    COLOR_LIST  [ERROR_MSG]          [BG]    = RED;
+    COLOR_LIST  [ERROR_MSG]          [FG]    = WHITE;
+    COLOR_LIST  [ERROR_MSG]          [ATTR]  = A_BOLD;
+    COLOR_LIST  [MODE]               [ATTR]  = A_BOLD;
+    COLOR_LIST  [CELL_ID]            [FG]    = RED;
+    COLOR_LIST  [CELL_ID]            [ATTR]  = A_BOLD;
+    COLOR_LIST  [CELL_FORMAT]        [FG]    = RED;
+    COLOR_LIST  [CELL_CONTENT]       [FG]    = CYAN;
+    COLOR_LIST  [CELL_CONTENT]       [ATTR]  = A_BOLD;
+    COLOR_LIST  [CELL_ERROR]         [FG]    = RED;
+    COLOR_LIST  [CELL_ERROR]         [ATTR]  = A_BOLD;
+    COLOR_LIST  [CELL_NEGATIVE]      [FG]    = GREEN;
+
+
+    // Initialize every COLOR_PAIR(i) from COLOR_LIST
+    int i;
+    use_default_colors();	// CRUCIAL!!
+    for (i=0; i<=20; i++)	// Set all the colors
+        init_pair(i, COLOR_LIST[i][FG], COLOR_LIST[i][BG]);
+
+}
+
+void set_nucolor(WINDOW * w, int c) {
+    // takes window and color as input
+    // for color names see macros.h
+    wattrset (w, COLOR_LIST[c][ATTR] | COLOR_PAIR(c));
+}
+
 void set_ucolor(WINDOW * w, struct ucolor * uc) {
-    long attr = A_NORMAL;
-    if (uc->bold)      attr |= A_BOLD;
-    if (uc->dim)       attr |= A_DIM;
-    if (uc->reverse)   attr |= A_REVERSE;
-    if (uc->standout)  attr |= A_STANDOUT;
-    if (uc->blink)     attr |= A_BLINK;
-    if (uc->underline) attr |= A_UNDERLINE;
-    wattrset (w, attr | COLOR_PAIR(uc->fg * 8 + uc->bg + 1));
+    // Backward compatibility workaround
+    wattrset (w, A_NORMAL | COLOR_PAIR(0));
 }
 
 // Create a dictionary that stores the correspondence between macros and key

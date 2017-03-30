@@ -53,26 +53,31 @@ extern WINDOW * input_win;
 #define CYAN              COLOR_CYAN
 #define WHITE             COLOR_WHITE
 
-#define HEADINGS          0
-#define WELCOME           1
-#define CELL_SELECTION    2
-#define CELL_SELECTION_SC 3
-#define NUMB              4
-#define STRG              5
-#define DATEF             6
-#define EXPRESSION        7
-#define INFO_MSG          8
-#define ERROR_MSG         9
-#define MODE              10
-#define CELL_ID           11
-#define CELL_FORMAT       12
-#define CELL_CONTENT      13
-#define INPUT             14
-#define NORMAL            15
-#define CELL_ERROR        16
-#define CELL_NEGATIVE     17
-#define DEFAULT           18
+#define DEFAULT            0
+#define HEADINGS           1
+#define WELCOME            2
+#define CELL_SELECTION     3
+#define CELL_SELECTION_SC  4
+#define NUMB               5
+#define STRG               6
+#define DATEF              7
+#define EXPRESSION         8
+#define INFO_MSG           9
+#define ERROR_MSG         10
+#define MODE              11
+#define CELL_ID           12
+#define CELL_FORMAT       13
+#define CELL_CONTENT      14
+#define INPUT             15
+#define NORMAL            16
+#define CELL_ERROR        17
+#define CELL_NEGATIVE     18
 #define DEBUG_MSG         19
+
+#define FG                 0
+#define BG                 1
+#define ATTR               2
+
 
 #define sc_error(x, ...)     sc_msg(x, ERROR_MSG, ##__VA_ARGS__)
 #define sc_debug(x, ...)     sc_msg(x, DEBUG_MSG, ##__VA_ARGS__)
