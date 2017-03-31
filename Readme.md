@@ -7,8 +7,8 @@ Original authors James Gosling and Mark Weiser, and mods added by Chuck Martin.
 
 - UNDO / REDO.
 - 65.536 rows and 702 columns supported. (The number of rows can be expanded to 1.048.576 if wished).
-- CSV / TAB delimited file import and export.
-- XLS / XLSX file import.
+- CSV / TAB delimited / XLSX file import and export.
+- Scripting support with LUA. Also with triggers and c dynamic linked modules.
 - Key-mappings.
 - Sort of rows.
 - Filter of rows.
