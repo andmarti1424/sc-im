@@ -653,14 +653,18 @@ Commands for handling cell content:
                 type, fg, bg, bold, dim, reverse, standout, underline, blink
                 Note: The type, fg, and bg keys are mandatory.
 
-                The value of type is one of the following:
+                The value of type shall be one of the following:
                      HEADINGS, MODE, NUMB, STRG, DATEF, EXPRESSION,
                      CELL_ERROR, CELL_NEGATIVE, CELL_SELECTION,
                      CELL_SELECTION_SC, INFO_MSG, ERROR_MSG, CELL_ID,
                      CELL_FORMAT, CELL_CONTENT, WELCOME, NORMAL, INPUT.
 
-                The value of fg and bg is one of the following:
-                     WHITE, BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN.
+                The value of fg and bg shall be one of the following:
+                     WHITE, BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN or DEFAULT_COLOR.
+                     DEFAULT_COLOR just takes the default color of your
+                     terminal. If you set it as fg color it will take default
+                     color of your foreground. If you set it as bg color it
+                     will take the default background color of your terminal.
 
                 The value of other parameters are booleans, 1 or 0.
 
@@ -698,7 +702,7 @@ Commands for handling cell content:
                 add it to $HOME/.scimrc:
                             REDEFINE_COLOR "RED" 700 100 100
 
-                Redefining the BLACK color is one way to change the default
+                Redefining the BLACK color itself is another way to change the default
                 background color of SC-IM.
 
     :lock       Lock the current cell or range.  Locked cells are immune to

@@ -44,7 +44,7 @@ extern WINDOW * input_win;
 
 #define N_INIT_PAIRS      19
 
-#define DEFBG             -1
+#define DEFAULT_COLOR     -1
 #define BLACK             COLOR_BLACK
 #define RED               COLOR_RED
 #define GREEN             COLOR_GREEN

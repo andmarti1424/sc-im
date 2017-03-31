@@ -38,11 +38,11 @@ void start_default_ucolors() {
 
     // Set some colors attributes
     ucolors[ DEFAULT         ].fg = WHITE;
-    ucolors[ DEFAULT         ].bg = DEFBG;
+    ucolors[ DEFAULT         ].bg = DEFAULT_COLOR;
     ucolors[ HEADINGS        ].fg = WHITE;
     ucolors[ HEADINGS        ].bg = RED;
     ucolors[ WELCOME         ].fg = RED;
-    ucolors[ WELCOME         ].bg = DEFBG;
+    ucolors[ WELCOME         ].bg = DEFAULT_COLOR;
     ucolors[ WELCOME         ].bold = 1;
     ucolors[ CELL_SELECTION  ].fg = BLUE;         // cell selection in headings
     ucolors[ CELL_SELECTION  ].bg = WHITE;
@@ -51,50 +51,50 @@ void start_default_ucolors() {
     ucolors[ CELL_SELECTION_SC ].bg = WHITE;
 
     ucolors[ NUMB            ].fg = CYAN;
-    ucolors[ NUMB            ].bg = DEFBG;
+    ucolors[ NUMB            ].bg = DEFAULT_COLOR;
 
     ucolors[ STRG            ].fg = MAGENTA;
-    ucolors[ STRG            ].bg = DEFBG;
+    ucolors[ STRG            ].bg = DEFAULT_COLOR;
     ucolors[ STRG            ].bold = 0;
 
     ucolors[ DATEF           ].fg = YELLOW;
-    ucolors[ DATEF           ].bg = DEFBG;
+    ucolors[ DATEF           ].bg = DEFAULT_COLOR;
 
     ucolors[ EXPRESSION      ].fg = YELLOW;
-    ucolors[ EXPRESSION      ].bg = DEFBG;
+    ucolors[ EXPRESSION      ].bg = DEFAULT_COLOR;
 
     ucolors[ INFO_MSG        ].fg = CYAN;
-    ucolors[ INFO_MSG        ].bg = DEFBG;
+    ucolors[ INFO_MSG        ].bg = DEFAULT_COLOR;
     ucolors[ INFO_MSG        ].bold = 1;
     ucolors[ ERROR_MSG       ].bg = RED;
     ucolors[ ERROR_MSG       ].fg = WHITE;
     ucolors[ ERROR_MSG       ].bold = 1;
 
     ucolors[ MODE            ].fg = WHITE;
-    ucolors[ MODE            ].bg = DEFBG;
+    ucolors[ MODE            ].bg = DEFAULT_COLOR;
     ucolors[ MODE            ].bold = 1;
 
     ucolors[ CELL_ID         ].fg = RED;
-    ucolors[ CELL_ID         ].bg = DEFBG;
+    ucolors[ CELL_ID         ].bg = DEFAULT_COLOR;
     ucolors[ CELL_ID         ].bold = 1;
     ucolors[ CELL_FORMAT     ].fg = RED;
-    ucolors[ CELL_FORMAT     ].bg = DEFBG;
+    ucolors[ CELL_FORMAT     ].bg = DEFAULT_COLOR;
     ucolors[ CELL_CONTENT    ].fg = CYAN;
-    ucolors[ CELL_CONTENT    ].bg = DEFBG;
+    ucolors[ CELL_CONTENT    ].bg = DEFAULT_COLOR;
     ucolors[ CELL_CONTENT    ].bold = 1;
 
     ucolors[ INPUT           ].fg = WHITE;
-    ucolors[ INPUT           ].bg = DEFBG;
+    ucolors[ INPUT           ].bg = DEFAULT_COLOR;
 
     ucolors[ NORMAL          ].fg = WHITE;
-    ucolors[ NORMAL          ].bg = DEFBG;
+    ucolors[ NORMAL          ].bg = DEFAULT_COLOR;
 
     ucolors[ CELL_ERROR      ].fg = RED;
-    ucolors[ CELL_ERROR      ].bg = DEFBG;
+    ucolors[ CELL_ERROR      ].bg = DEFAULT_COLOR;
     ucolors[ CELL_ERROR      ].bold = 1;
 
     ucolors[ CELL_NEGATIVE   ].fg = GREEN;
-    ucolors[ CELL_NEGATIVE   ].bg = DEFBG;
+    ucolors[ CELL_NEGATIVE   ].bg = DEFAULT_COLOR;
 
     // Initialize all possible 81 init pairs
     use_default_colors();
@@ -123,8 +123,8 @@ void set_colors_param_dict() {
     char str[3];
     str[0]='\0';
 
-    sprintf(str, "%d", DEFBG);
-    put(d_colors_param, "DEFBG", str);
+    sprintf(str, "%d", DEFAULT_COLOR);
+    put(d_colors_param, "DEFAULT_COLOR", str);
     sprintf(str, "%d", BLACK);
     put(d_colors_param, "BLACK", str);
     sprintf(str, "%d", RED);
@@ -212,7 +212,9 @@ void chg_color(char * str) {
     if (
         (get(d_colors_param, get(d, "fg")) == NULL) ||
         (get(d_colors_param, get(d, "bg")) == NULL) ||
-        (get(d_colors_param, get(d, "type")) == NULL)
+        (get(d_colors_param, get(d, "type")) == NULL) ||
+        (atoi(get(d_colors_param, get(d, "fg"))) > COLOR_WHITE) ||
+        (atoi(get(d_colors_param, get(d, "bg"))) > COLOR_WHITE)
     ) {
         sc_error("One of the values specified is wrong. Please check the values of type, fg and bg.");
         destroy_dictionary(d);
@@ -284,7 +286,7 @@ void color_cell(int r, int c, int rf, int cf, char * str) {
             if (n->ucolor == NULL) {
                 n->ucolor = (struct ucolor *) malloc(sizeof(struct ucolor));
                 n->ucolor->fg = WHITE;
-                n->ucolor->bg = DEFBG;
+                n->ucolor->bg = DEFAULT_COLOR;
                 n->ucolor->bold = 0;
                 n->ucolor->dim = 0;
                 n->ucolor->reverse = 0;
