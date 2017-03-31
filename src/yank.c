@@ -145,6 +145,7 @@ void yank_area(int tlrow, int tlcol, int brrow, int brcol, char type, int arg) {
 // should be zero.
 // When implementing column sorting, diffc should be zero as well!
 // type indicates if pasting format only, value only or the whole content
+// yank type: c=col, r=row, a=range, e=cell, '\0'=no yanking
 // returns -1 if locked cells are found. 0 otherwise.
 int paste_yanked_ents(int above, int type_paste) {
     if (! count_yank_ents()) return 0;
@@ -239,7 +240,9 @@ int paste_yanked_ents(int above, int type_paste) {
         destino->row += diffr;
         destino->col += diffc;
 
-        if (type_paste == 'c' && destino->expr) {
+        // commented for issue 167 - 20170331
+        //if (type_paste == 'c' && destino->expr) {
+        if (destino->expr) {
             EvalJustOneVertex(destino, destino->row, destino->col, 1);
         }
 
