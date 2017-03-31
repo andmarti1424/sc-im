@@ -63,8 +63,8 @@ void start_screen() {
             // values defined in '.sc' files
             set_colors_param_dict();
         }
-        wbkgd(main_win, COLOR_PAIR(ucolors[DEFAULT].fg * 8 + ucolors[DEFAULT].bg + 1));
-        wbkgd(input_win, COLOR_PAIR(ucolors[DEFAULT].fg * 8 + ucolors[DEFAULT].bg + 1));
+        wbkgd(main_win, COLOR_PAIR((ucolors[DEFAULT].fg+1) * 9 + ucolors[DEFAULT].bg + 2));
+        wbkgd(input_win, COLOR_PAIR((ucolors[DEFAULT].fg+1) * 9 + ucolors[DEFAULT].bg + 2));
     }
     #endif
 
@@ -104,8 +104,8 @@ void do_welcome() {
     char * msg_help = "Press «:help<Enter>» to get help";
 
     #ifdef USECOLORS
-    wbkgd(main_win, COLOR_PAIR(ucolors[DEFAULT].fg * 8 + ucolors[DEFAULT].bg + 1));
-    wbkgd(input_win, COLOR_PAIR(ucolors[DEFAULT].fg * 8 + ucolors[DEFAULT].bg + 1));
+    wbkgd(main_win, COLOR_PAIR((ucolors[DEFAULT].fg+1) * 9 + ucolors[DEFAULT].bg + 2));
+    wbkgd(input_win, COLOR_PAIR((ucolors[DEFAULT].fg+1) * 9 + ucolors[DEFAULT].bg + 2));
     #endif
 
     // show headings
@@ -134,11 +134,10 @@ void do_welcome() {
 // if header flag is set, it refresh the first column of screen.
 void update(int header) {
 
-
-    //#ifdef USECOLORS
-    //wbkgd(main_win, COLOR_PAIR(ucolors[DEFAULT].fg * 8 + ucolors[DEFAULT].bg + 1));
-    //wbkgd(input_win, COLOR_PAIR(ucolors[DEFAULT].fg * 8 + ucolors[DEFAULT].bg + 1));
-    //#endif
+    #ifdef USECOLORS
+    wbkgd(main_win, COLOR_PAIR((ucolors[DEFAULT].fg+1) * 9 + ucolors[DEFAULT].bg + 2));
+    wbkgd(input_win, COLOR_PAIR((ucolors[DEFAULT].fg+1) * 9 + ucolors[DEFAULT].bg + 2));
+    #endif
     if (loading) return;
     if (cmd_multiplier > 1) return;
     if (atoi(get_conf_value("nocurses"))) return;

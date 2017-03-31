@@ -27,7 +27,7 @@ void start_default_ucolors() {
 
     // Initialize colors attributes
     int i, j;
-    for (i=0; i< N_INIT_PAIRS; i++) {
+    for (i=0; i < N_INIT_PAIRS; i++) {
         ucolors[ i ].bold      = 0;
         ucolors[ i ].dim       = 0;
         ucolors[ i ].reverse   = 0;
@@ -38,69 +38,69 @@ void start_default_ucolors() {
 
     // Set some colors attributes
     ucolors[ DEFAULT         ].fg = WHITE;
-    ucolors[ DEFAULT         ].bg = BLACK;
+    ucolors[ DEFAULT         ].bg = DEFBG;
     ucolors[ HEADINGS        ].fg = WHITE;
     ucolors[ HEADINGS        ].bg = RED;
     ucolors[ WELCOME         ].fg = RED;
-    ucolors[ WELCOME         ].bg = BLACK;
+    ucolors[ WELCOME         ].bg = DEFBG;
     ucolors[ WELCOME         ].bold = 1;
     ucolors[ CELL_SELECTION  ].fg = BLUE;         // cell selection in headings
     ucolors[ CELL_SELECTION  ].bg = WHITE;
 
-    ucolors[ CELL_SELECTION_SC ].fg = BLACK;      // cell selection in spreadsheet
+    ucolors[ CELL_SELECTION_SC ].fg = DEFBG;      // cell selection in spreadsheet
     ucolors[ CELL_SELECTION_SC ].bg = WHITE;
 
     ucolors[ NUMB            ].fg = CYAN;
-    ucolors[ NUMB            ].bg = BLACK;
+    ucolors[ NUMB            ].bg = DEFBG;
 
     ucolors[ STRG            ].fg = MAGENTA;
-    ucolors[ STRG            ].bg = BLACK;
+    ucolors[ STRG            ].bg = DEFBG;
     ucolors[ STRG            ].bold = 0;
 
     ucolors[ DATEF           ].fg = YELLOW;
-    ucolors[ DATEF           ].bg = BLACK;
+    ucolors[ DATEF           ].bg = DEFBG;
 
     ucolors[ EXPRESSION      ].fg = YELLOW;
-    ucolors[ EXPRESSION      ].bg = BLACK;
+    ucolors[ EXPRESSION      ].bg = DEFBG;
 
     ucolors[ INFO_MSG        ].fg = CYAN;
-    ucolors[ INFO_MSG        ].bg = BLACK;
+    ucolors[ INFO_MSG        ].bg = DEFBG;
     ucolors[ INFO_MSG        ].bold = 1;
     ucolors[ ERROR_MSG       ].bg = RED;
     ucolors[ ERROR_MSG       ].fg = WHITE;
     ucolors[ ERROR_MSG       ].bold = 1;
 
     ucolors[ MODE            ].fg = WHITE;
-    ucolors[ MODE            ].bg = BLACK;
+    ucolors[ MODE            ].bg = DEFBG;
     ucolors[ MODE            ].bold = 1;
 
     ucolors[ CELL_ID         ].fg = RED;
-    ucolors[ CELL_ID         ].bg = BLACK;
+    ucolors[ CELL_ID         ].bg = DEFBG;
     ucolors[ CELL_ID         ].bold = 1;
     ucolors[ CELL_FORMAT     ].fg = RED;
-    ucolors[ CELL_FORMAT     ].bg = BLACK;
+    ucolors[ CELL_FORMAT     ].bg = DEFBG;
     ucolors[ CELL_CONTENT    ].fg = CYAN;
-    ucolors[ CELL_CONTENT    ].bg = BLACK;
+    ucolors[ CELL_CONTENT    ].bg = DEFBG;
     ucolors[ CELL_CONTENT    ].bold = 1;
 
     ucolors[ INPUT           ].fg = WHITE;
-    ucolors[ INPUT           ].bg = BLACK;
+    ucolors[ INPUT           ].bg = DEFBG;
 
     ucolors[ NORMAL          ].fg = WHITE;
-    ucolors[ NORMAL          ].bg = BLACK;
+    ucolors[ NORMAL          ].bg = DEFBG;
 
     ucolors[ CELL_ERROR      ].fg = RED;
-    ucolors[ CELL_ERROR      ].bg = BLACK;
+    ucolors[ CELL_ERROR      ].bg = DEFBG;
     ucolors[ CELL_ERROR      ].bold = 1;
 
     ucolors[ CELL_NEGATIVE   ].fg = GREEN;
-    ucolors[ CELL_NEGATIVE   ].bg = BLACK;
+    ucolors[ CELL_NEGATIVE   ].bg = DEFBG;
 
-    // Initialize all possible 64 init pairs
-    for (i=0; i < 8; i++)      // fg
-        for (j=0; j < 8; j++)  // bg
-            init_pair( (i*8) + j + 1, i, j); // i is fg and j is bg
-
+    // Initialize all possible 81 init pairs
+    use_default_colors();
+    for (i=0; i < 9; i++)      // fg
+        for (j=0; j < 9; j++)  // bg
+            init_pair( i*9+j+1, i-1, j-1); // i is fg and j is bg
 }
 
 // Set a color
@@ -112,7 +112,7 @@ void set_ucolor(WINDOW * w, struct ucolor * uc) {
     if (uc->standout)  attr |= A_STANDOUT;
     if (uc->blink)     attr |= A_BLINK;
     if (uc->underline) attr |= A_UNDERLINE;
-    wattrset (w, attr | COLOR_PAIR(uc->fg * 8 + uc->bg + 1));
+    wattrset (w, attr | COLOR_PAIR((uc->fg+1)*9 + uc->bg + 2));
 }
 
 // Create a dictionary that stores the correspondence between macros and key
@@ -123,6 +123,8 @@ void set_colors_param_dict() {
     char str[3];
     str[0]='\0';
 
+    sprintf(str, "%d", DEFBG);
+    put(d_colors_param, "DEFBG", str);
     sprintf(str, "%d", BLACK);
     put(d_colors_param, "BLACK", str);
     sprintf(str, "%d", RED);
@@ -282,7 +284,7 @@ void color_cell(int r, int c, int rf, int cf, char * str) {
             if (n->ucolor == NULL) {
                 n->ucolor = (struct ucolor *) malloc(sizeof(struct ucolor));
                 n->ucolor->fg = WHITE;
-                n->ucolor->bg = BLACK;
+                n->ucolor->bg = DEFBG;
                 n->ucolor->bold = 0;
                 n->ucolor->dim = 0;
                 n->ucolor->reverse = 0;
