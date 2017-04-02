@@ -82,8 +82,6 @@ void sync_refs() {
 }
 
 void syncref(register struct enode * e) {
-    //if (e == (struct enode *)0) {
-    //
     if ( e == NULL ) {
         return;
     } else if ( e->op == ERR_ ) {
@@ -194,13 +192,16 @@ void deletecol() {
     return;
 }
 
-// Copy a cell (struct ent).  "special" indicates special treatment when
-// merging two cells for the "pm" command, merging formats only for the
-// "pf" command, or for adjusting cell references when transposing with
-// the "pt" command.  r1, c1, r2, and c2 define the range in which the dr
-// and dc values should be used.
-void copyent(register struct ent * n, register struct ent * p, int dr, int dc,
-             int r1, int c1, int r2, int c2, int special) {
+/* Copy a cell (struct ent).  "special" indicates special treatment when
+ * merging two cells for the "pm" command, merging formats only for the
+ * "pf" command, or for adjusting cell references when transposing with
+ * the "pt" command.  r1, c1, r2, and c2 define the range in which the dr
+ * and dc values should be used.
+ * special == 'u' means special copy from spreadsheet to undo struct.
+ * since its mandatory to make isolated copies of
+ * p->expr->e.o.right.e.v.vp and p->expr->e.o.right.e.v.vp
+ */
+void copyent(register struct ent * n, register struct ent * p, int dr, int dc, int r1, int c1, int r2, int c2, int special) {
     if (!n || !p) {
         sc_error("copyent: internal error");
         return;
@@ -215,13 +216,18 @@ void copyent(register struct ent * n, register struct ent * p, int dr, int dc,
             n->v = p->v;
             n->flags |= p->flags & is_valid;
         }
-        if (special != 'v' && p->expr) {
+        if (special != 'v' && p->expr && special != 'u') {
             n->expr = copye(p->expr, dr, dc, r1, c1, r2, c2, special == 't');
-            if (p->flags & is_strexpr)
-                n->flags |= is_strexpr;
-            else
-                n->flags &= ~is_strexpr;
+#ifdef UNDO
+        } else if (special == 'u' && p->expr) { // from spreadsheet to undo
+            n->expr = copye(p->expr, dr, dc, r1, c1, r2, c2, 2);
+#endif
         }
+        if (p->expr && p->flags & is_strexpr)
+            n->flags |= is_strexpr;
+        else if (p->expr)
+            n->flags &= ~is_strexpr;
+
         if (p->label) {
             if (n->label) scxfree(n->label);
                 n->label = scxmalloc((unsigned) (strlen(p->label) + 1));
@@ -353,7 +359,11 @@ void erase_area(int sr, int sc, int er, int ec, int ignorelock, int mark_as_dele
     return;
 }
 
-struct enode * copye(register struct enode *e, int Rdelta, int Cdelta, int r1, int c1, int r2, int c2, int transpose) {
+/* function to copy an expression. it returns the copy.
+ * special = 1 means transpose
+ * special = 2 means copy from spreadsheet to undo struct
+ */
+struct enode * copye(register struct enode *e, int Rdelta, int Cdelta, int r1, int c1, int r2, int c2, int special) {
     register struct enode * ret;
     static struct enode * range = NULL;
 
@@ -362,46 +372,26 @@ struct enode * copye(register struct enode *e, int Rdelta, int Cdelta, int r1, i
 
     } else if (e->op & REDUCE) {
         int newrow, newcol;
-        //if (freeenodes) {
-        //    ret = freeenodes;
-        //    freeenodes = ret->e.o.left;
-        //} else
         ret = (struct enode *) scxmalloc((unsigned) sizeof (struct enode));
         ret->op = e->op;
-        newrow = e->e.r.left.vf & FIX_ROW ||
-        e->e.r.left.vp->row < r1 || e->e.r.left.vp->row > r2 ||
-        e->e.r.left.vp->col < c1 || e->e.r.left.vp->col > c2 ?
-        e->e.r.left.vp->row :
-        transpose ? r1 + Rdelta + e->e.r.left.vp->col - c1 :
-        e->e.r.left.vp->row + Rdelta;
-        newcol = e->e.r.left.vf & FIX_COL ||
-        e->e.r.left.vp->row < r1 || e->e.r.left.vp->row > r2 ||
-        e->e.r.left.vp->col < c1 || e->e.r.left.vp->col > c2 ?
-        e->e.r.left.vp->col :
-        transpose ? c1 + Cdelta + e->e.r.left.vp->row - r1 :
-        e->e.r.left.vp->col + Cdelta;
-        ret->e.r.left.vp = lookat(newrow, newcol);
+        newrow = e->e.r.left.vf & FIX_ROW || e->e.r.left.vp->row < r1 || e->e.r.left.vp->row > r2 || e->e.r.left.vp->col < c1 || e->e.r.left.vp->col > c2 ?  e->e.r.left.vp->row : special == 1 ? r1 + Rdelta + e->e.r.left.vp->col - c1 : e->e.r.left.vp->row + Rdelta;
+        newcol = e->e.r.left.vf & FIX_COL || e->e.r.left.vp->row < r1 || e->e.r.left.vp->row > r2 || e->e.r.left.vp->col < c1 || e->e.r.left.vp->col > c2 ?  e->e.r.left.vp->col : special == 1 ? c1 + Cdelta + e->e.r.left.vp->row - r1 : e->e.r.left.vp->col + Cdelta;
+        ret->e.r.left.vp =
+#ifdef UNDO
+        special == 2 ? add_undo_aux_ent(lookat(newrow, newcol)) :
+#endif
+        lookat(newrow, newcol);
         ret->e.r.left.vf = e->e.r.left.vf;
-        newrow = e->e.r.right.vf & FIX_ROW ||
-        e->e.r.right.vp->row < r1 || e->e.r.right.vp->row > r2 ||
-        e->e.r.right.vp->col < c1 || e->e.r.right.vp->col > c2 ?
-        e->e.r.right.vp->row :
-        transpose ? r1 + Rdelta + e->e.r.right.vp->col - c1 :
-        e->e.r.right.vp->row + Rdelta;
-        newcol = e->e.r.right.vf & FIX_COL ||
-        e->e.r.right.vp->row < r1 || e->e.r.right.vp->row > r2 ||
-        e->e.r.right.vp->col < c1 || e->e.r.right.vp->col > c2 ?
-        e->e.r.right.vp->col :
-        transpose ? c1 + Cdelta + e->e.r.right.vp->row - r1 :
-        e->e.r.right.vp->col + Cdelta;
-        ret->e.r.right.vp = lookat(newrow, newcol);
+        newrow = e->e.r.right.vf & FIX_ROW || e->e.r.right.vp->row < r1 || e->e.r.right.vp->row > r2 || e->e.r.right.vp->col < c1 || e->e.r.right.vp->col > c2 ?  e->e.r.right.vp->row : special == 1 ? r1 + Rdelta + e->e.r.right.vp->col - c1 : e->e.r.right.vp->row + Rdelta;
+        newcol = e->e.r.right.vf & FIX_COL || e->e.r.right.vp->row < r1 || e->e.r.right.vp->row > r2 || e->e.r.right.vp->col < c1 || e->e.r.right.vp->col > c2 ?  e->e.r.right.vp->col : special == 1 ? c1 + Cdelta + e->e.r.right.vp->row - r1 : e->e.r.right.vp->col + Cdelta;
+        ret->e.r.right.vp =
+#ifdef UNDO
+        special == 2 ? add_undo_aux_ent(lookat(newrow, newcol)) :
+#endif
+        lookat(newrow, newcol);
         ret->e.r.right.vf = e->e.r.right.vf;
     } else {
         struct enode *temprange=0;
-        //if (freeenodes) {
-        //    ret = freeenodes;
-        //    freeenodes = ret->e.o.left;
-        //} else
         ret = (struct enode *) scxmalloc((unsigned) sizeof (struct enode));
         ret->op = e->op;
         switch (ret->op) {
@@ -423,25 +413,18 @@ struct enode * copye(register struct enode *e, int Rdelta, int Cdelta, int r1, i
             case 'v':
                 {
                     int newrow, newcol;
-                    if (range && e->e.v.vp->row >= range->e.r.left.vp->row &&
-                        e->e.v.vp->row <= range->e.r.right.vp->row &&
-                        e->e.v.vp->col >= range->e.r.left.vp->col &&
-                        e->e.v.vp->col <= range->e.r.right.vp->col) {
-                            newrow = range->e.r.left.vf & FIX_ROW ? e->e.v.vp->row : e->e.v.vp->row + Rdelta;
-                            newcol = range->e.r.left.vf & FIX_COL ? e->e.v.vp->col : e->e.v.vp->col + Cdelta;
+                    if (range && e->e.v.vp->row >= range->e.r.left.vp->row && e->e.v.vp->row <= range->e.r.right.vp->row && e->e.v.vp->col >= range->e.r.left.vp->col && e->e.v.vp->col <= range->e.r.right.vp->col) {
+                        newrow = range->e.r.left.vf & FIX_ROW ? e->e.v.vp->row : e->e.v.vp->row + Rdelta;
+                        newcol = range->e.r.left.vf & FIX_COL ? e->e.v.vp->col : e->e.v.vp->col + Cdelta;
                     } else {
-                        newrow = e->e.v.vf & FIX_ROW ||
-                        e->e.v.vp->row < r1 || e->e.v.vp->row > r2 ||
-                        e->e.v.vp->col < c1 || e->e.v.vp->col > c2 ?
-                        e->e.v.vp->row : transpose ? r1 + Rdelta + e->e.v.vp->col - c1 :
-                        e->e.v.vp->row + Rdelta;
-                        newcol = e->e.v.vf & FIX_COL ||
-                        e->e.v.vp->row < r1 || e->e.v.vp->row > r2 ||
-                        e->e.v.vp->col < c1 || e->e.v.vp->col > c2 ?
-                        e->e.v.vp->col : transpose ? c1 + Cdelta + e->e.v.vp->row - r1 :
-                        e->e.v.vp->col + Cdelta;
+                        newrow = e->e.v.vf & FIX_ROW || e->e.v.vp->row < r1 || e->e.v.vp->row > r2 || e->e.v.vp->col < c1 || e->e.v.vp->col > c2 ?  e->e.v.vp->row : special == 1 ? r1 + Rdelta + e->e.v.vp->col - c1 : e->e.v.vp->row + Rdelta;
+                        newcol = e->e.v.vf & FIX_COL || e->e.v.vp->row < r1 || e->e.v.vp->row > r2 || e->e.v.vp->col < c1 || e->e.v.vp->col > c2 ?  e->e.v.vp->col : special == 1 ? c1 + Cdelta + e->e.v.vp->row - r1 : e->e.v.vp->col + Cdelta;
                     }
-                    ret->e.v.vp = lookat(newrow, newcol);
+                    ret->e.v.vp =
+#ifdef UNDO
+                        special == 2 ? add_undo_aux_ent(lookat(newrow, newcol)) :
+#endif
+                        lookat(newrow, newcol);
                     ret->e.v.vf = e->e.v.vf;
                     break;
                 }
@@ -452,7 +435,7 @@ struct enode * copye(register struct enode *e, int Rdelta, int Cdelta, int r1, i
             case 'F':
                 if ((range && ret->op == 'F') || (!range && ret->op == 'f'))
                     Rdelta = Cdelta = 0;
-                ret->e.o.left = copye(e->e.o.left, Rdelta, Cdelta, r1, c1, r2, c2, transpose);
+                ret->e.o.left = copye(e->e.o.left, Rdelta, Cdelta, r1, c1, r2, c2, special);
                 ret->e.o.right = (struct enode *)0;
                 break;
             case '$':
@@ -468,8 +451,8 @@ struct enode * copye(register struct enode *e, int Rdelta, int Cdelta, int r1, i
                     //ret->e.o.right = (struct enode *)0;
                     break; /* fix #108 */
                 }
-                ret->e.o.left = copye(e->e.o.left, Rdelta, Cdelta, r1, c1, r2, c2, transpose);
-                ret->e.o.right = copye(e->e.o.right, Rdelta, Cdelta, r1, c1, r2, c2, transpose);
+                ret->e.o.left = copye(e->e.o.left, Rdelta, Cdelta, r1, c1, r2, c2, special);
+                ret->e.o.right = copye(e->e.o.right, Rdelta, Cdelta, r1, c1, r2, c2, special);
                 break;
         }
         switch (ret->op) {
@@ -694,7 +677,6 @@ void deleterow(int row, int mult) {
     if (deps != NULL) free(deps);
     deps = NULL;
 
-    copy_to_undostruct(row, 0, row - 1 + mult, maxcol, 'a');
     end_undo_action();
 #endif
     return;
@@ -719,7 +701,7 @@ void int_deleterow(int row, int mult) {
                 }
             }
         }
-        rebuild_graph(); //TODO CHECK HERE WHY REBUILD IS NEEDED. See NOTE1 in shift.c
+        rebuild_graph(); //FIXME CHECK HERE WHY REBUILD IS NEEDED. See NOTE1 in shift.c
         sync_refs();
         //if (atoi(get_conf_value("autocalc")) && ! loading) EvalAll();
         EvalAll();
@@ -957,14 +939,7 @@ struct ent * lookat(int row, int col) {
     checkbounds(&row, &col);
     pp = ATBL(tbl, row, col);
     if ( *pp == NULL) {
-        //if (freeents == NULL) {
-            //*pp = (struct ent *) scxmalloc( (unsigned) sizeof(struct ent) );
-            *pp = (struct ent *) malloc( (unsigned) sizeof(struct ent) );
-        //} else {
-        //    sc_debug("lookat. reuse of deleted ent row:%d col:%d", row, col);
-        //    *pp = freeents;
-        //    freeents = freeents->next;
-        //}
+         *pp = (struct ent *) malloc( (unsigned) sizeof(struct ent) );
         (*pp)->label = (char *) 0;
         (*pp)->flags = may_sync;
         (*pp)->expr = (struct enode *) 0;
@@ -1017,7 +992,7 @@ void clearent(struct ent * v) {
     v->ucolor = NULL;
 
     v->flags = is_changed;
-    //changed++;
+
     modflg++;
 
     return;
@@ -1835,13 +1810,13 @@ int is_single_command (struct block * buf, long timeout) {
                                             res = MOVEMENT_CMD; // repeat last command
 
         else if (buf->value == L'.')        res = MOVEMENT_CMD; // repeat last command
-        else if (buf->value == L'y' && is_range_selected() != -1) 
+        else if (buf->value == L'y' && is_range_selected() != -1)
                                             res = EDITION_CMD;  // yank range
 
     } else if (curmode == NORMAL_MODE) {
 
         if (buf->value == L'g' && bs == 2 && (
-                 buf->pnext->value == L'M' || 
+                 buf->pnext->value == L'M' ||
                  buf->pnext->value == L'g' ||
                  buf->pnext->value == L'G' ||
                  buf->pnext->value == L'0' ||
@@ -1854,13 +1829,13 @@ int is_single_command (struct block * buf, long timeout) {
                  // TODO add validation: buf->pnext->value must be a letter
 
         else if (buf->value == L'P' && bs == 2 && (
-            buf->pnext->value == L'v' || 
-            buf->pnext->value == L'f' || 
+            buf->pnext->value == L'v' ||
+            buf->pnext->value == L'f' ||
             buf->pnext->value == L'c' ) )   res = EDITION_CMD;  // paste yanked cells below or left
 
         else if (buf->value == L'T' && bs == 2 && (
-            buf->pnext->value == L'v' || 
-            buf->pnext->value == L'f' || 
+            buf->pnext->value == L'v' ||
+            buf->pnext->value == L'f' ||
             buf->pnext->value == L'c' ) )   res = EDITION_CMD;  // paste yanked cells above or right
 
         else if (buf->value == L'a' && bs == 2 &&    // autojus
