@@ -583,7 +583,7 @@ void do_normalmode(struct block * buf) {
             }
             if (buf->pnext->value == L'l') {
                 lock_cells(lookat(r, c), lookat(rf, cf));
-            } else if (buf->pnext->value == L'u') {
+            } else if (buf->pnext->value == L'u') { // watch out if you do C-r and u too quickly !
                 unlock_cells(lookat(r, c), lookat(rf, cf));
             } else if (buf->pnext->value == L'v') {
                 valueize_area(r, c, rf, cf);
@@ -652,29 +652,8 @@ void do_normalmode(struct block * buf) {
 
         // deleterow
             if (buf->pnext->value == L'r') {
-                /*
-                if (any_locked_cells(currow, 0, currow + cmd_multiplier, maxcol)) {
-                    sc_error("Locked cells encountered. Nothing changed");
-                    return;
-                }
-#ifdef UNDO
-                create_undo_action();
-                copy_to_undostruct(currow, 0, currow + ic - 1, maxcol, 'd');
-                save_undo_range_shift(-ic, 0, currow, 0, currow - 1 + ic, maxcol);
-#endif
-                fix_marks(-ic, 0, currow + ic - 1, maxrow, 0, maxcol);
-                yank_area(currow, 0, currow - 1 + cmd_multiplier, maxcol, 'r', ic);
-                while (ic--) deleterow();
-                if (atoi(get_conf_value("autocalc")) && ! loading) EvalAll();
-#ifdef UNDO
-                copy_to_undostruct(currow, 0, currow - 1 + cmd_multiplier, maxcol, 'a');
-                end_undo_action();
-#endif
-*/
                 deleterow(currow, ic);
                 if (cmd_multiplier > 0) cmd_multiplier = 0;
-
-
 
         // deletecol
             } else if (buf->pnext->value == L'c') {
@@ -708,31 +687,26 @@ void do_normalmode(struct block * buf) {
 
 
                     deletecol();
-                    // Eval entire graph
-                    // TODO it should eval only necessary ents
+
+                    // Eval only necessary ents
                     //if (atoi(get_conf_value("autocalc")) && ! loading) EvalAll();
 #ifdef UNDO
 
                     // here we save in undostruct, all the ents that depends on the deleted one (after change)
                     for (i = 0; deps != NULL && i < deps->vf; i++) {
-                        if (deps[i].vp->col >= curcol)
-                            copy_to_undostruct(deps[i].vp->row, deps[i].vp->col+1, deps[i].vp->row, deps[i].vp->col+1, 'a');
-                        else
+                        //if (deps[i].vp->col >= curcol)
+                        //    copy_to_undostruct(deps[i].vp->row, deps[i].vp->col+1, deps[i].vp->row, deps[i].vp->col+1, 'a');
+                        //else
                             copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'a');
                     }
                     if (deps != NULL) free(deps);
                     deps = NULL;
-//
-                    copy_to_undostruct(0, curcol, maxrow, curcol-ic+1, 'a');
 #endif
                 }
 #ifdef UNDO
-//                copy_to_undostruct(0, curcol, maxrow, curcol + cmd_multiplier - 1, 'a');
                 end_undo_action();
 #endif
                 if (cmd_multiplier > 0) cmd_multiplier = 0;
-
-
 
             } else if (buf->pnext->value == L'd') {
                 del_selected_cells();
