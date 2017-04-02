@@ -1899,16 +1899,18 @@ void let(struct ent * v, struct enode * e) {
     if (locked_cell(v->row, v->col)) return;
 
     #ifdef UNDO
-    create_undo_action();
-    copy_to_undostruct(v->row, v->col, v->row, v->col, 'd');
-
-    // here we save in undostruct, all the ents that depends on the deleted one (before change)
-    extern struct ent_ptr * deps;
     int i;
-    ents_that_depends_on_range(v->row, v->col, v->row, v->col);
-    if (deps != NULL) {
-        for (i = 0; i < deps->vf; i++)
-            copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'd');
+    extern struct ent_ptr * deps;
+    if (!loading) {
+        create_undo_action();
+        copy_to_undostruct(v->row, v->col, v->row, v->col, 'd');
+
+        // here we save in undostruct, all the ents that depends on the deleted one (before change)
+        ents_that_depends_on_range(v->row, v->col, v->row, v->col);
+        if (deps != NULL) {
+            for (i = 0; i < deps->vf; i++)
+                copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'd');
+        }
     }
     #endif
     if (getVertex(graph, lookat(v->row, v->col), 0) != NULL) destroy_vertex(lookat(v->row, v->col));
@@ -1940,7 +1942,7 @@ void let(struct ent * v, struct enode * e) {
         if (exprerr) {
             efree(e);
             #ifdef UNDO
-            dismiss_undo_item(NULL);
+            if (!loading) dismiss_undo_item(NULL);
             #endif
             return;
         }
@@ -1973,17 +1975,19 @@ void let(struct ent * v, struct enode * e) {
 
 
     #ifdef UNDO
-    copy_to_undostruct(v->row, v->col, v->row, v->col, 'a');
-    // here we save in undostruct, all the ents that depends on the deleted one (after change)
-    if (deps != NULL) free(deps);
-    ents_that_depends_on_range(v->row, v->col, v->row, v->col);
-    if (deps != NULL) {
-        for (i = 0; i < deps->vf; i++)
-            copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'a');
-        free(deps);
-        deps = NULL;
+    if (!loading) {
+        copy_to_undostruct(v->row, v->col, v->row, v->col, 'a');
+        // here we save in undostruct, all the ents that depends on the deleted one (after change)
+        if (deps != NULL) free(deps);
+        ents_that_depends_on_range(v->row, v->col, v->row, v->col);
+        if (deps != NULL) {
+            for (i = 0; i < deps->vf; i++)
+                copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'a');
+            free(deps);
+            deps = NULL;
+        }
+        end_undo_action();
     }
-    end_undo_action();
     #endif
 
     return;
@@ -1993,15 +1997,17 @@ void slet(struct ent * v, struct enode * se, int flushdir) {
     if (locked_cell(v->row, v->col)) return;
 
     #ifdef UNDO
+    extern struct ent_ptr * deps;
+    int i;
+    if (!loading) {
     create_undo_action();
     copy_to_undostruct(v->row, v->col, v->row, v->col, 'd');
 
     // here we save in undostruct, all the ents that depends on the deleted one (before change)
-    extern struct ent_ptr * deps;
-    int i;
     ents_that_depends_on_range(v->row, v->col, v->row, v->col);
     for (i = 0; deps != NULL && i < deps->vf; i++)
         copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'd');
+    }
     #endif
     if (getVertex(graph, lookat(v->row, v->col), 0) != NULL) destroy_vertex(lookat(v->row, v->col));
 
@@ -2057,6 +2063,7 @@ void slet(struct ent * v, struct enode * se, int flushdir) {
     modflg++;
 
     #ifdef UNDO
+    if (!loading) {
     copy_to_undostruct(v->row, v->col, v->row, v->col, 'a');
     // here we save in undostruct, all the ents that depends on the deleted one (after change)
     if (deps != NULL) free(deps);
@@ -2068,6 +2075,7 @@ void slet(struct ent * v, struct enode * se, int flushdir) {
         deps = NULL;
     }
     end_undo_action();
+    }
     #endif
 
     return;
