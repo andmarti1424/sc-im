@@ -31,6 +31,7 @@ void shift(int r, int c, int rf, int cf, wchar_t type) {
     int ic = cmd_multiplier + 1;
 
     switch (type) {
+
         case L'j':
             fix_marks(  (rf - r + 1) * cmd_multiplier, 0, r, maxrow, c, cf);
 #ifdef UNDO
@@ -45,16 +46,14 @@ void shift(int r, int c, int rf, int cf, wchar_t type) {
 #ifdef UNDO
             copy_to_undostruct(r, c, rf + (rf-r+1) * (cmd_multiplier - 1), cf, 'd');
             save_undo_range_shift(-cmd_multiplier, 0, r, c, rf + (rf-r+1) * (cmd_multiplier - 1), cf);
-
             ents_that_depends_on_range(r, c, rf + (rf-r+1) * (cmd_multiplier - 1), cf);
             for (i = 0; deps != NULL && i < deps->vf; i++)
                 copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'd');
 #endif
             while (ic--) shift_range(-ic, 0, r, c, rf, cf);
-            rebuild_graph(); // FIXME check why have to rebuild graph here. See NOTE1 below.
             if (atoi(get_conf_value("autocalc")) && ! loading) EvalAll();
 #ifdef UNDO
-            copy_to_undostruct(r, c, rf + (rf-r+1) * (cmd_multiplier - 1), cf, 'a');
+            // update(TRUE); this is used just for make debugging easier
             for (i = 0; deps != NULL && i < deps->vf; i++)
                 copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'a');
 #endif
@@ -72,10 +71,8 @@ void shift(int r, int c, int rf, int cf, wchar_t type) {
                 copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'd');
 #endif
             while (ic--) shift_range(0, -ic, r, c, rf, cf);
-            rebuild_graph(); // FIXME check why have to rebuild graph here.
             if (atoi(get_conf_value("autocalc")) && ! loading) EvalAll();
 #ifdef UNDO
-            copy_to_undostruct(r, c, rf, cf + (cf-c+1) * (cmd_multiplier - 1), 'a');
             for (i = 0; deps != NULL && i < deps->vf; i++)
                 copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'a');
 #endif
@@ -94,6 +91,11 @@ void shift(int r, int c, int rf, int cf, wchar_t type) {
     if (deps != NULL) free(deps);
     deps = NULL;
 #endif
+    /* just for testing
+    sync_refs();
+    rebuild_graph();
+    sync_refs();
+    rebuild_graph(); */
     cmd_multiplier = 0;
     return;
 }
@@ -126,7 +128,6 @@ void shift_cells_down(int deltarows, int deltacols) {
         for (c = curcol; c < curcol + deltacols; c++) {
             pp = ATBL(tbl, r, c);
             pp[0] = *ATBL(tbl, r-deltarows, c);
-            //sc_debug("delta down");
             if ( pp[0] ) pp[0]->row += deltarows;
         }
     }
