@@ -7,6 +7,8 @@ Which contains:
              for the session.
       struct ent * added: 'ent' elements added by the change
       struct ent * removed: 'ent' elements removed by the change
+      struct ent * aux_ents: 'ent' elements that needs to be around, but out of tbl.
+                              these are used to update formulas correctly, upon shift/deletion of ents.
       struct undo_range_shift * range_shift: range shifted by change
       row_hidded: integers list (int *) hidden rows on screen
       row_showed: integers list (int *) visible rows on screen
@@ -66,8 +68,7 @@ Implemented actions for UNDO/REDO:
 20. unformat
 
 NOT implemented:
-1. Recover equations after redo of changes over ents that have equations on them.
-2. undo of freeze / unfreeze command
+1. undo of freeze / unfreeze command
 
 ----------------------------------------------------------------------------------------
 */
@@ -104,6 +105,7 @@ void create_undo_action() {
     undo_item.p_sig       = NULL;
     undo_item.range_shift = NULL;
     undo_item.cols_format = NULL;
+    undo_item.aux_ents    = NULL;
 
     undo_item.row_hidded  = NULL;
     undo_item.row_showed  = NULL;
@@ -118,7 +120,7 @@ void end_undo_action() {
     add_to_undolist(undo_item);
 
     // in case we need to dismissed this undo_item!
-    if ((undo_item.added      == NULL &&
+    if ((undo_item.added      == NULL && undo_item.aux_ents == NULL &&
         undo_item.removed     == NULL && undo_item.range_shift == NULL &&
         undo_item.row_hidded  == NULL && undo_item.row_showed  == NULL &&
         undo_item.cols_format == NULL &&
@@ -145,6 +147,7 @@ void add_to_undolist(struct undo u) {
     // Add 'ent' elements
     ul->added = u.added;
     ul->removed = u.removed;
+    ul->aux_ents = u.aux_ents;
     ul->range_shift = u.range_shift;
     ul->cols_format = u.cols_format;
     ul->row_hidded = u.row_hidded;
@@ -158,7 +161,7 @@ void add_to_undolist(struct undo u) {
     } else {
         ul->p_ant = undo_list;
 
-        // Voy hasta el final de la lista
+        // go to end of list
         while (undo_list->p_sig != NULL) undo_list = undo_list->p_sig;
 
         undo_list->p_sig = ul;
@@ -182,14 +185,21 @@ void dismiss_undo_item(struct undo * ul) {
 
     if (ul == NULL) ul = &undo_item;
 
-    en = ul->added;
+    en = ul->added;     // free added
     while (en != NULL) {
         de = en->next;
         clearent(en);
         free(en);
         en = de;
     }
-    en = ul->removed;
+    en = ul->removed;   // free removed
+    while (en != NULL) {
+        de = en->next;
+        clearent(en);
+        free(en);
+        en = de;
+    }
+    en = ul->aux_ents; // free aux_ents
     while (en != NULL) {
         de = en->next;
         clearent(en);
@@ -294,8 +304,8 @@ void copy_to_undostruct (int row_desde, int col_desde, int row_hasta, int col_ha
             // not repeated - we malloc an ent and add it to list
             struct ent * e = (struct ent *) malloc( (unsigned) sizeof(struct ent) );
             cleanent(e);
-            copyent(e, lookat(r, c), 0, 0, 0, 0, r, c, 0);
             //copyent(e, lookat(r, c), 0, 0, 0, 0, 0, 0, 0);
+            copyent(e, lookat(r, c), 0, 0, 0, 0, 0, 0, 'u');
 
             // Append 'ent' element at the beginning
             if (type == 'a') {
@@ -308,6 +318,18 @@ void copy_to_undostruct (int row_desde, int col_desde, int row_hasta, int col_ha
 
         }
     return;
+}
+
+// this is used to keep aux ents in the undo struct
+// used for undoing dr dc sk and sh commands..
+// it stores a copy of the ent received as parameter and returns the point to that copy
+struct ent * add_undo_aux_ent(struct ent * e) {
+    struct ent * e_new = (struct ent *) malloc( (unsigned) sizeof(struct ent) );
+    cleanent(e_new);
+    copyent(e_new, e, 0, 0, 0, 0, 0, 0, 'u'); // copy ent with special='u' (undo)
+    e_new->next = undo_item.aux_ents;         // add e_new to beginning of list
+    undo_item.aux_ents = e_new;
+    return e_new;
 }
 
 void add_undo_col_format(int col, int type, int fwidth, int precision, int realfmt) {
@@ -422,6 +444,15 @@ void do_undo() {
 
     struct undo * ul = undo_list;
 
+
+    struct ent * i = ul->added;
+    while (i != NULL) {
+        struct ent * pp = *ATBL(tbl, i->row, i->col);
+        clearent(pp);
+        cleanent(pp);
+        i = i->next;
+    }
+
     // Make undo shift, if any
     if (ul->range_shift != NULL) {
         // fix marks
@@ -455,14 +486,7 @@ void do_undo() {
         }
     }
 
-    // Remove 'ent' elements
-    struct ent * i = ul->added;
-    while (i != NULL) {
-        struct ent * pp = *ATBL(tbl, i->row, i->col);
-        clearent(pp);
-        cleanent(pp);
-        i = i->next;
-    }
+    //update(TRUE); //FIXME remove this line. its just to help debugging
 
     // Change cursor position
     //if (ul->removed != NULL) {
@@ -476,8 +500,7 @@ void do_undo() {
         struct ent * h;
         if ((h = *ATBL(tbl, j->row, j->col))) clearent(h);
         struct ent * e_now = lookat(j->row, j->col);
-        (void) copyent(e_now, j, 0, 0, 0, 0, j->row, j->col, 0);
-        //(void) copyent(e_now, j, 0, 0, 0, 0, 0, 0, 0);
+        (void) copyent(e_now, j, 0, 0, 0, 0, 0, 0, 0);
         j = j->next;
     }
 
@@ -572,10 +595,19 @@ void do_redo() {
     int ori_curcol = curcol;
     int mf = modflg; // save modflag status
 
-    if (undo_list->p_ant == NULL && undo_list_pos == 0) ;
+    if (undo_list->p_ant == NULL && undo_list_pos == 0);
     else if (undo_list->p_sig != NULL) undo_list = undo_list->p_sig;
 
     struct undo * ul = undo_list;
+
+    // Remove 'ent' elements
+    struct ent * i = ul->removed;
+    while (i != NULL) {
+        struct ent * pp = *ATBL(tbl, i->row, i->col);
+        clearent(pp);
+        cleanent(pp);
+        i = i->next;
+    }
 
     // Make undo shift, if any
     if (ul->range_shift != NULL) {
@@ -610,14 +642,7 @@ void do_redo() {
         }
     }
 
-    // Remove 'ent' elements
-    struct ent * i = ul->removed;
-    while (i != NULL) {
-        struct ent * pp = *ATBL(tbl, i->row, i->col);
-        clearent(pp);
-        cleanent(pp);
-        i = i->next;
-    }
+    //update(TRUE);
 
     // Change cursor position
     //if (ul->p_sig != NULL && ul->p_sig->removed != NULL) {
@@ -631,8 +656,7 @@ void do_redo() {
         struct ent * h;
         if ((h = *ATBL(tbl, j->row, j->col))) clearent(h);
         struct ent * e_now = lookat(j->row, j->col);
-        (void) copyent(e_now, j, 0, 0, 0, 0, j->row, j->col, 0);
-        //(void) copyent(e_now, j, 0, 0, 0, 0, 0, 0, 0);
+        (void) copyent(e_now, j, 0, 0, 0, 0, 0, 0, 0);
         j = j->next;
     }
 
@@ -703,7 +727,7 @@ void do_redo() {
     curcol = ori_curcol;
 
     // increase modflg
-    modflg= mf + 1;
+    modflg = mf + 1;
 
     sc_info("Change: %d of %d", undo_list_pos + 1, len_undo_list());
     undo_list_pos++;
