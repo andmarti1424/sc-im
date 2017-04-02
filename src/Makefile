@@ -121,5 +121,5 @@ statres.h : gram.y
 clean:
 	rm -f $(OBJS)
 	rm -f *res.h $(YTAB).h
-	rm -f debug core gram.c y.output pxmalloc.c pvmtbl.c tags $(name)qref
+	rm -f core gram.c y.output pxmalloc.c pvmtbl.c tags $(name)qref
 	rm -f qhelp.c $(name)
