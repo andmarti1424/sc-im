@@ -8,7 +8,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <wchar.h>
-#include <ncurses.h>
 #include <sys/wait.h>
 #include <wordexp.h>
 
@@ -29,7 +28,7 @@
 #include "y.tab.h"
 #include "xlsx.h"
 #include "xls.h"
-#include "screen.h"
+#include "tui.h"
 
 extern struct ent * freeents;
 

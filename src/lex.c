@@ -1,6 +1,5 @@
 #include <sys/types.h>
 #include <string.h>
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <signal.h>
@@ -9,6 +8,7 @@
 #include <unistd.h>
 #include <math.h>
 #include <limits.h>
+
 #include "lex.h"
 #include "sc.h"
 #include "conf.h"
@@ -48,7 +48,7 @@ struct key statres[] = {
 };
 
 #include "macros.h"
-#include "screen.h"
+#include "tui.h"
 #include "range.h"
 #include "color.h" // for set_ucolor
 

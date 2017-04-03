@@ -3,7 +3,7 @@
 #include <wchar.h>
 #include <wctype.h>
 #include "cmds.h"
-#include "screen.h"
+#include "tui.h"
 #include "buffer.h"
 #include "sc.h"    // for rescol
 #include "cmds_edit.h"

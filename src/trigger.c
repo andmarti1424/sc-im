@@ -13,7 +13,6 @@ Triggers need mode,type,file,function flags
 #include <sys/types.h>
 #include <string.h>
 #include <stdlib.h>      // for atoi
-#include <ncurses.h>
 #include <ctype.h>
 #include <unistd.h>
 #include <stdio.h>
@@ -25,11 +24,12 @@ Triggers need mode,type,file,function flags
 #include "utils/string.h"
 #include "range.h"
 #include "color.h"
-#include "screen.h"
+#include "tui.h"
 #include "undo.h"
 #include "conf.h"
 #include "cmds.h"
 #include "trigger.h"
+
 #ifdef XLUA
 #include "lua.h"
 #endif
@@ -45,8 +45,8 @@ void set_trigger(int r, int c, int rf, int cf, char * str) {
     struct dictionary * d = create_dictionary();
 
     // Remove quotes
-    if (str[0]=='"') del_char(str, 0);
-    if (str[strlen(str)-1]=='"') del_char(str, strlen(str)-1);
+    if (str[0] == '"') del_char(str, 0);
+    if (str[strlen(str)-1] == '"') del_char(str, strlen(str)-1);
 
     parse_str(d, str);
 
@@ -62,8 +62,8 @@ void set_trigger(int r, int c, int rf, int cf, char * str) {
 
     struct ent * n;
     int i, j;
-    for (i=r; i<=rf; i++) {
-        for (j=c; j<=cf; j++) {
+    for (i = r; i <= rf; i++) {
+        for (j = c; j <= cf; j++) {
             // action
             n = lookat(i, j);
             if (n->trigger == NULL)
@@ -73,20 +73,20 @@ void set_trigger(int r, int c, int rf, int cf, char * str) {
                 free(n->trigger->function);
             }
             n->trigger->file = strdup(get(d,"file"));
-            n->trigger->function=strdup(get(d,"function"));
+            n->trigger->function = strdup(get(d,"function"));
             int tmp;
-            if (strcmp(get(d,"mode"), "R") == 0) tmp=TRG_READ;
-            if (strcmp(get(d,"mode"), "W") == 0) tmp=TRG_WRITE;
-            if (strcmp(get(d,"mode"), "RW")== 0) tmp=TRG_READ | TRG_WRITE;
+            if (strcmp(get(d,"mode"), "R") == 0) tmp = TRG_READ;
+            if (strcmp(get(d,"mode"), "W") == 0) tmp = TRG_WRITE;
+            if (strcmp(get(d,"mode"), "RW")== 0) tmp = TRG_READ | TRG_WRITE;
 #ifdef XLUA
-            if (strcmp(get(d,"type"), "LUA")== 0) tmp|=TRG_LUA;
+            if (strcmp(get(d,"type"), "LUA")== 0) tmp |= TRG_LUA;
 #endif
             if (strcmp(get(d,"type"), "C")== 0) {
                 char * error;
                 char buffer[PATHLEN];
                 char buffer1[PATHLEN];
                 tmp |= TRG_C;
-                sprintf(buffer,"module/%s",n->trigger->file);
+                sprintf(buffer, "module/%s", n->trigger->file);
 
                 if(plugin_exists(buffer,strlen(buffer),buffer1))
                     n->trigger->handle=dlopen(buffer1,RTLD_LAZY);
@@ -100,10 +100,9 @@ void set_trigger(int r, int c, int rf, int cf, char * str) {
                     exit(1);
                 }
             }
-            n->trigger->flag=tmp;
+            n->trigger->flag = tmp;
         }
     }
-
     destroy_dictionary(d);
     return;
 }
@@ -116,8 +115,8 @@ void del_trigger(int r, int c, int rf, int cf ) {
 
     struct ent * n;
     int i, j;
-    for (i=r; i<=rf; i++) {
-        for (j=c; j<=cf; j++) {
+    for (i = r; i <= rf; i++) {
+        for (j = c; j <= cf; j++) {
            // action
            n = lookat(i, j);
            if (n->trigger != NULL ) {
@@ -127,7 +126,7 @@ void del_trigger(int r, int c, int rf, int cf ) {
                free(n->trigger->file);
                free(n->trigger->function);
                free(n->trigger);
-               n->trigger=NULL;
+               n->trigger = NULL;
            }
         }
     }
@@ -137,7 +136,7 @@ void del_trigger(int r, int c, int rf, int cf ) {
 static int in_trigger = 0;
 
 void do_trigger( struct ent *p , int rw) {
-    struct trigger *trigger = p->trigger;
+    struct trigger * trigger = p->trigger;
     if(in_trigger) return;
     in_trigger = 1;
 #ifdef XLUA
@@ -153,35 +152,30 @@ void do_trigger( struct ent *p , int rw) {
 void do_C_Trigger_cell(struct ent * p, int rw) {
     int (*function)(struct ent *, int );
 
-    function=p->trigger->c_function;
+    function = p->trigger->c_function;
     printf ("%d\n", (*function)(p,rw ));
     return;
 }
 
-
-
-
-int plugin_exists(char *name, int len, char *path) {
-    FILE *fp;
-    static char *HomeDir;
+int plugin_exists(char * name, int len, char * path) {
+    FILE * fp;
+    static char * HomeDir;
 
     if ((HomeDir = getenv("HOME"))) {
-        strcpy((char *)path, HomeDir);
-        strcat((char *)path, "/.scim/");
-        strncat((char *)path, name, len);
-        if ((fp = fopen((char *)path, "r"))) {
+        strcpy((char *) path, HomeDir);
+        strcat((char *) path, "/.scim/");
+        strncat((char *) path, name, len);
+        if ((fp = fopen((char *) path, "r"))) {
             fclose(fp);
             return 1;
         }
     }
-    strcpy((char *)path, HELP_PATH);
-    strcat((char *)path, "/");
-    strncat((char *)path, name, len);
-    if ((fp = fopen((char *)path, "r"))) {
+    strcpy((char *) path, HELP_PATH);
+    strcat((char *) path, "/");
+    strncat((char *) path, name, len);
+    if ((fp = fopen((char *) path, "r"))) {
         fclose(fp);
         return 1;
     }
     return 0;
 }
-
-

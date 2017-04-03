@@ -1,7 +1,8 @@
 #include <ncurses.h>
 #include <stdlib.h>
+
 #include "utils/string.h"
-#include "screen.h"
+#include "tui.h"
 #include "buffer.h"
 #include "marks.h"
 #include "macros.h"

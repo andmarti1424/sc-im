@@ -1,12 +1,11 @@
 #include <sys/time.h>
 #include <string.h>
 #include <ctype.h>   // for isdigit
-#include <ncurses.h>
 #include <stdlib.h>
 #include <wchar.h>
 #include <wctype.h>
 
-#include "screen.h"
+#include "tui.h"
 #include "maps.h"
 #include "cmds.h"
 #include "history.h"

@@ -1,5 +1,4 @@
 #include <signal.h>
-#include <ncurses.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
@@ -13,7 +12,7 @@
 #include "main.h"
 #include "shift.h"
 #include "macros.h"
-#include "screen.h"
+#include "tui.h"
 #include "input.h"
 #include "marks.h"
 #include "maps.h"

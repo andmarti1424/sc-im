@@ -12,7 +12,7 @@
 #include "cmds.h"
 #include "utils/string.h"
 #include "utils/dictionary.h"
-#include "screen.h"
+#include "tui.h"
 #include "file.h"
 #include "main.h"
 #include "interp.h"

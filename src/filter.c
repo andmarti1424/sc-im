@@ -1,15 +1,16 @@
 #include <string.h>
 #include <stdio.h>
+#include <ctype.h>             // for isalpha toupper
+#include <stdlib.h>
+
 #include "macros.h"
-#include "screen.h"
+#include "tui.h"
 #include "color.h"
 #include "conf.h"
 #include "xmalloc.h"
 #include "filter.h"
 #include "math.h"
 #include "utils/string.h"
-#include <ctype.h>   //for isalpha toupper
-#include <stdlib.h>
 #include "sc.h"
 #include "cmds.h"
 

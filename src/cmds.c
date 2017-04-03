@@ -8,7 +8,7 @@
 #include "marks.h"
 #include "cmds.h"
 #include "buffer.h"
-#include "screen.h"
+#include "tui.h"
 #include "conf.h"    // for conf parameters
 #include "color.h"   // for set_ucolor
 #include "xmalloc.h" // for scxfree

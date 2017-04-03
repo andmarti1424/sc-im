@@ -1,15 +1,15 @@
-#include <ncurses.h>
 #include <stdlib.h>
+
 #include "sc.h"
 #include "xmalloc.h"
 #include "macros.h"
 #include "color.h"
 #include "conf.h"
 
-extern void free();
-extern void exit();
-
 #define MAGIC    ((double) 1234567890.12344)
+
+extern void free();
+extern int shall_quit;
 
 char * scxmalloc(unsigned n) {
     //register char *ptr;
@@ -50,6 +50,6 @@ void scxfree(char *p) {
 
 void fatal(char * str) {
     //fprintf(stderr,"%s\n", str);
-    //exit(1);
     sc_error("%s", str);
+    shall_quit = 2;
 }

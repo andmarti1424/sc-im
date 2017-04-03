@@ -1,12 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <setjmp.h>
+#include <math.h>
+
 #include "dep_graph.h"
 #include "interp.h"
-#include "screen.h"    // for show_text
+#include "tui.h"    // for show_text
 #include "sc.h"
-#include <setjmp.h>
-#include "xmalloc.h" // for scxfree
-#include <math.h>
+#include "xmalloc.h"   // for scxfree
 #include "macros.h"
 #include "trigger.h"
 

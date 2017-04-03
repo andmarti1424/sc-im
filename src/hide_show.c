@@ -1,7 +1,8 @@
 #include <stdlib.h>
+
 #include "sc.h"
 #include "macros.h"
-#include "screen.h"
+#include "tui.h"
 #include "hide_show.h"
 #include "color.h"   // for set_ucolor
 #include "conf.h"

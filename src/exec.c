@@ -10,7 +10,7 @@
 #include "conf.h"
 #include "color.h"
 #include "utils/string.h"
-#include "screen.h"
+#include "tui.h"
 #include "sc.h"
 #include "main.h"     // exit_app
 

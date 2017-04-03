@@ -1,15 +1,13 @@
 #include <stdio.h>
-#include <ncurses.h>
+#include <stdlib.h> // for atoi
 #include <unistd.h>
+
 #include "vmtbl.h"
 #include "sc.h"
 #include "macros.h"
 #include "color.h"  // for set_ucolor
 #include "conf.h"   // for set_ucolor
 #include "trigger.h"
-#include <stdlib.h> // for atoi
-
-//LINUX - PSC not def
 
 #define ATBL_P(tbl, row, col)    (*(tbl + row) + (col))
 

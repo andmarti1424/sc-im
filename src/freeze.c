@@ -1,7 +1,8 @@
 #include <stdlib.h>
+
 #include "freeze.h"
 #include "macros.h"
-#include "screen.h"
+#include "tui.h"
 
 struct frange * freeze_ranges = NULL;
 

@@ -3,9 +3,10 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include <limits.h>
+
 #include "sc.h"
 #include "macros.h"
-#include "screen.h"
+#include "tui.h"
 #include "string.h"
 #include "color.h"
 #include "utils/string.h"
@@ -14,7 +15,7 @@
 
 static char ** long_help;
 static int delta = 0;
-static int max; 
+static int max;
 static int look_result = -1;
 static char word_looked[50] = "";
 

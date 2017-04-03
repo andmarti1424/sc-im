@@ -1,10 +1,11 @@
 #include <ctype.h>
 #include <stdlib.h>
+
 #include "yank.h"
 #include "marks.h"
 #include "cmds.h"
 #include "conf.h"
-#include "screen.h"
+#include "tui.h"
 #include "color.h"   // for set_ucolor
 #include "cmds_edit.h"
 #include "history.h"

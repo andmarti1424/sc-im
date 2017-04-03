@@ -40,7 +40,7 @@
 #define MOVEMENT_CMD     2
 
 #include <ncurses.h>
-extern WINDOW * input_win;
+//extern WINDOW * input_win;
 
 #define N_INIT_PAIRS      19
 

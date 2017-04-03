@@ -25,7 +25,7 @@
 #include "trigger.h"
 #include "utils/string.h"
 #include "main.h"
-#include "screen.h"
+#include "tui.h"
 #include "conf.h"
 
 extern FILE * fdoutput;

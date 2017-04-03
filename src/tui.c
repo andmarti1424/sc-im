@@ -1,16 +1,17 @@
 /*
-main_win: window that loads the spreadsheetssword:
-
-    input_win: stdin and state bar window
-*/
+ * main_win: window that loads the spreadsheetssword:
+ *
+ * input_win: stdin and state bar window
+ */
 #include <string.h>
 #include <ncurses.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include <locale.h>
+
 #include "input.h"
-#include "screen.h"
+#include "tui.h"
 #include "range.h"
 #include "sc.h"
 #include "cmds.h"
@@ -128,7 +129,6 @@ void do_welcome() {
 
     return;
 }
-
 
 // function that refreshes grid of screen
 // if header flag is set, the first column of screen gets refreshed

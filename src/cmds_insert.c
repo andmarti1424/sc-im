@@ -1,9 +1,10 @@
-#include "cmds_insert.h"
-#include "cmds.h"
-#include "screen.h"
 #include <string.h>
 #include <wchar.h>
 #include <stdlib.h>
+
+#include "cmds_insert.h"
+#include "cmds.h"
+#include "tui.h"
 #include "buffer.h"
 #include "sc.h"            // for rescol
 #include "utils/string.h"

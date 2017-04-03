@@ -1,6 +1,4 @@
-/*
-Adaptation of Chuck Martin's code - <nrocinu@myrealbox.com>
- */
+/* Adaptation of Chuck Martin's code - <nrocinu@myrealbox.com> */
 
 #include <sys/types.h>
 #include <string.h>
@@ -8,7 +6,7 @@ Adaptation of Chuck Martin's code - <nrocinu@myrealbox.com>
 #include <ctype.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <ncurses.h>
+
 #include "macros.h"
 #include "yank.h"
 #include "cmds.h"
