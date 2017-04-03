@@ -1009,8 +1009,6 @@ void do_normalmode(struct block * buf) {
         case ctl('r'):
             #ifdef UNDO
             do_redo();
-            // sync_refs();
-            //EvalAll();
             update(TRUE);
             break;
             #else
@@ -1055,17 +1053,6 @@ void do_normalmode(struct block * buf) {
             }
 
         case ctl('l'):
-            /*
-            endwin();
-            start_screen();
-            clearok(stdscr, TRUE);
-            update(TRUE);
-            flushinp();
-            show_header(input_win);
-            show_celldetails(input_win);
-            wrefresh(input_win);
-            update(TRUE);
-            */
             winchg();
             break;
 

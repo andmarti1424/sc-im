@@ -131,17 +131,19 @@ void do_welcome() {
 
 
 // function that refreshes grid of screen
-// if header flag is set, it refresh the first column of screen.
+// if header flag is set, the first column of screen gets refreshed
 void update(int header) {
 
-    #ifdef USECOLORS
-    wbkgd(main_win, COLOR_PAIR((ucolors[DEFAULT].fg+1) * 9 + ucolors[DEFAULT].bg + 2));
-    wbkgd(input_win, COLOR_PAIR((ucolors[DEFAULT].fg+1) * 9 + ucolors[DEFAULT].bg + 2));
-    #endif
     if (loading) return;
     if (cmd_multiplier > 1) return;
     if (atoi(get_conf_value("nocurses"))) return;
 
+    #ifdef USECOLORS
+    if (header) {
+        wbkgd(main_win, COLOR_PAIR((ucolors[DEFAULT].fg+1) * 9 + ucolors[DEFAULT].bg + 2));
+        wbkgd(input_win, COLOR_PAIR((ucolors[DEFAULT].fg+1) * 9 + ucolors[DEFAULT].bg + 2));
+    }
+    #endif
     // Clean from top to bottom
     if (header) {
         wmove(main_win, 0, rescol);
@@ -189,8 +191,7 @@ void update(int header) {
     wrefresh(main_win);
 
     // Show cell details in header (first row)
-    if (header)
-        show_celldetails(input_win);
+    if (header) show_celldetails(input_win);
 
     // print mode
     (void) print_mode(input_win);
