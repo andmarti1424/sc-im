@@ -53,8 +53,8 @@ void shift(int r, int c, int rf, int cf, wchar_t type) {
             while (ic--) shift_range(-ic, 0, r, c, rf, cf);
             if (atoi(get_conf_value("autocalc")) && ! loading) EvalAll();
 #ifdef UNDO
-            // update(TRUE); this is used just for make debugging easier
-            for (i = 0; deps != NULL && i < deps->vf; i++)
+            // update(TRUE); this is used just to make debugging easier
+            for (i = 0; deps != NULL && i < deps->vf; i++) // TODO here save just ents that are off the shifted range
                 copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'a');
 #endif
             break;
@@ -65,16 +65,21 @@ void shift(int r, int c, int rf, int cf, wchar_t type) {
 #ifdef UNDO
             copy_to_undostruct(r, c, rf, cf + (cf-c+1) * (cmd_multiplier - 1), 'd');
             save_undo_range_shift(0, -cmd_multiplier, r, c, rf, cf + (cf-c+1) * (cmd_multiplier - 1));
-
             ents_that_depends_on_range(r, c, rf, cf + (cf-c+1) * (cmd_multiplier - 1));
-            for (i = 0; deps != NULL && i < deps->vf; i++)
+            for (i = 0; deps != NULL && i < deps->vf; i++) {
                 copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'd');
+            }
 #endif
             while (ic--) shift_range(0, -ic, r, c, rf, cf);
+
             if (atoi(get_conf_value("autocalc")) && ! loading) EvalAll();
+            //update(TRUE); // this is used just to make debugging easier
 #ifdef UNDO
-            for (i = 0; deps != NULL && i < deps->vf; i++)
-                copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'a');
+            for (i = 0; deps != NULL && i < deps->vf; i++) {
+                if (deps[i].vp->col > cf || deps[i].vp->col <= c) {
+                    copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'a');
+                }
+            }
 #endif
             break;
 

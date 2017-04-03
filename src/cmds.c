@@ -130,7 +130,7 @@ void deletecol(int col, int mult) {
     copy_to_undostruct(0, col, maxrow, col - 1 + mult, 'd');
     save_undo_range_shift(0, -mult, 0, col, maxrow, col - 1 + mult);
 
-    // here we save in undostruct, all the ents that depends on the deleted one (before change) 
+    // here we save in undostruct, all the ents that depends on the deleted one (before change)
     extern struct ent_ptr * deps;
     int i;
     ents_that_depends_on_range(0, col, maxrow, col+mult);
@@ -150,7 +150,7 @@ void deletecol(int col, int mult) {
 
 #ifdef UNDO
     // here we save in undostruct, all the ents that depends on the deleted one (after change)
-    for (i = 0; deps != NULL && i < deps->vf; i++)
+    for (i = 0; deps != NULL && i < deps->vf; i++) // TODO here save just ents that are off the shifted range
         copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'a');
 
     if (deps != NULL) free(deps);
@@ -699,7 +699,7 @@ void deleterow(int row, int mult) {
 
 #ifdef UNDO
     // here we save in undostruct, all the ents that depends on the deleted one (after the change)
-    for (i = 0; deps != NULL && i < deps->vf; i++)
+    for (i = 0; deps != NULL && i < deps->vf; i++) // TODO here save just ents that are off the shifted range
         copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'a');
 
     if (deps != NULL) free(deps);

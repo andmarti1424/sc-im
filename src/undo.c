@@ -444,7 +444,7 @@ void do_undo() {
 
     struct undo * ul = undo_list;
 
-
+    // removed added ents
     struct ent * i = ul->added;
     while (i != NULL) {
         struct ent * pp = *ATBL(tbl, i->row, i->col);
