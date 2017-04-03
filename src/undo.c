@@ -543,7 +543,7 @@ void do_undo() {
 
         for (i=0; i < size; i++) {
            if (uf->cols[i].type == 'R') {
-               fwidth[uf->cols[i].col]     = uf->cols[i].fwidth;
+               fwidth[uf->cols[i].col]    = uf->cols[i].fwidth;
                precision[uf->cols[i].col] = uf->cols[i].precision;
                realfmt[uf->cols[i].col]   = uf->cols[i].realfmt;
            }
@@ -699,7 +699,7 @@ void do_redo() {
 
         for (i=0; i < size; i++) {
             if (uf->cols[i].type == 'A') {
-                fwidth[uf->cols[i].col]     = uf->cols[i].fwidth;
+                fwidth[uf->cols[i].col]    = uf->cols[i].fwidth;
                 precision[uf->cols[i].col] = uf->cols[i].precision;
                 realfmt[uf->cols[i].col]   = uf->cols[i].realfmt;
             }

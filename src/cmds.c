@@ -136,7 +136,8 @@ void deletecol(int col, int mult) {
     ents_that_depends_on_range(0, col, maxrow, col);
     for (i = 0; deps != NULL && i < deps->vf; i++)
         copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'd');
-    add_undo_col_format(col-mult+1, 'R', fwidth[curcol], precision[curcol], realfmt[curcol]);
+    for (i=col; i < col + mult; i++)
+        add_undo_col_format(i, 'R', fwidth[i], precision[i], realfmt[i]);
 #endif
 
     fix_marks(0, -mult, 0, maxrow,  col + mult -1, maxcol);
