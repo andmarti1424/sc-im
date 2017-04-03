@@ -650,62 +650,14 @@ void do_normalmode(struct block * buf) {
             if (bs != 2) return;
             int ic = cmd_multiplier; // orig
 
-        // deleterow
+            // deleterow
             if (buf->pnext->value == L'r') {
                 deleterow(currow, ic);
                 if (cmd_multiplier > 0) cmd_multiplier = 0;
 
-        // deletecol
+            // deletecol
             } else if (buf->pnext->value == L'c') {
-                if (any_locked_cells(0, curcol, maxrow, curcol + cmd_multiplier)) {
-                    sc_error("Locked cells encountered. Nothing changed");
-                    return;
-                }
-#ifdef UNDO
-                create_undo_action();
-                copy_to_undostruct(0, curcol, maxrow, curcol - 1 + ic, 'd');
-                save_undo_range_shift(0, -ic, 0, curcol, maxrow, curcol - 1 + ic);
-#endif
-                fix_marks(0, -ic, 0, maxrow,  curcol - 1 + ic, maxcol); // FIXME
-                yank_area(0, curcol, maxrow, curcol + cmd_multiplier - 1, 'c', ic);
-
-#ifdef UNDO
-                extern struct ent_ptr * deps;
-                int i;
-#endif
-
-                while (ic--) {
-#ifdef UNDO
-                    add_undo_col_format(curcol-ic+1, 'R', fwidth[curcol], precision[curcol], realfmt[curcol]);
-
-                    // here we save in undostruct, all the ents that depends on the deleted one (before change)
-                    ents_that_depends_on_range(0, curcol, maxrow, curcol);
-                    for (i = 0; deps != NULL && i < deps->vf; i++)
-                        if (deps[i].vp->col != curcol)
-                             copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'd');
-#endif
-
-
-                    deletecol();
-
-                    // Eval only necessary ents
-                    //if (atoi(get_conf_value("autocalc")) && ! loading) EvalAll();
-#ifdef UNDO
-
-                    // here we save in undostruct, all the ents that depends on the deleted one (after change)
-                    for (i = 0; deps != NULL && i < deps->vf; i++) {
-                        //if (deps[i].vp->col >= curcol)
-                        //    copy_to_undostruct(deps[i].vp->row, deps[i].vp->col+1, deps[i].vp->row, deps[i].vp->col+1, 'a');
-                        //else
-                            copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'a');
-                    }
-                    if (deps != NULL) free(deps);
-                    deps = NULL;
-#endif
-                }
-#ifdef UNDO
-                end_undo_action();
-#endif
+                deletecol(curcol, ic);
                 if (cmd_multiplier > 0) cmd_multiplier = 0;
 
             } else if (buf->pnext->value == L'd') {

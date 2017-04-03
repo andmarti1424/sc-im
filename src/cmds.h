@@ -25,6 +25,7 @@ void insert_col(int after);
 void deleterow(int row, int mult);
 void int_deleterow(int row, int multi);
 void deletecol();
+void int_deletecol(int col, int mult);
 void formatcol(int c);
 void del_selected_cells();
 struct ent * lookat(int row, int col); // return pointer to 'ent' of cell. Create it if it doesn't exist

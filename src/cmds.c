@@ -120,75 +120,102 @@ void syncref(register struct enode * e) {
     return;
 }
 
-// Delete a column
-void deletecol() {
-    int r, c, i;
-    struct ent ** pp;
-
-    if (any_locked_cells(0, curcol, maxrow, curcol)) {
-        sc_info("Locked cells encountered. Nothing changed");
+void deletecol(int col, int mult) {
+    if (any_locked_cells(0, col, maxrow, col + mult)) {
+        sc_error("Locked cells encountered. Nothing changed");
         return;
     }
+#ifdef UNDO
+    create_undo_action();
+    copy_to_undostruct(0, col, maxrow, col - 1 + mult, 'd');
+    save_undo_range_shift(0, -mult, 0, col, maxrow, col - 1 + mult);
 
-    // mark ent of column to erase with is_deleted flag
-    for (r = 0; r <= maxrow; r++) {
-        pp = ATBL(tbl, r, curcol);
-        if ( *pp != NULL ) {
-            mark_ent_as_deleted(*pp, TRUE);
-            //clearent(*pp);
-            //free(*pp);
-            *pp = NULL;
-        }
-    }
-
-    /*
+    // here we save in undostruct, all the ents that depends on the deleted one (before change) 
     extern struct ent_ptr * deps;
-    int n = 0;
-    struct ent * p;
-    //ents_that_depends_on_range(0, curcol, maxrow, curcol);
-    if (deps != NULL) {
-         n = deps->vf;
-         for (i = 0; i < n; i++)
-             if ((p = *ATBL(tbl, deps[i].vp->row, deps[i].vp->col)) && p->expr)
-                 EvalJustOneVertex(p, deps[i].vp->row, deps[i].vp->col, 0);
-    }*/
-    EvalAll();
+    int i;
+    ents_that_depends_on_range(0, col, maxrow, col);
+    for (i = 0; deps != NULL && i < deps->vf; i++)
+        copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'd');
+    add_undo_col_format(col-mult+1, 'R', fwidth[curcol], precision[curcol], realfmt[curcol]);
+#endif
 
-    // Copy references from right column cells to left column (which gets removed)
-    for (r = 0; r <= maxrow; r++) {
-        for (c = curcol; c < maxcol; c++) {
-            pp = ATBL(tbl, r, c);
+    fix_marks(0, -mult, 0, maxrow,  col + mult -1, maxcol);
+    if (!loading) yank_area(0, col, maxrow, col + mult - 1, 'c', mult);
 
-            // nota: pp[1] = ATBL(tbl, r, c+1);
-            if ( pp[1] != NULL ) pp[1]->col--;
-            pp[0] = pp[1];
+    // do the job
+    int_deletecol(col, mult);
+
+    if (!loading) modflg++;
+
+#ifdef UNDO
+    // here we save in undostruct, all the ents that depends on the deleted one (after change)
+    for (i = 0; deps != NULL && i < deps->vf; i++)
+        copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'a');
+
+    if (deps != NULL) free(deps);
+    deps = NULL;
+
+    end_undo_action();
+#endif
+    return;
+}
+
+// Delete a column - internal function
+// parameters: col = col to delete, multi = cmds multiplier.(commonly 1)
+void int_deletecol(int col, int mult) {
+    register struct ent ** pp;
+    int r, c, i;
+
+    while (mult--) {
+        // mark ent of column to erase with is_deleted flag
+        for (r = 0; r <= maxrow; r++) {
+            pp = ATBL(tbl, r, col);
+            if ( *pp != NULL ) {
+                mark_ent_as_deleted(*pp, TRUE);
+                //clearent(*pp);
+                //free(*pp);
+                *pp = NULL;
+            }
         }
 
-        // Free last column memory (Could also initialize 'ent' to zero with `cleanent`).
-        pp = ATBL(tbl, r, maxcol);
-        *pp = (struct ent *) 0;
+        EvalAll();
+
+        // Copy references from right column cells to left column (which gets removed)
+        for (r = 0; r <= maxrow; r++) {
+            for (c = col; c < maxcol; c++) {
+                pp = ATBL(tbl, r, c);
+
+                // nota: pp[1] = ATBL(tbl, r, c+1);
+                if ( pp[1] != NULL ) pp[1]->col--;
+                pp[0] = pp[1];
+            }
+
+            // Free last column memory (Could also initialize 'ent' to zero with `cleanent`).
+            pp = ATBL(tbl, r, maxcol);
+            *pp = (struct ent *) 0;
+        }
+
+        // Fix columns precision and width
+        for (i = col; i < maxcols - 2; i++) {
+            fwidth[i] = fwidth[i+1];
+            precision[i] = precision[i+1];
+            realfmt[i] = realfmt[i+1];
+            col_hidden[i] = col_hidden[i+1];
+        }
+
+        for (; i < maxcols - 1; i++) {
+            fwidth[i] = DEFWIDTH;
+            precision[i] = DEFPREC;
+            realfmt[i] = DEFREFMT;
+            col_hidden[i] = FALSE;
+        }
+
+        maxcol--;
+        sync_refs();
+        //flush_saved(); // we have to flush_saved only at exit.
+        //this is because we have to keep ents in case we want to UNDO?
     }
 
-    // Fix columns precision and width
-    for (i = curcol; i < maxcols - 2; i++) {
-        fwidth[i] = fwidth[i+1];
-        precision[i] = precision[i+1];
-        realfmt[i] = realfmt[i+1];
-        col_hidden[i] = col_hidden[i+1];
-    }
-
-    for (; i < maxcols - 1; i++) {
-        fwidth[i] = DEFWIDTH;
-        precision[i] = DEFPREC;
-        realfmt[i] = DEFREFMT;
-        col_hidden[i] = FALSE;
-    }
-
-    maxcol--;
-    sync_refs();
-    //flush_saved(); // we have to flush_saved only at exit.
-    //this is because we have to keep ents in case we want to UNDO?
-    modflg++;
     return;
 }
 
@@ -682,8 +709,8 @@ void deleterow(int row, int mult) {
     return;
 }
 
-// row = row to delete
-// multi = cmds multiplier. commonly 1
+// Delete a row - internal function
+// parameters: row = row to delete, multi = cmds multiplier.(commonly 1)
 void int_deleterow(int row, int mult) {
     register struct ent ** pp;
     int r, c;
