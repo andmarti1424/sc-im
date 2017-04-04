@@ -297,8 +297,6 @@ void read_stdin() {
     //sc_debug("finish reading");
 }
 
-
-
 // delete basic structures that depend on the loaded file
 void delete_structures() {
 
@@ -332,10 +330,7 @@ void delete_structures() {
     erasedb();
 }
 
-
-
 int exit_app(int status) {
-
     // free history
 #ifdef HISTORY_FILE
     if (! save_history(commandline_history, "w")) sc_error("Could not save commandline history");
@@ -373,8 +368,6 @@ int exit_app(int status) {
     return status;
 }
 
-
-
 // we read parameters passed to SC-IM executable
 // and store them in user_conf dictionary
 void read_argv(int argc, char ** argv) {
@@ -398,8 +391,6 @@ void read_argv(int argc, char ** argv) {
     return;
 }
 
-
-
 // we try to load a file
 void load_sc() {
     //sc_debug("start reading file");
@@ -421,23 +412,17 @@ void load_sc() {
     return;
 }
 
-
-
-// set the calculation order 
+// set the calculation order
 void setorder(int i) {
     if ((i == BYROWS) || (i == BYCOLS)) calc_order = i;
     return;
 }
-
-
 
 void nopipe() {
     sc_error("brokenpipe!");
     brokenpipe = TRUE;
     return;
 }
-
-
 
 // setup signals catched by SC-IM
 void signals() {
@@ -458,18 +443,13 @@ void signals() {
     return;
 }
 
-
-
 void sig_int() {
     if ( ! atoi(get_conf_value("debug")))
         sc_error("Got SIGINT. Press «:q<Enter>» to quit SC-IM");
     else
         shall_quit = 2;
-
     return;
 }
-
-
 
 void sig_abrt() {
     sc_error("Error !!! Quitting SC-IM.");
@@ -477,70 +457,8 @@ void sig_abrt() {
     return;
 }
 
-
-
 void sig_term() {
     sc_error("Got SIGTERM signal. Quitting SC-IM.");
     shall_quit = 2;
-    return;
-}
-
-
-
-// SIGWINCH signal !!!!
-// resize of terminal
-void winchg() {
-    extern SCREEN * sstdout;
-    endwin();
-    set_term(sstdout);
-
-    //start_screen();
-    clearok(stdscr, TRUE);
-    update(TRUE);
-    flushinp();
-    show_header(input_win);
-    show_celldetails(input_win);
-    wrefresh(input_win);
-    update(TRUE);
-    //signal(SIGWINCH, winchg);
-    return;
-}
-
-#include <stdlib.h>
-#include <stdarg.h>
-#include "conf.h"
-void sc_msg(char * s, int type, ...) {
-    if (type == DEBUG_MSG && ! atoi(get_conf_value("debug"))) return;
-    char t[BUFFERSIZE];
-    va_list args;
-    va_start(args, type);
-    vsprintf (t, s, args);
-    if ( ! atoi(get_conf_value("nocurses"))) {
-#ifdef USECOLORS
-        if (type == ERROR_MSG)
-            set_ucolor(input_win, &ucolors[ERROR_MSG]);
-        else
-            set_ucolor(input_win, &ucolors[INFO_MSG]);
-#endif
-        mvwprintw(input_win, 1, 0, "%s", t);
-        wclrtoeol(input_win);
-
-        if (type == DEBUG_MSG) {
-            wtimeout(input_win, -1);
-            wgetch(input_win);
-            wtimeout(input_win, TIMEOUT_CURSES);
-        }
-        wrefresh(input_win);
-
-    } else if (get_conf_value("output") != NULL && fdoutput != NULL) {
-        fwprintf(fdoutput, L"%s\n", t);
-    } else {
-        if (fwide(stdout, 0) >0)
-            wprintf(L"wide %s\n", t);
-        else
-            printf("nowide %s\n", t);
-        fflush(stdout);
-    }
-    va_end(args);
     return;
 }

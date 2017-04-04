@@ -1,4 +1,4 @@
-int main (int argc, char ** argv);
+int main(int argc, char ** argv);
 int exit_app(int status);
 void create_structures();
 void delete_structures();

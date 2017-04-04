@@ -1,15 +1,45 @@
-/*
- * main_win: window that loads the spreadsheetssword:
+/* this is the ncurses implementation of sc-im user interface, or called tui.
+ * it mainly consists on the following two windows:
+ * main_win: window that shows the grid
+ * input_win: state bar window and stdin input
  *
- * input_win: stdin and state bar window
+ * these are the functions called outside tui.c:
+ * ui_start_screen
+ * ui_stop_screen
+ * ui_do_welcome
+ * ui_update
+ * ui_handle_cursor
+ * ui_show_header
+ * ui_yyerror
+ * ui_show_text
+ * ui_sc_msg
+ * ui_winchg
+ *
+ * these are now called from outside and shouldnt:
+ * ui_clr_header
+ * ui_print_mult_pend
+ * ui_print_mode
+ * ui_show_celldetails
+ *
+ * these functions are here and should be out of tui.c:
+ * pad_and_align
+ * calc_offscr_sc_cols
+ * calc_offscr_sc_rows
+ *
+ * once these two are arranged, and main.c and input.c cleaned,
+ * anyone that want to port this to another ui, just
+ * need to reimplement the first group functions.
  */
 #include <string.h>
 #include <ncurses.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <time.h>
 #include <locale.h>
+#include <stdlib.h>
+#include <stdarg.h>
 
+#include "main.h"
+#include "conf.h"
 #include "input.h"
 #include "tui.h"
 #include "range.h"
@@ -93,6 +123,43 @@ void stop_screen() {
     endwin();
     set_term(sstderr);
     endwin();
+    return;
+}
+
+// sc_msg - used for sc_info, sc_error and sc_debug macros
+void sc_msg(char * s, int type, ...) {
+    if (type == DEBUG_MSG && ! atoi(get_conf_value("debug"))) return;
+    char t[BUFFERSIZE];
+    va_list args;
+    va_start(args, type);
+    vsprintf (t, s, args);
+    if ( ! atoi(get_conf_value("nocurses"))) {
+#ifdef USECOLORS
+        if (type == ERROR_MSG)
+            set_ucolor(input_win, &ucolors[ERROR_MSG]);
+        else
+            set_ucolor(input_win, &ucolors[INFO_MSG]);
+#endif
+        mvwprintw(input_win, 1, 0, "%s", t);
+        wclrtoeol(input_win);
+
+        if (type == DEBUG_MSG) {
+            wtimeout(input_win, -1);
+            wgetch(input_win);
+            wtimeout(input_win, TIMEOUT_CURSES);
+        }
+        wrefresh(input_win);
+
+    } else if (get_conf_value("output") != NULL && fdoutput != NULL) {
+        fwprintf(fdoutput, L"%s\n", t);
+    } else {
+        if (fwide(stdout, 0) >0)
+            wprintf(L"wide %s\n", t);
+        else
+            printf("nowide %s\n", t);
+        fflush(stdout);
+    }
+    va_end(args);
     return;
 }
 
@@ -886,7 +953,10 @@ void pad_and_align (char * str_value, char * numeric_value, int col_width, int a
     return;
 }
 
-// function that shows text in a child process
+/* function that shows text in a child process
+ * used for set, version, showmaps, print_graph,
+ * showfilters, hiddenrows and hiddencols commands
+ */
 void show_text(char * val) {
     int pid;
     char px[MAXCMD];
@@ -1064,4 +1134,22 @@ int calc_offscr_sc_rows() {
 
     while (freeze && currow > brrow && currow <= brrow + center_hidden_rows) center_hidden_rows--;
     return rows + center_hidden_rows - q;
+}
+
+// SIGWINCH signal !!!!
+// resize of terminal
+void winchg() {
+    endwin();
+    set_term(sstdout);
+
+    //start_screen();
+    clearok(stdscr, TRUE);
+    update(TRUE);
+    flushinp();
+    show_header(input_win);
+    show_celldetails(input_win);
+    wrefresh(input_win);
+    update(TRUE);
+    //signal(SIGWINCH, winchg);
+    return;
 }
