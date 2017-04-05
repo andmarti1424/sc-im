@@ -1,5 +1,4 @@
 #include <string.h>
-#include <ncurses.h>
 #include <wchar.h>
 #include <wctype.h>
 #include "cmds.h"
@@ -87,9 +86,9 @@ void do_editmode(struct block * sb) {
         return;
 
     } else if (sb->value == L'r') {         // r
-        curs_set(1);
+        //curs_set(1);
         if (ui_getch_b(&wi) != -1) inputline[real_inputline_pos] = wi;
-        curs_set(2);
+        //curs_set(2);
         ui_show_header();
         return;
 
@@ -225,7 +224,7 @@ void do_editmode(struct block * sb) {
         return;
 
     } else if (sb->value == L'R') {         // R
-        curs_set(1);
+        //curs_set(1);
         if (ui_getch_b(&wi) != -1) return;
         wint_t c = wi;
         while (c != OKEY_ENTER && c != -1) {
@@ -238,7 +237,7 @@ void do_editmode(struct block * sb) {
             if (ui_getch_b(&wi) != -1) return;
             c = wi;
         }
-        curs_set(2);
+        //curs_set(2);
 
 
     } else if (sb->value == L'd' || sb->value == L'c') {         // d or c
@@ -364,7 +363,6 @@ int for_word(int end_of_word, int delete, int big_word) {
     return 0;
 }
 
-// REVISADO
 void del_back_char() {      // x   DEL
     int max = wcswidth(inputline, wcslen(inputline));
     if (inputline_pos > max) return;
@@ -379,7 +377,6 @@ void del_back_char() {      // x   DEL
     return;
 }
 
-// REVISADO
 void del_for_char() {       // X    BS
     if ( ! wcslen(inputline) || ! real_inputline_pos ) return;
     int l = wcwidth(inputline[real_inputline_pos - 1]);

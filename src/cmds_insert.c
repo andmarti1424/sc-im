@@ -16,6 +16,8 @@
 char ori_insert_edit_submode;
 #endif
 
+extern void ins_in_line(wint_t d);
+
 void do_insertmode(struct block * sb) {
 
     if (sb->value == ctl('v') ) {  // VISUAL SUBMODE

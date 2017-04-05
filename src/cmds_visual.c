@@ -1,4 +1,3 @@
-#include <ncurses.h>
 #include <stdlib.h>
 
 #include "utils/string.h"
@@ -24,7 +23,6 @@ extern int cmd_multiplier;
 extern struct history * commandline_history;
 
 char visual_submode = '0';
-
 srange * r;                       // SELECTED RANGE!
 int moving = FALSE;
 
@@ -424,7 +422,6 @@ void do_visualmode(struct block * buf) {
     // delete selected range
     } else if (buf->value == L'x' || (buf->value == L'd' && buf->pnext->value == L'd') ) {
         del_selected_cells();
-
         exit_visualmode();
         curmode = NORMAL_MODE;
         ui_show_header();

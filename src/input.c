@@ -14,7 +14,6 @@
 #include "cmds_visual.h"
 #include "buffer.h"
 
-
 static wint_t wd;           // char read from stdin
 static int d;              // char read from stdin
 int return_value;          // return value of getch()

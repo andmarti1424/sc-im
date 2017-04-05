@@ -25,8 +25,6 @@ void set_comp(int i) {
 }
 
 #if defined HISTORY_FILE
-
-#include <ncurses.h>
 #include <stdlib.h>
 #include <fcntl.h>
 #include <unistd.h>
@@ -34,7 +32,6 @@ void set_comp(int i) {
 #include "history.h"
 #include "sc.h"
 #include "utils/string.h"
-
 
 struct history * create_history(char mode) {
     struct history * h = (struct history *) malloc (sizeof (struct history));

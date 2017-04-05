@@ -1,5 +1,4 @@
 #include <string.h>
-#include <ncurses.h>
 #include <wchar.h>
 #include <stdlib.h>
 #include <ctype.h>         // for isprint()
@@ -194,13 +193,6 @@ void do_commandmode(struct block * sb) {
         chg_mode('v');
         start_visualmode(currow, curcol, currow, curcol);
         return;
-
-
-
-
-
-
-
 
     } else if (sb->value == ctl('r') && get_bufsize(sb) == 2 &&        // C-r      // FIXME ???
         (sb->pnext->value - (L'a' - 1) < 1 || sb->pnext->value > 26)) {
@@ -780,8 +772,6 @@ void do_commandmode(struct block * sb) {
                 sc_error("XLS import support not compiled in");
                 chg_mode('.');
                 inputline[0] = L'\0';
-                //update(TRUE);
-                //return;
                 #endif
                 delim = 'x';
             } else if ( ! strncmp(cline, "i xlsx", 6) ) {
@@ -789,8 +779,6 @@ void do_commandmode(struct block * sb) {
                 sc_error("XLSX import support not compiled in");
                 chg_mode('.');
                 inputline[0]= L'\0';
-                //update(TRUE);
-                //return;
                 #endif
                 delim = 'y';
             }

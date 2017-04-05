@@ -1,6 +1,6 @@
-#include <ncurses.h>
 #include <wchar.h>
 #include <sys/time.h>                                                 // for struct timeval
+#include <ncurses.h>
 
 extern int multiplier;                                                // Multiplier
 extern int command_pending;                                           // Command pending
@@ -19,4 +19,3 @@ int has_cmd (struct block * buf, long timeout);
 void handle_mult(int * multiplier, struct block * buf, long timeout); // Handle multiplier ef.
 void exec_mult (struct block * buf, long timeout);
 void exec_single_cmd (struct block * sb);
-int wget_wch(WINDOW * win, wint_t * wch);
