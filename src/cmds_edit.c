@@ -233,10 +233,7 @@ void do_editmode(struct block * sb) {
                 inputline[real_inputline_pos] = c;
                 ++real_inputline_pos;
                 inputline_pos = wcswidth(inputline, real_inputline_pos);
-
-                mvwprintw(input_win, 0, 1 + rescol, "%ls", inputline);
-                wmove(input_win, 0, inputline_pos + 1 + rescol);
-                wrefresh(input_win);
+                ui_show_header();
             }
             if (ui_getch_b(&wi) != -1) return;
             c = wi;

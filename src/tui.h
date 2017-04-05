@@ -1,5 +1,6 @@
 #include <ncurses.h>
 #include <wchar.h>
+#include <lua.h>
 
 #define N_INIT_PAIRS      19
 #define DEFAULT_COLOR     -1
@@ -12,8 +13,6 @@
 #define CYAN              COLOR_CYAN
 #define WHITE             COLOR_WHITE
 
-extern WINDOW * main_win;
-extern WINDOW * input_win;
 extern int offscr_sc_rows, offscr_sc_cols;
 extern unsigned int curmode;
 extern struct srange * ranges;
@@ -46,3 +45,5 @@ void write_j(WINDOW * win, const char * word, const unsigned int row, const unsi
 
 void yyerror(char *err);               // error routine for yacc (gram.y)
 void show_text(char * val);
+void ui_bail(lua_State *L, char * msg);
+char * ui_query(char * initial_msg);

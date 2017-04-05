@@ -389,23 +389,16 @@ void do_normalmode(struct block * buf) {
 #ifdef HISTORY_FILE
             add(commandline_history, L"");
 #endif
-            ui_clr_header(0);
-            ui_print_mode();
-            wrefresh(input_win);
-
             handle_cursor();
             inputline_pos = 0;
             real_inputline_pos = 0;
+            ui_show_header();
             break;
 
         // enter visual mode
         case L'v':
             chg_mode('v');
-
-            ui_clr_header(0);
-            ui_print_mode();
-            wrefresh(input_win);
-
+            ui_show_header();
             handle_cursor();
             start_visualmode(currow, curcol, currow, curcol);
             break;
@@ -422,12 +415,9 @@ void do_normalmode(struct block * buf) {
             ori_insert_edit_submode = buf->value;
             add(insert_history, L"");
 #endif
-            ui_clr_header(0);
-            ui_print_mode();
-            wrefresh(input_win);
-
             inputline_pos = 0;
             real_inputline_pos = 0;
+            ui_show_header();
             break;
 
         // EDITION COMMANDS

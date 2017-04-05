@@ -260,8 +260,7 @@ void do_commandmode(struct block * sb) {
             break;
         }
         inputline_pos = wcswidth(inputline, real_inputline_pos);
-        wmove(input_win, 0, inputline_pos + 1 + rescol);
-        wrefresh(input_win);
+        ui_show_header();
         return;
 
     } else if (sb->value == '\t') {                  // TAB completion

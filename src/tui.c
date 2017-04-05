@@ -14,6 +14,7 @@
 
  * ui_yyerror
  * ui_show_text
+ * ui_bail
  * ui_sc_msg
  * ui_winchg
  * ui_print_mult_pend
@@ -1170,4 +1171,92 @@ void winchg() {
     update(TRUE);
     //signal(SIGWINCH, winchg);
     return;
+}
+
+#ifdef XLUA
+/* function to print errors of lua scripts */
+void ui_bail(lua_State *L, char * msg) {
+    extern char stderr_buffer[1024];
+    fprintf(stderr,"FATAL ERROR: %s: %s\n", msg, lua_tostring(L, -1));
+    move(0, 0);
+    clrtobot();
+    wrefresh(stdscr);
+    set_term(sstderr);
+    move(0, 0);
+    clrtobot();
+    clearok(stdscr, TRUE);
+    mvprintw(0, 0, "%s", stderr_buffer);
+    stderr_buffer[0]='\0';
+    fseek(stderr, 0, SEEK_END);
+    refresh();
+    getch();
+    set_term(sstdout);
+    clearok(stdscr, TRUE);
+    ui_show_header();
+    refresh();
+    update(TRUE);
+}
+#endif
+
+/* function to read text from stdin */
+char * ui_query(char * initial_msg) {
+    char * hline = (char *) malloc(sizeof(char) * BUFFERSIZE);
+    hline[0]='\0';
+
+    // curses is not enabled
+    if ( atoi(get_conf_value("nocurses"))) {
+        if (strlen(initial_msg)) wprintf(L"%s", initial_msg);
+
+        if (fgets(hline, BUFFERSIZE-1, stdin) == NULL)
+            hline[0]='\0';
+
+        clean_carrier(hline);
+        return hline;
+    }
+
+    // curses is enabled
+    int loading_o;
+    if (loading) {
+        loading_o=loading;
+        loading=0;
+        update(0);
+        loading=loading_o;
+    }
+    curs_set(1);
+
+    // show initial message
+    if (strlen(initial_msg)) sc_info(initial_msg);
+
+    // ask for input
+    wtimeout(input_win, -1);
+    notimeout(input_win, TRUE);
+    wmove(input_win, 0, rescol);
+    wclrtoeol(input_win);
+    wrefresh(input_win);
+    int d = wgetch(input_win);
+
+    while (d != OKEY_ENTER && d != OKEY_ESC) {
+        if (d == OKEY_BS || d == OKEY_BS2) {
+            del_char(hline, strlen(hline) - 1);
+        } else {
+            sprintf(hline + strlen(hline), "%c", d);
+        }
+
+        mvwprintw(input_win, 0, rescol, "%s", hline);
+        wclrtoeol(input_win);
+        wrefresh(input_win);
+        d = wgetch(input_win);
+    }
+    if (d == OKEY_ESC) hline[0]='\0';
+
+    // go back to spreadsheet
+    noecho();
+    curs_set(0);
+    wtimeout(input_win, TIMEOUT_CURSES);
+    wmove(input_win, 0,0);
+    wclrtoeol(input_win);
+    wmove(input_win, 1,0);
+    wclrtoeol(input_win);
+    wrefresh(input_win);
+    return hline;
 }

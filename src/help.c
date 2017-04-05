@@ -19,6 +19,9 @@ static int max;
 static int look_result = -1;
 static char word_looked[50] = "";
 
+extern WINDOW * main_win;
+extern WINDOW * input_win;
+
 // Load the contents of help_doc into memory
 int load_help () {
     register FILE * f;
