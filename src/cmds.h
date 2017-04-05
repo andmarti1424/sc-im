@@ -2,7 +2,6 @@
 #include <wchar.h>
 
 extern char insert_edit_submode;       // insert or edit submode
-extern WINDOW * main_win;
 extern wchar_t inputline[BUFFERSIZE];
 extern int inputline_pos;
 extern int real_inputline_pos;
@@ -21,7 +20,6 @@ void copyent(struct ent * n, struct ent * p, int dr, int dc, int r1, int c1, int
 void flush_saved();
 void insert_row(int after);
 void insert_col(int after);
-//void deleterow();
 void deleterow(int row, int mult);
 void int_deleterow(int row, int multi);
 void deletecol();

@@ -69,7 +69,7 @@ void bail(lua_State *L, char * msg){
 
     set_term(sstdout);
     clearok(stdscr, TRUE);
-    show_header(input_win);
+    ui_show_header();
     refresh();
     update(TRUE);
 }
@@ -130,21 +130,21 @@ static int l_setstr (lua_State *L) {
 
 static int l_getstr (lua_State *L) {
     int r,c;
-    
+
     //struct ent ** pp;
     struct ent *p;
     c = lua_tointeger(L, 1);  /* get argument */
     r = lua_tointeger(L, 2);
-   
+
     //sc_debug("setstr !!");
 
     p=lookat(r,c);
     if(p == 0) return 0;
     if(p->label !=0) {
-	lua_pushstring(L,p->label);
-	return 1;
+        lua_pushstring(L,p->label);
+        return 1;
     }
-    
+
     return 0;
 }
 

@@ -43,16 +43,13 @@ void handle_input(struct block * buffer) {
     while ( ! has_cmd(buffer, msec) && msec <= CMDTIMEOUT ) {
 
             // if command pending, refresh 'ef' only. Multiplier and cmd pending
-            if (cmd_pending) {
-                print_mult_pend(input_win);
-                wrefresh(input_win);
-            }
+            if (cmd_pending) ui_print_mult_pend();
 
             // Modify cursor state according to the current mode
             handle_cursor();
 
             // Read new character from stdin
-            return_value = wget_wch(input_win, & wd);
+            return_value = ui_getch(&wd);
             d = wd;
             if ( d == OKEY_ESC) {
                 break_waitcmd_loop(buffer);
@@ -74,8 +71,7 @@ void handle_input(struct block * buffer) {
                     msec = (m_tv.tv_sec - start_tv.tv_sec) * 1000L +
                            (m_tv.tv_usec - start_tv.tv_usec) / 1000L;
 
-                    print_mult_pend(input_win);
-                    wrefresh(input_win);
+                    ui_print_mult_pend();
                     continue;
             }
 
@@ -116,23 +112,19 @@ void handle_input(struct block * buffer) {
         // Reset multiplier
         cmd_multiplier = 0;
 
-        // Clean second line
-        //clr_header(input_win, 1); // commented on 22/06/2014
-
     // Execute command or mapping
     } else {
 
         cmd_pending = 0;
-        //if (curmode == NORMAL_MODE) show_header(input_win); commented on 08/06
 
         // Clean second line
-        clr_header(input_win, 1);
+        ui_clr_header(1);
 
         // Handle command and repeat as many times as the multiplier dictates
         handle_mult( &cmd_multiplier, buffer, msec );
     }
 
-    print_mult_pend(input_win);
+    ui_print_mult_pend();
 
     // Flush the buffer
     flush_buf(buffer);
@@ -168,9 +160,7 @@ void break_waitcmd_loop(struct block * buffer) {
     inputline[0] = L'\0';
 
     flush_buf(buffer);
-    //clr_header(input_win, 0);
-    //show_header(input_win);
-    print_mult_pend(input_win);
+    ui_print_mult_pend();
     update(TRUE);
     return;
 }

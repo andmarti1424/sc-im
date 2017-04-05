@@ -385,13 +385,14 @@ void do_normalmode(struct block * buf) {
 
         // enter command mode
         case L':':
-            clr_header(input_win, 0);
             chg_mode(':');
 #ifdef HISTORY_FILE
             add(commandline_history, L"");
 #endif
-            print_mode(input_win);
+            ui_clr_header(0);
+            ui_print_mode();
             wrefresh(input_win);
+
             handle_cursor();
             inputline_pos = 0;
             real_inputline_pos = 0;
@@ -400,10 +401,12 @@ void do_normalmode(struct block * buf) {
         // enter visual mode
         case L'v':
             chg_mode('v');
-            handle_cursor();
-            clr_header(input_win, 0);
-            print_mode(input_win);
+
+            ui_clr_header(0);
+            ui_print_mode();
             wrefresh(input_win);
+
+            handle_cursor();
             start_visualmode(currow, curcol, currow, curcol);
             break;
 
@@ -419,9 +422,10 @@ void do_normalmode(struct block * buf) {
             ori_insert_edit_submode = buf->value;
             add(insert_history, L"");
 #endif
-            clr_header(input_win, 0);
-            print_mode(input_win);
+            ui_clr_header(0);
+            ui_print_mode();
             wrefresh(input_win);
+
             inputline_pos = 0;
             real_inputline_pos = 0;
             break;
@@ -430,25 +434,24 @@ void do_normalmode(struct block * buf) {
         // edit cell (v)
         case L'e':
             if (locked_cell(currow, curcol)) return;
-            clr_header(input_win, 0);
+            ui_clr_header(0);
             inputline_pos = 0;
             real_inputline_pos = 0;
-            if (start_edit_mode(buf, 'v')) show_header(input_win);
+            if (start_edit_mode(buf, 'v')) ui_show_header();
             break;
 
         // edit cell (s)
         case L'E':
             if (locked_cell(currow, curcol)) return;
-            clr_header(input_win, 0);
+            ui_clr_header(0);
             inputline_pos = 0;
             real_inputline_pos = 0;
-            if (start_edit_mode(buf, 's')) show_header(input_win);
+            if (start_edit_mode(buf, 's')) ui_show_header();
             else {
                 sc_info("No string value to edit");
                 chg_mode('.');
-                show_celldetails(input_win);
-                print_mode(input_win);
-                wrefresh(input_win);
+                ui_print_mode();
+                ui_show_celldetails();
             }
             break;
 
@@ -1077,7 +1080,7 @@ void do_normalmode(struct block * buf) {
                 inputline_pos = 0;
                 real_inputline_pos = 0;
                 ins_in_line(buf->value);
-                show_header(input_win);
+                ui_show_header();
             }
     }
     return;

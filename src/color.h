@@ -1,4 +1,5 @@
 #include "macros.h"
+#include "tui.h"
 
 struct ucolor {
     int fg;

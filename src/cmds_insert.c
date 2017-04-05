@@ -29,7 +29,7 @@ void do_insertmode(struct block * sb) {
             real_inputline_pos--;
             int l = wcwidth(inputline[real_inputline_pos]);
             inputline_pos -= l;
-            show_header(input_win);
+            ui_show_header();
         }
 
     } else if (sb->value == OKEY_RIGHT) {  // RIGHT
@@ -37,7 +37,7 @@ void do_insertmode(struct block * sb) {
         if (inputline_pos < max) {
             int l = wcwidth(inputline[real_inputline_pos++]);
             inputline_pos += l;
-            show_header(input_win);
+            ui_show_header();
         }
 
 #ifdef INS_HISTORY_FILE
@@ -67,11 +67,7 @@ void do_insertmode(struct block * sb) {
         inputline_pos = wcswidth(inputline, real_inputline_pos);
 
         chg_mode(insert_edit_submode);
-        clr_header(input_win, 0);
-        print_mode(input_win);
-        wrefresh(input_win);
-        show_header(input_win);
-
+        ui_show_header();
         return;
 #endif
 
@@ -82,7 +78,7 @@ void do_insertmode(struct block * sb) {
         real_inputline_pos--;
         del_wchar(inputline, real_inputline_pos);
         inputline_pos -= l;
-        show_header(input_win);
+        ui_show_header();
 #ifdef INS_HISTORY_FILE
         if (insert_history->pos == 0)
             del_wchar(get_line_from_history(insert_history, insert_history->pos), real_inputline_pos); // Clean history
@@ -96,11 +92,11 @@ void do_insertmode(struct block * sb) {
         if (insert_history->pos == 0)
             del_wchar(get_line_from_history(insert_history, insert_history->pos), real_inputline_pos); // Clean history
 #endif
-        show_header(input_win);
+        //ui_show_header();
 
     } else if (sb->value == OKEY_TAB) {    // TAB
         chg_mode('e');
-        show_header(input_win);
+        ui_show_header();
 
     } else if (find_val(sb, OKEY_ENTER)) { // ENTER
         char ope[BUFFERSIZE] = "";
@@ -148,7 +144,7 @@ void do_insertmode(struct block * sb) {
         inputline_pos = 0;
         real_inputline_pos = 0;
         chg_mode('.');
-        clr_header(input_win, 0);
+        ui_clr_header(0);
 
         char * opt = get_conf_value("newline_action");
         switch (opt[0]) {
@@ -166,20 +162,20 @@ void do_insertmode(struct block * sb) {
     } else if (sb->value == OKEY_HOME) {   // HOME
         real_inputline_pos = 0;
         inputline_pos = wcswidth(inputline, real_inputline_pos);
-        show_header(input_win);
+        ui_show_header();
         return;
 
     } else if (sb->value == OKEY_END) {    // END
         real_inputline_pos = wcslen(inputline);
         inputline_pos = wcswidth(inputline, real_inputline_pos);
-        show_header(input_win);
+        ui_show_header();
         return;
 
     // Write new char !!
     } else if ( wcslen(inputline) < (COLS - 16) && sc_isprint(sb->value)) {
         //DEBUG sc_info("2: %d %lc", sb->value, sb->value);
         ins_in_line(sb->value);
-        show_header(input_win);
+        ui_show_header();
 #ifdef INS_HISTORY_FILE
         if (insert_history->pos == 0) {          // Only if editing the new command
             wchar_t * sl = get_line_from_history(insert_history, 0);
@@ -205,7 +201,7 @@ void do_insertmode(struct block * sb) {
             wcscat(sl, cline);                        // Insert into history
         }
 #endif
-        show_header(input_win);
+        ui_show_header();
         return;
     }
     return;

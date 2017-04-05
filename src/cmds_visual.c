@@ -132,7 +132,7 @@ void do_visualmode(struct block * buf) {
         exit_visualmode();
         chg_mode(c);
 
-        show_header(input_win);
+        ui_show_header();
         return;
 
     // moving to TRUE
@@ -318,16 +318,14 @@ void do_visualmode(struct block * buf) {
         set_range_mark(buf->pnext->value, rn);
         exit_visualmode();
         curmode = NORMAL_MODE;
-        clr_header(input_win, 0);
-        show_header(input_win);
+        ui_show_header();
 
     // auto_justify
     } else if (buf->value == ctl('j')) {
         auto_justify(r->tlcol, r->brcol, DEFWIDTH);  // auto justify columns
         exit_visualmode();
         curmode = NORMAL_MODE;
-        clr_header(input_win, 0);
-        show_header(input_win);
+        ui_show_header();
 
     // datefmt with locale D_FMT format
     } else if (buf->value == ctl('d')) {
@@ -349,8 +347,7 @@ void do_visualmode(struct block * buf) {
             dateformat(lookat(r->tlrow, r->tlcol), lookat(r->brrow, r->brcol), f);
         exit_visualmode();
         curmode = NORMAL_MODE;
-        clr_header(input_win, 0);
-        show_header(input_win);
+        ui_show_header();
         #else
             sc_info("Build made without USELOCALE enabled");
         #endif
@@ -362,8 +359,7 @@ void do_visualmode(struct block * buf) {
 
         exit_visualmode();
         curmode = NORMAL_MODE;
-        clr_header(input_win, 0);
-        show_header(input_win);
+        ui_show_header();
 
     // left / right / center align
     } else if (buf->value == L'{' || buf->value == L'}' || buf->value == L'|') {
@@ -389,8 +385,7 @@ void do_visualmode(struct block * buf) {
 
         exit_visualmode();
         curmode = NORMAL_MODE;
-        clr_header(input_win, 0);
-        show_header(input_win);
+        ui_show_header();
 
     // range lock / unlock // valueize
     } else if ( buf->value == L'r' && (buf->pnext->value == L'l' || buf->pnext->value == L'u' ||
@@ -406,8 +401,7 @@ void do_visualmode(struct block * buf) {
 
         exit_visualmode();
         curmode = NORMAL_MODE;
-        clr_header(input_win, 0);
-        show_header(input_win);
+        ui_show_header();
 
     // Zr Zc - Zap col or row
     } else if ( (buf->value == L'Z' || buf->value == L'S') && (buf->pnext->value == L'c' || buf->pnext->value == L'r')) {
@@ -425,8 +419,7 @@ void do_visualmode(struct block * buf) {
 
         exit_visualmode();
         curmode = NORMAL_MODE;
-        clr_header(input_win, 0);
-        show_header(input_win);
+        ui_show_header();
 
     // delete selected range
     } else if (buf->value == L'x' || (buf->value == L'd' && buf->pnext->value == L'd') ) {
@@ -434,26 +427,21 @@ void do_visualmode(struct block * buf) {
 
         exit_visualmode();
         curmode = NORMAL_MODE;
-        clr_header(input_win, 0);
-        show_header(input_win);
+        ui_show_header();
 
     // shift range
     } else if (buf->value == L's') {
         shift(r->tlrow, r->tlcol, r->brrow, r->brcol, buf->pnext->value);
         exit_visualmode();
         curmode = NORMAL_MODE;
-        clr_header(input_win, 0);
-        show_header(input_win);
+        ui_show_header();
 
     } else if (buf->value == L':') {
-        clr_header(input_win, 0);
-        wrefresh(input_win);
         chg_mode(':');
+        ui_show_header();
 #ifdef HISTORY_FILE
         add(commandline_history, L"");
 #endif
-        print_mode(input_win);
-        wrefresh(input_win);
         handle_cursor();
         inputline_pos = 0;
         real_inputline_pos = 0;

@@ -525,12 +525,6 @@ command:
                                      }
     |    S_FILTERON range            { enable_filters($2.left.vp, $2.right.vp);
                                      }
-                                          /* para debug
-                                          wtimeout(input_win, -1);
-                                          info("  ********* FILTERON");
-                                          int d = wgetch(input_win);
-                                          wtimeout(input_win, TIMEOUT_CURSES);
-                                          */
 /*
     |    S_GET strarg {
 /* This tmp hack is because readfile recurses back through yyparse.

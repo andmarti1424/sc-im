@@ -200,9 +200,8 @@ int main (int argc, char ** argv) {
         do_welcome();
         if ( ! curfile[0] && ! wcslen(stdin_buffer)) {
             // show mode and cell's details in status bar
-            show_celldetails(input_win);
-            print_mode(input_win);
-            wrefresh(input_win);
+            ui_print_mode();
+            ui_show_celldetails();
         } else {
             update(TRUE);
         }

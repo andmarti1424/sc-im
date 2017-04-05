@@ -672,6 +672,7 @@ FILE * openfile(char *fname, int *rpid, int *rfd) {
 // close a file opened by openfile(), if process wait for return
 void closefile(FILE *f, int pid, int rfd) {
     int temp;
+    wint_t wi;
 
     (void) fclose(f);
     if (pid) {
@@ -680,7 +681,7 @@ void closefile(FILE *f, int pid, int rfd) {
             printf("Press any key to continue ");
             fflush(stdout);
             cbreak();
-            get_key();
+            ui_getch_b(&wi);
         } else {
             close(rfd);
             if (! atoi(get_conf_value("nocurses"))) {

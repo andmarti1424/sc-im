@@ -131,13 +131,13 @@ void do_commandmode(struct block * sb) {
         real_inputline_pos--;
         del_wchar(inputline, real_inputline_pos);
         inputline_pos -= l;
-        show_header(input_win);
+        ui_show_header();
 
 #ifdef HISTORY_FILE
         if (commandline_history->pos == 0)
             del_wchar(get_line_from_history(commandline_history, commandline_history->pos), real_inputline_pos); // Clean history
 #endif
-        show_header(input_win);
+        ui_show_header();
         return;
 
     } else if (sb->value == OKEY_LEFT) {   // LEFT
@@ -145,7 +145,7 @@ void do_commandmode(struct block * sb) {
             real_inputline_pos--;
             int l = wcwidth(inputline[real_inputline_pos]);
             inputline_pos -= l;
-            show_header(input_win);
+            ui_show_header();
         }
         return;
 
@@ -154,7 +154,7 @@ void do_commandmode(struct block * sb) {
         if (inputline_pos < max) {
             int l = wcwidth(inputline[real_inputline_pos++]);
             inputline_pos += l;
-            show_header(input_win);
+            ui_show_header();
         }
         return;
 
@@ -166,7 +166,7 @@ void do_commandmode(struct block * sb) {
         if (commandline_history->pos == 0)
             del_wchar(get_line_from_history(commandline_history, commandline_history->pos), real_inputline_pos); // Clean history
 #endif
-        show_header(input_win);
+        ui_show_header();
         return;
 
 #ifdef HISTORY_FILE
@@ -185,7 +185,7 @@ void do_commandmode(struct block * sb) {
         commandline_history->pos += delta;
         wcscpy(inputline, get_line_from_history(commandline_history, commandline_history->pos));
         inputline_pos = wcswidth(inputline, real_inputline_pos);
-        show_header(input_win);
+        ui_show_header();
         return;
 #endif
 
@@ -220,7 +220,7 @@ void do_commandmode(struct block * sb) {
             wcscat(sl, cline);                        // Insert into history
         }
 #endif
-        show_header(input_win);
+        ui_show_header();
         return;
 
     } else if (sb->value == ctl('f')) {               // C-f
@@ -240,7 +240,7 @@ void do_commandmode(struct block * sb) {
             wcscat(sl, cline);                        // Insert into history
         }
 #endif
-        show_header(input_win);
+        ui_show_header();
         return;
 
     } else if ( sb->value == ctl('w') || sb->value == ctl('b') ||
@@ -292,12 +292,12 @@ void do_commandmode(struct block * sb) {
             set_comp(0);
         }
 
-        show_header(input_win);
+        ui_show_header();
         return;
 
     } else if (sc_isprint(sb->value)) {               //  Write new char
         ins_in_line(sb->value);
-        show_header(input_win);
+        ui_show_header();
 
 #ifdef HISTORY_FILE
         if (commandline_history->pos == 0) {          // Only if editing the new command
@@ -839,7 +839,6 @@ void do_commandmode(struct block * sb) {
         set_comp(0); // unmark tab completion
         update(TRUE);
     }
-    //show_header(input_win); // DO NOT UNCOMMENT
     return;
 }
 

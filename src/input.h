@@ -4,7 +4,6 @@
 
 extern int multiplier;                                                // Multiplier
 extern int command_pending;                                           // Command pending
-extern WINDOW * input_win;
 extern struct block * lastcmd_buffer;
 #ifdef HISTORY_FILE
 extern struct history * commandline_history;

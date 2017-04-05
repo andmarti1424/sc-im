@@ -6,20 +6,22 @@
  * these are the functions called outside tui.c:
  * ui_start_screen
  * ui_stop_screen
- * ui_do_welcome
- * ui_update
- * ui_handle_cursor
  * ui_show_header
+
+ * ui_update
+ * ui_do_welcome
+ * ui_handle_cursor
+
  * ui_yyerror
  * ui_show_text
  * ui_sc_msg
  * ui_winchg
+ * ui_print_mult_pend
+ * ui_show_celldetails
  *
  * these are now called from outside and shouldnt:
  * ui_clr_header
- * ui_print_mult_pend
  * ui_print_mode
- * ui_show_celldetails
  *
  * these functions are here and should be out of tui.c:
  * pad_and_align
@@ -126,6 +128,34 @@ void stop_screen() {
     return;
 }
 
+/* this function asks user for input from stdin.
+ * shall be non blocking and should
+ * return -1 when no key was press
+ * return 0 when key was press.
+ * it receives * wint_t as a parameter.
+ * when a valid key is press, its value its then updated in that wint_t variable.
+ */
+int ui_getch(wint_t * wd) {
+        return wget_wch(input_win, wd);
+}
+
+
+/* this function asks user for input from stdin.
+ * shall be blocking and should
+ * return -1 when ESC was pressed
+ * return 0 otherwise.
+ * it receives * wint_t as a parameter.
+ * when a valid key is press, its value its then updated in that wint_t variable.
+ */
+int ui_getch_b(wint_t * wd) {
+    wtimeout(input_win, -1);
+    move(0, rescol + inputline_pos + 1);
+    wget_wch(input_win, wd);
+    wtimeout(input_win, TIMEOUT_CURSES);
+    if ( *wd != OKEY_ESC ) return 0;
+    return -1;
+}
+
 // sc_msg - used for sc_info, sc_error and sc_debug macros
 void sc_msg(char * s, int type, ...) {
     if (type == DEBUG_MSG && ! atoi(get_conf_value("debug"))) return;
@@ -200,7 +230,6 @@ void do_welcome() {
 // function that refreshes grid of screen
 // if header flag is set, the first column of screen gets refreshed
 void update(int header) {
-
     if (loading) return;
     if (cmd_multiplier > 1) return;
     if (atoi(get_conf_value("nocurses"))) return;
@@ -257,12 +286,7 @@ void update(int header) {
     // Refresh curses windows
     wrefresh(main_win);
 
-    // Show cell details in header (first row)
-    if (header) show_celldetails(input_win);
-
-    // print mode
-    (void) print_mode(input_win);
-
+    ui_show_celldetails();
     return;
 }
 
@@ -295,15 +319,14 @@ void write_j(WINDOW * win, const char * word, const unsigned int row, const unsi
 }
 
 // Print multiplier and pending operator on the status bar
-void print_mult_pend(WINDOW * win) {
-
+void ui_print_mult_pend() {
     if (curmode != NORMAL_MODE && curmode != VISUAL_MODE && curmode != EDIT_MODE) return;
 
     int row_orig, col_orig;
-    getyx(win, row_orig, col_orig);
+    getyx(input_win, row_orig, col_orig);
 
     #ifdef USECOLORS
-    set_ucolor(win, &ucolors[MODE]);
+    set_ucolor(input_win, &ucolors[MODE]);
     #endif
     // Show multiplier and pending operator
     char strm[COLS];
@@ -319,107 +342,104 @@ void print_mult_pend(WINDOW * win) {
     subst(field, '0', ' ');
     strcat(strm, field);
 
-    mvwprintw(win, 0, 0, "%s", strm);
+    mvwprintw(input_win, 0, 0, "%s", strm);
 
     // Return cursor to previous position
-    wmove(win, row_orig, col_orig);
+    wmove(input_win, row_orig, col_orig);
+    wrefresh(input_win);
 }
 
 // Show first and second row (header)
 // Handle cursor position
-void show_header(WINDOW * win) {
+void ui_show_header() {
+    ui_clr_header(0);
+    ui_clr_header(1);
 
-    clr_header(win, 0);
-    clr_header(win, 1);
-
-    print_mult_pend(win);
+    ui_print_mult_pend();
 
     // Show current mode
-    print_mode(win);
+    ui_print_mode();
 
     // Print input text
-    #ifdef USECOLORS
-    //OJO!!! 28/09/2016
-    //set_ucolor(win, &ucolors[INPUT]);
-    #endif
     switch (curmode) {
         case COMMAND_MODE:
-            mvwprintw(win, 0, rescol, ":%ls", inputline);
-            wmove(win, 0, inputline_pos + 1 + rescol);
+            mvwprintw(input_win, 0, rescol, ":%ls", inputline);
+            wmove(input_win, 0, inputline_pos + 1 + rescol);
             break;
         case INSERT_MODE:
-            mvwprintw(win, 0, 1 + rescol, "%ls", inputline);
-            wmove(win, 0, inputline_pos + 1 + rescol);
+            mvwprintw(input_win, 0, 1 + rescol, "%ls", inputline);
+            wmove(input_win, 0, inputline_pos + 1 + rescol);
             break;
         case EDIT_MODE:
-            mvwprintw(win, 0, rescol, " %ls", inputline);
-            wmove(win, 0, inputline_pos + 1 + rescol);
+            mvwprintw(input_win, 0, rescol, " %ls", inputline);
+            wmove(input_win, 0, inputline_pos + 1 + rescol);
     }
-    wrefresh(win);
-
+    wrefresh(input_win);
     return;
 }
 
-// Clean a whole row
-void clr_header(WINDOW * win, int i) {
+/* Clean a whole row
+ * i = line to clean
+ */
+void ui_clr_header(int i) {
     int row_orig, col_orig;
-    getyx(win, row_orig, col_orig);
+    getyx(input_win, row_orig, col_orig);
     if (col_orig > COLS) col_orig = COLS - 1;
 
-    wmove(win, i, 0);
-    wclrtoeol(win);
+    wmove(input_win, i, 0);
+    wclrtoeol(input_win);
 
     // Return cursor to previous position
-    wmove(win, row_orig, col_orig);
+    wmove(input_win, row_orig, col_orig);
 
     return;
 }
 
 // Print current mode in the first row
 // Print ':' (colon) or submode indicator
-void print_mode(WINDOW * win) {
+void ui_print_mode() {
     unsigned int row = 0; // Print mode in first row
     char strm[22] = "";
 
     #ifdef USECOLORS
-    set_ucolor(win, &ucolors[MODE]);
+    set_ucolor(input_win, &ucolors[MODE]);
     #endif
 
     if (curmode == NORMAL_MODE) {
         strcat(strm, " -- NORMAL --");
-        write_j(win, strm, row, RIGHT);
+        write_j(input_win, strm, row, RIGHT);
 
     } else if (curmode == INSERT_MODE) {
         strcat(strm, " -- INSERT --");
-        write_j(win, strm, row, RIGHT);
+        write_j(input_win, strm, row, RIGHT);
 
         #ifdef USECOLORS
-        set_ucolor(win, &ucolors[INPUT]);
+        set_ucolor(input_win, &ucolors[INPUT]);
         #endif
         // Show submode (INSERT)
-        mvwprintw(win, 0, 0 + rescol, "%c", insert_edit_submode);
-        //wmove(win, 0, 1); commented on 01/06
+        mvwprintw(input_win, 0, 0 + rescol, "%c", insert_edit_submode);
+        //wmove(input_win, 0, 1); commented on 01/06
 
     } else if (curmode == EDIT_MODE) {
         strcat(strm, "   -- EDIT --");
-        write_j(win, strm, row, RIGHT);
+        write_j(input_win, strm, row, RIGHT);
 
     } else if (curmode == VISUAL_MODE) {
         strcat(strm, " -- VISUAL --");
         if (visual_submode != '0')
             strcpy(strm, " << VISUAL >>");
-        write_j(win, strm, row, RIGHT);
+        write_j(input_win, strm, row, RIGHT);
 
     } else if (curmode == COMMAND_MODE) {
         strcat(strm, "-- COMMAND --");
 
-        write_j(win, strm, row, RIGHT);
+        write_j(input_win, strm, row, RIGHT);
         #ifdef USECOLORS
-        set_ucolor(win, &ucolors[INPUT]);
+        set_ucolor(input_win, &ucolors[INPUT]);
         #endif
         // muestro ':'
-        mvwprintw(win, 0, 0 + rescol, ":");
-        wmove(win, 0, 1 + rescol);
+        mvwprintw(input_win, 0, 0 + rescol, ":");
+        wmove(input_win, 0, 1 + rescol);
     }
 
     return;
@@ -790,21 +810,21 @@ void add_cell_detail(char * d, struct ent * p1) {
 }
 
 // Draw cell content detail in header
-void show_celldetails(WINDOW * win) {
+void ui_show_celldetails() {
     char head[FBUFLEN];
     int inputline_pos = 0;
 
     // show cell in header
     #ifdef USECOLORS
-        set_ucolor(win, &ucolors[CELL_ID]);
+        set_ucolor(input_win, &ucolors[CELL_ID]);
     #endif
     sprintf(head, "%s%d ", coltoa(curcol), currow);
-    mvwprintw(win, 0, 0 + rescol, "%s", head);
+    mvwprintw(input_win, 0, 0 + rescol, "%s", head);
     inputline_pos += strlen(head) + rescol;
 
     // show the current cell's format
     #ifdef USECOLORS
-        set_ucolor(win, &ucolors[CELL_FORMAT]);
+        set_ucolor(input_win, &ucolors[CELL_FORMAT]);
     #endif
 
     register struct ent *p1 = *ATBL(tbl, currow, curcol);
@@ -820,19 +840,19 @@ void show_celldetails(WINDOW * win) {
         sprintf(head + strlen(head), "(%s) ", p1->format);
     else
         sprintf(head + strlen(head), "(%d %d %d) ", fwidth[curcol], precision[curcol], realfmt[curcol]);
-    mvwprintw(win, 0, inputline_pos, "%s", head);
+    mvwprintw(input_win, 0, inputline_pos, "%s", head);
     inputline_pos += strlen(head);
 
     // show expr
     #ifdef USECOLORS
-        set_ucolor(win, &ucolors[CELL_CONTENT]);
+        set_ucolor(input_win, &ucolors[CELL_CONTENT]);
     #endif
     if (p1 && p1->expr) {
         linelim = 0;
         editexp(currow, curcol);  /* set line to expr */
         linelim = -1;
         sprintf(head, "[%s] ", line);
-        mvwprintw(win, 0, inputline_pos, "%s", head);
+        mvwprintw(input_win, 0, inputline_pos, "%s", head);
         inputline_pos += strlen(head);
     }
     // add cell content to head string
@@ -847,9 +867,9 @@ void show_celldetails(WINDOW * win) {
         head[COLS - inputline_pos - 1 - 12]='\0';
     }
 
-    mvwprintw(win, 0, inputline_pos, "%s", head);
-
-    wclrtoeol(win);
+    mvwprintw(input_win, 0, inputline_pos, "%s", head);
+    wclrtoeol(input_win);
+    wrefresh(input_win);
 }
 
 // error routine for yacc (gram.y)
@@ -1146,9 +1166,7 @@ void winchg() {
     clearok(stdscr, TRUE);
     update(TRUE);
     flushinp();
-    show_header(input_win);
-    show_celldetails(input_win);
-    wrefresh(input_win);
+    ui_show_header();
     update(TRUE);
     //signal(SIGWINCH, winchg);
     return;
