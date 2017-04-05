@@ -287,7 +287,7 @@ void update(int header) {
     // Refresh curses windows
     wrefresh(main_win);
 
-    ui_show_celldetails();
+    if (header) ui_show_celldetails();
     return;
 }
 
