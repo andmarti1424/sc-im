@@ -727,7 +727,7 @@ int import_csv(char * fname, char d) {
 
     register FILE * f;
     int r = 0, c = 0;
-
+    wchar_t line_interp[FBUFLEN] = L"";
     char * token;
 
     int quote = 0; // if value has '"'. ex: 12,"1234,450.00",56
@@ -783,18 +783,18 @@ int import_csv(char * fname, char d) {
             if (isnumeric(st) && strlen(st)
             ) {
                 //wide char
-                //swprintf(line_interp, BUFFERSIZE, L"let %s%d=%s", coltoa(c), r, st);
-                sprintf(line, "let %s%d=%s", coltoa(c), r, st);
+                swprintf(line_interp, BUFFERSIZE, L"let %s%d=%s", coltoa(c), r, st);
+                //sprintf(line_in, "let %s%d=%s", coltoa(c), r, st);
 
             // text import
             } else if (strlen(st)){
                 //wide char
-                //swprintf(line_interp, BUFFERSIZE, L"label %s%d=\"%s\"", coltoa(c), r, st);
-                sprintf(line, "label %s%d=\"%s\"", coltoa(c), r, st);
+                swprintf(line_interp, BUFFERSIZE, L"label %s%d=\"%s\"", coltoa(c), r, st);
+                //sprintf(line_in, "label %s%d=\"%s\"", coltoa(c), r, st);
             }
             //wide char
-            //if (strlen(st)) send_to_interp(line_interp);
-            if (strlen(st)) send_to_interpp(line);
+            if (strlen(st)) send_to_interp(line_interp);
+            //if (strlen(st)) send_to_interpp(line_in);
 
             c++;
             quote = 0;
