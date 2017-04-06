@@ -68,3 +68,6 @@ int fcopy();
 int fsum();
 int pad(int n, int r1, int c1, int r2, int c2);
 void mark_ent_as_deleted(register struct ent * p, int delete);
+int calc_offscr_sc_rows();
+int calc_offscr_sc_cols();
+void pad_and_align (char * str_value, char * numeric_value, int col_width, int align, int padding, wchar_t * str_out);

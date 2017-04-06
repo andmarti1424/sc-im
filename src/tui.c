@@ -2,36 +2,55 @@
  * this is the ncurses implementation of sc-im user interface, or called tui.
  * it mainly consists on the following two windows:
  * main_win: window that shows the grid
- * input_win: state bar window and stdin input
+ * input_win: status bar window (or called header) and stdin input
  *
  * these are the functions called outside tui.c:
- * ui_start_screen
- * ui_stop_screen
- * ui_show_header
- * ui_update
- * ui_do_welcome
- * ui_handle_cursor
- * ui_yyerror
- * ui_show_text
- * ui_bail
- * ui_sc_msg
- * ui_winchg
- * ui_print_mult_pend
- * ui_show_celldetails
- * ui_start_colors
- * ui_set_ucolor
- * ui_clr_header
- * ui_print_mode
+ * ui_start_screen        // function called to start ui
+ * ui_stop_screen         // function called to stop ui
+ * ui_show_header         // function that updates status bar in top of screen.
+ * ui_update              // function used to refresh content of screen
+ * ui_getch               // function that asks the user input from stdin (non blocking)
+ * ui_getch_b             // function that asks the user input from stdin (blocking)
+ * ui_query               // function to read text from stdin 
+ * ui_do_welcome          // function used when starting sc-im without a file as a parameter
+ * ui_handle_cursor       // function used to handle cursor depending on current mode
+ * ui_yyerror             // error routine for yacc parser
+ * ui_show_text           // function that shows text in a child process.
+ *                           used for set, version, showmaps, print_graph,
+ *                           showfilters, hiddenrows and hiddencols commands
+ * ui_bail                // function to print errors of lua scripts
+ * ui_sc_msg              // function that is used for sc_info, sc_error and sc_debug macros
+ * ui_winchg              // function that handles SIGWINCH
+ * ui_print_mult_pend     // function that shows multiplier in top left of screen
+ * ui_show_celldetails    // function that shows cell details in header bar
+ * ui_start_colors        // exclusive ui startup routine for colors
+ * ui_clr_header          // functions that clears a line in header bar
+ * ui_print_mode          // function that shows current mode in top right of screen
+ * get_formated_value     // function used for exporting spreadsheet to plain text
  *
- * these functions are here and should be out of tui.c:
- * pad_and_align
- * calc_offscr_sc_cols
- * calc_offscr_sc_rows
+ * these are local funtions that might not be needed to reimplement if writing another ui:
+ * ui_set_ucolor          // function called internally for setting a color
+ * show_content
+ * show_sc_col_headings
+ * show_sc_row_headings
+ * write_j
+ * add_cell_detail        // Add details of an ent to a char * received as a parameter. used for input_win
  *
- * once these three are arranged,
  * ANYONE WHO WANTS TO PORT THIS TO ANOTHER UI, WOULD JUST NEED TO REIMPLEMENT THIS FILE
  * AND HELP() IN HELP.C
  */
+
+/*
+ * if not working with ncurses, you should have to define LINES and COLS macros as well.
+#ifndef LINES
+#define LINES ...
+#endif
+
+#ifndef ROWS
+#define ROWS ...
+#endif
+ */
+
 #include <string.h>
 #include <ncurses.h>
 #include <stdio.h>
@@ -59,17 +78,9 @@ extern int cmd_pending;
 extern int cmd_multiplier;
 extern char insert_edit_submode;
 
-unsigned int curmode;
 int rescol = RESCOL;           // Columns reserved for row numbers
-
 WINDOW * main_win;
 WINDOW * input_win;
-
-// off screen spreadsheet rows and columns
-int offscr_sc_rows = 0, offscr_sc_cols = 0;
-int center_hidden_cols = 0;
-int center_hidden_rows = 0;
-
 SCREEN * sstderr;
 SCREEN * sstdout;
 srange * ranges;
@@ -809,7 +820,7 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
     }
 }
 
-// Add details to ENT, used for 'input_win'
+// Add details of an ent to a char * received as a parameter. used for 'input_win'
 void add_cell_detail(char * d, struct ent * p1) {
     if ( ! p1 ) return;
 
@@ -943,80 +954,6 @@ int get_formated_value(struct ent ** p, int col, char * value) {
 }
 
 /*
- * this function aligns text of a cell (align = 0 center, align = 1 right, align = -1 left)
- * and adds padding between cells.
- * returns resulting string to be printed in screen.
- */
-void pad_and_align (char * str_value, char * numeric_value, int col_width, int align, int padding, wchar_t * str_out) {
-    int str_len  = 0;
-    int num_len  = strlen(numeric_value);
-    str_out[0] = L'\0';
-
-    wchar_t wcs_value[BUFFERSIZE] = { L'\0' };
-    mbstate_t state;
-    size_t result;
-    const char * mbsptr;
-    mbsptr = str_value;
-
-    // Here we handle \" and replace them with "
-    int pos;
-    while ((pos = str_in_str(str_value, "\\\"")) != -1)
-        del_char(str_value, pos);
-
-    // create wcs string based on multibyte string..
-    memset( &state, '\0', sizeof state );
-    result = mbsrtowcs(wcs_value, &mbsptr, BUFFERSIZE, &state);
-    if ( result != (size_t)-1 )
-        str_len = wcswidth(wcs_value, wcslen(wcs_value));
-
-    // If padding exceedes column width, returns n number of '-' needed to fill column width
-    if (padding >= col_width ) {
-        wmemset(str_out + wcslen(str_out), L'#', col_width);
-        return;
-    }
-
-    // If content exceedes column width, outputs n number of '*' needed to fill column width
-    if (str_len + num_len + padding > col_width && ( (! atoi(get_conf_value("overlap"))) || align == 1) ) {
-        if (padding) wmemset(str_out + wcslen(str_out), L'#', padding);
-        wmemset(str_out + wcslen(str_out), L'*', col_width - padding);
-        return;
-    }
-
-    // padding
-    if (padding) swprintf(str_out, BUFFERSIZE, L"%*ls", padding, L"");
-
-    // left spaces
-    int left_spaces = 0;
-    if (align == 0 && str_len) {                           // center align
-        left_spaces = (col_width - padding - str_len) / 2;
-        if (num_len > left_spaces) left_spaces = col_width - padding - str_len - num_len;
-    } else if (align == 1 && str_len && ! num_len) {       // right align
-        left_spaces = col_width - padding - str_len;
-    }
-    while (left_spaces-- > 0) add_wchar(str_out, L' ', wcslen(str_out));
-
-    // add text
-    if (align != 1 || ! num_len)
-        swprintf(str_out + wcslen(str_out), BUFFERSIZE, L"%s", str_value);
-
-    // spaces after string value
-    int spaces = col_width - padding - str_len - num_len;
-    if (align == 1) spaces += str_len;
-    if (align == 0) spaces -= (col_width - padding - str_len) / 2;
-    while (spaces-- > 0) add_wchar(str_out, L' ', wcslen(str_out));
-
-    // add number
-    int fill_with_number = col_width - str_len - padding;
-    if (num_len && num_len >= fill_with_number) {
-        swprintf(str_out + wcslen(str_out), BUFFERSIZE, L"%.*s", fill_with_number, & numeric_value[num_len - fill_with_number]);
-    } else if (num_len) {
-        swprintf(str_out + wcslen(str_out), BUFFERSIZE, L"%s", numeric_value);
-    }
-
-    return;
-}
-
-/*
  * function that shows text in a child process
  * used for set, version, showmaps, print_graph,
  * showfilters, hiddenrows and hiddencols commands
@@ -1044,160 +981,6 @@ void show_text(char * val) {
     reset_prog_mode();
     refresh();
     update(TRUE);
-}
-
-// Calculate number of hidden columns in the left
-// q are the number of columns that are before offscr_sc_cols that are shown because they are frozen.
-int calc_offscr_sc_cols() {
-    int q = 0, i, cols = 0, col = 0;
-    int freeze = freeze_ranges && (freeze_ranges->type == 'c' ||  freeze_ranges->type == 'a') ? 1 : 0;
-    int tlcol = freeze ? freeze_ranges->tl->col : 0;
-    int brcol = freeze ? freeze_ranges->br->col : 0;
-
-    // pick up col counts
-    while (freeze && curcol > brcol && curcol <= brcol + center_hidden_cols) center_hidden_cols--;
-    if (offscr_sc_cols - 1 <= curcol) {
-        for (i = 0, q = 0, cols = 0, col = rescol; i < maxcols && col + fwidth[i] <= COLS; i++) {
-            if (i < offscr_sc_cols && ! (freeze && i >= tlcol && i <= brcol)) continue;
-            else if (freeze && i > brcol && i <= brcol + center_hidden_cols) continue;
-            else if (freeze && i < tlcol && i >= tlcol - center_hidden_cols) continue;
-            if (i < offscr_sc_cols && freeze && i >= tlcol && i <= brcol && ! col_hidden[i] ) q++;
-            cols++;
-
-            if (! col_hidden[i]) col += fwidth[i];
-        }
-    }
-
-    // get  off screen cols
-    while ( offscr_sc_cols + center_hidden_cols + cols - 1      < curcol || curcol < offscr_sc_cols
-            || (freeze && curcol < tlcol && curcol >= tlcol - center_hidden_cols)) {
-
-        // izq
-        if (offscr_sc_cols - 1 == curcol) {
-            if (freeze && offscr_sc_cols + cols + center_hidden_cols >= brcol && brcol - cols - offscr_sc_cols + 2 > 0)
-                center_hidden_cols = brcol - cols - offscr_sc_cols + 2;
-            offscr_sc_cols--;
-
-        // derecha
-        } else if (offscr_sc_cols + center_hidden_cols + cols == curcol &&
-            (! freeze || (curcol > brcol && offscr_sc_cols < tlcol) || (curcol >= cols && offscr_sc_cols < tlcol))) {
-            offscr_sc_cols++;
-
-        // derecha con freeze cols a la izq.
-        } else if (offscr_sc_cols + center_hidden_cols + cols == curcol) {
-            center_hidden_cols++;
-
-        // derecha con freeze a la derecha
-        } else if (freeze && curcol < tlcol && curcol >= tlcol - center_hidden_cols ) {
-            center_hidden_cols--;
-            offscr_sc_cols++;
-
-        } else {
-            // Try to put the cursor in the center of the screen
-            col = (COLS - rescol - fwidth[curcol]) / 2 + rescol;
-            if (freeze && curcol > brcol) {
-                offscr_sc_cols = tlcol;
-                center_hidden_cols = curcol - brcol; //FIXME shall we count frozen cols to center??
-            } else {
-                offscr_sc_cols = curcol;
-                center_hidden_cols = 0;
-            }
-            for (i=curcol-1; i >= 0 && col-fwidth[i] - 1 > rescol; i--) {
-                if (freeze && curcol > brcol) center_hidden_cols--;
-                else offscr_sc_cols--;
-                if ( ! col_hidden[i]) col -= fwidth[i];
-            }
-        }
-        // Now pick up the counts again
-        for (i = 0, cols = 0, col = rescol, q = 0; i < maxcols && col + fwidth[i] <= COLS; i++) {
-            if (i < offscr_sc_cols && ! (freeze && i >= tlcol && i <= brcol)) continue;
-            else if (freeze && i > brcol && i <= brcol + center_hidden_cols) continue;
-            else if (freeze && i < tlcol && i >= tlcol - center_hidden_cols) continue;
-            if (i < offscr_sc_cols && freeze && i >= tlcol && i <= brcol && ! col_hidden[i]) q++;
-            cols++;
-
-            if (! col_hidden[i]) col += fwidth[i];
-        }
-    }
-    while (freeze && curcol > brcol && curcol <= brcol + center_hidden_cols) center_hidden_cols--;
-    return cols + center_hidden_cols - q;
-}
-
-// Calculate number of hide rows above
-int calc_offscr_sc_rows() {
-    int q, i, rows = 0, row = 0;
-    int freeze = freeze_ranges && (freeze_ranges->type == 'r' ||  freeze_ranges->type == 'a') ? 1 : 0;
-    int tlrow = freeze ? freeze_ranges->tl->row : 0;
-    int brrow = freeze ? freeze_ranges->br->row : 0;
-
-    // pick up row counts
-    while (freeze && currow > brrow && currow <= brrow + center_hidden_rows) center_hidden_rows--;
-    if (offscr_sc_rows - 1 <= currow) {
-        for (i = 0, q = 0, rows = 0, row=RESROW; i < maxrows && row < LINES; i++) {
-            if (i < offscr_sc_rows && ! (freeze && i >= tlrow && i <= brrow)) continue;
-            else if (freeze && i > brrow && i <= brrow + center_hidden_rows) continue;
-            else if (freeze && i < tlrow && i >= tlrow - center_hidden_rows) continue;
-            if (i < offscr_sc_rows && freeze && i >= tlrow && i <= brrow && ! row_hidden[i] ) q++;
-            rows++;
-            if (i == maxrows - 1) return rows + center_hidden_rows - q;
-            if (! row_hidden[i]) row++;
-        }
-    }
-
-    // get off screen rows
-    while ( offscr_sc_rows + center_hidden_rows + rows - RESROW < currow || currow < offscr_sc_rows
-            || (freeze && currow < tlrow && currow >= tlrow - center_hidden_rows)) {
-
-        // move up
-        if (offscr_sc_rows - 1 == currow) {
-            if (freeze && offscr_sc_rows + rows + center_hidden_rows >= brrow && brrow - rows - offscr_sc_rows + 3 > 0)
-                center_hidden_rows = brrow - rows - offscr_sc_rows + 3;
-            offscr_sc_rows--;
-
-        // move down
-        } else if (offscr_sc_rows + center_hidden_rows + rows - 1 == currow &&
-            (! freeze || (currow > brrow && offscr_sc_rows < tlrow) || (currow >= rows - 1 && offscr_sc_rows < tlrow))) {
-            offscr_sc_rows++;
-
-        // move down with freezen rows in top
-        } else if (offscr_sc_rows + center_hidden_rows + rows - 1 == currow) {
-            center_hidden_rows++;
-
-        // move down with freezen rows in bottom
-        } else if (freeze && currow < tlrow && currow >= tlrow - center_hidden_rows ) {
-            center_hidden_rows--;
-            offscr_sc_rows++;
-
-        } else {
-            // Try to put the cursor in the center of the screen
-            row = (LINES - RESROW) / 2 + RESROW;
-            if (freeze && currow > brrow) {
-                offscr_sc_rows = tlrow;
-                center_hidden_rows = currow - 2; //FIXME
-            } else {
-                offscr_sc_rows = currow;
-                center_hidden_rows = 0;
-            }
-            for (i=currow-1; i >= 0 && row - 1 > RESROW && i < maxrows; i--) {
-                if (freeze && currow > brrow) center_hidden_rows--;
-                else offscr_sc_rows--;
-                if ( ! row_hidden[i]) row--;
-            }
-        }
-        // Now pick up the counts again
-        for (i = 0, rows = 0, row=RESROW,   q = 0; i < maxrows && row < LINES; i++) {
-            if (i < offscr_sc_rows && ! (freeze && i >= tlrow && i <= brrow)) continue;
-            else if (freeze && i > brrow && i <= brrow + center_hidden_rows) continue;
-            else if (freeze && i < tlrow && i >= tlrow - center_hidden_rows) continue;
-            if (i < offscr_sc_rows && freeze && i >= tlrow && i <= brrow && ! row_hidden[i] ) q++;
-            rows++;
-            if (i == maxrows - 1) return rows + center_hidden_rows - q;
-            if (! row_hidden[i]) row++;
-        }
-    }
-
-    while (freeze && currow > brrow && currow <= brrow + center_hidden_rows) center_hidden_rows--;
-    return rows + center_hidden_rows - q;
 }
 
 // SIGWINCH signal !!!!

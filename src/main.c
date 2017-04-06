@@ -36,6 +36,7 @@
 #include "lua.h"
 #endif
 
+unsigned int curmode;
 int currow = 0, curcol = 0;
 int lastrow = 0, lastcol = 0;
 int maxrows, maxcols;

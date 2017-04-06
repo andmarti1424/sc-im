@@ -27,6 +27,10 @@ wchar_t interp_line[BUFFERSIZE];
 extern graphADT graph;
 extern int yyparse(void);
 
+// off screen spreadsheet rows and columns
+int offscr_sc_rows = 0, offscr_sc_cols = 0;
+int center_hidden_cols = 0;
+int center_hidden_rows = 0;
 
 // mark_ent_as_deleted
 // This structure is used to keep ent structs around before they
@@ -1735,6 +1739,234 @@ int pad(int n, int r1, int c1, int r2, int c2) {
         return 1;
     }
     return 0;
+}
+
+// Calculate number of hidden columns in the left
+// q are the number of columns that are before offscr_sc_cols that are shown because they are frozen.
+int calc_offscr_sc_cols() {
+    int q = 0, i, cols = 0, col = 0;
+    int freeze = freeze_ranges && (freeze_ranges->type == 'c' ||  freeze_ranges->type == 'a') ? 1 : 0;
+    int tlcol = freeze ? freeze_ranges->tl->col : 0;
+    int brcol = freeze ? freeze_ranges->br->col : 0;
+
+    // pick up col counts
+    while (freeze && curcol > brcol && curcol <= brcol + center_hidden_cols) center_hidden_cols--;
+    if (offscr_sc_cols - 1 <= curcol) {
+        for (i = 0, q = 0, cols = 0, col = rescol; i < maxcols && col + fwidth[i] <= COLS; i++) {
+            if (i < offscr_sc_cols && ! (freeze && i >= tlcol && i <= brcol)) continue;
+            else if (freeze && i > brcol && i <= brcol + center_hidden_cols) continue;
+            else if (freeze && i < tlcol && i >= tlcol - center_hidden_cols) continue;
+            if (i < offscr_sc_cols && freeze && i >= tlcol && i <= brcol && ! col_hidden[i] ) q++;
+            cols++;
+
+            if (! col_hidden[i]) col += fwidth[i];
+        }
+    }
+
+    // get  off screen cols
+    while ( offscr_sc_cols + center_hidden_cols + cols - 1      < curcol || curcol < offscr_sc_cols
+            || (freeze && curcol < tlcol && curcol >= tlcol - center_hidden_cols)) {
+
+        // izq
+        if (offscr_sc_cols - 1 == curcol) {
+            if (freeze && offscr_sc_cols + cols + center_hidden_cols >= brcol && brcol - cols - offscr_sc_cols + 2 > 0)
+                center_hidden_cols = brcol - cols - offscr_sc_cols + 2;
+            offscr_sc_cols--;
+
+        // derecha
+        } else if (offscr_sc_cols + center_hidden_cols + cols == curcol &&
+            (! freeze || (curcol > brcol && offscr_sc_cols < tlcol) || (curcol >= cols && offscr_sc_cols < tlcol))) {
+            offscr_sc_cols++;
+
+        // derecha con freeze cols a la izq.
+        } else if (offscr_sc_cols + center_hidden_cols + cols == curcol) {
+            center_hidden_cols++;
+
+        // derecha con freeze a la derecha
+        } else if (freeze && curcol < tlcol && curcol >= tlcol - center_hidden_cols ) {
+            center_hidden_cols--;
+            offscr_sc_cols++;
+
+        } else {
+            // Try to put the cursor in the center of the screen
+            col = (COLS - rescol - fwidth[curcol]) / 2 + rescol;
+            if (freeze && curcol > brcol) {
+                offscr_sc_cols = tlcol;
+                center_hidden_cols = curcol - brcol; //FIXME shall we count frozen cols to center??
+            } else {
+                offscr_sc_cols = curcol;
+                center_hidden_cols = 0;
+            }
+            for (i=curcol-1; i >= 0 && col-fwidth[i] - 1 > rescol; i--) {
+                if (freeze && curcol > brcol) center_hidden_cols--;
+                else offscr_sc_cols--;
+                if ( ! col_hidden[i]) col -= fwidth[i];
+            }
+        }
+        // Now pick up the counts again
+        for (i = 0, cols = 0, col = rescol, q = 0; i < maxcols && col + fwidth[i] <= COLS; i++) {
+            if (i < offscr_sc_cols && ! (freeze && i >= tlcol && i <= brcol)) continue;
+            else if (freeze && i > brcol && i <= brcol + center_hidden_cols) continue;
+            else if (freeze && i < tlcol && i >= tlcol - center_hidden_cols) continue;
+            if (i < offscr_sc_cols && freeze && i >= tlcol && i <= brcol && ! col_hidden[i]) q++;
+            cols++;
+
+            if (! col_hidden[i]) col += fwidth[i];
+        }
+    }
+    while (freeze && curcol > brcol && curcol <= brcol + center_hidden_cols) center_hidden_cols--;
+    return cols + center_hidden_cols - q;
+}
+
+// Calculate number of hide rows above
+int calc_offscr_sc_rows() {
+    int q, i, rows = 0, row = 0;
+    int freeze = freeze_ranges && (freeze_ranges->type == 'r' ||  freeze_ranges->type == 'a') ? 1 : 0;
+    int tlrow = freeze ? freeze_ranges->tl->row : 0;
+    int brrow = freeze ? freeze_ranges->br->row : 0;
+
+    // pick up row counts
+    while (freeze && currow > brrow && currow <= brrow + center_hidden_rows) center_hidden_rows--;
+    if (offscr_sc_rows - 1 <= currow) {
+        for (i = 0, q = 0, rows = 0, row=RESROW; i < maxrows && row < LINES; i++) {
+            if (i < offscr_sc_rows && ! (freeze && i >= tlrow && i <= brrow)) continue;
+            else if (freeze && i > brrow && i <= brrow + center_hidden_rows) continue;
+            else if (freeze && i < tlrow && i >= tlrow - center_hidden_rows) continue;
+            if (i < offscr_sc_rows && freeze && i >= tlrow && i <= brrow && ! row_hidden[i] ) q++;
+            rows++;
+            if (i == maxrows - 1) return rows + center_hidden_rows - q;
+            if (! row_hidden[i]) row++;
+        }
+    }
+
+    // get off screen rows
+    while ( offscr_sc_rows + center_hidden_rows + rows - RESROW < currow || currow < offscr_sc_rows
+            || (freeze && currow < tlrow && currow >= tlrow - center_hidden_rows)) {
+
+        // move up
+        if (offscr_sc_rows - 1 == currow) {
+            if (freeze && offscr_sc_rows + rows + center_hidden_rows >= brrow && brrow - rows - offscr_sc_rows + 3 > 0)
+                center_hidden_rows = brrow - rows - offscr_sc_rows + 3;
+            offscr_sc_rows--;
+
+        // move down
+        } else if (offscr_sc_rows + center_hidden_rows + rows - 1 == currow &&
+            (! freeze || (currow > brrow && offscr_sc_rows < tlrow) || (currow >= rows - 1 && offscr_sc_rows < tlrow))) {
+            offscr_sc_rows++;
+
+        // move down with freezen rows in top
+        } else if (offscr_sc_rows + center_hidden_rows + rows - 1 == currow) {
+            center_hidden_rows++;
+
+        // move down with freezen rows in bottom
+        } else if (freeze && currow < tlrow && currow >= tlrow - center_hidden_rows ) {
+            center_hidden_rows--;
+            offscr_sc_rows++;
+
+        } else {
+            // Try to put the cursor in the center of the screen
+            row = (LINES - RESROW) / 2 + RESROW;
+            if (freeze && currow > brrow) {
+                offscr_sc_rows = tlrow;
+                center_hidden_rows = currow - 2; //FIXME
+            } else {
+                offscr_sc_rows = currow;
+                center_hidden_rows = 0;
+            }
+            for (i=currow-1; i >= 0 && row - 1 > RESROW && i < maxrows; i--) {
+                if (freeze && currow > brrow) center_hidden_rows--;
+                else offscr_sc_rows--;
+                if ( ! row_hidden[i]) row--;
+            }
+        }
+        // Now pick up the counts again
+        for (i = 0, rows = 0, row=RESROW,   q = 0; i < maxrows && row < LINES; i++) {
+            if (i < offscr_sc_rows && ! (freeze && i >= tlrow && i <= brrow)) continue;
+            else if (freeze && i > brrow && i <= brrow + center_hidden_rows) continue;
+            else if (freeze && i < tlrow && i >= tlrow - center_hidden_rows) continue;
+            if (i < offscr_sc_rows && freeze && i >= tlrow && i <= brrow && ! row_hidden[i] ) q++;
+            rows++;
+            if (i == maxrows - 1) return rows + center_hidden_rows - q;
+            if (! row_hidden[i]) row++;
+        }
+    }
+
+    while (freeze && currow > brrow && currow <= brrow + center_hidden_rows) center_hidden_rows--;
+    return rows + center_hidden_rows - q;
+}
+
+/*
+ * this function aligns text of a cell (align = 0 center, align = 1 right, align = -1 left)
+ * and adds padding between cells.
+ * returns resulting string to be printed in screen.
+ */
+void pad_and_align (char * str_value, char * numeric_value, int col_width, int align, int padding, wchar_t * str_out) {
+    int str_len  = 0;
+    int num_len  = strlen(numeric_value);
+    str_out[0] = L'\0';
+
+    wchar_t wcs_value[BUFFERSIZE] = { L'\0' };
+    mbstate_t state;
+    size_t result;
+    const char * mbsptr;
+    mbsptr = str_value;
+
+    // Here we handle \" and replace them with "
+    int pos;
+    while ((pos = str_in_str(str_value, "\\\"")) != -1)
+        del_char(str_value, pos);
+
+    // create wcs string based on multibyte string..
+    memset( &state, '\0', sizeof state );
+    result = mbsrtowcs(wcs_value, &mbsptr, BUFFERSIZE, &state);
+    if ( result != (size_t)-1 )
+        str_len = wcswidth(wcs_value, wcslen(wcs_value));
+
+    // If padding exceedes column width, returns n number of '-' needed to fill column width
+    if (padding >= col_width ) {
+        wmemset(str_out + wcslen(str_out), L'#', col_width);
+        return;
+    }
+
+    // If content exceedes column width, outputs n number of '*' needed to fill column width
+    if (str_len + num_len + padding > col_width && ( (! atoi(get_conf_value("overlap"))) || align == 1) ) {
+        if (padding) wmemset(str_out + wcslen(str_out), L'#', padding);
+        wmemset(str_out + wcslen(str_out), L'*', col_width - padding);
+        return;
+    }
+
+    // padding
+    if (padding) swprintf(str_out, BUFFERSIZE, L"%*ls", padding, L"");
+
+    // left spaces
+    int left_spaces = 0;
+    if (align == 0 && str_len) {                           // center align
+        left_spaces = (col_width - padding - str_len) / 2;
+        if (num_len > left_spaces) left_spaces = col_width - padding - str_len - num_len;
+    } else if (align == 1 && str_len && ! num_len) {       // right align
+        left_spaces = col_width - padding - str_len;
+    }
+    while (left_spaces-- > 0) add_wchar(str_out, L' ', wcslen(str_out));
+
+    // add text
+    if (align != 1 || ! num_len)
+        swprintf(str_out + wcslen(str_out), BUFFERSIZE, L"%s", str_value);
+
+    // spaces after string value
+    int spaces = col_width - padding - str_len - num_len;
+    if (align == 1) spaces += str_len;
+    if (align == 0) spaces -= (col_width - padding - str_len) / 2;
+    while (spaces-- > 0) add_wchar(str_out, L' ', wcslen(str_out));
+
+    // add number
+    int fill_with_number = col_width - str_len - padding;
+    if (num_len && num_len >= fill_with_number) {
+        swprintf(str_out + wcslen(str_out), BUFFERSIZE, L"%.*s", fill_with_number, & numeric_value[num_len - fill_with_number]);
+    } else if (num_len) {
+        swprintf(str_out + wcslen(str_out), BUFFERSIZE, L"%s", numeric_value);
+    }
+
+    return;
 }
 
 // Check if the buffer content is a valid command
