@@ -679,14 +679,18 @@ void closefile(FILE *f, int pid, int rfd) {
         if (rfd==0) {
             printf("Press any key to continue ");
             fflush(stdout);
+#ifdef NCURSES
             cbreak();
+#endif
             ui_getch_b(&wi);
         } else {
             close(rfd);
+#ifdef NCURSES
             if (! atoi(get_conf_value("nocurses"))) {
                 cbreak();
                 nonl();
                 noecho ();
+#endif
             }
         }
     }

@@ -14,6 +14,7 @@
 #include "main.h"     // exit_app
 
 int exec_cmd (char * line) {
+#ifdef NCURSES
     int waitres;
 
     def_prog_mode();
@@ -81,5 +82,6 @@ int exec_cmd (char * line) {
         refresh();
         update(TRUE);
     }
+#endif
     return 0;
 }

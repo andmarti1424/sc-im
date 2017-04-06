@@ -76,6 +76,7 @@ int colsinrange = DEFWIDTH;
 double eval_result;
 char * seval_result;
 FILE * fdoutput;        // output file descriptor (stdout or file)
+int rescol = RESCOL;    // columns reserved for row numbers
 
 struct block * buffer;
 struct block * lastcmd_buffer;

@@ -41,13 +41,13 @@
  */
 
 /*
- * if not working with ncurses, you should have to define LINES and COLS macros as well.
+ * if not working with ncurses, you should have to define LINES and COLS macros in Xui.h as well.
 #ifndef LINES
 #define LINES ...
 #endif
 
-#ifndef ROWS
-#define ROWS ...
+#ifndef COLS
+#define COLS ...
 #endif
  */
 
@@ -78,7 +78,6 @@ extern int cmd_pending;
 extern int cmd_multiplier;
 extern char insert_edit_submode;
 
-int rescol = RESCOL;           // Columns reserved for row numbers
 WINDOW * main_win;
 WINDOW * input_win;
 SCREEN * sstderr;
@@ -146,7 +145,7 @@ void ui_stop_screen() {
  * when a valid key is press, its value its then updated in that wint_t variable.
  */
 int ui_getch(wint_t * wd) {
-        return wget_wch(input_win, wd);
+    return wget_wch(input_win, wd);
 }
 
 
