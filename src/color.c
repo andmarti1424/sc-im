@@ -41,7 +41,7 @@ void start_default_ucolors() {
     ucolors[ DEFAULT         ].bg = DEFAULT_COLOR;
     ucolors[ HEADINGS        ].fg = WHITE;
     ucolors[ HEADINGS        ].bg = RED;
-    ucolors[ WELCOME         ].fg = RED;
+    ucolors[ WELCOME         ].fg = WHITE;
     ucolors[ WELCOME         ].bg = DEFAULT_COLOR;
     ucolors[ WELCOME         ].bold = 1;
     ucolors[ CELL_SELECTION  ].fg = BLUE;         // cell selection in headings

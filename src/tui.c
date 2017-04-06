@@ -202,6 +202,7 @@ void do_welcome() {
     char * msg_version = rev;
     char * msg_help  = "Press  :help<Enter>  to get help         ";
     char * msg_help2 = "Press  <Enter>       to enter NORMAL mode";
+    int i=0;
 
     #ifdef USECOLORS
     wbkgd(main_win, COLOR_PAIR((ucolors[DEFAULT].fg+1) * 9 + ucolors[DEFAULT].bg + 2));
@@ -219,11 +220,45 @@ void do_welcome() {
     #endif
 
     // show message
-    mvwaddstr(main_win, LINES/2-2, COLS/2-strlen(msg_title)/2  , msg_title);
-    mvwaddstr(main_win, LINES/2-1, COLS/2-strlen(msg_by)/2     , msg_by);
-    mvwaddstr(main_win, LINES/2  , COLS/2-strlen(msg_version)/2, msg_version);
-    mvwaddstr(main_win, LINES/2+2, COLS/2-strlen(msg_help)/2   , msg_help);
-    mvwaddstr(main_win, LINES/2+3, COLS/2-strlen(msg_help2)/2  , msg_help2);
+    mvwaddstr(main_win, LINES/2-3, COLS/2-strlen(msg_title)/2  , msg_title);
+    mvwaddstr(main_win, LINES/2-2, COLS/2-strlen(msg_by)/2     , msg_by);
+    mvwaddstr(main_win, LINES/2-1, COLS/2-strlen(msg_version)/2, msg_version);
+
+    #ifdef USECOLORS
+    set_ucolor(main_win, &ucolors[WELCOME]);
+    #endif
+    while (msg_help[i] != '\0') {
+        if (msg_help[i] == '<') {
+            #ifdef USECOLORS
+            set_ucolor(main_win, &ucolors[NUMB]);
+            #endif
+        }
+        mvwaddstr(main_win, LINES/2, COLS/2-strlen(msg_help)/2+i, &msg_help[i]);
+        if (msg_help[i] == '>') {
+            #ifdef USECOLORS
+            set_ucolor(main_win, &ucolors[WELCOME]);
+            #endif
+        }
+        i++;
+    }
+    i=0;
+    while (msg_help2[i] != '\0') {
+        if (msg_help2[i] == '<') {
+            #ifdef USECOLORS
+            set_ucolor(main_win, &ucolors[NUMB]);
+            #endif
+        }
+        mvwaddstr(main_win, LINES/2+1, COLS/2-strlen(msg_help2)/2+i, &msg_help2[i]);
+        if (msg_help2[i] == '>') {
+            #ifdef USECOLORS
+            set_ucolor(main_win, &ucolors[WELCOME]);
+            #endif
+        }
+        i++;
+    }
+
+    //mvwaddstr(main_win, LINES/2  , COLS/2-strlen(msg_help)/2   , msg_help);
+    //mvwaddstr(main_win, LINES/2+1, COLS/2-strlen(msg_help2)/2  , msg_help2);
 
     wrefresh(main_win);
 
