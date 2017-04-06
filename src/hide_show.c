@@ -139,7 +139,7 @@ void show_hiddenrows() {
     for (r = 0; r < maxrow; r++) {
        if (row_hidden[r]) sprintf(valores + strlen(valores), "- %d\n", r); // 12
     }
-    show_text(valores);
+    ui_show_text(valores);
 
     return;
 }
@@ -155,7 +155,7 @@ void show_hiddencols() {
     for (c = 0; c < maxcol; c++) {
        if (col_hidden[c]) sprintf(valores + strlen(valores), "- %s\n", coltoa(c)); // 8
     }
-    show_text(valores);
+    ui_show_text(valores);
 
     return;
 }

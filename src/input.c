@@ -42,7 +42,7 @@ void handle_input(struct block * buffer) {
             if (cmd_pending) ui_print_mult_pend();
 
             // Modify cursor state according to the current mode
-            handle_cursor();
+            ui_handle_cursor();
 
             // Read new character from stdin
             return_value = ui_getch(&wd);
@@ -130,7 +130,7 @@ void break_waitcmd_loop(struct block * buffer) {
     cmd_multiplier = 0;    // Reset the multiplier
     inputline[0] = L'\0';  // clean inputline
     flush_buf(buffer);
-    update(TRUE);
+    ui_update(TRUE);
     return;
 }
 
@@ -212,7 +212,7 @@ void handle_mult(int * cmd_multiplier, struct block * buf, long timeout) {
     //if (is_single_command(buf, timeout) == EDITION_CMD)
     //    copybuffer(buf, lastcmd_buffer); // save stdin buffer content in lastcmd buffer
     exec_mult(buf, timeout);
-    if (*cmd_multiplier > 1) { *cmd_multiplier = 1; update(TRUE); }
+    if (*cmd_multiplier > 1) { *cmd_multiplier = 1; ui_update(TRUE); }
     *cmd_multiplier = 0;
 
     return;

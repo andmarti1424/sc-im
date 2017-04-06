@@ -157,7 +157,7 @@ void do_insertmode(struct block * sb) {
                 curcol = forw_col(1)->col;
                 break;
         }
-        update(TRUE);
+        ui_update(TRUE);
         return;
 
 

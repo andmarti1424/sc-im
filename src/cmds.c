@@ -581,7 +581,7 @@ void formatcol(int c) {
             break;
     }
     sc_info("Current format is %d %d %d", fwidth[curcol], precision[curcol], realfmt[curcol]);
-    update(TRUE);
+    ui_update(TRUE);
     return;
 }
 

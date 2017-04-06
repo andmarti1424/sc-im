@@ -54,7 +54,7 @@ int kbhit() {
 }
 
 /* this function asks user for input from stdin.
- * shall be non blocking and should
+ * should be non blocking and should
  * return -1 when no key was press
  * return 0 when key was press.
  * it receives * wint_t as a parameter.
@@ -79,7 +79,7 @@ int ui_getch(wint_t * wd) {
 }
 
 /* this function asks user for input from stdin.
- * shall be blocking and should
+ * should be blocking and should
  * return -1 when ESC was pressed
  * return 0 otherwise.
  * it receives * wint_t as a parameter.
@@ -122,21 +122,21 @@ void ui_sc_msg(char * s, int type, ...) {
 }
 
 // Welcome screen
-void do_welcome() {
+void ui_do_welcome() {
     printf("welcome screen\n");
     return;
 }
 
 // function that refreshes grid of screen
 // if header flag is set, the first column of screen gets refreshed
-void update(int header) {
+void ui_update(int header) {
     printf("update\n");
     printf("value of current cell: %d %d %f\n", currow, curcol, lookat(currow, curcol)->v);
     return;
 }
 
 // Enable cursor and echo depending on the current mode
-void handle_cursor() {
+void ui_handle_cursor() {
 }
 
 // Print multiplier and pending operator on the status bar
@@ -167,11 +167,11 @@ void yyerror(char * err) {
     return;
 }
 
-int get_formated_value(struct ent ** p, int col, char * value) {
+int ui_get_formated_value(struct ent ** p, int col, char * value) {
     return -1;
 }
 
-void show_text(char * val) {
+void ui_show_text(char * val) {
     printf("%s", val);
     return;
 }

@@ -166,7 +166,7 @@ void print_vertexs() {
    char det[BUFFERSIZE] = "";
    if (graph == NULL) {
        strcpy(det, "Graph is empty");
-       show_text((char *) &det);
+       ui_show_text((char *) &det);
        return;
    }
    vertexT * temp = graph->vertices;
@@ -219,7 +219,7 @@ void print_vertexs() {
       }
       temp = temp->next;
    }
-   show_text((char *) msg);
+   ui_show_text((char *) msg);
    free(msg);
    return;
 }

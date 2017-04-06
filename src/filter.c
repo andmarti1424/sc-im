@@ -133,7 +133,7 @@ void show_filters() {
     for (i=0; i < howmany; i++)
         if (filters[i].eval != NULL) sprintf(valores + strlen(valores), "%d + %s\n", i, filters[i].eval);
 
-    show_text(valores);
+    ui_show_text(valores);
     return;
 }
 

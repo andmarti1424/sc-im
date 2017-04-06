@@ -28,6 +28,6 @@ void remove_frange() {
     freeze_ranges = NULL;
     center_hidden_rows = 0;
     center_hidden_cols = 0;
-    update(TRUE);
+    ui_update(TRUE);
     return;
 }

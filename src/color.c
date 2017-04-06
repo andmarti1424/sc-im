@@ -290,8 +290,7 @@ void color_cell(int r, int c, int rf, int cf, char * str) {
     }
 
     destroy_dictionary(d);
-    if (! loading)
-        update(TRUE);
+    if (! loading) ui_update(TRUE);
     return;
 }
 
@@ -339,7 +338,7 @@ void unformat(int r, int c, int rf, int cf) {
         #ifdef UNDO
         end_undo_action();
         #endif
-        update(TRUE);
+        ui_update(TRUE);
     }
     return;
 }

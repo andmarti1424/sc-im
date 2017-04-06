@@ -358,7 +358,7 @@ void do_commandmode(struct block * sb) {
                 readfile(p.we_wordv[0], 0);
                 //EvalAll(); // is it necessary?
                 modflg = 0;
-                //update(TRUE);
+                //ui_update(TRUE);
             }
             wordfree(&p);
 
@@ -632,16 +632,16 @@ void do_commandmode(struct block * sb) {
         } else if ( ! wcscmp(inputline, L"set") ) {
             char valores[ (get_maxkey_length(user_conf_d) + get_maxvalue_length(user_conf_d) + 1) * user_conf_d->len ];
             get_conf_values(valores);
-            show_text(valores);
+            ui_show_text(valores);
 
         } else if ( ! wcscmp(inputline, L"version") ) {
-            show_text(rev);
+            ui_show_text(rev);
 
         } else if ( ! wcscmp(inputline, L"showmaps") ) {
             extern int len_maps;
             char valores[MAXMAPITEM * len_maps];
             get_mappings(valores);
-            show_text(valores);
+            ui_show_text(valores);
 
         } else if ( ! wcsncmp(inputline, L"nmap", 4) ||
                     ! wcsncmp(inputline, L"imap", 4) ||
@@ -804,7 +804,7 @@ void do_commandmode(struct block * sb) {
                     import_csv(cline, delim); // csv or tab delim import
                 }
                 modflg = 0;
-                update(TRUE);
+                ui_update(TRUE);
             }
         } else {
             sc_error("COMMAND NOT FOUND !");
@@ -823,7 +823,7 @@ void do_commandmode(struct block * sb) {
         chg_mode('.');
         inputline[0]=L'\0';
         set_comp(0); // unmark tab completion
-        update(TRUE);
+        ui_update(TRUE);
     }
     return;
 }

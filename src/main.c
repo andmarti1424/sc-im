@@ -200,12 +200,12 @@ int main (int argc, char ** argv) {
         // we show welcome screen if no spreadsheet was passed to SC-IM
         // and no input was sent throw pipeline
         if ( ! curfile[0] && ! wcslen(stdin_buffer)) {
-            do_welcome();
+            ui_do_welcome();
             // show mode and cell's details in status bar
             ui_print_mode();
             ui_show_celldetails();
         } else {
-            update(TRUE);
+            ui_update(TRUE);
         }
     } else {
         f = fopen("/dev/tty", "rw");

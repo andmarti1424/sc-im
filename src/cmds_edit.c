@@ -136,7 +136,7 @@ void do_editmode(struct block * sb) {
                 curcol = forw_col(1)->col;
                 break;
         }
-        update(TRUE);
+        ui_update(TRUE);
         return;
 
     } else if (sb->value == L'a') {         // a

@@ -14,7 +14,7 @@
  * ui_query               // function to read text from stdin 
  * ui_do_welcome          // function used when starting sc-im without a file as a parameter
  * ui_handle_cursor       // function used to handle cursor depending on current mode
- * ui_yyerror             // error routine for yacc parser
+ * yyerror                // error routine for yacc parser
  * ui_show_text           // function that shows text in a child process.
  *                           used for set, version, showmaps, print_graph,
  *                           showfilters, hiddenrows and hiddencols commands
@@ -26,15 +26,15 @@
  * ui_start_colors        // exclusive ui startup routine for colors
  * ui_clr_header          // functions that clears a line in header bar
  * ui_print_mode          // function that shows current mode in top right of screen
- * get_formated_value     // function used for exporting spreadsheet to plain text
+ * ui_get_formated_value  // function used for exporting spreadsheet to plain text
  *
  * these are local funtions that might not be needed to reimplement if writing another ui:
  * ui_set_ucolor          // function called internally for setting a color
- * show_content
- * show_sc_col_headings
- * show_sc_row_headings
- * write_j
- * add_cell_detail        // Add details of an ent to a char * received as a parameter. used for input_win
+ * ui_show_content
+ * ui_show_sc_col_headings
+ * ui_show_sc_row_headings
+ * ui_write_j
+ * ui_add_cell_detail        // Add details of an ent to a char * received as a parameter. used for input_win
  *
  * ANYONE WHO WANTS TO PORT THIS TO ANOTHER UI, WOULD JUST NEED TO REIMPLEMENT THIS FILE
  * AND HELP() IN HELP.C
@@ -138,7 +138,7 @@ void ui_stop_screen() {
 }
 
 /* this function asks user for input from stdin.
- * shall be non blocking and should
+ * should be non blocking and should
  * return -1 when no key was press
  * return 0 when key was press.
  * it receives * wint_t as a parameter.
@@ -150,7 +150,7 @@ int ui_getch(wint_t * wd) {
 
 
 /* this function asks user for input from stdin.
- * shall be blocking and should
+ * should be blocking and should
  * return -1 when ESC was pressed
  * return 0 otherwise.
  * it receives * wint_t as a parameter.
@@ -203,9 +203,9 @@ void ui_sc_msg(char * s, int type, ...) {
 }
 
 // Welcome screen
-void do_welcome() {
+void ui_do_welcome() {
     char * msg_title = "SC-IM - SpreadSheet Calculator Improvised";
-    char * msg_by = "A SC fork by Andrés Martinelli";
+    char * msg_by = "An SC fork by Andrés Martinelli";
     char * msg_version = rev;
     char * msg_help  = "Press  :help<Enter>  to get help         ";
     char * msg_help2 = "Press  <Enter>       to enter NORMAL mode";
@@ -219,8 +219,8 @@ void do_welcome() {
     // show headings
     int mxcol = offscr_sc_cols + calc_offscr_sc_cols() - 1;
     int mxrow = offscr_sc_rows + calc_offscr_sc_rows() - 1;
-    show_sc_col_headings(main_win, mxcol);
-    show_sc_row_headings(main_win, mxrow);
+    ui_show_sc_col_headings(main_win, mxcol);
+    ui_show_sc_row_headings(main_win, mxrow);
 
     #ifdef USECOLORS
     ui_set_ucolor(main_win, &ucolors[WELCOME]);
@@ -268,7 +268,7 @@ void do_welcome() {
 
 // function that refreshes grid of screen
 // if header flag is set, the first column of screen gets refreshed
-void update(int header) {
+void ui_update(int header) {
     if (loading) return;
     if (cmd_multiplier > 1) return;
     if (atoi(get_conf_value("nocurses"))) return;
@@ -318,13 +318,13 @@ void update(int header) {
 
     // Show the content of the cells
     // Numeric values, strings.
-    show_content(main_win, mxrow, mxcol);
+    ui_show_content(main_win, mxrow, mxcol);
 
     // Show sc_col headings: A, B, C, D..
-    show_sc_col_headings(main_win, mxcol);
+    ui_show_sc_col_headings(main_win, mxcol);
 
     // Show sc_row headings: 0, 1, 2, 3..
-    show_sc_row_headings(main_win, mxrow);
+    ui_show_sc_row_headings(main_win, mxrow);
 
     // Refresh curses windows
     wrefresh(main_win);
@@ -333,7 +333,7 @@ void update(int header) {
 }
 
 // Enable cursor and echo depending on the current mode
-void handle_cursor() {
+void ui_handle_cursor() {
     switch (curmode) {
         case COMMAND_MODE:
             noecho();
@@ -356,7 +356,7 @@ void handle_cursor() {
  *  JUSTIF: 0 left shift
  *  JUSTIF: 1 right shift
  */
-void write_j(WINDOW * win, const char * word, const unsigned int row, const unsigned int justif) {
+void ui_write_j(WINDOW * win, const char * word, const unsigned int row, const unsigned int justif) {
     (justif == 0) ? (wmove(win, row, 0) && wclrtoeol(win)) : wmove(win, row, COLS - strlen(word));
     wprintw(win, "%s", word);
     return;
@@ -456,11 +456,11 @@ void ui_print_mode() {
 
     if (curmode == NORMAL_MODE) {
         strcat(strm, " -- NORMAL --");
-        write_j(input_win, strm, row, RIGHT);
+        ui_write_j(input_win, strm, row, RIGHT);
 
     } else if (curmode == INSERT_MODE) {
         strcat(strm, " -- INSERT --");
-        write_j(input_win, strm, row, RIGHT);
+        ui_write_j(input_win, strm, row, RIGHT);
 
         #ifdef USECOLORS
         ui_set_ucolor(input_win, &ucolors[INPUT]);
@@ -471,18 +471,18 @@ void ui_print_mode() {
 
     } else if (curmode == EDIT_MODE) {
         strcat(strm, "   -- EDIT --");
-        write_j(input_win, strm, row, RIGHT);
+        ui_write_j(input_win, strm, row, RIGHT);
 
     } else if (curmode == VISUAL_MODE) {
         strcat(strm, " -- VISUAL --");
         if (visual_submode != '0')
             strcpy(strm, " << VISUAL >>");
-        write_j(input_win, strm, row, RIGHT);
+        ui_write_j(input_win, strm, row, RIGHT);
 
     } else if (curmode == COMMAND_MODE) {
         strcat(strm, "-- COMMAND --");
 
-        write_j(input_win, strm, row, RIGHT);
+        ui_write_j(input_win, strm, row, RIGHT);
         #ifdef USECOLORS
         ui_set_ucolor(input_win, &ucolors[INPUT]);
         #endif
@@ -495,7 +495,7 @@ void ui_print_mode() {
 }
 
 // Show sc_row headings: 0, 1, 2, 3, 4...
-void show_sc_row_headings(WINDOW * win, int mxrow) {
+void ui_show_sc_row_headings(WINDOW * win, int mxrow) {
     int row = 0;
     #ifdef USECOLORS
     if (has_colors()) ui_set_ucolor(win, &ucolors[HEADINGS]);
@@ -506,7 +506,7 @@ void show_sc_row_headings(WINDOW * win, int mxrow) {
     //for (i = 0; i < mxrow && i < maxrows; i++) {
     for (i = 0; i <= mxrow; i++) {
         if (i >= maxrows) {
-            sc_error("i >= maxrows in show_sc_row_headings. please check calc_offscr_sc_rows.");
+            sc_error("i >= maxrows in ui_show_sc_row_headings. please check calc_offscr_sc_rows.");
             break;
         }
         // print rows in case freezen rows are before offscr_sc_rows
@@ -540,7 +540,7 @@ void show_sc_row_headings(WINDOW * win, int mxrow) {
 
 // Show sc_col headings: A, B, C, D...
 // mxcol is last col printed in screen
-void show_sc_col_headings(WINDOW * win, int mxcol) {
+void ui_show_sc_col_headings(WINDOW * win, int mxcol) {
     int i, col = rescol;
     int freeze = freeze_ranges && (freeze_ranges->type == 'c' ||  freeze_ranges->type == 'a') ? 1 : 0;
 
@@ -554,7 +554,7 @@ void show_sc_col_headings(WINDOW * win, int mxcol) {
     //for (i = 0; i <= mxcol && i < maxcols; i++) {
     for (i = 0; i <= mxcol; i++) {
         if (i >= maxcols) {
-            sc_error("i >= maxcols in show_sc_col_headings. please check calc_offscr_sc_cols.");
+            sc_error("i >= maxcols in ui_show_sc_col_headings. please check calc_offscr_sc_cols.");
             break;
         }
         // print cols in case freezen columns are before offscr_sc_cols
@@ -591,7 +591,7 @@ void show_sc_col_headings(WINDOW * win, int mxcol) {
 }
 
 // Show the content of the cells
-void show_content(WINDOW * win, int mxrow, int mxcol) {
+void ui_show_content(WINDOW * win, int mxrow, int mxcol) {
     register struct ent ** p;
     int row, col;
     int q_row_hidden = 0;
@@ -735,7 +735,7 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
             if ( (*p) && (*p)->flags & is_valid) {
                 //show_numeric_content_of_cell(win, p, col, row + 1 - offscr_sc_rows - q_row_hidden, c);
 
-                res = get_formated_value(p, col, formated_s);
+                res = ui_get_formated_value(p, col, formated_s);
                 // res = 0, indicates that in num we store a date
                 // res = 1, indicates a format is applied in num
                 if (res == 0 || res == 1) {
@@ -820,7 +820,7 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
 }
 
 // Add details of an ent to a char * received as a parameter. used for 'input_win'
-void add_cell_detail(char * d, struct ent * p1) {
+void ui_add_cell_detail(char * d, struct ent * p1) {
     if ( ! p1 ) return;
 
     /* string expressions
@@ -906,7 +906,7 @@ void ui_show_celldetails() {
     }
     // add cell content to head string
     head[0] = '\0';
-    add_cell_detail(head, p1);
+    ui_add_cell_detail(head, p1);
 
     // cut string if its too large!
     if (strlen(head) > COLS - inputline_pos - 1) {
@@ -934,7 +934,7 @@ void yyerror(char * err) {
  * returns 1  format of number - (numbers with format) - puede haber label.
  * returns -1 if there is no format in the cell.
  */
-int get_formated_value(struct ent ** p, int col, char * value) {
+int ui_get_formated_value(struct ent ** p, int col, char * value) {
     //char * cfmt = (*p)->format ? (*p)->format : NULL;
     char * cfmt = (*p)->format ? (*p)->format : (realfmt[col] >= 0 && realfmt[col] < COLFORMATS && colformat[realfmt[col]] != NULL) ? colformat[realfmt[col]] : NULL;
 
@@ -957,7 +957,7 @@ int get_formated_value(struct ent ** p, int col, char * value) {
  * used for set, version, showmaps, print_graph,
  * showfilters, hiddenrows and hiddencols commands
  */
-void show_text(char * val) {
+void ui_show_text(char * val) {
     int pid;
     char px[MAXCMD];
     char * pager;
@@ -979,7 +979,7 @@ void show_text(char * val) {
     getchar();
     reset_prog_mode();
     refresh();
-    update(TRUE);
+    ui_update(TRUE);
 }
 
 // SIGWINCH signal !!!!
@@ -990,10 +990,10 @@ void winchg() {
 
     //ui_start_screen();
     clearok(stdscr, TRUE);
-    update(TRUE);
+    ui_update(TRUE);
     flushinp();
     ui_show_header();
-    update(TRUE);
+    ui_update(TRUE);
     //signal(SIGWINCH, winchg);
     return;
 }
@@ -1019,7 +1019,7 @@ void ui_bail(lua_State *L, char * msg) {
     clearok(stdscr, TRUE);
     ui_show_header();
     refresh();
-    update(TRUE);
+    ui_update(TRUE);
 }
 #endif
 
@@ -1044,7 +1044,7 @@ char * ui_query(char * initial_msg) {
     if (loading) {
         loading_o=loading;
         loading=0;
-        update(0);
+        ui_update(0);
         loading=loading_o;
     }
     curs_set(1);

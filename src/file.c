@@ -690,8 +690,8 @@ void closefile(FILE *f, int pid, int rfd) {
                 cbreak();
                 nonl();
                 noecho ();
-#endif
             }
+#endif
         }
     }
     if (brokenpipe) {
@@ -915,7 +915,7 @@ void export_plain(char * fname, int r0, int c0, int rn, int cn) {
 
                 // If a numeric value exists
                 if ( (*pp)->flags & is_valid) {
-                    res = get_formated_value(pp, col, formated_s);
+                    res = ui_get_formated_value(pp, col, formated_s);
                     // res = 0, indicates that in num we store a date
                     // res = 1, indicates a format is applied in num
                     if (res == 0 || res == 1) {

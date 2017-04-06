@@ -53,9 +53,9 @@ void start_visualmode(int tlrow, int tlcol, int brrow, int brcol) {
     }
 
     if (visual_submode == '0') {  // Started visual mode with 'v' command
-        update(TRUE);
+        ui_update(TRUE);
     } else {                      // Started visual mode with 'C-v' command
-        update(FALSE);
+        ui_update(FALSE);
         moving = TRUE;
     }
     return;
@@ -110,7 +110,7 @@ void do_visualmode(struct block * buf) {
         r->brrow = currow;
         r->brcol = curcol;
 
-        update(FALSE);
+        ui_update(FALSE);
         return;
     }
 
@@ -438,15 +438,15 @@ void do_visualmode(struct block * buf) {
 #ifdef HISTORY_FILE
         add(commandline_history, L"");
 #endif
-        handle_cursor();
+        ui_handle_cursor();
         inputline_pos = 0;
         real_inputline_pos = 0;
         return;
     }
 
-    //if (visual_submode == '0')
-    //    update(TRUE);
-    //else {
-        update(FALSE);
-    //}
+    if (visual_submode == '0')
+        ui_update(TRUE);
+    else {
+        ui_update(FALSE);
+    }
 }

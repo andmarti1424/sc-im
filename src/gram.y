@@ -385,7 +385,7 @@ command:
                                   sprintf(det + strlen(det), "is_label: %d\n"    , e->flags & is_label);
                                   sprintf(det + strlen(det), "iscleared: %d\n"   , e->flags & iscleared);
                                   sprintf(det + strlen(det), "may_sync: %d\n"    , e->flags & may_sync);
-                                  show_text((char *) &det);
+                                  ui_show_text((char *) &det);
                                   }
     |    S_LET var_or_range '='
                                   {
@@ -669,7 +669,7 @@ command:
                                    }
     |    S_REBUILD_GRAPH           {
                                      rebuild_graph();
-                                     update(FALSE);
+                                     ui_update(FALSE);
                                    }
 
     |    S_PRINT_GRAPH             { print_vertexs(); }
@@ -678,21 +678,21 @@ command:
                                      do_undo();
                                      // sync_refs();
                                      EvalAll();
-                                     update(TRUE);
+                                     ui_update(TRUE);
                                    }
 
     |    S_REDO                    {
                                      do_redo();
                                      // sync_refs();
                                      EvalAll();
-                                     update(TRUE);
+                                     ui_update(TRUE);
                                    }
 
 // For scripting and piping
 
     |    S_RECALC                  {
                                      EvalAll();
-                                     //update(1);
+                                     //ui_update(1);
                                      //changed = 0;
                                    }
     |    S_GETNUM var_or_range     {
