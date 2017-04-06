@@ -60,6 +60,7 @@
 #define DEFAULT           18
 #define DEBUG_MSG         19
 
-#define sc_error(x, ...)     sc_msg(x, ERROR_MSG, ##__VA_ARGS__)
-#define sc_debug(x, ...)     sc_msg(x, DEBUG_MSG, ##__VA_ARGS__)
-#define sc_info(x, ...)      sc_msg(x, INFO_MSG, ##__VA_ARGS__)
+void ui_sc_msg(char * s, int type, ...);
+#define sc_error(x, ...)     ui_sc_msg(x, ERROR_MSG, ##__VA_ARGS__)
+#define sc_debug(x, ...)     ui_sc_msg(x, DEBUG_MSG, ##__VA_ARGS__)
+#define sc_info(x, ...)      ui_sc_msg(x, INFO_MSG, ##__VA_ARGS__)

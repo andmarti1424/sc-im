@@ -9,6 +9,7 @@
 #include "marks.h"
 #include "yank.h"
 #include "conf.h"
+#include "tui.h"
 
 extern graphADT graph;
 extern int cmd_multiplier;

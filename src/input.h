@@ -1,6 +1,5 @@
 #include <wchar.h>
 #include <sys/time.h>                                                 // for struct timeval
-#include <ncurses.h>
 
 extern int multiplier;                                                // Multiplier
 extern int command_pending;                                           // Command pending

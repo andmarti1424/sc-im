@@ -139,7 +139,7 @@ int main (int argc, char ** argv) {
 
     // initiate NCURSES if that is what is wanted
     if (! atoi(get_conf_value("nocurses")))
-        start_screen();
+        ui_start_screen();
 
 #ifdef USECOLORS
     if (get_d_colors_param() == NULL) {
@@ -165,7 +165,7 @@ int main (int argc, char ** argv) {
         }
 
         if (! atoi(get_conf_value("nocurses"))) { // WE MUST STOP SCREEN!
-            stop_screen();
+            ui_stop_screen();
 
             // if output is set, nocurses should always be 1 !
             put(user_conf_d, "nocurses", "1");
@@ -351,7 +351,7 @@ int exit_app(int status) {
 
     // stop CURSES screen
     if (! atoi(get_conf_value("nocurses")))
-        stop_screen();
+        ui_stop_screen();
 
     // close fdoutput
     if (get_conf_value("output") != '\0' && fdoutput != NULL) {

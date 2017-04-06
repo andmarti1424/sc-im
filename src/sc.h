@@ -356,5 +356,4 @@ extern void label(register struct ent *v, register char *s, int flushdir);
 
 extern double eval_result;
 extern char * seval_result;
-void sc_msg(char * s, int type, ...);
 #endif // SC_H_

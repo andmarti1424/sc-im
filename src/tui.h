@@ -18,8 +18,8 @@ extern unsigned int curmode;
 extern struct srange * ranges;
 extern struct ent ** p;
 
-void start_screen();
-void stop_screen();
+void ui_start_screen();
+void ui_stop_screen();
 int ui_getch(wint_t * wd);
 int ui_getch_b(wint_t * wd);
 void ui_clr_header(int row);
@@ -49,3 +49,4 @@ void ui_bail(lua_State *L, char * msg);
 char * ui_query(char * initial_msg);
 void ui_set_ucolor(WINDOW * w, struct ucolor * uc);
 void ui_start_colors();
+void ui_sc_msg(char * s, int type, ...);

@@ -29,8 +29,8 @@
  * calc_offscr_sc_rows
  *
  * once these three are arranged,
- * anyone who wants to port this to another ui, would just
- * need to reimplement these functions and help() in help.c
+ * ANYONE WHO WANTS TO PORT THIS TO ANOTHER UI, WOULD JUST NEED TO REIMPLEMENT THIS FILE
+ * AND HELP() IN HELP.C
  */
 #include <string.h>
 #include <ncurses.h>
@@ -74,7 +74,7 @@ SCREEN * sstderr;
 SCREEN * sstdout;
 srange * ranges;
 
-void start_screen() {
+void ui_start_screen() {
     sstderr = newterm(NULL, stderr, NULL);
     noecho();
     sstdout = newterm(NULL, stdout, stdin);
@@ -111,7 +111,7 @@ void start_screen() {
     keypad(input_win, 1);
 }
 
-void stop_screen() {
+void ui_stop_screen() {
     #ifdef USECOLORS
         //if (get_d_colors_param() != NULL)
         free_colors_param_dict();
@@ -156,7 +156,7 @@ int ui_getch_b(wint_t * wd) {
 }
 
 // sc_msg - used for sc_info, sc_error and sc_debug macros
-void sc_msg(char * s, int type, ...) {
+void ui_sc_msg(char * s, int type, ...) {
     if (type == DEBUG_MSG && ! atoi(get_conf_value("debug"))) return;
     char t[BUFFERSIZE];
     va_list args;
@@ -1206,7 +1206,7 @@ void winchg() {
     endwin();
     set_term(sstdout);
 
-    //start_screen();
+    //ui_start_screen();
     clearok(stdscr, TRUE);
     update(TRUE);
     flushinp();
@@ -1325,4 +1325,3 @@ void ui_start_colors() {
         for (j=0; j < 9; j++)  // bg
             init_pair( i*9+j+1, i-1, j-1); // i is fg and j is bg
 }
-
