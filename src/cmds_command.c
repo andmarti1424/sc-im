@@ -4,7 +4,6 @@
 #include <ctype.h>         // for isprint()
 #include <wordexp.h>
 #include "sc.h"            // for rescol
-#include "color.h"         // for set_ucolor
 #include "conf.h"
 #include "cmds_command.h"
 #include "cmds_edit.h"

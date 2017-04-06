@@ -23,7 +23,6 @@ Triggers need mode,type,file,function flags
 #include "utils/dictionary.h"
 #include "utils/string.h"
 #include "range.h"
-#include "color.h"
 #include "tui.h"
 #include "undo.h"
 #include "conf.h"

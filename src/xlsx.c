@@ -6,7 +6,7 @@
 #include "macros.h"
 #include "sc.h"
 #include "cmds.h"
-#include "color.h"
+#include "tui.h"
 #include "conf.h"
 #include "lex.h"
 #include "utils/string.h"

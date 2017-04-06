@@ -1,4 +1,5 @@
-/* this is the ncurses implementation of sc-im user interface, or called tui.
+/*
+ * this is the ncurses implementation of sc-im user interface, or called tui.
  * it mainly consists on the following two windows:
  * main_win: window that shows the grid
  * input_win: state bar window and stdin input
@@ -7,11 +8,9 @@
  * ui_start_screen
  * ui_stop_screen
  * ui_show_header
-
  * ui_update
  * ui_do_welcome
  * ui_handle_cursor
-
  * ui_yyerror
  * ui_show_text
  * ui_bail
@@ -19,8 +18,8 @@
  * ui_winchg
  * ui_print_mult_pend
  * ui_show_celldetails
- *
- * these are now called from outside and shouldnt:
+ * ui_start_colors
+ * ui_set_ucolor
  * ui_clr_header
  * ui_print_mode
  *
@@ -29,9 +28,9 @@
  * calc_offscr_sc_cols
  * calc_offscr_sc_rows
  *
- * once these two are arranged, and main.c and input.c cleaned,
- * anyone that want to port this to another ui, just
- * need to reimplement the first group functions.
+ * once these three are arranged,
+ * anyone who wants to port this to another ui, would just
+ * need to reimplement these functions and help() in help.c
  */
 #include <string.h>
 #include <ncurses.h>
@@ -49,7 +48,6 @@
 #include "sc.h"
 #include "cmds.h"
 #include "cmds_visual.h"
-#include "color.h"
 #include "conf.h"
 #include "version.h"
 #include "file.h"
@@ -167,9 +165,9 @@ void sc_msg(char * s, int type, ...) {
     if ( ! atoi(get_conf_value("nocurses"))) {
 #ifdef USECOLORS
         if (type == ERROR_MSG)
-            set_ucolor(input_win, &ucolors[ERROR_MSG]);
+            ui_set_ucolor(input_win, &ucolors[ERROR_MSG]);
         else
-            set_ucolor(input_win, &ucolors[INFO_MSG]);
+            ui_set_ucolor(input_win, &ucolors[INFO_MSG]);
 #endif
         mvwprintw(input_win, 1, 0, "%s", t);
         wclrtoeol(input_win);
@@ -196,13 +194,12 @@ void sc_msg(char * s, int type, ...) {
 
 // Welcome screen
 void do_welcome() {
-
     char * msg_title = "SC-IM - SpreadSheet Calculator Improvised";
     char * msg_by = "A SC fork by Andrés Martinelli";
     char * msg_version = rev;
     char * msg_help  = "Press  :help<Enter>  to get help         ";
     char * msg_help2 = "Press  <Enter>       to enter NORMAL mode";
-    int i=0;
+    int i;
 
     #ifdef USECOLORS
     wbkgd(main_win, COLOR_PAIR((ucolors[DEFAULT].fg+1) * 9 + ucolors[DEFAULT].bg + 2));
@@ -216,7 +213,7 @@ void do_welcome() {
     show_sc_row_headings(main_win, mxrow);
 
     #ifdef USECOLORS
-    set_ucolor(main_win, &ucolors[WELCOME]);
+    ui_set_ucolor(main_win, &ucolors[WELCOME]);
     #endif
 
     // show message
@@ -225,43 +222,37 @@ void do_welcome() {
     mvwaddstr(main_win, LINES/2-1, COLS/2-strlen(msg_version)/2, msg_version);
 
     #ifdef USECOLORS
-    set_ucolor(main_win, &ucolors[WELCOME]);
+    ui_set_ucolor(main_win, &ucolors[WELCOME]);
     #endif
-    while (msg_help[i] != '\0') {
+    for (i=0; msg_help[i] != '\0'; i++) {
         if (msg_help[i] == '<') {
             #ifdef USECOLORS
-            set_ucolor(main_win, &ucolors[NUMB]);
+            ui_set_ucolor(main_win, &ucolors[NUMB]);
             #endif
         }
         mvwaddstr(main_win, LINES/2, COLS/2-strlen(msg_help)/2+i, &msg_help[i]);
         if (msg_help[i] == '>') {
             #ifdef USECOLORS
-            set_ucolor(main_win, &ucolors[WELCOME]);
+            ui_set_ucolor(main_win, &ucolors[WELCOME]);
             #endif
         }
-        i++;
     }
-    i=0;
-    while (msg_help2[i] != '\0') {
+    for (i=0; msg_help2[i] != '\0'; i++) {
         if (msg_help2[i] == '<') {
             #ifdef USECOLORS
-            set_ucolor(main_win, &ucolors[NUMB]);
+            ui_set_ucolor(main_win, &ucolors[NUMB]);
             #endif
         }
         mvwaddstr(main_win, LINES/2+1, COLS/2-strlen(msg_help2)/2+i, &msg_help2[i]);
         if (msg_help2[i] == '>') {
             #ifdef USECOLORS
-            set_ucolor(main_win, &ucolors[WELCOME]);
+            ui_set_ucolor(main_win, &ucolors[WELCOME]);
             #endif
         }
-        i++;
     }
-
     //mvwaddstr(main_win, LINES/2  , COLS/2-strlen(msg_help)/2   , msg_help);
     //mvwaddstr(main_win, LINES/2+1, COLS/2-strlen(msg_help2)/2  , msg_help2);
-
     wrefresh(main_win);
-
     return;
 }
 
@@ -341,7 +332,7 @@ void handle_cursor() {
         case INSERT_MODE:
         case EDIT_MODE:
             noecho();
-            curs_set(1); // changes for NETBSD compatibility
+            curs_set(1); // changed for NETBSD compatibility
             break;
         default:
             noecho();
@@ -350,9 +341,11 @@ void handle_cursor() {
     return;
 }
 
-/* Print string with alignment
-    JUSTIF: 0 left shift
-    JUSTIF: 1 right shift */
+/*
+ * internal function - Print string with alignment
+ *  JUSTIF: 0 left shift
+ *  JUSTIF: 1 right shift
+ */
 void write_j(WINDOW * win, const char * word, const unsigned int row, const unsigned int justif) {
     (justif == 0) ? (wmove(win, row, 0) && wclrtoeol(win)) : wmove(win, row, COLS - strlen(word));
     wprintw(win, "%s", word);
@@ -367,7 +360,7 @@ void ui_print_mult_pend() {
     getyx(input_win, row_orig, col_orig);
 
     #ifdef USECOLORS
-    set_ucolor(input_win, &ucolors[MODE]);
+    ui_set_ucolor(input_win, &ucolors[MODE]);
     #endif
     // Show multiplier and pending operator
     char strm[COLS];
@@ -390,8 +383,10 @@ void ui_print_mult_pend() {
     wrefresh(input_win);
 }
 
-// Show first and second row (header)
-// Handle cursor position
+/*
+ * Show first and second row (header)
+ * Handle cursor position
+ */
 void ui_show_header() {
     ui_clr_header(0);
     ui_clr_header(1);
@@ -419,7 +414,8 @@ void ui_show_header() {
     return;
 }
 
-/* Clean a whole row
+/*
+ * Clean a whole row
  * i = line to clean
  */
 void ui_clr_header(int i) {
@@ -436,14 +432,16 @@ void ui_clr_header(int i) {
     return;
 }
 
-// Print current mode in the first row
-// Print ':' (colon) or submode indicator
+/*
+ * Print current mode in the first row
+ * Print ':' (colon) or submode indicator
+ */
 void ui_print_mode() {
     unsigned int row = 0; // Print mode in first row
     char strm[22] = "";
 
     #ifdef USECOLORS
-    set_ucolor(input_win, &ucolors[MODE]);
+    ui_set_ucolor(input_win, &ucolors[MODE]);
     #endif
 
     if (curmode == NORMAL_MODE) {
@@ -455,7 +453,7 @@ void ui_print_mode() {
         write_j(input_win, strm, row, RIGHT);
 
         #ifdef USECOLORS
-        set_ucolor(input_win, &ucolors[INPUT]);
+        ui_set_ucolor(input_win, &ucolors[INPUT]);
         #endif
         // Show submode (INSERT)
         mvwprintw(input_win, 0, 0 + rescol, "%c", insert_edit_submode);
@@ -476,7 +474,7 @@ void ui_print_mode() {
 
         write_j(input_win, strm, row, RIGHT);
         #ifdef USECOLORS
-        set_ucolor(input_win, &ucolors[INPUT]);
+        ui_set_ucolor(input_win, &ucolors[INPUT]);
         #endif
         // muestro ':'
         mvwprintw(input_win, 0, 0 + rescol, ":");
@@ -490,7 +488,7 @@ void ui_print_mode() {
 void show_sc_row_headings(WINDOW * win, int mxrow) {
     int row = 0;
     #ifdef USECOLORS
-    if (has_colors()) set_ucolor(win, &ucolors[HEADINGS]);
+    if (has_colors()) ui_set_ucolor(win, &ucolors[HEADINGS]);
     #endif
     int i;
     int freeze = freeze_ranges && (freeze_ranges->type == 'r' ||  freeze_ranges->type == 'a') ? 1 : 0;
@@ -514,7 +512,7 @@ void show_sc_row_headings(WINDOW * win, int mxrow) {
         srange * s = get_selected_range();
         if ( (s != NULL && i >= s->tlrow && i <= s->brrow) || i == currow ) {
             #ifdef USECOLORS
-            if (has_colors()) set_ucolor(win, &ucolors[CELL_SELECTION]);
+            if (has_colors()) ui_set_ucolor(win, &ucolors[CELL_SELECTION]);
             #else
             wattron(win, A_REVERSE);
             #endif
@@ -522,7 +520,7 @@ void show_sc_row_headings(WINDOW * win, int mxrow) {
         mvwprintw (win, row+1, 0, "%*d ", rescol-1, i);
 
         #ifdef USECOLORS
-        if (has_colors()) set_ucolor(win, &ucolors[HEADINGS]);
+        if (has_colors()) ui_set_ucolor(win, &ucolors[HEADINGS]);
         #else
         wattroff(win, A_REVERSE);
         #endif
@@ -537,7 +535,7 @@ void show_sc_col_headings(WINDOW * win, int mxcol) {
     int freeze = freeze_ranges && (freeze_ranges->type == 'c' ||  freeze_ranges->type == 'a') ? 1 : 0;
 
     #ifdef USECOLORS
-    if (has_colors()) set_ucolor(win, &ucolors[HEADINGS]);
+    if (has_colors()) ui_set_ucolor(win, &ucolors[HEADINGS]);
     #endif
 
     wmove(win, 0, 0);
@@ -563,7 +561,7 @@ void show_sc_col_headings(WINDOW * win, int mxcol) {
         srange * s = get_selected_range();
         if ( (s != NULL && i >= s->tlcol && i <= s->brcol) || i == curcol ) {
             #ifdef USECOLORS
-            if (has_colors()) set_ucolor(win, &ucolors[CELL_SELECTION]);
+            if (has_colors()) ui_set_ucolor(win, &ucolors[CELL_SELECTION]);
             #else
             wattron(win, A_REVERSE);
             #endif
@@ -575,7 +573,7 @@ void show_sc_col_headings(WINDOW * win, int mxcol) {
             wclrtoeol(win);
 
         #ifdef USECOLORS
-        if (has_colors()) set_ucolor(win, &ucolors[HEADINGS]);
+        if (has_colors()) ui_set_ucolor(win, &ucolors[HEADINGS]);
         #else
         wattroff(win, A_REVERSE);
         #endif
@@ -665,29 +663,29 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
             // Clean format
             #ifdef USECOLORS
             if ((*p) && (*p)->cellerror) {                                  // cellerror
-                set_ucolor(win, &ucolors[CELL_ERROR]);
+                ui_set_ucolor(win, &ucolors[CELL_ERROR]);
             } else if ((*p) && (*p)->expr) {
-                set_ucolor(win, &ucolors[EXPRESSION]);
+                ui_set_ucolor(win, &ucolors[EXPRESSION]);
             } else if ((*p) && (*p)->label) {                               // string
-                set_ucolor(win, &ucolors[STRG]);
+                ui_set_ucolor(win, &ucolors[STRG]);
             } else if ((*p) && (*p)->flags & is_valid && ! (*p)->format) {  // numeric value
-                set_ucolor(win, &ucolors[NUMB]);
+                ui_set_ucolor(win, &ucolors[NUMB]);
             } else if ((*p) && (*p)->format && (*p)->format[0] == 'd') {    // date format
-                set_ucolor(win, &ucolors[DATEF]);
+                ui_set_ucolor(win, &ucolors[DATEF]);
             } else {
-                set_ucolor(win, &ucolors[NORMAL]);
+                ui_set_ucolor(win, &ucolors[NORMAL]);
             }
             #endif
 
             // Cell color!
             if ((*p) && (*p)->ucolor != NULL) {
-                set_ucolor(win, (*p)->ucolor);
+                ui_set_ucolor(win, (*p)->ucolor);
             }
 
             // Color selected cell
             if ((currow == row) && (curcol == col)) {
                 #ifdef USECOLORS
-                    if (has_colors()) set_ucolor(win, &ucolors[CELL_SELECTION_SC]);
+                    if (has_colors()) ui_set_ucolor(win, &ucolors[CELL_SELECTION_SC]);
                 #else
                     wattron(win, A_REVERSE);
                 #endif
@@ -698,7 +696,7 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
             srange * s = get_selected_range();
             if (s != NULL && row >= s->tlrow && row <= s->brrow && col >= s->tlcol && col <= s->brcol ) {
                 #ifdef USECOLORS
-                    set_ucolor(win, &ucolors[CELL_SELECTION_SC]);
+                    ui_set_ucolor(win, &ucolors[CELL_SELECTION_SC]);
                 #else
                     wattron(win, A_REVERSE);
                 #endif
@@ -710,7 +708,7 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
                  col >= ranges->tlcol && col <= ranges->brcol
                ) {
                 #ifdef USECOLORS
-                    set_ucolor(win, &ucolors[CELL_SELECTION_SC]);
+                    ui_set_ucolor(win, &ucolors[CELL_SELECTION_SC]);
                 #else
                     wattron(win, A_REVERSE);
                 #endif
@@ -770,13 +768,13 @@ void show_content(WINDOW * win, int mxrow, int mxcol) {
                 ( in_range && row >= ranges->tlrow && row <= ranges->brrow &&
                 col >= ranges->tlcol && col <= ranges->brcol ) ) {
                     #ifdef USECOLORS
-                    if (has_colors()) set_ucolor(win, &ucolors[CELL_SELECTION_SC]);
+                    if (has_colors()) ui_set_ucolor(win, &ucolors[CELL_SELECTION_SC]);
                     #else
                     wattron(win, A_REVERSE);
                     #endif
                 } else if ( !(*p) || (*p)->ucolor == NULL) {
                     #ifdef USECOLORS
-                    set_ucolor(win, &ucolors[STRG]); // When a long string does not fit in column.
+                    ui_set_ucolor(win, &ucolors[STRG]); // When a long string does not fit in column.
                     #endif
                 }
 
@@ -857,7 +855,7 @@ void ui_show_celldetails() {
 
     // show cell in header
     #ifdef USECOLORS
-        set_ucolor(input_win, &ucolors[CELL_ID]);
+        ui_set_ucolor(input_win, &ucolors[CELL_ID]);
     #endif
     sprintf(head, "%s%d ", coltoa(curcol), currow);
     mvwprintw(input_win, 0, 0 + rescol, "%s", head);
@@ -865,7 +863,7 @@ void ui_show_celldetails() {
 
     // show the current cell's format
     #ifdef USECOLORS
-        set_ucolor(input_win, &ucolors[CELL_FORMAT]);
+        ui_set_ucolor(input_win, &ucolors[CELL_FORMAT]);
     #endif
 
     register struct ent *p1 = *ATBL(tbl, currow, curcol);
@@ -886,7 +884,7 @@ void ui_show_celldetails() {
 
     // show expr
     #ifdef USECOLORS
-        set_ucolor(input_win, &ucolors[CELL_CONTENT]);
+        ui_set_ucolor(input_win, &ucolors[CELL_CONTENT]);
     #endif
     if (p1 && p1->expr) {
         linelim = 0;
@@ -920,10 +918,12 @@ void yyerror(char * err) {
     return;
 }
 
-// this function creates a string (value) that represents the formated value of the cell, if a format exists
-// returns 0  datetime format - number in p->v represents a date - format "d"
-// returns 1  format of number - (numbers with format) - puede haber label.
-// returns -1 if there is no format in the cell.
+/*
+ * this function creates a string (value) that represents the formated value of the cell, if a format exists
+ * returns 0  datetime format - number in p->v represents a date - format "d"
+ * returns 1  format of number - (numbers with format) - puede haber label.
+ * returns -1 if there is no format in the cell.
+ */
 int get_formated_value(struct ent ** p, int col, char * value) {
     //char * cfmt = (*p)->format ? (*p)->format : NULL;
     char * cfmt = (*p)->format ? (*p)->format : (realfmt[col] >= 0 && realfmt[col] < COLFORMATS && colformat[realfmt[col]] != NULL) ? colformat[realfmt[col]] : NULL;
@@ -942,9 +942,11 @@ int get_formated_value(struct ent ** p, int col, char * value) {
     }
 }
 
-// this function aligns text of a cell (align = 0 center, align = 1 right, align = -1 left)
-// and adds padding between cells.
-// returns resulting string to be printed in screen.
+/*
+ * this function aligns text of a cell (align = 0 center, align = 1 right, align = -1 left)
+ * and adds padding between cells.
+ * returns resulting string to be printed in screen.
+ */
 void pad_and_align (char * str_value, char * numeric_value, int col_width, int align, int padding, wchar_t * str_out) {
     int str_len  = 0;
     int num_len  = strlen(numeric_value);
@@ -1014,7 +1016,8 @@ void pad_and_align (char * str_value, char * numeric_value, int col_width, int a
     return;
 }
 
-/* function that shows text in a child process
+/*
+ * function that shows text in a child process
  * used for set, version, showmaps, print_graph,
  * showfilters, hiddenrows and hiddencols commands
  */
@@ -1300,3 +1303,26 @@ char * ui_query(char * initial_msg) {
     wrefresh(input_win);
     return hline;
 }
+
+// Set a color //CURSES
+void ui_set_ucolor(WINDOW * w, struct ucolor * uc) {
+    long attr = A_NORMAL;
+    if (uc->bold)      attr |= A_BOLD;
+    if (uc->dim)       attr |= A_DIM;
+    if (uc->reverse)   attr |= A_REVERSE;
+    if (uc->standout)  attr |= A_STANDOUT;
+    if (uc->blink)     attr |= A_BLINK;
+    if (uc->underline) attr |= A_UNDERLINE;
+    wattrset (w, attr | COLOR_PAIR((uc->fg+1)*9 + uc->bg + 2));
+}
+
+void ui_start_colors() {
+    if (! has_colors()) return;
+    int i, j;
+    // Initialize all possible 81 init pairs
+    use_default_colors();
+    for (i=0; i < 9; i++)      // fg
+        for (j=0; j < 9; j++)  // bg
+            init_pair( i*9+j+1, i-1, j-1); // i is fg and j is bg
+}
+

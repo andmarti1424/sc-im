@@ -4,7 +4,6 @@
 #include "macros.h"
 #include "tui.h"
 #include "hide_show.h"
-#include "color.h"   // for set_ucolor
 #include "conf.h"
 #include "vmtbl.h"   // for growtbl
 

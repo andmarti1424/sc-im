@@ -1,3 +1,4 @@
+#ifdef CURSES
 #include <ncurses.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -8,7 +9,6 @@
 #include "macros.h"
 #include "tui.h"
 #include "string.h"
-#include "color.h"
 #include "utils/string.h"
 #include "help.h"
 #include "conf.h"
@@ -102,7 +102,7 @@ void help() {
     wclrtobot(input_win);
     wrefresh(input_win);
 
-    set_ucolor(main_win, &ucolors[NORMAL]);
+    ui_set_ucolor(main_win, &ucolors[NORMAL]);
     wtimeout(input_win, -1);
     noecho();
     curs_set(0);
@@ -274,7 +274,7 @@ void find_word(char * word, char order) {
     if (look_result == -1) {
         sc_info("Pattern not found.");
     }
-    set_ucolor(input_win, &ucolors[NORMAL]);
+    ui_set_ucolor(input_win, &ucolors[NORMAL]);
     return;
 }
 
@@ -289,14 +289,14 @@ int show_lines() {
 
         for (c = 0; c < strlen(long_help[lineno + delta]); c++)  {
             if (long_help[lineno + delta][c] == '&') bold = ! bold;
-            bold ? set_ucolor(main_win, &ucolors[CELL_SELECTION_SC]) : set_ucolor(main_win, &ucolors[NORMAL]);
+            bold ? ui_set_ucolor(main_win, &ucolors[CELL_SELECTION_SC]) : ui_set_ucolor(main_win, &ucolors[NORMAL]);
 
             if (long_help[lineno + delta][c] == '&') {
-                  set_ucolor(main_win, &ucolors[NORMAL]);
+                  ui_set_ucolor(main_win, &ucolors[NORMAL]);
                 continue;
             } else if (look_result != -1 && c >= look_result &&
                 c < look_result + strlen(word_looked) ) {
-                  set_ucolor(main_win, &ucolors[CELL_SELECTION_SC]);
+                  ui_set_ucolor(main_win, &ucolors[CELL_SELECTION_SC]);
             }
             mvwprintw(main_win, lineno, c, "%c", long_help[lineno + delta][c]);
         }
@@ -310,3 +310,8 @@ int show_lines() {
     (void) wrefresh(main_win);
     return wgetch(input_win);
 }
+#else
+// implement this function if want to create another UI
+void help() {
+}
+#endif

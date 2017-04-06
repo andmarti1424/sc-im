@@ -8,7 +8,6 @@
 
 #include "macros.h"
 #include "conf.h"
-#include "color.h"
 #include "utils/string.h"
 #include "tui.h"
 #include "sc.h"

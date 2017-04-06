@@ -80,7 +80,6 @@ NOT implemented:
 #include "conf.h"
 #include "sc.h"
 #include "cmds.h"
-#include "color.h" // for set_ucolor
 #include "marks.h"
 #include "shift.h"
 #include "dep_graph.h"

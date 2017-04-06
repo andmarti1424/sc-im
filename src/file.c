@@ -23,7 +23,6 @@
 #include "utils/string.h"
 #include "utils/dictionary.h"
 #include "cmds_edit.h"
-#include "color.h"
 #include "xmalloc.h"
 #include "y.tab.h"
 #include "xlsx.h"

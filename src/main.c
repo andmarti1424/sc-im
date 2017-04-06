@@ -24,7 +24,6 @@
 #include "conf.h"
 #include "buffer.h"
 #include "cmds.h"
-#include "color.h"   // for set_ucolor
 #include "vmtbl.h"   // for growtbl
 #include "filter.h"
 #include "dep_graph.h"
@@ -89,7 +88,7 @@ void read_stdin();
 
 
 /*********************************************************************
-   MAIN LOOP
+ * MAIN LOOP
  *********************************************************************/
 int main (int argc, char ** argv) {
 
@@ -143,13 +142,14 @@ int main (int argc, char ** argv) {
         start_screen();
 
 #ifdef USECOLORS
-    //if (has_colors() && get_d_colors_param() == NULL) {
     if (get_d_colors_param() == NULL) {
         start_default_ucolors();
-        // in case we decide to change colors
-        // this creates a dictionary and stores in it
-        // the relationship between macros and the keys values
-        // that are defined in .sc files
+        /*
+         * in case we decide to change colors
+         * this creates a dictionary and stores in it
+         * the relationship between macros and the keys values
+         * that are defined in .sc files
+         */
         set_colors_param_dict();
     }
 #endif
@@ -192,7 +192,7 @@ int main (int argc, char ** argv) {
     // 4. read sc file passed as argv
     load_sc();
 
-    // initiate gui
+    // initiate ui
     FILE * f;
     if ( ! atoi(get_conf_value("nocurses"))) {
         // we show welcome screen if no spreadsheet was passed to SC-IM
@@ -237,7 +237,7 @@ int main (int argc, char ** argv) {
     return shall_quit == -1 ? exit_app(-1) : exit_app(0);
 }
 /*********************************************************************
-   END OF MAIN LOOP
+ * END OF MAIN LOOP
  *********************************************************************/
 
 extern graphADT graph;
@@ -348,8 +348,6 @@ int exit_app(int status) {
 
     // Erase stdin
     erase_buf(buffer);
-
-    //timeout(-1);
 
     // stop CURSES screen
     if (! atoi(get_conf_value("nocurses")))

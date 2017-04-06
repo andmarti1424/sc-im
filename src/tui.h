@@ -1,8 +1,8 @@
 #include <ncurses.h>
 #include <wchar.h>
 #include <lua.h>
+#include "color.h"
 
-#define N_INIT_PAIRS      19
 #define DEFAULT_COLOR     -1
 #define BLACK             COLOR_BLACK
 #define RED               COLOR_RED
@@ -47,3 +47,5 @@ void yyerror(char *err);               // error routine for yacc (gram.y)
 void show_text(char * val);
 void ui_bail(lua_State *L, char * msg);
 char * ui_query(char * initial_msg);
+void ui_set_ucolor(WINDOW * w, struct ucolor * uc);
+void ui_start_colors();

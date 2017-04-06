@@ -7,7 +7,6 @@
 #include "macros.h"
 #include "cmds.h"
 #include "conf.h"
-#include "color.h"       // for set_ucolor
 #include "hide_show.h"
 #include "shift.h"
 #include "yank.h"

@@ -9,7 +9,6 @@
 #include "buffer.h"
 #include "tui.h"
 #include "conf.h"    // for conf parameters
-#include "color.h"   // for set_ucolor
 #include "xmalloc.h" // for scxfree
 #include "vmtbl.h"   // for growtbl
 #include "utils/string.h" // for add_char

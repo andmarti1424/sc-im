@@ -10,7 +10,6 @@
 #include "utils/dictionary.h"
 #include "utils/string.h"
 #include "range.h"
-#include "color.h"
 #include "tui.h"
 #include "undo.h"
 #include "conf.h"
@@ -26,7 +25,7 @@ struct dictionary * get_d_colors_param() {
 void start_default_ucolors() {
 
     // Initialize colors attributes
-    int i, j;
+    int i;
     for (i=0; i < N_INIT_PAIRS; i++) {
         ucolors[ i ].bold      = 0;
         ucolors[ i ].dim       = 0;
@@ -46,80 +45,51 @@ void start_default_ucolors() {
     ucolors[ WELCOME         ].bold = 1;
     ucolors[ CELL_SELECTION  ].fg = BLUE;         // cell selection in headings
     ucolors[ CELL_SELECTION  ].bg = WHITE;
-
     ucolors[ CELL_SELECTION_SC ].fg = BLACK;      // cell selection in spreadsheet
     ucolors[ CELL_SELECTION_SC ].bg = WHITE;
-
     ucolors[ NUMB            ].fg = CYAN;
     ucolors[ NUMB            ].bg = DEFAULT_COLOR;
-
     ucolors[ STRG            ].fg = MAGENTA;
     ucolors[ STRG            ].bg = DEFAULT_COLOR;
     ucolors[ STRG            ].bold = 0;
-
     ucolors[ DATEF           ].fg = YELLOW;
     ucolors[ DATEF           ].bg = DEFAULT_COLOR;
-
     ucolors[ EXPRESSION      ].fg = YELLOW;
     ucolors[ EXPRESSION      ].bg = DEFAULT_COLOR;
-
     ucolors[ INFO_MSG        ].fg = CYAN;
     ucolors[ INFO_MSG        ].bg = DEFAULT_COLOR;
     ucolors[ INFO_MSG        ].bold = 1;
     ucolors[ ERROR_MSG       ].bg = RED;
     ucolors[ ERROR_MSG       ].fg = WHITE;
     ucolors[ ERROR_MSG       ].bold = 1;
-
     ucolors[ MODE            ].fg = WHITE;
     ucolors[ MODE            ].bg = DEFAULT_COLOR;
     ucolors[ MODE            ].bold = 1;
-
     ucolors[ CELL_ID         ].fg = RED;
     ucolors[ CELL_ID         ].bg = DEFAULT_COLOR;
     ucolors[ CELL_ID         ].bold = 1;
-    ucolors[ CELL_FORMAT     ].fg = RED;
+    ucolors[ CELL_FORMAT     ].fg = CYAN;
     ucolors[ CELL_FORMAT     ].bg = DEFAULT_COLOR;
     ucolors[ CELL_CONTENT    ].fg = CYAN;
     ucolors[ CELL_CONTENT    ].bg = DEFAULT_COLOR;
     ucolors[ CELL_CONTENT    ].bold = 1;
-
     ucolors[ INPUT           ].fg = WHITE;
     ucolors[ INPUT           ].bg = DEFAULT_COLOR;
-
     ucolors[ NORMAL          ].fg = WHITE;
     ucolors[ NORMAL          ].bg = DEFAULT_COLOR;
-
     ucolors[ CELL_ERROR      ].fg = RED;
     ucolors[ CELL_ERROR      ].bg = DEFAULT_COLOR;
     ucolors[ CELL_ERROR      ].bold = 1;
-
     ucolors[ CELL_NEGATIVE   ].fg = GREEN;
     ucolors[ CELL_NEGATIVE   ].bg = DEFAULT_COLOR;
 
-    // Initialize all possible 81 init pairs
-    use_default_colors();
-    for (i=0; i < 9; i++)      // fg
-        for (j=0; j < 9; j++)  // bg
-            init_pair( i*9+j+1, i-1, j-1); // i is fg and j is bg
-}
-
-// Set a color
-void set_ucolor(WINDOW * w, struct ucolor * uc) {
-    long attr = A_NORMAL;
-    if (uc->bold)      attr |= A_BOLD;
-    if (uc->dim)       attr |= A_DIM;
-    if (uc->reverse)   attr |= A_REVERSE;
-    if (uc->standout)  attr |= A_STANDOUT;
-    if (uc->blink)     attr |= A_BLINK;
-    if (uc->underline) attr |= A_UNDERLINE;
-    wattrset (w, attr | COLOR_PAIR((uc->fg+1)*9 + uc->bg + 2));
+    ui_start_colors(); // call specific ui startup routine
 }
 
 // Create a dictionary that stores the correspondence between macros and key
 // values (integers) defined in '.sc' files or through the color command.
 void set_colors_param_dict() {
     d_colors_param = create_dictionary();
-
     char str[3];
     str[0]='\0';
 
@@ -141,7 +111,6 @@ void set_colors_param_dict() {
     put(d_colors_param, "CYAN", str);
     sprintf(str, "%d", WHITE);
     put(d_colors_param, "WHITE", str);
-
     sprintf(str, "%d", HEADINGS);
     put(d_colors_param, "HEADINGS", str);
     sprintf(str, "%d", WELCOME);
@@ -187,9 +156,11 @@ void free_colors_param_dict() {
     return;
 }
 
-// Change color definition with users's one
-// STR: color definition read from '.sc' file
-// It can also be obtained at run time with the `:color str` command
+/*
+ * Change color definition with users's one
+ * STR: color definition read from '.sc' file
+ * It can also be obtained at run time with the `:color str` command
+ */
 void chg_color(char * str) {
 
     // Create key-value dictionary for the content of the string
@@ -213,8 +184,8 @@ void chg_color(char * str) {
         (get(d_colors_param, get(d, "fg")) == NULL) ||
         (get(d_colors_param, get(d, "bg")) == NULL) ||
         (get(d_colors_param, get(d, "type")) == NULL) ||
-        (atoi(get(d_colors_param, get(d, "fg"))) > COLOR_WHITE) ||
-        (atoi(get(d_colors_param, get(d, "bg"))) > COLOR_WHITE)
+        (atoi(get(d_colors_param, get(d, "fg"))) > WHITE) ||
+        (atoi(get(d_colors_param, get(d, "bg"))) > WHITE)
     ) {
         sc_error("One of the values specified is wrong. Please check the values of type, fg and bg.");
         destroy_dictionary(d);
@@ -237,9 +208,11 @@ void chg_color(char * str) {
     return;
 }
 
-// this functions is for coloring a cell, or a range of cells.
-// it also applies a format such as bold or underline.
-// supports undo / redo
+/*
+ * this functions is for coloring a cell, or a range of cells.
+ * it also applies a format such as bold or underline.
+ * supports undo / redo
+ */
 void color_cell(int r, int c, int rf, int cf, char * str) {
     if (any_locked_cells(r, c, rf, cf)) {
         sc_error("Locked cells encountered. Nothing changed");
@@ -301,7 +274,7 @@ void color_cell(int r, int c, int rf, int cf, char * str) {
             if (get(d, "fg") != '\0')
                 n->ucolor->fg = atoi(get(d_colors_param, get(d, "fg")));
 
-            if (get(d, "bold")      != '\0')     n->ucolor->bold = atoi(get(d, "bold"));
+            if (get(d, "bold")      != '\0')     n->ucolor->bold      = atoi(get(d, "bold"));
             if (get(d, "dim")       != '\0')     n->ucolor->dim       = atoi(get(d, "dim"));
             if (get(d, "reverse")   != '\0')     n->ucolor->reverse   = atoi(get(d, "reverse"));
             if (get(d, "standout")  != '\0')     n->ucolor->standout  = atoi(get(d, "standout"));
@@ -372,8 +345,10 @@ void unformat(int r, int c, int rf, int cf) {
     return;
 }
 
-// this function receives two ucolors variables and returns 1 if both have the same values
-// returns 0 otherwise
+/*
+ * this function receives two ucolors variables and returns 1 if both have the same values
+ * returns 0 otherwise
+ */
 int same_ucolor(struct ucolor * u, struct ucolor * v) {
     if (u == NULL || v == NULL)       return 0;
 
@@ -390,12 +365,11 @@ int same_ucolor(struct ucolor * u, struct ucolor * v) {
 }
 
 int redefine_color(char * color, int r, int g, int b) {
-    void winchg();
-
-#ifdef USECOLORS
+    #if defined(CURSES) && defined(USECOLORS)
+    extern void winchg();
     if (
-        ! atoi(get_conf_value("nocurses")) &&
-        has_colors() && can_change_color()
+        ! atoi(get_conf_value("nocurses"))
+        && has_colors() && can_change_color()
        ) {
            char * s = get(d_colors_param, color);
            if (s == NULL) {
@@ -408,9 +382,7 @@ int redefine_color(char * color, int r, int g, int b) {
                return 0;
            }
        }
-
-#endif
        if (! loading) sc_error("Could not redefine color");
-       return -1;
+    #endif
+    return -1;
 }
-

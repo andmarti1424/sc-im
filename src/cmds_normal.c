@@ -6,7 +6,6 @@
 #include "cmds.h"
 #include "conf.h"
 #include "tui.h"
-#include "color.h"   // for set_ucolor
 #include "cmds_edit.h"
 #include "history.h"
 #include "hide_show.h"

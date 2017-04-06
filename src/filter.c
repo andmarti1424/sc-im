@@ -5,7 +5,6 @@
 
 #include "macros.h"
 #include "tui.h"
-#include "color.h"
 #include "conf.h"
 #include "xmalloc.h"
 #include "filter.h"

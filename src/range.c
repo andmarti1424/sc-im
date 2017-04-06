@@ -7,7 +7,6 @@
 #include "sc.h"
 #include "marks.h"
 #include "macros.h"
-#include "color.h"   // for set_ucolor
 #include "conf.h"
 #include "xmalloc.h" // for scxfree
 

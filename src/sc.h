@@ -70,7 +70,6 @@ struct ent {
     struct enode * expr;  /* cell's contents */
     short flags;
     int row, col;
-    //short nlastrow, nlastcol;
     struct ent * next;    // used for yanklist, freeents list, undo..
     char * format;        /* printf format for this cell */
     char cellerror;       /* error in a cell? */

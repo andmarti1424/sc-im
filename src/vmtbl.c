@@ -5,9 +5,9 @@
 #include "vmtbl.h"
 #include "sc.h"
 #include "macros.h"
-#include "color.h"  // for set_ucolor
-#include "conf.h"   // for set_ucolor
+#include "conf.h"
 #include "trigger.h"
+#include "tui.h"
 
 #define ATBL_P(tbl, row, col)    (*(tbl + row) + (col))
 

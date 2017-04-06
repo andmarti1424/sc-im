@@ -3,7 +3,6 @@
 
 #include "sc.h"
 #include "cmds.h"
-#include "color.h"
 #include "interp.h"
 #include "macros.h"
 #include "sort.h"

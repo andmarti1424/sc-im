@@ -50,7 +50,6 @@ struct key statres[] = {
 #include "macros.h"
 #include "tui.h"
 #include "range.h"
-#include "color.h" // for set_ucolor
 
 int yylex() {
     char * p = line + linelim;

@@ -26,10 +26,10 @@
 
 #include "sc.h"
 #include "macros.h"
-#include "color.h"
 #include "cmds.h"
 #include "format.h"
 #include "conf.h"
+#include "tui.h"
 #include "range.h"
 #include "xmalloc.h" // for scxfree
 #include "lex.h"     // for atocol
