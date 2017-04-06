@@ -31,6 +31,7 @@ LDLIBS += -lm $(NCURSES_LIBS)
 
 CFLAGS += -Wall -g
 CFLAGS += $(NCURSES_CFLAGS)
+CFLAGS += -DNCURSES
 CFLAGS += -D_XOPEN_SOURCE_EXTENDED -D_GNU_SOURCE
 CFLAGS += -DSNAME=\"$(name)\"
 CFLAGS += -DHELP_PATH=\"$(HELPDIR)\"
@@ -96,7 +97,7 @@ uninstall :
 	-rm $(DESTDIR)$(prefix)/share/man/man1/$(name).1
 
 $(name) : $(OBJS)
-	$(CC) $(LDFLAGS) $^ -o $@ $(LDLIBS) 
+	$(CC) $(LDFLAGS) $^ -o $@ $(LDLIBS)
 
 $(name)qref: sc.h
 	$(CC) $(CFLAGS) $(LDFLAGS) -DQREF $(QREF_FMT) -DSCNAME=\"$(name)\" -o $(name)qref help.c $(LDLIBS)

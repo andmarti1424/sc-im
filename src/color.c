@@ -365,7 +365,7 @@ int same_ucolor(struct ucolor * u, struct ucolor * v) {
 }
 
 int redefine_color(char * color, int r, int g, int b) {
-    #if defined(CURSES) && defined(USECOLORS)
+    #if defined(NCURSES) && defined(USECOLORS)
     extern void winchg();
     if (
         ! atoi(get_conf_value("nocurses"))
