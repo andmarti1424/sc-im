@@ -200,7 +200,8 @@ void do_welcome() {
     char * msg_title = "SC-IM - SpreadSheet Calculator Improvised";
     char * msg_by = "A SC fork by Andrés Martinelli";
     char * msg_version = rev;
-    char * msg_help = "Press «:help<Enter>» to get help";
+    char * msg_help  = "Press  :help<Enter>  to get help         ";
+    char * msg_help2 = "Press  <Enter>       to enter NORMAL mode";
 
     #ifdef USECOLORS
     wbkgd(main_win, COLOR_PAIR((ucolors[DEFAULT].fg+1) * 9 + ucolors[DEFAULT].bg + 2));
@@ -222,6 +223,7 @@ void do_welcome() {
     mvwaddstr(main_win, LINES/2-1, COLS/2-strlen(msg_by)/2     , msg_by);
     mvwaddstr(main_win, LINES/2  , COLS/2-strlen(msg_version)/2, msg_version);
     mvwaddstr(main_win, LINES/2+2, COLS/2-strlen(msg_help)/2   , msg_help);
+    mvwaddstr(main_win, LINES/2+3, COLS/2-strlen(msg_help2)/2  , msg_help2);
 
     wrefresh(main_win);
 

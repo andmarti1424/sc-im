@@ -197,8 +197,8 @@ int main (int argc, char ** argv) {
     if ( ! atoi(get_conf_value("nocurses"))) {
         // we show welcome screen if no spreadsheet was passed to SC-IM
         // and no input was sent throw pipeline
-        do_welcome();
         if ( ! curfile[0] && ! wcslen(stdin_buffer)) {
+            do_welcome();
             // show mode and cell's details in status bar
             ui_print_mode();
             ui_show_celldetails();
