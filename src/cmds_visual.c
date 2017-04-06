@@ -445,9 +445,9 @@ void do_visualmode(struct block * buf) {
         return;
     }
 
-    if (visual_submode == '0')
-        update(TRUE);
-    else {
+    //if (visual_submode == '0')
+    //    update(TRUE);
+    //else {
         update(FALSE);
-    }
+    //}
 }

@@ -235,16 +235,20 @@ void update(int header) {
     if (cmd_multiplier > 1) return;
     if (atoi(get_conf_value("nocurses"))) return;
 
+    if (header) {
     #ifdef USECOLORS
-    if (header) {
         wbkgd(main_win, COLOR_PAIR((ucolors[DEFAULT].fg+1) * 9 + ucolors[DEFAULT].bg + 2));
-        wbkgd(input_win, COLOR_PAIR((ucolors[DEFAULT].fg+1) * 9 + ucolors[DEFAULT].bg + 2));
-    }
+        // comment this to prevent bold to be reset
+        //wbkgd(input_win, COLOR_PAIR((ucolors[DEFAULT].fg+1) * 9 + ucolors[DEFAULT].bg + 2));
     #endif
-    // Clean from top to bottom
-    if (header) {
+        // Clean from top to bottom
         wmove(main_win, 0, rescol);
         wclrtobot(main_win);
+        // comment this to prevent info message to be erased
+        //wmove(input_win, 0, 0);
+        //wclrtobot(input_win);
+        ui_show_celldetails(); // always before ui_print_mode
+        ui_print_mode();
     }
 
     /* Calculate offscreen rows and columns
@@ -287,7 +291,6 @@ void update(int header) {
     // Refresh curses windows
     wrefresh(main_win);
 
-    if (header) ui_show_celldetails();
     return;
 }
 
@@ -870,7 +873,7 @@ void ui_show_celldetails() {
 
     mvwprintw(input_win, 0, inputline_pos, "%s", head);
     wclrtoeol(input_win);
-    wrefresh(input_win);
+    //wrefresh(input_win);
 }
 
 // error routine for yacc (gram.y)

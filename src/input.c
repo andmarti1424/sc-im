@@ -159,7 +159,6 @@ void break_waitcmd_loop(struct block * buffer) {
     inputline[0] = L'\0';
 
     flush_buf(buffer);
-    ui_print_mult_pend();
     update(TRUE);
     return;
 }
