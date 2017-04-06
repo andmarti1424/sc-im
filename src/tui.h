@@ -1,6 +1,8 @@
 #include <ncurses.h>
 #include <wchar.h>
+#ifdef XLUA
 #include <lua.h>
+#endif
 #include "color.h"
 
 #define DEFAULT_COLOR     -1
@@ -34,7 +36,9 @@ int ui_get_formated_value(struct ent ** p, int col, char * value);
 void ui_handle_cursor();
 void yyerror(char *err);               // error routine for yacc (gram.y)
 void ui_show_text(char * val);
+#ifdef XLUA
 void ui_bail(lua_State *L, char * msg);
+#endif
 char * ui_query(char * initial_msg);
 void ui_start_colors();
 void ui_sc_msg(char * s, int type, ...);
