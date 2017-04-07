@@ -138,15 +138,29 @@ int savefile() {
     }
 
     // add sc extension if not present
-    if (wcslen(inputline) > 2 && str_in_str(curfile, ".") == -1)
+    if (wcslen(inputline) > 2 && str_in_str(curfile, ".") == -1) {
         sprintf(curfile + strlen(curfile), ".sc");
 
+    // treat csv
+    } else if (strlen(curfile) > 4 && (! strcasecmp( & curfile[strlen(curfile)-4], ".csv"))) {
+        export_delim(curfile, ',', 0, 0, maxrow, maxcol);
+        modflg = 0;
+        wordfree(&p);
+        return 0;
+    // treat tab
+    } else if (strlen(curfile) > 4 && (! strcasecmp( & curfile[strlen(curfile)-4], ".tsv") ||
+        ! strcasecmp( & curfile[strlen(curfile)-4], ".tab"))){
+        export_delim(curfile, '\t', 0, 0, maxrow, maxcol);
+        modflg = 0;
+        wordfree(&p);
+        return 0;
+    }
+    // save in sc format
     if (writefile(curfile, 0, 0, maxrow, maxcol) < 0) {
         sc_error("File could not be saved");
         wordfree(&p);
         return -1;
     }
-
     wordfree(&p);
     return 0;
 }
@@ -726,7 +740,7 @@ void print_options(FILE *f) {
 int import_csv(char * fname, char d) {
 
     register FILE * f;
-    int r = 0, c = 0;
+    int r = 0, c = 0, cf = 0;
     wchar_t line_interp[FBUFLEN] = L"";
     char * token;
 
@@ -784,19 +798,16 @@ int import_csv(char * fname, char d) {
             ) {
                 //wide char
                 swprintf(line_interp, BUFFERSIZE, L"let %s%d=%s", coltoa(c), r, st);
-                //sprintf(line_in, "let %s%d=%s", coltoa(c), r, st);
 
             // text import
             } else if (strlen(st)){
                 //wide char
                 swprintf(line_interp, BUFFERSIZE, L"label %s%d=\"%s\"", coltoa(c), r, st);
-                //sprintf(line_in, "label %s%d=\"%s\"", coltoa(c), r, st);
             }
             //wide char
             if (strlen(st)) send_to_interp(line_interp);
-            //if (strlen(st)) send_to_interpp(line_in);
 
-            c++;
+            if (++c > cf) cf = c;
             quote = 0;
             token = xstrtok(NULL, delim);
             free(st);
@@ -806,7 +817,7 @@ int import_csv(char * fname, char d) {
         if (r > MAXROWS - GROWAMT - 1 || c > ABSMAXCOLS - 1) break;
     }
     maxrow = r-1;
-    maxcol = c-1;
+    maxcol = cf-1;
 
     auto_justify(0, maxcols, DEFWIDTH);
 
