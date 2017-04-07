@@ -54,8 +54,9 @@ void start_visualmode(int tlrow, int tlcol, int brrow, int brcol) {
 
     if (visual_submode == '0') {  // Started visual mode with 'v' command
         ui_update(TRUE);
+        moving = FALSE;
     } else {                      // Started visual mode with 'C-v' command
-        ui_update(FALSE);
+        ui_update(TRUE);
         moving = TRUE;
     }
     return;
@@ -72,6 +73,7 @@ void exit_visualmode() {
 }
 
 void do_visualmode(struct block * buf) {
+    // we are moving (previous to a 'C-o' keypress)
     if (moving == TRUE) {
         switch (buf->value) {
             case L'j':
@@ -114,8 +116,10 @@ void do_visualmode(struct block * buf) {
         return;
     }
 
-    // ENTER - ctl(k) - Confirm selection
-    if (buf->value == OKEY_ENTER || buf->value == ctl('k')) {
+    // started visual mode with 'C-v'
+    // ENTER or 'C-k' : Confirm selection
+    // 'C-k' only works if started visualmode with 'C-v'
+    if ((buf->value == OKEY_ENTER || buf->value == ctl('k')) && visual_submode != '0') {
         wchar_t cline [BUFFERSIZE];
         swprintf(cline, BUFFERSIZE, L"%ls%d", coltoa(r->tlcol), r->tlrow);
         if (r->tlrow != r->brrow || r->tlcol != r->brcol)
