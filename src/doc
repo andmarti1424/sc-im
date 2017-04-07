@@ -1202,10 +1202,10 @@ Commands for handling cell content:
     @lua("luascript",0)
         Executes a "luascript". Using Lua script scim can be extend with lot 
         new functionality, such as complex programming, accessing databases etc.
-        The search patch for LUA scripts files is 
+        The search patch for LUA scripts files is
         $HOME/.scim/lua/ or /usr/local/share/scim/lua (in that order)
-	Always use it only with @ston see example:
-	@ston(@lua("luascript",0)) 
+        Always use it only with @ston see example:
+        @ston(@lua("luascript",0))
 
 ==============================================================================
 &Built-in Date and Time Functions&
@@ -1246,8 +1246,8 @@ Commands for handling cell content:
 &LUA Scripts and Triggers&
      SC-IM was extended with LUA capabilities and also provided with helper
      Function for manipulate SC-IM data with Lua at runtime. Since it is a
-     fully functional Lua, you can use all Lua packages also for sc-im lua 
-     scripts. Use luarocks to install additional packages. 
+     fully functional Lua, you can use all Lua packages also for sc-im lua
+     scripts. Use luarocks to install additional packages.
 
      Function provided to lua script/triggers :
 
@@ -1268,9 +1268,9 @@ Commands for handling cell content:
      sc.maxrows()            - return current maximum rows
      sc.curcol()             - return current column
      sc.currow()             - return current row
-     
-     The search patch for LUA scripts files is 
-     $HOME/.scim/lua/ or /usr/local/share/scim/lua (in that order)     
+
+     The search patch for LUA scripts files is
+     $HOME/.scim/lua/ or /usr/local/share/scim/lua (in that order)
      Example can be found in sc-im/files/lua in source code tree.
 
 
