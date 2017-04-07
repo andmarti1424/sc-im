@@ -51,10 +51,17 @@ SC-IM stands for Spreadsheet Calculator Improvised. :-)
     make install
 ```
 
+### Helping us
+
+Want to help?  You can help us with one or more of the following:
+
+* giving SC-IM a star in GitHub
+* taking screenshots / creating screencasts showing SC-IM
+* making a donation (see below).
 
 ### Donations
 
-Please make a DONATION with PayPal so I can keep working on SC-IM !!
+You can help SC-IM development by making a DONATION with PayPal.
 
 <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=U537V8SNQQ45J" target="_blank">
 <img src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" />
