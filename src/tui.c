@@ -28,27 +28,21 @@
  * ui_print_mode          // function that shows current mode in top right of screen
  * ui_get_formated_value  // function used for exporting spreadsheet to plain text
  *
- * these are local funtions that might not be needed to reimplement if writing another ui:
+ * these are local functions that might not be needed to reimplement if writing another ui:
  * ui_set_ucolor          // function called internally for setting a color
  * ui_show_content
  * ui_show_sc_col_headings
  * ui_show_sc_row_headings
  * ui_write_j
- * ui_add_cell_detail        // Add details of an ent to a char * received as a parameter. used for input_win
+ * ui_add_cell_detail     // Add details of an ent to a char * received as a parameter. used for input_win
  *
  * ANYONE WHO WANTS TO PORT THIS TO ANOTHER UI, WOULD JUST NEED TO REIMPLEMENT THIS FILE
  * AND HELP() IN HELP.C
  */
 
 /*
- * if not working with ncurses, you should have to define LINES and COLS macros in Xui.h as well.
-#ifndef LINES
-#define LINES ...
-#endif
-
-#ifndef COLS
-#define COLS ...
-#endif
+ * if not working with ncurses, you should also have to define LINES and COLS macros in Xui.h as well.
+ * see ui example inside /files folder
  */
 
 #include <string.h>
@@ -260,8 +254,6 @@ void ui_do_welcome() {
             #endif
         }
     }
-    //mvwaddstr(main_win, LINES/2  , COLS/2-strlen(msg_help)/2   , msg_help);
-    //mvwaddstr(main_win, LINES/2+1, COLS/2-strlen(msg_help2)/2  , msg_help2);
     wrefresh(main_win);
     return;
 }
@@ -953,7 +945,7 @@ int ui_get_formated_value(struct ent ** p, int col, char * value) {
 }
 
 /*
- * function that shows text in a child process
+ * function that shows text in a child process.
  * used for set, version, showmaps, print_graph,
  * showfilters, hiddenrows and hiddencols commands
  */
@@ -1086,7 +1078,7 @@ char * ui_query(char * initial_msg) {
     return hline;
 }
 
-// Set a color //CURSES
+// Set a color
 void ui_set_ucolor(WINDOW * w, struct ucolor * uc) {
     long attr = A_NORMAL;
     if (uc->bold)      attr |= A_BOLD;
