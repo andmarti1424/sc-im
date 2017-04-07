@@ -115,28 +115,20 @@ static int l_getstr (lua_State *L) {
 static int l_setform (lua_State *L) {
     int r,c;
     char * val;
-    //struct ent ** pp;
-    //struct ent * p;
-    char buf[256];
+    wchar_t buf[BUFFERSIZE];
     r = lua_tointeger(L, 1);  /* get argument */
     c = lua_tointeger(L, 2);
     val = (char *) lua_tostring(L,3);
-    //sc_debug("setstr !!");
-
-    sprintf(buf,"LET %s%d=%s",coltoa(c),r,val);
-    send_to_interpp(buf);
-
+    swprintf(buf, FBUFLEN, L"LET %s%d=%s", coltoa(c), r, val);
+    send_to_interp(buf);
     return 0;
 }
 
 static int l_sc (lua_State *L) {
-    char * val;
-
-    val=(char *) lua_tostring(L,1);
-    //sc_debug("setstr !!");
-
-    send_to_interpp(val);
-
+    char * val = (char *) lua_tostring(L,1);
+    wchar_t buf[BUFFERSIZE];
+    swprintf(buf, FBUFLEN, L"%s", val);
+    send_to_interp(buf);
     return 0;
 }
 

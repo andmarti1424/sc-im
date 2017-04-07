@@ -948,17 +948,6 @@ void send_to_interp(wchar_t * oper) {
     return;
 }
 
-// Send command to interpreter
-void send_to_interpp(char * oper) {
-    if (atoi(get_conf_value("nocurses"))) {
-        sc_debug("Interp GOT: %s", oper);
-    }
-    strcpy(line, oper);
-    linelim = 0;
-    yyparse();
-    if (atoi(get_conf_value("autocalc")) && ! loading) EvalAll();
-    return;
-}
 /* return a pointer to a cell's [struct ent *], creating if needed */
 struct ent * lookat(int row, int col) {
     register struct ent **pp;
