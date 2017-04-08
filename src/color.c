@@ -48,12 +48,12 @@ void start_default_ucolors() {
     ucolors[ CELL_SELECTION_SC ].bg = WHITE;
     ucolors[ NUMB            ].fg = CYAN;
     ucolors[ NUMB            ].bg = DEFAULT_COLOR;
-    ucolors[ STRG            ].fg = MAGENTA;
+    ucolors[ STRG            ].fg = BLUE;
     ucolors[ STRG            ].bg = DEFAULT_COLOR;
-    ucolors[ STRG            ].bold = 0;
+    ucolors[ STRG            ].bold = 1;
     ucolors[ DATEF           ].fg = YELLOW;
     ucolors[ DATEF           ].bg = DEFAULT_COLOR;
-    ucolors[ EXPRESSION      ].fg = YELLOW;
+    ucolors[ EXPRESSION      ].fg = RED;
     ucolors[ EXPRESSION      ].bg = DEFAULT_COLOR;
     ucolors[ INFO_MSG        ].fg = CYAN;
     ucolors[ INFO_MSG        ].bg = DEFAULT_COLOR;
