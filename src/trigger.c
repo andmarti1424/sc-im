@@ -1,15 +1,15 @@
-/* R.Pollak
-This is general trigger support, Idea behind triggers, is when ever a value is changed triggers will be called on Write
-and when ever a value will be evaluated a READ trigger will be fired
-ent structure is extended with trigger structure
-
-Triggers need mode,type,file,function flags
-  mode - can be R,W,RW
-  type - C|LUA (later even SH)
-  file - File name of the Trigger commands file
-  function - Which function should be called for both Lua and C
-*/
-
+/*
+ * R.Pollak
+ * This is general trigger support, Idea behind triggers, is when ever a value is changed triggers will be called on Write
+ * and when ever a value will be evaluated a READ trigger will be fired
+ * ent structure is extended with trigger structure
+ *
+ * Triggers need mode,type,file,function flags
+ *   mode - can be R,W,RW
+ *   type - C|LUA (later even SH)
+ *   file - File name of the Trigger commands file
+ *   function - Which function should be called for both Lua and C
+ */
 #include <sys/types.h>
 #include <string.h>
 #include <stdlib.h>      // for atoi

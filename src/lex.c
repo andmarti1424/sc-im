@@ -269,20 +269,6 @@ int yylex() {
         linelim = p-line;
         tokenst = NULL;
         return yylex();
-
-/*
-    } else if (tokenl ==  3) {
-                    //k++;
-            //mvprintw(0, 5, "$$%d", tokenl);
-                    //k++;
-            //mvprintw(0, 25, "$$%s", tokenst);
-            //ret = STRING;
-            //yylval.sval = tokenst;
-
-        yylval.sval = "HOLA";
-        ret = MAPWORD;
-        ret = STRING;
-*/
     } else {
         ret = *p++;
     }
@@ -294,35 +280,6 @@ int yylex() {
 }
 
 /*
-* This is a very simpleminded test for plugins:  does the file merely exist
-* in the plugin directories.  Perhaps should test for it being executable
-*/
-#if 0
-int plugin_exists(char *name, int len, char *path) {
-    FILE *fp;
-    static char *HomeDir;
-
-    if ((HomeDir = getenv("HOME"))) {
-        strcpy((char *)path, HomeDir);
-        strcat((char *)path, "/.sc/plugins/");
-        strncat((char *)path, name, len);
-        if ((fp = fopen((char *)path, "r"))) {
-            fclose(fp);
-            return 1;
-        }
-    }
-    strcpy((char *)path, LIBDIR);
-    strcat((char *)path, "/plugins/");
-    strncat((char *)path, name, len);
-    if ((fp = fopen((char *)path, "r"))) {
-        fclose(fp);
-        return 1;
-    }
-    return 0;
-}
-
-#endif
-/*
  * Given a token string starting with a symbolic column name and its valid
  * length, convert column name ("A"-"Z" or "AA"-"ZZ") to a column number (0-N).
  * Never mind if the column number is illegal (too high).  The procedure's name
@@ -330,7 +287,6 @@ int plugin_exists(char *name, int len, char *path) {
  *
  * Case-insensitivity is done crudely, by ignoring the 040 bit.
  */
-
 int atocol(char *string, int len) {
     register int col;
 

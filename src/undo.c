@@ -129,9 +129,11 @@ void end_undo_action() {
     return;
 }
 
-// Add a undo node to the undolist,
-// allocate memory for undo struct,
-// fill variable with undo_item value and append it to the list
+/*
+ * Add a undo node to the undolist,
+ * allocate memory for undo struct,
+ * fill variable with undo_item value and append it to the list
+ */
 void add_to_undolist(struct undo u) {
     // If not at the end of the list, remove from the end
     if ( undo_list != NULL && undo_list_pos != len_undo_list() )
@@ -168,13 +170,15 @@ void add_to_undolist(struct undo u) {
     return;
 }
 
-// dismiss current undo_item
-// this functions free memory of and struct undo.
-// its used in function free_undo_node for that purpose.
-//
-// but as well, this function shall be called instead of end_undo_action
-// in case we want to cancel a previous create_undo_action
-// if called for this purpose argument shall be NULL
+/*
+ * dismiss current undo_item
+ * this functions free memory of and struct undo.
+ * its used in function free_undo_node for that purpose.
+ *
+ * but as well, this function shall be called instead of end_undo_action
+ * in case we want to cancel a previous create_undo_action
+ * if called for this purpose argument shall be NULL
+ */
 void dismiss_undo_item(struct undo * ul) {
     struct ent * en;
     struct ent * de;
@@ -270,10 +274,12 @@ int len_undo_list() {
     return undo_list_len;
 }
 
-// Take a range of 'ent' elements and create new ones (as many as elements
-// inside the specified range).
-// Then copy the content of the original ones to the new ones and save them into
-// the 'added' or 'removed' list of undo_item, according to the char type.
+/*
+ * Take a range of 'ent' elements and create new ones (as many as elements
+ * inside the specified range).
+ * Then copy the content of the original ones to the new ones and save them into
+ * the 'added' or 'removed' list of undo_item, according to the char type.
+ */
 void copy_to_undostruct (int row_desde, int col_desde, int row_hasta, int col_hasta, char type) {
     int c, r;
     struct ent * p;
@@ -316,9 +322,11 @@ void copy_to_undostruct (int row_desde, int col_desde, int row_hasta, int col_ha
     return;
 }
 
-// this is used to keep aux ents in the undo struct
-// used for undoing dr dc sk and sh commands..
-// it stores a copy of the ent received as parameter and returns the point to that copy
+/*
+ * this is used to keep aux ents in the undo struct
+ * used for undoing dr dc sk and sh commands..
+ * it stores a copy of the ent received as parameter and returns the point to that copy
+ */
 struct ent * add_undo_aux_ent(struct ent * e) {
     struct ent * e_new = (struct ent *) malloc( (unsigned) sizeof(struct ent) );
     cleanent(e_new);
@@ -359,13 +367,15 @@ void save_undo_range_shift(int delta_rows, int delta_cols, int tlrow, int tlcol,
     return;
 }
 
-// This function is used for undoing and redoing
-// changes caused by commands that hide/show rows/columns of screen
-// such as Zr Zc Sc Sr commands.
-// it stores in four different lists (int * list) the row or columns numbers
-// that are showed or hidden because of a change.
-// As these lists are dynamically built, in the first position of every list,
-// we always store the number of elements that the list has.
+/*
+ * This function is used for undoing and redoing
+ * changes caused by commands that hide/show rows/columns of screen
+ * such as Zr Zc Sc Sr commands.
+ * it stores in four different lists (int * list) the row or columns numbers
+ * that are showed or hidden because of a change.
+ * As these lists are dynamically built, in the first position of every list,
+ * we always store the number of elements that the list has.
+ */
 void undo_hide_show(int row, int col, char type, int arg) {
     int i;
     if (type == 'h') {
@@ -424,9 +434,11 @@ void undo_hide_show(int row, int col, char type, int arg) {
     return;
 }
 
-// Do UNDO operation
-// Shift a range of an undo shift range to the original position, if any, append
-// 'ent' elements from 'removed' and remove those from 'added'
+/*
+ * Do UNDO operation
+ * Shift a range of an undo shift range to the original position, if any, append
+ * 'ent' elements from 'removed' and remove those from 'added'
+ */
 void do_undo() {
     if (undo_list == NULL || undo_list_pos == 0) {
         sc_error("No UNDO's left");
@@ -575,9 +587,11 @@ void do_undo() {
     return;
 }
 
-// Do REDO
-// Shift a range of an undo shift range to the original position, if any, append
-// 'ent' elements from 'added' and remove those from 'removed'
+/*
+ * Do REDO
+ * Shift a range of an undo shift range to the original position, if any, append
+ * 'ent' elements from 'added' and remove those from 'removed'
+ */
 void do_redo() {
     //if ( undo_list == NULL || undo_list_pos == len_undo_list()  ) {
     //FIXME check why undo_list_pos can sometimes be > len_undo_list(). it shouldnt!!

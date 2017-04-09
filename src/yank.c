@@ -1,9 +1,10 @@
-// Yanklist doesn't keep references to 'ent' elements, it creates new nodes.
-// the yanklist is constantly cleaned out.
-// Ex.: When removing 'ent' elements with `dc`, the original ones are removed
-// and new elements are created in the yanklist.
-// Important: each 'ent' element should keep a row and col.
-
+/*
+ * Yanklist doesn't keep references to 'ent' elements, it creates new nodes.
+ * the yanklist is constantly cleaned out.
+ * Ex.: When removing 'ent' elements with `dc`, the original ones are removed
+ * and new elements are created in the yanklist.
+ * Important: each 'ent' element should keep a row and col.
+ */
 #include "sc.h"
 #include "stdlib.h"
 #include "marks.h"
@@ -112,10 +113,12 @@ void add_ent_to_yanklist(struct ent * item) {
     return;
 }
 
-// yank a range of ents
-// ARG: number of rows or columns yanked. Used in commands like `4yr`
-// TYPE: yank type. c=col, r=row, a=range, e=cell, '\0'=no yanking, 's' sort
-// This two args are used for pasting.
+/*
+ * yank a range of ents
+ * ARG: number of rows or columns yanked. Used in commands like `4yr`
+ * TYPE: yank type. c=col, r=row, a=range, e=cell, '\0'=no yanking, 's' sort
+ * This two args are used for pasting.
+ */
 void yank_area(int tlrow, int tlcol, int brrow, int brcol, char type, int arg) {
     int r,c;
     free_yanklist();
@@ -134,19 +137,21 @@ void yank_area(int tlrow, int tlcol, int brrow, int brcol, char type, int arg) {
     return;
 }
 
-// paste yanked ents:
-// this function is used for paste ents that were yanked with yr yc dr dc..
-// it is also used for sorting.
-// if above == 1, paste is done above current row or to the right of current col.
-// ents that were yanked using yy or yanked ents of a range, are always pasted in currow and curcol positions.
-// diffr: diff between current rows and the yanked 'ent'
-// diffc: diff between current cols and the yanked 'ent'
-// When sorting, row and col values can vary from yank to paste time, so diffr
-// should be zero.
-// When implementing column sorting, diffc should be zero as well!
-// type indicates if pasting format only, value only or the whole content
-// yank type: c=col, r=row, a=range, e=cell, '\0'=no yanking
-// returns -1 if locked cells are found. 0 otherwise.
+/*
+ * paste yanked ents:
+ * this function is used for paste ents that were yanked with yr yc dr dc..
+ * it is also used for sorting.
+ * if above == 1, paste is done above current row or to the right of current col.
+ * ents that were yanked using yy or yanked ents of a range, are always pasted in currow and curcol positions.
+ * diffr: diff between current rows and the yanked 'ent'
+ * diffc: diff between current cols and the yanked 'ent'
+ * When sorting, row and col values can vary from yank to paste time, so diffr
+ * should be zero.
+ * When implementing column sorting, diffc should be zero as well!
+ * type indicates if pasting format only, value only or the whole content
+ * yank type: c=col, r=row, a=range, e=cell, '\0'=no yanking
+ * returns -1 if locked cells are found. 0 otherwise.
+ */
 int paste_yanked_ents(int above, int type_paste) {
     if (! count_yank_ents()) return 0;
 

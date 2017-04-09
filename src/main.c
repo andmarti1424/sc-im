@@ -93,12 +93,6 @@ void read_stdin();
  * MAIN LOOP
  *********************************************************************/
 int main (int argc, char ** argv) {
-
-    /* setup stderr buffer
-    if (freopen("/dev/stderr", "w", stderr) == NULL) {
-        fprintf(stderr, "Error opening stderr\n");
-        return -1;
-    }*/
     if (setvbuf(stderr, stderr_buffer, _IOFBF, STDERRBUF) != 0) {
         fprintf(stderr, "Error setting stderr buffer\n");
         return -1;
@@ -156,9 +150,11 @@ int main (int argc, char ** argv) {
     }
 #endif
 
-    // If the 'output' parameter is defined, SC-IM saves its output to that file.
-    // To achieve that, we open the output file and keep it open until exit.
-    // otherwise, SC-IM will output to stdout.
+    /*
+     * If the 'output' parameter is defined, SC-IM saves its output to that file.
+     * To achieve that, we open the output file and keep it open until exit.
+     * otherwise, SC-IM will output to stdout.
+     */
     if (get_conf_value("output") != NULL) {
         fdoutput = fopen(get_conf_value("output"), "w+");
         if (fdoutput == NULL) {
@@ -367,8 +363,10 @@ int exit_app(int status) {
     return status;
 }
 
-// we read parameters passed to SC-IM executable
-// and store them in user_conf dictionary
+/*
+ * we read parameters passed to SC-IM executable
+ * and store them in user_conf dictionary
+ */
 void read_argv(int argc, char ** argv) {
     int i;
     for (i = 1; i < argc; i++) {

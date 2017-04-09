@@ -130,7 +130,8 @@ void ui_stop_screen() {
     return;
 }
 
-/* this function asks user for input from stdin.
+/*
+ * this function asks user for input from stdin.
  * should be non blocking and should
  * return -1 when no key was press
  * return 0 when key was press.
@@ -142,7 +143,8 @@ int ui_getch(wint_t * wd) {
 }
 
 
-/* this function asks user for input from stdin.
+/*
+ * this function asks user for input from stdin.
  * should be blocking and should
  * return -1 when ESC was pressed
  * return 0 otherwise.
@@ -280,7 +282,8 @@ void ui_update(int header) {
         ui_print_mode();
     }
 
-    /* Calculate offscreen rows and columns
+    /*
+     * Calculate offscreen rows and columns
      *
      * mxcol is the last visible column in screen grid.
      * for instance, if mxcol is 8, last visible column would be I
@@ -529,8 +532,10 @@ void ui_show_sc_row_headings(WINDOW * win, int mxrow) {
     }
 }
 
-// Show sc_col headings: A, B, C, D...
-// mxcol is last col printed in screen
+/*
+ * Show sc_col headings: A, B, C, D...
+ * mxcol is last col printed in screen
+ */
 void ui_show_sc_col_headings(WINDOW * win, int mxcol) {
     int i, col = rescol;
     int freeze = freeze_ranges && (freeze_ranges->type == 'c' ||  freeze_ranges->type == 'a') ? 1 : 0;

@@ -1,8 +1,10 @@
 #include "range.h"
 
-// struct mark
-// row and col -1 indicates the node represents
-// a mark of a range of cells rather than a mark of just one cell
+/*
+ * struct mark
+ * row and col -1 indicates the node represents
+ * a mark of a range of cells rather than a mark of just one cell
+ */
 struct mark {
     int row;
     int col;

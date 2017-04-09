@@ -120,9 +120,9 @@ void do_commandmode(struct block * sb) {
     if (p != -1) sr = get_range_by_pos(p);
 
 
-    //-------------------------------------
-    // Normal KEY handlers for this MODE
-    //-------------------------------------
+    /*
+     * Normal KEY handlers for this MODE
+     */
     if (sb->value == OKEY_BS || sb->value == OKEY_BS2) {  // BS
         if ( ! wcslen(inputline) || ! real_inputline_pos ) return;
         int l = wcwidth(inputline[real_inputline_pos - 1]);
@@ -298,9 +298,9 @@ void do_commandmode(struct block * sb) {
         return;
 
 
-    //-------------------------------------
-    // CONFIRM A COMMAND PRESSING ENTER
-    //-------------------------------------
+    /*
+     * CONFIRM A COMMAND PRESSING ENTER
+     */
     } else if (find_val(sb, OKEY_ENTER)) {
 
         if ( ! wcscmp(inputline, L"refresh")) {
@@ -811,9 +811,11 @@ void do_commandmode(struct block * sb) {
         }
 
 #ifdef HISTORY_FILE
-        // if exists in history an item with same text to the command typed
-        // (counting from the second position) it is moved to the beginning of list.
-        // (first element in list means last command executed)
+        /*
+         * if exists in history an item with same text to the command typed
+         * (counting from the second position) it is moved to the beginning of list.
+         * (first element in list means last command executed)
+         */
         del_item_from_history(commandline_history, 0);
         int moved = move_item_from_history_by_str(commandline_history, inputline, -1);
         if (! moved) add(commandline_history, inputline);

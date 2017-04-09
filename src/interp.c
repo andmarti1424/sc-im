@@ -1,10 +1,11 @@
-/*    Expression interpreter and assorted support routines
- *    Based on SC
- *        original by James Gosling, September 1982
- *        modified by Mark Weiser and Bruce Israel, University of Maryland
+/*
+ * Expression interpreter and assorted support routines
+ * Based on SC
+ * original by James Gosling, September 1982
+ * modified by Mark Weiser and Bruce Israel, University of Maryland
  *
- *        More mods Robert Bond, 12/86
- *        More mods by Alan Silverstein, 3-4/88, see list of changes.
+ * More mods Robert Bond, 12/86
+ * More mods by Alan Silverstein, 3-4/88, see list of changes.
  */
 
 #include <sys/types.h>
@@ -69,7 +70,6 @@ jmp_buf fpe_save;
 extern bool decimal;      /* Set if there was a decimal point in the number */
 
 /* a linked list of free [struct enodes]'s, uses .e.o.left as the pointer */
-//struct enode * freeenodes = NULL;
 
 double dolookup      (struct enode * val, int minr, int minc, int maxr, int maxc, int offr, int offc);
 double fn1_eval      (double (* fn)(), double arg);
@@ -98,8 +98,6 @@ extern int find_range(char * name, int len, struct ent * lmatch, struct ent * rm
 
 #include "dep_graph.h"
 extern graphADT graph;
-//extern char valores;
-
 
 double finfunc(int fun, double v1, double v2, double v3) {
     double answer,p;
@@ -631,9 +629,9 @@ double donval(char * colstr, double rowdoub) {
 }
 
 /*
- *    The list routines (e.g. dolmax) are called with an LMAX enode.
- *    The left pointer is a chain of ELIST nodes, the right pointer
- *    is a value.
+ * The list routines (e.g. dolmax) are called with an LMAX enode.
+ * The left pointer is a chain of ELIST nodes, the right pointer
+ * is a value.
  */
 double dolmax(struct enode * ep) {
     register int count = 0;
@@ -917,7 +915,7 @@ double eval(register struct ent * ent, register struct enode * e) {
             double temp = eval(ent, e->e.o.left);
             return (temp - floor(temp) < 0.5 ? floor(temp) : ceil(temp));
         }
-     case ROUND:
+    case ROUND:
         {
         int precision = (int) eval(ent, e->e.o.right);
         double scale = 1;
@@ -1026,7 +1024,7 @@ double fn2_eval(double (*fn)(), double arg1, double arg2) {
     return res;
 }
 
-/* 
+/*
  * Rules for string functions:
  * Take string arguments which they scxfree.
  * All returned strings are assumed to be xalloced.
@@ -1108,7 +1106,6 @@ char * dofmt(char * fmtstr, double v) {
  * allocated string in all cases, even if null, insures cell expressions are
  * written to files, etc.
  */
-
 char * doext(struct enode *se) {
     char buff[FBUFLEN];        /* command line/return, not permanently alloc */
     char * command;
@@ -1171,7 +1168,6 @@ char * doext(struct enode *se) {
  * still allocate and return a null string so the cell has a label value so
  * the expression is saved in a file, etc.
  */
-
 char * dosval(char * colstr, double rowdoub) {
     struct ent * ep;
     char * llabel;
@@ -1503,7 +1499,8 @@ void go_last() {
     }
 }
 
-/* Place the cursor on a given cell.  If cornerrow >= 0, place the cell
+/*
+ * Place the cursor on a given cell.  If cornerrow >= 0, place the cell
  * at row cornerrow and column cornercol in the upper left corner of the
  * screen if possible.
  */
@@ -1627,7 +1624,8 @@ void num_search(double n, int firstrow, int firstcol, int lastrow_, int lastcol_
     //} //else remember(1);
 }
 
-/* 'goto' a cell containing a matching string
+/*
+ * 'goto' a cell containing a matching string
  * flow = 1, look forward
  * flow = 0, look backwards
  */
@@ -1813,8 +1811,6 @@ void fill(struct ent *v1, struct ent *v2, double start, double inc) {
     else {
         sc_error(" Internal error calc_order");
     }
-    //changed++;
-
     #ifdef UNDO
     end_undo_action();
     #endif
@@ -2212,9 +2208,9 @@ char * coltoa(int col) {
 }
 
 /*
- *    To make list elements come out in the same order
- *    they were entered, we must do a depth-first eval
- *    of the ELIST tree
+ * To make list elements come out in the same order
+ * they were entered, we must do a depth-first eval
+ * of the ELIST tree
  */
 static void decompile_list(struct enode *p) {
     if (!p) return;
@@ -2633,18 +2629,18 @@ int dateformat(struct ent *v1, struct ent *v2, char * fmt) {
 }
 
 #ifdef RINT
-/*    round-to-even, also known as ``banker's rounding''.
-    With round-to-even, a number exactly halfway between two values is
-    rounded to whichever is even; e.g. rnd(0.5)=0, rnd(1.5)=2,
-    rnd(2.5)=2, rnd(3.5)=4.  This is the default rounding mode for
-    IEEE floating point, for good reason: it has better numeric
-    properties.  For example, if X+Y is an integer,
-    then X+Y = rnd(X)+rnd(Y) with round-to-even,
-    but not always with sc's rounding (which is
-    round-to-positive-infinity).  I ran into this problem when trying to
-    split interest in an account to two people fairly.
-*/
-
+/*
+ * round-to-even, also known as ``banker's rounding''.
+ * With round-to-even, a number exactly halfway between two values is
+ * rounded to whichever is even; e.g. rnd(0.5)=0, rnd(1.5)=2,
+ * rnd(2.5)=2, rnd(3.5)=4.  This is the default rounding mode for
+ * IEEE floating point, for good reason: it has better numeric
+ * properties.  For example, if X+Y is an integer,
+ * then X+Y = rnd(X)+rnd(Y) with round-to-even,
+ * but not always with sc's rounding (which is
+ * round-to-positive-infinity).  I ran into this problem when trying to
+ * split interest in an account to two people fairly.
+ */
 double rint(double d) {
     /* as sent */
     double fl = floor(d), fr = d-fl;

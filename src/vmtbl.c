@@ -183,7 +183,7 @@ int growtbl(int rowcol, int toprow, int topcol) {
         }
         for (nullit = tbl[i], cnt = 0; cnt < newcols; cnt++, nullit++)
             *nullit = (struct ent *)NULL;
-/*    memset((char *) tbl[i], 0, newcols * sizeof(struct ent **));*/
+        /* memset((char *) tbl[i], 0, newcols * sizeof(struct ent **));*/
     }
 
     maxrows = newrows;
@@ -206,5 +206,3 @@ struct ent ** ATBL(struct ent ***tbl, int row, int col) {
           do_trigger(v,TRG_READ);
     return ent;
 }
-
-

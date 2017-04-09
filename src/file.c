@@ -106,9 +106,11 @@ int modcheck() {
     return 0;
 }
 
-// This function handles the save file process in SC-IM format
-// returns 0 if OK
-// return -1 on error
+/*
+ * This function handles the save file process in SC-IM format
+ * returns 0 if OK
+ * return -1 on error
+ */
 int savefile() {
     int force_rewrite = 0;
     char name[BUFFERSIZE];
@@ -302,10 +304,10 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
                 }
 
 
-                /*if ((*pp)->nrow >= 0) {
+                /* if ((*pp)->nrow >= 0) {
                     (void) fprintf(f, "addnote %s ", v_name((*pp)->row, (*pp)->col));
                     (void) fprintf(f, "%s\n", r_name((*pp)->nrow, (*pp)->ncol, (*pp)->nlastrow, (*pp)->nlastcol));
-                }*/
+                } */
 
                 // padding
                 // previous implementation
@@ -830,7 +832,9 @@ int import_csv(char * fname, char d) {
     return 0;
 }
 
-// Export to CSV, TAB or plain TXT
+/*
+ * Export to CSV, TAB or plain TXT
+ */
 void do_export(int r0, int c0, int rn, int cn) {
     int force_rewrite = 0;
     char type_export[4] = "";
@@ -1037,8 +1041,10 @@ void unspecial(FILE * f, char * str, int delim) {
     if (backquote) putc('\"', f);
 }
 
-// check max length of lines in a file
-// FILE * f shall be opened.
+/*
+ * check max length of lines in a file
+ * FILE * f shall be opened.
+ */
 int max_length(FILE * f) {
     int count = 0, max = 0;
     int c = fgetc(f);

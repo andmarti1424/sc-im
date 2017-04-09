@@ -14,7 +14,7 @@
 #include "cmds_visual.h"
 #include "buffer.h"
 
-static wint_t wd;           // char read from stdin
+static wint_t wd;          // char read from stdin
 static int d;              // char read from stdin
 int return_value;          // return value of getch()
 int cmd_multiplier = 0;    // Multiplier
@@ -22,11 +22,12 @@ int cmd_pending = 0;       // Command pending
 int shall_quit;            // Break loop if ESC key is pressed
 
 
-/* Reads stdin for a valid command.
+/*
+ * Reads stdin for a valid command.
  * Details: Read characters from stdin to a input buffer.
  * When filled up, validate the command and call the appropriate handler.
  * When a timeout is reached, flush the buffer.
-*/
+ */
 void handle_input(struct block * buffer) {
     struct timeval start_tv, m_tv; // For measuring timeout
     gettimeofday(&start_tv, NULL);
@@ -71,13 +72,17 @@ void handle_input(struct block * buffer) {
                     continue;
             }
 
-            // Update time stap to reset timeout after each loop
-            // (Only if current mode is COMMAND, INSERT or EDIT) and for each
-            // user input as well.
+            /*
+             * Update time stap to reset timeout after each loop
+             * (Only if current mode is COMMAND, INSERT or EDIT) and for each
+             * user input as well.
+             */
             fix_timeout(&start_tv);
 
-            // Handle special characters input: BS TAG ENTER HOME END DEL PGUP
-            // PGDOWN and alphanumeric characters
+            /*
+             * Handle special characters input: BS TAG ENTER HOME END DEL PGUP
+             * PGDOWN and alphanumeric characters
+             */
             if (is_idchar(d) || return_value != -1) {
                 // If in NORMAL, VISUAL or EDITION mode , change top left corner indicator
                 if ( (curmode == NORMAL_MODE && d >= ' ') || //FIXME
@@ -134,8 +139,10 @@ void break_waitcmd_loop(struct block * buffer) {
     return;
 }
 
-// Handle timeout depending on the current mode
-// there is NO timeout for COMMAND, INSERT and EDIT modes.
+/*
+ * Handle timeout depending on the current mode
+ * there is NO timeout for COMMAND, INSERT and EDIT modes.
+ */
 void fix_timeout(struct timeval * start_tv) {
     switch (curmode) {
         case COMMAND_MODE:
@@ -150,8 +157,10 @@ void fix_timeout(struct timeval * start_tv) {
     return;
 }
 
-// Traverse 'stuffbuff' and determines if there  is a valid command
-// Ej. buffer = "diw"
+/*
+ * Traverse 'stuffbuff' and determines if there  is a valid command
+ * Ej. buffer = "diw"
+ */
 int has_cmd (struct block * buf, long timeout) {
     int len = get_bufsize(buf);
     if ( ! len ) return 0;

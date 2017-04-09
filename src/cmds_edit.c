@@ -340,9 +340,11 @@ int back_word(int big_word) {
     return cpos;
 }
 
-// end_of_word is used for moving forward to end of a WORD
-// big_word looks for ' ', else looks for istext.
-// delete 1 is used when typing dw command
+/*
+ * end_of_word is used for moving forward to end of a WORD
+ * big_word looks for ' ', else looks for istext.
+ * delete 1 is used when typing dw command
+ */
 int for_word(int end_of_word, int delete, int big_word) {
     int cpos = real_inputline_pos;
 

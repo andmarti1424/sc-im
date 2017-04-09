@@ -17,16 +17,21 @@
 #include <libxml/tree.h>
 #include "xlsx.h"
 
-// ------------------------------------------------------------------
-// requires libzip-dev
-// requires libxml2-dev
-// for building: gcc -lzip -lxml2 -I/usr/include/libxml2 xlsx.c
-// ------------------------------------------------------------------
+/*
+ * xlsx import requires:
+ * requires libzip-dev
+ * requires libxml2-dev
+ *
+ * xlsx export requires
+ * libxlsxwriter
+ */
 
 
-// this functions takes the DOM of the sharedStrings file
-// and based on a position, it returns the according string
-// note that 0 is the first string.
+/*
+ * this functions takes the DOM of the sharedStrings file
+ * and based on a position, it returns the according string
+ * note that 0 is the first string.
+ */
 char * get_xlsx_string(xmlDocPtr doc, int pos) {
     xmlNode * cur_node = xmlDocGetRootElement(doc)->xmlChildrenNode;
     xmlNode * father;
@@ -57,9 +62,11 @@ char * get_xlsx_string(xmlDocPtr doc, int pos) {
     return result;
 }
 
-// this functions takes the DOM of the styles file
-// and based on a position, it returns the according numFmtId
-// IMPORTANT: note that 0 is the first "xf".
+/*
+ * this functions takes the DOM of the styles file
+ * and based on a position, it returns the according numFmtId
+ * IMPORTANT: note that 0 is the first "xf".
+ */
 char * get_xlsx_styles(xmlDocPtr doc_styles, int pos) {
     // we go forward up to styles data
     xmlNode * cur_node = xmlDocGetRootElement(doc_styles)->xmlChildrenNode;

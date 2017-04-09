@@ -233,8 +233,10 @@ void del_map(char * in, int mode) {
     return;
 }
 
-// Translate a block into a string
-// special characters are in the <CR> form
+/*
+ * Translate a block into a string
+ * special characters are in the <CR> form
+ */
 void get_mapstr_buf (struct block * b, char * str) {
     struct block * a = b;
     int i, len = get_bufsize(a);
@@ -305,6 +307,5 @@ void get_mappings(char * salida) {
        sprintf(salida + strlen(salida), "%3d + %c%smap \"%s\" = \"%s\"\n", i, mode, nore, min, mout);
        m = m->psig;
    }
-
    return;
 }

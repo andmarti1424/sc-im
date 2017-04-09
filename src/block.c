@@ -3,12 +3,13 @@
 #include "utils/string.h"
 
 
-// Find out if the int elements in the bus list are inside the ori list
-// If so, return the ori position of it.
-
-// TODO - IMPROVE this. Use two while statements in order to create an array
-// from a block, and make them work separately.
-// Leave the logic unmodified
+/*
+ * block in block: find out if the int elements in the bus list are
+ * inside the ori list. If so, return the ori position of it.
+ * TODO: IMPROVE this. Use two while statements in order to create an array
+ * from a block, and make them work separately.
+ * Leave the logic unmodified
+ */
 int block_in_block (struct block * o, struct block * b) {
     int lori = get_bufsize(o);
     int lbus = get_bufsize(b);
@@ -50,10 +51,12 @@ int block_in_block (struct block * o, struct block * b) {
     return -1;
 }
 
-// Replace the content of the block list "olist"
-// replace the nodes of the 'in' list
-// with the nodes of the 'out' list
-// Returns 0 on success, -1 on error.
+/*
+ * Replace the content of the block list "olist"
+ * replace the nodes of the 'in' list
+ * with the nodes of the 'out' list
+ * Returns 0 on success, -1 on error.
+ */
 int replace_block_in_block (struct block * olist, struct block * in, struct block * out) {
     struct block * ori = olist;
 
@@ -79,21 +82,3 @@ int replace_block_in_block (struct block * olist, struct block * in, struct bloc
 
     return 0;
 }
-
-/* NOT USED
-void block_to_str(struct block * b, char * out) {
-    struct block * b_aux = b;
-
-    if (b_aux == NULL || b_aux->value == '\0') return;
-
-    while (b_aux != NULL) {
-        if (b_aux->value > 31 && b_aux->value < 127) {
-           add_char(out, (char) b_aux->value, strlen(out));
-        } else if (b_aux->value == 27) {
-           return;
-        }
-        b_aux = b_aux->pnext;
-    }
-    return;
-}
-*/

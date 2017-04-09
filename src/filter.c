@@ -161,8 +161,11 @@ void del_filter(int id) {
     return;
 }
 
-// this functions checks if a filter was deleted, so there would be room in filters structure for a new filter
-// and preventing an unnecessary realloc.
+/*
+ * this functions checks if a filter was deleted, so there would be room
+ * in filters structure for a new filter
+ * and preventing an unnecessary realloc.
+ */
 int exists_freed_filter() {
     if (filters == NULL) return -1;
     int i;

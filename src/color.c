@@ -85,8 +85,10 @@ void start_default_ucolors() {
     ui_start_colors(); // call specific ui startup routine
 }
 
-// Create a dictionary that stores the correspondence between macros and key
-// values (integers) defined in '.sc' files or through the color command.
+/*
+ * Create a dictionary that stores the correspondence between macros and key
+ * values (integers) defined in '.sc' files or through the color command.
+ */
 void set_colors_param_dict() {
     d_colors_param = create_dictionary();
     char str[3];

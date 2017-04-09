@@ -9,16 +9,20 @@
 #include "xls.h"
 #include "utils/string.h"
 
-// xls.h is part of libxls. make sure its installed and headers are in path.
-// build must be done with '-lxlsreader'
+/*
+ * xls.h is part of libxls. make sure its installed and headers are in path.
+ * build must be done with '-lxlsreader'
+ */
 #ifdef XLS
 #include <xls.h>
 #endif
 
-// this functions loads an excel file into tbl.
-// As SC-IM still does not handle multiple sheets,
-// if the excel file has multiple sheets, only the first one is read.
-// this function returns -1 in case of error
+/*
+ * this functions loads an excel file into tbl.
+ * As SC-IM still does not handle multiple sheets,
+ * if the excel file has multiple sheets, only the first one is read.
+ * this function returns -1 in case of error
+ */
 int open_xls(char * fname, char * encoding) {
 #ifdef XLS
 
@@ -123,5 +127,4 @@ int open_xls(char * fname, char * encoding) {
 #else
     return -1;
 #endif
-
 }

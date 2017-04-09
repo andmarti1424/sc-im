@@ -130,9 +130,11 @@ void do_insertmode(struct block * sb) {
         enter_cell_content(currow, curcol, ope, content);
 
 #ifdef INS_HISTORY_FILE
-        // if exists in history an item with same text to the command typed
-        // (counting from the second position) it is moved to the beginning of list.
-        // (first element in list means last command executed)
+        /*
+         * if exists in history an item with same text to the command typed
+         * (counting from the second position) it is moved to the beginning of list.
+         * (first element in list means last command executed)
+         */
         del_item_from_history(insert_history, 0);
         wchar_t copy[BUFFERSIZE];
 

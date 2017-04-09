@@ -147,9 +147,11 @@ void del_item_from_history(struct history * h, int pos) {
     return;
 }
 
-// Find a history element and move it. Starts from POS
-// pos=0 first element, pos=-1 second element
-// returns 1 if moved, 0 otherwise.
+/*
+ * Find a history element and move it. Starts from POS
+ * pos=0 first element, pos=-1 second element
+ * returns 1 if moved, 0 otherwise.
+ */
 int move_item_from_history_by_str(struct history * h, wchar_t * item, int pos) {
     if (h->len - 1 < -pos || pos == 0 || ! wcslen(item)) return 0; // Move the first element is not allowed
     struct hlist * nl = h->list;
@@ -202,8 +204,10 @@ void add(struct history * h, wchar_t * line) {
     return;
 }
 
-// Returns a history line from COMMAND_MODE
-// POS 0 is the most recent line
+/*
+ * Returns a history line from COMMAND_MODE
+ * POS 0 is the most recent line
+ */
 wchar_t * get_line_from_history(struct history * h, int pos) {
     return get_hlist_from_history(h, pos)->line;
 }

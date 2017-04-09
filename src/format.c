@@ -1,13 +1,12 @@
-/*****************************************************************************
- *
+/*
  * Based on code of Mark Nagel <nagel@ics.uci.edu>, 20 July 1989
  *
  * int
  * format(fmt, precision, num, buf, buflen)
- *  char *fmt;
- *  double num;
- *  char buf[];
- *  int buflen;
+ * char *fmt;
+ * double num;
+ * char buf[];
+ * int buflen;
  *
  * The format function will produce a string representation of a number
  * given a _format_ (described below) and a double value.  The result is
@@ -76,15 +75,12 @@
  *    ';' character will be used if the number given is zero or
  *    positive.  The format to the right of the ';' character is
  *      used if the number given is negative.
- *    
+ *
  *  Any
  *    Self insert.  Any other character will be inserted directly
  *    into the formatted number with no change made to the actual
  *      number.
- *
- *****************************************************************************/
-
-/*****************************************************************************/
+ */
 
 #include <stdio.h>
 #include <string.h>
@@ -92,20 +88,16 @@
 #include <time.h>
 #include "sc.h"
 
-#define true    1
+#define true     1
 #define false    0
-#define EOS    '\0'
-#define MAXBUF    256
+#define EOS      '\0'
+#define MAXBUF   256
 
 static char *fmt_int(char *val, char *fmt, int comma, int negative);
 static char *fmt_frac(char *val, char *fmt, int lprecision);
 static char *fmt_exp(int val, char *fmt);
-
 static void reverse(register char *buf);
-
 char * colformat[COLFORMATS];
-
-/*****************************************************************************/
 
 int format(char *fmt, int lprecision, double val, char *buf, int buflen) {
     register char *cp;
@@ -187,7 +179,8 @@ int format(char *fmt, int lprecision, double val, char *buf, int buflen) {
     *tp = EOS;
     fmt = tmpfmt2;
 
-/* The following line was necessary due to problems with the gcc
+/*
+ * The following line was necessary due to problems with the gcc
  * compiler and val being a negative zero.  Thanks to Mike Novack for
  * the suggestion. - CRM
  */
@@ -312,8 +305,6 @@ int format(char *fmt, int lprecision, double val, char *buf, int buflen) {
     }
 }
 
-/*****************************************************************************/
-
 static char * fmt_int(char *val,  /* integer part of the value to be formatted */
     char *fmt,         /* integer part of the format */
     int comma,        /* true if we should comma-ify the value */
@@ -369,8 +360,6 @@ static char * fmt_int(char *val,  /* integer part of the value to be formatted *
     return (buf);
 }
 
-/*****************************************************************************/
-
 static char * fmt_frac(
     char *val,   /* fractional part of the value to be formatted */
     char *fmt,        /* fractional portion of format */
@@ -403,8 +392,6 @@ static char * fmt_frac(
         return (buf);
 }
 
-/*****************************************************************************/
-
 static char * fmt_exp(int val, /* value of the exponent */
     char *fmt) {               /* exponent part of the format */
     static char buf[MAXBUF];
@@ -430,8 +417,6 @@ static char * fmt_exp(int val, /* value of the exponent */
     return (buf);
 }
 
-/*****************************************************************************/
-
 static void reverse(register char *buf) {
     register char *cp = buf + strlen(buf) - 1;
     register char tmp;
@@ -443,7 +428,6 @@ static void reverse(register char *buf) {
     }
 }
 
-/*****************************************************************************/
 /*
  * Tom Anderson    <toma@hpsad.hp.com>
  * 10/14/90
@@ -470,7 +454,6 @@ static void reverse(register char *buf) {
  * may be missing, and the default will be fixed point (format 0).
  *
  * When an old style sheet is saved, the third value will be stored.
- *
  */
 
 /* defined in sc.h */
