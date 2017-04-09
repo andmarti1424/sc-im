@@ -2060,6 +2060,7 @@ void slet(struct ent * v, struct enode * se, int flushdir) {
             v->flags &= ~is_label;
     }
     modflg++;
+    if (( v->trigger  ) && ((v->trigger->flag & TRG_WRITE) == TRG_WRITE)) do_trigger(v,TRG_WRITE);
 
     #ifdef UNDO
     if (!loading) {
