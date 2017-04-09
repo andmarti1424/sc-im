@@ -32,11 +32,13 @@ int offscr_sc_rows = 0, offscr_sc_cols = 0;
 int center_hidden_cols = 0;
 int center_hidden_rows = 0;
 
-// mark_ent_as_deleted
-// This structure is used to keep ent structs around before they
-// are actualy deleted (memory freed) to allow the sync_refs routine a chance to fix the
-// variable references.
-// if delete flag is set, is_deleted flag of an ent is set
+/*
+ * mark_ent_as_deleted
+ * This structure is used to keep ent structs around before they
+ * are actualy deleted (memory freed) to allow the sync_refs routine a chance to fix the
+ * variable references.
+ * if delete flag is set, is_deleted flag of an ent is set
+ */
 void mark_ent_as_deleted(register struct ent * p, int delete) {
     if (p == NULL) return;
     if (delete) p->flags |= is_deleted;
@@ -47,10 +49,12 @@ void mark_ent_as_deleted(register struct ent * p, int delete) {
     return;
 }
 
-// flush_saved: iterates throw freeents (ents marked as deleted)
-// calls clearent for freeing ents contents memory
-// and free ent pointer. this function should always be called
-// at exit. this is mandatory, just in case we want to UNDO any changes.
+/*
+ * flush_saved: iterates throw freeents (ents marked as deleted)
+ * calls clearent for freeing ents contents memory
+ * and free ent pointer. this function should always be called
+ * at exit. this is mandatory, just in case we want to UNDO any changes.
+ */
 void flush_saved() {
     register struct ent * p;
     register struct ent * q;
@@ -66,12 +70,14 @@ void flush_saved() {
     return;
 }
 
-// sync_refs and syncref are used to REMOVE references to
-// deleted struct ents.
-// Note that the deleted structure must still
-// be hanging around before the call, but not referenced
-// by an entry in tbl.
-// IMPROVE: Shouldn't traverse the whole table.
+/*
+ * sync_refs and syncref are used to REMOVE references to
+ * deleted struct ents.
+ * Note that the deleted structure must still
+ * be hanging around before the call, but not referenced
+ * by an entry in tbl.
+ * IMPROVE: Shouldn't traverse the whole table.
+ */
 void sync_refs() {
     int i, j;
     register struct ent * p;
@@ -163,8 +169,10 @@ void deletecol(int col, int mult) {
     return;
 }
 
-// Delete a column - internal function
-// parameters: col = col to delete, multi = cmds multiplier.(commonly 1)
+/*
+ * Delete a column - internal function
+ * parameters: col = col to delete, multi = cmds multiplier.(commonly 1)
+ */
 void int_deletecol(int col, int mult) {
     register struct ent ** pp;
     int r, c, i;
@@ -357,11 +365,13 @@ void erase_area(int sr, int sc, int er, int ec, int ignorelock, int mark_as_dele
         sc = 0;
     checkbounds(&er, &ec);
 
-    // mark the ent as deleted
-    // Do a lookat() for the upper left and lower right cells of the range
-    // being erased to make sure they are included in the delete buffer so
-    // that pulling cells always works correctly even if the cells at one
-    // or more edges of the range are all empty.
+    /*
+     * mark the ent as deleted
+     * Do a lookat() for the upper left and lower right cells of the range
+     * being erased to make sure they are included in the delete buffer so
+     * that pulling cells always works correctly even if the cells at one
+     * or more edges of the range are all empty.
+     */
     (void) lookat(sr, sc);
     (void) lookat(er, ec);
     for (r = sr; r <= er; r++) {
@@ -389,7 +399,8 @@ void erase_area(int sr, int sc, int er, int ec, int ignorelock, int mark_as_dele
     return;
 }
 
-/* function to copy an expression. it returns the copy.
+/*
+ * function to copy an expression. it returns the copy.
  * special = 1 means transpose
  * special = 2 means copy from spreadsheet to undo struct
  */
@@ -585,8 +596,10 @@ void formatcol(int c) {
     return;
 }
 
-// Insert a single row.  It will be inserted before currow
-// if after is 0; after if it is 1.
+/*
+ * Insert a single row.  It will be inserted before currow
+ * if after is 0; after if it is 1.
+ */
 void insert_row(int after) {
     int    r, c;
     struct ent ** tmprow, ** pp, ** qq;
@@ -619,9 +632,11 @@ void insert_row(int after) {
     return;
 }
 
-// Insert a single col. The col will be inserted
-// BEFORE CURCOL if after is 0;
-// AFTER  CURCOL if it is 1.
+/*
+ * Insert a single col. The col will be inserted
+ * BEFORE CURCOL if after is 0;
+ * AFTER  CURCOL if it is 1.
+ */
 void insert_col(int after) {
     int r, c;
     register struct ent ** pp, ** qq;
@@ -712,8 +727,10 @@ void deleterow(int row, int mult) {
     return;
 }
 
-// Delete a row - internal function
-// parameters: row = row to delete, multi = cmds multiplier.(commonly 1)
+/*
+ * Delete a row - internal function
+ * parameters: row = row to delete, multi = cmds multiplier.(commonly 1)
+ */
 void int_deleterow(int row, int mult) {
     register struct ent ** pp;
     int r, c;
@@ -854,8 +871,10 @@ void chg_mode(char strcmd){
 }
 
 
-// del selected cells
-// can be a single cell or a range
+/*
+ * del selected cells
+ * can be a single cell or a range
+ */
 void del_selected_cells() {
     int tlrow = currow;
     int tlcol = curcol;
@@ -921,8 +940,9 @@ void del_selected_cells() {
     return;
 }
 
-/* Enter cell content on a cell.
-   Covers commands LET, LABEL, LEFTSTRING and RIGHTSTRING
+/*
+ * Enter cell content on a cell.
+ * Covers commands LET, LABEL, LEFTSTRING and RIGHTSTRING
  */
 void enter_cell_content(int r, int c, char * submode,  wchar_t * content) {
     // TODO - ADD PADDING INTELLIGENCE HERE ??
@@ -930,8 +950,10 @@ void enter_cell_content(int r, int c, char * submode,  wchar_t * content) {
     send_to_interp(interp_line);
 }
 
-// Send command to interpreter
-// wide_char version
+/*
+ * Send command to interpreter
+ * wide_char version
+ */
 void send_to_interp(wchar_t * oper) {
     if (atoi(get_conf_value("nocurses"))) {
         int pos = -1;
@@ -1238,8 +1260,10 @@ struct ent * go_end() {
     return NULL;
 }
 
-// if ticks a cell, returns struct ent *
-// if ticks a range, return struct ent * to top left cell
+/*
+ * if ticks a cell, returns struct ent *
+ * if ticks a range, return struct ent * to top left cell
+ */
 struct ent * tick(char ch) {
     int r, c;
     struct mark * m = get_mark(ch);
@@ -1683,8 +1707,10 @@ int fcopy() {
     return 0;
 }
 
-// add padd to cells!
-// this sets n to padding of a range
+/*
+ * add padd to cells!
+ * this sets n to padding of a range
+ */
 int pad(int n, int r1, int c1, int r2, int c2) {
     int r, c;
     struct ent * p ;
@@ -1730,8 +1756,10 @@ int pad(int n, int r1, int c1, int r2, int c2) {
     return 0;
 }
 
-// Calculate number of hidden columns in the left
-// q are the number of columns that are before offscr_sc_cols that are shown because they are frozen.
+/*
+ * Calculate number of hidden columns in the left
+ * q are the number of columns that are before offscr_sc_cols that are shown because they are frozen.
+ */
 int calc_offscr_sc_cols() {
     int q = 0, i, cols = 0, col = 0;
     int freeze = freeze_ranges && (freeze_ranges->type == 'c' ||  freeze_ranges->type == 'a') ? 1 : 0;
@@ -1958,11 +1986,13 @@ void pad_and_align (char * str_value, char * numeric_value, int col_width, int a
     return;
 }
 
-// Check if the buffer content is a valid command
-// res = 0 or NO_CMD : buf has no command
-// res = 1 or EDITION_CMD : buf has a command
-// res = 2 or MOVEMENT_CMD : buf has a movement command or a command that do not
-// change cell content, and should not be considered by the '.' command
+/*
+ * Check if the buffer content is a valid command
+ * res = 0 or NO_CMD : buf has no command
+ * res = 1 or EDITION_CMD : buf has a command
+ * res = 2 or MOVEMENT_CMD : buf has a movement command or a command that do not
+ * change cell content, and should not be considered by the '.' command
+ */
 int is_single_command (struct block * buf, long timeout) {
     if (buf->value == L'\0') return NO_CMD;
     int res = NO_CMD;

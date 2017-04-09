@@ -64,11 +64,11 @@ int yylex();
 %token <sval> PLUGIN
 
 /*
- *  When adding new commands, make sure that any commands that may take
- *  COL as an argument precede S_FORMAT in the %token list.  All other
- *  commands must come after S_FORMAT.  This is necessary so that range
- *  names can be less than three letters without being parsed as column
- *  names.
+ * When adding new commands, make sure that any commands that may take
+ * COL as an argument precede S_FORMAT in the %token list.  All other
+ * commands must come after S_FORMAT.  This is necessary so that range
+ * names can be less than three letters without being parsed as column
+ * names.
  */
 
 %token S_SHOW

@@ -1,77 +1,74 @@
 #ifdef UNDO
 /*
-----------------------------------------------------------------------------------------
-UNDO and REDO features works with an 'undo' struct list.
-Which contains:
-      p_ant: pointer to 'undo' struct. If NULL, this node is the first change
-             for the session.
-      struct ent * added: 'ent' elements added by the change
-      struct ent * removed: 'ent' elements removed by the change
-      struct ent * aux_ents: 'ent' elements that needs to be around, but out of tbl.
-                              these are used to update formulas correctly, upon shift/deletion of ents.
-      struct undo_range_shift * range_shift: range shifted by change
-      row_hidded: integers list (int *) hidden rows on screen
-      row_showed: integers list (int *) visible rows on screen
-      col_hidded: integers list (int *) hidden columns on screen
-      col_showed: integers list (int *) visible columns on screen
-             NOTE: the first position of the lists contains (number of elements - 1) in the list
-      struct undo_cols_format * cols_format: list of 'undo_col_info' elements used for
-             undoing / redoing changes in columns format (fwidth, precision y realfmt)
-      p_sig: pointer to 'undo' struct, If NULL, this node is the last change in
-             the session.
-
-Follows one level UNDO/REDO scheme. A change (C1) is made, then an UNDO operation, and
-another change (C2). From there later changes are removed.
-Scheme:
-
-+ C1 -> + -> UNDO -
-^                 \
-|_                |
-  \---------------/
-|
-|
-|
- \-> C2 --> + ...
-
-undo_shift_range struct contains:
-    int delta_rows: delta rows for the range shift
-    int delta_cols: delta columns for the range shift
-    int tlrow:      Upper left row defining the range of the shift
-                    (As if a cell range shift is made)
-    int tlcol:      Upper left column defining the range of the shift
-                    (As if a cell range shift is made)
-    int brrow:      Lower right row defining the range of the shift
-                    (As if a cell range shift is made)
-    int brcol:      Lower right column defining the range of the shift
-                    (As if a cell range shift is made)
-
-Implemented actions for UNDO/REDO:
-1. Remove content from cell or range
-2. Input content into a cell
-3. Edit a cell
-4. Change alginment of range or cell
-5. Paste range or cell
-6. Shift range or cell with sh, sj, sk, sl
-7. Insert row or column
-8. Delete row or column
-9. Paste row or column
-10. Hide/show rows and columns
-11. Sort of a range
-12. Change in the format of a range or cell
-13. '-' and '+' commands in normal mode
-14. Lock and unlock of cells
-15. datefmt command
-16. Change in format of a column as a result of the 'f' command
-17. Change in format of a column as a result of auto_jus
-18. Change format of columns as a result of ic dc
-19. fill command
-20. unformat
-
-NOT implemented:
-1. undo of freeze / unfreeze command
-
-----------------------------------------------------------------------------------------
-*/
+ * UNDO and REDO features works with an 'undo' struct list.
+ * Which contains:
+ *       p_ant: pointer to 'undo' struct. If NULL, this node is the first change
+ *              for the session.
+ *       struct ent * added: 'ent' elements added by the change
+ *       struct ent * removed: 'ent' elements removed by the change
+ *       struct ent * aux_ents: 'ent' elements that needs to be around, but out of tbl.
+ *                               these are used to update formulas correctly, upon shift/deletion of ents.
+ *       struct undo_range_shift * range_shift: range shifted by change
+ *       row_hidded: integers list (int *) hidden rows on screen
+ *       row_showed: integers list (int *) visible rows on screen
+ *       col_hidded: integers list (int *) hidden columns on screen
+ *       col_showed: integers list (int *) visible columns on screen
+ *              NOTE: the first position of the lists contains (number of elements - 1) in the list
+ *       struct undo_cols_format * cols_format: list of 'undo_col_info' elements used for
+ *              undoing / redoing changes in columns format (fwidth, precision y realfmt)
+ *       p_sig: pointer to 'undo' struct, If NULL, this node is the last change in
+ *              the session.
+ *
+ * Follows one level UNDO/REDO scheme. A change (C1) is made, then an UNDO operation, and
+ * another change (C2). From there later changes are removed.
+ * Scheme:
+ *
+ * + C1 -> + -> UNDO -
+ * ^                 \
+ * |_                |
+ *   \---------------/
+ * |
+ * |
+ * |
+ *  \-> C2 --> + ...
+ *
+ * undo_shift_range struct contains:
+ *     int delta_rows: delta rows for the range shift
+ *     int delta_cols: delta columns for the range shift
+ *     int tlrow:      Upper left row defining the range of the shift
+ *                     (As if a cell range shift is made)
+ *     int tlcol:      Upper left column defining the range of the shift
+ *                     (As if a cell range shift is made)
+ *     int brrow:      Lower right row defining the range of the shift
+ *                     (As if a cell range shift is made)
+ *     int brcol:      Lower right column defining the range of the shift
+ *                     (As if a cell range shift is made)
+ *
+ * Implemented actions for UNDO/REDO:
+ * 1. Remove content from cell or range
+ * 2. Input content into a cell
+ * 3. Edit a cell
+ * 4. Change alginment of range or cell
+ * 5. Paste range or cell
+ * 6. Shift range or cell with sh, sj, sk, sl
+ * 7. Insert row or column
+ * 8. Delete row or column
+ * 9. Paste row or column
+ * 10. Hide/show rows and columns
+ * 11. Sort of a range
+ * 12. Change in the format of a range or cell
+ * 13. '-' and '+' commands in normal mode
+ * 14. Lock and unlock of cells
+ * 15. datefmt command
+ * 16. Change in format of a column as a result of the 'f' command
+ * 17. Change in format of a column as a result of auto_jus
+ * 18. Change format of columns as a result of ic dc
+ * 19. fill command
+ * 20. unformat
+ *
+ * NOT implemented:
+ * 1. undo of freeze / unfreeze command
+ */
 
 #include <stdlib.h>
 #include "undo.h"

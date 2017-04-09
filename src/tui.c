@@ -38,9 +38,8 @@
  *
  * ANYONE WHO WANTS TO PORT THIS TO ANOTHER UI, WOULD JUST NEED TO REIMPLEMENT THIS FILE
  * AND HELP() IN HELP.C
- */
-
-/*
+ *
+ *
  * if not working with ncurses, you should also have to define LINES and COLS macros in Xui.h as well.
  * see ui example inside /files folder
  */
