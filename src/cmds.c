@@ -839,7 +839,7 @@ void center(int sr, int sc, int er, int ec) {
 
 void chg_mode(char strcmd){
     switch (strcmd) {
-        case '=': 
+        case '=':
             curmode = INSERT_MODE;
             break;
         case '<':
@@ -869,7 +869,6 @@ void chg_mode(char strcmd){
     }
     return;
 }
-
 
 /*
  * del selected cells

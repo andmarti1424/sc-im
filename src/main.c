@@ -36,7 +36,6 @@
 #include "lua.h"
 #endif
 
-unsigned int curmode;
 int currow = 0, curcol = 0;
 int lastrow = 0, lastcol = 0;
 int maxrows, maxcols;
@@ -49,7 +48,7 @@ char line[FBUFLEN];
 int modflg;          // a change was made since last save
 struct ent *** tbl;
 int shall_quit = 0;
-unsigned int curmode = NORMAL_MODE;
+unsigned int curmode;
 int maxrow, maxcol;
 char curfile[PATHLEN];
 char * exepath;
@@ -213,6 +212,9 @@ int main (int argc, char ** argv) {
         buffer = (struct block *) create_buf(); // this should only take place if curses ui
 
     wchar_t nocurses_buffer[BUFFERSIZE];
+
+    // change curmode to NORMAL_MODE
+    chg_mode('.');
 
     while ( ! shall_quit && ! atoi(get_conf_value("quit_afterload"))) {
 

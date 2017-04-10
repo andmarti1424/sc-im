@@ -318,14 +318,14 @@ void do_visualmode(struct block * buf) {
         srange * rn = create_range('\0', '\0', lookat(r->tlrow, r->tlcol), lookat(r->brrow, r->brcol));
         set_range_mark(buf->pnext->value, rn);
         exit_visualmode();
-        curmode = NORMAL_MODE;
+        chg_mode('.');
         ui_show_header();
 
     // auto_justify
     } else if (buf->value == ctl('j')) {
         auto_justify(r->tlcol, r->brcol, DEFWIDTH);  // auto justify columns
         exit_visualmode();
-        curmode = NORMAL_MODE;
+        chg_mode('.');
         ui_show_header();
 
     // datefmt with locale D_FMT format
@@ -347,7 +347,7 @@ void do_visualmode(struct block * buf) {
             }
             dateformat(lookat(r->tlrow, r->tlcol), lookat(r->brrow, r->brcol), f);
         exit_visualmode();
-        curmode = NORMAL_MODE;
+        chg_mode('.');
         ui_show_header();
         #else
             sc_info("Build made without USELOCALE enabled");
@@ -359,7 +359,7 @@ void do_visualmode(struct block * buf) {
         yank_area(r->tlrow, r->tlcol, r->brrow, r->brcol, 'a', 1);
 
         exit_visualmode();
-        curmode = NORMAL_MODE;
+        chg_mode('.');
         ui_show_header();
 
     // left / right / center align
@@ -385,7 +385,7 @@ void do_visualmode(struct block * buf) {
         cmd_multiplier = 0;
 
         exit_visualmode();
-        curmode = NORMAL_MODE;
+        chg_mode('.');
         ui_show_header();
 
     // range lock / unlock // valueize
@@ -401,7 +401,7 @@ void do_visualmode(struct block * buf) {
         cmd_multiplier = 0;
 
         exit_visualmode();
-        curmode = NORMAL_MODE;
+        chg_mode('.');
         ui_show_header();
 
     // Zr Zc - Zap col or row
@@ -419,21 +419,21 @@ void do_visualmode(struct block * buf) {
         cmd_multiplier = 0;
 
         exit_visualmode();
-        curmode = NORMAL_MODE;
+        chg_mode('.');
         ui_show_header();
 
     // delete selected range
     } else if (buf->value == L'x' || (buf->value == L'd' && buf->pnext->value == L'd') ) {
         del_selected_cells();
         exit_visualmode();
-        curmode = NORMAL_MODE;
+        chg_mode('.');
         ui_show_header();
 
     // shift range
     } else if (buf->value == L's') {
         shift(r->tlrow, r->tlcol, r->brrow, r->brcol, buf->pnext->value);
         exit_visualmode();
-        curmode = NORMAL_MODE;
+        chg_mode('.');
         ui_show_header();
 
     } else if (buf->value == L':') {

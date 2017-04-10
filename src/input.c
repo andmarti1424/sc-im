@@ -130,7 +130,7 @@ void break_waitcmd_loop(struct block * buffer) {
         exit_visualmode();
     }
 
-    curmode = NORMAL_MODE;
+    chg_mode('.');
     cmd_pending = 0;       // No longer wait for command. Set flag.
     cmd_multiplier = 0;    // Reset the multiplier
     inputline[0] = L'\0';  // clean inputline
