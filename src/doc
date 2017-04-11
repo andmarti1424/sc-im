@@ -227,7 +227,8 @@ Commands for handling cell content:
                  Input numbers, letters and operators.
      <BS>, <DELETE>
                  Delete the character after or before the cursor.
-     <ESC>       Go back to Normal mode.
+     <ESC>       Go back to NORMAL MODE. If you were in EDIT MODE before,
+                 it goes back to that mode, instead of NORMAL MODE.
      c-r{a-zA-Z}
                  If the character is a mark of a cell or range, the range
                  represented is inserted into the field.
@@ -295,7 +296,8 @@ Commands for handling cell content:
      D           Delete from the current cursor position to end of line.
      <SPACE>     Add a space under the cursor.
      <ENTER>     Confirm changes.
-
+     <ESC>       Go back to NORMAL MODE. If you were in INSERT MODE before,
+                 it goes back to that mode, instead of NORMAL MODE.
 ==============================================================================
 &COMMAND MODE&
 
