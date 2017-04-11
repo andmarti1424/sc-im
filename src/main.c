@@ -49,6 +49,7 @@ int modflg;          // a change was made since last save
 struct ent *** tbl;
 int shall_quit = 0;
 unsigned int curmode;
+unsigned int lastmode;
 int maxrow, maxcol;
 char curfile[PATHLEN];
 char * exepath;

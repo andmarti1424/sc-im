@@ -97,7 +97,12 @@ void do_insertmode(struct block * sb) {
         //ui_show_header();
 
     } else if (sb->value == OKEY_TAB) {    // TAB
-        chg_mode('e');
+        if (inputline_pos && wcslen(inputline) >= inputline_pos) {
+            real_inputline_pos--;
+            int l = wcwidth(inputline[real_inputline_pos]);
+            inputline_pos -= l;
+        }
+        chg_mode(insert_edit_submode == '=' ? 'e' : 'E');
         ui_show_header();
 
     } else if (find_val(sb, OKEY_ENTER)) { // ENTER

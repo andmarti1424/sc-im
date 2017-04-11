@@ -15,3 +15,6 @@ void sig_int();
 void winchg();
 
 extern FILE * fdoutput; // output file descriptor (stdout or file)
+extern unsigned int curmode;
+extern unsigned int lastmode;
+

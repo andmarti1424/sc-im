@@ -5,6 +5,7 @@
 #include <wchar.h>
 #include <wctype.h>
 
+#include "main.h"
 #include "tui.h"
 #include "maps.h"
 #include "cmds.h"
@@ -20,7 +21,6 @@ int return_value;          // return value of getch()
 int cmd_multiplier = 0;    // Multiplier
 int cmd_pending = 0;       // Command pending
 int shall_quit;            // Break loop if ESC key is pressed
-
 
 /*
  * Reads stdin for a valid command.
@@ -129,13 +129,28 @@ void break_waitcmd_loop(struct block * buffer) {
     } else if (curmode == VISUAL_MODE) {
         exit_visualmode();
     }
-
-    chg_mode('.');
+    if (curmode == INSERT_MODE && lastmode == EDIT_MODE)     {
+        if (inputline_pos && wcslen(inputline) >= inputline_pos) {
+            real_inputline_pos--;
+            int l = wcwidth(inputline[real_inputline_pos]);
+            inputline_pos -= l;
+        }
+        chg_mode(insert_edit_submode == '=' ? 'e' : 'E');
+        lastmode=NORMAL_MODE;
+        ui_show_header();
+    } else if (curmode == EDIT_MODE && lastmode == INSERT_MODE) {
+        chg_mode(insert_edit_submode);
+        lastmode=NORMAL_MODE;
+        ui_show_header();
+    } else {
+        chg_mode('.');
+        lastmode=NORMAL_MODE;
+        inputline[0] = L'\0';  // clean inputline
+        flush_buf(buffer);
+        ui_update(TRUE);
+    }
     cmd_pending = 0;       // No longer wait for command. Set flag.
     cmd_multiplier = 0;    // Reset the multiplier
-    inputline[0] = L'\0';  // clean inputline
-    flush_buf(buffer);
-    ui_update(TRUE);
     return;
 }
 

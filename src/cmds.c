@@ -2,6 +2,7 @@
 #include <ctype.h>   // for isdigit
 #include <wchar.h>
 #include <wctype.h>
+#include "main.h"
 #include "maps.h"
 #include "yank.h"
 #include "marks.h"
@@ -838,6 +839,7 @@ void center(int sr, int sc, int er, int ec) {
 }
 
 void chg_mode(char strcmd){
+    lastmode = curmode;
     switch (strcmd) {
         case '=':
             curmode = INSERT_MODE;
