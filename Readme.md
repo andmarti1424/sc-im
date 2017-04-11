@@ -1,7 +1,7 @@
 ## SC-IM
 
 SC-IM is a spreadsheet program that is based on SC (http://ibiblio.org/pub/Linux/apps/financial/spreadsheet/sc-7.16.tar.gz)
-Original authors James Gosling and Mark Weiser, and mods added by Chuck Martin.
+SC original authors are James Gosling and Mark Weiser, and mods were later added by Chuck Martin.
 
 ## Some of the features of SC-IM
 
