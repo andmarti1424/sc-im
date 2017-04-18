@@ -1,10 +1,5 @@
 Problem: It was detected that libxls can produce memory leaks.
 One example is when you try to read a non xls file, ex. xlsx file.
 
-Problem: Some cell equations gets messy after undo/redos.
-This fix requires implementation of Calc Chain. This will allow
-to fix this problem when UNDOing actions that change cells equations.
-
 Problem: Extended ascii chars not showing correctly.
 Compile sc-im against -lncursesw and not -lncurses.
-
