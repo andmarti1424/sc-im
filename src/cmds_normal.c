@@ -879,32 +879,35 @@ void do_normalmode(struct block * buf) {
 
 
                     if (buf->pnext->value == L't') {
-                        while (i < LINES - RESROW - 1 && r < currow) {
+                        while (i < LINES - RESROW - 1 && r <= currow) {
                             r++;
-                            if (freezer && r >= tlrow && r <= brrow) continue;
-                            else if (freezer && r > brrow && r <= brrow + center_hidden_rows) continue;
+                            //if (freezer && r >= tlrow && r <= brrow) continue;
+                            //else
+                            if (freezer && r > brrow && r <= brrow + center_hidden_rows) continue;
                             else if (freezer && r < tlrow && r >= tlrow - center_hidden_rows) continue;
                             i++;
                         }
                         scroll_down(--i);
 
-                    } else if (buf->pnext->value == L'b') { // FIXME
+                    } else if (buf->pnext->value == L'b') {
+                        int hidden = 0;
                         while (i < LINES - RESROW - 1) {
                             r++;
-                            if (row_hidden[r]) continue;
+                            if (row_hidden[r]) { hidden++; continue; }
                             else if (r < offscr_sc_rows && ! (freezer && r >= tlrow && r <= brrow)) continue;
                             else if (freezer && r >= tlrow && r <= brrow) continue;
                             else if (freezer && r > brrow && r <= brrow + center_hidden_rows) continue;
                             else if (freezer && r < tlrow && r >= tlrow - center_hidden_rows) continue;
                             i++;
                         }
-                        scroll_up(r-currow); //FIXME
+                        scroll_up(r-currow-hidden);
 
                     } else if (buf->pnext->value == L'z' || buf->pnext->value == L'.') {
-                        while (i < LINES - RESROW - 1 && r < currow) {
+                        while (i < LINES - RESROW - 1 && r <= currow) {
                             r++;
-                            if (freezer && r >= tlrow && r <= brrow) continue;
-                            else if (freezer && r > brrow && r <= brrow + center_hidden_rows) continue;
+                            //if (freezer && r >= tlrow && r <= brrow) continue;
+                            //else
+                            if (freezer && r > brrow && r <= brrow + center_hidden_rows) continue;
                             else if (freezer && r < tlrow && r >= tlrow - center_hidden_rows) continue;
                             i++;
                         }

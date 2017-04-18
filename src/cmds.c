@@ -1140,15 +1140,18 @@ struct ent * back_row(int arg) {
 void scroll_down(int n) {
     extern int center_hidden_rows;
     int freezer = freeze_ranges && (freeze_ranges->type == 'r' ||  freeze_ranges->type == 'a') ? 1 : 0;
-    int brrow = freezer ? freeze_ranges->br->row : 0;
-    int tlrow = freezer ? freeze_ranges->tl->row : 0;
+    //int brrow = freezer ? freeze_ranges->br->row : 0;
+    //int tlrow = freezer ? freeze_ranges->tl->row : 0;
     while (currow < maxrows && n--) {
-        if ( (freezer && currow == offscr_sc_rows + center_hidden_rows + brrow - tlrow + 1)
-             || (currow == offscr_sc_rows && !freezer)
-             || (currow == offscr_sc_rows && freezer && tlrow != currow) ) {
+    //while (n--) {
+        /*if (// (freezer && currow == offscr_sc_rows + center_hidden_rows + brrow - tlrow + 1) &&
+              (currow == offscr_sc_rows)
+            //(currow == offscr_sc_rows && !freezer) ||
+            //(currow == offscr_sc_rows && freezer && tlrow != currow)
+           ) {
             currow = forw_row(1)->row;
             unselect_ranges();
-        }
+        }*/
         if (freezer && offscr_sc_rows == freeze_ranges->tl->row) {
             center_hidden_rows++;
         } else {
@@ -1164,9 +1167,10 @@ void scroll_up(int n) {
     int brrow = freezer ? freeze_ranges->br->row : 0;
     int tlrow = freezer ? freeze_ranges->tl->row : 0;
 
-    // check what is the last row visible
+    // check what is the last row visible (r)
     int i = 0, r = offscr_sc_rows-1;
-    while (i < LINES - RESROW - 1 && r < maxrows - 1) {
+    while (i < LINES - RESROW - 1 && r < maxrows - 1){
+    //while (i < LINES - RESROW - 1) {
         r++;
         if (row_hidden[r]) continue;
         else if (r < offscr_sc_rows && ! (freezer && r >= tlrow && r <= brrow)) continue;
@@ -1174,17 +1178,19 @@ void scroll_up(int n) {
         else if (freezer && r < tlrow && r >= tlrow - center_hidden_rows) continue;
         i++;
     }
-
     while (n--) {
-        if (freezer && center_hidden_rows) {
+        if (freezer && center_hidden_rows && r != brrow) {
             center_hidden_rows--;
-        } else if (offscr_sc_rows) {
+        } else if (offscr_sc_rows && (!freezer || r > brrow) ) {
             offscr_sc_rows--;
+        } else if (offscr_sc_rows && freezer && r == brrow) {
+            offscr_sc_rows--;
+            center_hidden_rows++;
         } else {
             sc_info("cannot scroll no longer");
             break;
         }
-        if (currow == r) { // CHECK
+        if (currow == r) {
             currow = back_row(1)->row;
             unselect_ranges();
         }
