@@ -879,7 +879,7 @@ void do_normalmode(struct block * buf) {
 
 
                     if (buf->pnext->value == L't') {
-                        while (i < LINES - RESROW - 1 && r <= currow) {
+                        while (i < LINES - RESROW - 1 && r < currow) {
                             r++;
                             //if (freezer && r >= tlrow && r <= brrow) continue;
                             //else
