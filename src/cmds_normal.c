@@ -881,9 +881,8 @@ void do_normalmode(struct block * buf) {
                     if (buf->pnext->value == L't') {
                         while (i < LINES - RESROW - 1 && r < currow) {
                             r++;
-                            //if (freezer && r >= tlrow && r <= brrow) continue;
-                            //else
-                            if (freezer && r > brrow && r <= brrow + center_hidden_rows) continue;
+                            if (freezer && r >= tlrow && r <= brrow) continue;
+                            else if (freezer && r > brrow && r <= brrow + center_hidden_rows) continue;
                             else if (freezer && r < tlrow && r >= tlrow - center_hidden_rows) continue;
                             i++;
                         }
