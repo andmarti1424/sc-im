@@ -2078,8 +2078,8 @@ int is_single_command (struct block * buf, long timeout) {
 
         // edition commands
         else if (buf->value == L'x')        res = EDITION_CMD;  // cuts a cell
-        else if (buf->value == L'u')        res = EDITION_CMD;  // undo
-        else if (buf->value == ctl('r'))    res = EDITION_CMD;  // redo
+        else if (buf->value == L'u')        res = MOVEMENT_CMD; // undo
+        else if (buf->value == ctl('r'))    res = MOVEMENT_CMD; // redo
         else if (buf->value == L'@')        res = EDITION_CMD;  // EvalAll
         else if (buf->value == L'{')        res = EDITION_CMD;
         else if (buf->value == L'}')        res = EDITION_CMD;
