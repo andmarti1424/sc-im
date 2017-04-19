@@ -957,12 +957,20 @@ Commands for handling cell content:
 &Built-in Range Functions&
 
     The following functions return the result of performing an operation on
-    all valid (nonblank) entries in the given {range}. The optional expression
-    {expr} restricts which cells in {range} to operate on. (See above.)
+    all valid (nonblank) entries in the given {range}. The optional second
+    argument {expr} is an expression that is to be evaluated for each cell
+    in the specified range to determine which cells to include in the function.
+    Only those cells for which the expression evaluates to true (non-zero)
+    will be used in calculating the value of the function.
+
 
     @sum({range})
     @sum({range},{expr})
         Sum up the values.
+        examples with optional {expr} argument:
+            @sum(D1:D20,D1>25)
+            @sum(D1:D20,E1>25)
+            @sum(D1:D20,@eqs(C1,"s"))
 
     @prod({range})
     @prod({range},{expr})
