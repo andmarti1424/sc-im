@@ -188,9 +188,11 @@ void ui_sc_msg(char * s, int type, ...) {
         fwprintf(fdoutput, L"%s\n", t);
     } else {
         if (fwide(stdout, 0) >0)
-            wprintf(L"wide %s\n", t);
+            //wprintf(L"wide %s\n", t);
+            wprintf(L"%s\n", t);
         else
-            printf("nowide %s\n", t);
+            //printf("nowide %s\n", t);
+            printf("%s\n", t);
         fflush(stdout);
     }
     va_end(args);

@@ -7,6 +7,7 @@ void read_argv(int argc, char ** argv);
 void setorder(int i);
 void nopipe();
 void signals();
+void show_version_and_quit();
 
 // SIGINT signal
 void sig_int();

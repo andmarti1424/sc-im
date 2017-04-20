@@ -87,7 +87,7 @@ struct history * insert_history;
 char stderr_buffer[1024] = "";
 
 void read_stdin();
-
+extern char * rev;
 
 /*********************************************************************
  * MAIN LOOP
@@ -112,6 +112,13 @@ int main (int argc, char ** argv) {
     predefined_conf_d = (struct dictionary *) create_dictionary();
     store_default_config_values();
 
+    // we save parameters and use them to replace conf-values in config dictionary !
+    read_argv(argc, argv);
+
+    // check if version is in argv. if so, show version and quit
+    if (atoi(get_conf_value("version")))
+        show_version_and_quit();
+
     // create command line history structure
     if (! atoi(get_conf_value("nocurses"))) {
 #ifdef HISTORY_FILE
@@ -130,8 +137,6 @@ int main (int argc, char ** argv) {
     // setup the spreadsheet arrays (tbl)
     if (! growtbl(GROWNEW, 0, 0)) return exit_app(1);
 
-    // we save parameters and use them to replace conf-values in config dictionary !
-    read_argv(argc, argv);
 
     // initiate NCURSES if that is what is wanted
     if (! atoi(get_conf_value("nocurses")))
@@ -332,13 +337,15 @@ void delete_structures() {
 
 int exit_app(int status) {
     // free history
+    if (! atoi(get_conf_value("nocurses"))) {
 #ifdef HISTORY_FILE
-    if (! save_history(commandline_history, "w")) sc_error("Could not save commandline history");
-    if (commandline_history != NULL) destroy_history(commandline_history);
+        if (! save_history(commandline_history, "w")) sc_error("Could not save commandline history");
+        if (commandline_history != NULL) destroy_history(commandline_history);
 #endif
 #ifdef INS_HISTORY_FILE
-    if (! save_history(insert_history, "a")) sc_error("Could not save input mode history");
-    if (insert_history != NULL) destroy_history(insert_history);
+        if (! save_history(insert_history, "a")) sc_error("Could not save input mode history");
+        if (insert_history != NULL) destroy_history(insert_history);
+    }
 #endif
 
     // erase structures
@@ -461,4 +468,61 @@ void sig_term() {
     sc_error("Got SIGTERM signal. Quitting SC-IM.");
     shall_quit = 2;
     return;
+}
+
+void show_version_and_quit() {
+        put(user_conf_d, "nocurses", "1");
+        sc_info("Sc-im - %s", rev);
+#ifdef NCURSES
+        sc_info("-DNCURSES");
+#endif
+#ifdef MAXROWS
+        sc_info("-DMAXROWS %d", MAXROWS);
+#endif
+#ifdef UNDO
+        sc_info("-DUNDO");
+#endif
+#ifdef XLS
+        sc_info("-DXLS");
+#endif
+#ifdef XLSX
+        sc_info("-DXLSX");
+#endif
+#ifdef XLSX_EXPORT
+        sc_info("-DXLSX_EXPORT");
+#endif
+#ifdef XLUA
+        sc_info("-DXLUA");
+#endif
+#ifdef USELOCALE
+        sc_info("-DUSELOCALE");
+#endif
+#ifdef USECOLORS
+        sc_info("-DUSECOLORS");
+#endif
+#ifdef _XOPEN_SOURCE_EXTENDED
+        sc_info("-D_XOPEN_SOURCE_EXTENDED");
+#endif
+#ifdef _GNU_SOURCE
+        sc_info("-D_GNU_SOURCE");
+#endif
+#ifdef SNAME
+        sc_info("-DSNAME=\"%s\"", SNAME);
+#endif
+#ifdef HELP_PATH
+        sc_info("-DHELP_PATH=\"%s\"", HELP_PATH);
+#endif
+#ifdef LIBDIR
+        sc_info("-DLIBDIR=\"%s\"", LIBDIR);
+#endif
+#ifdef DFLT_PAGER
+        sc_info("-DDFLT_PAGER=\"%s\"", DFLT_PAGER);
+#endif
+#ifdef HISTORY_FILE
+        sc_info("-DHISTORY_FILE=\"%s\"", HISTORY_FILE);
+#endif
+#ifdef INS_HISTORY_FILE
+        sc_info("-DINS_HISTORY_FILE=\"%s\"", INS_HISTORY_FILE);
+#endif
+        put(user_conf_d, "quit_afterload", "1");
 }

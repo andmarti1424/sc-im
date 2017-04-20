@@ -20,6 +20,7 @@ void store_default_config_values() {
     put(user_conf_d, "debug", "0");
     put(user_conf_d, "ignorecase", "0");
     put(user_conf_d, "trigger", "1");
+    put(user_conf_d, "version", "0");
 
     // we calc get gmtoffset
     #ifdef USELOCALE
@@ -41,6 +42,9 @@ char * get_conf_values(char * salida) {
    nl = user_conf_d->list;
    salida[0]='\0';
    while (nl != NULL) {
+       // ignore version conf variable here so that its not shown in :set command
+       if (! strcmp(nl->key, "version")) { nl = nl->next; continue; }
+
        sprintf(salida + strlen(salida), "%s=%s\n", nl->key, nl->val);
        nl = nl->next;
    }
