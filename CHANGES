@@ -1,3 +1,43 @@
+v0.6.0
+*Added new freeze feature (including new :freeze and :unfreeze commands).
+*Scripting support with LUA. Also with triggers and c dynamic linked modules.
+*Added new :trigger and :untrigger commands.
+*Insert mode history
+*Added xlsx file export
+*Added new :unformat command
+*Added new ignorecase configuration variable for string searches.
+*Double quotes can now be entered in SCIM backquoting them.
+*Change in exponential and unary - priority: Exponentials bind higher than unary -.
+*Change in how data coming from pipeline or redirection is processed.
+*let and slet functions now handle undo/redo.
+so that if you set a content with let or slet over script, you can also undo it.
+*Group cols and rows when saving hidden columns and rows to file
+*Added :wq command.
+*Added SHIFT command in parser.
+*sk and sh shift commands now saves in undo struct cells that depends on the range shifted.
+*Keep default background or fg color of terminal
+*Handle ESC key in EDIT and INSERT modes. Now it goes back to previous mode, instead of always returning to NORMAL MODE.
+*UI isolation. Added dumb ui example.
+*undo / redo are now ignored by the dot command.
+*Fix in :sort command when a range is selected and not specified within the command.
+*Fix in goto command. Removed unneeded free that made SCIM crash, and another crash when no result was found in search.
+*Fix in '!' command. Did not work properly when using a white space after the '!'.
+*Fix when saving cellcolors, locked cells and pad ranges in sc files. Sometimes colors and locked ranges did not get saved (most right column).
+*Fix in history. Last element typed could get written twice in history.
+*Fix crash with 'c' command after dc, dr, or shift command affecting cell A0.
+*Now scim print columns to latest col in COLS, maximizing the grid view.
+*Fixed crash because of syntax error when entering ". as text value. This also happened in sc.
+*Fix when entering a number and then a centered text in the same cell. This also happened in sc. Text appeared a column to the   right and aligned left.
+*Fixed setfunc when saving sc file.
+*Fix in deleterow
+*Fix in shift functions
+*Fix a memory leak in undo.c
+*Fix/mods in undo/redo
+*Fix in csv import
+*Cleaned deletecol
+*Fix in csv import: maxcol was not updated correctly during import.
+*Fix when saving csv files with :w. before it saved a csv file with sc format.
+
 v0.5.0
 *new @frow / @fcol functions.
 *Added :file special command.

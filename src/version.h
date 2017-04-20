@@ -2,4 +2,4 @@
  * CODE REVISION NUMBER:
  */
 
-char * rev = "version 0.5.8-dev";
+char * rev = "version 0.6.0";
