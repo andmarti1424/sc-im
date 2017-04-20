@@ -403,13 +403,18 @@ Commands for handling cell content:
 
      :version    Show SC-IM version number.
 
+                 If you start Sc-im with ./scim --version
+                 version number of Sc-im will be printed on screen, including
+                 the different features that were enabled when Sc-im was compiled.
+                 Afterwards Sc-im will exit.
+
      :refresh    Refresh the UI. Acts like the <C-l> command of NORMAL_MODE.
 
      :set        Show all configuration options and their values.
 
      :set {option}={value}
                  Set a configuration option to {value}. The arguments may be
-                 repeated. 
+                 repeated.
                  Example:    :set half_page_scroll=0 numeric_zero=1
                              :set numeric          (same as :set numeric=1)
                              :set nonumeric        (same as :set numeric=0)
