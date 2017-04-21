@@ -159,12 +159,18 @@ int save_plain(FILE * fout, int r0, int c0, int rn, int cn) {
                         text[0] = '\0';
                     }
                 }
-                pad_and_align(text, num, fwidth[col], align, 0, out);
-
-                fwprintf(fout, L"%ls", out);
-
-            } else {
+                if (! atoi(get_conf_value("copy_to_clipboard_delimited_tab"))) {
+                    pad_and_align(text, num, fwidth[col], align, 0, out);
+                    fwprintf(fout, L"%ls", out);
+                } else if ( (*pp)->flags & is_valid) {
+                    fwprintf(fout, L"%s\t", num);
+                } else if ( (*pp)->label) {
+                    fwprintf(fout, L"%s\t", text);
+                }
+            } else if (! atoi(get_conf_value("copy_to_clipboard_delimited_tab"))) {
                 fwprintf(fout, L"%*s", fwidth[col], " ");
+            } else {
+                fwprintf(fout, L"\t");
             }
         }
         if (row != rn) fwprintf(fout, L"\n");

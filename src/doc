@@ -410,6 +410,10 @@ Commands for handling cell content:
                  options available.
                  You can also set a different value of 'default_copy_to_clipboard_cmd'
                  configuration variable at runtime, using the :set command.
+                 This process will export content as plain text. It will not delimit columns
+                 with '\t' chars.
+                 If you wish to delimit columns with tabs, set
+                 "copy_to_clipboard_delimited_tab" variable to "1".
 
      :cpaste     Paste clipboard content to Sc-im.
                  When 'cpaste' command is executed, the default value of macro
