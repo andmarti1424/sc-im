@@ -52,6 +52,16 @@ CFLAGS += -DMAXROWS=65536
 # Used for date formatting with C-d shortcut using you local d_fmt
 CFLAGS += -DUSELOCALE
 
+# Clipboard support is OS dependent.
+# Choose one of the following options for copying to different clipboards:
+# You can later change it at runtime.
+#to copy to tmux clipboard:
+CFLAGS += -DDEFAULT_COPY_TO_CLIPBOARD_CMD=\""tmux load-buffer"\"
+#to copy to X clipboard:
+#CFLAGS += -DDEFAULT_COPY_TO_CLIPBOARD_CMD=\""xclip -i <"\"
+#to copy to OSX clipboard:
+#CFLAGS += -DDEFAULT_COPY_TO_CLIPBOARD_CMD=\""pbcopy <"\"
+
 # Uncomment for basic XLS import. Requires libxlsreader
 #CFLAGS += -DXLS
 #LDLIBS += -lxlsreader

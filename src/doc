@@ -401,6 +401,16 @@ Commands for handling cell content:
      :i! xlsx {file}
                  Like ":i xlsx", but overwrite changes since last save.
 
+     :ccopy      Copy a selected range to clipboard.
+                 When 'ccopy' command is executed, the default value of macro
+                 DEFAULT_COPY_TO_CLIPBOARD_CMD (set in Makefile during build)
+                 is executed.
+                 That value contains a system command that is executed to copy
+                 to an specific clipboard. See in Makefile the different
+                 options available.
+                 You can also set a different value of 'default_copy_to_clipboard_cmd'
+                 configuration variable at runtime, using the :set command.
+
      :version    Show SC-IM version number.
 
                  If you start Sc-im with ./scim --version
@@ -1215,7 +1225,7 @@ Commands for handling cell content:
         See also @ascii.
 
     @lua("luascript",0)
-        Executes a "luascript". Using Lua script scim can be extend with lot 
+        Executes a "luascript". Using Lua script scim can be extend with lot
         new functionality, such as complex programming, accessing databases etc.
         The search patch for LUA scripts files is
         $HOME/.scim/lua/ or /usr/local/share/scim/lua (in that order)
@@ -1266,19 +1276,19 @@ Commands for handling cell content:
 
      Function provided to lua script/triggers :
 
-     sc.lgetnum (c, r)       - get nummeric value of cell c,r (c/r is number column/row)
+     sc.lgetnum (c, r)       - get numeric value of cell c,r (c/r is number column/row)
                                returns value
-     sc.lsetnum (c, r, val)  - set nummeric value to a cell c,t
+     sc.lsetnum (c, r, val)  - set numeric value to a cell c,t
      sc.lsetform (c, r, str) - set formula to a cell. Basically it does "let cell= str"
      sc.setstr(c, r, str)    - set string to a cell
      sc.query(str)           - query input from user, but first prints str. Use with care!!
                                Dont use this function within triggers!!
-                               returns string 
+                               returns string
      sc.sc(str)              - send str to sc-im parser
-     sc.a2colrow(str)        - convert ascii cell representation to nummeric column/row
+     sc.a2colrow(str)        - convert ascii cell representation to numeric column/row
                                returns column, row example:
                                c,r=sc.a2colrow("c5")
-     sc.colrow2a(c,r)        - returns ascii representation of nummeric column/row
+     sc.colrow2a(c,r)        - returns ascii representation of numeric column/row
      sc.maxcols()            - return current maximum columns
      sc.maxrows()            - return current maximum rows
      sc.curcol()             - return current column

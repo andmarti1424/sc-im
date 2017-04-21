@@ -42,6 +42,7 @@ static wchar_t * valid_commands[] = {
 L"!",
 L"addfilter",
 L"autojus",
+L"ccopy",
 L"cellcolor",
 L"color",
 L"e csv",
@@ -547,6 +548,18 @@ void do_commandmode(struct block * sb) {
             copy_to_undostruct(r, c, rf, cf, 'a');
             end_undo_action();
             #endif
+
+        } else if ( ! wcsncmp(inputline, L"ccopy", 5) ) {
+            int r = currow, c = curcol, rf = currow, cf = curcol;
+            if (p != -1) {
+                c = sr->tlcol;
+                r = sr->tlrow;
+                rf = sr->brrow;
+                cf = sr->brcol;
+            }
+            swprintf(interp_line, BUFFERSIZE, L"ccopy %s%d:", coltoa(c), r);
+            swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%s%d", coltoa(cf), rf);
+            send_to_interp(interp_line);
 
         } else if ( ! wcsncmp(inputline, L"cellcolor ", 10) ) {
             #ifdef USECOLORS

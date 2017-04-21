@@ -22,6 +22,12 @@ void store_default_config_values() {
     put(user_conf_d, "trigger", "1");
     put(user_conf_d, "version", "0");
 
+    #ifdef DEFAULT_COPY_TO_CLIPBOARD_CMD
+    put(user_conf_d, "default_copy_to_clipboard_cmd", DEFAULT_COPY_TO_CLIPBOARD_CMD);
+    #else
+    put(user_conf_d, "default_copy_to_clipboard_cmd", "");
+    #endif
+
     // we calc get gmtoffset
     #ifdef USELOCALE
     time_t t = time(NULL);

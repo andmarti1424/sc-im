@@ -494,6 +494,9 @@ void show_version_and_quit() {
 #ifdef XLUA
         sc_info("-DXLUA");
 #endif
+#ifdef DEFAULT_COPY_TO_CLIPBOARD_CMD
+        sc_info("-DDEFAULT_COPY_TO_CLIPBOARD_CMD=\"%s\"", DEFAULT_COPY_TO_CLIPBOARD_CMD);
+#endif
 #ifdef USELOCALE
         sc_info("-DUSELOCALE");
 #endif
