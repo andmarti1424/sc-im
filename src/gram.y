@@ -103,6 +103,7 @@ token S_YANKCOL
 %token S_FILTERON
 %token S_GOTO
 %token S_CCOPY
+%token S_CPASTE
 %token S_LOCK
 %token S_UNLOCK
 %token S_DEFINE
@@ -550,6 +551,7 @@ command:
  //   |    S_GOTO WORD             { /* don't repeat last goto on "unintelligible word" */ ; }
 
     |    S_CCOPY range           { copy_to_clipboard($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col); }
+    |    S_CPASTE                { paste_from_clipboard(); }
     |    S_LOCK var_or_range     { lock_cells($2.left.vp, $2.right.vp); }
     |    S_UNLOCK var_or_range   { unlock_cells($2.left.vp, $2.right.vp); }
     |    S_NMAP STRING STRING    {

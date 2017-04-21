@@ -11,6 +11,67 @@
 #include "cmds.h"
 #include "file.h"
 #include "conf.h"
+#include "utils/string.h"
+
+int paste_from_clipboard() {
+    if (! strlen(get_conf_value("default_paste_from_clipboard_cmd"))) return -1;
+
+    // create tmp file
+    char template[] = "/tmp/sc-im-clipboardXXXXXX";
+    int fd = mkstemp(template);
+    if (fd == -1) {
+        sc_error("Error while pasting from clipboard");
+        return -1;
+    }
+
+    // get temp file pointer based on temp file descriptor
+    //FILE * fpori = fdopen(fd, "w");
+
+    // copy content from clipboard to temp file
+    char syscmd[PATHLEN + strlen(get_conf_value("default_paste_from_clipboard_cmd")) + 1];
+    sprintf(syscmd, "%s", get_conf_value("default_paste_from_clipboard_cmd"));
+    sprintf(syscmd + strlen(syscmd), " >> %s", template);
+    system(syscmd);
+
+    // traverse the temp file
+    FILE * fp = fdopen(fd, "r");
+    char line_in[BUFFERSIZE];
+    wchar_t line_interp[FBUFLEN] = L"";
+    int c, r = currow;
+    char * token;
+    char delim[2] = { '\t', '\0' } ;
+
+    while ( ! feof(fp) && (fgets(line_in, sizeof(line_in), fp) != NULL) ) {
+        // Split string using the delimiter
+        token = xstrtok(line_in, delim);
+        c = curcol;
+        while( token != NULL ) {
+            if (r > MAXROWS - GROWAMT - 1 || c > ABSMAXCOLS - 1) break;
+            clean_carrier(token);
+            char * st = str_replace (token, " ", ""); //trim
+            if (strlen(st) && isnumeric(st))
+                swprintf(line_interp, BUFFERSIZE, L"let %s%d=%s", coltoa(c), r, st);
+            else
+                swprintf(line_interp, BUFFERSIZE, L"label %s%d=\"%s\"", coltoa(c), r, st);
+            if (strlen(st)) send_to_interp(line_interp);
+            c++;
+            token = xstrtok(NULL, delim);
+            free(st);
+            if (c > maxcol) maxcol = c;
+        }
+        r++;
+        if (r > maxrow) maxrow = r;
+        if (r > MAXROWS - GROWAMT - 1 || c > ABSMAXCOLS - 1) break;
+    }
+    sc_info("Content pasted from clipboard");
+
+    // close file descriptor
+    close(fd);
+
+    // remove temp file
+    unlink(template);
+    return 0;
+}
 
 int copy_to_clipboard(int r0, int c0, int rn, int cn) {
     if (! strlen(get_conf_value("default_copy_to_clipboard_cmd"))) return -1;

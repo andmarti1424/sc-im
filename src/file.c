@@ -758,6 +758,10 @@ int import_csv(char * fname, char d) {
 
     // Check max length of line
     int max = max_length(f) + 1;
+    if (max == 0) {
+        sc_error("Can't read file \"%s\"", fname);
+        return -1;
+    }
     char line_in[max];
     rewind(f);
 
@@ -1046,6 +1050,7 @@ void unspecial(FILE * f, char * str, int delim) {
  * FILE * f shall be opened.
  */
 int max_length(FILE * f) {
+    if (f == NULL) return -1;
     int count = 0, max = 0;
     int c = fgetc(f);
 

@@ -53,14 +53,22 @@ CFLAGS += -DMAXROWS=65536
 CFLAGS += -DUSELOCALE
 
 # Clipboard support is OS dependent.
-# Choose one of the following options for copying to different clipboards:
+#
+# Choose one of the following commands for copying to different clipboards:
 # You can later change it at runtime.
 #to copy to tmux clipboard:
-CFLAGS += -DDEFAULT_COPY_TO_CLIPBOARD_CMD=\""tmux load-buffer"\"
+#CFLAGS += -DDEFAULT_COPY_TO_CLIPBOARD_CMD=\""tmux load-buffer"\"
 #to copy to X clipboard:
-#CFLAGS += -DDEFAULT_COPY_TO_CLIPBOARD_CMD=\""xclip -i <"\"
+CFLAGS += -DDEFAULT_COPY_TO_CLIPBOARD_CMD=\""xclip -i -selection clipboard <"\"
 #to copy to OSX clipboard:
 #CFLAGS += -DDEFAULT_COPY_TO_CLIPBOARD_CMD=\""pbcopy <"\"
+#
+# Choose one of the proposed commands for pasting from different clipboards:
+# You can later change it at runtime.
+#CFLAGS += -DDEFAULT_PASTE_FROM_CLIPBOARD_CMD=\""tmux show-buffer"\"
+CFLAGS += -DDEFAULT_PASTE_FROM_CLIPBOARD_CMD=\""xclip -o"\"
+#CFLAGS += -DDEFAULT_PASTE_FROM_CLIPBOARD_CMD=\""pbpaste"\"
+
 
 # Uncomment for basic XLS import. Requires libxlsreader
 #CFLAGS += -DXLS

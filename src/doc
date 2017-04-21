@@ -411,6 +411,18 @@ Commands for handling cell content:
                  You can also set a different value of 'default_copy_to_clipboard_cmd'
                  configuration variable at runtime, using the :set command.
 
+     :cpaste     Paste clipboard content to Sc-im.
+                 When 'cpaste' command is executed, the default value of macro
+                 DEFAULT_PASTE_FROM_CLIPBOARD_CMD (set in Makefile during build)
+                 is executed.
+                 That value contains a system command that is executed to
+                 paste content of a specific clipboard to Sc-im.
+                 See in Makefile the different options available.
+                 You can also set a different value of 'default_paste_from_clipboard_cmd'
+                 configuration variable at runtime, using the :set command.
+                 This process will treat '\t' chars as column delimiter, and '\n' chars
+                 as rows delimiters.
+
      :version    Show SC-IM version number.
 
                  If you start Sc-im with ./scim --version

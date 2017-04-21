@@ -497,6 +497,9 @@ void show_version_and_quit() {
 #ifdef DEFAULT_COPY_TO_CLIPBOARD_CMD
         sc_info("-DDEFAULT_COPY_TO_CLIPBOARD_CMD=\"%s\"", DEFAULT_COPY_TO_CLIPBOARD_CMD);
 #endif
+#ifdef DEFAULT_PASTE_FROM_CLIPBOARD_CMD
+        sc_info("-DDEFAULT_PASTE_FROM_CLIPBOARD_CMD=\"%s\"", DEFAULT_PASTE_FROM_CLIPBOARD_CMD);
+#endif
 #ifdef USELOCALE
         sc_info("-DUSELOCALE");
 #endif
