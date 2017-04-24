@@ -789,7 +789,7 @@ int import_csv(char * fname, char d) {
                 char * next = xstrtok(NULL, delim);
 
                 if (next != NULL) {
-                    sprintf(token + strlen(token), "%s", next);
+                    sprintf(token + strlen(token), "%c%s", d, next);
                     continue;
                 }
             }
