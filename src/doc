@@ -386,9 +386,13 @@ Commands for handling cell content:
 
      :i csv {file}
                  Import comma-separated file {file} to SC-IM's buffer.
+                 If 'import_delimited_as_text' configuration variable is set
+                 Sc-im will import numbers as text.
 
      :i tab {file}
                  Import tab-separated file {file} to SC-IM's buffer.
+                 If 'import_delimited_as_text' configuration variable is set
+                 Sc-im will import numbers as text.
 
      :i xls {file}
                  Import xls file {file} to SC-IM's buffer.

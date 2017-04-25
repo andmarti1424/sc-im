@@ -800,7 +800,7 @@ int import_csv(char * fname, char d) {
             char * st = str_replace (token, "\"", "''"); //replace double quotes inside string
 
             // number import
-            if (isnumeric(st) && strlen(st)
+            if (isnumeric(st) && strlen(st) && ! atoi(get_conf_value("import_delimited_as_text"))
             ) {
                 //wide char
                 swprintf(line_interp, BUFFERSIZE, L"let %s%d=%s", coltoa(c), r, st);
