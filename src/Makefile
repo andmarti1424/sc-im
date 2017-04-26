@@ -106,12 +106,14 @@ install :
 	install $(name) $(DESTDIR)$(prefix)/bin/$(name)
 	install -d $(DESTDIR)$(HELPDIR)
 	install doc $(DESTDIR)$(HELPDIR)/$(name)_help
+	install plotline $(DESTDIR)$(HELPDIR)/
 	install -d $(DESTDIR)$(prefix)/share/man/man1
 	install -m 644 sc-im.1 $(DESTDIR)$(prefix)/share/man/man1/$(name).1
 
 uninstall :
 	-rm $(DESTDIR)$(prefix)/bin/$(name)
 	-rm $(DESTDIR)$(HELPDIR)/$(name)_help
+	-rm $(DESTDIR)$(HELPDIR)/plotline
 	-rm $(DESTDIR)$(prefix)/share/man/man1/$(name).1
 
 $(name) : $(OBJS)

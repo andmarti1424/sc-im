@@ -808,6 +808,17 @@ Commands for handling cell content:
                 If a range is selected, the formula in the top left cell will
                 be copied down to the end of the range.
 
+     :plot {type}
+                Plot a graphic using a selected range.
+                Right now, only a line type is allowed.
+                Ex. of use:     :plot line
+                This command calls gnuplot using the file called 'plotline'
+                that is first looked in $HOME/.scim/, and if not found in
+                /usr/local/share/scim/ (or HELPDIR path of Makefile).
+                This 'plotline' can be customized by user. You can set
+                terminal and other gnuplot parameters. Default terminal is
+                'dumb'.
+
      c-r{a-zA-Z}
                 If the character is a mark of a cell or range, the range
                 represented is inserted into the command line.

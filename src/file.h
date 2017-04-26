@@ -22,3 +22,4 @@ void export_delim(char * fname, char coldelim, int r0, int c0, int rn, int cn);
 void export_plain(char * fname, int r0, int c0, int rn, int cn);
 void unspecial(FILE * f, char * str, int delim);
 int max_length(FILE * f);
+int plugin_exists(char * name, int len, char * path);

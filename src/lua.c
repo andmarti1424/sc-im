@@ -26,6 +26,7 @@
 #include "main.h"
 #include "tui.h"
 #include "conf.h"
+#include "file.h"
 
 extern FILE * fdoutput;
 

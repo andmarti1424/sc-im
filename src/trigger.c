@@ -28,6 +28,7 @@
 #include "conf.h"
 #include "cmds.h"
 #include "trigger.h"
+#include "file.h"
 
 #ifdef XLUA
 #include "lua.h"
@@ -154,27 +155,4 @@ void do_C_Trigger_cell(struct ent * p, int rw) {
     function = p->trigger->c_function;
     printf ("%d\n", (*function)(p,rw ));
     return;
-}
-
-int plugin_exists(char * name, int len, char * path) {
-    FILE * fp;
-    static char * HomeDir;
-
-    if ((HomeDir = getenv("HOME"))) {
-        strcpy((char *) path, HomeDir);
-        strcat((char *) path, "/.scim/");
-        strncat((char *) path, name, len);
-        if ((fp = fopen((char *) path, "r"))) {
-            fclose(fp);
-            return 1;
-        }
-    }
-    strcpy((char *) path, HELP_PATH);
-    strcat((char *) path, "/");
-    strncat((char *) path, name, len);
-    if ((fp = fopen((char *) path, "r"))) {
-        fclose(fp);
-        return 1;
-    }
-    return 0;
 }

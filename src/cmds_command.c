@@ -22,7 +22,6 @@
 #include "maps.h"
 #include "xls.h"
 #include "xlsx.h"
-
 #include "cmds_visual.h"
 
 #ifdef UNDO
@@ -90,6 +89,7 @@ L"nmap",
 L"nnoremap",
 L"nunmap",
 L"pad",
+L"plot",
 L"q",
 L"q!",
 L"quit!",
@@ -645,6 +645,21 @@ void do_commandmode(struct block * sb) {
             wcscpy(interp_line, inputline); // pad 5
             swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L" %s:", coltoa(c)); // pad 5 A:
             swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%s", coltoa(cf));  // B
+            send_to_interp(interp_line);
+
+        } else if ( ! wcsncmp(inputline, L"plot ", 5) ) {
+            int r = currow, c = curcol, rf = currow, cf = curcol;
+            if (p != -1) {
+                c = sr->tlcol;
+                r = sr->tlrow;
+                rf = sr->brrow;
+                cf = sr->brcol;
+            }
+            wchar_t aux[wcslen(inputline)+1];
+            wcscpy(aux, inputline);
+            del_range_wchars(aux, 0, 4);
+            swprintf(interp_line, BUFFERSIZE, L"plot \"%ls\" %s%d:", aux, coltoa(c), r);
+            swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%s%d", coltoa(cf), rf);
             send_to_interp(interp_line);
 
         } else if ( ! wcscmp(inputline, L"set") ) {

@@ -23,6 +23,7 @@
 #include "trigger.h"
 #include "shift.h"
 #include "clipboard.h"
+#include "plot.h"
 
 void yyerror(char *err);               // error routine for yacc (gram.y)
 int yylex();
@@ -104,6 +105,7 @@ token S_YANKCOL
 %token S_GOTO
 %token S_CCOPY
 %token S_CPASTE
+%token S_PLOT
 %token S_LOCK
 %token S_UNLOCK
 %token S_DEFINE
@@ -642,6 +644,10 @@ command:
     |    S_PAD NUMBER COL          { pad($2, 0, $3, maxrow, $3); }
     |    S_PAD NUMBER var_or_range { pad($2, $3.left.vp->row, $3.left.vp->col, $3.right.vp->row, $3.right.vp->col); }
 
+    |    S_PLOT STRING var_or_range       {
+                                     plot($2, $3.left.vp->row, $3.left.vp->col, $3.right.vp->row, $3.right.vp->col);
+                                     scxfree($2);
+                                   }
 /*  |    S_SET STRING              { parse_str(user_conf_d, $2);
                                      scxfree($2);
                                    }
