@@ -817,7 +817,7 @@ Commands for handling cell content:
                 /usr/local/share/scim/ (or HELPDIR path of Makefile).
                 This 'plotline' can be customized by user. You can set
                 terminal and other gnuplot parameters. Default terminal is
-                'dumb'.
+                'caca'.
 
      c-r{a-zA-Z}
                 If the character is a mark of a cell or range, the range
