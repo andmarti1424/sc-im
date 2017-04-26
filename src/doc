@@ -784,7 +784,7 @@ Commands for handling cell content:
                 sc-im, will export all symbols from sc-im, making it
                 available for dynamic linking with modules.
 
-                The search patch for LUA trigger files is
+                The search path for LUA trigger files is
                 $HOME/.scim/lua/ or /usr/local/share/scim/lua
                 (in that order) and for C Trigger
                 $HOME/.scim/module or /usr/local/share/scim/module
