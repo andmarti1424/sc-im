@@ -8,6 +8,36 @@
 #include "file.h"
 #include "tui.h"
 
+int plotedit(wchar_t * s) {
+    // edit ~/.scim/plotxxxx (or /usr/local/share/scim/plotxxxx)
+    char command[BUFFERSIZE];
+    if (! wcscmp(s, L"line")) {
+        char buffer[PATHLEN];
+        char path_out[PATHLEN];
+        sprintf(buffer, "plotline");
+        if (! plugin_exists(buffer, strlen(buffer), path_out)) {
+            sc_error("could not load default plotline file");
+            return -1;
+        }
+
+        def_prog_mode();
+        endwin();
+        system("reset");
+        //reset_shell_mode();
+
+        sprintf(command, "vim %s", path_out);
+
+        if (system(command) == -1) sc_error("Failed editting plot file - errno:%d", errno);
+        reset_prog_mode();
+        refresh();
+        ui_update(TRUE);
+    } else {
+        sc_error("error: invalid plot file: %ls", s);
+        return -1;
+    }
+    return 0;
+}
+
 int plot(char * s, int r, int c, int rf, int cf) {
     // create tmp file
     char datafile[] = "/tmp/sc-im-plotdataXXXXXX";

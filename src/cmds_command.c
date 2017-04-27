@@ -23,6 +23,7 @@
 #include "xls.h"
 #include "xlsx.h"
 #include "cmds_visual.h"
+#include "plot.h"
 
 #ifdef UNDO
 #include "undo.h"
@@ -90,6 +91,7 @@ L"nnoremap",
 L"nunmap",
 L"pad",
 L"plot",
+L"plotedit",
 L"q",
 L"q!",
 L"quit!",
@@ -661,6 +663,12 @@ void do_commandmode(struct block * sb) {
             swprintf(interp_line, BUFFERSIZE, L"plot \"%ls\" %s%d:", aux, coltoa(c), r);
             swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%s%d", coltoa(cf), rf);
             send_to_interp(interp_line);
+
+        } else if ( ! wcsncmp(inputline, L"plotedit ", 9) ) {
+            wchar_t aux[wcslen(inputline)+1];
+            wcscpy(aux, inputline);
+            del_range_wchars(aux, 0, 8);
+            plotedit(aux);
 
         } else if ( ! wcscmp(inputline, L"set") ) {
             char valores[ (get_maxkey_length(user_conf_d) + get_maxvalue_length(user_conf_d) + 1) * user_conf_d->len ];

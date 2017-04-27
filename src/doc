@@ -820,6 +820,12 @@ Commands for handling cell content:
                 'dumb', although 'caca' terminal is recommended for colors and wide
                 chars support.
 
+     :plotedit {type}
+                Edit a plot file that will be used for plotting.
+                Can contain any gnuplot command.
+                Right now, only a line type file can be edited.
+                Ex. of use:     :plotedit line
+
      c-r{a-zA-Z}
                 If the character is a mark of a cell or range, the range
                 represented is inserted into the command line.
