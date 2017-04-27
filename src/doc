@@ -810,7 +810,8 @@ Commands for handling cell content:
 
     :plot {type}
                 Plot a graphic using a selected range.
-                Right now, only a line type and scatter type are allowed.
+                Right now, only a 'line' type, 'scatter' type and 'pie' type
+                are allowed.
 
                 Ex. of use:     :plot line
                 This command calls gnuplot using the file called 'plotline'
@@ -824,7 +825,8 @@ Commands for handling cell content:
     :plotedit {type}
                 Edit a plot file that will be used for plotting.
                 Can contain any gnuplot command.
-                Right now, only line type and scatter type files can be edited.
+                Right now, only 'line' type, 'scatter' type and 'pie' type
+                files can be edited.
 
                 Ex. of use:     :plotedit scatter
 

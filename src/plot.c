@@ -12,7 +12,8 @@ int plotedit(wchar_t * s) {
     // edit ~/.scim/plotxxxx (or /usr/local/share/scim/plotxxxx)
     char command[BUFFERSIZE];
 
-    if (! wcscmp(s, L"line") || ! wcscmp(s, L"scatter")) {
+    if (! wcscmp(s, L"line") || ! wcscmp(s, L"scatter") ||
+        ! wcscmp(s, L"pie")) {
         char buffer[PATHLEN];
         char path_out[PATHLEN];
         char type[BUFFERSIZE];
@@ -62,7 +63,8 @@ int plot(char * s, int r, int c, int rf, int cf) {
     char buffer1[PATHLEN];
     sprintf(command, "gnuplot -e \"filename='%s'\"", datafile);
 
-    if (! strcmp(s, "line") || ! strcmp(s, "scatter")) {
+    if (! strcmp(s, "line") || ! strcmp(s, "scatter") ||
+        ! strcmp(s, "pie")) {
         sprintf(buffer, "plot%s", s);
         if (! plugin_exists(buffer, strlen(buffer), buffer1)) {
             sc_error("could not load default plotline file");
