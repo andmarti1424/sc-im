@@ -11,12 +11,15 @@
 int plotedit(wchar_t * s) {
     // edit ~/.scim/plotxxxx (or /usr/local/share/scim/plotxxxx)
     char command[BUFFERSIZE];
-    if (! wcscmp(s, L"line")) {
+
+    if (! wcscmp(s, L"line") || ! wcscmp(s, L"scatter")) {
         char buffer[PATHLEN];
         char path_out[PATHLEN];
-        sprintf(buffer, "plotline");
+        char type[BUFFERSIZE];
+        wcstombs(type, s, BUFFERSIZE);
+        sprintf(buffer, "plot%s", type);
         if (! plugin_exists(buffer, strlen(buffer), path_out)) {
-            sc_error("could not load default plotline file");
+            sc_error("could not load plot template file");
             return -1;
         }
 
@@ -55,16 +58,16 @@ int plot(char * s, int r, int c, int rf, int cf) {
 
     // call gnuplot with  ~/.scim/plotline (or /usr/local/share/scim/plotline) and temp data file
     char command[BUFFERSIZE];
+    char buffer[PATHLEN];
+    char buffer1[PATHLEN];
     sprintf(command, "gnuplot -e \"filename='%s'\"", datafile);
-    if (! strcmp(s, "line")) {
-        char buffer[PATHLEN];
-        char buffer1[PATHLEN];
-        sprintf(buffer, "plotline");
+
+    if (! strcmp(s, "line") || ! strcmp(s, "scatter")) {
+        sprintf(buffer, "plot%s", s);
         if (! plugin_exists(buffer, strlen(buffer), buffer1)) {
             sc_error("could not load default plotline file");
             return -1;
         }
-        /* sprintf(command + strlen(command), " %s", "~/.scim/plotline"); */
         sprintf(command + strlen(command), " %s", buffer1);
 
     } else {

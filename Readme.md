@@ -28,7 +28,6 @@ SC-IM stands for Spreadsheet Calculator Improvised. :-)
 
 ![demo image](screenshots/scim5.png?raw=true)
 ![demo image](screenshots/scim4.png?raw=true)
-![demo image](screenshots/scim.png?raw=true)
 ![demo image](screenshots/scimp1.png?raw=true)
 ![demo image](screenshots/scimp2.png?raw=true)
 ![demo image](screenshots/scimp3.png?raw=true)
