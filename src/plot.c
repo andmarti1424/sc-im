@@ -25,7 +25,10 @@ int plotedit(wchar_t * s) {
         system("reset");
         //reset_shell_mode();
 
-        sprintf(command, "vim %s", path_out);
+        char * editor;
+        if (! (editor = getenv("EDITOR")))
+            editor = DFLT_EDITOR;
+        sprintf(command, "%s %s", editor, path_out);
 
         if (system(command) == -1) sc_error("Failed editting plot file - errno:%d", errno);
         reset_prog_mode();

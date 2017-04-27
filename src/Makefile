@@ -39,6 +39,8 @@ CFLAGS += -DLIBDIR=\"$(LIBDIR)\"
 
 # Sets default pager, e.g. 'less' or 'more'
 CFLAGS += -DDFLT_PAGER=\"less\"
+# Sets default editor. Its use in case EDITOR env variable is not set
+CFLAGS += -DDFLT_EDITOR=\"vim\"
 # Comment out to disable color support
 CFLAGS += -DUSECOLORS
 # Command history file, relative to home directory. Comment out to disable commandline history

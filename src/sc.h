@@ -36,11 +36,14 @@ extern struct ent ** ATBL(struct ent ***,int ,int );
 #define STDERRBUF   8192     /* stderr buffer size */
 
 #ifndef DFLT_PAGER
- #define    DFLT_PAGER "more"    /* more is probably more widespread than less */
+#define    DFLT_PAGER "more" /* more is probably more widespread than less */
 #endif                       /* DFLT_PAGER */
 
+#ifndef DFLT_EDITOR
+#define    DFLT_EDITOR "vim"
+#endif
 
-//#ifndef A_CHARTEXT           /* Should be defined in curses.h */
+//#ifndef A_CHARTEXT         /* Should be defined in curses.h */
 // #define A_CHARTEXT 0xff
 //#endif
 
