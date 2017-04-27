@@ -1065,11 +1065,16 @@ void do_normalmode(struct block * buf) {
         // input of numbers
         default:
         numeric:
-            if ( (isdigit(buf->value) || buf->value == L'-' || buf->value == L'+' || 
+            if ( (isdigit(buf->value) || buf->value == L'-' || buf->value == L'+' ||
                   ( buf->value == L'.' &&  atoi(get_conf_value("numeric_decimal")) )) &&
                 atoi(get_conf_value("numeric")) ) {
+                if (locked_cell(currow, curcol)) return;
                 insert_edit_submode='=';
                 chg_mode(insert_edit_submode);
+#ifdef INS_HISTORY_FILE
+                ori_insert_edit_submode = buf->value;
+                add(insert_history, L"");
+#endif
                 inputline_pos = 0;
                 real_inputline_pos = 0;
                 ins_in_line(buf->value);
