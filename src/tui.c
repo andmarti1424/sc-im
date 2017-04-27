@@ -78,6 +78,7 @@ SCREEN * sstdout;
 srange * ranges;
 
 void ui_start_screen() {
+    //def_shell_mode();
     sstderr = newterm(NULL, stderr, NULL);
     noecho();
     sstdout = newterm(NULL, stdout, stdin);

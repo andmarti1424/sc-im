@@ -20,6 +20,9 @@ int exec_cmd (char * line) {
     def_prog_mode();
     endwin();
 
+    system("reset");
+    //reset_shell_mode();
+
     int my_pipe[2];
     if (pipe(my_pipe) == -1) {
         sc_error("Error creating pipe");

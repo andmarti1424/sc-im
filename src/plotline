@@ -1,11 +1,11 @@
-#set terminal dumb nofeed noenhanced size 80,43
-set terminal caca driver ncurses color enhanced size 80,43 inverted charset ascii
+set terminal dumb nofeed noenhanced
+#set terminal caca driver ncurses color enhanced size 80,43 inverted charset ascii
 
 set datafile separator ","
 set key autotitle columnhead
 
-#plot filename
-plot filename with linespoints
+plot filename
+#plot filename with linespoints
 #plot filename using 1:2 with linespoints #1=x 2=y
 
 #plot filename using 1:2 with linespoints linetype rgb "red",\

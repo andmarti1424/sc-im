@@ -42,6 +42,10 @@ int plot(char * s, int r, int c, int rf, int cf) {
 
     def_prog_mode();
     endwin();
+
+    system("reset");
+    //reset_shell_mode();
+
     if (system(command) == -1)
         sc_error("Failed during plot - errno:%d", errno);
     getchar();
