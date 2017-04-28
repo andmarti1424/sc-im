@@ -14,7 +14,7 @@ int plotedit(wchar_t * s) {
     char command[BUFFERSIZE];
 
     if (! wcscmp(s, L"line") || ! wcscmp(s, L"scatter") ||
-        ! wcscmp(s, L"pie")) {
+        ! wcscmp(s, L"pie")  || ! wcscmp(s, L"bar")) {
         char buffer[PATHLEN];
         char path_out[PATHLEN];
         char type[BUFFERSIZE];
@@ -70,7 +70,7 @@ int plot(char * s, int r, int c, int rf, int cf) {
     sprintf(command, "gnuplot -e \"filename='%s'\"", datafile);
 
     if (! strcmp(s, "line") || ! strcmp(s, "scatter") ||
-        ! strcmp(s, "pie")) {
+        ! strcmp(s, "pie")  || ! strcmp(s, "bar")) {
         sprintf(buffer, "plot%s", s);
         if (! plugin_exists(buffer, strlen(buffer), buffer1)) {
             sc_error("could not load default plotline file");
