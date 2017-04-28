@@ -9,6 +9,7 @@
 #include "tui.h"
 
 int plotedit(wchar_t * s) {
+#ifdef GNUPLOT
     // edit ~/.scim/plotxxxx (or /usr/local/share/scim/plotxxxx)
     char command[BUFFERSIZE];
 
@@ -43,9 +44,14 @@ int plotedit(wchar_t * s) {
         return -1;
     }
     return 0;
+#else
+    sc_error("Gnuplot was not installed when building Sc-im. Please rebuild Sc-im.");
+    return -1;
+#endif
 }
 
 int plot(char * s, int r, int c, int rf, int cf) {
+#ifdef GNUPLOT
     // create tmp file
     char datafile[] = "/tmp/sc-im-plotdataXXXXXX";
     int fd = mkstemp(datafile);
@@ -98,4 +104,8 @@ int plot(char * s, int r, int c, int rf, int cf) {
     unlink(datafile);
 
     return 0;
+#else
+    sc_error("Gnuplot was not installed when building Sc-im. Please rebuild Sc-im.");
+    return -1;
+#endif
 }
