@@ -18,4 +18,4 @@ void winchg();
 extern FILE * fdoutput; // output file descriptor (stdout or file)
 extern unsigned int curmode;
 extern unsigned int lastmode;
-
+extern struct timeval startup_tv, current_tv; //runtime timer

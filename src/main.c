@@ -85,6 +85,7 @@ struct dictionary * predefined_conf_d;
 struct history * commandline_history;
 struct history * insert_history;
 char stderr_buffer[1024] = "";
+struct timeval startup_tv, current_tv; //runtime timer
 
 void read_stdin();
 extern char * rev;
@@ -222,7 +223,12 @@ int main (int argc, char ** argv) {
     // change curmode to NORMAL_MODE
     chg_mode('.');
 
+    // runtime timer
+    gettimeofday(&startup_tv, NULL);
+
     while ( ! shall_quit && ! atoi(get_conf_value("quit_afterload"))) {
+        // save current time for runtime timer
+        gettimeofday(&current_tv, NULL);
 
         // if we are in ncurses
         if (! atoi(get_conf_value("nocurses"))) {

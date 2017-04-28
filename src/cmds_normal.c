@@ -44,6 +44,7 @@ void do_normalmode(struct block * buf) {
     switch (buf->value) {
         // FOR TEST PURPOSES
         case L'A':
+            //sc_info("runtime:%d", RUNTIME);
             break;
 
         case L'W':
