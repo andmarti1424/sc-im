@@ -232,6 +232,10 @@ token S_YANKCOL
 %token K_NOQUIT_AFTERLOAD
 %token K_XLSX_READFORMULAS
 %token K_NOXLSX_READFORMULAS
+%token K_DEFAULT_COPY_TO_CLIPBOARD_CMD
+%token K_DEFAULT_PASTE_FROM_CLIPBOARD_CMD
+%token K_COPY_TO_CLIPBOARD_DELIMITED_TAB
+%token K_NOCOPY_TO_CLIPBOARD_DELIMITED_TAB
 %token K_IGNORECASE
 %token K_NOIGNORECASE
 %token K_TM_GMTOFF
@@ -1054,6 +1058,28 @@ setitem :
                                   else if (s[0] =='l')
                                   parse_str(user_conf_d, "newline_action=l");
                                   }
+    |    K_DEFAULT_COPY_TO_CLIPBOARD_CMD '=' strarg {
+                                  char cmd[MAXCMD];
+                                  char * s = (char *) $3;
+                                  sprintf(cmd, "default_copy_to_clipboard_cmd=%s", s);
+                                  parse_str(user_conf_d, cmd);
+                                  scxfree(s);
+                                  }
+    |    K_DEFAULT_PASTE_FROM_CLIPBOARD_CMD '=' strarg {
+                                  char cmd[MAXCMD];
+                                  char * s = (char *) $3;
+                                  sprintf(cmd, "default_paste_from_clipboard_cmd=%s", s);
+                                  parse_str(user_conf_d, cmd);
+                                  scxfree(s);
+                                  }
+
+    |    K_COPY_TO_CLIPBOARD_DELIMITED_TAB {      parse_str(user_conf_d, "copy_to_clipboard_delimited_tab=1"); }
+
+    |    K_COPY_TO_CLIPBOARD_DELIMITED_TAB '=' NUMBER
+                                  {  if ($3 == 0) parse_str(user_conf_d, "copy_to_clipboard_delimited_tab=1");
+                                     else         parse_str(user_conf_d, "copy_to_clipboard_delimited_tab=0"); }
+    |    K_NOCOPY_TO_CLIPBOARD_DELIMITED_TAB {    parse_str(user_conf_d, "copy_to_clipboard_delimited_tab=0"); }
+
     |    K_NEWLINE_ACTION '=' NUMBER {
                                      if ($3 == 0) parse_str(user_conf_d, "newline_action=0"); }
     |    K_TM_GMTOFF              {               parse_str(user_conf_d, "tm_gmtoff=-10800"); }
