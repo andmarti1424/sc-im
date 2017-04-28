@@ -27,6 +27,8 @@
  * ui_clr_header          // functions that clears a line in header bar
  * ui_print_mode          // function that shows current mode in top right of screen
  * ui_get_formated_value  // function used for exporting spreadsheet to plain text
+ * ui_pause
+ * ui_resume
  *
  * these are local functions that might not be needed to reimplement if writing another ui:
  * ui_set_ucolor          // function called internally for setting a color
@@ -78,7 +80,6 @@ SCREEN * sstdout;
 srange * ranges;
 
 void ui_start_screen() {
-    //def_shell_mode();
     sstderr = newterm(NULL, stderr, NULL);
     noecho();
     sstdout = newterm(NULL, stdout, stdin);
@@ -1106,3 +1107,18 @@ void ui_start_colors() {
         for (j=0; j < 9; j++)  // bg
             init_pair( i*9+j+1, i-1, j-1); // i is fg and j is bg
 }
+
+void ui_pause() {
+    def_prog_mode();
+    set_term(sstderr);
+    endwin();
+    return;
+}
+
+void ui_resume() {
+    set_term(sstdout);
+    reset_prog_mode();
+    refresh();
+    return;
+}
+

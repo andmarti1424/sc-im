@@ -19,15 +19,14 @@ int plotedit(wchar_t * s) {
         char path_out[PATHLEN];
         char type[BUFFERSIZE];
         wcstombs(type, s, BUFFERSIZE);
-        sprintf(buffer, "plot%s", type);
+        sprintf(buffer, "plot_%s", type);
         if (! plugin_exists(buffer, strlen(buffer), path_out)) {
             sc_error("could not load plot template file");
             return -1;
         }
+        ui_pause();
 
-        def_prog_mode();
-        endwin();
-        system("reset");
+        //system("reset");
         //reset_shell_mode();
 
         char * editor;
@@ -36,8 +35,7 @@ int plotedit(wchar_t * s) {
         sprintf(command, "%s %s", editor, path_out);
 
         if (system(command) == -1) sc_error("Failed editting plot file - errno:%d", errno);
-        reset_prog_mode();
-        refresh();
+        ui_resume();
         ui_update(TRUE);
     } else {
         sc_error("error: invalid plot file: %ls", s);
@@ -71,7 +69,7 @@ int plot(char * s, int r, int c, int rf, int cf) {
 
     if (! strcmp(s, "line") || ! strcmp(s, "scatter") ||
         ! strcmp(s, "pie")  || ! strcmp(s, "bar")) {
-        sprintf(buffer, "plot%s", s);
+        sprintf(buffer, "plot_%s", s);
         if (! plugin_exists(buffer, strlen(buffer), buffer1)) {
             sc_error("could not load default plotline file");
             return -1;
@@ -84,17 +82,14 @@ int plot(char * s, int r, int c, int rf, int cf) {
     }
     //sc_debug(command);
 
-    def_prog_mode();
-    endwin();
-
-    system("reset");
+    ui_pause();
+    //system("reset");
     //reset_shell_mode();
 
     if (system(command) == -1)
         sc_error("Failed during plot - errno:%d", errno);
     getchar();
-    reset_prog_mode();
-    refresh();
+    ui_resume();
     ui_update(TRUE);
 
     // close file descriptor

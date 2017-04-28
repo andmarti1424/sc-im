@@ -17,18 +17,13 @@ int exec_cmd (char * line) {
 #ifdef NCURSES
     int waitres;
 
-    def_prog_mode();
-    endwin();
-
-    system("reset");
-    //reset_shell_mode();
+    ui_pause();
 
     int my_pipe[2];
     if (pipe(my_pipe) == -1) {
         sc_error("Error creating pipe");
         getchar();
-        reset_prog_mode();
-        refresh();
+        ui_resume();
         ui_update(TRUE);
         return -1;
     }
@@ -37,8 +32,7 @@ int exec_cmd (char * line) {
     if (child_id == -1) {
         sc_error("Fork error");
         getchar();
-        reset_prog_mode();
-        refresh();
+        ui_resume();
         ui_update(TRUE);
         return -1;
     }
@@ -81,8 +75,7 @@ int exec_cmd (char * line) {
         }
 
         getchar();
-        reset_prog_mode();
-        refresh();
+        ui_resume();
         ui_update(TRUE);
     }
 #endif

@@ -111,7 +111,7 @@ install :
 	install $(name) $(DESTDIR)$(prefix)/bin/$(name)
 	install -d $(DESTDIR)$(HELPDIR)
 	install doc $(DESTDIR)$(HELPDIR)/$(name)_help
-	install plot* $(DESTDIR)$(HELPDIR)/
+	install plot_* $(DESTDIR)$(HELPDIR)/
 	install -d $(DESTDIR)$(prefix)/share/man/man1
 	install -m 644 sc-im.1 $(DESTDIR)$(prefix)/share/man/man1/$(name).1
 

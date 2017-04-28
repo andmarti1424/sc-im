@@ -50,3 +50,5 @@ void ui_show_sc_col_headings(WINDOW * win, int mxcol);
 void ui_add_cell_detail(char * d, struct ent * p1);
 void ui_write_j(WINDOW * win, const char * word, const unsigned int row, const unsigned int justif);
 void ui_show_cursor(WINDOW * win);
+void ui_pause();
+void ui_resume();
