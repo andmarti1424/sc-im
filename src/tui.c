@@ -11,7 +11,8 @@
  * ui_update              // function used to refresh content of screen
  * ui_getch               // function that asks the user input from stdin (non blocking)
  * ui_getch_b             // function that asks the user input from stdin (blocking)
- * ui_query               // function to read text from stdin 
+ * ui_query               // function to read text from stdin
+ * ui_query_opt           // function that shows a message and waits for confirmation between a couple of defined options
  * ui_do_welcome          // function used when starting sc-im without a file as a parameter
  * ui_handle_cursor       // function used to handle cursor depending on current mode
  * yyerror                // error routine for yacc parser
@@ -1022,6 +1023,30 @@ void ui_bail(lua_State *L, char * msg) {
     ui_update(TRUE);
 }
 #endif
+
+/*
+ * this function shows a message in screen
+ * and waits for user confirmation between a couple of options defined on valid (wchar *)
+ * returns a wchar_t indicating user answer
+ */
+wchar_t ui_query_opt(wchar_t * initial_msg, wchar_t * valid) {
+    if (! wcslen(initial_msg)) return L'\0';
+    sc_info("%ls", initial_msg);
+    wint_t wd = -1;
+    wchar_t wdc[2] = L"";
+    int res = -1;
+
+    curs_set(1);
+    wtimeout(input_win, -1);
+    move(0, rescol + wcslen(initial_msg) + 1);
+    while ((res = wstr_in_wstr(valid, wdc)) == -1) {
+        wget_wch(input_win, &wd);
+        swprintf(wdc, FBUFLEN, L"%lc", wd);
+    }
+    wtimeout(input_win, TIMEOUT_CURSES);
+    curs_set(0);
+    return wdc[0];
+}
 
 /* function to read text from stdin */
 char * ui_query(char * initial_msg) {
