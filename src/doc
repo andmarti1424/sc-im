@@ -810,8 +810,7 @@ Commands for handling cell content:
 
     :plot {type}
                 Plot a graphic using a selected range.
-                Right now, only a 'line' type, 'scatter' type, 'bar' type
-                and 'pie' type are allowed.
+                Right now, only 'line', 'scatter', 'bar' and 'pie' types are allowed.
 
                 Ex. of use:     :plot line
                 This command calls gnuplot using the file called 'plotline'

@@ -1034,7 +1034,7 @@ wchar_t ui_query_opt(wchar_t * initial_msg, wchar_t * valid) {
     sc_info("%ls", initial_msg);
     wint_t wd = -1;
     wchar_t wdc[2] = L"";
-    int res = -1;
+    int res;
 
     curs_set(1);
     wtimeout(input_win, -1);
