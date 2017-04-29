@@ -1144,6 +1144,9 @@ void ui_resume() {
     set_term(sstdout);
     reset_prog_mode();
     refresh();
+    clearok(stdscr, TRUE);
+    ui_show_header();
+    ui_update(TRUE);
     return;
 }
 

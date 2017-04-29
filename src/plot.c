@@ -26,9 +26,6 @@ int plotedit(wchar_t * s) {
         }
         ui_pause();
 
-        //system("reset");
-        //reset_shell_mode();
-
         char * editor;
         if (! (editor = getenv("EDITOR")))
             editor = DFLT_EDITOR;
@@ -36,7 +33,6 @@ int plotedit(wchar_t * s) {
 
         if (system(command) == -1) sc_error("Failed editting plot file - errno:%d", errno);
         ui_resume();
-        ui_update(TRUE);
     } else {
         sc_error("error: invalid plot file: %ls", s);
         return -1;
@@ -80,17 +76,13 @@ int plot(char * s, int r, int c, int rf, int cf) {
         sc_error("plot option not valid");
         return -1;
     }
-    //sc_debug(command);
 
     ui_pause();
-    //system("reset");
-    //reset_shell_mode();
 
     if (system(command) == -1)
         sc_error("Failed during plot - errno:%d", errno);
     getchar();
     ui_resume();
-    ui_update(TRUE);
 
     // close file descriptor
     close(fd);
