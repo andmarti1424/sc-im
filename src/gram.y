@@ -1076,8 +1076,8 @@ setitem :
     |    K_COPY_TO_CLIPBOARD_DELIMITED_TAB {      parse_str(user_conf_d, "copy_to_clipboard_delimited_tab=1"); }
 
     |    K_COPY_TO_CLIPBOARD_DELIMITED_TAB '=' NUMBER
-                                  {  if ($3 == 0) parse_str(user_conf_d, "copy_to_clipboard_delimited_tab=1");
-                                     else         parse_str(user_conf_d, "copy_to_clipboard_delimited_tab=0"); }
+                                  {  if ($3 == 0) parse_str(user_conf_d, "copy_to_clipboard_delimited_tab=0");
+                                     else         parse_str(user_conf_d, "copy_to_clipboard_delimited_tab=1"); }
     |    K_NOCOPY_TO_CLIPBOARD_DELIMITED_TAB {    parse_str(user_conf_d, "copy_to_clipboard_delimited_tab=0"); }
 
     |    K_NEWLINE_ACTION '=' NUMBER {

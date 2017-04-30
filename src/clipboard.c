@@ -48,7 +48,8 @@ int paste_from_clipboard() {
         while( token != NULL ) {
             if (r > MAXROWS - GROWAMT - 1 || c > ABSMAXCOLS - 1) break;
             clean_carrier(token);
-            char * st = str_replace (token, " ", ""); //trim
+            //char * st = str_replace (token, " ", ""); //trim
+            char * st = token;
             if (strlen(st) && isnumeric(st))
                 swprintf(line_interp, BUFFERSIZE, L"let %s%d=%s", coltoa(c), r, st);
             else
