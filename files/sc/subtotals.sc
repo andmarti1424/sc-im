@@ -2,7 +2,7 @@
 # You almost certainly shouldn't edit it.
 
 format A 19 2 0
-format E 28 2 0
+format E 32 2 0
 label E0 = "original"
 label A1 = "barrio"
 label B1 = "sala"
@@ -59,5 +59,5 @@ leftstring E9 = "congreso"
 label F9 = "B"
 let G9 = 5
 label E11 = "test this with:"
-label E12 = ":int subtotal A1:C9 A @sum C"
-goto E11
+label E12 = ":int subtotal A1:C9 A \"@sum\" C"
+goto E12
