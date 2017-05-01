@@ -24,6 +24,7 @@
 #include "shift.h"
 #include "clipboard.h"
 #include "plot.h"
+#include "subtotal.h"
 
 void yyerror(char *err);               // error routine for yacc (gram.y)
 int yylex();
@@ -91,6 +92,8 @@ token S_DELETECOL
 token S_YANKCOL
 */
 %token S_DATEFMT
+%token S_SUBTOTAL
+%token S_RSUBTOTAL
 %token S_FORMAT
 %token S_FMT
 %token S_LET
@@ -529,7 +532,18 @@ command:
     |    S_FREEZE COL                { add_frange(lookat(0, $2), lookat(0, $2), 'c'); }
 
     |    S_SORT range STRING         { sortrange($2.left.vp, $2.right.vp, $3);
-                                          //scxfree($3);
+                                       //scxfree($3);
+                                       //do not free here
+                                     }
+    |    S_SUBTOTAL range COL STRING COL {
+                                       subtotal($2.left.vp->row, $2.left.vp->col, $2.right.vp->row,
+                                                $2.right.vp->col, $3, $4, $5, 0);
+                                       scxfree($4);
+                                     }
+    |    S_RSUBTOTAL range COL STRING COL {
+                                       subtotal($2.left.vp->row, $2.left.vp->col, $2.right.vp->row,
+                                                 $2.right.vp->col, $3, $4, $5, 1);
+                                       scxfree($4);
                                      }
     |    S_FILTERON range            { enable_filters($2.left.vp, $2.right.vp);
                                      }
@@ -725,7 +739,9 @@ command:
     |    S_SEVAL e                 { seval_result = seval(NULL, $2); // TODO make sure this seval_result is always freed afterwards
                                      efree($2);
                                    }
-    |    S_ERROR STRING            { sc_error($2); }
+    |    S_ERROR STRING            { sc_error($2);
+                                     //free $2
+                                   }
 
     |    // nothing
     |    error   {
