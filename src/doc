@@ -590,6 +590,15 @@ Commands for handling cell content:
                 Like ":sort {range}", but the sort is performed on the
                 selected range.
 
+    :subtotal {col_range} {operation} {col_operation}
+                Apply subtotals over the data in a selected range.
+                {col_range} is the column to group by.
+                {operation} can be one of the followings:
+                    @sum, @prod, @avg, @count, @stddev, @max, @min
+                {col_operation} is the column whose values will be used
+                to do the {operation}.
+                Example: load the file example files/sc/subtotals.sc,
+                select the A1:C9 range, and type    :subtotal A @sum C
 
     :addfilter "{filter_string}"
     :showfilters

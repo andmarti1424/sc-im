@@ -57,14 +57,12 @@ L"e! xlsx",
 L"datefmt",
 L"delfilter",
 L"delfilters",
-L"fcopy",
 L"file",
 L"fill",
 L"filteron",
 L"filteroff",
 L"format",
 L"freeze",
-L"fsum",
 L"h",
 L"help",
 L"hiddencols",
@@ -107,6 +105,7 @@ L"showmaps",
 L"showrow",
 L"showrows",
 L"sort",
+L"subtotal",
 L"trigger",
 L"untrigger",
 L"unformat",
@@ -428,6 +427,50 @@ void do_commandmode(struct block * sb) {
                 swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%s%d %ls", coltoa(sr->brcol), sr->brrow, cline);
             }
             send_to_interp(interp_line);
+
+        } else if ( ! wcsncmp(inputline, L"subtotal ", 9) ) {
+            int r = currow, c = curcol, rf = currow, cf = curcol, pos;
+            if (p != -1) {
+                c = sr->tlcol;
+                r = sr->tlrow;
+                rf = sr->brrow;
+                cf = sr->brcol;
+            }
+            if (any_locked_cells(r, c, rf, cf)) {
+                sc_error("Locked cells encountered. Nothing changed");
+                return;
+            }
+            wchar_t line [BUFFERSIZE];
+            wcscpy(line, inputline);
+            del_range_wchars(line, 0, 8);
+            if (
+                (pos = wstr_in_wstr(line, L"@sum")) != -1 ||
+                (pos = wstr_in_wstr(line, L"@avg")) != -1 ||
+                (pos = wstr_in_wstr(line, L"@max")) != -1 ||
+                (pos = wstr_in_wstr(line, L"@min")) != -1 ) {
+                add_wchar(line, L'\"', pos);
+                add_wchar(line, L'\"', pos+5);
+            } else if (
+                (pos = wstr_in_wstr(line, L"@prod")) != -1) {
+                add_wchar(line, L'\"', pos);
+                add_wchar(line, L'\"', pos+6);
+            } else if (
+                (pos = wstr_in_wstr(line, L"@count"))  != -1) {
+                add_wchar(line, L'\"', pos);
+                add_wchar(line, L'\"', pos+7);
+            } else if (
+                (pos = wstr_in_wstr(line, L"@stddev")) == -1) {
+                add_wchar(line, L'\"', pos);
+                add_wchar(line, L'\"', pos+8);
+            } else {
+                sc_error("Please specify a function to apply the subtotals.");
+                return;
+            }
+            swprintf(interp_line, BUFFERSIZE, L"subtotal %s%d:", coltoa(c), r);
+            swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%s%d ", coltoa(cf), rf);
+            swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%ls", line);
+            send_to_interp(interp_line);
+            unselect_ranges();
 
         } else if ( ! wcsncmp(inputline, L"freeze ", 7) ) {
             wcscpy(interp_line, inputline);
