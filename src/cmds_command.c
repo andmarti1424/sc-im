@@ -459,7 +459,7 @@ void do_commandmode(struct block * sb) {
                 add_wchar(line, L'\"', pos);
                 add_wchar(line, L'\"', pos+7);
             } else if (
-                (pos = wstr_in_wstr(line, L"@stddev")) == -1) {
+                (pos = wstr_in_wstr(line, L"@stddev")) != -1) {
                 add_wchar(line, L'\"', pos);
                 add_wchar(line, L'\"', pos+8);
             } else {
