@@ -14,6 +14,7 @@ SC original authors are James Gosling and Mark Weiser, and mods were later added
 - Key-mappings.
 - Sort of rows.
 - Filter of rows.
+- Subtotals.
 - Cell shifting.
 - 256 color support - screen colors can be customized by user, even at runtime.
 - Colorize cells or give them format such as bold or underline.

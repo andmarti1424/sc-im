@@ -597,7 +597,7 @@ Commands for handling cell content:
                     @sum, @prod, @avg, @count, @stddev, @max, @min
                 {col_operation} is the column whose values will be used
                 to do the {operation}.
-                Example: load the file example files/sc/subtotals.sc,
+                Example: load the file example examples/sc/subtotals.sc,
                 select the A1:C9 range, and type    :subtotal A @sum C
 
     :addfilter "{filter_string}"
@@ -774,7 +774,7 @@ Commands for handling cell content:
                 or Both. On Read, trigger is executed before evaluating cells
                 value, on Write, after the evaluation. Type of Trigger can be
                 Lua or C. In Lua there are scim specific function available
-                accessing cells, more in "files/lua* directory.
+                accessing cells, more in "examples/lua* directory.
 
                 Example:
                 :trigger a5 "mode=R type=LUA file=trg.lua function=trg"
@@ -788,7 +788,7 @@ Commands for handling cell content:
 
                 Function "wr2mysql" in trg.so is called when to
                 cell b10 is writen a new value.
-                See "files/Module/module.c" for more Infos.
+                See "examples/Module/module.c" for more Infos.
                 Adding "-Wl,--export-dynamic" in Makefile for linking
                 sc-im, will export all symbols from sc-im, making it
                 available for dynamic linking with modules.
@@ -1347,7 +1347,7 @@ Commands for handling cell content:
 
      The search patch for LUA scripts files is
      $HOME/.scim/lua/ or /usr/local/share/scim/lua (in that order)
-     Example can be found in sc-im/files/lua in source code tree.
+     Example can be found in sc-im/examples/lua in source code tree.
 
 
 ==============================================================================
