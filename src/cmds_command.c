@@ -375,12 +375,13 @@ void do_commandmode(struct block * sb) {
             send_to_interp(inputline);
 
         } else if ( ! wcsncmp(inputline, L"showrows", 8) ) {
-            if (p == -1) return; // If there is not selected range, go back.
-            int r, arg;
-            sr = get_range_by_pos(p);
-            r = sr->tlrow;
-            arg = sr->brcol - sr->tlcol + 1;
-            show_row(r, arg);
+            if (p != -1) { // only continue if there is a selected range
+                int r, arg;
+                sr = get_range_by_pos(p);
+                r = sr->tlrow;
+                arg = sr->brcol - sr->tlcol + 1;
+                show_row(r, arg);
+            }
 
         // range lock / unlock
         } else if ( ! wcsncmp(inputline, L"lock", 4) || ! wcsncmp(inputline, L"unlock", 6) ||
@@ -399,21 +400,22 @@ void do_commandmode(struct block * sb) {
         } else if ( ! wcsncmp(inputline, L"datefmt", 7)) {
             wcscpy(interp_line, inputline);
 
+            int r = currow, c = curcol, rf = currow, cf = curcol;
             if (p != -1) { // in case there is a range selected
-                int r = currow, c = curcol, rf = currow, cf = curcol;
                 c = sr->tlcol;
                 r = sr->tlrow;
                 rf = sr->brrow;
                 cf = sr->brcol;
-                wchar_t cline [BUFFERSIZE];
-                wcscpy(cline, interp_line);
-                int found = wstr_in_wstr(interp_line, L"\"");
-                if (found == -1) return;
+            }
+            wchar_t cline [BUFFERSIZE];
+            wcscpy(cline, interp_line);
+            int found = wstr_in_wstr(interp_line, L"\"");
+            if (found != -1) {
                 del_range_wchars(cline, 0, found-1);
                 swprintf(interp_line, BUFFERSIZE, L"datefmt %s%d:", coltoa(c), r);
                 swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%s%d %ls", coltoa(cf), rf, cline);
+                send_to_interp(interp_line);
             }
-            send_to_interp(interp_line);
 
         } else if ( ! wcsncmp(inputline, L"sort ", 5) ) {
             wcscpy(interp_line, inputline);
@@ -421,15 +423,16 @@ void do_commandmode(struct block * sb) {
                 wchar_t cline [BUFFERSIZE];
                 wcscpy(cline, interp_line);
                 int found = wstr_in_wstr(interp_line, L"\"");
-                if (found == -1) return;
-                del_range_wchars(cline, 0, found-1);
-                swprintf(interp_line, BUFFERSIZE, L"sort %s%d:", coltoa(sr->tlcol), sr->tlrow);
-                swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%s%d %ls", coltoa(sr->brcol), sr->brrow, cline);
+                if (found != -1) {
+                    del_range_wchars(cline, 0, found-1);
+                    swprintf(interp_line, BUFFERSIZE, L"sort %s%d:", coltoa(sr->tlcol), sr->tlrow);
+                    swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%s%d %ls", coltoa(sr->brcol), sr->brrow, cline);
+                    send_to_interp(interp_line);
+                }
             }
-            send_to_interp(interp_line);
 
         } else if ( ! wcsncmp(inputline, L"subtotal ", 9) ) {
-            int r = currow, c = curcol, rf = currow, cf = curcol, pos;
+            int r = currow, c = curcol, rf = currow, cf = curcol, pos, cancel = 0;
             if (p != -1) {
                 c = sr->tlcol;
                 r = sr->tlrow;
@@ -438,39 +441,41 @@ void do_commandmode(struct block * sb) {
             }
             if (any_locked_cells(r, c, rf, cf)) {
                 sc_error("Locked cells encountered. Nothing changed");
-                return;
-            }
-            wchar_t line [BUFFERSIZE];
-            wcscpy(line, inputline);
-            del_range_wchars(line, 0, 8);
-            if (
-                (pos = wstr_in_wstr(line, L"@sum")) != -1 ||
-                (pos = wstr_in_wstr(line, L"@avg")) != -1 ||
-                (pos = wstr_in_wstr(line, L"@max")) != -1 ||
-                (pos = wstr_in_wstr(line, L"@min")) != -1 ) {
-                add_wchar(line, L'\"', pos);
-                add_wchar(line, L'\"', pos+5);
-            } else if (
-                (pos = wstr_in_wstr(line, L"@prod")) != -1) {
-                add_wchar(line, L'\"', pos);
-                add_wchar(line, L'\"', pos+6);
-            } else if (
-                (pos = wstr_in_wstr(line, L"@count"))  != -1) {
-                add_wchar(line, L'\"', pos);
-                add_wchar(line, L'\"', pos+7);
-            } else if (
-                (pos = wstr_in_wstr(line, L"@stddev")) != -1) {
-                add_wchar(line, L'\"', pos);
-                add_wchar(line, L'\"', pos+8);
             } else {
-                sc_error("Please specify a function to apply the subtotals.");
-                return;
+                wchar_t line [BUFFERSIZE];
+                wcscpy(line, inputline);
+                del_range_wchars(line, 0, 8);
+                if (
+                    (pos = wstr_in_wstr(line, L"@sum")) != -1 ||
+                    (pos = wstr_in_wstr(line, L"@avg")) != -1 ||
+                    (pos = wstr_in_wstr(line, L"@max")) != -1 ||
+                    (pos = wstr_in_wstr(line, L"@min")) != -1 ) {
+                    add_wchar(line, L'\"', pos);
+                    add_wchar(line, L'\"', pos+5);
+                } else if (
+                    (pos = wstr_in_wstr(line, L"@prod")) != -1) {
+                    add_wchar(line, L'\"', pos);
+                    add_wchar(line, L'\"', pos+6);
+                } else if (
+                    (pos = wstr_in_wstr(line, L"@count"))  != -1) {
+                    add_wchar(line, L'\"', pos);
+                    add_wchar(line, L'\"', pos+7);
+                } else if (
+                    (pos = wstr_in_wstr(line, L"@stddev")) != -1) {
+                    add_wchar(line, L'\"', pos);
+                    add_wchar(line, L'\"', pos+8);
+                } else {
+                    sc_error("Please specify a function to apply the subtotals");
+                    cancel = 1;
+                }
+                if (!cancel) {
+                    swprintf(interp_line, BUFFERSIZE, L"subtotal %s%d:", coltoa(c), r);
+                    swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%s%d ", coltoa(cf), rf);
+                    swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%ls", line);
+                    send_to_interp(interp_line);
+                    unselect_ranges();
+                }
             }
-            swprintf(interp_line, BUFFERSIZE, L"subtotal %s%d:", coltoa(c), r);
-            swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%s%d ", coltoa(cf), rf);
-            swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%ls", line);
-            send_to_interp(interp_line);
-            unselect_ranges();
 
         } else if ( ! wcsncmp(inputline, L"freeze ", 7) ) {
             wcscpy(interp_line, inputline);
@@ -495,12 +500,13 @@ void do_commandmode(struct block * sb) {
             wchar_t cline [BUFFERSIZE];
             char line [BUFFERSIZE];
             wcscpy(cline, inputline);
-            int found = wstr_in_wstr(cline, L"\"");
-            if (found == -1) return;
-            del_range_wchars(cline, wcslen(cline), wcslen(cline));
-            del_range_wchars(cline, 0, found);
-            wcstombs(line, cline, BUFFERSIZE);
-            add_filter(line);
+            int found;
+            if ((found = wstr_in_wstr(cline, L"\"")) != -1) {
+                del_range_wchars(cline, wcslen(cline), wcslen(cline));
+                del_range_wchars(cline, 0, found);
+                wcstombs(line, cline, BUFFERSIZE);
+                add_filter(line);
+            }
 
         } else if ( ! wcsncmp(inputline, L"delfilter ", 10) ) {
             wchar_t cline [BUFFERSIZE];
@@ -518,14 +524,13 @@ void do_commandmode(struct block * sb) {
             wcscpy(interp_line, inputline);
             if ( ! wcscmp(inputline, L"filteron") && p == -1) { // If there is no selected range
                 sc_error("Please specify a range or select one");
-                return;
             } else if (p != -1) {
                 wchar_t cline [BUFFERSIZE];
                 wcscpy(cline, interp_line);
                 swprintf(interp_line, BUFFERSIZE, L"filteron %s%d:", coltoa(sr->tlcol), sr->tlrow);
                 swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%s%d", coltoa(sr->brcol), sr->brrow);
+                send_to_interp(interp_line);
             }
-            send_to_interp(interp_line);
 
         } else if ( ! wcsncmp(inputline, L"filteroff", 9) ) {
             disable_filters();
@@ -559,14 +564,13 @@ void do_commandmode(struct block * sb) {
             if (any_locked_cells(r, c, rf, cf)) {
                 swprintf(interp_line, BUFFERSIZE, L"");
                 sc_error("Locked cells encountered. Nothing changed");
-                return;
+            } else {
+                if (p != -1)
+                    swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%ls", &inputline[5]);
+                else
+                    swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%ls", inputline);
+                send_to_interp(interp_line);
             }
-
-            if (p != -1)
-                swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%ls", &inputline[5]);
-            else
-                swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%ls", inputline);
-            send_to_interp(interp_line);
 
         } else if ( ! wcsncmp(inputline, L"format ", 7) ) {
             int r = currow, c = curcol, rf = currow, cf = curcol;
@@ -582,20 +586,20 @@ void do_commandmode(struct block * sb) {
 
             if (any_locked_cells(r, c, rf, cf)) {
                 sc_error("Locked cells encountered. Nothing changed");
-                return;
+            } else {
+                int l = wcslen(interp_line);
+                swprintf(interp_line + l, BUFFERSIZE, L"%ls", inputline);
+                del_range_wchars(interp_line, l, l + 5);
+                #ifdef UNDO
+                create_undo_action();
+                copy_to_undostruct(r, c, rf, cf, 'd');
+                #endif
+                send_to_interp(interp_line);
+                #ifdef UNDO
+                copy_to_undostruct(r, c, rf, cf, 'a');
+                end_undo_action();
+                #endif
             }
-            int l = wcslen(interp_line);
-            swprintf(interp_line + l, BUFFERSIZE, L"%ls", inputline);
-            del_range_wchars(interp_line, l, l + 5);
-            #ifdef UNDO
-            create_undo_action();
-            copy_to_undostruct(r, c, rf, cf, 'd');
-            #endif
-            send_to_interp(interp_line);
-            #ifdef UNDO
-            copy_to_undostruct(r, c, rf, cf, 'a');
-            end_undo_action();
-            #endif
 
         } else if ( ! wcsncmp(inputline, L"ccopy", 5) ) {
             int r = currow, c = curcol, rf = currow, cf = curcol;
