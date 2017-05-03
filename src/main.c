@@ -196,6 +196,9 @@ int main (int argc, char ** argv) {
     // 4. read sc file passed as argv
     load_sc();
 
+    // change curmode to NORMAL_MODE
+    chg_mode('.');
+
     // initiate ui
     FILE * f;
     if ( ! atoi(get_conf_value("nocurses"))) {
@@ -219,9 +222,6 @@ int main (int argc, char ** argv) {
         buffer = (struct block *) create_buf(); // this should only take place if curses ui
 
     wchar_t nocurses_buffer[BUFFERSIZE];
-
-    // change curmode to NORMAL_MODE
-    chg_mode('.');
 
     // runtime timer
     gettimeofday(&startup_tv, NULL);
