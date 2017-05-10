@@ -55,7 +55,7 @@ int plot(char * s, int r, int c, int rf, int cf) {
     }
 
     // export range to temp file in csv format
-    export_delim(datafile, ',', r, c, rf, cf);
+    export_delim(datafile, ',', r, c, rf, cf, 0);
 
     // call gnuplot with  ~/.scim/plotline (or /usr/local/share/scim/plotline) and temp data file
     char command[BUFFERSIZE];

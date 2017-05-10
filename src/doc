@@ -337,6 +337,16 @@ Commands for handling cell content:
 
      :load {file}
                  Load {file} into the SC-IM database.
+
+                 {file} can be an sc format file (.sc), a comma-separated file (.csv),
+                 a tab-separated file (.tab, .tsv), an xlsx or xls file.
+
+                 If loading a csv, tab or tsv file and 'import_delimited_as_text' configuration variable is set
+                 Sc-im will import numbers as text.
+
+                 If loading an xlsx file and 'xlsx_readformulas' is set, Sc-im will try to import
+                 formulas, rather than the final values of a cell.
+
      :load! {file}
                  Same as previous, but ignore changes done to the current
                  loaded spreadsheet.
@@ -352,6 +362,8 @@ Commands for handling cell content:
                  The name of the created file comes from the current
                  spreadsheet, with ".tab" appended.
                  If a range is selected, only that range is exported.
+                 NOTE: If you do an export with the :e command, current file name stays unchaged.
+                 See :file command for more details.
 
      :e txt      Export current spreadsheet to plain text.
                  If a range is selected, only that range is exported.
@@ -383,27 +395,6 @@ Commands for handling cell content:
 
      :e! xlsx {file}
                  Like ":e xlsx", but overwrite {file} if it exists.
-
-     :i csv {file}
-                 Import comma-separated file {file} to SC-IM's buffer.
-                 If 'import_delimited_as_text' configuration variable is set
-                 Sc-im will import numbers as text.
-
-     :i tab {file}
-                 Import tab-separated file {file} to SC-IM's buffer.
-                 If 'import_delimited_as_text' configuration variable is set
-                 Sc-im will import numbers as text.
-
-     :i xls {file}
-                 Import xls file {file} to SC-IM's buffer.
-
-     :i xlsx {file}
-                 Import xlsx file {file} to SC-IM's buffer.
-                 If 'xlsx_readformulas' is set, SC-IM tries to import
-                 formulas, rather than the final values of a cell.
-
-     :i! xlsx {file}
-                 Like ":i xlsx", but overwrite changes since last save.
 
      :ccopy      Copy a selected range to clipboard.
                  When 'ccopy' command is executed, the default value of macro
@@ -484,6 +475,9 @@ Commands for handling cell content:
 
                  If {file} is not given, display the current file name on
                  the status line.
+                 Take note that current file name is set during loading of
+                 Sc-im or with this command. If you do an export with the :e
+                 command, current file name stays unchaged.
 
      :fill {range} {initial_number} {increment_number}
                  Fill range {range} with values. The first cell of the range
@@ -1018,6 +1012,13 @@ Commands for handling cell content:
 
     'ignorecase' [default off]
     set this to ignore case in searches done with '/' command.
+
+    'autobackup' [default 0 (no autobackup)]
+    set this to a number in seconds 'n', to backup current file every 'n' seconds.
+    AUTOBACKUP must be set during Sc-im build for this feature to be
+    available.
+    If you set this to 0 but AUTOBACKUP was set during build, it still will
+    check for existance of backups before loading a file.
 
 ==============================================================================
 &Built-in Range Functions&

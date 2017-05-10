@@ -71,10 +71,15 @@ CFLAGS += -DDEFAULT_PASTE_FROM_CLIPBOARD_CMD=\""tmux show-buffer"\"
 #CFLAGS += -DDEFAULT_PASTE_FROM_CLIPBOARD_CMD=\""xclip -o -selection clipboard"\"
 #CFLAGS += -DDEFAULT_PASTE_FROM_CLIPBOARD_CMD=\""pbpaste"\"
 
-
 # Uncomment for basic XLS import. Requires libxlsreader
 #CFLAGS += -DXLS
 #LDLIBS += -lxlsreader
+
+# Autobackup. If you unset this, no backup check nor autobackup feature will be available.
+CFLAGS += -DAUTOBACKUP
+# Have threads? Set these two, if you want the autobackup feature to work with threads.
+CFLAGS += -DHAVE_PTHREAD
+LDLIBS += -pthread
 
 # NOTE: libxml and libzip are required for xlsx file import support
 ifneq ($(shell pkg-config --exists libzip libxml-2.0 || echo 'no'),no)

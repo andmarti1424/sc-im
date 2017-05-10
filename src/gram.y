@@ -211,6 +211,8 @@ token S_YANKCOL
 %token S_TRIGGER
 %token S_UNTRIGGER
 
+%token K_AUTOBACKUP
+%token K_NOAUTOBACKUP
 %token K_AUTOCALC
 %token K_NOAUTOCALC
 %token K_DEBUG
@@ -1013,6 +1015,11 @@ setitem :
                                      else         parse_str(user_conf_d, "overlap=1"); }
     |    K_OVERLAP                {               parse_str(user_conf_d, "overlap=1"); }
     |    K_NOOVERLAP              {               parse_str(user_conf_d, "overlap=0"); }
+    |    K_AUTOBACKUP '=' NUMBER  {
+                                                  char cmd[MAXCMD];
+                                                  sprintf(cmd, "autobackup=%d", $3);
+                                                  parse_str(user_conf_d, cmd); }
+    |    K_NOAUTOBACKUP           {               parse_str(user_conf_d, "autobackup=0"); }
     |    K_AUTOCALC               {               parse_str(user_conf_d, "autocalc=1"); }
     |    K_AUTOCALC '=' NUMBER    {  if ($3 == 0) parse_str(user_conf_d, "autocalc=0");
                                      else         parse_str(user_conf_d, "autocalc=1"); }

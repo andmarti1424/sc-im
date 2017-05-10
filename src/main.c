@@ -52,6 +52,7 @@ unsigned int curmode;
 unsigned int lastmode;
 int maxrow, maxcol;
 char curfile[PATHLEN];
+char loadingfile[PATHLEN] = { '\0' };
 char * exepath;
 
 int changed;
@@ -86,6 +87,16 @@ struct history * commandline_history;
 struct history * insert_history;
 char stderr_buffer[1024] = "";
 struct timeval startup_tv, current_tv; //runtime timer
+
+#ifdef AUTOBACKUP
+struct timeval lastbackup_tv; // last backup timer
+#ifdef HAVE_PTHREAD
+#include <pthread.h>
+int pthread_exists;     // return status of pthread_create
+//pthread_t fthread = 0;
+pthread_t fthread;
+#endif
+#endif
 
 void read_stdin();
 extern char * rev;
@@ -182,9 +193,9 @@ int main (int argc, char ** argv) {
 
     wchar_t stdin_buffer[BUFFERSIZE] = { L'\0' };
 
-    // there was no file passed to scim executable
+    // if there was no file passed to scim executable
     // 1. erase db !
-    if (! curfile[0]) erasedb();
+    if (! loadingfile[0]) erasedb();
 
     // 2. loadrc
     loadrc();
@@ -210,6 +221,7 @@ int main (int argc, char ** argv) {
             ui_print_mode();
             ui_show_celldetails();
         } else {
+            ui_show_header();
             ui_update(TRUE);
         }
     } else {
@@ -226,9 +238,17 @@ int main (int argc, char ** argv) {
     // runtime timer
     gettimeofday(&startup_tv, NULL);
 
+    #ifdef AUTOBACKUP
+    //gettimeofday(&lastbackup_tv, NULL);
+    lastbackup_tv = (struct timeval) {0};
+    #endif
+
     while ( ! shall_quit && ! atoi(get_conf_value("quit_afterload"))) {
         // save current time for runtime timer
         gettimeofday(&current_tv, NULL);
+
+        // autobackup if it is time to do so
+        handle_backup();
 
         // if we are in ncurses
         if (! atoi(get_conf_value("nocurses"))) {
@@ -342,16 +362,29 @@ void delete_structures() {
 }
 
 int exit_app(int status) {
+
     // free history
     if (! atoi(get_conf_value("nocurses"))) {
+
 #ifdef HISTORY_FILE
         if (! save_history(commandline_history, "w")) sc_error("Could not save commandline history");
         if (commandline_history != NULL) destroy_history(commandline_history);
 #endif
+
 #ifdef INS_HISTORY_FILE
         if (! save_history(insert_history, "a")) sc_error("Could not save input mode history");
         if (insert_history != NULL) destroy_history(insert_history);
+#endif
     }
+
+    // wait for autobackup thread to finish, just in case
+    #if defined(AUTOBACKUP) && defined(HAVE_PTHREAD)
+    if (pthread_exists) pthread_join (fthread, NULL);
+    #endif
+
+    // remove backup file
+#ifdef AUTOBACKUP
+    remove_backup(curfile);
 #endif
 
     // erase structures
@@ -397,7 +430,7 @@ void read_argv(int argc, char ** argv) {
             }
             free(dup);
         } else {                                   // it was passed a file
-            strncpy(curfile, argv[i], PATHLEN-1);
+            strncpy(loadingfile, argv[i], PATHLEN-1);
         }
     }
     exepath = argv[0];
@@ -406,9 +439,8 @@ void read_argv(int argc, char ** argv) {
 
 // we try to load a file
 void load_sc() {
-    //sc_debug("start reading file");
     wordexp_t p;
-    wordexp(curfile, &p, 0);
+    wordexp(loadingfile, &p, 0);
 
     int c;
     char word[PATHLEN] = "";
@@ -420,8 +452,6 @@ void load_sc() {
         sc_info("New file: \"%s\"", word);     // file passed to scim executable does not exists
     }
     wordfree(&p);
-    //EvalAll();                                 // we eval formulas (already evaluated in readfile
-    //sc_debug("finished reading file");
     return;
 }
 
@@ -477,64 +507,70 @@ void sig_term() {
 }
 
 void show_version_and_quit() {
-        put(user_conf_d, "nocurses", "1");
-        sc_info("Sc-im - %s", rev);
+    put(user_conf_d, "nocurses", "1");
+    sc_info("Sc-im - %s", rev);
 #ifdef NCURSES
-        sc_info("-DNCURSES");
+    sc_info("-DNCURSES");
 #endif
 #ifdef MAXROWS
-        sc_info("-DMAXROWS %d", MAXROWS);
+    sc_info("-DMAXROWS %d", MAXROWS);
 #endif
 #ifdef UNDO
-        sc_info("-DUNDO");
+    sc_info("-DUNDO");
 #endif
 #ifdef XLS
-        sc_info("-DXLS");
+    sc_info("-DXLS");
 #endif
 #ifdef XLSX
-        sc_info("-DXLSX");
+    sc_info("-DXLSX");
 #endif
 #ifdef XLSX_EXPORT
-        sc_info("-DXLSX_EXPORT");
+    sc_info("-DXLSX_EXPORT");
 #endif
 #ifdef XLUA
-        sc_info("-DXLUA");
+    sc_info("-DXLUA");
 #endif
 #ifdef DEFAULT_COPY_TO_CLIPBOARD_CMD
-        sc_info("-DDEFAULT_COPY_TO_CLIPBOARD_CMD=\"%s\"", DEFAULT_COPY_TO_CLIPBOARD_CMD);
+    sc_info("-DDEFAULT_COPY_TO_CLIPBOARD_CMD=\"%s\"", DEFAULT_COPY_TO_CLIPBOARD_CMD);
 #endif
 #ifdef DEFAULT_PASTE_FROM_CLIPBOARD_CMD
-        sc_info("-DDEFAULT_PASTE_FROM_CLIPBOARD_CMD=\"%s\"", DEFAULT_PASTE_FROM_CLIPBOARD_CMD);
+    sc_info("-DDEFAULT_PASTE_FROM_CLIPBOARD_CMD=\"%s\"", DEFAULT_PASTE_FROM_CLIPBOARD_CMD);
 #endif
 #ifdef USELOCALE
-        sc_info("-DUSELOCALE");
+    sc_info("-DUSELOCALE");
 #endif
 #ifdef USECOLORS
-        sc_info("-DUSECOLORS");
+    sc_info("-DUSECOLORS");
 #endif
 #ifdef _XOPEN_SOURCE_EXTENDED
-        sc_info("-D_XOPEN_SOURCE_EXTENDED");
+    sc_info("-D_XOPEN_SOURCE_EXTENDED");
 #endif
 #ifdef _GNU_SOURCE
-        sc_info("-D_GNU_SOURCE");
+    sc_info("-D_GNU_SOURCE");
 #endif
 #ifdef SNAME
-        sc_info("-DSNAME=\"%s\"", SNAME);
+    sc_info("-DSNAME=\"%s\"", SNAME);
 #endif
 #ifdef HELP_PATH
-        sc_info("-DHELP_PATH=\"%s\"", HELP_PATH);
+    sc_info("-DHELP_PATH=\"%s\"", HELP_PATH);
 #endif
 #ifdef LIBDIR
-        sc_info("-DLIBDIR=\"%s\"", LIBDIR);
+    sc_info("-DLIBDIR=\"%s\"", LIBDIR);
 #endif
 #ifdef DFLT_PAGER
-        sc_info("-DDFLT_PAGER=\"%s\"", DFLT_PAGER);
+    sc_info("-DDFLT_PAGER=\"%s\"", DFLT_PAGER);
 #endif
 #ifdef HISTORY_FILE
-        sc_info("-DHISTORY_FILE=\"%s\"", HISTORY_FILE);
+    sc_info("-DHISTORY_FILE=\"%s\"", HISTORY_FILE);
 #endif
 #ifdef INS_HISTORY_FILE
-        sc_info("-DINS_HISTORY_FILE=\"%s\"", INS_HISTORY_FILE);
+    sc_info("-DINS_HISTORY_FILE=\"%s\"", INS_HISTORY_FILE);
 #endif
-        put(user_conf_d, "quit_afterload", "1");
+#ifdef HAVE_PTHREAD
+    sc_info("-DHAVE_PTHREAD");
+#endif
+#ifdef AUTOBACKUP
+    sc_info("-DAUTOBACKUP");
+#endif
+    put(user_conf_d, "quit_afterload", "1");
 }

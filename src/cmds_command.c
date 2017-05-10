@@ -69,14 +69,6 @@ L"hiddencols",
 L"hiddenrows",
 L"hidecol",
 L"hiderow",
-L"i csv",
-L"i tab",
-L"i xls",
-L"i xlsx",
-L"i! csv",
-L"i! tab",
-L"i! xls",
-L"i! xlsx",
 L"imap",
 L"inoremap",
 L"int",
@@ -361,9 +353,7 @@ void do_commandmode(struct block * sb) {
                 delete_structures();
                 create_structures();
                 readfile(p.we_wordv[0], 0);
-                //EvalAll(); // is it necessary?
-                modflg = 0;
-                //ui_update(TRUE);
+                ui_show_header();
             }
             wordfree(&p);
 
@@ -776,10 +766,14 @@ void do_commandmode(struct block * sb) {
             if ( p.we_wordc < 1 ) {
                 sc_error("Failed to expand filename");
             } else {
+                #ifdef AUTOBACKUP
+                // check if backup of curfile exists.
+                // if it exists, remove it.
+                if (strlen(curfile) && backup_exists(curfile)) remove_backup(curfile);
+                #endif
                 strncpy(curfile, p.we_wordv[0], PATHLEN - 1);
                 sc_info("File name set to \"%s\"", curfile);
             }
-
             wordfree(&p);
 
         } else if ( ! wcscmp(inputline, L"file") ) {
@@ -791,7 +785,7 @@ void do_commandmode(struct block * sb) {
             }
 
         } else if ( inputline[0] == L'x' ) {
-            if ( savefile() == 0 ) shall_quit = 1;
+            if (savefile() == 0) shall_quit = 1;
 
         } else if ( ! wcscmp(inputline, L"fcopy") ) {
             fcopy();
@@ -802,10 +796,10 @@ void do_commandmode(struct block * sb) {
         } else if (
                 ! wcsncmp(inputline, L"e csv"  , 5) ||
                 ! wcsncmp(inputline, L"e! csv" , 6) ||
-            ! wcsncmp(inputline, L"e tab"  , 5) ||
-            ! wcsncmp(inputline, L"e! tab" , 6) ||
-            ! wcsncmp(inputline, L"e txt" , 5) ||
-            ! wcsncmp(inputline, L"e! txt" , 6) ) {
+                ! wcsncmp(inputline, L"e tab"  , 5) ||
+                ! wcsncmp(inputline, L"e! tab" , 6) ||
+                ! wcsncmp(inputline, L"e txt" , 5) ||
+                ! wcsncmp(inputline, L"e! txt" , 6) ) {
                 do_export( p == -1 ? 0 : sr->tlrow, p == -1 ? 0 : sr->tlcol,
                 p == -1 ? maxrow : sr->brrow, p == -1 ? maxcol : sr->brcol);
 
@@ -840,74 +834,27 @@ void do_commandmode(struct block * sb) {
 
                 if (strlen(filename) > 0 && ! force_rewrite && file_exists(filename)) {
                     sc_error("File %s already exists. Use \"!\" to force rewrite.", filename);
-                } else if (strlen(filename) && export_xlsx(
+
+                #ifdef AUTOBACKUP
+                    // check if backup of filename exists.
+                    // if it exists and '!' is set, remove it.
+                    // if it exists and curfile = fname, remove it.
+                    // else return.
+                } else if (strlen(filename) && backup_exists(filename)
+                    && !force_rewrite && !(strlen(curfile) && !strcmp(curfile, filename))) {
+                    sc_error("Backup file of %s exists. Use \"!\" to force the write process.", filename);
+                #endif
+                } else if (strlen(filename)) {
+                    #ifdef AUTOBACKUP
+                    if (backup_exists(filename)) remove_backup(filename);
+                    #endif
+                    if (export_xlsx(
                     filename, p == -1 ? 0 : sr->tlrow, p == -1 ? 0 : sr->tlcol,
                     p == -1 ? maxrow : sr->brrow, p == -1 ? maxcol : sr->brcol) == 0)
                     sc_info("File \"%s\" written", filename);
-                #endif
-
-        } else if (
-            ! wcsncmp(inputline, L"i csv " , 6) ||
-            ! wcsncmp(inputline, L"i! csv ", 7) ||
-            ! wcsncmp(inputline, L"i xlsx" , 6) ||
-            ! wcsncmp(inputline, L"i! xlsx", 7) ||
-            ! wcsncmp(inputline, L"i xls " , 6) ||
-            ! wcsncmp(inputline, L"i! xls ", 7) ||
-            ! wcsncmp(inputline, L"i tab " , 6) ||
-            ! wcsncmp(inputline, L"i! tab ", 7) ) {
-
-            int force_rewrite = 0;
-            char delim = ',';
-            char cline [BUFFERSIZE];
-            wcstombs(cline, inputline, BUFFERSIZE);
-
-            if (inputline[1] == '!') {
-                force_rewrite = 1;
-                del_range_chars(cline, 1, 1);
-            }
-
-            if ( ! strncmp(cline, "i csv ", 6) ) { delim = ',';
-            } else if ( ! strncmp(cline, "i tab ", 6) ) { delim = '\t';
-            } else if ( ! strncmp(cline, "i xls ", 6) ) {
-                #ifndef XLS
-                sc_error("XLS import support not compiled in");
-                chg_mode('.');
-                inputline[0] = L'\0';
-                #endif
-                delim = 'x';
-            } else if ( ! strncmp(cline, "i xlsx", 6) ) {
-                #ifndef XLSX
-                sc_error("XLSX import support not compiled in");
-                chg_mode('.');
-                inputline[0]= L'\0';
-                #endif
-                delim = 'y';
-            }
-
-            del_range_chars(cline, 0, 5);
-
-            if ( ! strlen(cline) ) {
-                sc_error("Path to file to import is missing !");
-            } else if ( modflg && ! force_rewrite ) {
-                sc_error("Changes were made since last save. Save current file or use '!' to force the import.");
-            } else {
-                delete_structures();
-                create_structures();
-                if (delim == 'x') {           // xls import
-                #ifdef XLS
-                    open_xls(cline, "UTF-8");
-                #endif
-                } else if (delim == 'y') {    // xlsx import
-                #ifdef XLSX
-                    del_range_chars(cline, 0, 0);
-                    open_xlsx(cline, "UTF-8");
-                #endif
-                } else {
-                    import_csv(cline, delim); // csv or tab delim import
                 }
-                modflg = 0;
-                ui_update(TRUE);
-            }
+                #endif
+
         } else {
             sc_error("COMMAND NOT FOUND !");
         }

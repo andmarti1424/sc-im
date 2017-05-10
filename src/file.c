@@ -30,8 +30,12 @@
 #include "tui.h"
 
 extern struct ent * freeents;
-
 extern int yyparse(void);
+
+#ifdef HAVE_PTHREAD
+#include <pthread.h>
+extern pthread_t fthread;
+#endif
 
 /* erase the database (tbl, etc.) */
 void erasedb() {
@@ -84,6 +88,7 @@ void loadrc(void) {
         strcat(rcpath, "/.scimrc");
         (void) readfile(rcpath, 0);
     }
+    *curfile = '\0';
 }
 
 // function that checks if a file exists.
@@ -135,6 +140,24 @@ int savefile() {
         return -1;
     }
 
+    #ifdef AUTOBACKUP
+    // check if backup of curfile exists.
+    // if it exists, remove it.
+    if (strlen(curfile) && backup_exists(curfile)) remove_backup(curfile);
+
+    // check if backup of newfilename exists.
+    // if it exists and '!' is set, remove it.
+    // if it exists and no '!' is set, return.
+    if (!strlen(curfile) && backup_exists(p.we_wordv[0])) {
+        if (!force_rewrite) {
+            sc_error("Backup file of %s exists. Use \"!\" to force the write process.", p.we_wordv[0]);
+            wordfree(&p);
+            return -1;
+        } else remove_backup(p.we_wordv[0]);
+    }
+    #endif
+
+    // copy newfilename to curfile
     if (wcslen(inputline) > 2) {
         strcpy(curfile, p.we_wordv[0]);
     }
@@ -143,22 +166,23 @@ int savefile() {
     if (wcslen(inputline) > 2 && str_in_str(curfile, ".") == -1) {
         sprintf(curfile + strlen(curfile), ".sc");
 
+
     // treat csv
     } else if (strlen(curfile) > 4 && (! strcasecmp( & curfile[strlen(curfile)-4], ".csv"))) {
-        export_delim(curfile, ',', 0, 0, maxrow, maxcol);
+        export_delim(curfile, ',', 0, 0, maxrow, maxcol, 1);
         modflg = 0;
         wordfree(&p);
         return 0;
     // treat tab
     } else if (strlen(curfile) > 4 && (! strcasecmp( & curfile[strlen(curfile)-4], ".tsv") ||
         ! strcasecmp( & curfile[strlen(curfile)-4], ".tab"))){
-        export_delim(curfile, '\t', 0, 0, maxrow, maxcol);
+        export_delim(curfile, '\t', 0, 0, maxrow, maxcol, 1);
         modflg = 0;
         wordfree(&p);
         return 0;
     }
     // save in sc format
-    if (writefile(curfile, 0, 0, maxrow, maxcol) < 0) {
+    if (writefile(curfile, 0, 0, maxrow, maxcol, 1) < 0) {
         sc_error("File could not be saved");
         wordfree(&p);
         return -1;
@@ -169,7 +193,7 @@ int savefile() {
 
 // Write a file
 // receives parameter range and file name
-int writefile(char * fname, int r0, int c0, int rn, int cn) {
+int writefile(char * fname, int r0, int c0, int rn, int cn, int verbose) {
     register FILE *f;
     char save[PATHLEN];
     char tfname[PATHLEN];
@@ -180,11 +204,11 @@ int writefile(char * fname, int r0, int c0, int rn, int cn) {
     (void) strcpy(save, tfname);
 
     if ((f = openfile(tfname, &pid, NULL)) == NULL) {
-        sc_error("Can't create file \"%s\"", save);
+        if (verbose) sc_error("Can't create file \"%s\"", save);
         return -1;
     }
 
-    sc_info("Writing file \"%s\"...", save);
+    if (verbose) sc_info("Writing file \"%s\"...", save);
     write_fd(f, r0, c0, rn, cn);
 
     closefile(f, pid, 0);
@@ -192,7 +216,7 @@ int writefile(char * fname, int r0, int c0, int rn, int cn) {
     if (! pid) {
         (void) strcpy(curfile, save);
         modflg = 0;
-        sc_info("File \"%s\" written", curfile);
+        if (verbose) sc_info("File \"%s\" written", curfile);
     }
 
     return 0;
@@ -436,6 +460,54 @@ void write_cells(register FILE *f, int r0, int c0, int rn, int cn, int dr, int d
 }
 
 int readfile(char * fname, int eraseflg) {
+    if (!strlen(fname)) return 0;
+    loading = 1;
+
+#ifdef AUTOBACKUP
+    // Check if curfile is set and backup exists..
+    if (str_in_str(fname, ".scimrc") == -1 && strlen(curfile) &&
+    backup_exists(curfile) && strcmp(fname, curfile)) {
+        if (modflg) {
+            // TODO - force load with '!' ??
+            sc_error("There are changes unsaved. Cannot load file: %s", fname);
+            loading = 0;
+            return 0;
+        }
+        remove_backup(curfile);
+    }
+    // Check if fname is set and backup exists..
+    if (backup_exists(fname)) {
+        wchar_t msg[BUFFERSIZE];
+        swprintf(msg, BUFFERSIZE,
+        // TODO - Open backup readonly ??
+        L"Backup of %s file exists. Do you want to (E)dit the file and remove the backup, (R)ecover the backup or (Q)uit: ", fname);
+        wchar_t t = ui_query_opt(msg, L"qer");
+        switch (t) {
+            case L'q':
+                loading = 0;
+                extern int shall_quit;
+                shall_quit = 1;
+                return 0;
+                break;
+            case L'e':
+                remove_backup(fname);
+                break;
+            case L'r':
+                ;
+                int len = strlen(fname);
+                if (!len) return 0;
+                char * pstr = strrchr(fname, '/');
+                int pos = pstr == NULL ? -1 : pstr - fname;
+                char bkpname[len+6];
+                strcpy(bkpname, fname);
+                add_char(bkpname, '.', pos+1);
+                sprintf(bkpname + strlen(bkpname), ".bak");
+                remove(fname);
+                rename(bkpname, fname);
+                break;
+        }
+    }
+#endif
 
     // Check if file is a correct format
     int len = strlen(fname);
@@ -446,25 +518,25 @@ int readfile(char * fname, int eraseflg) {
     // If file is an xlsx file, we import it
     } else if (len > 5 && ! strcasecmp( & fname[len-5], ".xlsx")){
         #ifndef XLSX
-        if (loading) loading = 0;
         sc_error("XLSX import support not compiled in");
         #else
         open_xlsx(fname, "UTF-8");
-        #endif
-        //*curfile = '\0';
+        strcpy(curfile, fname);
         modflg = 0;
+        #endif
+        loading = 0;
         return 1;
 
     // If file is an xls file, we import it
     } else if (len > 4 && ! strcasecmp( & fname[len-4], ".xls")){
         #ifndef XLS
-        if (loading) loading = 0;
         sc_error("XLS import support not compiled in");
         #else
         open_xls(fname, "UTF-8");
-        #endif
-        //*curfile = '\0';
         modflg = 0;
+        strcpy(curfile, fname);
+        #endif
+        loading = 0;
         return 1;
 
     // If file is an delimited text file, we import it
@@ -486,44 +558,44 @@ int readfile(char * fname, int eraseflg) {
             }
         }
         import_csv(fname, delim); // csv tsv tab txt delim import
+        strcpy(curfile, fname);
         modflg = 0;
+        loading = 0;
         return 1;
 
     } else {
-        if (loading) loading = 0;
         sc_info("\"%s\" is not a SC-IM compatible file", fname);
-        return 1;
-    }
-
-    register FILE * f;
-    char save[PATHLEN];
-    if (*fname == '\0')
-        fname = curfile;
-    (void) strcpy(save, fname);
-
-    //agregado el día 29/08/2016
-    f = fopen(save, "r");
-    if (f == NULL) {
+        loading = 0;
         return 0;
     }
 
+    // We open an 'sc' format file
+    // open fname for reading ?
+    register FILE * f;
+    char save[PATHLEN];
+    if (*fname == '\0') fname = curfile;
+    (void) strcpy(save, fname);
+    f = fopen(save, "r");
+    if (f == NULL) {
+        loading = 0;
+        return 0;
+    } /* */
+
     if (eraseflg) erasedb();
 
-    loading++;
     while (! brokenpipe && fgets(line, sizeof(line), f)) {
         linelim = 0;
         if (line[0] != '#') (void) yyparse();
     }
-
-    //agregado el día 29/08/2016
     fclose(f);
 
-    loading--;
+    loading = 0;
     linelim = -1;
     if (eraseflg) {
-        (void) strcpy(curfile, save);
+        //(void) strcpy(curfile, save);
         cellassign = 0;
     }
+    strcpy(curfile, save);
     EvalAll();
     modflg = 0;
     return 1;
@@ -564,63 +636,6 @@ char * findhome(char * path) {
         strcpy(path, tmppath);
     }
     return (path);
-}
-
-// make a backup copy of a file, use the same mode and name in the format
-//[path/]file~
-// return 1 if we were successful, 0 otherwise
-int backup_file(char *path) {
-    struct stat statbuf;
-    struct utimbuf timebuf;
-    char fname[PATHLEN];
-    char tpath[PATHLEN];
-    char buf[BUFSIZ];
-    char *tpp;
-    int infd, outfd;
-    int count;
-    mode_t oldumask;
-
-    // tpath will be the [path/]file ---> [path/]file~
-    strcpy(tpath, path);
-    if ((tpp = strrchr(tpath, '/')) == NULL)
-        tpp = tpath;
-    else
-        tpp++;
-    strcpy(fname, tpp);
-    (void) sprintf(tpp, "%s~", fname);
-
-    if (stat(path, &statbuf) == 0) {
-        if ((infd = open(path, O_RDONLY, 0)) < 0)
-            return (0);
-
-        oldumask = umask(0);
-        outfd = open(tpath, O_TRUNC|O_WRONLY|O_CREAT, statbuf.st_mode);
-        umask(oldumask);
-        if (outfd < 0)
-            return (0);
-
-        if (!chown(tpath, statbuf.st_uid, statbuf.st_gid)) {
-            /* not fatal */
-        }
-
-        while ((count = read(infd, buf, sizeof(buf))) > 0) {
-            if (write(outfd, buf, count) != count) {
-                count = -1;
-                break;
-            }
-        }
-        close(infd);
-        close(outfd);
-
-        // copy access and modification times from original file
-        timebuf.actime = statbuf.st_atime;
-        timebuf.modtime = statbuf.st_mtime;
-        utime(tpath, &timebuf);
-
-        return ((count < 0) ? 0 : 1);
-    } else if (errno == ENOENT)
-        return (1);
-    return (0);
 }
 
 // Open the input or output file, setting up a pipe if needed
@@ -740,7 +755,6 @@ void print_options(FILE *f) {
 
 // Import: CSV to SC
 int import_csv(char * fname, char d) {
-
     register FILE * f;
     int r = 0, c = 0, cf = 0;
     wchar_t line_interp[FBUFLEN] = L"";
@@ -754,7 +768,6 @@ int import_csv(char * fname, char d) {
         sc_error("Can't read file \"%s\"", fname);
         return -1;
     }
-    loading = 1;
 
     // Check max length of line
     int max = max_length(f) + 1;
@@ -827,12 +840,9 @@ int import_csv(char * fname, char d) {
 
     auto_justify(0, maxcols, DEFWIDTH);
 
-    //closefile(f, pid, rfd);
     fclose(f);
-    loading = 0;
 
     EvalAll();
-
     return 0;
 }
 
@@ -882,11 +892,26 @@ void do_export(int r0, int c0, int rn, int cn) {
         return;
     }
 
+    #ifdef AUTOBACKUP
+    // check if backup of fname exists.
+    // if it exists and '!' is set, remove it.
+    // if it exists and curfile = fname, remove it.
+    // else return.
+    if (( !strcmp(type_export, "csv") || !strcmp(type_export, "tab")) && (strlen(ruta) && backup_exists(ruta))) {
+        if (force_rewrite || (strlen(curfile) && !strcmp(curfile, ruta))) {
+            remove_backup(ruta);
+        } else {
+            sc_error("Backup file of %s exists. Use \"!\" to force the write process.", ruta);
+            return;
+        }
+    }
+    #endif
+
     // Call export routines
     if (strcmp(type_export, "csv") == 0) {
-        export_delim(ruta, ',', r0, c0, rn, cn);
+        export_delim(ruta, ',', r0, c0, rn, cn, 1);
     } else if (strcmp(type_export, "tab") == 0) {
-        export_delim(ruta, '\t', r0, c0, rn, cn);
+        export_delim(ruta, '\t', r0, c0, rn, cn, 1);
     } else if (strcmp(type_export, "txt") == 0) {
         export_plain(ruta, r0, c0, rn, cn);
     }
@@ -975,16 +1000,17 @@ void export_plain(char * fname, int r0, int c0, int rn, int cn) {
 }
 
 // fname is the path and name of file
-void export_delim(char * fname, char coldelim, int r0, int c0, int rn, int cn) {
+void export_delim(char * fname, char coldelim, int r0, int c0, int rn, int cn, int verbose) {
     FILE * f;
     int row, col;
     register struct ent ** pp;
     int pid;
 
-    sc_info("Writing file \"%s\"...", fname);
+
+    if (verbose) sc_info("Writing file \"%s\"...", fname);
 
     if ((f = openfile(fname, &pid, NULL)) == (FILE *)0) {
-        sc_error ("Can't create file \"%s\"", fname);
+        if (verbose) sc_error ("Can't create file \"%s\"", fname);
         return;
     }
 
@@ -1027,7 +1053,7 @@ void export_delim(char * fname, char coldelim, int r0, int c0, int rn, int cn) {
     }
     closefile(f, pid, 0);
 
-    if (! pid) {
+    if (! pid && verbose) {
         sc_info("File \"%s\" written", fname);
     }
 }
@@ -1085,6 +1111,98 @@ int plugin_exists(char * name, int len, char * path) {
     strcat((char *) path, "/");
     strncat((char *) path, name, len);
     if ((fp = fopen((char *) path, "r"))) {
+        fclose(fp);
+        return 1;
+    }
+    return 0;
+}
+
+void * do_autobackup() {
+    int len = strlen(curfile);
+    //if (loading || ! len) return (void *) -1;
+    if (! len) return (void *) -1;
+
+    char * pstr = strrchr(curfile, '/');
+    int pos = pstr == NULL ? -1 : pstr - curfile;
+    char name[PATHLEN] = {'\0'};
+    char namenew[PATHLEN] = {'\0'};
+    strcpy(name, curfile);
+    add_char(name, '.', pos+1);
+    sprintf(name + strlen(name), ".bak");
+    sprintf(namenew, "%s.new", name);
+    //if (atoi(get_conf_value("debug"))) sc_info("doing autobackup of file:%s", name);
+
+    // create new version
+    if (! strcmp(&name[strlen(name)-7], ".sc.bak")) {
+        register FILE * f;
+        if ((f = fopen(namenew , "w")) == NULL) return (void *) -1;
+        write_fd(f, 0, 0, maxrow, maxcol);
+        fclose(f);
+    } else if (! strcmp(&name[strlen(name)-8], ".csv.bak")) {
+        export_delim(namenew, ',', 1, 0, maxrow, maxcol, 0);
+#ifdef XLSX_EXPORT
+    } else if (! strcmp(&name[strlen(name)-9], ".xlsx.bak")) {
+        export_delim(namenew, ',', 0, 0, maxrow, maxcol, 0);
+        export_xlsx(namenew, 0, 0, maxrow, maxcol);
+#endif
+    } else if (! strcmp(&name[strlen(name)-8], ".tab.bak") || ! strcmp(&name[strlen(name)-8], ".tsv.bak")) {
+        export_delim(namenew, '\t', 0, 0, maxrow, maxcol, 0);
+    }
+
+    // delete if exists name
+    remove(name);
+
+    // rename name.new to name
+    rename(namenew, name);
+
+    return (void *) 0;
+}
+
+/* check if it is time to do an autobackup */
+void handle_backup() {
+    #ifdef AUTOBACKUP
+    extern struct timeval lastbackup_tv; // last backup timer
+    extern struct timeval current_tv; //runtime timer
+
+    int autobackup = atoi(get_conf_value ("autobackup"));
+    if (autobackup && autobackup > 0 && (current_tv.tv_sec - lastbackup_tv.tv_sec > autobackup || (lastbackup_tv.tv_sec == 0 && lastbackup_tv.tv_usec == 0))) {
+        #ifdef HAVE_PTHREAD
+            extern int pthread_exists;
+            pthread_exists = (pthread_create(&fthread, NULL, do_autobackup, NULL) == 0) ? 1 : 0;
+        #else
+            do_autobackup();
+        #endif
+        gettimeofday(&lastbackup_tv, NULL);
+    }
+    #endif
+    return;
+}
+
+/* remove autobackup file (used when quitting or when loading a new file) */
+void remove_backup(char * file) {
+    int len = strlen(file);
+    if (!len) return;
+    char * pstr = strrchr(file, '/');
+    int pos = pstr == NULL ? -1 : pstr - file;
+    char name[len+6];
+    strcpy(name, file);
+    add_char(name, '.', pos+1);
+    sprintf(name + strlen(name), ".bak");
+    remove(name);
+    return;
+}
+
+int backup_exists(char * file) {
+    int len = strlen(file);
+    if (!len) return 0;
+    char * pstr = strrchr(file, '/');
+    int pos = pstr == NULL ? -1 : pstr - file;
+    char name[len+6];
+    strcpy(name, file);
+    add_char(name, '.', pos+1);
+    sprintf(name + strlen(name), ".bak");
+    FILE * fp;
+    if ((fp = fopen((char *) name, "r"))) {
         fclose(fp);
         return 1;
     }

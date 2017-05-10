@@ -22,6 +22,9 @@ void store_default_config_values() {
     put(user_conf_d, "ignorecase", "0");
     put(user_conf_d, "trigger", "1");
     put(user_conf_d, "version", "0");
+    #ifdef AUTOBACKUP
+    put(user_conf_d, "autobackup", "0"); // 0:noautobackup, n>0: backup every n in seconds
+    #endif
 
     #ifdef DEFAULT_COPY_TO_CLIPBOARD_CMD
     put(user_conf_d, "default_copy_to_clipboard_cmd", DEFAULT_COPY_TO_CLIPBOARD_CMD);

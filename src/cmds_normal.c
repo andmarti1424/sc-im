@@ -44,7 +44,7 @@ void do_normalmode(struct block * buf) {
     switch (buf->value) {
         // FOR TEST PURPOSES
         case L'A':
-            //sc_info("runtime:%d", RUNTIME);
+            sc_info("runtime:%d", RUNTIME);
             //;
             //wchar_t t = ui_query_opt(
             //L"Backup file exists. Do you want to (E)dit file and remove backup, (R)ecover backup or (Q)uit: ", L"qer");
