@@ -379,7 +379,7 @@ int exit_app(int status) {
 
     // wait for autobackup thread to finish, just in case
     #if defined(AUTOBACKUP) && defined(HAVE_PTHREAD)
-    if (pthread_exists && fthread) pthread_join (fthread, NULL);
+    if (fthread) pthread_join (fthread, NULL);
     #endif
 
     // remove backup file
