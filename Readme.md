@@ -19,6 +19,7 @@ SC original authors are James Gosling and Mark Weiser, and mods were later added
 - 256 color support - screen colors can be customized by user, even at runtime.
 - Colorize cells or give them format such as bold or underline.
 - Wide character support. The following alphabets are supported: English, Spanish, French, Italian, German, Portuguese, Russian, Ukrainian, Greek, Turkish, Czech, Japanese, Chinese.
+- Autobackup.
 - Implement external functions in the language you prefer and use them in SC-IM.
 - Use SC-IM as a non-interactive calculator, reading its input from a external script.
 - More movements commands implemented !

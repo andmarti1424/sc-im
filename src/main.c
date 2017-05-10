@@ -384,7 +384,7 @@ int exit_app(int status) {
 
     // remove backup file
 #ifdef AUTOBACKUP
-    remove_backup(curfile);
+    if (strlen(curfile) && backup_exists(curfile)) remove_backup(curfile);
 #endif
 
     // erase structures
