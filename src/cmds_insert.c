@@ -46,14 +46,35 @@ void do_insertmode(struct block * sb) {
     } else if (sb->value == OKEY_UP || sb->value == ctl('p') ||         // UP
                sb->value == OKEY_DOWN || sb->value == ctl('n')) {       // DOWN
 
-        int delta = 0;
+        int delta = 0, i, cmp;
         if (sb->value == OKEY_UP || sb->value == ctl('p')) {            // up
-            if (insert_history->len <= - insert_history->pos + 1) return;
-            delta = -1;
-        }
-        if (sb->value == OKEY_DOWN || sb->value == ctl('n')) {          // down
-            if ( - insert_history->pos == 0) return;
-            delta = 1;
+            for (i=insert_history->pos; -i+1 < insert_history->len; i--, delta--)
+                if (wcslen(get_line_from_history(insert_history, 0))) {
+                    if (! (cmp = wcsncmp(inputline, &get_line_from_history(insert_history, i-1)[1], wcslen(get_line_from_history(insert_history, 0))))) {
+                        delta--;
+                        break;
+                    } else if (insert_history->len == 2-i && cmp) {
+                        delta=0;
+                        break;
+                    }
+                } else if (!wcslen(get_line_from_history(insert_history, 0))) {
+                    delta--;
+                    break;
+                }
+        } else if (sb->value == OKEY_DOWN || sb->value == ctl('n')) {   // down
+            for (i=insert_history->pos; i != 0; i++, delta++)
+                if (wcslen(get_line_from_history(insert_history, 0))) {
+                    if (! (cmp = wcsncmp(inputline, &get_line_from_history(insert_history, i+1)[1], wcslen(get_line_from_history(insert_history, 0))))) {
+                        delta++;
+                        break;
+                    } else if (insert_history->pos == 0 && cmp) {
+                        delta=0;
+                        break;
+                    }
+                } else if (!wcslen(get_line_from_history(insert_history, 0))) {
+                    delta++;
+                    break;
+                }
         }
         insert_history->pos += delta;
 

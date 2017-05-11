@@ -840,6 +840,8 @@ Commands for handling cell content:
 
     c-p
     <UP>        Go back in command line history.
+                NOTE: if inputline is not empty, up and down keys recall older commands from history,
+                but taking whose commands that beginning matches the current inputline content.
 
     c-n
     <DOWN>      Go forward in command line history.

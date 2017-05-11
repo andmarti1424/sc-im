@@ -168,15 +168,37 @@ void do_commandmode(struct block * sb) {
     } else if (sb->value == OKEY_UP || sb->value == ctl('p') ||         // UP
                sb->value == OKEY_DOWN || sb->value == ctl('n')) {       // DOWN
 
-        int delta = 0;
+        int delta = 0, k = 0, i, cmp;
         if (sb->value == OKEY_UP || sb->value == ctl('p')) {            // up
-            if (commandline_history->len <= - commandline_history->pos + 1) return;
-            delta = -1;
+            for (i=commandline_history->pos; -i+1 < commandline_history->len; i--, k--)
+                if (wcslen(get_line_from_history(commandline_history, 0))) {
+                    if (! (cmp = wcsncmp(inputline, get_line_from_history(commandline_history, i-1), wcslen(get_line_from_history(commandline_history, 0))))) {
+                        k--;
+                        break;
+                    } else if (commandline_history->len == 2-i && cmp) {
+                        k=0;
+                        break;
+                    }
+                } else if (!wcslen(get_line_from_history(commandline_history, 0))) {
+                    k--;
+                    break;
+                }
+        } else if (sb->value == OKEY_DOWN || sb->value == ctl('n')) {   // down
+            for (i=commandline_history->pos; i != 0; i++, k++)
+                if (wcslen(get_line_from_history(commandline_history, 0))) {
+                    if (! (cmp = wcsncmp(inputline, get_line_from_history(commandline_history, i+1), wcslen(get_line_from_history(commandline_history, 0))))) {
+                        k++;
+                        break;
+                    } else if (commandline_history->pos == 0 && cmp) {
+                        k=0;
+                        break;
+                    }
+                } else if (!wcslen(get_line_from_history(commandline_history, 0))) {
+                    k++;
+                    break;
+                }
         }
-        if (sb->value == OKEY_DOWN || sb->value == ctl('n')) {          // down
-            if ( - commandline_history->pos == 0) return;
-            delta = 1;
-        }
+        delta += k;
         commandline_history->pos += delta;
         wcscpy(inputline, get_line_from_history(commandline_history, commandline_history->pos));
         inputline_pos = wcswidth(inputline, real_inputline_pos);
