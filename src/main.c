@@ -92,9 +92,8 @@ struct timeval startup_tv, current_tv; //runtime timer
 struct timeval lastbackup_tv; // last backup timer
 #ifdef HAVE_PTHREAD
 #include <pthread.h>
-int pthread_exists;     // return status of pthread_create
-pthread_t fthread = 0;
-//pthread_t fthread;
+int pthread_exists = 0;       // return status of pthread_create
+pthread_t fthread;
 #endif
 #endif
 
@@ -379,7 +378,7 @@ int exit_app(int status) {
 
     // wait for autobackup thread to finish, just in case
     #if defined(AUTOBACKUP) && defined(HAVE_PTHREAD)
-    if (fthread) pthread_join (fthread, NULL);
+    if (pthread_exists) pthread_join (fthread, NULL);
     #endif
 
     // remove backup file

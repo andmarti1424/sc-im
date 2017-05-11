@@ -35,6 +35,7 @@ extern int yyparse(void);
 #ifdef HAVE_PTHREAD
 #include <pthread.h>
 extern pthread_t fthread;
+extern int pthread_exists;
 #endif
 
 /* erase the database (tbl, etc.) */
@@ -1167,8 +1168,7 @@ void handle_backup() {
     int autobackup = atoi(get_conf_value ("autobackup"));
     if (autobackup && autobackup > 0 && (current_tv.tv_sec - lastbackup_tv.tv_sec > autobackup || (lastbackup_tv.tv_sec == 0 && lastbackup_tv.tv_usec == 0))) {
         #ifdef HAVE_PTHREAD
-            extern int pthread_exists;
-            if (fthread) pthread_join (fthread, NULL);
+            if (pthread_exists) pthread_join (fthread, NULL);
             pthread_exists = (pthread_create(&fthread, NULL, do_autobackup, NULL) == 0) ? 1 : 0;
         #else
             do_autobackup();
