@@ -571,7 +571,7 @@ int readfile(char * fname, int eraseflg) {
     }
 
     // We open an 'sc' format file
-    // open fname for reading ?
+    // open fname for reading
     register FILE * f;
     char save[PATHLEN];
     if (*fname == '\0') fname = curfile;
@@ -579,6 +579,7 @@ int readfile(char * fname, int eraseflg) {
     f = fopen(save, "r");
     if (f == NULL) {
         loading = 0;
+        strcpy(curfile, save);
         return 0;
     } /* */
 
