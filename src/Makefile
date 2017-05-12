@@ -79,7 +79,9 @@ CFLAGS += -DDEFAULT_PASTE_FROM_CLIPBOARD_CMD=\""tmux show-buffer"\"
 CFLAGS += -DAUTOBACKUP
 # Have threads? Set these two, if you want the autobackup feature to work with threads.
 CFLAGS += -DHAVE_PTHREAD
+ifneq ($(shell uname -s),Darwin)
 LDLIBS += -pthread
+endif
 
 # NOTE: libxml and libzip are required for xlsx file import support
 ifneq ($(shell pkg-config --exists libzip libxml-2.0 || echo 'no'),no)
@@ -98,8 +100,10 @@ ifneq ($(shell pkg-config --exists lua51 || echo 'no'),no)
 CFLAGS += -DXLUA $(shell pkg-config --cflags lua51)
 LDLIBS += $(shell pkg-config --libs lua51) -Wl,--export-dynamic
 endif
-# dynamic linking
+# dynamic linking (should not be used in FreeBSD
+ifneq ($(shell uname -s),FreeBSD)
 LDLIBS += -ldl
+endif
 
 # Check for gnuplot existance
 ifneq (, $(shell which gnuplot))
