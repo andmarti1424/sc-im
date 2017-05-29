@@ -57,7 +57,7 @@ int paste_from_clipboard() {
             if (strlen(st)) send_to_interp(line_interp);
             c++;
             token = xstrtok(NULL, delim);
-            free(st);
+            if (st != NULL) free(st);
             if (c > maxcol) maxcol = c;
         }
         r++;
