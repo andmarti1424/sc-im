@@ -5,7 +5,7 @@
 struct block {
   wint_t value;
   struct block * pnext;
-}; 
+};
 
 struct block * create_buf();
 void addto_buf(struct block * buf, wint_t d);

@@ -70,13 +70,14 @@ int replace_block_in_block (struct block * olist, struct block * in, struct bloc
 
     // Remove the 'in' part of "olist"
     int pos = block_in_block (olist, in);
+
     // Remove the 'pos' position of the "olist" list
-    while (lin--) del_buf (olist, pos); //FIXME checkout this when 'pos' == 0
+    while (lin--) del_buf(ori, lin+pos);
 
     // Then add the nodes of the 'out' list to "olist"
     while (out != NULL) {
         int e = out->value;
-        addto_buf(olist, e); 
+        addto_buf(olist, e);
         out = out->pnext;
     }
 

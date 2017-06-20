@@ -4,7 +4,7 @@ struct map {
     int mode;
     short recursive;
     struct block * in;
-    struct block * out; 
+    struct block * out;
     struct map * psig;
 };
 typedef struct map map;
