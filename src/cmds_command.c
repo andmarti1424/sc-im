@@ -431,7 +431,7 @@ void do_commandmode(struct block * sb) {
 
         } else if ( ! wcsncmp(inputline, L"sort ", 5) ) {
             wcscpy(interp_line, inputline);
-            if (p != -1) {
+            if (p != -1) { // in case there is a range selected
                 wchar_t cline [BUFFERSIZE];
                 wcscpy(cline, interp_line);
                 int found = wstr_in_wstr(interp_line, L"\"");
@@ -439,9 +439,9 @@ void do_commandmode(struct block * sb) {
                     del_range_wchars(cline, 0, found-1);
                     swprintf(interp_line, BUFFERSIZE, L"sort %s%d:", coltoa(sr->tlcol), sr->tlrow);
                     swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%s%d %ls", coltoa(sr->brcol), sr->brrow, cline);
-                    send_to_interp(interp_line);
                 }
             }
+            send_to_interp(interp_line);
 
         } else if ( ! wcsncmp(inputline, L"subtotal ", 9) ) {
             int r = currow, c = curcol, rf = currow, cf = curcol, pos, cancel = 0;
