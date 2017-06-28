@@ -99,7 +99,11 @@ endif
 ifneq ($(shell pkg-config --exists lua51 || echo 'no'),no)
 CFLAGS += -DXLUA $(shell pkg-config --cflags lua51)
 LDLIBS += $(shell pkg-config --libs lua51) -Wl,--export-dynamic
+else ifneq ($(shell pkg-config --exists lua-5.1 || echo 'no'),no) # FreeBSD
+CFLAGS += -DXLUA $(shell pkg-config --cflags lua-5.1)
+LDLIBS += $(shell pkg-config --libs lua-5.1) -Wl,--export-dynamic
 endif
+
 # dynamic linking (should not be used in FreeBSD
 ifneq ($(shell uname -s),FreeBSD)
 LDLIBS += -ldl
