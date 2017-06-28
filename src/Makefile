@@ -9,7 +9,7 @@ HELPDIR = $(prefix)/share/$(name)
 LIBDIR  = $(prefix)/share/doc/$(name)
 
 # This is where the man page goes.
-MANDIR  = $(prefix)/man/man1
+MANDIR  = $(prefix)/share/man/man1
 
 # Change these to your liking or use `make CC=gcc` etc
 #CC   = cc
@@ -121,14 +121,14 @@ install :
 	install -d $(DESTDIR)$(HELPDIR)
 	install doc $(DESTDIR)$(HELPDIR)/$(name)_help
 	install plot_* $(DESTDIR)$(HELPDIR)/
-	install -d $(DESTDIR)$(prefix)/share/man/man1
-	install -m 644 sc-im.1 $(DESTDIR)$(prefix)/share/man/man1/$(name).1
+	install -d $(DESTDIR)$(MANDIR)/
+	install -m 644 sc-im.1 $(DESTDIR)$(MANDIR)/$(name).1
 
 uninstall :
 	-rm $(DESTDIR)$(prefix)/bin/$(name)
 	-rm $(DESTDIR)$(HELPDIR)/$(name)_help
 	-rm $(DESTDIR)$(HELPDIR)/plot*
-	-rm $(DESTDIR)$(prefix)/share/man/man1/$(name).1
+	-rm $(DESTDIR)$(MANDIR)/$(name).1
 
 $(name) : $(OBJS)
 	$(CC) $(LDFLAGS) $^ -o $@ $(LDLIBS)
