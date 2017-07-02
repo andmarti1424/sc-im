@@ -16,21 +16,9 @@ MANDIR  = $(prefix)/share/man/man1
 #YACC = bison -y
 #SED  = sed
 
-ifeq ($(shell uname -s),Darwin)
-  NCURSES_CFLAGS ?=
-  NCURSES_LIBS   ?= -lncursesw
-else ifeq ($(shell pkg-config --exists ncursesw || echo 'no'),no)
-  NCURSES_CFLAGS ?=
-  NCURSES_LIBS   ?= -lncursesw
-else
-  NCURSES_CFLAGS ?= $(shell pkg-config --cflags ncursesw)
-  NCURSES_LIBS   ?= $(shell pkg-config --libs ncursesw)
-endif
-
-LDLIBS += -lm $(NCURSES_LIBS)
+LDLIBS += -lm
 
 CFLAGS += -Wall -g
-CFLAGS += $(NCURSES_CFLAGS)
 CFLAGS += -DNCURSES
 CFLAGS += -D_XOPEN_SOURCE_EXTENDED -D_GNU_SOURCE
 CFLAGS += -DSNAME=\"$(name)\"
@@ -79,40 +67,63 @@ CFLAGS += -DDEFAULT_PASTE_FROM_CLIPBOARD_CMD=\""tmux show-buffer"\"
 CFLAGS += -DAUTOBACKUP
 # Have threads? Set these two, if you want the autobackup feature to work with threads.
 CFLAGS += -DHAVE_PTHREAD
-ifneq ($(shell uname -s),Darwin)
-LDLIBS += -pthread
-endif
 
-# NOTE: libxml and libzip are required for xlsx file import support
-ifneq ($(shell pkg-config --exists libzip libxml-2.0 || echo 'no'),no)
-CFLAGS += -DXLSX $(shell pkg-config --cflags libxml-2.0 libzip)
-LDLIBS += $(shell pkg-config --libs libxml-2.0 libzip)
+ifneq ($(shell uname -s),Darwin)
+  LDLIBS += -pthread
 endif
 
 # NOTE: libxlsxwriter is required for xlsx file export support
 ifneq (,$(wildcard /usr/include/xlsxwriter.h))
-CFLAGS += -DXLSX_EXPORT
-LDLIBS += -lxlsxwriter
-endif
-
-# NOTE: lua support
-ifneq ($(shell pkg-config --exists lua51 || echo 'no'),no)
-CFLAGS += -DXLUA $(shell pkg-config --cflags lua51)
-LDLIBS += $(shell pkg-config --libs lua51) -Wl,--export-dynamic
-else ifneq ($(shell pkg-config --exists lua-5.1 || echo 'no'),no) # FreeBSD
-CFLAGS += -DXLUA $(shell pkg-config --cflags lua-5.1)
-LDLIBS += $(shell pkg-config --libs lua-5.1) -Wl,--export-dynamic
-endif
-
-# dynamic linking (should not be used in FreeBSD
-ifneq ($(shell uname -s),FreeBSD)
-LDLIBS += -ldl
+  CFLAGS += -DXLSX_EXPORT
+  LDLIBS += -lxlsxwriter
 endif
 
 # Check for gnuplot existance
 ifneq (, $(shell which gnuplot))
-CFLAGS += -DGNUPLOT
+  CFLAGS += -DGNUPLOT
 endif
+
+# dynamic linking (should not be used in FreeBSD
+ifneq ($(shell uname -s),FreeBSD)
+  LDLIBS += -ldl
+endif
+
+ifneq (, $(shell which pkg-config))
+  # Any system with pkg-config
+
+  # NOTE: ncursesw (required)
+  ifneq ($(shell pkg-config --exists ncursesw || echo 'no'),no)
+    CFLAGS += $(shell pkg-config --cflags ncursesw)
+    LDLIBS += $(shell pkg-config --libs ncursesw)
+  else ifneq ($(shell pkg-config --exists ncurses || echo 'no'),no)
+    # hopefully this includes wide character support then
+    CFLAGS += $(shell pkg-config --cflags ncurses)
+    LDLIBS += $(shell pkg-config --libs ncurses)
+  else
+    LDLIBS += -lncursesw
+  endif
+
+  # NOTE: libxml and libzip are required for xlsx file import support
+  ifneq ($(shell pkg-config --exists libzip libxml-2.0 || echo 'no'),no)
+    CFLAGS += -DXLSX $(shell pkg-config --cflags libxml-2.0 libzip)
+    LDLIBS += $(shell pkg-config --libs libxml-2.0 libzip)
+  endif
+
+  # NOTE: lua support
+  ifneq ($(shell pkg-config --exists lua51 || echo 'no'),no)
+    CFLAGS += -DXLUA $(shell pkg-config --cflags lua51)
+    LDLIBS += $(shell pkg-config --libs lua51) -Wl,--export-dynamic
+  else ifneq ($(shell pkg-config --exists lua-5.1 || echo 'no'),no) # FreeBSD
+    CFLAGS += -DXLUA $(shell pkg-config --cflags lua-5.1)
+    LDLIBS += $(shell pkg-config --libs lua-5.1) -Wl,--export-dynamic
+  endif
+else ifeq ($(shell uname -s),Darwin)
+  # macOS without pkg-config
+
+  # macOS' ncurses is built with wide-char support
+  LDFLAGS += -lncurses
+endif
+
 OBJS = $(patsubst %.c, %.o, $(wildcard *.c) $(wildcard utils/*.c)) gram.o
 
 .PHONY : all clean install
