@@ -81,7 +81,7 @@ SCREEN * sstdout;
 srange * ranges;
 
 void ui_start_screen() {
-    sstderr = newterm(NULL, stderr, NULL);
+    sstderr = newterm(NULL, stderr, stdin);
     noecho();
     sstdout = newterm(NULL, stdout, stdin);
     set_term(sstdout);
