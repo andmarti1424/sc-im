@@ -77,7 +77,8 @@ int replace_block_in_block (struct block * olist, struct block * in, struct bloc
     // Then add the nodes of the 'out' list to "olist"
     while (out != NULL) {
         int e = out->value;
-        addto_buf(olist, e);
+        if (e != '\\' || out->pnext == NULL || out->pnext->value != '"')
+            addto_buf(olist, e);
         out = out->pnext;
     }
 
