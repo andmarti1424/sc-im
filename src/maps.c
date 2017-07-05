@@ -63,29 +63,29 @@ struct block * get_mapbuf_str (char * str) {
 
         } else if (str[i] == '>') {
            is_specialkey = 0;
-           if (! strcmp(sk, "CR"))                                  // CR - ENTER key
+           if (! strcasecmp(sk, "CR"))                                  // CR - ENTER key
                addto_buf(buffer, OKEY_ENTER);
-           else if (! strcmp(sk, "TAB"))                            // TAB
+           else if (! strcasecmp(sk, "TAB"))                            // TAB
                addto_buf(buffer, OKEY_TAB);
-           else if (! strcmp(sk, "LEFT"))                           // LEFT
+           else if (! strcasecmp(sk, "LEFT"))                           // LEFT
                addto_buf(buffer, OKEY_LEFT);
-           else if (! strcmp(sk, "RIGHT"))                          // RIGHT
+           else if (! strcasecmp(sk, "RIGHT"))                          // RIGHT
                addto_buf(buffer, OKEY_RIGHT);
-           else if (! strcmp(sk, "DOWN"))                           // DOWN
+           else if (! strcasecmp(sk, "DOWN"))                           // DOWN
                addto_buf(buffer, OKEY_DOWN);
-           else if (! strcmp(sk, "UP"))                             // UP
+           else if (! strcasecmp(sk, "UP"))                             // UP
                addto_buf(buffer, OKEY_UP);
-           else if (! strcmp(sk, "DEL"))                            // DEL
+           else if (! strcasecmp(sk, "DEL"))                            // DEL
                addto_buf(buffer, OKEY_DEL);
-           else if (! strcmp(sk, "BS"))                             // BS
+           else if (! strcasecmp(sk, "BS"))                             // BS
                addto_buf(buffer, OKEY_BS);
-           else if (! strcmp(sk, "HOME"))                           // HOME
+           else if (! strcasecmp(sk, "HOME"))                           // HOME
                addto_buf(buffer, OKEY_HOME);
-           else if (! strcmp(sk, "END"))                            // END
+           else if (! strcasecmp(sk, "END"))                            // END
                addto_buf(buffer, OKEY_END);
-           else if (! strcmp(sk, "PGDOWN"))                         // PGDOWN
+           else if (! strcasecmp(sk, "PGDOWN"))                         // PGDOWN
                addto_buf(buffer, OKEY_PGDOWN);
-           else if (! strcmp(sk, "PGUP"))                           // PGUP
+           else if (! strcasecmp(sk, "PGUP"))                           // PGUP
                addto_buf(buffer, OKEY_PGUP);
            else if (! strncmp(sk, "C-", 2) && strlen(sk) == 3       // C-X
                     && ( (sk[2] > 64 && sk[2] < 91) || (sk[2] > 96 && sk[2] < 123)) )
