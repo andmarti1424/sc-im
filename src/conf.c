@@ -116,7 +116,7 @@ void store_default_config_values() {
  *
  * \param[in] salida TODO Document this parameter
  *
- * \return NULL if user_conf_d is NULL; salida if salida exists
+ * \return NULL if user_conf_d is NULL; otherwise, salida is returned unchanged
  */
 
 // TODO Change 'salida' to a more descriptive variable name.
@@ -140,11 +140,13 @@ char * get_conf_values(char * salida) {
 }
 
 /**
- * \brief Retreive teh value of a given key in user_conf_d
+ * \brief Retreive the value of a given key in user_conf_d
  *
  * \details This function will look for a given key in the user_conf_d
  * dictionary. If the key is found it will return the value of that
  * dictionary entry.
+ *
+ * \param[in] key The key to search for in user_conf_d
  *
  * \return key value
  */
