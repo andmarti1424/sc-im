@@ -36,7 +36,7 @@
  *******************************************************************************/
 
 /**
- * \file visual.h
+ * \file cmds_visual.h
  * \author Andrés Martinelli <andmarti@gmail.com>
  * \date 2017-07-18
  * \brief Header file for cmds_visual.c
