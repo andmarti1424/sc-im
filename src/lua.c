@@ -1,3 +1,47 @@
+/*******************************************************************************
+ * Copyright (c) 2013-2017, Andrés Martinelli <andmarti@gmail.com              *
+ * All rights reserved.                                                        *
+ *                                                                             *
+ * This file is a part of SC-IM                                                *
+ *                                                                             *
+ * SC-IM is a spreadsheet program that is based on SC. The original authors    *
+ * of SC are James Gosling and Mark Weiser, and mods were later added by       *
+ * Chuck Martin.                                                               *
+ *                                                                             *
+ * Redistribution and use in source and binary forms, with or without          *
+ * modification, are permitted provided that the following conditions are met: *
+ * 1. Redistributions of source code must retain the above copyright           *
+ *    notice, this list of conditions and the following disclaimer.            *
+ * 2. Redistributions in binary form must reproduce the above copyright        *
+ *    notice, this list of conditions and the following disclaimer in the      *
+ *    documentation and/or other materials provided with the distribution.     *
+ * 3. All advertising materials mentioning features or use of this software    *
+ *    must display the following acknowledgement:                              *
+ *    This product includes software developed by Andrés Martinelli            *
+ *    <andmarti@gmail.com>.                                                    *
+ * 4. Neither the name of the Andrés Martinelli nor the                        *
+ *   names of other contributors may be used to endorse or promote products    *
+ *   derived from this software without specific prior written permission.     *
+ *                                                                             *
+ * THIS SOFTWARE IS PROVIDED BY ANDRES MARTINELLI ''AS IS'' AND ANY            *
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED   *
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE      *
+ * DISCLAIMED. IN NO EVENT SHALL ANDRES MARTINELLI BE LIABLE FOR ANY           *
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES  *
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;*
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND *
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT  *
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE       *
+ * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.           *
+ *******************************************************************************/
+
+/**
+ * \file lua.c
+ * \author Andrés Martinelli <andmarti@gmail.com>
+ * \date 2017-07-18
+ * \brief TODO Write a tbrief file description.
+ */
+
 #ifdef XLUA
 /*
  * R.Pollak
@@ -10,10 +54,10 @@
  * Those are then accessible also  when called via @lua cmd or in triggers.
  */
 
-#include <lua.h>                                /* Always include this when calling Lua */
-#include <lauxlib.h>                            /* Always include this when calling Lua */
-#include <lualib.h>                             /* Prototype for luaL_openlibs(),       */
-                                                /* always include this when calling Lua */
+#include <lua.h>        /* Always include this when calling Lua */
+#include <lauxlib.h>    /* Always include this when calling Lua */
+#include <lualib.h>     /* Prototype for luaL_openlibs(),       */
+                        /* always include this when calling Lua */
 #include <ctype.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -39,6 +83,14 @@ extern FILE * fdoutput;
 
 lua_State *L;
 
+/**
+ * \brief TODO Document l_getnum()
+ *
+ * \param[in] L
+ *
+ * \return none
+ */
+
 static int l_getnum (lua_State *L) {
     int r,c;
     struct ent **pp;
@@ -55,6 +107,14 @@ static int l_getnum (lua_State *L) {
         return 1;                 /* number of results */
     } else return 0;
 }
+
+/**
+ * \brief TODO Document l_setnum
+ *
+ * \param[in] L
+ *
+ * \return 0 on success
+ */
 
 static int l_setnum (lua_State *L) {
     int r,c;
@@ -76,6 +136,14 @@ static int l_setnum (lua_State *L) {
     return 0;
 }
 
+/**
+ * \brief TODO Document l_setstr
+ *
+ * \param[in] L
+ *
+ * \return 0 on success
+ */
+
 static int l_setstr (lua_State *L) {
     int r,c;
     char * val;
@@ -92,6 +160,13 @@ static int l_setstr (lua_State *L) {
     return 0;
 }
 
+/**
+ * \brief TODO Document l_getstr
+ *
+ * \param[in] L
+ *
+ * \return none
+ */
 
 static int l_getstr (lua_State *L) {
     int r,c;
@@ -113,6 +188,14 @@ static int l_getstr (lua_State *L) {
     return 0;
 }
 
+/**
+ * \brief TODO <brief function description>
+ *
+ * \param[in] L
+ *
+ * \return none
+ */
+
 static int l_setform (lua_State *L) {
     int r,c;
     char * val;
@@ -125,6 +208,14 @@ static int l_setform (lua_State *L) {
     return 0;
 }
 
+/**
+ * \brief TODO Document l_sc
+ *
+ * \param[in] L
+ *
+ * \return none
+ */
+
 static int l_sc (lua_State *L) {
     char * val = (char *) lua_tostring(L,1);
     wchar_t buf[BUFFERSIZE];
@@ -132,6 +223,14 @@ static int l_sc (lua_State *L) {
     send_to_interp(buf);
     return 0;
 }
+
+/**
+ * \brief TODO Document l_colrow2a()
+ *
+ * \param[in] L
+ *
+ * returns: none
+ */
 
 static int l_colrow2a(lua_State *L) {
     int c, r;
@@ -143,6 +242,14 @@ static int l_colrow2a(lua_State *L) {
     lua_pushstring(L,buf);
     return 1;
 }
+
+/**
+ * \brief TODO Document l_colrow()
+ *
+ * \param[in] L
+ *
+ * \return none
+ */
 
 static int l_colrow(lua_State *L) {
     char buf[16];
@@ -161,6 +268,14 @@ static int l_colrow(lua_State *L) {
     lua_pushnumber(L,r);
     return 2;
 }
+
+/**
+ * \brief TODO Document l_query()
+ *
+ * \param[in] L
+ *
+ * \return none
+ */
 
 int l_query (lua_State *L) {
     char * val;
@@ -201,6 +316,12 @@ static const luaL_reg sclib[] = {
     {NULL,NULL}
 };
 
+/**
+ * \brief TODO Document doLuainit()
+ *
+ * \return none
+ */
+
 void doLuainit() {
     char buffer[PATHLEN];
     char buffer1[PATHLEN];
@@ -222,10 +343,24 @@ void doLuainit() {
     return;
 }
 
+/**
+ * \brief TODO Document doLuaclose()
+ *
+ * \return none
+ */
+
 void doLuaclose() {
     lua_close(L);
     return;
 }
+
+/**
+ * \brief TODO Document doLUA
+ *
+ * \param[in] se
+ *
+ * \return none
+ */
 
 char * doLUA( struct enode * se) {
     char * cmd;
@@ -248,6 +383,12 @@ char * doLUA( struct enode * se) {
     return 0;
 }
 
+/**
+ * \brief TODO Document doLuaTriger()
+ *
+ * \return none
+ */
+
 void doLuaTriger() {
     if (luaL_loadfile(L, "trigger.lua"))         /* Load but don't run the Lua script */
         return;
@@ -265,6 +406,16 @@ void doLuaTriger() {
     //sc_debug("Back in C again");
     return;
 }
+
+/**
+ * \brief TODO Document doLuaTriger2()
+ *
+ * \param[in] row
+ * \param[in] col
+ * \param[in] flags
+ *
+ * \return none
+ */
 
 void doLuaTriger2(int row, int col, int flags) {
     if (luaL_loadfile(L, "trigger.lua"))         /* Load but don't run the Lua script */
@@ -286,10 +437,18 @@ void doLuaTriger2(int row, int col, int flags) {
     return;
 }
 
-/*
- * Lua trigger on a particular cell
- * we assume file and function ist correct other lua throught an error
+/**
+ * \brief TODO Document doLuaTrigger_cell()
+ *
+ * \details Lua trigger on a particular cell. We assum file and
+ * function ist correct other lua throught an error
+ * 
+ * \param[in] p
+ * \param[in] flags
+ *
+ * returns: none
  */
+
 void doLuaTrigger_cell(struct ent *p, int flags) {
     int row,col;
     struct trigger *trigger = p->trigger;
