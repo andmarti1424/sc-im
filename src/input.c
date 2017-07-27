@@ -1,3 +1,47 @@
+/*******************************************************************************
+ * Copyright (c) 2013-2017, Andrés Martinelli <andmarti@gmail.com              *
+ * All rights reserved.                                                        *
+ *                                                                             *
+ * This file is a part of SC-IM                                                *
+ *                                                                             *
+ * SC-IM is a spreadsheet program that is based on SC. The original authors    *
+ * of SC are James Gosling and Mark Weiser, and mods were later added by       *
+ * Chuck Martin.                                                               *
+ *                                                                             *
+ * Redistribution and use in source and binary forms, with or without          *
+ * modification, are permitted provided that the following conditions are met: *
+ * 1. Redistributions of source code must retain the above copyright           *
+ *    notice, this list of conditions and the following disclaimer.            *
+ * 2. Redistributions in binary form must reproduce the above copyright        *
+ *    notice, this list of conditions and the following disclaimer in the      *
+ *    documentation and/or other materials provided with the distribution.     *
+ * 3. All advertising materials mentioning features or use of this software    *
+ *    must display the following acknowledgement:                              *
+ *    This product includes software developed by Andrés Martinelli            *
+ *    <andmarti@gmail.com>.                                                    *
+ * 4. Neither the name of the Andrés Martinelli nor the                        *
+ *   names of other contributors may be used to endorse or promote products    *
+ *   derived from this software without specific prior written permission.     *
+ *                                                                             *
+ * THIS SOFTWARE IS PROVIDED BY ANDRES MARTINELLI ''AS IS'' AND ANY            *
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED   *
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE      *
+ * DISCLAIMED. IN NO EVENT SHALL ANDRES MARTINELLI BE LIABLE FOR ANY           *
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES  *
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;*
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND *
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT  *
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE       *
+ * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.           *
+ *******************************************************************************/
+
+/**
+ * \file input.c
+ * \author Andrés Martinelli <andmarti@gmail.com>
+ * \date 2017-07-18
+ * \brief TODO Write a tbrief file description.
+ */
+
 #include <sys/time.h>
 #include <string.h>
 #include <ctype.h>   // for isdigit
@@ -22,12 +66,18 @@ int cmd_multiplier = 0;    // Multiplier
 int cmd_pending = 0;       // Command pending
 int shall_quit;            // Break loop if ESC key is pressed
 
-/*
- * Reads stdin for a valid command.
- * Details: Read characters from stdin to a input buffer.
- * When filled up, validate the command and call the appropriate handler.
- * When a timeout is reached, flush the buffer.
+/**
+ * \brief Reads stdin for a valid command
+ *
+ * \details Read characters from stdin to an input buffer. When filled,
+ * validate the command and call the appropriate handler. When a timeout
+ * is reached, flush the buffer.
+ *
+ * \param buffer
+ *
+ * \return none
  */
+
 void handle_input(struct block * buffer) {
     struct timeval start_tv, m_tv; // For measuring timeout
     gettimeofday(&start_tv, NULL);
@@ -113,7 +163,12 @@ void handle_input(struct block * buffer) {
     return;
 }
 
-// Break waiting command loop
+/**
+ * \brief Break waiting command loop
+ *
+ * \return none
+ */
+
 void break_waitcmd_loop(struct block * buffer) {
     if (curmode == COMMAND_MODE) {
 #ifdef HISTORY_FILE
@@ -154,10 +209,17 @@ void break_waitcmd_loop(struct block * buffer) {
     return;
 }
 
-/*
- * Handle timeout depending on the current mode
- * there is NO timeout for COMMAND, INSERT and EDIT modes.
+/**
+ * \brief Handle timeout depending on the current mode
+ *
+ * Handle timeout depending on the current mode. There is NO timeout
+ * for COMMAND, INSERT, and EDIT modes.
+ *
+ * \param[in] start_tv
+ *
+ * \return none
  */
+
 void fix_timeout(struct timeval * start_tv) {
     switch (curmode) {
         case COMMAND_MODE:
@@ -172,10 +234,17 @@ void fix_timeout(struct timeval * start_tv) {
     return;
 }
 
-/*
- * Traverse 'stuffbuff' and determines if there  is a valid command
- * Ej. buffer = "diw"
+/**
+ * \brief Traverse 'stuffbuff' and determine if there is a valid command.
+ *
+ * Traverse 'stuffbuff' and determine if there is a valid
+ * command (e.g. buffer = "diw").
+ *
+ * \param[in]buf
+ * \param[in]timeout
+ * \return none
  */
+
 int has_cmd (struct block * buf, long timeout) {
     int len = get_bufsize(buf);
     if ( ! len ) return 0;
@@ -198,7 +267,14 @@ void do_insertmode(struct block * sb);
 void do_editmode(struct block * sb);
 void do_visualmode(struct block * sb);
 
-// Use specific functions for every command on each mode
+/**
+ * \brief Use specific functions for every command on each mode
+ *
+ * \param[in] sb
+ *
+ * \return none
+ */
+
 void exec_single_cmd (struct block * sb) {
     switch (curmode) {
         case NORMAL_MODE:
@@ -220,7 +296,16 @@ void exec_single_cmd (struct block * sb) {
     return;
 }
 
-// Handle the final command to be executed, using the multiplier
+/**
+ * \brief Handle the final command to be executed, using the multiplier
+ *
+ * \param[in] cmd_multiplier
+ * \param[in] buf
+ * \param[in] timeout
+ *
+ * \return none
+ */
+
 void handle_mult(int * cmd_multiplier, struct block * buf, long timeout) {
     int j, k;
     struct block * b_copy = buf;
@@ -242,7 +327,12 @@ void handle_mult(int * cmd_multiplier, struct block * buf, long timeout) {
     return;
 }
 
-// Handle multiple command execution in sequence
+/**
+ * \brief Handle multiple command execution in sequence
+ *
+ * \return none
+ */
+
 void exec_mult (struct block * buf, long timeout) {
     int k, res, len = get_bufsize(buf);
     if ( ! len ) return;
