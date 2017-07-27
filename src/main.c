@@ -1,3 +1,57 @@
+/*******************************************************************************
+ * Copyright (c) 2013-2017, Andrés Martinelli <andmarti@gmail.com              *
+ * All rights reserved.                                                        *
+ *                                                                             *
+ * This file is a part of SC-IM                                                *
+ *                                                                             *
+ * SC-IM is a spreadsheet program that is based on SC. The original authors    *
+ * of SC are James Gosling and Mark Weiser, and mods were later added by       *
+ * Chuck Martin.                                                               *
+ *                                                                             *
+ * Redistribution and use in source and binary forms, with or without          *
+ * modification, are permitted provided that the following conditions are met: *
+ * 1. Redistributions of source code must retain the above copyright           *
+ *    notice, this list of conditions and the following disclaimer.            *
+ * 2. Redistributions in binary form must reproduce the above copyright        *
+ *    notice, this list of conditions and the following disclaimer in the      *
+ *    documentation and/or other materials provided with the distribution.     *
+ * 3. All advertising materials mentioning features or use of this software    *
+ *    must display the following acknowledgement:                              *
+ *    This product includes software developed by Andrés Martinelli            *
+ *    <andmarti@gmail.com>.                                                    *
+ * 4. Neither the name of the Andrés Martinelli nor the                        *
+ *   names of other contributors may be used to endorse or promote products    *
+ *   derived from this software without specific prior written permission.     *
+ *                                                                             *
+ * THIS SOFTWARE IS PROVIDED BY ANDRES MARTINELLI ''AS IS'' AND ANY            *
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED   *
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE      *
+ * DISCLAIMED. IN NO EVENT SHALL ANDRES MARTINELLI BE LIABLE FOR ANY           *
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES  *
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;*
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND *
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT  *
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE       *
+ * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.           *
+ *******************************************************************************/
+
+/**
+ * \file main.c
+ * \author Andrés Martinelli <andmarti@gmail.com>
+ * \date 2017-07-18
+ * \brief The main file of sc-im
+ * 
+ * \details This is the main file for sc-im.
+ *
+ * \see Homepage: https://github.com/andmarti1424/sc-im
+ *
+ * \bug It has been detected that libxls can produce memory leaks. One example
+ * is when you try to read a non xls file (e.g. xlsx file).
+ *
+ * \bug Extended ascii characters are not showing correctly. Compile sc-im
+ * against -lncursesw and not -lncurses.
+ */
+
 #include <signal.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -36,16 +90,19 @@
 #include "lua.h"
 #endif
 
-int currow = 0, curcol = 0;
-int lastrow = 0, lastcol = 0;
-int maxrows, maxcols;
+int currow = 0; /**< Current row of the selected cell. */
+int curcol = 0; /**< Current column of the selected cell. */
+int lastrow = 0;
+int lastcol = 0;
+int maxrows;
+int maxcols;
 int * fwidth;
 int * precision;
 int * realfmt;
 char * col_hidden;
 char * row_hidden;
 char line[FBUFLEN];
-int modflg;          // a change was made since last save
+int modflg; /**< Indicates a change was made since last save */
 struct ent *** tbl;
 int shall_quit = 0;
 unsigned int curmode;
@@ -58,41 +115,41 @@ char * exepath;
 int changed;
 int cellassign;
 int arg = 1;
-int brokenpipe = FALSE; /* Set to true if SIGPIPE is received */
+int brokenpipe = FALSE; /**< Set to true if SIGPIPE is received */
 char * ascext;
 char * tbl0ext;
 char * tblext;
 char * latexext;
 char * slatexext;
 char * texext;
-char dpoint = '.';      // decimal point
-char thsep = ',';       // thousands separator
+char dpoint = '.'; /**< Default decimal point character */
+char thsep = ','; /**< Default thousands separator character */
 int linelim = -1;
 int calc_order = BYROWS;
-int optimize  = 0;      // Causes numeric expressions to be optimized
-int tbl_style = 0;      // headers for T command output
+int optimize  = 0; /**< Causes numeric expressions to be optimizedv */
+int tbl_style = 0; /**< Headers for T command output */
 int rndtoeven = 0;
 int rowsinrange = 1;
 int colsinrange = DEFWIDTH;
 double eval_result;
 char * seval_result;
-FILE * fdoutput;        // output file descriptor (stdout or file)
-int rescol = RESCOL;    // columns reserved for row numbers
+FILE * fdoutput;  /**< Output file descriptor (stdout or file) */
+int rescol = RESCOL; /**< Columns reserved for row numbers */
 
 struct block * buffer;
 struct block * lastcmd_buffer;
-struct dictionary * user_conf_d;
-struct dictionary * predefined_conf_d;
+struct dictionary * user_conf_d; /**< User's configuration dictionary */
+struct dictionary * predefined_conf_d; /**< Predefined configuration dictionary */
 struct history * commandline_history;
 struct history * insert_history;
 char stderr_buffer[1024] = "";
-struct timeval startup_tv, current_tv; //runtime timer
+struct timeval startup_tv, current_tv; /**< Runtime timer */
 
 #ifdef AUTOBACKUP
-struct timeval lastbackup_tv; // last backup timer
+struct timeval lastbackup_tv; /**< Last backup timer */
 #ifdef HAVE_PTHREAD
 #include <pthread.h>
-int pthread_exists = 0;       // return status of pthread_create
+int pthread_exists = 0; /**< Return status of pthread_create */
 pthread_t fthread;
 #endif
 #endif
@@ -100,10 +157,28 @@ pthread_t fthread;
 void read_stdin();
 extern char * rev;
 
-/*********************************************************************
- * MAIN LOOP
- *********************************************************************/
+/**
+ * \brief The main() function
+ * 
+ * \details The main() function of sc-im. It is the first function called when
+ * the applicaiton is executed.
+ *
+ * \param[in] argc (argument count) is the number of strings pointed to by argv. This
+ * is passed to main() by the system.
+ *
+ * \param[in] argv (argument vector) is a is a one-dimensional array of strings.
+ * Each string is one of the arguments that was passed to the program. The
+ * first string is the executable's name. This is passed to main() by
+ * the system.
+ *
+ * \return 0 on success; 1 on some errors; -1 on error
+ */
+
+// TODO Document the possible errors. Why are some things -1 while others
+// are 1? Look for instances of exit_app(<number>).
+
 int main (int argc, char ** argv) {
+    // Define how the file stream should be buffered. Error if unsuccessful.
     if (setvbuf(stderr, stderr_buffer, _IOFBF, STDERRBUF) != 0) {
         fprintf(stderr, "Error setting stderr buffer\n");
         return -1;
@@ -113,7 +188,7 @@ int main (int argc, char ** argv) {
     signals();
 
 #ifdef USELOCALE
-    // pass LC_CTYPE env variable to libraries
+    // Set location dependent information. This is used by some libraries.
     //setlocale(LC_ALL, "");
     setlocale(LC_CTYPE, "");
 #endif
@@ -121,24 +196,24 @@ int main (int argc, char ** argv) {
     // start configuration dictionaries
     user_conf_d = (struct dictionary *) create_dictionary();
     predefined_conf_d = (struct dictionary *) create_dictionary();
-    store_default_config_values();
+    store_default_config_values(); // Stores default values in user_conf_d
 
-    // we save parameters and use them to replace conf-values in config dictionary !
+    // Read the main() parameters and replace values in user_conf_d as necessary
     read_argv(argc, argv);
 
     // check if version is in argv. if so, show version and quit
-    if (atoi(get_conf_value("version")))
+    if (atoi(get_conf_value("version"))) // atoi converts string to an int
         show_version_and_quit();
 
     // create command line history structure
     if (! atoi(get_conf_value("nocurses"))) {
 #ifdef HISTORY_FILE
         commandline_history = (struct history *) create_history(':');
-        load_history(commandline_history, ':');
+        load_history(commandline_history, ':'); // load the command history file
 #endif
 #ifdef INS_HISTORY_FILE
         insert_history = (struct history *) create_history('=');
-        load_history(insert_history, '=');
+        load_history(insert_history, '='); // load the insert history file
 #endif
     }
 
@@ -267,14 +342,16 @@ int main (int argc, char ** argv) {
 
     return shall_quit == -1 ? exit_app(-1) : exit_app(0);
 }
-/*********************************************************************
- * END OF MAIN LOOP
- *********************************************************************/
 
 extern graphADT graph;
 
-void create_structures() {
+/**
+ * \brief Creates the structures used by the program.
+ * 
+ * \return none
+ */
 
+void create_structures() {
     // initiate mark array
     create_mark_array();
 
@@ -293,6 +370,12 @@ void create_structures() {
     // init calc chain graph
     graph = GraphCreate();
 }
+
+/**
+ *\brief TODO Document read_stdin()
+ *
+ * \return none
+ */
 
 void read_stdin() {
     //sc_debug("reading stdin from pipeline");
@@ -327,9 +410,13 @@ void read_stdin() {
     //sc_debug("finish reading");
 }
 
-// delete basic structures that depend on the loaded file
-void delete_structures() {
+/**
+ * \brief Delete basic structures that depend on the loaded files.
+ *
+ * \return none
+ */
 
+void delete_structures() {
     // Free marks array
     free_marks_array();
 
@@ -359,6 +446,15 @@ void delete_structures() {
     // Free ents of tbl
     erasedb();
 }
+
+/**
+ * \brief Cleans things up just before exiting the program.
+ *
+ * \param[in] status
+ * \param[out] status
+ *
+ * \return status is returned unchanged
+ */
 
 int exit_app(int status) {
 
@@ -411,10 +507,21 @@ int exit_app(int status) {
     return status;
 }
 
-/*
- * we read parameters passed to SC-IM executable
- * and store them in user_conf dictionary
+/**
+ * \brief Read command line parameters and store them in a dictionary 
+ *
+ * \details Read parameters passed to SC-IM executable and
+ * store them in user_conf dictionary.
+ *
+ * \param[in] argc (argument count) is the number of strings pointed to by
+ * argv.
+ * \param[in] argv (argument vector) is a one-dimensional array of strings.
+ * Each string is one of the arguments that was passed to the program. The
+ * first string is the executable's name.
+ *
+ * \return none
  */
+
 void read_argv(int argc, char ** argv) {
     int i;
     for (i = 1; i < argc; i++) {
@@ -436,7 +543,12 @@ void read_argv(int argc, char ** argv) {
     return;
 }
 
-// we try to load a file
+/**
+ * \brief Attempt to load a file
+ *
+ * \return none
+ */
+
 void load_sc() {
     wordexp_t p;
     wordexp(loadingfile, &p, 0);
@@ -454,19 +566,23 @@ void load_sc() {
     return;
 }
 
-// set the calculation order
+/**
+ * \brief Set the calculation order
+ *
+ * \return none
+ */
+
 void setorder(int i) {
     if ((i == BYROWS) || (i == BYCOLS)) calc_order = i;
     return;
 }
 
-void nopipe() {
-    sc_error("brokenpipe!");
-    brokenpipe = TRUE;
-    return;
-}
+/**
+ * \brief Set signals catched by sc-im
+ *
+ * \return none
+ */
 
-// setup signals catched by SC-IM
 void signals() {
     void sig_int();
     void sig_abrt();
@@ -485,6 +601,27 @@ void signals() {
     return;
 }
 
+/**
+ * \brief Handles the SIGPIPE signal
+ *
+ * \return none
+ */
+
+// TODO Possibly rename this function to sig_nopipe() for consistency
+// with the other signal functions.
+
+void nopipe() {
+    sc_error("brokenpipe!");
+    brokenpipe = TRUE;
+    return;
+}
+
+/**
+ * \brief Handles the SIGINT signal
+ *
+ * \return none
+ */
+
 void sig_int() {
     if ( ! atoi(get_conf_value("debug")))
         sc_error("Got SIGINT. Press «:q<Enter>» to quit SC-IM");
@@ -493,17 +630,38 @@ void sig_int() {
     return;
 }
 
+/**
+ * \brief Handles the SIGABRT signal
+ *
+ * \return none
+ */
+
 void sig_abrt() {
     sc_error("Error !!! Quitting SC-IM.");
     shall_quit = -1; // error !
     return;
 }
 
+/**
+ * \brief Handles the SIGABRT signal
+ *
+ * \return none
+ */
+
 void sig_term() {
     sc_error("Got SIGTERM signal. Quitting SC-IM.");
     shall_quit = 2;
     return;
 }
+
+/**
+ * \brief Send the version number to standard output and quit.
+ *
+ * \return none
+ */
+
+// TODO Split this into two commands. One prints the version number
+// the other prints the version number along with the other information.
 
 void show_version_and_quit() {
     put(user_conf_d, "nocurses", "1");
