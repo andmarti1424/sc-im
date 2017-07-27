@@ -39,7 +39,7 @@
  * \file vmtbl.h
  * \author Andrés Martinelli <andmarti@gmail.com>
  * \date 2017-07-18
- * \brief Header file for vmtbl.h
+ * \brief Header file for vmtbl.c
  */
 
 void checkbounds(int * rowp, int * colp);

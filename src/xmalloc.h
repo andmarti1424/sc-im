@@ -39,7 +39,7 @@
  * \file xmalloc.h
  * \author Andrés Martinelli <andmarti@gmail.com>
  * \date 2017-07-18
- * \brief Header file for xmalloc.h
+ * \brief Header file for xmalloc.c
  */
 
 char * scxmalloc(unsigned n);

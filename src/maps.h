@@ -39,7 +39,7 @@
  * \file maps.h
  * \author Andrés Martinelli <andmarti@gmail.com>
  * \date 2017-07-18
- * \brief Header file for maps.h
+ * \brief Header file for maps.c
  */
 
 #include "input.h"

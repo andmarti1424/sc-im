@@ -36,12 +36,10 @@
  *******************************************************************************/
 
 /**
- * @file exec.h
- * @author Andrés Martinelli <andmarti@gmail.com>
- * @date 2017-07-18
- * @brief TODO Write a brief file description.
- *
- * TODO Write a longer file description here.
+ * \file exec.h
+ * \author Andrés Martinelli <andmarti@gmail.com>
+ * \date 2017-07-18
+ * \brief Header file for exec.c
  */
 
 int exec_cmd (char * line);

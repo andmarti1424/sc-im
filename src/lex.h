@@ -39,7 +39,7 @@
  * \file lex.h
  * \author Andrés Martinelli <andmarti@gmail.com>
  * \date 2017-07-18
- * \brief Header file lex.h
+ * \brief Header file lex.c
  */
 
 int yylex();

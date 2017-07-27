@@ -39,7 +39,7 @@
  * \file subtotal.h
  * \author Andrés Martinelli <andmarti@gmail.com>
  * \date 2017-07-18
- * \brief Header file for subtotal.h
+ * \brief Header file for subtotal.c
  */
 
 int subtotal(int r, int c, int rf, int cf, int group_col, char * operation, int ope_col, int replace_subtotals);

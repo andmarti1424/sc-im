@@ -36,12 +36,10 @@
  *******************************************************************************/
 
 /**
- * @file format.h
- * @author Andrés Martinelli <andmarti@gmail.com>
- * @date 2017-07-18
- * @brief TODO Write a tbrief file description.
- *
- * TODO Write a longer file description here.
+ * \file format.h
+ * \author Andrés Martinelli <andmarti@gmail.com>
+ * \date 2017-07-18
+ * \brief Header file for format.c
  */
 
 int format(char *fmt, int lprecision, double val, char *buf, int buflen);

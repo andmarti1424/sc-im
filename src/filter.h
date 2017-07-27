@@ -36,12 +36,10 @@
  *******************************************************************************/
 
 /**
- * @file filter.h
- * @author Andrés Martinelli <andmarti@gmail.com>
- * @date 2017-07-18
- * @brief TODO Write a tbrief file description.
- *
- * TODO Write a longer file description here.
+ * \file filter.h
+ * \author Andrés Martinelli <andmarti@gmail.com>
+ * \date 2017-07-18
+ * \brief Header file for filter.c
  */
 
 struct filter_item {
