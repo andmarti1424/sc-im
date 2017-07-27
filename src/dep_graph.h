@@ -36,25 +36,14 @@
  *******************************************************************************/
 
 /**
- * @file dep_graph.hg
- * @author Andrés Martinelli <andmarti@gmail.com>
- * @date 2017-07-18
- * @brief TODO Write a brief file description
- *
- * TODO Write a longer file description.
+ * \file dep_graph.h
+ * \author Andrés Martinelli <andmarti@gmail.com>
+ * \date 2017-07-18
+ * \brief Header file for dep_graph.c
  */
 
 #include "sc.h"
 
-/**
- * @brief TODO <brief function description>
- *
- * For each vertex, we need to store an element, its visitied flag, its list of
- * edges, and a link to the next vertex.
- * 
- */
-
-// TODO Is this how we use doxygen for documenting structs?
 typedef struct vertexTag {
     struct ent * ent; /**< Add comment here */
     int visited; /**< Add comment here */

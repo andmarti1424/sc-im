@@ -1,3 +1,49 @@
+/*******************************************************************************
+ * Copyright (c) 2013-2017, Andrés Martinelli <andmarti@gmail.com              *
+ * All rights reserved.                                                        *
+ *                                                                             *
+ * This file is a part of SC-IM                                                *
+ *                                                                             *
+ * SC-IM is a spreadsheet program that is based on SC. The original authors    *
+ * of SC are James Gosling and Mark Weiser, and mods were later added by       *
+ * Chuck Martin.                                                               *
+ *                                                                             *
+ * Redistribution and use in source and binary forms, with or without          *
+ * modification, are permitted provided that the following conditions are met: *
+ * 1. Redistributions of source code must retain the above copyright           *
+ *    notice, this list of conditions and the following disclaimer.            *
+ * 2. Redistributions in binary form must reproduce the above copyright        *
+ *    notice, this list of conditions and the following disclaimer in the      *
+ *    documentation and/or other materials provided with the distribution.     *
+ * 3. All advertising materials mentioning features or use of this software    *
+ *    must display the following acknowledgement:                              *
+ *    This product includes software developed by Andrés Martinelli            *
+ *    <andmarti@gmail.com>.                                                    *
+ * 4. Neither the name of the Andrés Martinelli nor the                        *
+ *   names of other contributors may be used to endorse or promote products    *
+ *   derived from this software without specific prior written permission.     *
+ *                                                                             *
+ * THIS SOFTWARE IS PROVIDED BY ANDRES MARTINELLI ''AS IS'' AND ANY            *
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED   *
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE      *
+ * DISCLAIMED. IN NO EVENT SHALL ANDRES MARTINELLI BE LIABLE FOR ANY           *
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES  *
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;*
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND *
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT  *
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE       *
+ * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.           *
+ *******************************************************************************/
+
+/**
+ * @file color.c
+ * @author Andrés Martinelli <andmarti@gmail.com>
+ * @date 2017-07-18
+ * @brief TODO Write a brief file description.
+ *
+ * TODO Write a longer file description here.
+ */
+
 #include <sys/types.h>
 #include <string.h>
 #include <stdlib.h>      // for atoi
@@ -20,7 +66,18 @@ struct dictionary * get_d_colors_param() {
     return d_colors_param;
 }
 
-// Generate DEFAULT 'initcolor' colors
+/**
+ * @brief Generate DEFAULT 'initcolor' colors
+ *
+ * Generate DEFAULT 'initcolor' colors.
+ * 
+ * Example usage:
+ * @code
+ *     start_default_ucolors();
+ * @endcode
+ * returns: none
+ */
+
 void start_default_ucolors() {
 
     // Initialize colors attributes
@@ -85,10 +142,19 @@ void start_default_ucolors() {
     ui_start_colors(); // call specific ui startup routine
 }
 
-/*
+/**
+ * @brief TODO <brief function description>
+ *
  * Create a dictionary that stores the correspondence between macros and key
  * values (integers) defined in '.sc' files or through the color command.
+ *
+ * Example usage:
+ * @code
+ *     set_colors_param_dict();
+ * @endcode
+ * returns: none
  */
+
 void set_colors_param_dict() {
     d_colors_param = create_dictionary();
     char str[3];
@@ -152,16 +218,36 @@ void set_colors_param_dict() {
     put(d_colors_param, "DEFAULT", str);
 }
 
+/**
+ * @brief TODO <brief function description>
+ *
+ * TODO Write longer function description.
+ *
+ * Example usage:
+ * @code
+ *     free_colors_param_dict();
+ * @endcode
+ * returns: none
+ */
+
 void free_colors_param_dict() {
     destroy_dictionary(d_colors_param);
     return;
 }
 
-/*
- * Change color definition with users's one
- * STR: color definition read from '.sc' file
- * It can also be obtained at run time with the `:color str` command
+/**
+ * @brief TODO <brief function description>
+ *
+ * Change color definition with user's one STR: color definition from '.sc'
+ * file. It can be obtained at run time with the ':color str' command.
+ *
+ * Example usage:
+ * @code
+ *     chg_color();
+ * @endcode
+ * returns: none
  */
+
 void chg_color(char * str) {
 
     // Create key-value dictionary for the content of the string
@@ -214,6 +300,22 @@ void chg_color(char * str) {
  * it also applies a format such as bold or underline.
  * supports undo / redo
  */
+/**
+ * @brief TODO <brief function description>
+ *
+ * Changes coloring and format for cell or range of cells.
+ *
+ * Format options: bold, underline.
+ *
+ * This funciton supports undo/redo.
+ *
+ * Example usage:
+ * @code
+ *     color_cell(<var1>,<var2>,<var3>,<var4>,<var5>);
+ * @endcode
+ * returns: none
+ */
+
 void color_cell(int r, int c, int rf, int cf, char * str) {
     if (any_locked_cells(r, c, rf, cf)) {
         sc_error("Locked cells encountered. Nothing changed");
@@ -296,6 +398,18 @@ void color_cell(int r, int c, int rf, int cf, char * str) {
     return;
 }
 
+/**
+ * @brief TODO <brief function description>
+ *
+ * TODO Write longer function description.
+ *
+ * Example usage:
+ * @code
+ *     unformat(<var1>,<var2>,<var3>,<var4>);
+ * @endcode
+ * returns: none
+ */
+
 void unformat(int r, int c, int rf, int cf) {
     if (any_locked_cells(r, c, rf, cf)) {
         sc_error("Locked cells encountered. Nothing changed");
@@ -345,10 +459,19 @@ void unformat(int r, int c, int rf, int cf) {
     return;
 }
 
-/*
- * this function receives two ucolors variables and returns 1 if both have the same values
- * returns 0 otherwise
+/**
+ * @brief TODO <brief function description>
+ *
+ * This function receives two ucolor variables and returns 1 if both have the
+ * same values, returns 0 otherwise.
+ *
+ * Example usage:
+ * @code
+ *     same_color(<ucolor>,<ucolor>);
+ * @endcode
+ * returns: 1 if colors are the same, 0 otherwise
  */
+
 int same_ucolor(struct ucolor * u, struct ucolor * v) {
     if (u == NULL || v == NULL)       return 0;
 
@@ -363,6 +486,18 @@ int same_ucolor(struct ucolor * u, struct ucolor * v) {
 
     return 1;
 }
+
+/**
+ * @brief TODO <brief function description>
+ *
+ * TODO Write longer function description.
+ *
+ * Example usage:
+ * @code
+ *     redefine_color(<color>,<var1>,<var2>,<var3>);
+ * @endcode
+ * returns: 0 on success, -1 on error
+ */
 
 int redefine_color(char * color, int r, int g, int b) {
     #if defined(NCURSES) && defined(USECOLORS)
