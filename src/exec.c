@@ -62,7 +62,7 @@
  *
  * \param[in] line
  *
- * returns: 0on success; -1 on error
+ * \return none
  */
 
 int exec_cmd (char * line) {
