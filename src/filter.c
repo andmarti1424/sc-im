@@ -1,3 +1,47 @@
+/*******************************************************************************
+ * Copyright (c) 2013-2017, Andrés Martinelli <andmarti@gmail.com              *
+ * All rights reserved.                                                        *
+ *                                                                             *
+ * This file is a part of SC-IM                                                *
+ *                                                                             *
+ * SC-IM is a spreadsheet program that is based on SC. The original authors    *
+ * of SC are James Gosling and Mark Weiser, and mods were later added by       *
+ * Chuck Martin.                                                               *
+ *                                                                             *
+ * Redistribution and use in source and binary forms, with or without          *
+ * modification, are permitted provided that the following conditions are met: *
+ * 1. Redistributions of source code must retain the above copyright           *
+ *    notice, this list of conditions and the following disclaimer.            *
+ * 2. Redistributions in binary form must reproduce the above copyright        *
+ *    notice, this list of conditions and the following disclaimer in the      *
+ *    documentation and/or other materials provided with the distribution.     *
+ * 3. All advertising materials mentioning features or use of this software    *
+ *    must display the following acknowledgement:                              *
+ *    This product includes software developed by Andrés Martinelli            *
+ *    <andmarti@gmail.com>.                                                    *
+ * 4. Neither the name of the Andrés Martinelli nor the                        *
+ *   names of other contributors may be used to endorse or promote products    *
+ *   derived from this software without specific prior written permission.     *
+ *                                                                             *
+ * THIS SOFTWARE IS PROVIDED BY ANDRES MARTINELLI ''AS IS'' AND ANY            *
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED   *
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE      *
+ * DISCLAIMED. IN NO EVENT SHALL ANDRES MARTINELLI BE LIABLE FOR ANY           *
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES  *
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;*
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND *
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT  *
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE       *
+ * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.           *
+ *******************************************************************************/
+
+/**
+ * \file filter.c
+ * \author Andrés Martinelli <andmarti@gmail.com>
+ * \date 2017-07-18
+ * \brief TODO Write a tbrief file description.
+ */
+
 #include <string.h>
 #include <stdio.h>
 #include <ctype.h>             // for isalpha toupper
@@ -13,11 +57,18 @@
 #include "sc.h"
 #include "cmds.h"
 
-static int howmany = 0;        // how many filters were defined
-static int active = 0;         // indicates if those filters are applied or not
-static int * results = NULL;   // this keeps the results of the applied filters
+static int howmany = 0;      /**< how many filters were definedi */
+static int active = 0;       /**< indicates if those filters are applied or not */
+static int * results = NULL; /**< this keeps the results of the applied filters */
 
-// Add a filter to filters structure
+/**
+ * \brief Add a filter to filters structure
+ *
+ * \param[in] criteria
+ *
+ * \return none
+ */
+
 void add_filter(char * criteria) {
     int cp = 0;
     char c;
@@ -44,7 +95,15 @@ void add_filter(char * criteria) {
     return;
 }
 
-// Apply filters to a range
+/**
+ * \brief Apply filters to a range
+ *
+ * \param[in] left
+ * \param[in] right
+ *
+ * \return none
+ */
+
 void enable_filters(struct ent * left, struct ent * right) {
     int minr = left->row < right->row ? left->row : right->row;
     int maxr = left->row > right->row ? left->row : right->row;
@@ -96,7 +155,12 @@ void enable_filters(struct ent * left, struct ent * right) {
     return;
 }
 
-// disable any applied filter
+/**
+ * \brief Disable any applied filters
+ *
+ * \return none
+ */
+
 void disable_filters() {
     if (results == NULL) {
         sc_error("There are no filters active");
@@ -112,6 +176,12 @@ void disable_filters() {
 }
 
 // Show details of each filter
+/**
+ * \brief Show details of each filter
+ *
+ * \return none
+ */
+
 void show_filters() {
     if (filters == NULL) {
         sc_error("There are no filters defined");
@@ -137,7 +207,12 @@ void show_filters() {
     return;
 }
 
-// Free memory of entire filters structure
+/**
+ * \brief Free memory of entire filters structure
+ *
+ * \return none
+ */
+
 void free_filters() {
     if (filters == NULL) return;
     int i;
@@ -148,7 +223,14 @@ void free_filters() {
     return;
 }
 
-// Remove a filter, freeing its memory
+/**
+ * \brief Remove a filter, freeing its memory
+ *
+ * \param[in] id
+ *
+ * \return none
+ */
+
 void del_filter(int id) {
     if (filters == NULL || id < 0 || id > howmany) {
         sc_error("Cannot delete the filter");
@@ -161,11 +243,16 @@ void del_filter(int id) {
     return;
 }
 
-/*
- * this functions checks if a filter was deleted, so there would be room
- * in filters structure for a new filter
- * and preventing an unnecessary realloc.
+/**
+ * \brief Check if a filter was deleted
+ *
+ * \details This function checks if a filter was deleted, so there would
+ * be room in filters structure for a new filter and preventing
+ * an unnecessary realloc.
+ *
+ * \return how many filters exist; -1 otherwise
  */
+
 int exists_freed_filter() {
     if (filters == NULL) return -1;
     int i;

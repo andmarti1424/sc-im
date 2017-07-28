@@ -1,3 +1,47 @@
+/*******************************************************************************
+ * Copyright (c) 2013-2017, Andrés Martinelli <andmarti@gmail.com              *
+ * All rights reserved.                                                        *
+ *                                                                             *
+ * This file is a part of SC-IM                                                *
+ *                                                                             *
+ * SC-IM is a spreadsheet program that is based on SC. The original authors    *
+ * of SC are James Gosling and Mark Weiser, and mods were later added by       *
+ * Chuck Martin.                                                               *
+ *                                                                             *
+ * Redistribution and use in source and binary forms, with or without          *
+ * modification, are permitted provided that the following conditions are met: *
+ * 1. Redistributions of source code must retain the above copyright           *
+ *    notice, this list of conditions and the following disclaimer.            *
+ * 2. Redistributions in binary form must reproduce the above copyright        *
+ *    notice, this list of conditions and the following disclaimer in the      *
+ *    documentation and/or other materials provided with the distribution.     *
+ * 3. All advertising materials mentioning features or use of this software    *
+ *    must display the following acknowledgement:                              *
+ *    This product includes software developed by Andrés Martinelli            *
+ *    <andmarti@gmail.com>.                                                    *
+ * 4. Neither the name of the Andrés Martinelli nor the                        *
+ *   names of other contributors may be used to endorse or promote products    *
+ *   derived from this software without specific prior written permission.     *
+ *                                                                             *
+ * THIS SOFTWARE IS PROVIDED BY ANDRES MARTINELLI ''AS IS'' AND ANY            *
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED   *
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE      *
+ * DISCLAIMED. IN NO EVENT SHALL ANDRES MARTINELLI BE LIABLE FOR ANY           *
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES  *
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;*
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND *
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT  *
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE       *
+ * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.           *
+ *******************************************************************************/
+
+/**
+ * \file format.c
+ * \author Andrés Martinelli <andmarti@gmail.com>
+ * \date 2017-07-18
+ * \brief TODO Write a tbrief file description.
+ */
+
 /*
  * Based on code of Mark Nagel <nagel@ics.uci.edu>, 20 July 1989
  *
@@ -98,6 +142,18 @@ static char *fmt_frac(char *val, char *fmt, int lprecision);
 static char *fmt_exp(int val, char *fmt);
 static void reverse(register char *buf);
 char * colformat[COLFORMATS];
+
+/**
+ * \brief TODO Document format()
+ *
+ * \param[in] fmt
+ * \param[in] lprecision
+ * \param[in] val
+ * \param[in] buf
+ * \param[in] buflen
+ *
+ * returns: ret
+ */
 
 int format(char *fmt, int lprecision, double val, char *buf, int buflen) {
     register char *cp;
@@ -305,10 +361,17 @@ int format(char *fmt, int lprecision, double val, char *buf, int buflen) {
     }
 }
 
-static char * fmt_int(char *val,  /* integer part of the value to be formatted */
-    char *fmt,         /* integer part of the format */
-    int comma,        /* true if we should comma-ify the value */
-    int negative) {   /* true if the value is actually negative */
+/**
+ * \brief TODO Document fmt_int()
+ *
+ * \param[in] val integer part of the value to be formatted
+ * \param[in] fmt integer part of the format
+ * \param[in] comma true if we should comma-ify the value
+ * \param[in] negative true if the value is actually negative
+ * \return none
+ */
+
+static char * fmt_int(char *val, char *fmt, int comma, int negative) {
 
     int digit, f, v;
     int thousands = 0;
@@ -360,10 +423,17 @@ static char * fmt_int(char *val,  /* integer part of the value to be formatted *
     return (buf);
 }
 
-static char * fmt_frac(
-    char *val,   /* fractional part of the value to be formatted */
-    char *fmt,        /* fractional portion of format */
-    int lprecision) { /* precision, for interpreting the "&" */
+/**
+ * \brief TODO Document fmt_frac()
+ *
+ * \param[in] val fractional part of the value to be formatted
+ * \param[in] fmt fractional portion of format
+ * \param[in] precision, for interpreting the "&"
+ * 
+ * \return none
+ */
+
+static char * fmt_frac(char *val, char *fmt, int lprecision) {
 
     static char buf[MAXBUF];
     register char * bufptr = buf;
@@ -392,8 +462,16 @@ static char * fmt_frac(
         return (buf);
 }
 
-static char * fmt_exp(int val, /* value of the exponent */
-    char *fmt) {               /* exponent part of the format */
+/**
+ * \brief TODO Document fmt_exp
+ *
+ * \param[in] val value of the exponent
+ * \param[in] fmt exponent part of the format
+ * 
+ * \return none
+ */
+
+static char * fmt_exp(int val, char *fmt) {
     static char buf[MAXBUF];
     register char *bufptr = buf;
     char valbuf[64];
@@ -416,6 +494,14 @@ static char * fmt_exp(int val, /* value of the exponent */
     (void) strcat(buf, fmt_int(valbuf, fmt, false, negative));
     return (buf);
 }
+
+/**
+ * \brief TODO Document reverse()
+ *
+ * \param[in] buf
+ *
+ * \return none
+ */
 
 static void reverse(register char *buf) {
     register char *cp = buf + strlen(buf) - 1;
@@ -464,6 +550,19 @@ static void reverse(register char *buf) {
 #define REFMTDATE   3
 #define REFMTLDATE  4
 #endif
+
+/**
+ * \brief TODO Document engformat()
+ *
+ * \param[in] fmt
+ * \param[in] width
+ * \param[in] lprecision
+ * \param[in] val
+ * \param[in] buf
+ * \param[in] buflen
+ *
+ * \return none
+ */
 
 int engformat(int fmt, int width, int lprecision, double val, char *buf, int buflen) {
 
