@@ -54,10 +54,10 @@
  * Those are then accessible also  when called via @lua cmd or in triggers.
  */
 
-#include <lua.h>        /* Always include this when calling Lua */
-#include <lauxlib.h>    /* Always include this when calling Lua */
-#include <lualib.h>     /* Prototype for luaL_openlibs(),       */
-                        /* always include this when calling Lua */
+#include <lua.h>                                /* Always include this when calling Lua */
+#include <lauxlib.h>                            /* Always include this when calling Lua */
+#include <lualib.h>                             /* Prototype for luaL_openlibs(),       */
+                                                /* always include this when calling Lua */
 #include <ctype.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -88,7 +88,7 @@ lua_State *L;
  *
  * \param[in] L
  *
- * \return none
+ * \return number of results; 0 otherwise
  */
 
 static int l_getnum (lua_State *L) {
@@ -109,7 +109,7 @@ static int l_getnum (lua_State *L) {
 }
 
 /**
- * \brief TODO Document l_setnum
+ * \brief TODO Document l_setnum()
  *
  * \param[in] L
  *
@@ -160,12 +160,11 @@ static int l_setstr (lua_State *L) {
     return 0;
 }
 
+
 /**
  * \brief TODO Document l_getstr
  *
- * \param[in] L
- *
- * \return none
+ * \return
  */
 
 static int l_getstr (lua_State *L) {
@@ -189,9 +188,7 @@ static int l_getstr (lua_State *L) {
 }
 
 /**
- * \brief TODO <brief function description>
- *
- * \param[in] L
+ * \brief TODO Document l_setform()
  *
  * \return none
  */
@@ -212,7 +209,6 @@ static int l_setform (lua_State *L) {
  * \brief TODO Document l_sc
  *
  * \param[in] L
- *
  * \return none
  */
 
@@ -229,7 +225,7 @@ static int l_sc (lua_State *L) {
  *
  * \param[in] L
  *
- * returns: none
+ * \return none
  */
 
 static int l_colrow2a(lua_State *L) {
@@ -355,7 +351,7 @@ void doLuaclose() {
 }
 
 /**
- * \brief TODO Document doLUA
+ * \brief TODO Document doLUA()
  *
  * \param[in] se
  *
@@ -384,7 +380,7 @@ char * doLUA( struct enode * se) {
 }
 
 /**
- * \brief TODO Document doLuaTriger()
+ * \brief TODO Document duLuaTriger
  *
  * \return none
  */
@@ -437,16 +433,17 @@ void doLuaTriger2(int row, int col, int flags) {
     return;
 }
 
+/*
+ * Lua trigger on a particular cell
+ * we assume file and function ist correct other lua throught an error
+ */
 /**
  * \brief TODO Document doLuaTrigger_cell()
  *
- * \details Lua trigger on a particular cell. We assum file and
- * function ist correct other lua throught an error
- * 
- * \param[in] p
- * \param[in] flags
+ * \details Lua trigger on a particular cell. We assume file and
+ * function ist correct. Otherwise, Lua throes an error
  *
- * returns: none
+ * \return: none
  */
 
 void doLuaTrigger_cell(struct ent *p, int flags) {

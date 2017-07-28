@@ -1,3 +1,47 @@
+/*******************************************************************************
+ * Copyright (c) 2013-2017, Andrés Martinelli <andmarti@gmail.com              *
+ * All rights reserved.                                                        *
+ *                                                                             *
+ * This file is a part of SC-IM                                                *
+ *                                                                             *
+ * SC-IM is a spreadsheet program that is based on SC. The original authors    *
+ * of SC are James Gosling and Mark Weiser, and mods were later added by       *
+ * Chuck Martin.                                                               *
+ *                                                                             *
+ * Redistribution and use in source and binary forms, with or without          *
+ * modification, are permitted provided that the following conditions are met: *
+ * 1. Redistributions of source code must retain the above copyright           *
+ *    notice, this list of conditions and the following disclaimer.            *
+ * 2. Redistributions in binary form must reproduce the above copyright        *
+ *    notice, this list of conditions and the following disclaimer in the      *
+ *    documentation and/or other materials provided with the distribution.     *
+ * 3. All advertising materials mentioning features or use of this software    *
+ *    must display the following acknowledgement:                              *
+ *    This product includes software developed by Andrés Martinelli            *
+ *    <andmarti@gmail.com>.                                                    *
+ * 4. Neither the name of the Andrés Martinelli nor the                        *
+ *   names of other contributors may be used to endorse or promote products    *
+ *   derived from this software without specific prior written permission.     *
+ *                                                                             *
+ * THIS SOFTWARE IS PROVIDED BY ANDRES MARTINELLI ''AS IS'' AND ANY            *
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED   *
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE      *
+ * DISCLAIMED. IN NO EVENT SHALL ANDRES MARTINELLI BE LIABLE FOR ANY           *
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES  *
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;*
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND *
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT  *
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE       *
+ * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.           *
+ *******************************************************************************/
+
+/**
+ * \file lex.c
+ * \author Andrés Martinelli <andmarti@gmail.com>
+ * \date 2017-07-18
+ * \brief TODO Write a tbrief file description.
+ */
+
 #include <sys/types.h>
 #include <string.h>
 #include <stdlib.h>
@@ -23,6 +67,12 @@ jmp_buf wakeup;
 jmp_buf fpe_buf;
 
 bool decimal = FALSE;
+
+/**
+ * \brief TODO Document fpe_trap()
+ *
+ * \return none
+ */
 
 void fpe_trap(int signo) {
 #if defined(i386)
@@ -50,6 +100,12 @@ struct key statres[] = {
 #include "macros.h"
 #include "tui.h"
 #include "range.h"
+
+/**
+ * \brief TODO Document yylex()
+ *
+ * \return none
+ */
 
 int yylex() {
     char * p = line + linelim;
@@ -279,14 +335,19 @@ int yylex() {
     return ret;
 }
 
-/*
- * Given a token string starting with a symbolic column name and its valid
- * length, convert column name ("A"-"Z" or "AA"-"ZZ") to a column number (0-N).
- * Never mind if the column number is illegal (too high).  The procedure's name
- * and function are the inverse of coltoa().
+/**
+ * \brief TODO Document atocol()
  *
- * Case-insensitivity is done crudely, by ignoring the 040 bit.
+ * \details Given a token string starting with a symbolid column name and
+ * its valid length, convert column namd ("A"-"Z" or "AA"-"ZZ") to a
+ * column number (0-N). Never mind if the column number is illegal
+ * (too high). The procedure's name and function are the inverse of coltoa().
+ *
+ * \details Case-insensitivity is done crudely, but ignoring the 040 bit.
+ *
+ * \return none
  */
+
 int atocol(char *string, int len) {
     register int col;
 
