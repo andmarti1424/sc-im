@@ -260,7 +260,7 @@ void color_cell(int r, int c, int rf, int cf, char * str) {
             if (n->ucolor == NULL) {
                 n->ucolor = (struct ucolor *) malloc(sizeof(struct ucolor));
                 n->ucolor->fg = WHITE;
-                n->ucolor->bg = DEFAULT_COLOR;
+                n->ucolor->bg = BLACK;
                 n->ucolor->bold = 0;
                 n->ucolor->dim = 0;
                 n->ucolor->reverse = 0;
