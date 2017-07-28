@@ -1,3 +1,47 @@
+/*******************************************************************************
+ * Copyright (c) 2013-2017, Andrés Martinelli <andmarti@gmail.com              *
+ * All rights reserved.                                                        *
+ *                                                                             *
+ * This file is a part of SC-IM                                                *
+ *                                                                             *
+ * SC-IM is a spreadsheet program that is based on SC. The original authors    *
+ * of SC are James Gosling and Mark Weiser, and mods were later added by       *
+ * Chuck Martin.                                                               *
+ *                                                                             *
+ * Redistribution and use in source and binary forms, with or without          *
+ * modification, are permitted provided that the following conditions are met: *
+ * 1. Redistributions of source code must retain the above copyright           *
+ *    notice, this list of conditions and the following disclaimer.            *
+ * 2. Redistributions in binary form must reproduce the above copyright        *
+ *    notice, this list of conditions and the following disclaimer in the      *
+ *    documentation and/or other materials provided with the distribution.     *
+ * 3. All advertising materials mentioning features or use of this software    *
+ *    must display the following acknowledgement:                              *
+ *    This product includes software developed by Andrés Martinelli            *
+ *    <andmarti@gmail.com>.                                                    *
+ * 4. Neither the name of the Andrés Martinelli nor the                        *
+ *   names of other contributors may be used to endorse or promote products    *
+ *   derived from this software without specific prior written permission.     *
+ *                                                                             *
+ * THIS SOFTWARE IS PROVIDED BY ANDRES MARTINELLI ''AS IS'' AND ANY            *
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED   *
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE      *
+ * DISCLAIMED. IN NO EVENT SHALL ANDRES MARTINELLI BE LIABLE FOR ANY           *
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES  *
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;*
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND *
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT  *
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE       *
+ * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.           *
+ *******************************************************************************/
+
+/**
+ * \file history.c
+ * \author Andrés Martinelli <andmarti@gmail.com>
+ * \date 2017-07-18
+ * \brief TODO Write a tbrief file description.
+ */
+
 #include <string.h>
 #include <wchar.h>
 #include "macros.h"
@@ -5,9 +49,23 @@
 // current command before tab completion
 static wchar_t curcmd [BUFFERSIZE];
 
+/**
+ * \brief TODO Document copy_to_curcmd()
+ *
+ * \param[in] inputline
+ *
+ * \return none
+ */
+
 void copy_to_curcmd(wchar_t * inputline) {
     wcscpy(curcmd, inputline);
 }
+
+/**
+ * \brief TODO Document get_curcmd()
+ *
+ * \return curcmd
+ */
 
 wchar_t * get_curcmd() {
     return curcmd;
@@ -16,9 +74,23 @@ wchar_t * get_curcmd() {
 // this comp mark is used to mark when tab completion is started
 static int comp = 0;
 
+/**
+ * \brief TODO Document get_comp()
+ *
+ * \return none
+ */
+
 int get_comp() {
     return comp;
 }
+
+/**
+ * \brief TODO Document set_comp()
+ *
+ * \param[in] i
+ *
+ * \return none
+ */
 
 void set_comp(int i) {
     comp = i;
@@ -42,6 +114,14 @@ struct history * create_history(char mode) {
     return h;
 }
 
+/**
+ * \brief TODO Document destroy_history()
+ *
+ * \param[in] h
+ *
+ * \return none
+ */
+
 void destroy_history(struct history * h) {
     struct hlist * nl;
     struct hlist * n_sig;
@@ -55,6 +135,18 @@ void destroy_history(struct history * h) {
     free(h);
     return;
 }
+
+/**
+ * \brief TODO Document load_history
+ *
+ * \details Read the specified history file from the user's home directory
+ * and load it into the specified history struct.
+ *
+ * \param[in] h
+ * \param[in] mode
+ *
+ * returns: none
+ */
 
 void load_history(struct history * h, wchar_t mode) {
     char infofile[PATHLEN];
@@ -89,8 +181,12 @@ void load_history(struct history * h, wchar_t mode) {
     return;
 }
 
-// Save history to file
-// returns 0 on success, -1 otherwise
+/**
+ * @brief Save history to file
+ *
+ * \return 0 on success; -1 otherwise
+ */
+
 int save_history(struct history * h, char * mode) {
     char infofile [PATHLEN];
     char * home;
@@ -120,8 +216,12 @@ int save_history(struct history * h, char * mode) {
     return 0;
 }
 
-// Remove history element
-// 0 first element, -1 second element
+/**
+ * \brief Remove history element
+ *
+ * \return 0 first element; -1 second element
+ */
+
 void del_item_from_history(struct history * h, int pos) {
     if (h->len - 1 < -pos) return;
 
@@ -147,11 +247,20 @@ void del_item_from_history(struct history * h, int pos) {
     return;
 }
 
-/*
- * Find a history element and move it. Starts from POS
- * pos=0 first element, pos=-1 second element
- * returns 1 if moved, 0 otherwise.
+/**
+ * \brief TODO <brief function description>
+ *
+ * \details Find a history element and move it. Starts from POS
+ * pos=0 first element, pos=-1 second element. Returns 1 if moved,
+ * 0 otherwise
+ *
+ * \param[in] h
+ * \param[in] item
+ * \param[in] pos
+ *
+ * \returns: 1 if moved; 0 otherwise
  */
+
 int move_item_from_history_by_str(struct history * h, wchar_t * item, int pos) {
     if (h->len - 1 < -pos || pos == 0 || ! wcslen(item)) return 0; // Move the first element is not allowed
     struct hlist * nl = h->list;
@@ -180,7 +289,15 @@ int move_item_from_history_by_str(struct history * h, wchar_t * item, int pos) {
     return 1;
 }
 
-// Add recent entry at the beginning
+/**
+ * @brief Add recent entry at the beginning
+ *
+ * \param[in] h
+ * \param[in] line
+ *
+ * \return none
+ */
+
 void add(struct history * h, wchar_t * line) {
     struct hlist * nl = (struct hlist *) malloc(sizeof(struct hlist));
 
@@ -204,13 +321,27 @@ void add(struct history * h, wchar_t * line) {
     return;
 }
 
-/*
- * Returns a history line from COMMAND_MODE
- * POS 0 is the most recent line
+/**
+ * \brief Returns
+ *
+ * \details Returns a history line form COMMAND_MODE
+ * POS 0 is the mose recent line
+ *
+ * \return none
  */
+
 wchar_t * get_line_from_history(struct history * h, int pos) {
     return get_hlist_from_history(h, pos)->line;
 }
+
+/**
+ * \brief TODO Document get_hlist_from_history()
+ *
+ * \param[in] h
+ * \param[in] pos
+ * 
+ * \return none
+ */
 
 struct hlist * get_hlist_from_history(struct history * h, int pos) {
     if (h->len <= - pos) return NULL;
