@@ -1,33 +1,59 @@
-/*
- * this is the ncurses implementation of sc-im user interface, or called tui.
- * it mainly consists on the following two windows:
+/*******************************************************************************
+ * Copyright (c) 2013-2017, Andrés Martinelli <andmarti@gmail.com              *
+ * All rights reserved.                                                        *
+ *                                                                             *
+ * This file is a part of SC-IM                                                *
+ *                                                                             *
+ * SC-IM is a spreadsheet program that is based on SC. The original authors    *
+ * of SC are James Gosling and Mark Weiser, and mods were later added by       *
+ * Chuck Martin.                                                               *
+ *                                                                             *
+ * Redistribution and use in source and binary forms, with or without          *
+ * modification, are permitted provided that the following conditions are met: *
+ * 1. Redistributions of source code must retain the above copyright           *
+ *    notice, this list of conditions and the following disclaimer.            *
+ * 2. Redistributions in binary form must reproduce the above copyright        *
+ *    notice, this list of conditions and the following disclaimer in the      *
+ *    documentation and/or other materials provided with the distribution.     *
+ * 3. All advertising materials mentioning features or use of this software    *
+ *    must display the following acknowledgement:                              *
+ *    This product includes software developed by Andrés Martinelli            *
+ *    <andmarti@gmail.com>.                                                    *
+ * 4. Neither the name of the Andrés Martinelli nor the                        *
+ *   names of other contributors may be used to endorse or promote products    *
+ *   derived from this software without specific prior written permission.     *
+ *                                                                             *
+ * THIS SOFTWARE IS PROVIDED BY ANDRES MARTINELLI ''AS IS'' AND ANY            *
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED   *
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE      *
+ * DISCLAIMED. IN NO EVENT SHALL ANDRES MARTINELLI BE LIABLE FOR ANY           *
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES  *
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;*
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND *
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT  *
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE       *
+ * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.           *
+ *******************************************************************************/
+
+/**
+ * \file tui.c
+ * \author Andrés Martinelli <andmarti@gmail.com>
+ * \date 2017-07-18
+ * \brief TODO Write a brief file description.
+ *
+ * \details This is the ncurses implementation of sc-im user interface,
+ * or called tui. It mainly consists on the following two windows:
  * main_win: window that shows the grid
  * input_win: status bar window (or called header) and stdin input
  *
  * these are the functions called outside tui.c:
- * ui_start_screen        // function called to start ui
- * ui_stop_screen         // function called to stop ui
- * ui_show_header         // function that updates status bar in top of screen.
- * ui_update              // function used to refresh content of screen
- * ui_getch               // function that asks the user input from stdin (non blocking)
- * ui_getch_b             // function that asks the user input from stdin (blocking)
  * ui_query               // function to read text from stdin
  * ui_query_opt           // function that shows a message and waits for confirmation between a couple of defined options
- * ui_do_welcome          // function used when starting sc-im without a file as a parameter
- * ui_handle_cursor       // function used to handle cursor depending on current mode
  * yyerror                // error routine for yacc parser
- * ui_show_text           // function that shows text in a child process.
- *                           used for set, version, showmaps, print_graph,
- *                           showfilters, hiddenrows and hiddencols commands
  * ui_bail                // function to print errors of lua scripts
- * ui_sc_msg              // function that is used for sc_info, sc_error and sc_debug macros
  * ui_winchg              // function that handles SIGWINCH
- * ui_print_mult_pend     // function that shows multiplier in top left of screen
  * ui_show_celldetails    // function that shows cell details in header bar
  * ui_start_colors        // exclusive ui startup routine for colors
- * ui_clr_header          // functions that clears a line in header bar
- * ui_print_mode          // function that shows current mode in top right of screen
- * ui_get_formated_value  // function used for exporting spreadsheet to plain text
  * ui_pause
  * ui_resume
  *
@@ -35,8 +61,6 @@
  * ui_set_ucolor          // function called internally for setting a color
  * ui_show_content
  * ui_show_sc_col_headings
- * ui_show_sc_row_headings
- * ui_write_j
  * ui_add_cell_detail     // Add details of an ent to a char * received as a parameter. used for input_win
  *
  * ANYONE WHO WANTS TO PORT THIS TO ANOTHER UI, WOULD JUST NEED TO REIMPLEMENT THIS FILE
@@ -80,6 +104,12 @@ SCREEN * sstderr;
 SCREEN * sstdout;
 srange * ranges;
 
+/**
+ * \brief Called to start UI 
+ *
+ * \return none
+ */
+
 void ui_start_screen() {
     sstderr = newterm(NULL, stderr, stdin);
     noecho();
@@ -117,6 +147,12 @@ void ui_start_screen() {
     keypad(input_win, 1);
 }
 
+/**
+ * \brief Called to stop UI
+ *
+ * \return none
+ */
+
 void ui_stop_screen() {
     #ifdef USECOLORS
         //if (get_d_colors_param() != NULL)
@@ -133,27 +169,36 @@ void ui_stop_screen() {
     return;
 }
 
-/*
- * this function asks user for input from stdin.
- * should be non blocking and should
- * return -1 when no key was press
- * return 0 when key was press.
- * it receives * wint_t as a parameter.
- * when a valid key is press, its value its then updated in that wint_t variable.
+/**
+ * \brief Asks the user input from stdin (non-blocking)
+ *
+ * \details This function asks the user for input from stdin. Should be
+ * non-blocking and should return -1 when no key was pressed; 0 when
+ * key was pressed. It receives wint_t as a parameter. When a valid
+ * key is pressed, its value is then updated in that win_t variable.
+ *
+ * \param[in] wd
+ *
+ * \return 0 on key press; -1 otherwise
  */
+
 int ui_getch(wint_t * wd) {
     return wget_wch(input_win, wd);
 }
 
-
-/*
- * this function asks user for input from stdin.
- * should be blocking and should
- * return -1 when ESC was pressed
- * return 0 otherwise.
- * it receives * wint_t as a parameter.
- * when a valid key is press, its value its then updated in that wint_t variable.
+/**
+ * \brief Asks the user for input from stdin (blocking)
+ *
+ * \details This function asks the user for input from stdin. Should be
+ * blocking and should return -1 when ESC was pressed; 0 otherwise. It
+ * receives * wint_t as a parameter. When a valid key is pressed, its value
+ * is then updated in that wint_t variable.
+ *
+ * \param[in] wd
+ *
+ * \return -1 on ESC press; 0 otherwise
  */
+
 int ui_getch_b(wint_t * wd) {
     wtimeout(input_win, -1);
     move(0, rescol + inputline_pos + 1);
@@ -163,7 +208,14 @@ int ui_getch_b(wint_t * wd) {
     return -1;
 }
 
-// sc_msg - used for sc_info, sc_error and sc_debug macros
+/**
+ * \brief Used for sc_info, sc_error, and sc_debug macros
+ *
+ * \param[in] s
+ * \param[in] type
+ * \return none
+ */
+
 void ui_sc_msg(char * s, int type, ...) {
     if (type == DEBUG_MSG && ! atoi(get_conf_value("debug"))) return;
     char t[BUFFERSIZE];
@@ -202,7 +254,13 @@ void ui_sc_msg(char * s, int type, ...) {
     return;
 }
 
-// Welcome screen
+/**
+ * \brief Welcome screen function used when starting sc-im without a file
+ * as a parameter
+ *
+ * \return none
+ */
+
 void ui_do_welcome() {
     char * msg_title = "SC-IM - SpreadSheet Calculator Improvised";
     char * msg_by = "An SC fork by Andrés Martinelli";
@@ -264,8 +322,18 @@ void ui_do_welcome() {
     return;
 }
 
-// function that refreshes grid of screen
-// if header flag is set, the first column of screen gets refreshed
+/**
+ * \brief Refreshes screen grid
+ *
+ * \details This function is used to refresh the screen content. If 
+ * the header flag is set, the first column of the screen gets
+ * refreshed.
+ * 
+ * \param[in] header
+ *
+ * \return none
+ */
+
 void ui_update(int header) {
     if (loading) return;
     if (cmd_multiplier > 1) return;
@@ -331,7 +399,12 @@ void ui_update(int header) {
     return;
 }
 
-// Enable cursor and echo depending on the current mode
+/**
+ * \brief Enable cursor and echo depending on the current screen mode
+ *
+ * \return none
+ */
+
 void ui_handle_cursor() {
     switch (curmode) {
         case COMMAND_MODE:
@@ -350,18 +423,35 @@ void ui_handle_cursor() {
     return;
 }
 
-/*
- * internal function - Print string with alignment
- *  JUSTIF: 0 left shift
- *  JUSTIF: 1 right shift
+/**
+ * \brief Print string with alignment
+ *
+ * \details Internal function to print a string with alignment.
+ *
+ * JUSTIF: 0 left shift
+ * 
+ * JUSTIF: 1 right shift
+ *
+ * \param[in] win
+ * \param[in] word
+ * \param[in] row
+ * \param[in] justify
+ *
+ * \return none
  */
+
 void ui_write_j(WINDOW * win, const char * word, const unsigned int row, const unsigned int justif) {
     (justif == 0) ? (wmove(win, row, 0) && wclrtoeol(win)) : wmove(win, row, COLS - strlen(word));
     wprintw(win, "%s", word);
     return;
 }
 
-// Print multiplier and pending operator on the status bar
+/**
+ * \brief Print multiplier and pending operator to the status bar
+ *
+ * \return none
+ */
+
 void ui_print_mult_pend() {
     if (curmode != NORMAL_MODE && curmode != VISUAL_MODE && curmode != EDIT_MODE) return;
 
@@ -392,10 +482,12 @@ void ui_print_mult_pend() {
     wrefresh(input_win);
 }
 
-/*
- * Show first and second row (header)
- * Handle cursor position
+/**
+ * @brief Show first and second row (header). Handle cursor position.
+ *
+ * \return none
  */
+
 void ui_show_header() {
     ui_clr_header(0);
     ui_clr_header(1);
@@ -423,10 +515,14 @@ void ui_show_header() {
     return;
 }
 
-/*
- * Clean a whole row
- * i = line to clean
+/**
+ * \brief Clean a whole row
+ *
+ * \param[in] i Line to clean
+ *
+ * \return none
  */
+
 void ui_clr_header(int i) {
     int row_orig, col_orig;
     getyx(input_win, row_orig, col_orig);
@@ -441,10 +537,15 @@ void ui_clr_header(int i) {
     return;
 }
 
-/*
- * Print current mode in the first row
- * Print ':' (colon) or submode indicator
+/**
+ * \brief Print current mode in the first row
+ *
+ * Print the current mode in the first row. Print ':' (colon)
+ * or submode indicator.
+ *
+ * \return none
  */
+
 void ui_print_mode() {
     unsigned int row = 0; // Print mode in first row
     char strm[22] = "";
@@ -493,7 +594,15 @@ void ui_print_mode() {
     return;
 }
 
-// Show sc_row headings: 0, 1, 2, 3, 4...
+/**
+ * \brief Show sc_row headings: 0, 1, 2...
+ *
+ * \param[in] win
+ * \param[in] mxrow
+ *
+ * \return none
+ */
+
 void ui_show_sc_row_headings(WINDOW * win, int mxrow) {
     int row = 0;
     #ifdef USECOLORS
@@ -537,10 +646,15 @@ void ui_show_sc_row_headings(WINDOW * win, int mxrow) {
     }
 }
 
-/*
- * Show sc_col headings: A, B, C, D...
- * mxcol is last col printed in screen
+/**
+ * \brief Show sc_col headings: A, B, C...
+ *
+ * \param[in] win
+ * \param[in] mxcol last column printed to the screen
+ *
+ * \return none
  */
+
 void ui_show_sc_col_headings(WINDOW * win, int mxcol) {
     int i, col = rescol;
     int freeze = freeze_ranges && (freeze_ranges->type == 'c' ||  freeze_ranges->type == 'a') ? 1 : 0;
@@ -591,7 +705,16 @@ void ui_show_sc_col_headings(WINDOW * win, int mxcol) {
     }
 }
 
-// Show the content of the cells
+/**
+ * \brief Show the content of the cell
+ *
+ * \param[in] win
+ * \param[in] mxrow
+ * \param[in] mxcol
+ *
+ * \return none
+ */
+
 void ui_show_content(WINDOW * win, int mxrow, int mxcol) {
     register struct ent ** p;
     int row, col;
@@ -820,7 +943,18 @@ void ui_show_content(WINDOW * win, int mxrow, int mxcol) {
     }
 }
 
-// Add details of an ent to a char * received as a parameter. used for 'input_win'
+/**
+ * \brief Add details of an ent to a char*
+ *
+ * \details Add details of an ent to a char * received as a parameter.
+ * Used for 'input_win'
+ *
+ * \param[in] d
+ * \param[in] p1
+ *
+ * \return none
+ */
+
 void ui_add_cell_detail(char * d, struct ent * p1) {
     if ( ! p1 ) return;
 
@@ -859,7 +993,12 @@ void ui_add_cell_detail(char * d, struct ent * p1) {
     }
 }
 
-// Draw cell content detail in header
+/**
+ * \brief Draw cell content detail in header
+ *
+ * \return none
+ */
+
 void ui_show_celldetails() {
     char head[FBUFLEN];
     int inputline_pos = 0;
@@ -922,69 +1061,29 @@ void ui_show_celldetails() {
     //wrefresh(input_win);
 }
 
-// error routine for yacc (gram.y)
+/**
+ * \brief Error routine for yacc (gram.y)
+ *
+ * \param[in] err
+
+ * \return none
+ */
+
 void yyerror(char * err) {
     mvwprintw(input_win, 1, 0, "%s: %.*s<=%s", err, linelim, line, line + linelim);
     wrefresh(input_win);
     return;
 }
 
-/*
- * this function creates a string (value) that represents the formated value of the cell, if a format exists
- * returns 0  datetime format - number in p->v represents a date - format "d"
- * returns 1  format of number - (numbers with format) - puede haber label.
- * returns -1 if there is no format in the cell.
+/**
+ * \brief TODO Document winchg()
+ *
+ * \return none
  */
-int ui_get_formated_value(struct ent ** p, int col, char * value) {
-    //char * cfmt = (*p)->format ? (*p)->format : NULL;
-    char * cfmt = (*p)->format ? (*p)->format : (realfmt[col] >= 0 && realfmt[col] < COLFORMATS && colformat[realfmt[col]] != NULL) ? colformat[realfmt[col]] : NULL;
 
-    if (cfmt) {
-        if (*cfmt == 'd') {
-            time_t v = (time_t) ((*p)->v);
-            strftime(value, sizeof(char) * FBUFLEN, cfmt + 1, localtime(&v));
-            return 0;
-        } else {
-            format(cfmt, precision[col], (*p)->v, value, sizeof(char) * FBUFLEN);
-            return 1;
-        }
-    } else { // there is no format
-        return -1;
-    }
-}
+// TODO Consider renaming this to sig_winchg for consistancy with
+// the other signal funcitons.
 
-/*
- * function that shows text in a child process.
- * used for set, version, showmaps, print_graph,
- * showfilters, hiddenrows and hiddencols commands
- */
-void ui_show_text(char * val) {
-    int pid;
-    char px[MAXCMD];
-    char * pager;
-
-    (void) strcpy(px, "| ");
-    if ( !(pager = getenv("PAGER")) )
-        pager = DFLT_PAGER;
-    (void) strcat(px, pager);
-    FILE * f = openfile(px, &pid, NULL);
-    if ( !f ) {
-        sc_error("Can't open pipe to %s", pager);
-        return;
-    }
-    def_prog_mode();
-    endwin();
-    fprintf(f, "%s\n", val);
-    fprintf(f, "Press 'q' and then ENTER to return.");
-    closefile(f, pid, 0);
-    getchar();
-    reset_prog_mode();
-    refresh();
-    ui_update(TRUE);
-}
-
-// SIGWINCH signal !!!!
-// resize of terminal
 void winchg() {
     endwin();
     set_term(sstdout);
@@ -1001,6 +1100,15 @@ void winchg() {
 
 #ifdef XLUA
 /* function to print errors of lua scripts */
+/**
+ * \brief Print error of lua scripts
+ *
+ * \param[in] L
+ * \param[in] msg
+ *
+ * \return none
+ */
+
 void ui_bail(lua_State *L, char * msg) {
     extern char stderr_buffer[1024];
     fprintf(stderr,"FATAL ERROR: %s: %s\n", msg, lua_tostring(L, -1));
@@ -1029,6 +1137,18 @@ void ui_bail(lua_State *L, char * msg) {
  * and waits for user confirmation between a couple of options defined on valid (wchar *)
  * returns a wchar_t indicating user answer
  */
+/**
+ * @brief TODO Write a brief function description
+ *
+ * TODO Write a longer function description.
+ *
+ * Example usage:
+ * @code
+ *     <function name>();
+ * @endcode
+ * returns: none
+ */
+
 wchar_t ui_query_opt(wchar_t * initial_msg, wchar_t * valid) {
     if (! wcslen(initial_msg)) return L'\0';
     sc_info("%ls", initial_msg);
@@ -1049,6 +1169,18 @@ wchar_t ui_query_opt(wchar_t * initial_msg, wchar_t * valid) {
 }
 
 /* function to read text from stdin */
+/**
+ * @brief TODO Write a brief function description
+ *
+ * TODO Write a longer function description.
+ *
+ * Example usage:
+ * @code
+ *     <function name>();
+ * @endcode
+ * returns: none
+ */
+
 char * ui_query(char * initial_msg) {
     char * hline = (char *) malloc(sizeof(char) * BUFFERSIZE);
     hline[0]='\0';
@@ -1112,6 +1244,18 @@ char * ui_query(char * initial_msg) {
 }
 
 // Set a color
+/**
+ * @brief TODO Write a brief function description
+ *
+ * TODO Write a longer function description.
+ *
+ * Example usage:
+ * @code
+ *     <function name>();
+ * @endcode
+ * returns: none
+ */
+
 void ui_set_ucolor(WINDOW * w, struct ucolor * uc) {
     long attr = A_NORMAL;
     if (uc->bold)      attr |= A_BOLD;
@@ -1123,6 +1267,18 @@ void ui_set_ucolor(WINDOW * w, struct ucolor * uc) {
     wattrset (w, attr | COLOR_PAIR((uc->fg+1)*9 + uc->bg + 2));
 }
 
+/**
+ * @brief TODO Write a brief function description
+ *
+ * TODO Write a longer function description.
+ *
+ * Example usage:
+ * @code
+ *     <function name>();
+ * @endcode
+ * returns: none
+ */
+
 void ui_start_colors() {
     if (! has_colors()) return;
     int i, j;
@@ -1133,12 +1289,24 @@ void ui_start_colors() {
             init_pair( i*9+j+1, i-1, j-1); // i is fg and j is bg
 }
 
+/**
+ * \brief TODO Write a brief function description
+ *
+ * \return none
+ */
+
 void ui_pause() {
     def_prog_mode();
     set_term(sstderr);
     endwin();
     return;
 }
+
+/**
+ * \brief TODO Write a brief function description
+ *
+ * \return none
+ */
 
 void ui_resume() {
     set_term(sstdout);
