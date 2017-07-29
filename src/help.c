@@ -281,8 +281,12 @@ void find_word(char * word, char order) {
 int show_lines() {
     int lineno, i, k, key = 0, bold = 0 ;
 
-    for (lineno = 0; long_help[lineno + delta] && lineno < LINES - RESROW; lineno++) {
-        if (strlen(word_looked)) look_result = str_in_str(long_help[lineno + delta], word_looked);
+    for (lineno = 0; lineno + delta <= max && long_help[lineno + delta] && lineno < LINES - RESROW; lineno++) {
+        if (strlen(word_looked))
+            look_result =
+                str_in_str(
+                        long_help[lineno + delta],
+                        word_looked);
 
         wmove(main_win, lineno, 0);
         wclrtoeol(main_win);
