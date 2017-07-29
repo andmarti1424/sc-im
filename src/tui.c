@@ -483,7 +483,7 @@ void ui_print_mult_pend() {
 }
 
 /**
- * @brief Show first and second row (header). Handle cursor position.
+ * \brief Show first and second row (header). Handle cursor position.
  *
  * \return none
  */
@@ -540,7 +540,7 @@ void ui_clr_header(int i) {
 /**
  * \brief Print current mode in the first row
  *
- * Print the current mode in the first row. Print ':' (colon)
+ * \details Print the current mode in the first row. Print ':' (colon)
  * or submode indicator.
  *
  * \return none
@@ -1075,12 +1075,19 @@ void yyerror(char * err) {
     return;
 }
 
-/*
- * this function creates a string (value) that represents the formated value of the cell, if a format exists
- * returns 0  datetime format - number in p->v represents a date - format "d"
- * returns 1  format of number - (numbers with format) - puede haber label.
- * returns -1 if there is no format in the cell.
+/**
+ * \brief Create a string that represents the formatted value of the cell
+ *
+ * \details This function creates a string (value) that represents
+ * the formatted value of the cell.
+ *
+ * \param[in] err
+
+ * \return 0 datetime format - number in p->v represents a date - format "d"
+ * \return 1 if format of number - (numbers with format) - puede harber label.
+ * \return -1 if there is no format in the cell
  */
+
 int ui_get_formated_value(struct ent ** p, int col, char * value) {
     //char * cfmt = (*p)->format ? (*p)->format : NULL;
     char * cfmt = (*p)->format ? (*p)->format : (realfmt[col] >= 0 && realfmt[col] < COLFORMATS && colformat[realfmt[col]] != NULL) ? colformat[realfmt[col]] : NULL;
@@ -1099,11 +1106,15 @@ int ui_get_formated_value(struct ent ** p, int col, char * value) {
     }
 }
 
-/*
- * function that shows text in a child process.
- * used for set, version, showmaps, print_graph,
- * showfilters, hiddenrows and hiddencols commands
+/**
+ * \brief Shows text in child process
+ *
+ * \details Shows text in child process. Used for set, version,
+ * showmaps, print_graph, showfilters, hiddenrows, and hiddencols commands.
+ *
+ * \param[in] val
  */
+
 void ui_show_text(char * val) {
     int pid;
     char px[MAXCMD];
