@@ -1,3 +1,47 @@
+/*******************************************************************************
+ * Copyright (c) 2013-2017, Andrés Martinelli <andmarti@gmail.com              *
+ * All rights reserved.                                                        *
+ *                                                                             *
+ * This file is a part of SC-IM                                                *
+ *                                                                             *
+ * SC-IM is a spreadsheet program that is based on SC. The original authors    *
+ * of SC are James Gosling and Mark Weiser, and mods were later added by       *
+ * Chuck Martin.                                                               *
+ *                                                                             *
+ * Redistribution and use in source and binary forms, with or without          *
+ * modification, are permitted provided that the following conditions are met: *
+ * 1. Redistributions of source code must retain the above copyright           *
+ *    notice, this list of conditions and the following disclaimer.            *
+ * 2. Redistributions in binary form must reproduce the above copyright        *
+ *    notice, this list of conditions and the following disclaimer in the      *
+ *    documentation and/or other materials provided with the distribution.     *
+ * 3. All advertising materials mentioning features or use of this software    *
+ *    must display the following acknowledgement:                              *
+ *    This product includes software developed by Andrés Martinelli            *
+ *    <andmarti@gmail.com>.                                                    *
+ * 4. Neither the name of the Andrés Martinelli nor the                        *
+ *   names of other contributors may be used to endorse or promote products    *
+ *   derived from this software without specific prior written permission.     *
+ *                                                                             *
+ * THIS SOFTWARE IS PROVIDED BY ANDRES MARTINELLI ''AS IS'' AND ANY            *
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED   *
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE      *
+ * DISCLAIMED. IN NO EVENT SHALL ANDRES MARTINELLI BE LIABLE FOR ANY           *
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES  *
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;*
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND *
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT  *
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE       *
+ * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.           *
+ *******************************************************************************/
+
+/**
+ * \file vmtbl.c
+ * \author Andrés Martinelli <andmarti@gmail.com>
+ * \date 2017-07-18
+ * \brief TODO Write a tbrief file description.
+ */
+
 #include <stdio.h>
 #include <stdlib.h> // for atoi
 #include <unistd.h>
@@ -16,6 +60,15 @@
  * current size if we can.
  */
 #ifndef PSC
+/**
+ * \brief TODO Document checkbounds()
+ *
+ * \param[in] rowp
+ * \param[in] colp
+ *
+ * \return none
+ */
+
 void checkbounds(int *rowp, int *colp) {
     if (*rowp < 0)
         *rowp = 0;
@@ -57,11 +110,20 @@ static char nolonger[] = "The table can't be any longer";
 
 static char nowider[] = "The table can't be any wider";
 
-/*
- * grow the main && auxiliary tables (reset maxrows/maxcols as needed)
- * toprow &&/|| topcol tell us a better guess of how big to become.
- * we return TRUE if we could grow, FALSE if not....
+/**
+ * \brief TODO Document growtbl()
+ *
+ * \details Grow the main && auxillary tables (reset maxrows/mascols
+ * as needed). toprow &&/|| topcol tells us a better guess of how big
+ * to become. We return TRUE if we could grow, FALSE if not.
+ * \param[in] rowcol
+ * \param[in] toprow
+ * \param[in] topcol
+ *
+ * \return TRUE if we could grow
+ * \return FALSE if we cannot grow
  */
+
 int growtbl(int rowcol, int toprow, int topcol) {
     int * fwidth2;
     int * precision2;
@@ -197,6 +259,16 @@ int growtbl(int rowcol, int toprow, int topcol) {
     maxcols = newcols;
     return (TRUE);
 }
+
+/**
+ * \brief TODO Document ATBL()
+ *
+ * \param[in] tlb
+ * \param[in] row
+ * \param[in] col
+ *
+ * \return none
+ */
 
 struct ent ** ATBL(struct ent ***tbl, int row, int col) {
     struct ent **ent=(*(tbl+row)+(col));
