@@ -1,3 +1,47 @@
+/*******************************************************************************
+ * Copyright (c) 2013-2017, Andrés Martinelli <andmarti@gmail.com              *
+ * All rights reserved.                                                        *
+ *                                                                             *
+ * This file is a part of SC-IM                                                *
+ *                                                                             *
+ * SC-IM is a spreadsheet program that is based on SC. The original authors    *
+ * of SC are James Gosling and Mark Weiser, and mods were later added by       *
+ * Chuck Martin.                                                               *
+ *                                                                             *
+ * Redistribution and use in source and binary forms, with or without          *
+ * modification, are permitted provided that the following conditions are met: *
+ * 1. Redistributions of source code must retain the above copyright           *
+ *    notice, this list of conditions and the following disclaimer.            *
+ * 2. Redistributions in binary form must reproduce the above copyright        *
+ *    notice, this list of conditions and the following disclaimer in the      *
+ *    documentation and/or other materials provided with the distribution.     *
+ * 3. All advertising materials mentioning features or use of this software    *
+ *    must display the following acknowledgement:                              *
+ *    This product includes software developed by Andrés Martinelli            *
+ *    <andmarti@gmail.com>.                                                    *
+ * 4. Neither the name of the Andrés Martinelli nor the                        *
+ *   names of other contributors may be used to endorse or promote products    *
+ *   derived from this software without specific prior written permission.     *
+ *                                                                             *
+ * THIS SOFTWARE IS PROVIDED BY ANDRES MARTINELLI ''AS IS'' AND ANY            *
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED   *
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE      *
+ * DISCLAIMED. IN NO EVENT SHALL ANDRES MARTINELLI BE LIABLE FOR ANY           *
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES  *
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;*
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND *
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT  *
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE       *
+ * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.           *
+ *******************************************************************************/
+
+/**
+ * \file undo.c
+ * \author Andrés Martinelli <andmarti@gmail.com>
+ * \date 2017-07-18
+ * \brief TODO Write a tbrief file description.
+ */
+
 #ifdef UNDO
 /*
  * UNDO and REDO features works with an 'undo' struct list.
@@ -93,7 +137,12 @@ static int undo_list_len = 0;
 // Temporal variable
 static struct undo undo_item;
 
-// Init 'unto_item'
+/**
+ * \brief Init 'unto_item'
+ *
+ * \return none
+ */
+
 void create_undo_action() {
     undo_item.added       = NULL;
     undo_item.removed     = NULL;
@@ -110,8 +159,15 @@ void create_undo_action() {
     return;
 }
 
-// Save undo_item copy with 'ent' elements modified, and the undo range shift
-// struct into the undolist
+/**
+ * @brief TODO Document end_undo_action()
+ *
+ * \details Save undo_item copy with 'ent' elements modified, and the
+ * unto range shift struct into the undolist.
+ *
+ * \return none
+ */
+
 void end_undo_action() {
     add_to_undolist(undo_item);
 
@@ -129,11 +185,18 @@ void end_undo_action() {
     return;
 }
 
-/*
- * Add a undo node to the undolist,
- * allocate memory for undo struct,
- * fill variable with undo_item value and append it to the list
+/**
+ * \brief Document add_to_undolist()
+ *
+ * \details Add an undo node to the undolist. Allocate memory for
+ * undo struct. Fill variable with undo_item value and append it
+ * to the list.
+ *
+ * \param[in] u
+ *
+ * \return none
  */
+
 void add_to_undolist(struct undo u) {
     // If not at the end of the list, remove from the end
     if ( undo_list != NULL && undo_list_pos != len_undo_list() )
@@ -170,15 +233,20 @@ void add_to_undolist(struct undo u) {
     return;
 }
 
-/*
- * dismiss current undo_item
- * this functions free memory of and struct undo.
- * its used in function free_undo_node for that purpose.
+/**
+ * \brief Dismiss current undo_item
  *
- * but as well, this function shall be called instead of end_undo_action
- * in case we want to cancel a previous create_undo_action
- * if called for this purpose argument shall be NULL
+ * \details This function frees memory of a struct unto. It is used
+ * in function free_undo_node for that purpose. But as well, this 
+ * function shall be called instead of end_undo_action in case we want
+ * to cancel a previous create_undo_action. If called for this purpose,
+ * argument shall be NULL.
+ *
+ * \param[in] ul
+ *
+ * \return none
  */
+
 void dismiss_undo_item(struct undo * ul) {
     struct ent * en;
     struct ent * de;
@@ -219,7 +287,14 @@ void dismiss_undo_item(struct undo * ul) {
     return;
 }
 
-// Cascade free UNDO node memory
+/**
+ * \brief Cascade free UNDO node memory
+ *
+ * \param[in] ul
+ *
+ * \return none
+ */
+
 void free_undo_node(struct undo * ul) {
     struct undo * e;
 
@@ -235,7 +310,12 @@ void free_undo_node(struct undo * ul) {
     return;
 }
 
-// Remove nodes below the current position from the undolist
+/**
+ * \brief Remove nodes below the current position from the undolist
+ *
+ * \return none
+ */
+
 void clear_from_current_pos() {
     if (undo_list == NULL) return;
 
@@ -252,6 +332,12 @@ void clear_from_current_pos() {
 }
 
 // Remove undolist content
+/**
+ * \brief Remove undolist content
+ *
+ * \return none
+ */
+
 void clear_undo_list() {
     if (undo_list == NULL) return;
 
@@ -270,16 +356,31 @@ void clear_undo_list() {
     return;
 }
 
+/**
+ * \brief Returnt the length of the undo list
+ *
+ * \return length of undolist
+ */
+
 int len_undo_list() {
     return undo_list_len;
 }
 
-/*
- * Take a range of 'ent' elements and create new ones (as many as elements
- * inside the specified range).
- * Then copy the content of the original ones to the new ones and save them into
- * the 'added' or 'removed' list of undo_item, according to the char type.
+/**
+ * \brief TODO Document copy_to_undostruct()
+ *
+ * \details Take a range of 'ent' elements and create new ones (as many
+ * as there are elements inside the specified range). Then copy the content
+ * of the original ones to the new ones and save them into the 'added' or
+ * 'removed' list of undo_items, according to the char type.
+ *
+ * Example usage:
+ * @code
+ *     <function name>();
+ * @endcode
+ * returns: none
  */
+
 void copy_to_undostruct (int row_desde, int col_desde, int row_hasta, int col_hasta, char type) {
     int c, r;
     struct ent * p;
@@ -322,11 +423,16 @@ void copy_to_undostruct (int row_desde, int col_desde, int row_hasta, int col_ha
     return;
 }
 
-/*
- * this is used to keep aux ents in the undo struct
- * used for undoing dr dc sk and sh commands..
- * it stores a copy of the ent received as parameter and returns the point to that copy
+/**
+ * \brief TODO Codument add_undo_aux_ent()
+ *
+ * \details This function is used to keep aux ents in the undo struct.
+ * This is used for undoing dr, dc, sk, and sh commands. It stores a copy
+ * of the ent received as a parameter and returns the pointer to that copy.
+ *
+ * \return pointer to a copied ent
  */
+
 struct ent * add_undo_aux_ent(struct ent * e) {
     struct ent * e_new = (struct ent *) malloc( (unsigned) sizeof(struct ent) );
     cleanent(e_new);
@@ -335,6 +441,18 @@ struct ent * add_undo_aux_ent(struct ent * e) {
     undo_item.aux_ents = e_new;
     return e_new;
 }
+
+/**
+ * \brief TODO Document add_undo_col_format()
+ *
+ * \param[in] col
+ * \param[in] type
+ * \param[in] fwidth
+ * \param[in] precision
+ * \param[in] realfmt
+ *
+ * \return none
+ */
 
 void add_undo_col_format(int col, int type, int fwidth, int precision, int realfmt) {
     if (undo_item.cols_format == NULL) {
@@ -353,8 +471,23 @@ void add_undo_col_format(int col, int type, int fwidth, int precision, int realf
     return;
 }
 
-// Takes a range, a rows and columns delta and save them in the undo struct
-// Used to shift ranges when UNDO or REDO without duplicating 'ent' elements
+/**
+ * \brief TODO Document save_undo_range_shift()
+ *
+ * \detials Take a range, a rows and columns delta and save them into
+ * they undo struct. Used to shift ranges when UNDO or REDO without
+ * duplicating 'ent'elements.
+ *
+ * \param[in] delta_rows
+ * \param[in] delta_cols
+ * \param[in] tlrow
+ * \param[in] tlcol
+ * \param[in] brrow
+ * \param[in] brcol
+ *
+ * \return none
+ */
+
 void save_undo_range_shift(int delta_rows, int delta_cols, int tlrow, int tlcol, int brrow, int brcol) {
     struct undo_range_shift * urs = (struct undo_range_shift *) malloc( (unsigned) sizeof(struct undo_range_shift ) );
     urs->delta_rows = delta_rows;
@@ -376,6 +509,26 @@ void save_undo_range_shift(int delta_rows, int delta_cols, int tlrow, int tlcol,
  * As these lists are dynamically built, in the first position of every list,
  * we always store the number of elements that the list has.
  */
+/**
+ * \brief TODO Document undo_hide_show()
+ *
+ * \details This function is used for undoint and redoing changes
+ * caused by commands that hide/show rows/columns of screen such
+ * as Zr, Zc, Sc, and Sr commands.
+ *
+ * It stores in four different lists (int * list) the row or column numbers
+ * that are shown or hidden because of a change. As these lists are
+ * dynamically built, in the first position of every list, we always store
+ * the number of elements that the list has.
+ *
+ * \param[in] row
+ * \param[in] col
+ * \param[in] type
+ * \param[in] arg
+ *
+ * \return none
+ */
+
 void undo_hide_show(int row, int col, char type, int arg) {
     int i;
     if (type == 'h') {
@@ -434,11 +587,15 @@ void undo_hide_show(int row, int col, char type, int arg) {
     return;
 }
 
-/*
- * Do UNDO operation
- * Shift a range of an undo shift range to the original position, if any, append
- * 'ent' elements from 'removed' and remove those from 'added'
+/**
+ * \brief Do UNDO operation
+ *
+ * Shift a range of an undo shift range to the original position, if any,
+ * append 'ent' elements 'removed' and remove those from 'added'.
+ *
+ * \return none
  */
+
 void do_undo() {
     if (undo_list == NULL || undo_list_pos == 0) {
         sc_error("No UNDO's left");
@@ -587,11 +744,15 @@ void do_undo() {
     return;
 }
 
-/*
- * Do REDO
- * Shift a range of an undo shift range to the original position, if any, append
- * 'ent' elements from 'added' and remove those from 'removed'
+/**
+ * \brief Do REDO
+ *
+ * Shift a range of an undo shift range to the original position, if any,
+ * append 'ent' elements from 'added' and remove those from 'removed'.
+ *
+ * \return none
  */
+
 void do_redo() {
     //if ( undo_list == NULL || undo_list_pos == len_undo_list()  ) {
     //FIXME check why undo_list_pos can sometimes be > len_undo_list(). it shouldnt!!
