@@ -1,3 +1,47 @@
+/*******************************************************************************
+ * Copyright (c) 2013-2017, Andrés Martinelli <andmarti@gmail.com              *
+ * All rights reserved.                                                        *
+ *                                                                             *
+ * This file is a part of SC-IM                                                *
+ *                                                                             *
+ * SC-IM is a spreadsheet program that is based on SC. The original authors    *
+ * of SC are James Gosling and Mark Weiser, and mods were later added by       *
+ * Chuck Martin.                                                               *
+ *                                                                             *
+ * Redistribution and use in source and binary forms, with or without          *
+ * modification, are permitted provided that the following conditions are met: *
+ * 1. Redistributions of source code must retain the above copyright           *
+ *    notice, this list of conditions and the following disclaimer.            *
+ * 2. Redistributions in binary form must reproduce the above copyright        *
+ *    notice, this list of conditions and the following disclaimer in the      *
+ *    documentation and/or other materials provided with the distribution.     *
+ * 3. All advertising materials mentioning features or use of this software    *
+ *    must display the following acknowledgement:                              *
+ *    This product includes software developed by Andrés Martinelli            *
+ *    <andmarti@gmail.com>.                                                    *
+ * 4. Neither the name of the Andrés Martinelli nor the                        *
+ *   names of other contributors may be used to endorse or promote products    *
+ *   derived from this software without specific prior written permission.     *
+ *                                                                             *
+ * THIS SOFTWARE IS PROVIDED BY ANDRES MARTINELLI ''AS IS'' AND ANY            *
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED   *
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE      *
+ * DISCLAIMED. IN NO EVENT SHALL ANDRES MARTINELLI BE LIABLE FOR ANY           *
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES  *
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;*
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND *
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT  *
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE       *
+ * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.           *
+ *******************************************************************************/
+
+/**
+ * \file range.c
+ * \author Andrés Martinelli <andmarti@gmail.com>
+ * \date 2017-07-18
+ * \brief The main file of sc-im 
+ */
+
 #include <sys/types.h>
 #include <string.h>
 #include <stdio.h>
@@ -17,7 +61,17 @@ extern int curcol;
 extern char * col_hidden;
 extern char * row_hidden;
 
-// Create a range from either to marks or two cells
+/**
+* \brief Create a range from either to marks or two cells. 
+* 
+* \param[in] c
+* \param[in] d
+* \param[in] tl
+* \param[in] br
+* 
+* \return none
+*/
+
 srange * create_range(char c, char d, struct ent * tl, struct ent * br) {
     int tlrow, tlcol, brrow, brcol;
 
@@ -80,7 +134,12 @@ srange * create_range(char c, char d, struct ent * tl, struct ent * br) {
     return r;
 }
 
-// Deselect recorded ranges
+/**
+* \brief Deselect recorded ranges 
+*
+* \return none
+*/
+
 void unselect_ranges() {
     srange * r = ranges;
     while (r != NULL) {
@@ -99,12 +158,24 @@ void unselect_ranges() {
     }
 }
 
-// Returns a range from the range list on POS
+/**
+* \brief Returns a range from the range list on POS
+*
+* \param[in] pos
+*
+* \return ranges + pos
+*/
+
 srange * get_range_by_pos(int pos) {
     return (ranges + pos);
 }
 
-// Return the select range if any
+/**
+* \brief Return the select range if any
+*
+* \return none
+*/
+
 srange * get_selected_range() {
     srange * s = ranges;
     while (s != NULL) {
@@ -114,7 +185,12 @@ srange * get_selected_range() {
     return NULL;
 }
 
-// Returns the position of the select range if any, -1 otherwise
+/**
+* \brief Returns the position of the select range if any, -1 otherwise
+*
+* \return none
+*/
+
 int is_range_selected() {
     srange * r = ranges;
     int f = 0;
@@ -126,7 +202,12 @@ int is_range_selected() {
     return -1;
 }
 
-// Remove all recorded ranges and free the corresponding  memory
+/**
+* \brief Remove all recorded ranges and free the corresponding memory
+*
+* \return none
+*/
+
 void free_ranges () {
     srange * r = ranges;
     srange * e = r;
@@ -139,7 +220,14 @@ void free_ranges () {
     return;
 }
 
-// Remove ranges by mark C, and free corresponding memory
+/**
+* \brief Remove ranges by mark C, and free corresponding memory
+* 
+* \param[in] c
+*
+* \return none
+*/
+
 void del_ranges_by_mark (char c) {
     srange * r = ranges;
     srange * ant;
@@ -171,6 +259,15 @@ void del_ranges_by_mark (char c) {
     return;
 }
 
+/**
+* \brief Returns the range created by two marks
+*
+* \param[in] c
+* \param[in] d
+*
+* \return none
+*/
+
 // Returns the range created by two marks
 srange * get_range_by_marks (char c, char d) {
     srange * r = ranges;
@@ -186,6 +283,17 @@ srange * get_range_by_marks (char c, char d) {
     return NULL;
 }
 
+/**
+* \brief TODO Document create_custom_range()
+*
+* \param[in] tlrow
+* \param[in] tlcol
+* \param[in] brrow
+* \param[in] brcol
+*
+* \return none
+*/
+
 srange * create_custom_range(int tlrow, int tlcol, int brrow, int brcol) {
     srange * srn = (srange *) malloc (sizeof(srange));
     srn->tlrow = tlrow;
@@ -195,6 +303,14 @@ srange * create_custom_range(int tlrow, int tlcol, int brrow, int brcol) {
     return srn;
 }
 
+/**
+* \brief TODO Document free_custom_range()
+*
+* \param[in] sr
+*
+* \return none
+*/
+
 void free_custom_range(srange * sr) {
     if (sr != NULL) free(sr);
     return;
@@ -202,6 +318,17 @@ void free_custom_range(srange * sr) {
 
 // ---------------------------------------------------------
 static struct range * rng_base;
+
+/**
+* \brief TODO Document add_range()
+*
+* \param[in] name
+* \param[in] left
+* \param[in] right
+* \param[in] is_range
+*
+* \return none
+*/
 
 void add_range(char * name, struct ent_ptr left, struct ent_ptr right, int is_range) {
     register char * p;
@@ -283,6 +410,15 @@ void add_range(char * name, struct ent_ptr left, struct ent_ptr right, int is_ra
     modflg++;
 }
 
+/**
+* \brief TODO Document del_range()
+*
+* \param[in] left
+* \param[in] right
+*
+* \return none
+*/
+
 void del_range(struct ent * left, struct ent * right) {
     struct range * r;
     int minr, minc, maxr, maxc;
@@ -309,6 +445,12 @@ void del_range(struct ent * left, struct ent * right) {
     modflg++;
 }
 
+/**
+* \brief TODO Document clean_range()
+*
+* \return none
+*/
+
 void clean_range() { // Used in 'erasedb'
     register struct range *r;
     register struct range *nextr;
@@ -324,7 +466,18 @@ void clean_range() { // Used in 'erasedb'
     }
 }
 
-// IMPORTANT
+/**
+* \brief TODO Document find_range()
+*
+* \param[in] name
+* \param[in] len
+* \param[in] lmatch
+* \param[in] rmatch
+* \param[in] rng
+*
+* \return none
+*/
+
 int find_range(char * name, int len, struct ent * lmatch, struct ent * rmatch, struct range ** rng) {
     struct range * r;
 
