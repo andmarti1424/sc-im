@@ -126,7 +126,7 @@ endif
 
 OBJS = $(patsubst %.c, %.o, $(wildcard *.c) $(wildcard utils/*.c)) gram.o
 
-.PHONY : all clean install
+.PHONY : all clean install docs
 
 all : $(name)
 
@@ -168,8 +168,12 @@ experres.h : gram.y
 statres.h : gram.y
 	sed -f sres.sed < gram.y > statres.h
 
+docs:
+	doxygen Doxyfile
+
 clean:
 	rm -f $(OBJS)
 	rm -f *res.h $(YTAB).h
 	rm -f core gram.c y.output pxmalloc.c pvmtbl.c tags $(name)qref
 	rm -f qhelp.c $(name)
+	rm -rf ../docs/ 
