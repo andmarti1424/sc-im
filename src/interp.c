@@ -838,17 +838,24 @@ double doeqs(char * s1, char * s2) {
     return(v);
 }
 
-
-/*
- * Given a string representing a column name and a value which is a row
- * number, return a pointer to the selected cell's entry, if any, else NULL.
- * Use only the integer part of the column number.  Always free the string.
+/**
+ * \brief TODO Document getent()
+ *
+ * \details Given a string representing a column name and a value which
+ * is a row number, return a pointer to the selected cell's entry, if any,
+ * else NULL. Use only the integer part of the column number. Always
+ * free the string
+ *
+ * \param[in] colstr
+ * \param[in] rwodoub
+ *
+ * \return none
  */
 
 struct ent * getent(char *colstr, double rowdoub) {
-    int collen;                         /* length of string */
-    int row, col;                       /* integer values   */
-    struct ent *p = (struct ent *) 0;   /* selected entry   */
+    int collen;                         /**< length of string */
+    int row, col;                       /**< integer values   */
+    struct ent *p = (struct ent *) 0;   /**< selected entry   */
 
     if (!colstr) {
         cellerror = CELLERROR;
@@ -868,21 +875,16 @@ struct ent * getent(char *colstr, double rowdoub) {
 }
 
 
-/*
- * Given a string representing a column name and a value which is a column
- * number, return the selected cell's numeric value, if any.
- */
-
 /**
- * @brief TODO <brief function description>
+ * \brief TODO Document donval()
  *
- * TODO Write longer function description.
+ * \details Given a string representing a column name and a value which is a
+ * column number, return the selected cell's numeric value, if any.
  *
- * Example usage:
- * @code
- *     <function name>();
- * @endcode
- * returns: none
+ * \param[in] colstr
+ * \param[in] rowdoub
+ *
+ * \return none
  */
 
 double donval(char * colstr, double rowdoub) {
@@ -892,21 +894,16 @@ double donval(char * colstr, double rowdoub) {
         (ep->v) : (double)0);
 }
 
-/*
- * The list routines (e.g. dolmax) are called with an LMAX enode.
- * The left pointer is a chain of ELIST nodes, the right pointer
- * is a value.
- */
 /**
- * @brief TODO <brief function description>
+ * \brief TODO Document dolmax()
  *
- * TODO Write longer function description.
+ * \details The list routines (e.g. dolmax) are called with an LMAX
+ * enode. The left pointer is a chain of ELIST nodes, the right
+ * pointer is a value.
  *
- * Example usage:
- * @code
- *     <function name>();
- * @endcode
- * returns: none
+ * \param[in] ep
+ *
+ * \return none
  */
 
 double dolmax(struct enode * ep) {
@@ -928,15 +925,11 @@ double dolmax(struct enode * ep) {
 }
 
 /**
- * @brief TODO <brief function description>
+ * \brief TODO Document dolmin()
  *
- * TODO Write longer function description.
+ * \param[in] ep
  *
- * Example usage:
- * @code
- *     <function name>();
- * @endcode
- * returns: none
+ * \return none
  */
 
 double dolmin(struct enode * ep) {
@@ -958,15 +951,12 @@ double dolmin(struct enode * ep) {
 }
 
 /**
- * @brief TODO <brief function description>
+ * \brief TODO Document eval()
  *
- * TODO Write longer function description.
+ * \param[in] end
+ * \param[in] e
  *
- * Example usage:
- * @code
- *     <function name>();
- * @endcode
- * returns: none
+ * \return none
  */
 
 double eval(register struct ent * ent, register struct enode * e) {
@@ -1292,15 +1282,9 @@ double eval(register struct ent * ent, register struct enode * e) {
 }
 
 /**
- * @brief TODO <brief function description>
+ * \brief TODO Document eval_fpe()
  *
- * TODO Write longer function description.
- *
- * Example usage:
- * @code
- *     <function name>();
- * @endcode
- * returns: none
+ * \return none
  */
 
 void eval_fpe() { /* Trap for FPE errors in eval */
@@ -1319,15 +1303,12 @@ void eval_fpe() { /* Trap for FPE errors in eval */
 }
 
 /**
- * @brief TODO <brief function description>
+ * \brief TODO Document fn1_eval()
  *
- * TODO Write longer function description.
+ * \param[in] fn
+ * \param[in] arg
  *
- * Example usage:
- * @code
- *     <function name>();
- * @endcode
- * returns: none
+ * \return none
  */
 
 double fn1_eval(double (*fn)(), double arg) {
@@ -1340,15 +1321,13 @@ double fn1_eval(double (*fn)(), double arg) {
 }
 
 /**
- * @brief TODO <brief function description>
+ * \brief TODO Document fn2_eval()
  *
- * TODO Write longer function description.
+ * \param[in] fn
+ * \param[in] arg1
+ * \param[in] arg2
  *
- * Example usage:
- * @code
- *     <function name>();
- * @endcode
- * returns: none
+ * \return none
  */
 
 double fn2_eval(double (*fn)(), double arg1, double arg2) {
@@ -1360,21 +1339,17 @@ double fn2_eval(double (*fn)(), double arg1, double arg2) {
     return res;
 }
 
-/*
- * Rules for string functions:
- * Take string arguments which they scxfree.
- * All returned strings are assumed to be xalloced.
- */
 /**
- * @brief TODO <brief function description>
+ * \brief TODO Document docat()
  *
- * TODO Write longer function description.
+ * \details Tules for string functions:
+ * Take string arguments which they scxfree. All returned strings
+ * are assumed to be xalloced.
  *
- * Example usage:
- * @code
- *     <function name>();
- * @endcode
- * returns: none
+ * \param[in] s1
+ * \param[in] s2
+ *
+ * \return none
  */
 
 char * docat(register char * s1, register char * s2) {
@@ -1396,15 +1371,12 @@ char * docat(register char * s1, register char * s2) {
 }
 
 /**
- * @brief TODO <brief function description>
+ * \brief TODO Document dodate()
  *
- * TODO Write longer function description.
+ * \param[in] tloc
+ * \param[in] fmstr
  *
- * Example usage:
- * @code
- *     <function name>();
- * @endcode
- * returns: none
+ * \return none
  */
 
 char * dodate(time_t tloc, char * fmtstr) {
@@ -1419,19 +1391,12 @@ char * dodate(time_t tloc, char * fmtstr) {
     return (p);
 }
 
-/*
- * conversion reverse from doascii
- */
 /**
- * @brief TODO <brief function description>
+ * @brief Conversion reverse from doascii
  *
- * TODO Write longer function description.
+ * \param[in] ascii
  *
- * Example usage:
- * @code
- *     <function name>();
- * @endcode
- * returns: none
+ * \return none
  */
 
 char * dochr(double ascii) {
@@ -1456,15 +1421,12 @@ char * dochr(double ascii) {
 }
 
 /**
- * @brief TODO <brief function description>
+ * \brief TODO Document dofmt()
  *
- * TODO Write longer function description.
+ * \param[in] fmtstr
+ * \param[in] v
  *
- * Example usage:
- * @code
- *     <function name>();
- * @endcode
- * returns: none
+ * \return none
  */
 
 char * dofmt(char * fmtstr, double v) {
@@ -1480,26 +1442,20 @@ char * dofmt(char * fmtstr, double v) {
     return (p);
 }
 
-
-/*
- * Given a command name and a value, run the command with the given value and
- * read and return its first output line (only) as an allocated string, always
- * a copy of se->e.o.s, which is set appropriately first unless external
- * functions are disabled, in which case the previous value is used.  The
- * handling of se->e.o.s and freeing of command is tricky.  Returning an
- * allocated string in all cases, even if null, insures cell expressions are
- * written to files, etc.
- */
 /**
- * @brief TODO <brief function description>
+ * \brief TODO Document doext()
  *
- * TODO Write longer function description.
+ * \details Given a command name and a value, run the command with the given
+ * value and read and return its first output line (only) as an allocated
+ * string, always a copy of se->e.o.s, whic is set appropriately first
+ * unless external functions are disabled, in which case the previous value
+ * is used. The handling of se->e.o.s. and freezing of command is tricky.
+ * Returning an allocated string in all cases, even if null, insures cell
+ * expressions are written to files, etc..
  *
- * Example usage:
- * @code
- *     <function name>();
- * @endcode
- * returns: none
+ * \param[in] se
+ *
+ * \return none
  */
 
 char * doext(struct enode *se) {
@@ -1558,22 +1514,18 @@ char * doext(struct enode *se) {
         return (strcpy(scxmalloc((size_t)1), ""));
 }
 
-/*
- * Given a string representing a column name and a value which is a column
- * number, return the selected cell's string value, if any.  Even if none,
- * still allocate and return a null string so the cell has a label value so
- * the expression is saved in a file, etc.
- */
 /**
- * @brief TODO <brief function description>
+ * \brief TODO Document dosval()
  *
- * TODO Write longer function description.
+ * \details Given a string representing a column name and a value which
+ * is a column number, return the selected cell's string value, if any.
+ * Even if none, still allocate and return a null string, so the cell
+ * has a label value, so the expression is saved in a file, etc..
  *
- * Example usage:
- * @code
- *     <function name>();
- * @endcode
- * returns: none
+ * \param[in] colstr
+ * \param[in] rowdoub
+ *
+ * \return none
  */
 
 char * dosval(char * colstr, double rowdoub) {
@@ -1589,35 +1541,27 @@ char * dosval(char * colstr, double rowdoub) {
 }
 
 /**
- * @brief TODO <brief function description>
+ * \brief TODO Document doreplace()
  *
- * TODO Write longer function description.
+ * \param[in] source
+ * \param[in] old
+ * \param[in] new
  *
- * Example usage:
- * @code
- *     <function name>();
- * @endcode
- * returns: none
+ * \return none
  */
 
 char * doreplace(char * source, char * old, char * new) {
     return str_replace(source, old, new);
 }
 
-/*
- * Substring:  Note that v1 and v2 are one-based to users, but zero-based
- * when calling this routine.
- */
 /**
- * @brief TODO <brief function description>
+ * \brief TODO Document dosubstring()
  *
- * TODO Write longer function description.
+ * \param[in] s
+ * \param[in] v1
+ * \param[in] v2
  *
- * Example usage:
- * @code
- *     <function name>();
- * @endcode
- * returns: none
+ * \return none
  */
 
 char * dosubstr(char * s, register int v1, register int v2) {
@@ -1645,19 +1589,13 @@ char * dosubstr(char * s, register int v1, register int v2) {
     return (p);
 }
 
-/*
- * character casing: make upper case, make lower case, set 8th bit
- */
 /**
- * @brief TODO <brief function description>
+ * \brief Character casing: make upper case, make lower case, set 8th bit
  *
- * TODO Write longer function description.
+ * \param[in] acase
+ * \param[in] s
  *
- * Example usage:
- * @code
- *     <function name>();
- * @endcode
- * returns: none
+ * \return none
  */
 
 char * docase(int acase, char * s) {
@@ -1688,22 +1626,17 @@ char * docase(int acase, char * s) {
     return (s);
 }
 
-/*
- * make proper capitals of every word in a string
- * if the string has mixed case we say the string is lower
- *    and we will upcase only first letters of words
- * if the string is all upper we will lower rest of words.
- */
 /**
- * @brief TODO <brief function description>
+ * \brief TODO Document docapital
  *
- * TODO Write longer function description.
+ * \details Make proper capitals of every word in a string. If the string
+ * has mixed case, we say the string is lower and we will upcase only
+ * first letters of words. If the string is all upper, we will lower rest
+ * of words.
  *
- * Example usage:
- * @code
- *     <function name>();
- * @endcode
- * returns: none
+ * \param[in] s
+ *
+ * \return none
  */
 
 char * docapital(char * s) {
@@ -1728,15 +1661,12 @@ char * docapital(char * s) {
 }
 
 /**
- * @brief TODO <brief function description>
+ * \brief TODO Document seval()
  *
- * TODO Write longer function description.
+ * \param[in] ent
+ * \param[in] se
  *
- * Example usage:
- * @code
- *     <function name>();
- * @endcode
- * returns: none
+ * \return none
  */
 
 char * seval(register struct ent * ent, register struct enode * se) {
@@ -1844,15 +1774,13 @@ char * seval(register struct ent * ent, register struct enode * se) {
 }
 
 /**
- * @brief TODO <brief function description>
+ * \brief TODO Document new()
  *
- * TODO Write longer function description.
+ * \param[in] op
+ * \param[in] a1
+ * \param[in] a2
  *
- * Example usage:
- * @code
- *     <function name>();
- * @endcode
- * returns: none
+ * \return none
  */
 
 struct enode * new(int op, struct enode * a1, struct enode * a2) {
@@ -1871,15 +1799,12 @@ struct enode * new(int op, struct enode * a1, struct enode * a2) {
 }
 
 /**
- * @brief TODO <brief function description>
+ * \brief TODO Document new_var()
  *
- * TODO Write longer function description.
+ * \param[in] op
+ * \param[in] a1
  *
- * Example usage:
- * @code
- *     <function name>();
- * @endcode
- * returns: none
+ * \return none
  */
 
 struct enode * new_var(int op, struct ent_ptr a1) {
@@ -1895,15 +1820,12 @@ struct enode * new_var(int op, struct ent_ptr a1) {
 }
 
 /**
- * @brief TODO <brief function description>
+ * \brief TODO Document new_range()
  *
- * TODO Write longer function description.
+ * \param[in] op
+ * \param[in] a1
  *
- * Example usage:
- * @code
- *     <function name>();
- * @endcode
- * returns: none
+ * \return none
  */
 
 struct enode * new_range(int op, struct range_s a1) {
@@ -1920,15 +1842,12 @@ struct enode * new_range(int op, struct range_s a1) {
 }
 
 /**
- * @brief TODO <brief function description>
+ * \brief TODO Document new_const()
  *
- * TODO Write longer function description.
+ * \param[in] op
+ * \param[in] a1
  *
- * Example usage:
- * @code
- *     <function name>();
- * @endcode
- * returns: none
+ * \return none
  */
 
 struct enode * new_const(int op, double a1) {
