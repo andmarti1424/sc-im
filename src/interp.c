@@ -1,11 +1,52 @@
-/*
- * Expression interpreter and assorted support routines
+/*******************************************************************************
+ * Copyright (c) 2013-2017, Andrés Martinelli <andmarti@gmail.com              *
+ * All rights reserved.                                                        *
+ *                                                                             *
+ * This file is a part of SC-IM                                                *
+ *                                                                             *
+ * SC-IM is a spreadsheet program that is based on SC. The original authors    *
+ * of SC are James Gosling and Mark Weiser, and mods were later added by       *
+ * Chuck Martin.                                                               *
+ *                                                                             *
+ * Redistribution and use in source and binary forms, with or without          *
+ * modification, are permitted provided that the following conditions are met: *
+ * 1. Redistributions of source code must retain the above copyright           *
+ *    notice, this list of conditions and the following disclaimer.            *
+ * 2. Redistributions in binary form must reproduce the above copyright        *
+ *    notice, this list of conditions and the following disclaimer in the      *
+ *    documentation and/or other materials provided with the distribution.     *
+ * 3. All advertising materials mentioning features or use of this software    *
+ *    must display the following acknowledgement:                              *
+ *    This product includes software developed by Andrés Martinelli            *
+ *    <andmarti@gmail.com>.                                                    *
+ * 4. Neither the name of the Andrés Martinelli nor the                        *
+ *   names of other contributors may be used to endorse or promote products    *
+ *   derived from this software without specific prior written permission.     *
+ *                                                                             *
+ * THIS SOFTWARE IS PROVIDED BY ANDRES MARTINELLI ''AS IS'' AND ANY            *
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED   *
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE      *
+ * DISCLAIMED. IN NO EVENT SHALL ANDRES MARTINELLI BE LIABLE FOR ANY           *
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES  *
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;*
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND *
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT  *
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE       *
+ * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.           *
+ *******************************************************************************/
+
+/**
+ * \file intrep.c
+ * \author Andrés Martinelli <andmarti@gmail.com>
+ * \date 2017-07-18
+ * \brief TODO Write a tbrief file description.
+ * 
+ * \details Expression interpreter and assorted support routines
  * Based on SC
- * original by James Gosling, September 1982
- * modified by Mark Weiser and Bruce Israel, University of Maryland
- *
- * More mods Robert Bond, 12/86
- * More mods by Alan Silverstein, 3-4/88, see list of changes.
+ * \details Original by James Gosling, September 1982
+ * \details Modified by Mark Weiser and Bruce Israel, University of Maryland
+ * \details More mods Robert Bond, 12/86
+ * \details More mods by Alan Silverstein, 3-4/88, see list of changes.
  */
 
 #include <sys/types.h>
@@ -85,7 +126,7 @@ void   three_arg     (char * s, struct enode * e);
 void   two_arg       (char * s, struct enode * e);
 void   two_arg_index (char * s, struct enode * e);
 double rint          (double d);
-int    cellerror = CELLOK;    /* is there an error in this cell */
+int    cellerror = CELLOK;    /**< is there an error in this cell */
 
 #ifndef M_PI
     #define M_PI (double)3.14159265358979323846
@@ -98,6 +139,17 @@ extern int find_range(char * name, int len, struct ent * lmatch, struct ent * rm
 
 #include "dep_graph.h"
 extern graphADT graph;
+
+/**
+ * \brief TODO Document finfunc()
+ *
+ * \param[in] fun
+ * \param[in] v1
+ * \param[in] v2
+ * \param[in] v3
+ *
+ * \return none
+ */
 
 double finfunc(int fun, double v1, double v2, double v3) {
     double answer,p;
@@ -138,6 +190,18 @@ double finfunc(int fun, double v1, double v2, double v3) {
         return (answer);
 }
 
+/**
+ * \brief TODO Document dostindex()
+ *
+ * \param[in] minr
+ * \param[in] minc
+ * \param[in] maxr
+ * \param[in] maxc
+ * \param[in] val
+ *
+ * \return none
+ */
+
 char * dostindex(int minr, int minc, int maxr, int maxc, struct enode * val) {
     int r, c;
     register struct ent * p;
@@ -167,6 +231,14 @@ char * dostindex(int minr, int minc, int maxr, int maxc, struct enode * val) {
         return ((char *) 0);
 }
 
+/**
+ * \brief TODO Document doascii()
+ *
+ * \param[in] s
+ *
+ * \return none
+ */
+
 double doascii(char * s) {
     double v = 0.;
     int i ;
@@ -177,6 +249,18 @@ double doascii(char * s) {
     scxfree(s);
     return(v);
 }
+
+/**
+ * \brief TODO Documetn doindex()
+ *
+ * \param[in] minr
+ * \param[in] minc
+ * \param[in] maxr
+ * \param[in] maxc
+ * \param[in] val
+ *
+ * \return none
+ */
 
 double doindex(int minr, int minc, int maxr, int maxc, struct enode * val) {
     int r, c;
@@ -204,6 +288,20 @@ double doindex(int minr, int minc, int maxr, int maxc, struct enode * val) {
     } else
         return (double) 0;
 }
+
+/**
+ * \brief TODO Document dolookup()
+ *
+ * \param[in] val
+ * \param[in] minr
+ * \param[in] minc
+ * \param[in] maxr
+ * \param[in] maxc
+ * \param[in] offset
+ * \param[in] vflag
+ *
+ * \return none
+ */
 
 double dolookup(struct enode * val, int minr, int minc, int maxr, int maxc, int offset, int vflag) {
     double v, ret = (double) 0;
@@ -265,6 +363,18 @@ double dolookup(struct enode * val, int minr, int minc, int maxr, int maxc, int 
     return ret;
 }
 
+/**
+ * \brief TODO Document docount()
+ *
+ * \param[in] minr
+ * \param[in] minc
+ * \param[in] maxr
+ * \param[in] maxc
+ * \param[in] e
+ *
+ * \return none
+ */
+
 double docount(int minr, int minc, int maxr, int maxc, struct enode * e) {
     int v;
     int r, c;
@@ -288,6 +398,18 @@ double docount(int minr, int minc, int maxr, int maxc, struct enode * e) {
     rowoffset = coloffset = 0;
     return v;
 }
+
+/**
+ * \brief TODO Document dosum()
+ *
+ * \param[in] minr
+ * \param[in] minc
+ * \param[in] maxr
+ * \param[in] maxc
+ * \param[in] e
+ *
+ * \return none
+ */
 
 double dosum(int minr, int minc, int maxr, int maxc, struct enode * e) {
     double v;
@@ -314,6 +436,18 @@ double dosum(int minr, int minc, int maxr, int maxc, struct enode * e) {
     return v;
 }
 
+/**
+ * \brief TODO Document doprod()
+ *
+ * \param[in] minr
+ * \param[in] minc
+ * \param[in] maxr
+ * \param[in] maxc
+ * \param[in] e
+ *
+ * \return none
+ */
+
 double doprod(int minr, int minc, int maxr, int maxc, struct enode * e) {
     double v;
     int r, c;
@@ -337,6 +471,18 @@ double doprod(int minr, int minc, int maxr, int maxc, struct enode * e) {
     rowoffset = coloffset = 0;
     return v;
 }
+
+/**
+ * \brief TODO Document doavg()
+ *
+ * \param[in] minr
+ * \param[in] minc
+ * \param[in] maxr
+ * \param[in] maxc
+ * \param[in] e
+ *
+ * \return none
+ */
 
 double doavg(int minr, int minc, int maxr, int maxc, struct enode * e) {
     double v;
@@ -367,6 +513,18 @@ double doavg(int minr, int minc, int maxr, int maxc, struct enode * e) {
 
     return (v / (double)count);
 }
+
+/**
+ * \brief TODO Document dostddev()
+ *
+ * \param[in] minr
+ * \param[in] minc
+ * \param[in] maxr
+ * \param[in] maxc
+ * \param[in] e
+ *
+ * \return none
+ */
 
 double dostddev(int minr, int minc, int maxr, int maxc, struct enode * e) {
     double lp, rp, v, nd;
@@ -401,6 +559,18 @@ double dostddev(int minr, int minc, int maxr, int maxc, struct enode * e) {
     return ( sqrt((nd*lp-rp*rp) / (nd*(nd-1))) );
 }
 
+/**
+ * \brief TODO Document domax()
+ *
+ * \param[in] minr
+ * \param[in] minc
+ * \param[in] maxr
+ * \param[in] maxc
+ * \param[in] e
+ *
+ * \return none
+ */
+
 double domax(int minr, int minc, int maxr, int maxc, struct enode * e) {
     double v = (double) 0;
     int r, c;
@@ -433,6 +603,18 @@ double domax(int minr, int minc, int maxr, int maxc, struct enode * e) {
 
     return (v);
 }
+
+/**
+ * \brief TODO Document domin()
+ *
+ * \param[in] minr
+ * \param[in] minc
+ * \param[in] maxr
+ * \param[in] maxc
+ * \param[in] e
+ *
+ * \return none
+ */
 
 double domin(int minr, int minc, int maxr, int maxc, struct enode * e) {
     double v = (double)0;
@@ -468,6 +650,16 @@ double domin(int minr, int minc, int maxr, int maxc, struct enode * e) {
 
 int mdays[12]={ 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
+/**
+ * \brief TODO Document dodts()
+ *
+ * \param[in] e1
+ * \param[in] e2
+ * \param[in] e3
+ *
+ * \return none
+ */
+
 double dodts(int e1, int e2, int e3) {
     int yr, mo, day;
     time_t secs;
@@ -499,6 +691,16 @@ double dodts(int e1, int e2, int e3) {
     return ((double) secs);
 }
 
+/**
+ * \brief TODO Document dotts()
+ *
+ * \param[in] hr
+ * \param[in] min
+ * \param[in] sec
+ *
+ * \return none
+ */
+
 double dotts(int hr, int min, int sec) {
     if (hr < 0 || hr > 23 || min < 0 || min > 59 || sec < 0 || sec > 59) {
         sc_error ("@tts: Invalid argument");
@@ -508,13 +710,38 @@ double dotts(int hr, int min, int sec) {
     return ((double) (sec + min * 60 + hr * 3600));
 }
 
+/**
+ * \brief TODO Document dorow()
+ * 
+ * \param[in] ep
+ *
+ * \return none
+ */
+
 double dorow(struct enode * ep) {
     return (double) ep->e.v.vp->row;
 }
 
+/**
+ * \brief TODO Document docol()
+ *
+ * \param[in] ep
+ *
+ * \return none
+ */
+
 double docol(struct enode * ep) {
     return (double) ep->e.v.vp->col;
 }
+
+/**
+ * \brief TODO Document dotime()
+ *
+ * \param[in] which
+ * \param[in] when
+ *
+ * \return none
+ */
 
 double dotime(int which, double when) {
     static time_t t_cache;
@@ -548,6 +775,14 @@ double dotime(int which, double when) {
     return ((double)0);
 }
 
+/**
+ * \brief TODO Document doston()
+ *
+ * \param[in] s
+ *
+ * \return none
+ */
+
 double doston(char * s) {
     double v;
 
@@ -558,6 +793,14 @@ double doston(char * s) {
     return(v);
 }
 
+/**
+ * \brief TODO Document doslen()
+ *
+ * \param[in] s
+ *
+ * \return none
+ */
+
 int doslen(char * s) {
     if (!s) return 0;
 
@@ -565,6 +808,15 @@ int doslen(char * s) {
     scxfree(s);
     return i;
 }
+
+/**
+ * \brief TODO Document doeqs()
+ *
+ * \param[in] s1
+ * \param[in] s2
+ *
+ * \return none
+ */
 
 double doeqs(char * s1, char * s2) {
     double v;
@@ -621,6 +873,18 @@ struct ent * getent(char *colstr, double rowdoub) {
  * number, return the selected cell's numeric value, if any.
  */
 
+/**
+ * @brief TODO <brief function description>
+ *
+ * TODO Write longer function description.
+ *
+ * Example usage:
+ * @code
+ *     <function name>();
+ * @endcode
+ * returns: none
+ */
+
 double donval(char * colstr, double rowdoub) {
     struct ent * ep;
 
@@ -633,7 +897,19 @@ double donval(char * colstr, double rowdoub) {
  * The left pointer is a chain of ELIST nodes, the right pointer
  * is a value.
  */
-double dolmax(struct ent * e, struct enode * ep) {
+/**
+ * @brief TODO <brief function description>
+ *
+ * TODO Write longer function description.
+ *
+ * Example usage:
+ * @code
+ *     <function name>();
+ * @endcode
+ * returns: none
+ */
+
+double dolmax(struct enode * ep) {
     register int count = 0;
     register double maxval = 0; /* Assignment to shut up lint */
     register struct enode * p;
@@ -641,7 +917,7 @@ double dolmax(struct ent * e, struct enode * ep) {
 
     cellerror = CELLOK;
     for (p = ep; p; p = p->e.o.left) {
-        v = eval(e, p->e.o.right);
+        v = eval(NULL, p->e.o.right);
         if ( !count || v > maxval) {
             maxval = v;
             count++;
@@ -651,7 +927,19 @@ double dolmax(struct ent * e, struct enode * ep) {
     else return (double)0;
 }
 
-double dolmin(struct ent * e, struct enode * ep) {
+/**
+ * @brief TODO <brief function description>
+ *
+ * TODO Write longer function description.
+ *
+ * Example usage:
+ * @code
+ *     <function name>();
+ * @endcode
+ * returns: none
+ */
+
+double dolmin(struct enode * ep) {
     register int count = 0;
     register double minval = 0; /* Assignment to shut up lint */
     register struct enode * p;
@@ -659,7 +947,7 @@ double dolmin(struct ent * e, struct enode * ep) {
 
     cellerror = CELLOK;
     for (p = ep; p; p = p->e.o.left) {
-        v = eval(e, p->e.o.right);
+        v = eval(NULL, p->e.o.right);
         if ( !count || v < minval) {
             minval = v;
             count++;
@@ -668,6 +956,18 @@ double dolmin(struct ent * e, struct enode * ep) {
     if (count) return minval;
     else return (double)0;
 }
+
+/**
+ * @brief TODO <brief function description>
+ *
+ * TODO Write longer function description.
+ *
+ * Example usage:
+ * @code
+ *     <function name>();
+ * @endcode
+ * returns: none
+ */
 
 double eval(register struct ent * ent, register struct enode * e) {
 //    //if (cellerror == CELLERROR || (ent && ent->cellerror == CELLERROR)) {
@@ -960,8 +1260,8 @@ double eval(register struct ent * ent, register struct enode * e) {
     case ASCII:  return (doascii(seval(ent, e->e.o.left)));
     case SLEN:   return (doslen(seval(ent, e->e.o.left)));
     case EQS:    return (doeqs(seval(ent, e->e.o.right), seval(ent, e->e.o.left)));
-    case LMAX:   return dolmax(ent, e);
-    case LMIN:   return dolmin(ent, e);
+    case LMAX:   return dolmax(e);
+    case LMIN:   return dolmin(e);
     case NVAL:   return (donval(seval(ent, e->e.o.left), eval(ent, e->e.o.right)));
     case MYROW:  return ((double) (gmyrow + rowoffset));
     case MYCOL:  return ((double) (gmycol + coloffset));
@@ -991,6 +1291,18 @@ double eval(register struct ent * ent, register struct enode * e) {
     return ((double) 0.0);
 }
 
+/**
+ * @brief TODO <brief function description>
+ *
+ * TODO Write longer function description.
+ *
+ * Example usage:
+ * @code
+ *     <function name>();
+ * @endcode
+ * returns: none
+ */
+
 void eval_fpe() { /* Trap for FPE errors in eval */
 #if defined(i386)
     sc_debug("eval_fpe i386");
@@ -1006,6 +1318,18 @@ void eval_fpe() { /* Trap for FPE errors in eval */
     longjmp(fpe_save, 1);
 }
 
+/**
+ * @brief TODO <brief function description>
+ *
+ * TODO Write longer function description.
+ *
+ * Example usage:
+ * @code
+ *     <function name>();
+ * @endcode
+ * returns: none
+ */
+
 double fn1_eval(double (*fn)(), double arg) {
     double res;
     errno = 0;
@@ -1014,6 +1338,18 @@ double fn1_eval(double (*fn)(), double arg) {
 
     return res;
 }
+
+/**
+ * @brief TODO <brief function description>
+ *
+ * TODO Write longer function description.
+ *
+ * Example usage:
+ * @code
+ *     <function name>();
+ * @endcode
+ * returns: none
+ */
 
 double fn2_eval(double (*fn)(), double arg1, double arg2) {
     double res;
@@ -1029,6 +1365,18 @@ double fn2_eval(double (*fn)(), double arg1, double arg2) {
  * Take string arguments which they scxfree.
  * All returned strings are assumed to be xalloced.
  */
+/**
+ * @brief TODO <brief function description>
+ *
+ * TODO Write longer function description.
+ *
+ * Example usage:
+ * @code
+ *     <function name>();
+ * @endcode
+ * returns: none
+ */
+
 char * docat(register char * s1, register char * s2) {
     register char * p;
     char * arg1, * arg2;
@@ -1047,6 +1395,18 @@ char * docat(register char * s1, register char * s2) {
     return (p);
 }
 
+/**
+ * @brief TODO <brief function description>
+ *
+ * TODO Write longer function description.
+ *
+ * Example usage:
+ * @code
+ *     <function name>();
+ * @endcode
+ * returns: none
+ */
+
 char * dodate(time_t tloc, char * fmtstr) {
     char buff[FBUFLEN];
     char * p;
@@ -1062,6 +1422,18 @@ char * dodate(time_t tloc, char * fmtstr) {
 /*
  * conversion reverse from doascii
  */
+/**
+ * @brief TODO <brief function description>
+ *
+ * TODO Write longer function description.
+ *
+ * Example usage:
+ * @code
+ *     <function name>();
+ * @endcode
+ * returns: none
+ */
+
 char * dochr(double ascii) {
     char * p = scxmalloc((size_t) 10);
     char * q = p;
@@ -1082,6 +1454,18 @@ char * dochr(double ascii) {
     *q = '\0';
     return p;
 }
+
+/**
+ * @brief TODO <brief function description>
+ *
+ * TODO Write longer function description.
+ *
+ * Example usage:
+ * @code
+ *     <function name>();
+ * @endcode
+ * returns: none
+ */
 
 char * dofmt(char * fmtstr, double v) {
     char buff[FBUFLEN];
@@ -1106,6 +1490,18 @@ char * dofmt(char * fmtstr, double v) {
  * allocated string in all cases, even if null, insures cell expressions are
  * written to files, etc.
  */
+/**
+ * @brief TODO <brief function description>
+ *
+ * TODO Write longer function description.
+ *
+ * Example usage:
+ * @code
+ *     <function name>();
+ * @endcode
+ * returns: none
+ */
+
 char * doext(struct enode *se) {
     char buff[FBUFLEN];        /* command line/return, not permanently alloc */
     char * command;
@@ -1168,6 +1564,18 @@ char * doext(struct enode *se) {
  * still allocate and return a null string so the cell has a label value so
  * the expression is saved in a file, etc.
  */
+/**
+ * @brief TODO <brief function description>
+ *
+ * TODO Write longer function description.
+ *
+ * Example usage:
+ * @code
+ *     <function name>();
+ * @endcode
+ * returns: none
+ */
+
 char * dosval(char * colstr, double rowdoub) {
     struct ent * ep;
     char * llabel;
@@ -1180,6 +1588,18 @@ char * dosval(char * colstr, double rowdoub) {
     return (strcpy(scxmalloc( (size_t) (strlen(llabel) + 1)), llabel));
 }
 
+/**
+ * @brief TODO <brief function description>
+ *
+ * TODO Write longer function description.
+ *
+ * Example usage:
+ * @code
+ *     <function name>();
+ * @endcode
+ * returns: none
+ */
+
 char * doreplace(char * source, char * old, char * new) {
     return str_replace(source, old, new);
 }
@@ -1188,6 +1608,18 @@ char * doreplace(char * source, char * old, char * new) {
  * Substring:  Note that v1 and v2 are one-based to users, but zero-based
  * when calling this routine.
  */
+/**
+ * @brief TODO <brief function description>
+ *
+ * TODO Write longer function description.
+ *
+ * Example usage:
+ * @code
+ *     <function name>();
+ * @endcode
+ * returns: none
+ */
+
 char * dosubstr(char * s, register int v1, register int v2) {
     register char * s1, * s2;
     char * p;
@@ -1216,6 +1648,18 @@ char * dosubstr(char * s, register int v1, register int v2) {
 /*
  * character casing: make upper case, make lower case, set 8th bit
  */
+/**
+ * @brief TODO <brief function description>
+ *
+ * TODO Write longer function description.
+ *
+ * Example usage:
+ * @code
+ *     <function name>();
+ * @endcode
+ * returns: none
+ */
+
 char * docase(int acase, char * s) {
     char * p = s;
 
@@ -1250,6 +1694,18 @@ char * docase(int acase, char * s) {
  *    and we will upcase only first letters of words
  * if the string is all upper we will lower rest of words.
  */
+/**
+ * @brief TODO <brief function description>
+ *
+ * TODO Write longer function description.
+ *
+ * Example usage:
+ * @code
+ *     <function name>();
+ * @endcode
+ * returns: none
+ */
+
 char * docapital(char * s) {
     char * p;
     int skip = 1;
@@ -1270,6 +1726,18 @@ char * docapital(char * s) {
     }
     return (s);
 }
+
+/**
+ * @brief TODO <brief function description>
+ *
+ * TODO Write longer function description.
+ *
+ * Example usage:
+ * @code
+ *     <function name>();
+ * @endcode
+ * returns: none
+ */
 
 char * seval(register struct ent * ent, register struct enode * se) {
     register char * p;
@@ -1375,6 +1843,18 @@ char * seval(register struct ent * ent, register struct enode * se) {
     }
 }
 
+/**
+ * @brief TODO <brief function description>
+ *
+ * TODO Write longer function description.
+ *
+ * Example usage:
+ * @code
+ *     <function name>();
+ * @endcode
+ * returns: none
+ */
+
 struct enode * new(int op, struct enode * a1, struct enode * a2) {
     register struct enode * p;
     //if (freeenodes) {
@@ -1390,6 +1870,18 @@ struct enode * new(int op, struct enode * a1, struct enode * a2) {
     return p;
 }
 
+/**
+ * @brief TODO <brief function description>
+ *
+ * TODO Write longer function description.
+ *
+ * Example usage:
+ * @code
+ *     <function name>();
+ * @endcode
+ * returns: none
+ */
+
 struct enode * new_var(int op, struct ent_ptr a1) {
     register struct enode * p;
     //if (freeenodes) {
@@ -1401,6 +1893,18 @@ struct enode * new_var(int op, struct ent_ptr a1) {
     p->e.v = a1; // ref to cell needed for this expr
     return p;
 }
+
+/**
+ * @brief TODO <brief function description>
+ *
+ * TODO Write longer function description.
+ *
+ * Example usage:
+ * @code
+ *     <function name>();
+ * @endcode
+ * returns: none
+ */
 
 struct enode * new_range(int op, struct range_s a1) {
     register struct enode * p;
@@ -1415,6 +1919,18 @@ struct enode * new_range(int op, struct range_s a1) {
     return p;
 }
 
+/**
+ * @brief TODO <brief function description>
+ *
+ * TODO Write longer function description.
+ *
+ * Example usage:
+ * @code
+ *     <function name>();
+ * @endcode
+ * returns: none
+ */
+
 struct enode * new_const(int op, double a1) {
     register struct enode * p;
     //if (freeenodes) {    /* reuse an already free'd enode */
@@ -1426,6 +1942,18 @@ struct enode * new_const(int op, double a1) {
     p->e.k = a1;
     return p;
 }
+
+/**
+ * @brief TODO <brief function description>
+ *
+ * TODO Write longer function description.
+ *
+ * Example usage:
+ * @code
+ *     <function name>();
+ * @endcode
+ * returns: none
+ */
 
 struct enode * new_str(char * s) {
     register struct enode * p;
@@ -1440,6 +1968,18 @@ struct enode * new_str(char * s) {
 }
 
 // Goto subroutines */
+/**
+ * @brief TODO <brief function description>
+ *
+ * TODO Write longer function description.
+ *
+ * Example usage:
+ * @code
+ *     <function name>();
+ * @endcode
+ * returns: none
+ */
+
 void g_free() {
     switch (gs.g_type) {
         case G_STR:
@@ -1452,6 +1992,18 @@ void g_free() {
     gs.g_type = G_NONE;
     gs.errsearch = 0;
 }
+
+/**
+ * @brief TODO <brief function description>
+ *
+ * TODO Write longer function description.
+ *
+ * Example usage:
+ * @code
+ *     <function name>();
+ * @endcode
+ * returns: none
+ */
 
 void go_previous() {
     int num = 0;
@@ -1473,6 +2025,18 @@ void go_previous() {
 }
 
 /* repeat the last goto command */
+/**
+ * @brief TODO <brief function description>
+ *
+ * TODO Write longer function description.
+ *
+ * Example usage:
+ * @code
+ *     <function name>();
+ * @endcode
+ * returns: none
+ */
+
 void go_last() {
     int num = 0;
 
@@ -1504,6 +2068,18 @@ void go_last() {
  * at row cornerrow and column cornercol in the upper left corner of the
  * screen if possible.
  */
+/**
+ * @brief TODO <brief function description>
+ *
+ * TODO Write longer function description.
+ *
+ * Example usage:
+ * @code
+ *     <function name>();
+ * @endcode
+ * returns: none
+ */
+
 void moveto(int row, int col, int lastrow_, int lastcol_, int cornerrow, int cornercol) {
     register int i;
 
@@ -1545,6 +2121,18 @@ void moveto(int row, int col, int lastrow_, int lastcol_, int cornerrow, int cor
  * flow = 1, look forward
  * flow = 0, look backwards
  */
+/**
+ * @brief TODO <brief function description>
+ *
+ * TODO Write longer function description.
+ *
+ * Example usage:
+ * @code
+ *     <function name>();
+ * @endcode
+ * returns: none
+ */
+
 void num_search(double n, int firstrow, int firstcol, int lastrow_, int lastcol_, int errsearch, int flow) {
     register struct ent * p;
     register int r, c;
@@ -1629,6 +2217,18 @@ void num_search(double n, int firstrow, int firstcol, int lastrow_, int lastcol_
  * flow = 1, look forward
  * flow = 0, look backwards
  */
+/**
+ * @brief TODO <brief function description>
+ *
+ * TODO Write longer function description.
+ *
+ * Example usage:
+ * @code
+ *     <function name>();
+ * @endcode
+ * returns: none
+ */
+
 void str_search(char *s, int firstrow, int firstcol, int lastrow_, int lastcol_, int num, int flow) {
     struct ent * p;
     int r, c;
@@ -1753,6 +2353,18 @@ void str_search(char *s, int firstrow, int firstcol, int lastrow_, int lastcol_,
 }
 
 /* fill a range with constants */
+/**
+ * @brief TODO <brief function description>
+ *
+ * TODO Write longer function description.
+ *
+ * Example usage:
+ * @code
+ *     <function name>();
+ * @endcode
+ * returns: none
+ */
+
 void fill(struct ent *v1, struct ent *v2, double start, double inc) {
     int r, c;
     register struct ent *n;
@@ -1817,6 +2429,18 @@ void fill(struct ent *v1, struct ent *v2, double start, double inc) {
 }
 
 /* lock a range of cells */
+/**
+ * @brief TODO <brief function description>
+ *
+ * TODO Write longer function description.
+ *
+ * Example usage:
+ * @code
+ *     <function name>();
+ * @endcode
+ * returns: none
+ */
+
 void lock_cells(struct ent * v1, struct ent * v2) {
     int r, c;
     register struct ent * n;
@@ -1853,6 +2477,18 @@ void lock_cells(struct ent * v1, struct ent * v2) {
 }
 
 /* unlock a range of cells */
+/**
+ * @brief TODO <brief function description>
+ *
+ * TODO Write longer function description.
+ *
+ * Example usage:
+ * @code
+ *     <function name>();
+ * @endcode
+ * returns: none
+ */
+
 void unlock_cells(struct ent * v1, struct ent * v2) {
     int r, c;
     register struct ent * n;
@@ -1889,6 +2525,18 @@ void unlock_cells(struct ent * v1, struct ent * v2) {
 }
 
 /* set the numeric part of a cell */
+/**
+ * @brief TODO <brief function description>
+ *
+ * TODO Write longer function description.
+ *
+ * Example usage:
+ * @code
+ *     <function name>();
+ * @endcode
+ * returns: none
+ */
+
 void let(struct ent * v, struct enode * e) {
 
     if (locked_cell(v->row, v->col)) return;
@@ -1988,6 +2636,18 @@ void let(struct ent * v, struct enode * e) {
     return;
 }
 
+/**
+ * @brief TODO <brief function description>
+ *
+ * TODO Write longer function description.
+ *
+ * Example usage:
+ * @code
+ *     <function name>();
+ * @endcode
+ * returns: none
+ */
+
 void slet(struct ent * v, struct enode * se, int flushdir) {
     if (locked_cell(v->row, v->col)) return;
 
@@ -2077,6 +2737,18 @@ void slet(struct ent * v, struct enode * se, int flushdir) {
     return;
 }
 
+/**
+ * @brief TODO <brief function description>
+ *
+ * TODO Write longer function description.
+ *
+ * Example usage:
+ * @code
+ *     <function name>();
+ * @endcode
+ * returns: none
+ */
+
 void format_cell(struct ent *v1, struct ent *v2, char *s) {
     int r, c;
     register struct ent *n;
@@ -2112,6 +2784,18 @@ void format_cell(struct ent *v1, struct ent *v2, char *s) {
 /*
  * Say if an expression is a constant (return 1) or not.
  */
+/**
+ * @brief TODO <brief function description>
+ *
+ * TODO Write longer function description.
+ *
+ * Example usage:
+ * @code
+ *     <function name>();
+ * @endcode
+ * returns: none
+ */
+
 int constant(register struct enode *e) {
     return e == NULL
      || e->op == O_CONST
@@ -2137,6 +2821,18 @@ int constant(register struct enode *e) {
          && optimize );
 }
 
+/**
+ * @brief TODO <brief function description>
+ *
+ * TODO Write longer function description.
+ *
+ * Example usage:
+ * @code
+ *     <function name>();
+ * @endcode
+ * returns: none
+ */
+
 void efree(struct enode * e) {
     if (e) {
         if (e->op != O_VAR && e->op != O_CONST && e->op != O_SCONST
@@ -2153,6 +2849,18 @@ void efree(struct enode * e) {
         scxfree((char *) e);
     }
 }
+
+/**
+ * @brief TODO <brief function description>
+ *
+ * TODO Write longer function description.
+ *
+ * Example usage:
+ * @code
+ *     <function name>();
+ * @endcode
+ * returns: none
+ */
 
 void label(register struct ent * v, register char * s, int flushdir) {
     if (v) {
@@ -2178,6 +2886,18 @@ void label(register struct ent * v, register char * s, int flushdir) {
         modflg++;
     }
 }
+
+/**
+ * @brief TODO <brief function description>
+ *
+ * TODO Write longer function description.
+ *
+ * Example usage:
+ * @code
+ *     <function name>();
+ * @endcode
+ * returns: none
+ */
 
 void decodev(struct ent_ptr v) {
     struct range * r;
@@ -2212,12 +2932,36 @@ char * coltoa(int col) {
  * they were entered, we must do a depth-first eval
  * of the ELIST tree
  */
+/**
+ * @brief TODO <brief function description>
+ *
+ * TODO Write longer function description.
+ *
+ * Example usage:
+ * @code
+ *     <function name>();
+ * @endcode
+ * returns: none
+ */
+
 static void decompile_list(struct enode *p) {
     if (!p) return;
     decompile_list(p->e.o.left);    /* depth first */
     decompile(p->e.o.right, 0);
     line[linelim++] = ',';
 }
+
+/**
+ * @brief TODO <brief function description>
+ *
+ * TODO Write longer function description.
+ *
+ * Example usage:
+ * @code
+ *     <function name>();
+ * @endcode
+ * returns: none
+ */
 
 void decompile(register struct enode *e, int priority) {
     register char *s;
@@ -2424,6 +3168,18 @@ void decompile(register struct enode *e, int priority) {
     } else line[linelim++] = '?';
 }
 
+/**
+ * @brief TODO <brief function description>
+ *
+ * TODO Write longer function description.
+ *
+ * Example usage:
+ * @code
+ *     <function name>();
+ * @endcode
+ * returns: none
+ */
+
 void index_arg(char *s, struct enode *e) {
     if (e->e.o.right && e->e.o.right->op == ',') {
         two_arg_index(s, e);
@@ -2440,6 +3196,18 @@ void index_arg(char *s, struct enode *e) {
     line[linelim++] = ')';
 }
 
+/**
+ * @brief TODO <brief function description>
+ *
+ * TODO Write longer function description.
+ *
+ * Example usage:
+ * @code
+ *     <function name>();
+ * @endcode
+ * returns: none
+ */
+
 void two_arg_index(char *s, struct enode *e) {
     for (; (line[linelim++] = *s++); );
     linelim--;
@@ -2452,6 +3220,18 @@ void two_arg_index(char *s, struct enode *e) {
     line[linelim++] = ')';
 }
 
+/**
+ * @brief TODO <brief function description>
+ *
+ * TODO Write longer function description.
+ *
+ * Example usage:
+ * @code
+ *     <function name>();
+ * @endcode
+ * returns: none
+ */
+
 void list_arg(char *s, struct enode *e) {
     for (; (line[linelim++] = *s++); );
     linelim--;
@@ -2462,12 +3242,36 @@ void list_arg(char *s, struct enode *e) {
     line[linelim - 1] = ')';
 }
 
+/**
+ * @brief TODO <brief function description>
+ *
+ * TODO Write longer function description.
+ *
+ * Example usage:
+ * @code
+ *     <function name>();
+ * @endcode
+ * returns: none
+ */
+
 void one_arg(char *s, struct enode *e) {
     for (; (line[linelim++] = *s++); );
     linelim--;
     decompile(e->e.o.left, 0);
     line[linelim++] = ')';
 }
+
+/**
+ * @brief TODO <brief function description>
+ *
+ * TODO Write longer function description.
+ *
+ * Example usage:
+ * @code
+ *     <function name>();
+ * @endcode
+ * returns: none
+ */
 
 void two_arg(char *s, struct enode *e) {
     for (; (line[linelim++] = *s++); );
@@ -2477,6 +3281,30 @@ void two_arg(char *s, struct enode *e) {
     decompile (e->e.o.right, 0);
     line[linelim++] = ')';
 }
+
+/**
+ * @brief TODO <brief function description>
+ *
+ * TODO Write longer function description.
+ *
+ * Example usage:
+ * @code
+ *     <function name>();
+ * @endcode
+ * returns: none
+ */
+
+/**
+ * @brief TODO <brief function description>
+ *
+ * TODO Write longer function description.
+ *
+ * Example usage:
+ * @code
+ *     <function name>();
+ * @endcode
+ * returns: none
+ */
 
 void three_arg(char *s, struct enode *e) {
     for (; (line[linelim++] = *s++); );
@@ -2488,6 +3316,18 @@ void three_arg(char *s, struct enode *e) {
     decompile (e->e.o.right->e.o.right, 0);
     line[linelim++] = ')';
 }
+
+/**
+ * @brief TODO <brief function description>
+ *
+ * TODO Write longer function description.
+ *
+ * Example usage:
+ * @code
+ *     <function name>();
+ * @endcode
+ * returns: none
+ */
 
 void range_arg(char *s, struct enode *e) {
     struct range *r;
@@ -2505,6 +3345,18 @@ void range_arg(char *s, struct enode *e) {
     line[linelim++] = ')';
 }
 
+/**
+ * @brief TODO <brief function description>
+ *
+ * TODO Write longer function description.
+ *
+ * Example usage:
+ * @code
+ *     <function name>();
+ * @endcode
+ * returns: none
+ */
+
 void editfmt(int row, int col) {
     register struct ent *p;
 
@@ -2514,6 +3366,18 @@ void editfmt(int row, int col) {
         linelim = strlen(line);
     }
 }
+
+/**
+ * @brief TODO <brief function description>
+ *
+ * TODO Write longer function description.
+ *
+ * Example usage:
+ * @code
+ *     <function name>();
+ * @endcode
+ * returns: none
+ */
 
 void editv(int row, int col) {
     register struct ent *p;
@@ -2530,6 +3394,18 @@ void editv(int row, int col) {
     }
 }
 
+/**
+ * @brief TODO <brief function description>
+ *
+ * TODO Write longer function description.
+ *
+ * Example usage:
+ * @code
+ *     <function name>();
+ * @endcode
+ * returns: none
+ */
+
 void editexp(int row, int col) {
     register struct ent *p;
 
@@ -2538,6 +3414,18 @@ void editexp(int row, int col) {
     decompile(p->expr, 0);
     line[linelim] = '\0';
 }
+
+/**
+ * @brief TODO <brief function description>
+ *
+ * TODO Write longer function description.
+ *
+ * Example usage:
+ * @code
+ *     <function name>();
+ * @endcode
+ * returns: none
+ */
 
 void edits(int row, int col, int saveinfile) {
     register struct ent *p;
@@ -2566,6 +3454,18 @@ void edits(int row, int col, int saveinfile) {
         linelim += 1;
     }
 }
+
+/**
+ * @brief TODO <brief function description>
+ *
+ * TODO Write longer function description.
+ *
+ * Example usage:
+ * @code
+ *     <function name>();
+ * @endcode
+ * returns: none
+ */
 
 int dateformat(struct ent *v1, struct ent *v2, char * fmt) {
     if ( ! fmt || *fmt == '\0') return -1;
@@ -2641,6 +3541,18 @@ int dateformat(struct ent *v1, struct ent *v2, char * fmt) {
  * round-to-positive-infinity).  I ran into this problem when trying to
  * split interest in an account to two people fairly.
  */
+/**
+ * @brief TODO <brief function description>
+ *
+ * TODO Write longer function description.
+ *
+ * Example usage:
+ * @code
+ *     <function name>();
+ * @endcode
+ * returns: none
+ */
+
 double rint(double d) {
     /* as sent */
     double fl = floor(d), fr = d-fl;
