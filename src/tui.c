@@ -1075,6 +1075,62 @@ void yyerror(char * err) {
     return;
 }
 
+/*
+ * this function creates a string (value) that represents the formated value of the cell, if a format exists
+ * returns 0  datetime format - number in p->v represents a date - format "d"
+ * returns 1  format of number - (numbers with format) - puede haber label.
+ * returns -1 if there is no format in the cell.
+ */
+int ui_get_formated_value(struct ent ** p, int col, char * value) {
+    //char * cfmt = (*p)->format ? (*p)->format : NULL;
+    char * cfmt = (*p)->format ? (*p)->format : (realfmt[col] >= 0 && realfmt[col] < COLFORMATS && colformat[realfmt[col]] != NULL) ? colformat[realfmt[col]] : NULL;
+
+    if (cfmt) {
+        if (*cfmt == 'd') {
+            time_t v = (time_t) ((*p)->v);
+            strftime(value, sizeof(char) * FBUFLEN, cfmt + 1, localtime(&v));
+            return 0;
+        } else {
+            format(cfmt, precision[col], (*p)->v, value, sizeof(char) * FBUFLEN);
+            return 1;
+        }
+    } else { // there is no format
+        return -1;
+    }
+}
+
+/*
+ * function that shows text in a child process.
+ * used for set, version, showmaps, print_graph,
+ * showfilters, hiddenrows and hiddencols commands
+ */
+void ui_show_text(char * val) {
+    int pid;
+    char px[MAXCMD];
+    char * pager;
+
+    (void) strcpy(px, "| ");
+    if ( !(pager = getenv("PAGER")) )
+        pager = DFLT_PAGER;
+    (void) strcat(px, pager);
+    FILE * f = openfile(px, &pid, NULL);
+    if ( !f ) {
+        sc_error("Can't open pipe to %s", pager);
+        return;
+    }
+    def_prog_mode();
+    endwin();
+    fprintf(f, "%s\n", val);
+    fprintf(f, "Press 'q' and then ENTER to return.");
+    closefile(f, pid, 0);
+    getchar();
+    reset_prog_mode();
+    refresh();
+    ui_update(TRUE);
+}
+
+
+
 /**
  * \brief TODO Document winchg()
  *
@@ -1099,7 +1155,6 @@ void winchg() {
 }
 
 #ifdef XLUA
-/* function to print errors of lua scripts */
 /**
  * \brief Print error of lua scripts
  *
@@ -1132,21 +1187,13 @@ void ui_bail(lua_State *L, char * msg) {
 }
 #endif
 
-/*
- * this function shows a message in screen
- * and waits for user confirmation between a couple of options defined on valid (wchar *)
- * returns a wchar_t indicating user answer
- */
 /**
- * @brief TODO Write a brief function description
+ * \brief Show a message in the screen
  *
- * TODO Write a longer function description.
+ * \details This function shows a message on the screen and waits for user
+ * confirmation between a coupld of options defined on valie (wchar *).
  *
- * Example usage:
- * @code
- *     <function name>();
- * @endcode
- * returns: none
+ * \return wchar_t indicating user answer
  */
 
 wchar_t ui_query_opt(wchar_t * initial_msg, wchar_t * valid) {
@@ -1168,17 +1215,12 @@ wchar_t ui_query_opt(wchar_t * initial_msg, wchar_t * valid) {
     return wdc[0];
 }
 
-/* function to read text from stdin */
 /**
- * @brief TODO Write a brief function description
+ * \brief Read text from stdin
  *
- * TODO Write a longer function description.
+ * \param[in] initial_msg
  *
- * Example usage:
- * @code
- *     <function name>();
- * @endcode
- * returns: none
+ * \return user input
  */
 
 char * ui_query(char * initial_msg) {
@@ -1243,17 +1285,13 @@ char * ui_query(char * initial_msg) {
     return hline;
 }
 
-// Set a color
 /**
- * @brief TODO Write a brief function description
+ * \brief Set a color
  *
- * TODO Write a longer function description.
+ * \param[in] w
+ * \param[in] uc
  *
- * Example usage:
- * @code
- *     <function name>();
- * @endcode
- * returns: none
+ * \return none
  */
 
 void ui_set_ucolor(WINDOW * w, struct ucolor * uc) {
@@ -1268,15 +1306,9 @@ void ui_set_ucolor(WINDOW * w, struct ucolor * uc) {
 }
 
 /**
- * @brief TODO Write a brief function description
+ * \brief TODO Document ui_start_colors()
  *
- * TODO Write a longer function description.
- *
- * Example usage:
- * @code
- *     <function name>();
- * @endcode
- * returns: none
+ * \return none
  */
 
 void ui_start_colors() {
@@ -1290,7 +1322,7 @@ void ui_start_colors() {
 }
 
 /**
- * \brief TODO Write a brief function description
+ * \brief TODO Document ui_pause()
  *
  * \return none
  */
@@ -1303,7 +1335,7 @@ void ui_pause() {
 }
 
 /**
- * \brief TODO Write a brief function description
+ * \brief TODO Document ui_resume
  *
  * \return none
  */
