@@ -372,7 +372,7 @@ void create_structures() {
 }
 
 /**
- *\brief TODO Document read_stdin()
+ * \brief TODO Document read_stdin()
  *
  * \return none
  */

@@ -1865,15 +1865,11 @@ struct enode * new_const(int op, double a1) {
 }
 
 /**
- * @brief TODO <brief function description>
+ * \brief TODO Document new_str()
  *
- * TODO Write longer function description.
+ * \param[in] s
  *
- * Example usage:
- * @code
- *     <function name>();
- * @endcode
- * returns: none
+ * \return none
  */
 
 struct enode * new_str(char * s) {
@@ -1888,17 +1884,10 @@ struct enode * new_str(char * s) {
     return (p);
 }
 
-// Goto subroutines */
 /**
- * @brief TODO <brief function description>
+ * \brief Goto subroutines
  *
- * TODO Write longer function description.
- *
- * Example usage:
- * @code
- *     <function name>();
- * @endcode
- * returns: none
+ * \return none
  */
 
 void g_free() {
@@ -1915,15 +1904,9 @@ void g_free() {
 }
 
 /**
- * @brief TODO <brief function description>
+ * \brief TODO Document go_previous()
  *
- * TODO Write longer function description.
- *
- * Example usage:
- * @code
- *     <function name>();
- * @endcode
- * returns: none
+ * \return none
  */
 
 void go_previous() {
@@ -1946,15 +1929,9 @@ void go_previous() {
 }
 
 /**
- * @brief TODO <brief function description>
+ * \brief TODO Document go_last()
  *
- * TODO Write longer function description.
- *
- * Example usage:
- * @code
- *     <function name>();
- * @endcode
- * returns: none
+ * \return none
  */
 
 void go_last() {
@@ -1983,21 +1960,21 @@ void go_last() {
     }
 }
 
-/*
- * Place the cursor on a given cell.  If cornerrow >= 0, place the cell
- * at row cornerrow and column cornercol in the upper left corner of the
- * screen if possible.
- */
 /**
- * @brief TODO <brief function description>
+ * \brief Place the cursor on a given cell.
  *
- * TODO Write longer function description.
+ * \details Place the cursor on a given cell. If cornerrow >= 0, place
+ * the cell at row cornerrow and column cornercol in the upper corner
+ * of the screen possible.
  *
- * Example usage:
- * @code
- *     <function name>();
- * @endcode
- * returns: none
+ * \param[in] row
+ * \param[in] col
+ * \param[in] lastrow_
+ * \param[in] lastcol_
+ * \param[in] cornerrow
+ * \param[in] cornercol
+ *
+ * \return none
  */
 
 void moveto(int row, int col, int lastrow_, int lastcol_, int cornerrow, int cornercol) {
@@ -2036,21 +2013,23 @@ void moveto(int row, int col, int lastrow_, int lastcol_, int cornerrow, int cor
     //if (loading) changed = 0;
 }
 
-/*
- * 'goto' either a given number,'error', or 'invalid' starting at (currow,curcol)
- * flow = 1, look forward
- * flow = 0, look backwards
- */
 /**
- * @brief TODO <brief function description>
+ * \brief TODO Document num_search()
  *
- * TODO Write longer function description.
+ * \details 'goto' either a given number, 'error', or 'invalid' starting
+ * at (currow, curcol).
+ * \details flow = 1, look forward
+ * \details flow = 0, look backwards
  *
- * Example usage:
- * @code
- *     <function name>();
- * @endcode
- * returns: none
+ * \param[in] n
+ * \param[in] firstrow
+ * \param[in] firstcol
+ * \param[in] lastrow_
+ * \param[in] lastcol_
+ * \param[in] errsearch
+ * \param[in] flow
+ *
+ * \return none
  */
 
 void num_search(double n, int firstrow, int firstcol, int lastrow_, int lastcol_, int errsearch, int flow) {
@@ -2132,21 +2111,22 @@ void num_search(double n, int firstrow, int firstcol, int lastrow_, int lastcol_
     //} //else remember(1);
 }
 
-/*
- * 'goto' a cell containing a matching string
- * flow = 1, look forward
- * flow = 0, look backwards
- */
 /**
- * @brief TODO <brief function description>
+ * \brief 'goto' a cell containing a matching string
  *
- * TODO Write longer function description.
+ * \details 'goto' a cell containing a matching string.
+ * \details flow = 1, look forward
+ * \details flow = 0, look backwards
+ * 
+ * \param[in] s
+ * \param[in] firstrow
+ * \param[in] firstcol
+ * \param[in] lastrow_
+ * \param[in] lastcol_
+ * \param[in] num
+ * \param[in] flow
  *
- * Example usage:
- * @code
- *     <function name>();
- * @endcode
- * returns: none
+ * \return none
  */
 
 void str_search(char *s, int firstrow, int firstcol, int lastrow_, int lastcol_, int num, int flow) {
@@ -2272,17 +2252,15 @@ void str_search(char *s, int firstrow, int firstcol, int lastrow_, int lastcol_,
     //}
 }
 
-/* fill a range with constants */
 /**
- * @brief TODO <brief function description>
+ * \brief Fill a range with constants
  *
- * TODO Write longer function description.
+ * \param[in] v1
+ * \param[in] v2
+ * \param[in] start
+ * \param[in] inc
  *
- * Example usage:
- * @code
- *     <function name>();
- * @endcode
- * returns: none
+ * \return none
  */
 
 void fill(struct ent *v1, struct ent *v2, double start, double inc) {
@@ -2348,17 +2326,13 @@ void fill(struct ent *v1, struct ent *v2, double start, double inc) {
     #endif
 }
 
-/* lock a range of cells */
 /**
- * @brief TODO <brief function description>
+ * \brief Lock a range of cells
  *
- * TODO Write longer function description.
+ * \param[in] v1
+ * \param[in] v2
  *
- * Example usage:
- * @code
- *     <function name>();
- * @endcode
- * returns: none
+ * \return none
  */
 
 void lock_cells(struct ent * v1, struct ent * v2) {
@@ -2396,17 +2370,13 @@ void lock_cells(struct ent * v1, struct ent * v2) {
     #endif
 }
 
-/* unlock a range of cells */
 /**
- * @brief TODO <brief function description>
+ * \brief Unlock a range of cells
  *
- * TODO Write longer function description.
+ * \param[in] v1
+ * \param[in] v2
  *
- * Example usage:
- * @code
- *     <function name>();
- * @endcode
- * returns: none
+ * \return none
  */
 
 void unlock_cells(struct ent * v1, struct ent * v2) {
@@ -2446,15 +2416,12 @@ void unlock_cells(struct ent * v1, struct ent * v2) {
 
 /* set the numeric part of a cell */
 /**
- * @brief TODO <brief function description>
+ * \brief Set the numeric part of a cell
  *
- * TODO Write longer function description.
+ * \param[in] v
+ * \param[in] e
  *
- * Example usage:
- * @code
- *     <function name>();
- * @endcode
- * returns: none
+ * \return none
  */
 
 void let(struct ent * v, struct enode * e) {
@@ -2557,15 +2524,13 @@ void let(struct ent * v, struct enode * e) {
 }
 
 /**
- * @brief TODO <brief function description>
+ * \brief TODO Document slet()
  *
- * TODO Write longer function description.
+ * \param[in] v
+ * \param[in] se
+ * \param[in] flushdir
  *
- * Example usage:
- * @code
- *     <function name>();
- * @endcode
- * returns: none
+ * \return none
  */
 
 void slet(struct ent * v, struct enode * se, int flushdir) {
@@ -2658,15 +2623,13 @@ void slet(struct ent * v, struct enode * se, int flushdir) {
 }
 
 /**
- * @brief TODO <brief function description>
+ * \brief TODO Document format_cell()
  *
- * TODO Write longer function description.
+ * \param[in] v1
+ * \param[in] v2
+ * \param[in] s
  *
- * Example usage:
- * @code
- *     <function name>();
- * @endcode
- * returns: none
+ * \return none
  */
 
 void format_cell(struct ent *v1, struct ent *v2, char *s) {
@@ -2701,19 +2664,13 @@ void format_cell(struct ent *v1, struct ent *v2, char *s) {
         }
 }
 
-/*
- * Say if an expression is a constant (return 1) or not.
- */
 /**
- * @brief TODO <brief function description>
+ * \brief Say if an expression is a constant or not
  *
- * TODO Write longer function description.
+ * \param[in] e
  *
- * Example usage:
- * @code
- *     <function name>();
- * @endcode
- * returns: none
+ * \return 1 function is an expression
+ * \return 0 function is not an expression
  */
 
 int constant(register struct enode *e) {
@@ -2742,15 +2699,11 @@ int constant(register struct enode *e) {
 }
 
 /**
- * @brief TODO <brief function description>
+ * \brief TODO Document efree()
  *
- * TODO Write longer function description.
+ * \param[in] e
  *
- * Example usage:
- * @code
- *     <function name>();
- * @endcode
- * returns: none
+ * \return none
  */
 
 void efree(struct enode * e) {
@@ -2771,15 +2724,13 @@ void efree(struct enode * e) {
 }
 
 /**
- * @brief TODO <brief function description>
+ * \brief TODO Document label()
  *
- * TODO Write longer function description.
+ * \param[in] v
+ * \param[in] s
+ * \param[in] flushdir
  *
- * Example usage:
- * @code
- *     <function name>();
- * @endcode
- * returns: none
+ * \return none
  */
 
 void label(register struct ent * v, register char * s, int flushdir) {
@@ -2808,15 +2759,11 @@ void label(register struct ent * v, register char * s, int flushdir) {
 }
 
 /**
- * @brief TODO <brief function description>
+ * \brief TODO Document decodev()
  *
- * TODO Write longer function description.
+ * \param[in] v
  *
- * Example usage:
- * @code
- *     <function name>();
- * @endcode
- * returns: none
+ * \return none
  */
 
 void decodev(struct ent_ptr v) {
@@ -2847,21 +2794,16 @@ char * coltoa(int col) {
     return (rname);
 }
 
-/*
- * To make list elements come out in the same order
- * they were entered, we must do a depth-first eval
- * of the ELIST tree
- */
 /**
- * @brief TODO <brief function description>
+ * \brief TODO Document decompile_list()
  *
- * TODO Write longer function description.
+ * \details To make list elements come out in the same order
+ * they were entered, we must do a depth-first eval of the
+ * ELIST tree.
  *
- * Example usage:
- * @code
- *     <function name>();
- * @endcode
- * returns: none
+ * \param[in] p
+ *
+ * \return none
  */
 
 static void decompile_list(struct enode *p) {
@@ -2872,15 +2814,12 @@ static void decompile_list(struct enode *p) {
 }
 
 /**
- * @brief TODO <brief function description>
+ * \brief TODO Document decompile()
  *
- * TODO Write longer function description.
+ * \param[in] e
+ * \param[in] priority
  *
- * Example usage:
- * @code
- *     <function name>();
- * @endcode
- * returns: none
+ * \return none
  */
 
 void decompile(register struct enode *e, int priority) {
@@ -3089,15 +3028,12 @@ void decompile(register struct enode *e, int priority) {
 }
 
 /**
- * @brief TODO <brief function description>
+ * \brief TODO Document index_arg()
  *
- * TODO Write longer function description.
+ * \param[in] s
+ * \param[in] e
  *
- * Example usage:
- * @code
- *     <function name>();
- * @endcode
- * returns: none
+ * \return none
  */
 
 void index_arg(char *s, struct enode *e) {
@@ -3117,15 +3053,12 @@ void index_arg(char *s, struct enode *e) {
 }
 
 /**
- * @brief TODO <brief function description>
+ * \brief TODO Document two_arg_index()
  *
- * TODO Write longer function description.
+ * \param[in] s
+ * \param[in] e
  *
- * Example usage:
- * @code
- *     <function name>();
- * @endcode
- * returns: none
+ * \return none
  */
 
 void two_arg_index(char *s, struct enode *e) {
@@ -3141,15 +3074,12 @@ void two_arg_index(char *s, struct enode *e) {
 }
 
 /**
- * @brief TODO <brief function description>
+ * \brief TODO Document list_arg()
  *
- * TODO Write longer function description.
+ * \param[in] s
+ * \param[in] e
  *
- * Example usage:
- * @code
- *     <function name>();
- * @endcode
- * returns: none
+ * \return none
  */
 
 void list_arg(char *s, struct enode *e) {
@@ -3163,15 +3093,12 @@ void list_arg(char *s, struct enode *e) {
 }
 
 /**
- * @brief TODO <brief function description>
+ * \brief TODO Document one_arg()
  *
- * TODO Write longer function description.
+ * \param[in] s
+ * \param[in] e
  *
- * Example usage:
- * @code
- *     <function name>();
- * @endcode
- * returns: none
+ * \return none
  */
 
 void one_arg(char *s, struct enode *e) {
@@ -3182,15 +3109,12 @@ void one_arg(char *s, struct enode *e) {
 }
 
 /**
- * @brief TODO <brief function description>
+ * \brief TODO Document two_arg()
  *
- * TODO Write longer function description.
+ * \param[in] s
+ * \param[in] e
  *
- * Example usage:
- * @code
- *     <function name>();
- * @endcode
- * returns: none
+ * \return none
  */
 
 void two_arg(char *s, struct enode *e) {
@@ -3203,27 +3127,12 @@ void two_arg(char *s, struct enode *e) {
 }
 
 /**
- * @brief TODO <brief function description>
+ * \brief TODO Document three_arg()
  *
- * TODO Write longer function description.
+ * \param[in] s
+ * \param[in] e
  *
- * Example usage:
- * @code
- *     <function name>();
- * @endcode
- * returns: none
- */
-
-/**
- * @brief TODO <brief function description>
- *
- * TODO Write longer function description.
- *
- * Example usage:
- * @code
- *     <function name>();
- * @endcode
- * returns: none
+ * \return none
  */
 
 void three_arg(char *s, struct enode *e) {
@@ -3238,15 +3147,12 @@ void three_arg(char *s, struct enode *e) {
 }
 
 /**
- * @brief TODO <brief function description>
+ * \brief TODO Document range_arg()
  *
- * TODO Write longer function description.
+ * \param[in] s
+ * \param[in] e
  *
- * Example usage:
- * @code
- *     <function name>();
- * @endcode
- * returns: none
+ * \return none
  */
 
 void range_arg(char *s, struct enode *e) {
@@ -3266,15 +3172,12 @@ void range_arg(char *s, struct enode *e) {
 }
 
 /**
- * @brief TODO <brief function description>
+ * \brief TODO Document editfmt()
  *
- * TODO Write longer function description.
+ * \param[in] row
+ * \param[in] col
  *
- * Example usage:
- * @code
- *     <function name>();
- * @endcode
- * returns: none
+ * \return none
  */
 
 void editfmt(int row, int col) {
@@ -3288,15 +3191,12 @@ void editfmt(int row, int col) {
 }
 
 /**
- * @brief TODO <brief function description>
+ * \brief TODO Document editv()
  *
- * TODO Write longer function description.
+ * \param[in] row
+ * \param[in] col
  *
- * Example usage:
- * @code
- *     <function name>();
- * @endcode
- * returns: none
+ * \return none
  */
 
 void editv(int row, int col) {
@@ -3315,15 +3215,12 @@ void editv(int row, int col) {
 }
 
 /**
- * @brief TODO <brief function description>
+ * \brief TODO Document editexp()
  *
- * TODO Write longer function description.
+ * \param[in] row
+ * \param[in] col
  *
- * Example usage:
- * @code
- *     <function name>();
- * @endcode
- * returns: none
+ * \return none
  */
 
 void editexp(int row, int col) {
@@ -3336,15 +3233,13 @@ void editexp(int row, int col) {
 }
 
 /**
- * @brief TODO <brief function description>
+ * \brief TODO Document edits()
  *
- * TODO Write longer function description.
+ * \param[in] row
+ * \param[in] col
+ * \param[in] saveinfile
  *
- * Example usage:
- * @code
- *     <function name>();
- * @endcode
- * returns: none
+ * \return none
  */
 
 void edits(int row, int col, int saveinfile) {
@@ -3376,15 +3271,13 @@ void edits(int row, int col, int saveinfile) {
 }
 
 /**
- * @brief TODO <brief function description>
+ * \brief TODO Document dateformat()
  *
- * TODO Write longer function description.
+ * \param[in] v1
+ * \param[in] v2
+ * \param[in] fmt
  *
- * Example usage:
- * @code
- *     <function name>();
- * @endcode
- * returns: none
+ * \return none
  */
 
 int dateformat(struct ent *v1, struct ent *v2, char * fmt) {
@@ -3449,28 +3342,23 @@ int dateformat(struct ent *v1, struct ent *v2, char * fmt) {
 }
 
 #ifdef RINT
-/*
- * round-to-even, also known as ``banker's rounding''.
- * With round-to-even, a number exactly halfway between two values is
- * rounded to whichever is even; e.g. rnd(0.5)=0, rnd(1.5)=2,
- * rnd(2.5)=2, rnd(3.5)=4.  This is the default rounding mode for
- * IEEE floating point, for good reason: it has better numeric
- * properties.  For example, if X+Y is an integer,
- * then X+Y = rnd(X)+rnd(Y) with round-to-even,
- * but not always with sc's rounding (which is
- * round-to-positive-infinity).  I ran into this problem when trying to
- * split interest in an account to two people fairly.
- */
+
 /**
- * @brief TODO <brief function description>
+ * \brief TODO Round-to-even
  *
- * TODO Write longer function description.
+ * \details Round-to-even, also known as "banker's rounding". With 
+ * round-to-even, a number exactly halfway between two values is
+ * rounded to whichever is even; e.g. rnd(0.5)=0, rnd(1.5)=2,
+ * rnd(3.5)=4. This is the default rounding mode for IEEE floating
+ * point. for good reason: it has better njmeric properties. For example,
+ * if X+Y is an integer, then X+Y = rnd(X)+rnd(Y) will round-to-even, but
+ * not always with sc's rounding (which is round-to-positive-infinity). I
+ * ran into this problem when trying to split interest in an account to
+ * two people fairly.
  *
- * Example usage:
- * @code
- *     <function name>();
- * @endcode
- * returns: none
+ * \param[in] d
+ *
+ * \return none
  */
 
 double rint(double d) {
