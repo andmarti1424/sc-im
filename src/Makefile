@@ -1,8 +1,8 @@
 # Specify the name of the resulting executable file
-name = sim
+name = scim
 
 # The base directory where everything should be installed.
-prefix  = /usr/local/stow/sc-im
+prefix  = /usr/local
 
 EXDIR   = $(prefix)/bin
 HELPDIR = $(prefix)/share/$(name)
@@ -13,10 +13,10 @@ MANDIR  = $(prefix)/share/man/man1
 
 # Change these to your liking or use `make CC=gcc` etc
 #CC   = cc
-YACC = bison -y
+#YACC = bison -y
 #SED  = sed
 
-LDLIBS += -lm -lncursesw -lzip -lxml2
+LDLIBS += -lm
 
 CFLAGS += -Wall -g
 CFLAGS += -DNCURSES
@@ -26,7 +26,7 @@ CFLAGS += -DHELP_PATH=\"$(HELPDIR)\"
 CFLAGS += -DLIBDIR=\"$(LIBDIR)\"
 
 # Sets default pager, e.g. 'less' or 'more'
-CFLAGS += -DDFLT_PAGER=\"pager\"
+CFLAGS += -DDFLT_PAGER=\"less\"
 # Sets default editor. Its use in case EDITOR env variable is not set
 CFLAGS += -DDFLT_EDITOR=\"vim\"
 # Comment out to disable color support
@@ -74,8 +74,8 @@ endif
 
 # NOTE: libxlsxwriter is required for xlsx file export support
 ifneq (,$(wildcard /usr/include/xlsxwriter.h))
-#  CFLAGS += -DXLSX_EXPORT
-#  LDLIBS += -lxlsxwriter
+  CFLAGS += -DXLSX_EXPORT
+  LDLIBS += -lxlsxwriter
 endif
 
 # Check for gnuplot existance
