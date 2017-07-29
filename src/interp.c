@@ -901,12 +901,13 @@ double donval(char * colstr, double rowdoub) {
  * enode. The left pointer is a chain of ELIST nodes, the right
  * pointer is a value.
  *
+ * \param[in] e
  * \param[in] ep
  *
  * \return none
  */
 
-double dolmax(struct enode * ep) {
+double dolmax(struct ent * e, struct enode * ep) {
     register int count = 0;
     register double maxval = 0; /* Assignment to shut up lint */
     register struct enode * p;
@@ -914,7 +915,7 @@ double dolmax(struct enode * ep) {
 
     cellerror = CELLOK;
     for (p = ep; p; p = p->e.o.left) {
-        v = eval(NULL, p->e.o.right);
+        v = eval(e, p->e.o.right);
         if ( !count || v > maxval) {
             maxval = v;
             count++;
@@ -927,12 +928,13 @@ double dolmax(struct enode * ep) {
 /**
  * \brief TODO Document dolmin()
  *
+ * \param[in] e
  * \param[in] ep
  *
  * \return none
  */
 
-double dolmin(struct enode * ep) {
+double dolmin(struct ent * e, struct enode * ep) {
     register int count = 0;
     register double minval = 0; /* Assignment to shut up lint */
     register struct enode * p;
@@ -940,7 +942,7 @@ double dolmin(struct enode * ep) {
 
     cellerror = CELLOK;
     for (p = ep; p; p = p->e.o.left) {
-        v = eval(NULL, p->e.o.right);
+        v = eval(e, p->e.o.right);
         if ( !count || v < minval) {
             minval = v;
             count++;
@@ -1250,8 +1252,8 @@ double eval(register struct ent * ent, register struct enode * e) {
     case ASCII:  return (doascii(seval(ent, e->e.o.left)));
     case SLEN:   return (doslen(seval(ent, e->e.o.left)));
     case EQS:    return (doeqs(seval(ent, e->e.o.right), seval(ent, e->e.o.left)));
-    case LMAX:   return dolmax(e);
-    case LMIN:   return dolmin(e);
+    case LMAX:   return dolmax(ent, e);
+    case LMIN:   return dolmin(ent, e);
     case NVAL:   return (donval(seval(ent, e->e.o.left), eval(ent, e->e.o.right)));
     case MYROW:  return ((double) (gmyrow + rowoffset));
     case MYCOL:  return ((double) (gmycol + coloffset));
@@ -1392,7 +1394,7 @@ char * dodate(time_t tloc, char * fmtstr) {
 }
 
 /**
- * @brief Conversion reverse from doascii
+ * \brief Conversion reverse from doascii
  *
  * \param[in] ascii
  *
@@ -1943,7 +1945,6 @@ void go_previous() {
     }
 }
 
-/* repeat the last goto command */
 /**
  * @brief TODO <brief function description>
  *
