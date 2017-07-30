@@ -1,10 +1,53 @@
-/*
- * Yanklist doesn't keep references to 'ent' elements, it creates new nodes.
- * the yanklist is constantly cleaned out.
- * Ex.: When removing 'ent' elements with `dc`, the original ones are removed
- * and new elements are created in the yanklist.
- * Important: each 'ent' element should keep a row and col.
+/*******************************************************************************
+ * Copyright (c) 2013-2017, Andrés Martinelli <andmarti@gmail.com              *
+ * All rights reserved.                                                        *
+ *                                                                             *
+ * This file is a part of SC-IM                                                *
+ *                                                                             *
+ * SC-IM is a spreadsheet program that is based on SC. The original authors    *
+ * of SC are James Gosling and Mark Weiser, and mods were later added by       *
+ * Chuck Martin.                                                               *
+ *                                                                             *
+ * Redistribution and use in source and binary forms, with or without          *
+ * modification, are permitted provided that the following conditions are met: *
+ * 1. Redistributions of source code must retain the above copyright           *
+ *    notice, this list of conditions and the following disclaimer.            *
+ * 2. Redistributions in binary form must reproduce the above copyright        *
+ *    notice, this list of conditions and the following disclaimer in the      *
+ *    documentation and/or other materials provided with the distribution.     *
+ * 3. All advertising materials mentioning features or use of this software    *
+ *    must display the following acknowledgement:                              *
+ *    This product includes software developed by Andrés Martinelli            *
+ *    <andmarti@gmail.com>.                                                    *
+ * 4. Neither the name of the Andrés Martinelli nor the                        *
+ *   names of other contributors may be used to endorse or promote products    *
+ *   derived from this software without specific prior written permission.     *
+ *                                                                             *
+ * THIS SOFTWARE IS PROVIDED BY ANDRES MARTINELLI ''AS IS'' AND ANY            *
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED   *
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE      *
+ * DISCLAIMED. IN NO EVENT SHALL ANDRES MARTINELLI BE LIABLE FOR ANY           *
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES  *
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;*
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND *
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT  *
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE       *
+ * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.           *
+ *******************************************************************************/
+
+/**
+ * \file yank.c
+ * \author Andrés Martinelli <andmarti@gmail.com>
+ * \date 2017-07-18
+ * \brief TODO Write a tbrief file description.
+ *
+ * \details Yanklist doesn't keep references to 'ent' elements, it
+ * creates new nodes.Tthe yanklist is constantly cleaned out. Example: When
+ * removing 'ent' elements with `dc`, the original ones are removed
+ * and new elements are created in the yanklist. Important: each 'ent'
+ * element should keep a row and col.
  */
+
 #include "sc.h"
 #include "stdlib.h"
 #include "marks.h"
@@ -25,16 +68,33 @@ int yank_arg;                 // number of rows and columns yanked. Used for com
 char type_of_yank;            // yank type. c=col, r=row, a=range, e=cell, '\0'=no yanking
 static struct ent * yanklist;
 
+/**
+ * \brief TODO Document init_yanklist()
+ *
+ * \return none
+ */
+
 void init_yanklist() {
     type_of_yank = '\0';
     yanklist = NULL;
 }
 
+/**
+ * \brief Return the yanklist
+ *
+ * \return yanklist
+ */
+
 struct ent * get_yanklist() {
     return yanklist;
 }
 
-// Remove yank 'ent' elements and free corresponding memory
+/**
+ * \brief Remove yank 'ent' elements and free corresponding memory
+ *
+ * \return none
+ */
+
 void free_yanklist () {
     if (yanklist == NULL) return;
     int c;
@@ -62,7 +122,12 @@ void free_yanklist () {
     return;
 }
 
-// Count and return number of entries in the yanklist
+/**
+ * \brief Count and return number of entries in the yanklist
+ *
+ * \return number of yanklist entries
+ */
+
 int count_yank_ents() {
     int i = 0;
 
@@ -74,7 +139,13 @@ int count_yank_ents() {
     return i;
 }
 
-// Add 'ent' element to the yanklist
+/**
+ * \brief Add 'ent' element to the yanklist
+ *
+ * \param[in] item 'ent' element to add to the yanklist
+ * \return none
+ */
+
 void add_ent_to_yanklist(struct ent * item) {
     // Create and initialize the 'ent'
     struct ent * i_ent = (struct ent *) malloc (sizeof(struct ent));
@@ -113,12 +184,21 @@ void add_ent_to_yanklist(struct ent * item) {
     return;
 }
 
-/*
- * yank a range of ents
- * ARG: number of rows or columns yanked. Used in commands like `4yr`
- * TYPE: yank type. c=col, r=row, a=range, e=cell, '\0'=no yanking, 's' sort
- * This two args are used for pasting.
+/**
+ * \brief Yank a range of ents
+ *
+ * \param[in] tlrow
+ * \param[in] tlcol
+ * \param[in] brrow
+ * \param[in] brcol
+ * \param[in] type yank type. c=col, r=row, a=range, e=cell. '\o'=no yanking,
+ * 's' sort. Used for pasting.
+ * \param[in] arg number of rows or columns yanked. Used in commands like
+ * '4yr'. Used for pasting.
+ *
+ * \return none
  */
+
 void yank_area(int tlrow, int tlcol, int brrow, int brcol, char type, int arg) {
     int r,c;
     free_yanklist();
@@ -137,21 +217,30 @@ void yank_area(int tlrow, int tlcol, int brrow, int brcol, char type, int arg) {
     return;
 }
 
-/*
- * paste yanked ents:
- * this function is used for paste ents that were yanked with yr yc dr dc..
- * it is also used for sorting.
- * if above == 1, paste is done above current row or to the right of current col.
- * ents that were yanked using yy or yanked ents of a range, are always pasted in currow and curcol positions.
- * diffr: diff between current rows and the yanked 'ent'
- * diffc: diff between current cols and the yanked 'ent'
- * When sorting, row and col values can vary from yank to paste time, so diffr
- * should be zero.
- * When implementing column sorting, diffc should be zero as well!
- * type indicates if pasting format only, value only or the whole content
- * yank type: c=col, r=row, a=range, e=cell, '\0'=no yanking
- * returns -1 if locked cells are found. 0 otherwise.
+/**
+ * \brief Paste yanked ents
+ *
+ * \details This function is used for pasting ents that were yanked
+ * with tr, yc, dr, or dc. It is also used for sorting.
+ * \details If above == 1, paste is done above current row or the
+ * right of the current column. Enst that were yanked using yy or yanked
+ * ents of a range, always pasted in currow and curcol positions.
+ * \details diffr: difference between current rows and the yanked 'ent'
+ * \details diffc: difference between current columns and the yanked 'ent'
+ * \details When sorting, rwo and col values can vary from yank to paste
+ * time, so diffr should be zero.
+ * \details When implementing column sorting, diffc should be zero as well!
+ * \details type indicates if pasting format only, valuue only for the
+ * whole content.
+ * \details yank type: c=col, r=row, a=range, e=cell, '\0'=no yanking.
+ *
+ * \param[in] above
+ * \param[in] type_paste
+ *
+ * \return -1 if locked cells are found
+ * \return 0 otherwise
  */
+
 int paste_yanked_ents(int above, int type_paste) {
     if (! count_yank_ents()) return 0;
 
