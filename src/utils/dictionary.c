@@ -1,17 +1,75 @@
-// Dictionary implementation using malloc
+/*******************************************************************************
+ * Copyright (c) 2013-2017, Andrés Martinelli <andmarti@gmail.com              *
+ * All rights reserved.                                                        *
+ *                                                                             *
+ * This file is a part of SC-IM                                                *
+ *                                                                             *
+ * SC-IM is a spreadsheet program that is based on SC. The original authors    *
+ * of SC are James Gosling and Mark Weiser, and mods were later added by       *
+ * Chuck Martin.                                                               *
+ *                                                                             *
+ * Redistribution and use in source and binary forms, with or without          *
+ * modification, are permitted provided that the following conditions are met: *
+ * 1. Redistributions of source code must retain the above copyright           *
+ *    notice, this list of conditions and the following disclaimer.            *
+ * 2. Redistributions in binary form must reproduce the above copyright        *
+ *    notice, this list of conditions and the following disclaimer in the      *
+ *    documentation and/or other materials provided with the distribution.     *
+ * 3. All advertising materials mentioning features or use of this software    *
+ *    must display the following acknowledgement:                              *
+ *    This product includes software developed by Andrés Martinelli            *
+ *    <andmarti@gmail.com>.                                                    *
+ * 4. Neither the name of the Andrés Martinelli nor the                        *
+ *   names of other contributors may be used to endorse or promote products    *
+ *   derived from this software without specific prior written permission.     *
+ *                                                                             *
+ * THIS SOFTWARE IS PROVIDED BY ANDRES MARTINELLI ''AS IS'' AND ANY            *
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED   *
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE      *
+ * DISCLAIMED. IN NO EVENT SHALL ANDRES MARTINELLI BE LIABLE FOR ANY           *
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES  *
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;*
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND *
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT  *
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE       *
+ * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.           *
+ *******************************************************************************/
+
+/**
+ * \file dictionary.c
+ * \author Andrés Martinelli <andmarti@gmail.com>
+ * \date 2017-07-18
+ * \brief Dictionary implementation using malloc
+ */
 
 #include <stdlib.h>
 #include <string.h>
 #include "string.h"
 #include "dictionary.h"
 
-struct dictionary * create_dictionary() {
+/**
+ * \brief TODO Document create_dictionary()
+ *
+ * \return dictionary
+ */
+
+ struct dictionary * create_dictionary() {
    struct dictionary * d = (struct dictionary *) malloc (sizeof (struct dictionary));
    d->len = 0;
    d->list = NULL;
 
    return d;
 }
+
+/**
+ * \brief TODO Document put()
+ *
+ * \param[in] d
+ * \param[in] k
+ * \param[in] v
+ *
+ * \return none
+ */
 
 void put(struct dictionary * d, char * k, char * v) {
    if ( ! strlen (k) || ! strlen(v) ) return;
@@ -72,6 +130,14 @@ void put(struct dictionary * d, char * k, char * v) {
    return;
 }
 
+/**
+ * \brief TODO Document destroy_dictionary()
+ *
+ * \param[in] d
+ *
+ * \return none
+ */
+
 void destroy_dictionary(struct dictionary * d) {
    //if (d == NULL) return;
    struct nlist * nl;
@@ -90,6 +156,15 @@ void destroy_dictionary(struct dictionary * d) {
    return;
 }
 
+/**
+ * \brief TODO Document get_nl()
+ *
+ * \param[in] d
+ * \param[in] key
+ *
+ * \return nl
+ */
+
 struct nlist * get_nl(struct dictionary * d, char * key) {
    int i=0;
    struct nlist * nl = d->list;
@@ -97,11 +172,18 @@ struct nlist * get_nl(struct dictionary * d, char * key) {
        if (strcmp(nl->key, key) == 0)
            return nl;
        nl = nl->next;
-   }
+  }
    return nl; // just in case d->list == NULL
 }
 
-// Get max length of keys in a dictionary
+/**
+ * \brief Get max length of keys in a dictionary
+ *
+ * \param[in] d
+ *
+ * \return count
+ */
+
 int get_maxkey_length(struct dictionary * d) {
    int i = 0, len, count = 0;
    if (d == NULL || d->list == NULL) return count;
@@ -114,7 +196,14 @@ int get_maxkey_length(struct dictionary * d) {
    return count;
 }
 
-// Get max length of value of a dictionary
+/**
+ * \brief Get max length of value of dictionary
+ *
+ * \param[in] d
+ *
+ * \return count
+ */
+
 int get_maxvalue_length(struct dictionary * d) {
    int i = 0, len, count = 0;
    if (d == NULL || d->list == NULL) return count;
@@ -127,7 +216,15 @@ int get_maxvalue_length(struct dictionary * d) {
    return count;
 }
 
-// Get the value for KEY
+/**
+ * \brief Get the value for KEY
+ *
+ * \param[in] d
+ * \param[in] key
+ *
+ * \return value for the key
+ */
+
 char * get(struct dictionary * d, char * key) {
    int i=0;
    if (d == NULL || d->list == NULL) return NULL;
@@ -156,7 +253,15 @@ char * get_key_name(struct dictionary * d, char * value) {
 */
 
 
-// Save key/value pairs in D dictionary from a string STR
+/**
+ * \brief Save key/value pairs in D dictionary from a string STR
+ *
+ * \param[in] d
+ * \param[in] str
+ *
+ * \return dictionary
+ */
+
 void parse_str(struct dictionary * d, char * str) {
     char c = str[0];
     char key[30];

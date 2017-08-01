@@ -55,7 +55,7 @@
  * \param[in] o
  * \param[in] b
  *
- * returns: TODO What does this return?
+ * \return TODO What does this return?
  */
 
 // TODO: IMPROVE this. Use two while statements in order to create an array
@@ -112,7 +112,8 @@ int block_in_block (struct block * o, struct block * b) {
  * \param[in] in
  * \param[in] out
  *
- * returns: 0 on success, -1 on error
+ * \return 0 on success
+ * \return -1 on error
  */
 
 int replace_block_in_block (struct block * olist, struct block * in, struct block * out) {
