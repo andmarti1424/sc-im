@@ -39,7 +39,7 @@
  * \file lua.c
  * \author Andrés Martinelli <andmarti@gmail.com>
  * \date 2017-07-18
- * \brief TODO Write a tbrief file description.
+ * \brief TODO Write a brief file description.
  */
 
 #ifdef XLUA
