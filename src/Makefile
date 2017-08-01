@@ -126,7 +126,7 @@ endif
 
 OBJS = $(patsubst %.c, %.o, $(wildcard *.c) $(wildcard utils/*.c)) gram.o
 
-.PHONY : all clean install docs
+.PHONY : all clean install docs man_install man_uninstall
 
 all : $(name)
 
@@ -170,6 +170,15 @@ statres.h : gram.y
 
 docs:
 	doxygen Doxyfile
+
+man_install:
+	@cp -r ../docs/man/man3/ /usr/local/share/man/
+	mandb
+
+# "scim" MUST match what is in Doxyfile `MAN_EXTENSION = .scim.3`
+man_uninstall:
+	@rm -rf /usr/local/share/man/man3/*scim.3
+	@mandb
 
 clean:
 	rm -f $(OBJS)
