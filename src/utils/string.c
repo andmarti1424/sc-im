@@ -1,3 +1,47 @@
+/*******************************************************************************
+ * Copyright (c) 2013-2017, Andrés Martinelli <andmarti@gmail.com              *
+ * All rights reserved.                                                        *
+ *                                                                             *
+ * This file is a part of SC-IM                                                *
+ *                                                                             *
+ * SC-IM is a spreadsheet program that is based on SC. The original authors    *
+ * of SC are James Gosling and Mark Weiser, and mods were later added by       *
+ * Chuck Martin.                                                               *
+ *                                                                             *
+ * Redistribution and use in source and binary forms, with or without          *
+ * modification, are permitted provided that the following conditions are met: *
+ * 1. Redistributions of source code must retain the above copyright           *
+ *    notice, this list of conditions and the following disclaimer.            *
+ * 2. Redistributions in binary form must reproduce the above copyright        *
+ *    notice, this list of conditions and the following disclaimer in the      *
+ *    documentation and/or other materials provided with the distribution.     *
+ * 3. All advertising materials mentioning features or use of this software    *
+ *    must display the following acknowledgement:                              *
+ *    This product includes software developed by Andrés Martinelli            *
+ *    <andmarti@gmail.com>.                                                    *
+ * 4. Neither the name of the Andrés Martinelli nor the                        *
+ *   names of other contributors may be used to endorse or promote products    *
+ *   derived from this software without specific prior written permission.     *
+ *                                                                             *
+ * THIS SOFTWARE IS PROVIDED BY ANDRES MARTINELLI ''AS IS'' AND ANY            *
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED   *
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE      *
+ * DISCLAIMED. IN NO EVENT SHALL ANDRES MARTINELLI BE LIABLE FOR ANY           *
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES  *
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;*
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND *
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT  *
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE       *
+ * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.           *
+ *******************************************************************************/
+
+/**
+ * \file string.c
+ * \author Andrés Martinelli <andmarti@gmail.com>
+ * \date 2017-07-18
+ * \brief TODO Write a brief file description.
+ */
+
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>   // for isdigit
@@ -9,8 +53,16 @@
 #include "../sc.h"
 #include "../macros.h"
 
-// Remove POSICION character of a cell (zero based)
-// returns 0 on success, -1 otherwise
+/**
+ * \brief Remove POSICION character of a cell (zero based)
+ *
+ * \param[in] str
+ * \param[in] posicion
+ *
+ * \return 0 on success
+ * \return -1 otherwise
+ */
+
 int del_char(char * str, int posicion) {
     int i, slen = strlen(str);
 
@@ -22,9 +74,16 @@ int del_char(char * str, int posicion) {
     return 0;
 }
 
-// WIDE CHAR VERSION
-// Remove POSICION character of a cell (zero based)
-// returns 0 on success, -1 otherwise
+/**
+ * \brief Remove POSICION character of a cell (zero based) (Wide char version)
+ *
+ * \param[in] srt
+ * \param[in] posicion
+ *
+ * \return 0 on success
+ * \return -1 otherwise
+ */
+
 int del_wchar(wchar_t * str, int posicion) {
     int i, slen = wcslen(str);
 
@@ -36,8 +95,17 @@ int del_wchar(wchar_t * str, int posicion) {
     return 0;
 }
 
-// Remove D to H characters range of a cell
-// returns 0 on success, -1 otherwise
+/**
+ * \brief Remove D to H characters range of a cell
+ *
+ * \param[in] str
+ * \param[in] d
+ * \param[in] h
+ *
+ * \return 0 on success
+ * \return -1 otherwise
+ */
+
 int del_range_chars(char * str, int d, int h) {
     int i = 0, j = 0, slen = strlen(str);
 
@@ -51,9 +119,17 @@ int del_range_chars(char * str, int d, int h) {
     return 0;
 }
 
-// WIDE CHAR VERSION
-// Remove D to H characters range of a cell
-// returns 0 on success, -1 otherwise
+/**
+ * \brief Remove D to H characters range of a cell. Wide char version.
+ *
+ * \param[in] str
+ * \param[in] d
+ * \param[in] h
+ *
+ * \return 0 on success
+ * \return -1 otherwise
+ */
+
 int del_range_wchars(wchar_t * str, int d, int h) {
     int i = 0, j = 0, slen = wcslen(str);
 
@@ -67,10 +143,20 @@ int del_range_wchars(wchar_t * str, int d, int h) {
     return 0;
 }
 
-// WIDE CHAR VERSION
-// Add a C character to a cell in POSICION
-// STR should be previously allocated with enough memory
-// returns 0 on success, -1 otherwise
+/**
+ * \brief Add a C character to a cell in POSICION.
+ *
+ * \details Wide char version. STR should be
+ * previously allocated with enough memory.
+ *
+ * \param[in] str
+ * \param[in] c
+ * \param[in] posicion
+ *
+ * \return 0 on success
+ * \return -1 otherwise
+ */
+
 int add_char(char * str, char c, int posicion) {
     int slen = strlen(str);
     int len = slen - posicion;
@@ -84,10 +170,19 @@ int add_char(char * str, char c, int posicion) {
     return 0;
 }
 
-// WIDE CHAR VERSION
-// Add a C character to a cell in POSICION
-// STR should be previously allocated with enough memory
-// returns 0 on success, -1 otherwise
+/**
+ * \brief Add a C character to a cell in POSICION. Wade char version.
+ *
+ * \details STR should be previously allocated with enough memory.
+ *
+ * \param[in] str
+ * \param[in] c
+ * \param[in] posicion
+ *
+ * \return 0 on success
+ * \return -1 otherwise
+ */
+
 int add_wchar(wchar_t * str, wchar_t c, int posicion) {
     int slen = wcslen(str);
     int len = slen - posicion;
@@ -101,14 +196,31 @@ int add_wchar(wchar_t * str, wchar_t c, int posicion) {
     return 0;
 }
 
-// Replace all matches FROM character TO character
+/**
+ * \brief Replace all matches FROM character TO character
+ *
+ * \param[in] s
+ * \param[in] from
+ * \param[in] to
+ *
+ * \return none
+ */
+
 void subst(char * s, char from, char to) {
     while (*s == from) *s++ = to;
     return;
 }
 
-// Find string B inside string S
-// returns S position in B , -1 otherwise
+/**
+ * \brief Rind string B inside string S
+ *
+ * \param[in]
+ * \param[in[ b
+ *
+ * \return S position in B
+ * \return -1 otherwise
+ */
+
 int str_in_str(char * s, char * b) {
     int slen = strlen(s);
     int blen = strlen(b);
@@ -130,9 +242,16 @@ int str_in_str(char * s, char * b) {
     return -1;
 }
 
-// WIDE CHAR VERSION
-// Find string B inside string S
-// returns S position in B , -1 otherwise
+/**
+ * \brief Find string B inside string S. Wide char version.
+ *
+ * \param[in] s
+ * \param[in] b
+ *
+ * \return S position in B
+ * \return -1 otherwise
+ */
+
 int wstr_in_wstr(wchar_t * s, wchar_t * b) {
     int slen = wcslen(s);
     int blen = wcslen(b);
@@ -154,7 +273,14 @@ int wstr_in_wstr(wchar_t * s, wchar_t * b) {
     return -1;
 }
 
-// Returns 1 if a special or control character is found
+/**
+ * \brief Returns 1 if special control character is found
+ *
+ * \param[in] d
+ *
+ * \return 1 if special control character is found
+ */
+
 int is_idchar (int d) {
     switch (d) {
         case OKEY_LEFT:
@@ -175,12 +301,30 @@ int is_idchar (int d) {
     return 0;
 }
 
+/**
+ * \brief TODO Document this function
+ *
+ * \param[in] string
+ * \param[in] junk
+ *
+ * \return string
+ */
+
 char * rtrim(char * string, char junk) {
     char * original = string + strlen(string);
     while(*--original == junk);
     *(original + 1) = '\0';
     return string;
 }
+
+/**
+ * \brief TODO Document this function
+ *
+ * \param[in] string
+ * \param[in] junk
+ *
+ * \return TODO returns
+ */
 
 char * ltrim(char * string, char junk) {
     char * original = string;
@@ -195,8 +339,15 @@ char * ltrim(char * string, char junk) {
     return string;
 }
 
-// this function tells is a string represents a numeric value
-// returns 1 if that is the case. 0 otherwise
+/**
+ * \brief Tells if a string represents a numeric value
+ *
+ * \param[in] string
+ *
+ * \return 1 if string represents a numeric value
+ * \return 0 otherwise
+ */
+
 int isnumeric(char * string) {
     int i, len = strlen(string);
     int res = true;
@@ -235,8 +386,15 @@ int isnumeric(char * string) {
     return res;
 }
 
-// clean \r and \n from a string
-// returns 1 if changes were made
+/**
+ * \brief Clean \r and \n from a string
+ *
+ * \param[in] string
+ *
+ * \return 1 of changes were made
+ * \return 0 otherwise
+ */
+
 int clean_carrier(char * string) {
     int i, changes = 0, len = strlen(string);
     for (i=0; i<len; i++) {
@@ -249,9 +407,15 @@ int clean_carrier(char * string) {
     return changes;
 }
 
-/*
- *  * strtok version that handles null fields
- *  */
+/**
+ * \brief strtok version that handles null fields
+ *
+ * \param[in] line
+ * \param[in] delims
+ *
+ * \return TODO returns
+ */
+
 char * xstrtok(char * line, char * delims) {
     static char * saveline = NULL;
     char * p;
@@ -260,14 +424,10 @@ char * xstrtok(char * line, char * delims) {
     if (line != NULL)
        saveline = line;
 
-/*
- * see if we have reached the end of the line
- */
+ // see if we have reached the end of the line
     if (saveline == NULL || *saveline == '\0')
        return(NULL);
-/*
- * return the number of characters that aren't delims
- */
+ // return the number of characters that aren't delims
     n = strcspn(saveline, delims);
     p = saveline; // save start of this token
 
@@ -279,8 +439,16 @@ char * xstrtok(char * line, char * delims) {
     return p;
 }
 
-// Count number of occurences of word in s
-// Not used
+/**
+ * \brief Change the number of occurences of a word in s. Not used.
+ *
+ * \param[in] s
+ * \param[in] word
+ * \param[in] overlap
+ *
+ * \return c
+ */
+
 int count_word_occurrences(char * s, char * word, int overlap) {
     int c = 0, l = strlen(word);
 
@@ -292,8 +460,16 @@ int count_word_occurrences(char * s, char * word, int overlap) {
     return c;
 }
 
-// Search substr word inside string and replace all its occurrences with replacement
-// it returns the resulting string
+/**
+ * \brief Search substr word inside string and replace all its occurances with replacement
+ *
+ * \param[in] string
+ * \param[in] substr
+ * \param[in] replacement
+ *
+ * \return resulting string
+ */
+
 char * str_replace ( const char * string, const char * substr, const char * replacement){
     char * tok = NULL;
     char * newstr = NULL;
@@ -324,10 +500,26 @@ char * str_replace ( const char * string, const char * substr, const char * repl
     return newstr;
 }
 
+/**
+ * \brief TODO Document uppercase()
+ *
+ * \param[in] sPtr
+ *
+ * \return none
+ */
+
 void uppercase(char * sPtr) {
     for(; *sPtr != '\0'; ++sPtr)
          *sPtr = toupper(*sPtr);
 }
+
+/**
+ * \brief TODO Document sc+isprint()
+ *
+ * \param[in] d
+ *
+ * \return TODO returns
+ */
 
 int sc_isprint(int d) {
     if ( ((d > 31) && (d < 127)) || ((d > 127) && (d < 255)) || iswprint(d) )
@@ -335,8 +527,16 @@ int sc_isprint(int d) {
     return 0;
 }
 
-//return the number of wide chars of
-//wchar_t * s string, needed to fill p column positions.
+/**
+ * \brief Return the number of wide chars of wchar_t * s string. Needed to 
+ * fill p column positions.
+ *
+ * \param[in] s
+ * \param[in] p
+ *
+ * \return TODO returns
+ */
+
 int count_width_widestring(const wchar_t * s, int p) {
     int n;
     int c_width = 0;

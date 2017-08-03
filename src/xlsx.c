@@ -1,3 +1,54 @@
+/*******************************************************************************
+ * Copyright (c) 2013-2017, Andrés Martinelli <andmarti@gmail.com              *
+ * All rights reserved.                                                        *
+ *                                                                             *
+ * This file is a part of SC-IM                                                *
+ *                                                                             *
+ * SC-IM is a spreadsheet program that is based on SC. The original authors    *
+ * of SC are James Gosling and Mark Weiser, and mods were later added by       *
+ * Chuck Martin.                                                               *
+ *                                                                             *
+ * Redistribution and use in source and binary forms, with or without          *
+ * modification, are permitted provided that the following conditions are met: *
+ * 1. Redistributions of source code must retain the above copyright           *
+ *    notice, this list of conditions and the following disclaimer.            *
+ * 2. Redistributions in binary form must reproduce the above copyright        *
+ *    notice, this list of conditions and the following disclaimer in the      *
+ *    documentation and/or other materials provided with the distribution.     *
+ * 3. All advertising materials mentioning features or use of this software    *
+ *    must display the following acknowledgement:                              *
+ *    This product includes software developed by Andrés Martinelli            *
+ *    <andmarti@gmail.com>.                                                    *
+ * 4. Neither the name of the Andrés Martinelli nor the                        *
+ *   names of other contributors may be used to endorse or promote products    *
+ *   derived from this software without specific prior written permission.     *
+ *                                                                             *
+ * THIS SOFTWARE IS PROVIDED BY ANDRES MARTINELLI ''AS IS'' AND ANY            *
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED   *
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE      *
+ * DISCLAIMED. IN NO EVENT SHALL ANDRES MARTINELLI BE LIABLE FOR ANY           *
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES  *
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;*
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND *
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT  *
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE       *
+ * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.           *
+ *******************************************************************************/
+
+/**
+ * \file xlsx.c
+ * \author Andrés Martinelli <andmarti@gmail.com>
+ * \date 2017-07-18
+ * \brief TODO Write a tbrief file description.
+ *
+ * \details xlsx import requires:
+ * - libzip-dev
+ * - libxml2-dev
+ *
+ * \details xlsx export requires
+ * - libxlsxwriter
+ */
+
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
@@ -17,21 +68,19 @@
 #include <libxml/tree.h>
 #include "xlsx.h"
 
-/*
- * xlsx import requires:
- * requires libzip-dev
- * requires libxml2-dev
+/**
+ * \brief TODO Document get_xlsx_string()
  *
- * xlsx export requires
- * libxlsxwriter
+ * \details This function takes the DOM of the sharedStrings file
+ * and based on position, it returns the according string. Note
+ * that 0 is the first string.
+ *
+ * \param[in] doc
+ * \param[in] pos
+ *
+ * \return none
  */
 
-
-/*
- * this functions takes the DOM of the sharedStrings file
- * and based on a position, it returns the according string
- * note that 0 is the first string.
- */
 char * get_xlsx_string(xmlDocPtr doc, int pos) {
     xmlNode * cur_node = xmlDocGetRootElement(doc)->xmlChildrenNode;
     xmlNode * father;
@@ -67,6 +116,19 @@ char * get_xlsx_string(xmlDocPtr doc, int pos) {
  * and based on a position, it returns the according numFmtId
  * IMPORTANT: note that 0 is the first "xf".
  */
+/**
+ * \brief TODO Document get_xlsx_styles
+ *
+ * \details This function takes the DOM of the styles file
+ * and mased on position, it returns the according numFmtId.
+ * IMPORTANT: Note that 0 is the first "xf".
+ *
+ * \param[in] doc_styles
+ * \param[in] pos
+ *
+ * \return none
+ */
+
 char * get_xlsx_styles(xmlDocPtr doc_styles, int pos) {
     // we go forward up to styles data
     xmlNode * cur_node = xmlDocGetRootElement(doc_styles)->xmlChildrenNode;
@@ -79,6 +141,15 @@ char * get_xlsx_styles(xmlDocPtr doc_styles, int pos) {
     char * id = (char *) xmlGetProp(cur_node, (xmlChar *) "numFmtId");
     return id;
 }
+
+/**
+ * \brief TODO Document get_xlsx_number_format_by_id()
+ *
+ * \param[in] doc_styles
+ * \param[in] id
+ *
+ * \return none
+ */
 
 char * get_xlsx_number_format_by_id(xmlDocPtr doc_styles, int id) {
     if (doc_styles == NULL || !((id >= 165 && id <= 180) || id == 100)) 
@@ -107,7 +178,15 @@ char * get_xlsx_number_format_by_id(xmlDocPtr doc_styles, int id) {
     }
 }
 
-// this function takes the sheetfile DOM and builds the tbl spreadsheet (SC-IM format)
+/**
+ * \brief TODO Document get_sheet_data()
+ *
+ * \details This function takes the sheetfile DOM and builds the tbl
+ * spreadsheet (SC-IM format)
+ *
+ * \return none
+ */
+
 void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) {
     xmlNode * cur_node = xmlDocGetRootElement(doc)->xmlChildrenNode;
     xmlNode * child_node = NULL;
@@ -273,6 +352,15 @@ void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) 
     return;
 }
 
+/**
+ * \brief TODO Document open_xlsx()
+ *
+ * \param[in] fname
+ * \param[in] encoding
+ *
+ * \return none
+ */
+
 int open_xlsx(char * fname, char * encoding) {
     struct zip * za;
     struct zip_file * zf;
@@ -399,6 +487,18 @@ int open_xlsx(char * fname, char * encoding) {
 
 #ifdef XLSX_EXPORT
 #include "xlsxwriter.h"
+/**
+ * \brief TODO Document export_xlsx()
+ *
+ * \param[in] filename
+ * \param[in] r0
+ * \param[in] c0
+ * \param[in] rn
+ * \param[in] cn
+ *
+ * \return none
+ */
+
 int export_xlsx(char * filename, int r0, int c0, int rn, int cn) {
     int row, col;
     register struct ent ** pp;

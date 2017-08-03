@@ -1,16 +1,60 @@
-/*
- * This file contains all functions used for maintaining a dependence graph
- * that keeps track of all the cells that depends on each other.
- * this is done in a two way relationship.
+/*******************************************************************************
+ * Copyright (c) 2013-2017, Andrés Martinelli <andmarti@gmail.com              *
+ * All rights reserved.                                                        *
+ *                                                                             *
+ * This file is a part of SC-IM                                                *
+ *                                                                             *
+ * SC-IM is a spreadsheet program that is based on SC. The original authors    *
+ * of SC are James Gosling and Mark Weiser, and mods were later added by       *
+ * Chuck Martin.                                                               *
+ *                                                                             *
+ * Redistribution and use in source and binary forms, with or without          *
+ * modification, are permitted provided that the following conditions are met: *
+ * 1. Redistributions of source code must retain the above copyright           *
+ *    notice, this list of conditions and the following disclaimer.            *
+ * 2. Redistributions in binary form must reproduce the above copyright        *
+ *    notice, this list of conditions and the following disclaimer in the      *
+ *    documentation and/or other materials provided with the distribution.     *
+ * 3. All advertising materials mentioning features or use of this software    *
+ *    must display the following acknowledgement:                              *
+ *    This product includes software developed by Andrés Martinelli            *
+ *    <andmarti@gmail.com>.                                                    *
+ * 4. Neither the name of the Andrés Martinelli nor the                        *
+ *   names of other contributors may be used to endorse or promote products    *
+ *   derived from this software without specific prior written permission.     *
+ *                                                                             *
+ * THIS SOFTWARE IS PROVIDED BY ANDRES MARTINELLI ''AS IS'' AND ANY            *
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED   *
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE      *
+ * DISCLAIMED. IN NO EVENT SHALL ANDRES MARTINELLI BE LIABLE FOR ANY           *
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES  *
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;*
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND *
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT  *
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE       *
+ * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.           *
+ *******************************************************************************/
+
+/**
+ * \file dep_graph.c
+ * \author Andrés Martinelli <andmarti@gmail.com>
+ * \date 2017-07-18
+ * \brief All the functions used to track cell dependencies
  *
- * A vertex represents an ent and has in "edges", links to other vertex's(ents) which the first vertex depends on.
+ * \details This file contains all functions used for maintaining a
+ * dependence graph that keeps track of all the cells that depends on
+ * each other. This is done in a two way relationship.
  *
- * The other relationship is "back_edges". This is a pointer to other vertex's and
- * there you will keep linked all the vertex's that use the first vertex in their formulas.
- * In other words, you will keep track of all the vertex's that depends on the first vertex.
+ * \details A vertex represents an ent and has in "edges", links to
+ * other vertex's(ents) which the first vertex depends on.
  *
- * NOTE: an orphan vertex represents an ent that has an enode thats need to be evaluated,
- * but do not depend in another cell.
+ * \details The other relationship is "back_edges". This is a pointer
+ * to other vertex's and there you will keep linked all the vertex's that
+ * use the first vertex in their formulas. In other words, you will keep
+ * track of all the vertex's that depends on the first vertex.
+ *
+ * \details NOTE: an orphan vertex represents an ent that has an enode
+ * thats need to be evaluated, but do not depend in another cell.
  */
 
 #include <stdio.h>
@@ -27,7 +71,7 @@
 #include "trigger.h"
 
 extern jmp_buf fpe_save;
-extern int cellerror;    /* is there an error in this cell */
+extern int cellerror;    /**< is there an error in this cell */
 
 #define CREATE_NEW(type) (type *) malloc(sizeof(type))
 
@@ -43,22 +87,33 @@ extern int cellerror;    /* is there an error in this cell */
       tempNode->next = newNode; \
    }
 
-graphADT graph;
+graphADT graph; /**< Creates an empty graph, with no vertices. Allocate memory from the heap */
 
-/* Creates an empty graph, with no vertices. Allocate memory from the heap */
+/**
+ * \brief TODO Document GraphCreate()
+ *
+ * \return An empty graph
+ */
+
 graphADT GraphCreate() {
    graphADT emptyGraph = (graphCDT *) malloc(sizeof(graphCDT));
    emptyGraph->vertices = NULL;
    return emptyGraph;
 }
 
-/*
- * this adds the vertex sorted in the list
- * and not at the end
- * given a row & col to insert as a new vertex, this function will create a new vertex with those values
- * and add it order in the list!
- * returns a pointer to the new vertex
+/**
+ * \brief Undefined function 
+ *
+ * This adds the vertex sorted in the list and not at the end. Given a row and
+ * column to insert as a new vertex, this function will create a new vertex
+ * with those values and add it in order to the list.
+ *
+ * \param[in] graph
+ * \param[in] ent
+ *
+ * \return a pointer to the new vertex
  */
+
 vertexT * GraphAddVertex(graphADT graph , struct ent * ent) {
     vertexT * newVertex = (vertexT *) malloc(sizeof(vertexT));
     newVertex->visited = 0;
@@ -95,12 +150,21 @@ vertexT * GraphAddVertex(graphADT graph , struct ent * ent) {
 }
 
 
-/*
- * This looks for a vertex representing a specific ent in a sorted list
- * we search for a vertex in graph and return it if found.
- * if not found and create flag, we add the vertex (malloc it) and return it
- * else if not found, it returns NULL
+/**
+ * \brief TODO Write a brief description
+ *
+ * \details This looks for a vertex representing a specific ent in
+ * a sorted list. We search for a vertex in graph and return it if
+ * found. If not found and create flag, we add add the vertex
+ * (malloc it) and return it. If not found, it returns NULL.
+ *
+ * \param[in] graph
+ * \param[in] ent
+ * \param[in] create
+ *
+ * \return vertex if found; NULL if not found
  */
+
 vertexT * getVertex(graphADT graph, struct ent * ent, int create) {
    if (graph == NULL || ent == NULL) return NULL;
    vertexT * temp = graph->vertices;
@@ -121,6 +185,15 @@ vertexT * getVertex(graphADT graph, struct ent * ent, int create) {
  * This function adds a edge in our graph from the vertex "from" to the vertex "to"
  * should add edges ordered in list ?
  */
+/**
+ * \brief Add an edge to a graph
+ *
+ * \details This function adds an edge in out graph from the vertex "from"
+ * to the vertex "to". Should add edges ordered in list?
+ *
+ * \return none
+ */
+
 void GraphAddEdge(vertexT * from, vertexT * to) {
    if (from == NULL || to == NULL) {
       sc_info("Error while adding edge: either of the vertices do not exist") ;
@@ -150,9 +223,14 @@ void GraphAddEdge(vertexT * from, vertexT * to) {
   return;
 }
 
+/**
+ * \brief Iterate through all verticies and set visited to false
+ *
+ * Iterate through all verticies and set visited to false
+ *
+ * \return none
+ */
 
-
-// iterate through all the vertices. Set visited = false
 void markAllVerticesNotVisited () {
    vertexT * temp = graph->vertices;
    while (temp != NULL) {
@@ -163,7 +241,12 @@ void markAllVerticesNotVisited () {
 }
 
 
-// print vertexs
+/**
+ * \brief Prints vertexes 
+ *
+ * \return none
+ */
+
 void print_vertexs() {
    char det[BUFFERSIZE] = "";
    if (graph == NULL) {
@@ -227,11 +310,18 @@ void print_vertexs() {
 }
 
 
-/*
- * this function frees the memory of vertex's edges.
- * this also frees the vertex itself, but only if it has no back_dependences.
- * the only parameter is an ent pointer.
+/**
+ * \brief Destroy a vertex
+ *
+ * \details This function frees the memory of vertex's edges. This also
+ * frees the vertex itself, but only if it has no back_dependences. The
+ * only parameter is an int pointer.
+ *
+ * \param[in] ent
+ *
+ * \return none
  */
+
 void destroy_vertex(struct ent * ent) {
    if (graph == NULL || ent == NULL) return;
 
@@ -290,12 +380,24 @@ void destroy_vertex(struct ent * ent) {
 }
 
 
-/*
- * for each edge in edges, we look for the reference to the vertex we are deleting and we erase it!
- * v_cur is the reference
- * if back_reference is set, the delete is done over the back_edges list
- * if not, it is done over edges list.
+/**
+ * \brief TODO Write brief function description
+ *
+ * \details For each edge in edges, we look for the references to the
+ * vertex we are deleting and we erase it!
+ *
+ * \details v_cur is the reference.
+ *
+ * \details If back_reference is set, the delete is done over the
+ * back_edges list. If not, it is done over edges list.
+ *
+ * \param[in] v_cur
+ * \param[in] tc
+ * \param[in] back_reference
+ *
+ * \return none
  */
+
 void delete_reference(vertexT * v_cur, vertexT * vc, int back_reference) {
     if (v_cur == NULL || vc == NULL) return;
 //  sc_debug("we follow %d %d", vc->ent->row, vc->ent->col);
@@ -330,7 +432,12 @@ void delete_reference(vertexT * v_cur, vertexT * vc, int back_reference) {
 }
 
 
-// this free memory of an edge and its linked edges
+/**
+ * \brief Free memory of an edge and its linked edges
+ *
+ * \return none
+ */
+
 void destroy_list_edges(edgeT * e) {
     if (e == NULL) return;
     edgeT * e_next, * e_cur = e;
@@ -345,7 +452,14 @@ void destroy_list_edges(edgeT * e) {
 }
 
 
-// this free memory of a graph
+/**
+ * \brief Free the memory of a graph
+ *
+ * \param[in] graph
+ *
+ * \return none
+ */
+
 void destroy_graph(graphADT graph) {
     if (graph == NULL) return;
 
@@ -362,6 +476,12 @@ void destroy_graph(graphADT graph) {
 }
 
 
+/**
+ * \brief TODO Document rebuild_graph()
+ *
+ * \return none
+ */
+
 void rebuild_graph() {
     destroy_graph(graph);
     graph = GraphCreate();
@@ -376,11 +496,22 @@ void rebuild_graph() {
 }
 
 
+/**
+ * \brief Eval vertexs of graph
+ *
+ * \return none
+ */
+
 void EvalAll() {
-    // Eval vertexs of graph
     EvalAllVertexs();
     return;
 }
+
+/**
+ * \brief TODO Document EvalAllVertexs
+ *
+ * \return none
+ */
 
 void EvalAllVertexs() {
     struct ent * p;
@@ -397,7 +528,17 @@ void EvalAllVertexs() {
     //(void) signal(SIGFPE, exit_app);
 }
 
-// Evaluate just one vertex
+/**
+ * \brief Evaluate just one vertex
+ *
+ * \param[in] p
+ * \param[in] i
+ * \param[in] j
+ * \param[in] rebuild_graph
+ *
+ * \return none
+ */
+
 void EvalJustOneVertex(register struct ent * p, int i, int j, int rebuild_graph) {
     gmyrow=i; gmycol=j;
 
@@ -444,15 +585,21 @@ void EvalJustOneVertex(register struct ent * p, int i, int j, int rebuild_graph)
 }
 
 
-
-
-/*
+/* TODO Incorporate this comment into the functions and variables below.
  * the folowing functions and variables are used for ent_that_depends_on function.
  * the last is used to get the list of ents that depends on an specific ent
  * the result is saved in a list of ents.
  */
 struct ent_ptr * deps = NULL;
 int dep_size = 0;
+
+/**
+ * \brief TODO Document ents_that_depends_on()
+ *
+ * \param[in] ent
+ *
+ * \return none
+ */
 
 void ents_that_depends_on (struct ent * ent) {
    if (graph == NULL) return;
@@ -472,11 +619,21 @@ void ents_that_depends_on (struct ent * ent) {
    return;
 }
 
-/*
- * This method returns if a vertex called dest is reachable from the vertex called src
- * (if back_dep is set to false).
- * if back_dep is set to true, the relationship is evaluated in the opposite way.
+/**
+ * \brief TODO Write brief function description
+ *
+ * \details This method returns if a vertex called dest is reachable
+ * from the vertex called src (if back_dep is set to false). If back_dep
+ * is set to true, the relationship is evaluated in the opposite way.
+ *
+ * \param[in] src
+ * \param[out] dest
+ * \param[in] back_dep
+ *
+ * \return
  */
+// TODO List the returns of this function
+
 int GraphIsReachable(vertexT * src, vertexT * dest, int back_dep) {
    if (src == dest) {
        return 1;
@@ -503,10 +660,20 @@ int GraphIsReachable(vertexT * src, vertexT * dest, int back_dep) {
    return 0;
 }
 
-/*
- * this checks dependency of a range of ents
- * keep the ents in "deps" lists
+/**
+ * \brief TODO Document ents_that_depends_on_range()
+ *
+ * \details Checks dependency of a range of ents. Keep the ends
+ * in "deps" lists.
+ *
+ * \param[in] r1
+ * \param[in] c1
+ * \param[in] r2
+ * \param[in] c2
+ *
+ * \return none
  */
+
 void ents_that_depends_on_range (int r1, int c1, int r2, int c2) {
         if (graph == NULL) return;
 

@@ -1,3 +1,47 @@
+/*******************************************************************************
+ * Copyright (c) 2013-2017, Andrés Martinelli <andmarti@gmail.com              *
+ * All rights reserved.                                                        *
+ *                                                                             *
+ * This file is a part of SC-IM                                                *
+ *                                                                             *
+ * SC-IM is a spreadsheet program that is based on SC. The original authors    *
+ * of SC are James Gosling and Mark Weiser, and mods were later added by       *
+ * Chuck Martin.                                                               *
+ *                                                                             *
+ * Redistribution and use in source and binary forms, with or without          *
+ * modification, are permitted provided that the following conditions are met: *
+ * 1. Redistributions of source code must retain the above copyright           *
+ *    notice, this list of conditions and the following disclaimer.            *
+ * 2. Redistributions in binary form must reproduce the above copyright        *
+ *    notice, this list of conditions and the following disclaimer in the      *
+ *    documentation and/or other materials provided with the distribution.     *
+ * 3. All advertising materials mentioning features or use of this software    *
+ *    must display the following acknowledgement:                              *
+ *    This product includes software developed by Andrés Martinelli            *
+ *    <andmarti@gmail.com>.                                                    *
+ * 4. Neither the name of the Andrés Martinelli nor the                        *
+ *   names of other contributors may be used to endorse or promote products    *
+ *   derived from this software without specific prior written permission.     *
+ *                                                                             *
+ * THIS SOFTWARE IS PROVIDED BY ANDRES MARTINELLI ''AS IS'' AND ANY            *
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED   *
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE      *
+ * DISCLAIMED. IN NO EVENT SHALL ANDRES MARTINELLI BE LIABLE FOR ANY           *
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES  *
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;*
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND *
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT  *
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE       *
+ * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.           *
+ *******************************************************************************/
+
+/**
+ * \file file.c
+ * \author Andrés Martinelli <andmarti@gmail.com>
+ * \date 2017-07-18
+ * \brief TODO Write a brief file description.
+ */
+
 #include <pwd.h>
 #include <sys/stat.h>
 #include <time.h>
@@ -38,7 +82,12 @@ extern pthread_t fthread;
 extern int pthread_exists;
 #endif
 
-/* erase the database (tbl, etc.) */
+/**
+ * \brief Erase the database (tbl, etc.)
+ *
+ * \return none
+ */
+
 void erasedb() {
     int  r, c;
 
@@ -92,8 +141,16 @@ void loadrc(void) {
     *curfile = '\0';
 }
 
-// function that checks if a file exists.
-// returns 1 if so. returns 0 otherwise.
+/**
+ * \brief Check if a file exists
+ *
+ * \details Check if a file exists. Returns 1 if so. Returns 0 otherwise.
+ *
+ * \param[in] fname file name
+ *
+ * \return 1 if file exises; 0 otherwise
+ */
+
 int file_exists(const char * fname) {
     FILE * file;
     if ((file = fopen(fname, "r"))) {
@@ -103,7 +160,14 @@ int file_exists(const char * fname) {
     return 0;
 }
 
-// This function checks if a file suffered mods since it was open
+/**
+ * \brief Check if file has been modified since last save.
+ *
+ * \details This function checks if a file suffered mods since it was open.
+ *
+ * \return 0 if not modified; 1 if modified
+ */
+
 int modcheck() {
     if (modflg && ! atoi(get_conf_value("nocurses"))) {
         sc_error("File not saved since last change. Add '!' to force");
@@ -112,11 +176,14 @@ int modcheck() {
     return 0;
 }
 
-/*
- * This function handles the save file process in SC-IM format
- * returns 0 if OK
- * return -1 on error
+/**
+ * \brief TODO Handle the save file process
+ *
+ * This funciton handles the save file process in SC-IM format..
+ *
+ * \return 0 on OK; -1 on error
  */
+
 int savefile() {
     int force_rewrite = 0;
     char name[BUFFERSIZE];
@@ -192,8 +259,21 @@ int savefile() {
     return 0;
 }
 
-// Write a file
-// receives parameter range and file name
+/**
+ * \brief Write a file
+ *
+ * \details Write a file. Receives parameter range and file name.
+ *
+ * \param[in] fname file name
+ * \param[in] r0
+ * \param[in] c0
+ * \param[in] rn
+ * \param[in] cn
+ * \param[in] verbose
+ *
+ * \return 0 on success; -1 on error
+ */
+
 int writefile(char * fname, int r0, int c0, int rn, int cn, int verbose) {
     register FILE *f;
     char save[PATHLEN];
@@ -222,6 +302,18 @@ int writefile(char * fname, int r0, int c0, int rn, int cn, int verbose) {
 
     return 0;
 }
+
+/**
+ * \brief TODO Document write_fd
+ *
+ * \param[in] f file pointer
+ * \param[in] r0
+ * \param[in] c0
+ * \param[in] rn
+ * \param[in] cn
+ * 
+ * \return none
+ */
 
 void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
     register struct ent **pp;
@@ -383,6 +475,14 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
     fprintf(f, "\n");
 }
 
+/**
+ * \brief TODO Document write_franges()
+ *
+ * \param[in] f file pointer
+ * 
+ * \return none
+ */
+
 void write_franges(register FILE *f) {
     if (! freeze_ranges) return;
     if (freeze_ranges->type == 'a') {
@@ -399,6 +499,14 @@ void write_franges(register FILE *f) {
         fprintf(f, "freeze %d:%d\n", freeze_ranges->tl->row, freeze_ranges->br->row);
     }
 }
+
+/**
+ * \brief TODO Document write_marks()
+ *
+ * \param[in] f file pointer
+ *
+ * \return none
+ */
 
 void write_marks(register FILE *f) {
     int i;
@@ -418,6 +526,20 @@ void write_marks(register FILE *f) {
 
     return;
 }
+
+/**
+ * \brief TODO Document write_cells()
+ *
+ * \param[in] f file pointer
+ * \param[in] r0
+ * \param[in] c0
+ * \param[in] rn
+ * \param[in] cn
+ * \param[in] dr
+ * \param[in[ dc
+ *
+ * \return none
+ */
 
 void write_cells(register FILE *f, int r0, int c0, int rn, int cn, int dr, int dc) {
     register struct ent **pp;
@@ -459,6 +581,15 @@ void write_cells(register FILE *f, int r0, int c0, int rn, int cn, int dr, int d
     }
     //modflg = mf;
 }
+
+/**
+ * \brief TODO Document readfile
+ *
+ * \param[in] fname file name
+ * \param[in] eraseflg
+ *
+ * \return none
+ */
 
 int readfile(char * fname, int eraseflg) {
     if (!strlen(fname)) return 0;
@@ -603,7 +734,14 @@ int readfile(char * fname, int eraseflg) {
     return 1;
 }
 
-// expand a ~ in a path to your home directory
+/**
+ * \brief Expand a ~ in path to the user's home directory
+ *
+ * \param[in] path
+ *
+ * \return path
+ */
+
 char * findhome(char * path) {
     static char * HomeDir = NULL;
 
@@ -640,7 +778,18 @@ char * findhome(char * path) {
     return (path);
 }
 
-// Open the input or output file, setting up a pipe if needed
+/**
+ * \brief Open the input or output file
+ *
+ * \details Open the input or output file, setting up a pipe if needed.
+ *
+ * \param[in] fname file name
+ * \param[in] rpid
+ * \param[in] rfd
+ *
+ * \return file pointer
+ */
+
 FILE * openfile(char *fname, int *rpid, int *rfd) {
     int pipefd[4];
     int pid;
@@ -702,6 +851,18 @@ FILE * openfile(char *fname, int *rpid, int *rfd) {
 }
 
 // close a file opened by openfile(), if process wait for return
+/**
+ * \brief Close a file opened by openfile()
+ *
+ * \details Close a file opened by openfile(). If process, wait for return
+ *
+ * \param[in] f file pointer
+ * \param[in] pid
+ * \param[in] rfd
+ *
+ * \return none
+ */
+
 void closefile(FILE *f, int pid, int rfd) {
     int temp;
     wint_t wi;
@@ -733,6 +894,14 @@ void closefile(FILE *f, int pid, int rfd) {
     }
 }
 
+/**
+ * \brief TODO <brief function description>
+ *
+ * \param[in] f file pointer
+ *
+ * \return none
+ */
+
 void print_options(FILE *f) {
     if (
         ! optimize &&
@@ -755,7 +924,15 @@ void print_options(FILE *f) {
 }
 
 
-// Import: CSV to SC
+/**
+ * \brief Import csv to sc
+ *
+ * \param[in] fname file name
+ * \param[in] d
+ *
+ * \return 0 on success; -1 on error
+ */
+
 int import_csv(char * fname, char d) {
     register FILE * f;
     int r = 0, c = 0, cf = 0;
@@ -848,9 +1025,17 @@ int import_csv(char * fname, char d) {
     return 0;
 }
 
-/*
- * Export to CSV, TAB or plain TXT
+/**
+ * \brief Export to CSV, TAB, or plain TXT
+ *
+ * \param[in] r0
+ * \param[in] c0
+ * \param[in] rn
+ * \param[in] cn
+ *
+ * \return none
  */
+
 void do_export(int r0, int c0, int rn, int cn) {
     int force_rewrite = 0;
     char type_export[4] = "";
@@ -919,7 +1104,18 @@ void do_export(int r0, int c0, int rn, int cn) {
     }
 }
 
-// fname is the path and name of file
+/**
+ * \brief Export to plain TXT
+ *
+ * \param[in] fname file name
+ * \param[in] r0
+ * \param[in] c0
+ * \param[in] rn
+ * \param[in] cn
+ * 
+ * \return none
+ */
+
 void export_plain(char * fname, int r0, int c0, int rn, int cn) {
     FILE * f;
     int row, col;
@@ -1002,6 +1198,20 @@ void export_plain(char * fname, int r0, int c0, int rn, int cn) {
 }
 
 // fname is the path and name of file
+/**
+ * \brief TODO Document export_delim
+ *
+ * \param[in] fname full path of the file
+ * \param[in] coldelim
+ * \param[in] r0
+ * \param[in] c0
+ * \param[in] rn
+ * \param[in] cn
+ * \param[in] verbose
+ *
+ * \return none
+ */
+
 void export_delim(char * fname, char coldelim, int r0, int c0, int rn, int cn, int verbose) {
     FILE * f;
     int row, col;
@@ -1060,7 +1270,19 @@ void export_delim(char * fname, char coldelim, int r0, int c0, int rn, int cn, i
     }
 }
 
-/* unspecial (backquote -> ") things that are special chars in a table */
+/**
+ * \brief TODO Document unspecial()
+ *
+ * \details Unxpecial (backquotes - > ") things that are special
+ * chars in a table
+ *
+ * \param[in] f file pointer
+ * \param[in] srt string pointer
+ * \param[in] delim
+ *
+ * \return none
+ */
+
 void unspecial(FILE * f, char * str, int delim) {
     int backquote = 0;
 
@@ -1073,10 +1295,16 @@ void unspecial(FILE * f, char * str, int delim) {
     if (backquote) putc('\"', f);
 }
 
-/*
- * check max length of lines in a file
+/**
+ * \brief Check the mas length of lines in a file
+ *
+ * \details Check masimum length of lines in a file. Note: 
  * FILE * f shall be opened.
+ *
+ * \param[in] f file pointer
+ * \return file length + 1
  */
+
 int max_length(FILE * f) {
     if (f == NULL) return -1;
     int count = 0, max = 0;
@@ -1095,6 +1323,16 @@ int max_length(FILE * f) {
     }
     return max + 1;
 }
+
+/**
+ * \brief TODO Document plugin_exists()
+ *
+ * \param[in] name
+ * \param[in] len
+ * \param[in] path
+ *
+ * \return none
+ */
 
 int plugin_exists(char * name, int len, char * path) {
     FILE * fp;
@@ -1118,6 +1356,12 @@ int plugin_exists(char * name, int len, char * path) {
     }
     return 0;
 }
+
+/**
+ * \brief TODO Document do_autobackup()
+ *
+ * \return none
+ */
 
 void * do_autobackup() {
     int len = strlen(curfile);
@@ -1160,7 +1404,12 @@ void * do_autobackup() {
     return (void *) 0;
 }
 
-/* check if it is time to do an autobackup */
+/**
+ * \brief Check if it is time to do an autobackup
+ *
+ * \return none
+ */
+
 void handle_backup() {
     #ifdef AUTOBACKUP
     extern struct timeval lastbackup_tv; // last backup timer
@@ -1180,7 +1429,16 @@ void handle_backup() {
     return;
 }
 
-/* remove autobackup file (used when quitting or when loading a new file) */
+/**
+ * \brief Remove autobackup file
+ *
+ * \details Remove autobackup file. Used when quitting or when loading
+ * a new file.
+ *
+ * \param[in] file file pointer
+ * \return none
+ */
+
 void remove_backup(char * file) {
     int len = strlen(file);
     if (!len) return;
@@ -1193,6 +1451,14 @@ void remove_backup(char * file) {
     remove(name);
     return;
 }
+
+/**
+ * \brief TODO Document backup_exists()
+ *
+ * \param[in] file file pointer
+ *
+ * \return none
+ */
 
 int backup_exists(char * file) {
     int len = strlen(file);

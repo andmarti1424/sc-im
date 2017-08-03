@@ -1,3 +1,47 @@
+/*******************************************************************************
+ * Copyright (c) 2013-2017, Andrés Martinelli <andmarti@gmail.com              *
+ * All rights reserved.                                                        *
+ *                                                                             *
+ * This file is a part of SC-IM                                                *
+ *                                                                             *
+ * SC-IM is a spreadsheet program that is based on SC. The original authors    *
+ * of SC are James Gosling and Mark Weiser, and mods were later added by       *
+ * Chuck Martin.                                                               *
+ *                                                                             *
+ * Redistribution and use in source and binary forms, with or without          *
+ * modification, are permitted provided that the following conditions are met: *
+ * 1. Redistributions of source code must retain the above copyright           *
+ *    notice, this list of conditions and the following disclaimer.            *
+ * 2. Redistributions in binary form must reproduce the above copyright        *
+ *    notice, this list of conditions and the following disclaimer in the      *
+ *    documentation and/or other materials provided with the distribution.     *
+ * 3. All advertising materials mentioning features or use of this software    *
+ *    must display the following acknowledgement:                              *
+ *    This product includes software developed by Andrés Martinelli            *
+ *    <andmarti@gmail.com>.                                                    *
+ * 4. Neither the name of the Andrés Martinelli nor the                        *
+ *   names of other contributors may be used to endorse or promote products    *
+ *   derived from this software without specific prior written permission.     *
+ *                                                                             *
+ * THIS SOFTWARE IS PROVIDED BY ANDRES MARTINELLI ''AS IS'' AND ANY            *
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED   *
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE      *
+ * DISCLAIMED. IN NO EVENT SHALL ANDRES MARTINELLI BE LIABLE FOR ANY           *
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES  *
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;*
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND *
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT  *
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE       *
+ * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.           *
+ *******************************************************************************/
+
+/**
+ * \file cmds_edit.c
+ * \author Andrés Martinelli <andmarti@gmail.com>
+ * \date 2017-07-18
+ * \brief TODO Write a tbrief file description.
+ */
+
 #include <string.h>
 #include <wchar.h>
 #include <wctype.h>
@@ -19,7 +63,15 @@
 extern char ori_insert_edit_submode;
 #endif
 
-static wint_t wi;                      // char read from stdin
+static wint_t wi; /**< char read from stdin */
+
+/**
+ * \brief TODO Document do_editmode()
+ *
+ * \param[in] sb
+ *
+ * \return none
+ */
 
 void do_editmode(struct block * sb) {
     if (sb->value == L'h' || sb->value == OKEY_LEFT) {         // LEFT
@@ -319,7 +371,14 @@ void do_editmode(struct block * sb) {
     return;
 }
 
-// looks for a char in inputline
+/**
+ * \brief Looks for a char in inputline
+ *
+ * \param[in] cb
+ *
+ * \return position; -1 otherwise 
+ */
+
 int look_for(wchar_t cb) {
     int c, cpos = inputline_pos;
     while (++cpos < wcslen(inputline))
@@ -328,7 +387,14 @@ int look_for(wchar_t cb) {
     return -1;
 }
 
-// move backwards a word
+/**
+ * \brief Move backward one word
+ *
+ * \param[in] big_word
+ *
+ * \return position
+ */
+
 int back_word(int big_word) {
     int c, cpos = real_inputline_pos;
     if (inputline[cpos-1] == L' ' ) cpos--;
@@ -340,11 +406,19 @@ int back_word(int big_word) {
     return cpos;
 }
 
-/*
- * end_of_word is used for moving forward to end of a WORD
- * big_word looks for ' ', else looks for istext.
- * delete 1 is used when typing dw command
+/**
+ * \brief Move to the end of a word
+ *
+ * \details Used for moving forward to the end of a WORD. big_word
+ * looks for ' ', else looks for istext.
+ *
+ * \param[in] end_of_word
+ * \param[in] delete
+ * \param[in] big_word
+ *
+ * \return position; 0 otherwise
  */
+
 int for_word(int end_of_word, int delete, int big_word) {
     int cpos = real_inputline_pos;
 
@@ -365,6 +439,12 @@ int for_word(int end_of_word, int delete, int big_word) {
     return 0;
 }
 
+/**
+ * \brief TODO Cocument del_back_char()
+ *
+ * \return none
+ */
+
 void del_back_char() {      // x   DEL
     int max = wcswidth(inputline, wcslen(inputline));
     if (inputline_pos > max) return;
@@ -379,6 +459,12 @@ void del_back_char() {      // x   DEL
     return;
 }
 
+/**
+ * \brief TODO Document del_for_char()
+ *
+ * \return none
+ */
+
 void del_for_char() {       // X    BS
     if ( ! wcslen(inputline) || ! real_inputline_pos ) return;
     int l = wcwidth(inputline[real_inputline_pos - 1]);
@@ -388,8 +474,12 @@ void del_for_char() {       // X    BS
     return;
 }
 
-// return 1 OK
-// return 0 on error
+/**
+ * \brief TODO Document start_edit_mode()
+ *
+ * \returns: 1 on success; 0 on error
+ */
+
 int start_edit_mode(struct block * buf, char type) {
     chg_mode(buf->value);
 
