@@ -804,7 +804,13 @@ double doston(char * s) {
 int doslen(char * s) {
     if (!s) return 0;
 
-    int i = strlen(s);
+    //int i = strlen(s);
+    int i = 0;
+
+    wchar_t widestring[BUFFERSIZE] = { L'\0' };
+    const char * mbsptr = s;
+    size_t result = mbsrtowcs(widestring, &mbsptr, BUFFERSIZE, NULL);
+    if ( result != (size_t) -1 ) i = wcslen(widestring);
     scxfree(s);
     return i;
 }
