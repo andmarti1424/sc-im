@@ -1153,15 +1153,15 @@ void ui_show_text(char * val) {
 
 void winchg() {
     endwin();
+    refresh();
+    clear();
     set_term(sstdout);
 
-    //ui_start_screen();
-    clearok(stdscr, TRUE);
+    wresize(main_win, LINES - RESROW, COLS);
+    wresize(input_win, RESROW, COLS);
     ui_update(TRUE);
     flushinp();
-    ui_show_header();
-    ui_update(TRUE);
-    //signal(SIGWINCH, winchg);
+
     return;
 }
 
