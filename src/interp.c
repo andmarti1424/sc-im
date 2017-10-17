@@ -1057,6 +1057,7 @@ double eval(register struct ent * ent, register struct enode * e) {
                 sc_error("Circular reference in eval (cell %s%d)", coltoa(vp->col), vp->row);
                 //ERR propagates. comment to make it not to.
                 cellerror = CELLERROR;
+
                 //ent->cellerror = CELLERROR;
                 GraphAddEdge( getVertex(graph, lookat(ent->row, ent->col), 1), getVertex(graph, lookat(vp->row, vp->col), 1) ) ;
                 return (double) 0;
@@ -2510,6 +2511,10 @@ void let(struct ent * v, struct enode * e) {
         do_trigger(v,TRG_WRITE);
 
 
+    if (!loading && cellerror == CELLERROR) { /* issue #201 */
+        if (v->expr) efree(v->expr);
+        v->expr = NULL;
+    }
     #ifdef UNDO
     if (!loading) {
         copy_to_undostruct(v->row, v->col, v->row, v->col, 'a');
