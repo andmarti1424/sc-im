@@ -34,7 +34,16 @@ SC-IM stands for Spreadsheet Calculator Improvised. :-)
 ![demo image](screenshots/scimp2.png?raw=true)
 ![demo image](screenshots/scimp3.png?raw=true)
 
-## Build & Install
+## Installation
+
+### Homebrew
+
+```
+brew tap nickolasburr/pfa
+brew install sc-im
+```
+
+### Manual
 
 * Edit Makefile file according to your system and needs.
 ```
