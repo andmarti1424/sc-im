@@ -36,13 +36,6 @@ SC-IM stands for Spreadsheet Calculator Improvised. :-)
 
 ## Installation
 
-### Homebrew
-
-```
-brew tap nickolasburr/pfa
-brew install sc-im
-```
-
 ### Manual
 
 * Edit Makefile file according to your system and needs.
@@ -50,7 +43,7 @@ brew install sc-im
     vim /src/Makefile
 ```
 
-* Only for OSX users do:
+* Only for OSX users who dont use Homebrew:
 ```
     brew install ncurses
     brew link ncurses
@@ -64,6 +57,14 @@ brew install sc-im
 * Optional: You can install the binary 'sc-im' in your system by typing with a privileged user:
 ```
     make install
+```
+
+
+### Homebrew for OSX users
+
+```
+brew tap nickolasburr/pfa
+brew install sc-im
 ```
 
 ### Helping us
