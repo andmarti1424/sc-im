@@ -77,6 +77,10 @@ ifneq (,$(wildcard /usr/include/xlsxwriter.h))
   CFLAGS += -DXLSX_EXPORT
   LDLIBS += -lxlsxwriter
 endif
+ifneq (,$(wildcard /usr/local/include/xlsxwriter.h))
+  CFLAGS += -DXLSX_EXPORT
+  LDLIBS += -lxlsxwriter
+endif
 
 # Check for gnuplot existance
 ifneq (, $(shell which gnuplot))
