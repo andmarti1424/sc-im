@@ -92,7 +92,10 @@ ifneq (, $(shell which pkg-config))
   # Any system with pkg-config
 
   # NOTE: ncursesw (required)
-  ifneq ($(shell pkg-config --exists ncursesw || echo 'no'),no)
+  ifeq ($(shell uname -s),Darwin)
+    # macOS' ncurses is built with wide-char support
+    LDFLAGS += -lncurses
+  else ifneq ($(shell pkg-config --exists ncursesw || echo 'no'),no)
     CFLAGS += $(shell pkg-config --cflags ncursesw)
     LDLIBS += $(shell pkg-config --libs ncursesw)
   else ifneq ($(shell pkg-config --exists ncurses || echo 'no'),no)
