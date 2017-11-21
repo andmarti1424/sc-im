@@ -43,12 +43,6 @@ SC-IM stands for Spreadsheet Calculator Improvised. :-)
     vim /src/Makefile
 ```
 
-* Only for OSX users who dont use Homebrew:
-```
-    brew install ncurses
-    brew link ncurses
-```
-
 * Inside /src folder run:
 ```
     make
