@@ -61,6 +61,22 @@ brew tap nickolasburr/pfa
 brew install sc-im
 ```
 
+### Ubuntu with XLSX import & export
+
+See [this wiki page](https://github.com/andmarti1424/sc-im/wiki/Ubuntu-with-XLSX-import-&-export).
+
+### Configuration
+
+The file `~/.scimrc` contains configuration data. Here is an example.
+
+    set autocalc
+    set numeric
+    set numeric_decimal=0
+    set overlap
+    set xlsx_readformulas
+    
+Other configuration variables are listed in the [help file](https://raw.githubusercontent.com/andmarti1424/sc-im/freeze/src/doc).
+
 ### Helping us
 
 Want to help?  You can help us with one or more of the following:
