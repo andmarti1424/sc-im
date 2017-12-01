@@ -147,7 +147,7 @@ void do_normalmode(struct block * buf) {
             break;
 
         case L'0':
-            if (atoi(get_conf_value("numeric_zero")) == 1) goto numeric;
+            if (atoi(get_conf_value("numeric_zero")) == 1 && atoi(get_conf_value("numeric")) == 1) goto numeric;
         case OKEY_HOME:
             ;
             int freeze = freeze_ranges && (freeze_ranges->type == 'c' ||  freeze_ranges->type == 'a') ? 1 : 0;
@@ -435,7 +435,7 @@ void do_normalmode(struct block * buf) {
 
         // repeat last command
         case L'.':
-            if (atoi(get_conf_value("numeric_decimal")) == 1) goto numeric;
+            if (atoi(get_conf_value("numeric_decimal")) == 1 && atoi(get_conf_value("numeric")) == 1) goto numeric;
             copybuffer(lastcmd_buffer, buf); // nose graba en lastcmd_buffer!!
             cmd_multiplier = 1;
             exec_mult(buf, COMPLETECMDTIMEOUT);
