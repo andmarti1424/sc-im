@@ -1224,7 +1224,7 @@ void send_to_interp(wchar_t * oper) {
 
     linelim = 0;
     yyparse();
-    if (atoi(get_conf_value("autocalc")) && ! loading) EvalAll();
+    //if (atoi(get_conf_value("autocalc")) && ! loading) EvalAll();
     return;
 }
 

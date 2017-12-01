@@ -102,7 +102,7 @@ graphADT GraphCreate() {
 }
 
 /**
- * \brief Undefined function 
+ * \brief Undefined function
  *
  * This adds the vertex sorted in the list and not at the end. Given a row and
  * column to insert as a new vertex, this function will create a new vertex
@@ -242,7 +242,7 @@ void markAllVerticesNotVisited () {
 
 
 /**
- * \brief Prints vertexes 
+ * \brief Prints vertexes
  *
  * \return none
  */
@@ -263,12 +263,12 @@ void print_vertexs() {
    strcpy(msg, "Content of graph:\n");
 
    while (temp != NULL) {
-      sprintf(det + strlen(det), "%d %d\n", temp->ent->row, temp->ent->col);
+      sprintf(det + strlen(det), "vertex: %d %d v:%d\n", temp->ent->row, temp->ent->col, temp->visited);
       etemp = temp->edges;
 
       /* check not overflow msg size. if so, just realloc. */
       if (strlen(det) + strlen(msg) > msg_size) {
-          sc_debug("realloc"),
+          //sc_debug("realloc"),
           msg_size += BUFFERSIZE;
           msg = (char *) realloc(msg, msg_size);
       }
@@ -290,7 +290,7 @@ void print_vertexs() {
       }
       etemp = temp->back_edges;
       while (etemp != NULL) {
-          sprintf(det + strlen(det), "edges that depend on that ent: \\-> %d %d\n", etemp->connectsTo->ent->row, etemp->connectsTo->ent->col);
+          sprintf(det + strlen(det), "(back_edges) edges that depend on that ent: \\-> %d %d\n", etemp->connectsTo->ent->row, etemp->connectsTo->ent->col);
           etemp = etemp->next;
 
           /* check not overflow msg size. if so, just realloc. */
@@ -477,8 +477,8 @@ void destroy_graph(graphADT graph) {
 
 
 /**
- * \brief TODO Document rebuild_graph()
- *
+ * \brief Document rebuild_graph()
+ * \details Rebuild entire graph and eval from top left to bottom right.
  * \return none
  */
 
@@ -497,19 +497,79 @@ void rebuild_graph() {
 
 
 /**
- * \brief Eval vertexs of graph
- *
+ * \brief Document All_vertexs_of_edges_visited
+ * \details Used in EvalBottomUp
+ * \return int
+ */
+int All_vertexs_of_edges_visited(struct edgeTag * e) {
+    struct edgeTag * edges = e;
+    while (edges != NULL) {
+        //sc_debug("1 r:%d c:%d visited:%d", edges->connectsTo->ent->row, edges->connectsTo->ent->col, edges->connectsTo->visited);
+        if (! edges->connectsTo->visited) return 0;
+        edges = edges->next;
+    }
+    return 1;
+}
+
+
+/**
+ * \brief TODO Document EvalBottomUp
  * \return none
  */
+void EvalBottomUp() {
+    struct ent * p;
+    vertexT * temp = graph->vertices;
 
+    if (temp == NULL) return;
+    markAllVerticesNotVisited();
+
+    int evaluated = 0;
+
+    while (temp != NULL) {
+        if (! temp->visited && (p = *ATBL(tbl, temp->ent->row, temp->ent->col)) && ! p->expr) {
+            //FIXME: min y max no figuran en p->expr?
+            evaluated = 1;
+            temp->visited = 1;
+            //sc_debug("1valuating: %d %d",  temp->ent->row, temp->ent->col);
+        } else if (! temp->visited && (temp->edges == NULL || All_vertexs_of_edges_visited(temp->edges)) ) {
+
+            if ((p = *ATBL(tbl, temp->ent->row, temp->ent->col)) && p->expr) {
+                //sc_debug("evaluating: %d %d",  temp->ent->row, temp->ent->col);
+                EvalJustOneVertex(p, temp->ent->row, temp->ent->col, 1);
+                evaluated = 1;
+                temp->visited = 1;
+            } else {
+                //sc_debug("problem");
+            }
+        }
+
+        temp = temp->next;
+
+        /*
+        if (temp == NULL && evaluated) { //end of cycle. if evaluated a vertex in this loop, loop again
+            //sc_debug("recycle");
+            evaluated = 0;
+            temp = graph->vertices;
+        } else if (temp == NULL) return;*/
+    }
+    //sc_debug("fin eval");
+}
+
+
+/**
+ * \brief Eval vertexs of graph
+ * \return none
+ */
 void EvalAll() {
     EvalAllVertexs();
+    //EvalBottomUp();
     return;
 }
 
+
 /**
  * \brief TODO Document EvalAllVertexs
- *
+ * \details Eval all vertexs of graph in the order that they were added
  * \return none
  */
 
@@ -520,7 +580,7 @@ void EvalAllVertexs() {
     vertexT * temp = graph->vertices;
     //int i = 0;
     while (temp != NULL) {
-        //sc_info("%d %d %d", temp->ent->row, temp->ent->col, i++);
+        //sc_debug("%d %d %d", temp->ent->row, temp->ent->col, i++);
         if ((p = *ATBL(tbl, temp->ent->row, temp->ent->col)) && p->expr)
             EvalJustOneVertex(p, temp->ent->row, temp->ent->col, 1);
         temp = temp->next;
@@ -579,7 +639,7 @@ void EvalJustOneVertex(register struct ent * p, int i, int j, int rebuild_graph)
             p->v = v;
             p->flags |= is_changed | is_valid;
             if (( p->trigger  ) && ((p->trigger->flag & TRG_WRITE) == TRG_WRITE))
-                do_trigger(p,TRG_WRITE);
+                do_trigger(p, TRG_WRITE);
         }
     }
 }

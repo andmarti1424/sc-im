@@ -961,7 +961,7 @@ double dolmin(struct ent * e, struct enode * ep) {
 /**
  * \brief TODO Document eval()
  *
- * \param[in] end
+ * \param[in] ent
  * \param[in] e
  *
  * \return none

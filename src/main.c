@@ -40,7 +40,7 @@
  * \author Andrés Martinelli <andmarti@gmail.com>
  * \date 2017-07-18
  * \brief The main file of sc-im
- * 
+ *
  * \details This is the main file for sc-im.
  *
  * \see Homepage: https://github.com/andmarti1424/sc-im
@@ -589,6 +589,8 @@ void signals() {
     void sig_term();
     void nopipe();
     void winchg();
+    void sig_tstp();
+    void sig_cont();
 
     signal(SIGINT, sig_int);
     signal(SIGABRT, sig_abrt);
@@ -598,6 +600,8 @@ void signals() {
     signal(SIGWINCH, winchg);
     //(void) signal(SIGBUS, doquit);
     //(void) signal(SIGFPE, doquit);
+    signal(SIGTSTP, sig_tstp);
+    signal(SIGCONT, sig_cont);
     return;
 }
 
@@ -614,6 +618,31 @@ void nopipe() {
     sc_error("brokenpipe!");
     brokenpipe = TRUE;
     return;
+}
+
+/**
+ * \brief Handles the SIGTSTP signal
+ *
+ * \return none
+ */
+
+void sig_tstp() {
+    sc_debug("Got SIGTSTP.");
+    signal(SIGTSTP, SIG_DFL);  /* set handler to default */
+    kill(getpid(), SIGTSTP);   /* call the default handler */
+}
+
+
+/**
+ * \brief Handles the SIGCONT signal
+ *
+ * \return none
+ */
+
+void sig_cont() {
+    signal(SIGTSTP, sig_tstp); /* set handler back to this */
+    winchg();
+    sc_debug("Got SIGCONT.");
 }
 
 /**
