@@ -627,7 +627,9 @@ void nopipe() {
  */
 
 void sig_tstp() {
-    sc_debug("Got SIGTSTP.");
+    //sc_info("Got SIGTSTP.");
+    def_prog_mode();
+    endwin();
     signal(SIGTSTP, SIG_DFL);  /* set handler to default */
     kill(getpid(), SIGTSTP);   /* call the default handler */
 }
@@ -642,7 +644,10 @@ void sig_tstp() {
 void sig_cont() {
     signal(SIGTSTP, sig_tstp); /* set handler back to this */
     winchg();
-    sc_debug("Got SIGCONT.");
+    reset_prog_mode();
+    refresh();
+    ui_update(TRUE);
+    //sc_info("Got SIGCONT.");
 }
 
 /**
