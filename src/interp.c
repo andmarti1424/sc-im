@@ -1274,7 +1274,9 @@ double eval(register struct ent * ent, register struct enode * e) {
                  cellerror = CELLREF;
                  if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
                  return ((double) 0);
-    case PI_:    return ((double) M_PI);
+    case PI_:
+                 if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
+                 return ((double) M_PI);
     case BLACK:  return ((double) COLOR_BLACK);
     case RED:    return ((double) COLOR_RED);
     case GREEN:  return ((double) COLOR_GREEN);
