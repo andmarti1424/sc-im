@@ -76,6 +76,7 @@ void put(struct dictionary * d, char * k, char * v) {
    //if ( ! strlen (k) ) return;
 
    struct nlist * nl;
+   char * cl;
 
    // Insert the first element
    if (d->list == NULL) {
@@ -91,7 +92,7 @@ void put(struct dictionary * d, char * k, char * v) {
 
    // Duplicated keys are not allowed.
    // If an existent key is inserted, the value is overwritten.
-   } else if ( get(d, k) != '\0' ) {
+   } else if ( (cl = get(d, k)) != NULL && cl[0] != '\0' ) {
        nl = get_nl(d, k);
        free(nl->val);
 

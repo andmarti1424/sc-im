@@ -156,8 +156,8 @@ char * get_conf_values(char * salida) {
 char * get_conf_value(char * key) {
    char * val = get(user_conf_d, key);
 
-   if ( val != '\0' )
-       return val;
-   else
+   if ( val == NULL || *(&val[0]) == '\0')
        return get(predefined_conf_d, key);
+   else
+       return val;
 }

@@ -517,6 +517,7 @@ int All_vertexs_of_edges_visited(struct edgeTag * e) {
  * \return none
  */
 void EvalBottomUp() {
+    /*
     struct ent * p;
     vertexT * temp = graph->vertices;
 
@@ -545,14 +546,15 @@ void EvalBottomUp() {
 
         temp = temp->next;
 
-        /*
-        if (temp == NULL && evaluated) { //end of cycle. if evaluated a vertex in this loop, loop again
-            //sc_debug("recycle");
-            evaluated = 0;
-            temp = graph->vertices;
-        } else if (temp == NULL) return;*/
+        //
+        //if (temp == NULL && evaluated) { //end of cycle. if evaluated a vertex in this loop, loop again
+        //    //sc_debug("recycle");
+        //    evaluated = 0;
+        //    temp = graph->vertices;
+        //} else if (temp == NULL) return;
     }
     //sc_debug("fin eval");
+    */
 }
 
 

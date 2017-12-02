@@ -281,7 +281,7 @@ int l_query (lua_State *L) {
 
     ret = ui_query(val);
     //sc_debug("return of query:%s.\n", ret);
-    if (ret == '\0') {
+    if (ret != NULL && ret[0] == '\0') {
         free(ret);
         return 0;
     }
