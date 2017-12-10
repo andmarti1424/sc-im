@@ -225,21 +225,22 @@ int main (int argc, char ** argv) {
 
 
     // initiate NCURSES if that is what is wanted
-    if (! atoi((char *) get_conf_value("nocurses")))
+    if (! atoi((char *) get_conf_value("nocurses"))) {
         ui_start_screen();
 
 #ifdef USECOLORS
-    if (get_d_colors_param() == NULL) {
-        start_default_ucolors();
+        if (get_d_colors_param() == NULL) {
+            start_default_ucolors();
         /*
          * in case we decide to change colors
          * this creates a dictionary and stores in it
          * the relationship between macros and the keys values
          * that are defined in .sc files
          */
-        set_colors_param_dict();
-    }
+            set_colors_param_dict();
+        }
 #endif
+    }
 
     /*
      * If the 'output' parameter is defined, SC-IM saves its output to that file.
