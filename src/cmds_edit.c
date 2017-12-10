@@ -513,7 +513,8 @@ int start_edit_mode(struct block * buf, char type) {
         linelim = 0;
         edits(currow, curcol, 0);
         linelim = -1;
-        (void) swprintf(inputline, BUFFERSIZE, L"%s", line);
+        if ((p1)->flags & is_strexpr) swprintf(inputline + wcslen(inputline), BUFFERSIZE, L"\"");
+        (void) swprintf(inputline + wcslen(inputline), BUFFERSIZE, L"%s", line);
     }
     inputline_pos = wcswidth(inputline, wcslen(inputline)) - 1;
     real_inputline_pos = wcslen(inputline) - 1;
