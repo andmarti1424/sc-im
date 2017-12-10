@@ -1320,6 +1320,9 @@ Commands for handling cell content:
         Conditional:   If the  first  expression  is  true  then  the  value  of
         the  second  is  returned,  otherwise the  value  of  the  third.
         example of use: @if(@eqs(A1,"a"),B1,0)
+        example of use with string expression: @if(A1>100,"over","not enough")
+        Remember string expressions should be entered by typing \"
+
 
 ==============================================================================
 &LUA Scripts and Triggers&
