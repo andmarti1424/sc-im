@@ -1733,7 +1733,7 @@ char * seval(register struct ent * ent, register struct enode * se) {
              }
     case 'F':    return (seval(ent, se->e.o.left));
     case IF:
-    case '?':    return (seval(NULL, se->e.o.left) ? seval(ent, se->e.o.right->e.o.left)
+    case '?':    return (eval(NULL, se->e.o.left) ? seval(ent, se->e.o.right->e.o.left)
                          : seval(ent, se->e.o.right->e.o.right));
     case DATE:   return (dodate( (time_t) (eval(NULL, se->e.o.left)),
                  seval(ent, se->e.o.right)));
