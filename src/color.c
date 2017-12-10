@@ -261,7 +261,10 @@ void chg_color(char * str) {
     char * cl;
 
     // Validate we got enough keys to change a color
-    if ( (((cl = get(d, "fg")) != NULL) && cl[0] == '\0') || (((cl = get(d, "bg")) != NULL) && cl[0] == '\0') || (((cl = get(d, "type")) != NULL) && cl[0] == '\0')) {
+    if (
+        (get(d, "fg") == NULL) ||
+        (get(d, "type") == NULL) ||
+        (get(d, "bg") == NULL)) {
         sc_error("Color definition incomplete");
         destroy_dictionary(d);
         return;
@@ -269,6 +272,8 @@ void chg_color(char * str) {
 
     // Validate the values for those keys are correct
     if (
+        (get(d_colors_param, get(d, "bg")) == NULL) ||
+        (get(d_colors_param, get(d, "type")) == NULL) ||
         (get(d_colors_param, get(d, "fg")) == NULL) ||
         (get(d_colors_param, get(d, "bg")) == NULL) ||
         (get(d_colors_param, get(d, "type")) == NULL) ||
