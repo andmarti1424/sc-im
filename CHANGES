@@ -1,3 +1,36 @@
+v0.7.0
+*Added 'copy to clipboard' feature: now content of a range can be copied to clipboard using the :ccopy command.
+*Added 'paste from clipboard' feature with :cpaste command.
+*Added :subtotal
+*Added autobackup feature
+*Added :plot command with the following types of chart: line, scatter, bar and pie.
+*Added :plotedit command
+*New "version" argument. --version can be passed to scim executable file as argv. This will show Sc-im version number
+and the different features enabled at compile time.
+*Change when moving in command mode and insert mode history:
+if inputline is not empty, up and down keys now recall older commands from history,
+but taking whose commands that beginning matches the current inputline content.
+*Changed default options for numeric, newline_action, numeric_decimal, numeric_zero.
+*Doxygen support
+*exit_app: only free histories if in ncurses ui. this fix a segfault when quitting.
+*replaced :i command. Now xlsx, xls, csv, tsv and tab files shall be imported with the :load command.
+*Ignore case when handing special keys in a map
+*Handle mappings with double quotes
+*Handle SIGTSTP and SIGCONT signals. #213
+*fix in csv import: little fix when importing csv files that had commas between quotes. sc-im used to ignore those comma during import process.
+*fix in auto numeric when using insert mode history.
+*Fix when saving cellcolors. #187
+*fix in nmap. #178
+*fix in sorting when no range is selected. #180
+*fix when displaying help page. #188
+*fix in @slen with wide chars. #196
+*fix when resizing terminal. #199
+*fix calculation when using @pi. #209
+*fix when numeric=0 and try to use 0 command. #212
+*fix : not initialize colors if working in interactive mode. #220
+*fix when :color is intended to be used without having set enough parameters. #219
+*fix when editing cells with string expressions. #197
+
 v0.6.0
 *Added new freeze feature (including new :freeze and :unfreeze commands).
 *Scripting support with LUA. Also with triggers and c dynamic linked modules.
