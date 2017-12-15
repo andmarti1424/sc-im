@@ -58,7 +58,7 @@ void show_version_and_quit();
 void sig_int();
 
 // SIGWINCH signal - resize of terminal
-void winchg();
+void sig_winchg();
 
 extern FILE * fdoutput; // output file descriptor (stdout or file)
 extern unsigned int curmode;

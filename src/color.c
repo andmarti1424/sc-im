@@ -70,7 +70,7 @@ struct dictionary * get_d_colors_param() {
  * @brief Generate DEFAULT 'initcolor' colors
  *
  * Generate DEFAULT 'initcolor' colors.
- * 
+ *
  * Example usage:
  * @code
  *     start_default_ucolors();
@@ -307,13 +307,13 @@ void chg_color(char * str) {
  * supports undo / redo
  */
 /**
- * @brief TODO <brief function description>
+ * @brief
  *
  * Changes coloring and format for cell or range of cells.
  *
  * Format options: bold, underline.
  *
- * This funciton supports undo/redo.
+ * This function supports undo/redo.
  *
  * Example usage:
  * @code
@@ -368,8 +368,8 @@ void color_cell(int r, int c, int rf, int cf, char * str) {
             n = lookat(i, j);
             if (n->ucolor == NULL) {
                 n->ucolor = (struct ucolor *) malloc(sizeof(struct ucolor));
-                n->ucolor->fg = WHITE;
-                n->ucolor->bg = BLACK;
+                n->ucolor->fg = NONE_COLOR;
+                n->ucolor->bg = NONE_COLOR;
                 n->ucolor->bold = 0;
                 n->ucolor->dim = 0;
                 n->ucolor->reverse = 0;
@@ -406,9 +406,9 @@ void color_cell(int r, int c, int rf, int cf, char * str) {
 }
 
 /**
- * @brief TODO <brief function description>
+ * @brief
  *
- * TODO Write longer function description.
+ * Cleans format from a range of cells
  *
  * Example usage:
  * @code
@@ -467,7 +467,7 @@ void unformat(int r, int c, int rf, int cf) {
 }
 
 /**
- * @brief TODO <brief function description>
+ * @brief
  *
  * This function receives two ucolor variables and returns 1 if both have the
  * same values, returns 0 otherwise.
@@ -508,7 +508,7 @@ int same_ucolor(struct ucolor * u, struct ucolor * v) {
 
 int redefine_color(char * color, int r, int g, int b) {
     #if defined(NCURSES) && defined(USECOLORS)
-    extern void winchg();
+    extern void sig_winchg();
     if (
         ! atoi(get_conf_value("nocurses"))
         && has_colors() && can_change_color()
@@ -519,7 +519,7 @@ int redefine_color(char * color, int r, int g, int b) {
                return -1;
            }
            if (init_color(atoi(s), r, g, b) == 0) {
-               winchg();
+               sig_winchg();
                if (! loading) sc_info("Color %s redefined to %d %d %d.", color, r, g, b);
                return 0;
            }

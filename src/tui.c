@@ -105,7 +105,7 @@ SCREEN * sstdout;
 srange * ranges;
 
 /**
- * \brief Called to start UI 
+ * \brief Called to start UI
  *
  * \return none
  */
@@ -328,7 +328,7 @@ void ui_do_welcome() {
  * \details This function is used to refresh the screen content. If 
  * the header flag is set, the first column of the screen gets
  * refreshed.
- * 
+ *
  * \param[in] header
  *
  * \return none
@@ -429,7 +429,7 @@ void ui_handle_cursor() {
  * \details Internal function to print a string with alignment.
  *
  * JUSTIF: 0 left shift
- * 
+ *
  * JUSTIF: 1 right shift
  *
  * \param[in] win
@@ -1143,15 +1143,11 @@ void ui_show_text(char * val) {
 
 
 /**
- * \brief TODO Document winchg()
- *
+ * \brief
+ * UI function thats called after SIGWINCH signal.
  * \return none
  */
-
-// TODO Consider renaming this to sig_winchg for consistancy with
-// the other signal funcitons.
-
-void winchg() {
+void sig_winchg() {
     endwin();
     refresh();
     clear();
@@ -1306,6 +1302,7 @@ char * ui_query(char * initial_msg) {
  */
 
 void ui_set_ucolor(WINDOW * w, struct ucolor * uc) {
+    short color;
     long attr = A_NORMAL;
     if (uc->bold)      attr |= A_BOLD;
     if (uc->dim)       attr |= A_DIM;
@@ -1313,7 +1310,14 @@ void ui_set_ucolor(WINDOW * w, struct ucolor * uc) {
     if (uc->standout)  attr |= A_STANDOUT;
     if (uc->blink)     attr |= A_BLINK;
     if (uc->underline) attr |= A_UNDERLINE;
-    wattrset (w, attr | COLOR_PAIR((uc->fg+1)*9 + uc->bg + 2));
+    if (uc->bg == NONE_COLOR || uc->fg == NONE_COLOR) {
+        // get current window color;
+        attr_t a;
+        wattr_get(w, &a, &color, NULL);
+    } else {
+        color = (uc->fg+1)*9 + uc->bg + 2;
+    }
+    wattrset (w, attr | COLOR_PAIR(color));
 }
 
 /**
@@ -1321,7 +1325,6 @@ void ui_set_ucolor(WINDOW * w, struct ucolor * uc) {
  *
  * \return none
  */
-
 void ui_start_colors() {
     if (! has_colors()) return;
     int i, j;
@@ -1333,11 +1336,10 @@ void ui_start_colors() {
 }
 
 /**
- * \brief TODO Document ui_pause()
- *
+ * \brief
+ * UI function thats called after SIGTSTP signal.
  * \return none
  */
-
 void ui_pause() {
     def_prog_mode();
     set_term(sstderr);
@@ -1346,11 +1348,10 @@ void ui_pause() {
 }
 
 /**
- * \brief TODO Document ui_resume
- *
+ * \brief
+ * UI function thats called after SIGCONT signal.
  * \return none
  */
-
 void ui_resume() {
     set_term(sstdout);
     reset_prog_mode();

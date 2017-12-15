@@ -54,7 +54,7 @@
 #include "history.h"
 #include "hide_show.h"
 #include "shift.h"
-#include "main.h"    // for winchg
+#include "main.h"    // for sig_winchg
 #include "interp.h"
 #include "freeze.h"
 #include "utils/extra.h"
@@ -1059,7 +1059,7 @@ void do_normalmode(struct block * buf) {
             }
 
         case ctl('l'):
-            winchg();
+            sig_winchg();
             break;
 
         case L'@':

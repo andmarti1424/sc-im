@@ -49,6 +49,7 @@
 #endif
 #include "color.h"
 
+#define NONE_COLOR        -2
 #define DEFAULT_COLOR     -1
 #define BLACK             COLOR_BLACK
 #define RED               COLOR_RED

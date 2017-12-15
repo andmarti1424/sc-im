@@ -375,7 +375,7 @@ void do_commandmode(struct block * sb) {
     } else if (find_val(sb, OKEY_ENTER)) {
 
         if ( ! wcscmp(inputline, L"refresh")) {
-            winchg();
+            sig_winchg();
 
         } else if ( ! wcscmp(inputline, L"help") || ! wcscmp(inputline, L"h") ) {
             help();

@@ -589,7 +589,7 @@ void signals() {
     void sig_abrt();
     void sig_term();
     void nopipe();
-    void winchg();
+    void sig_winchg();
     void sig_tstp();
     void sig_cont();
 
@@ -598,7 +598,7 @@ void signals() {
     signal(SIGTERM, sig_term); // kill
     signal(SIGPIPE, nopipe);
     //(void) signal(SIGALRM, time_out);
-    signal(SIGWINCH, winchg);
+    signal(SIGWINCH, sig_winchg);
     //(void) signal(SIGBUS, doquit);
     //(void) signal(SIGFPE, doquit);
     signal(SIGTSTP, sig_tstp);
@@ -644,7 +644,7 @@ void sig_tstp() {
 
 void sig_cont() {
     signal(SIGTSTP, sig_tstp); /* set handler back to this */
-    winchg();
+    sig_winchg();
     reset_prog_mode();
     refresh();
     ui_update(TRUE);
