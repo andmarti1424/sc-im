@@ -249,6 +249,7 @@ void free_colors_param_dict() {
  */
 
 void chg_color(char * str) {
+    if (atoi((char *) get_conf_value("nocurses"))) return;
 
     // Create key-value dictionary for the content of the string
     struct dictionary * d = create_dictionary();
@@ -272,11 +273,9 @@ void chg_color(char * str) {
 
     // Validate the values for those keys are correct
     if (
-        (get(d_colors_param, get(d, "bg")) == NULL) ||
         (get(d_colors_param, get(d, "type")) == NULL) ||
         (get(d_colors_param, get(d, "fg")) == NULL) ||
         (get(d_colors_param, get(d, "bg")) == NULL) ||
-        (get(d_colors_param, get(d, "type")) == NULL) ||
         (atoi(get(d_colors_param, get(d, "fg"))) > WHITE) ||
         (atoi(get(d_colors_param, get(d, "bg"))) > WHITE)
     ) {
