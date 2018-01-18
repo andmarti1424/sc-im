@@ -72,6 +72,8 @@ Navigation commands:
      zb          Scroll vertically to position the selected cell at the bottom
                  of the screen.
      Vir         Select the smallest range that covers all valid cells.
+     ESC or c-g  Clean stdin buffer, so SC-IM no longer waits for completing a
+                 correct command.
 
 
 Commands for handling cell content:

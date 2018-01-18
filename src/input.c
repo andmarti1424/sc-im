@@ -98,8 +98,9 @@ void handle_input(struct block * buffer) {
             // Read new character from stdin
             return_value = ui_getch(&wd);
             d = wd;
-            if ( d == OKEY_ESC) {
+            if ( d == OKEY_ESC || d == ctl('g')) {
                 break_waitcmd_loop(buffer);
+                ui_print_mult_pend();
                 return;
             }
 
