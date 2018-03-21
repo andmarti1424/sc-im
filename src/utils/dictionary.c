@@ -259,11 +259,12 @@ char * get_key_name(struct dictionary * d, char * value) {
  *
  * \param[in] d
  * \param[in] str
+ * \param[in] blank_space
  *
  * \return dictionary
  */
 
-void parse_str(struct dictionary * d, char * str) {
+void parse_str(struct dictionary * d, char * str, int blank_space) {
     char c = str[0];
     char key[30];
     char value[30];
@@ -278,8 +279,9 @@ void parse_str(struct dictionary * d, char * str) {
         }
         if (c == '\0') break;
         c = *++str;
-        while (c != ' ' && c != '\0') {
         //while (c != '\0') {
+        while (c != ' ' && c != '\0') {
+            if (blank_space && c == ' ') break;
             add_char(value, c, strlen(value));
             c = *++str;
         }

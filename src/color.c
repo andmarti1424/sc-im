@@ -258,7 +258,7 @@ void chg_color(char * str) {
     if (str[0]=='"') del_char(str, 0);
     if (str[strlen(str)-1]=='"') del_char(str, strlen(str)-1);
 
-    parse_str(d, str);
+    parse_str(d, str, TRUE);
     char * cl;
 
     // Validate we got enough keys to change a color
@@ -335,7 +335,7 @@ void color_cell(int r, int c, int rf, int cf, char * str) {
     if (str[0]=='"') del_char(str, 0);
     if (str[strlen(str)-1]=='"') del_char(str, strlen(str)-1);
 
-    parse_str(d, str);
+    parse_str(d, str, TRUE);
     char * cl;
 
     // Validations
