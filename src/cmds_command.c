@@ -757,9 +757,9 @@ void do_commandmode(struct block * sb) {
             if ((l = wcschr(line, L'=')) != NULL) l[0] = L'\0';
             wcstombs(oper, line, BUFFERSIZE);
             if (get_conf_value(oper)) {
-                sc_info("Config value changed: %s", oper);
                 wcscpy(interp_line, inputline);
                 send_to_interp(interp_line);
+                sc_info("Config value changed: %s", oper);
             } else
                 sc_error("Invalid configuration parameter");
 

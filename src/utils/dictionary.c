@@ -280,7 +280,7 @@ void parse_str(struct dictionary * d, char * str, int blank_space) {
         }
         if (c == '\0') break;
         c = *++str;
-        while (c != ' ' && c != '\0') {
+        while (c != '\0') {
             if (blank_space && c == ' ') break;
             add_char(value, c, strlen(value));
             c = *++str;
