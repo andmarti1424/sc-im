@@ -566,6 +566,11 @@ void do_normalmode(struct block * buf) {
             if (bs != 2) break;
             struct mark * m = get_mark(buf->pnext->value);
             if ( m == NULL) return;
+
+            // added for #244 - 22/03/2018
+            int i;
+            extern struct ent_ptr * deps;
+
             // if m represents a range
             if ( m->row == -1 && m->col == -1) {
                 srange * r = m->rng;
@@ -605,12 +610,30 @@ void do_normalmode(struct block * buf) {
                     n->row += currow - get_mark(buf->pnext->value)->row;
                     n->col += c1 - get_mark(buf->pnext->value)->col;
 
-
                     n->flags |= is_changed;
                     if (n->expr) EvalJustOneVertex(n, n->row, n->col, 1);
+
 #ifdef UNDO
                     copy_to_undostruct(currow, c1, currow, c1, 'a');
 #endif
+
+                    // added for #244 - 22/03/2018
+                    ents_that_depends_on_range(n->row, n->col, n->row, n->col);
+                    if (deps != NULL) {
+                        for (i = 0; i < deps->vf; i++) {
+#ifdef UNDO
+                            copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'd');
+#endif
+                            EvalJustOneVertex(deps[i].vp, deps[i].vp->row, deps[i].vp->col, 0);
+#ifdef UNDO
+                            copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'a');
+#endif
+                            }
+                    }
+
+
+
+
                 }
 #ifdef UNDO
                 end_undo_action();

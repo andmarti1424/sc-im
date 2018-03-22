@@ -247,6 +247,8 @@ int paste_yanked_ents(int above, int type_paste) {
     struct ent * yl = yanklist;
     struct ent * yll = yl;
     int diffr = 0, diffc = 0 , ignorelock = 0;
+    extern struct ent_ptr * deps;
+    int i;
 
     #ifdef UNDO
     create_undo_action();
@@ -305,9 +307,22 @@ int paste_yanked_ents(int above, int type_paste) {
     // otherwise continue
     // por cada ent en yanklist
     while (yl != NULL) {
+
+
         #ifdef UNDO
         copy_to_undostruct(yl->row + diffr, yl->col + diffc, yl->row + diffr, yl->col + diffc, 'd');
         #endif
+
+
+        // save graph dependencies as well
+        // added for #244 - 22/03/2018
+        ents_that_depends_on_range(yl->row + diffr, yl->col + diffc, yl->row + diffr, yl->col + diffc);
+        if (deps != NULL) {
+            for (i = 0; i < deps->vf; i++)
+#ifdef UNDO
+                copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'd');
+#endif
+        }
 
         // here we delete current content of "destino" ent
         if (type_paste == 'a' || type_paste == 's')
@@ -344,7 +359,24 @@ int paste_yanked_ents(int above, int type_paste) {
         copy_to_undostruct(yl->row + diffr, yl->col + diffc, yl->row + diffr, yl->col + diffc, 'a');
         #endif
 
+        // store dependencies after the change as well
+        // added for #244 - 22/03/2018
+        if (deps != NULL) {
+            for (i = 0; i < deps->vf; i++) {
+                EvalJustOneVertex(deps[i].vp, deps[i].vp->row, deps[i].vp->col, 0);
+#ifdef UNDO
+                copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'a');
+#endif
+            }
+        }
+
+
+
+
+
         yl = yl->next;
+
+        // TODO save graph dependencies as well
     }
     //EvalAll();
     sync_refs();
