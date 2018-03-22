@@ -672,7 +672,7 @@ command:
                                      scxfree($2);
                                    }
 */
-    |    S_SET setlist             { } //sc_info("INT: Config value changed: %s", $2); }
+    |    S_SET setlist             { if (! loading) sc_info("INT: Config value changed"); }
 /*
     |    S_DEFINE strarg           { struct ent_ptr arg1, arg2;
                                           arg1.vp = lookat(showsr, showsc);
