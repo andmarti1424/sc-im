@@ -442,6 +442,7 @@ Commands for handling cell content:
                  Example:    :set half_page_scroll=0 numeric_zero=1
                              :set numeric          (same as :set numeric=1)
                              :set nonumeric        (same as :set numeric=0)
+                             :set default_paste_from_clipboard_cmd="xsel"
 
      :showmaps   Show all key mappings.
 

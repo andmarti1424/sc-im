@@ -46,6 +46,7 @@
 #include <string.h>
 #include "string.h"
 #include "dictionary.h"
+#include "../macros.h"
 
 /**
  * \brief TODO Document create_dictionary()
@@ -266,8 +267,8 @@ char * get_key_name(struct dictionary * d, char * value) {
 
 void parse_str(struct dictionary * d, char * str, int blank_space) {
     char c = str[0];
-    char key[30];
-    char value[30];
+    char key[90];
+    char value[90];
     key[0] = '\0';
     value[0] = '\0';
 
@@ -279,7 +280,6 @@ void parse_str(struct dictionary * d, char * str, int blank_space) {
         }
         if (c == '\0') break;
         c = *++str;
-        //while (c != '\0') {
         while (c != ' ' && c != '\0') {
             if (blank_space && c == ' ') break;
             add_char(value, c, strlen(value));
