@@ -586,13 +586,15 @@ void do_commandmode(struct block * sb) {
 
         } else if ( ! wcsncmp(inputline, L"filteron", 8) ) {
             wcscpy(interp_line, inputline);
-            if ( ! wcscmp(inputline, L"filteron") && p == -1) { // If there is no selected range
+            if ( ! wcscmp(inputline, L"filteron") && p == -1) { // If there is no selected range and no range in inputline passed
                 sc_error("Please specify a range or select one");
             } else if (p != -1) {
                 wchar_t cline [BUFFERSIZE];
                 wcscpy(cline, interp_line);
                 swprintf(interp_line, BUFFERSIZE, L"filteron %s%d:", coltoa(sr->tlcol), sr->tlrow);
                 swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%s%d", coltoa(sr->brcol), sr->brrow);
+                send_to_interp(interp_line);
+            } else { // no range selected. range passed in inputline
                 send_to_interp(interp_line);
             }
 
@@ -757,6 +759,7 @@ void do_commandmode(struct block * sb) {
             if ((l = wcschr(line, L'=')) != NULL) l[0] = L'\0';
             wcstombs(oper, line, BUFFERSIZE);
             if (get_conf_value(oper)) {
+                sc_info("Config value changed: %s", oper);
                 wcscpy(interp_line, inputline);
                 send_to_interp(interp_line);
             } else
