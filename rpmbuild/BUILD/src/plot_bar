@@ -1,0 +1,22 @@
+set terminal dumb enhanced
+#set terminal caca driver ncurses color enhanced size 80,43 inverted charset ascii
+
+set datafile separator ","
+set key autotitle columnhead
+
+set boxwidth 0.5
+set style fill solid
+set auto x
+set yrange [0:*]
+
+set linetype 1 linecolor rgb 'red'
+set linetype 2 linecolor rgb 'green'
+set linetype 3 linecolor rgb 'blue'
+set linetype 4 linecolor rgb 'cyan'
+set linetype 5 linecolor rgb 'magenta'
+set linetype 6 linecolor rgb 'white'
+set linetype 7 linecolor rgb 'yellow'
+set linetype 8 linecolor rgb 'orange'
+
+#plot filename using 2:xtic(1) with boxes ls 4
+plot filename using 2:xtic(1) with boxes ls 4, "" using 0:($2+.1):(sprintf("%d",$2)) with labels

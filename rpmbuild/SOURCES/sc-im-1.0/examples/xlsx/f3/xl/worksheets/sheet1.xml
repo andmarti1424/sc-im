@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+  <sheetPr>
+    <pageSetUpPr fitToPage="0"/>
+  </sheetPr>
+  <dimension ref="A2:B5"/>
+  <sheetViews>
+    <sheetView workbookViewId="0" tabSelected="1">
+      <selection activeCell="B6" sqref="B6"/>
+    </sheetView>
+  </sheetViews>
+  <sheetFormatPr defaultRowHeight="12.75"/>
+  <cols>
+    <col min="1" max="1" style="0" width="9.142308"/>
+    <col min="2" max="2" style="0" width="12.14213" bestFit="1" customWidth="1"/>
+    <col min="3" max="16384" style="0"/>
+  </cols>
+  <sheetData>
+    <row r="2" spans="1:2">
+      <c r="A2" t="inlineStr">
+        <is>
+          <t>o</t>
+        </is>
+      </c>
+      <c r="B2">
+        <v>1</v>
+      </c>
+    </row>
+    <row r="3" spans="1:2">
+      <c r="A3" t="inlineStr">
+        <is>
+          <t>y</t>
+        </is>
+      </c>
+      <c r="B3">
+        <v>2</v>
+      </c>
+    </row>
+    <row r="4" spans="1:2">
+      <c r="A4" t="inlineStr">
+        <is>
+          <t>si</t>
+        </is>
+      </c>
+      <c r="B4" t="s">
+        <f>IF(AND(OR(B2=4,B2=1),B3=2)=TRUE,&quot;SI&quot;,&quot;NO&quot;)</f>
+        <v>0</v>
+      </c>
+    </row>
+    <row r="5" spans="1:2">
+      <c r="B5" t="b">
+        <f>B3&gt;1</f>
+        <v>1</v>
+      </c>
+    </row>
+  </sheetData>
+  <sheetProtection formatCells="0" formatColumns="0" formatRows="0" insertColumns="0" insertRows="0" insertHyperlinks="0" deleteColumns="0" deleteRows="0" selectLockedCells="1" sort="0" autoFilter="0" pivotTables="0" selectUnlockedCells="1"/>
+  <printOptions/>
+  <pageMargins left="1" right="1" top="1.667" bottom="1.667" header="1" footer="1"/>
+  <pageSetup blackAndWhite="0" cellComments="asDisplayed" draft="0" errors="displayed" orientation="portrait" pageOrder="downThenOver" paperSize="9" scale="100" useFirstPageNumber="0"/>
+  <headerFooter>
+    <oddHeader></oddHeader>
+    <oddFooter>&amp;CPage </oddFooter>
+  </headerFooter>
+</worksheet>

@@ -1,0 +1,37 @@
+#set terminal dumb enhanced
+set terminal caca driver ncurses color enhanced size 80,43 inverted charset ascii
+set datafile separator ','
+stats filename u 2 noout      # get STATS_sum (sum of column 2)
+
+ang(x)=x*360.0/STATS_sum        # get angle (grades)
+perc(x)=x*100.0/STATS_sum       # get percentage
+
+
+set palette color
+set size square                 # square canvas
+set xrange [-1:1.5]
+set yrange [-1.25:1.25]
+set style fill solid 1
+
+unset border
+unset tics
+unset key
+
+set linetype 1 linecolor rgb 'red'
+set linetype 2 linecolor rgb 'green'
+set linetype 3 linecolor rgb 'blue'
+set linetype 4 linecolor rgb 'cyan'
+set linetype 5 linecolor rgb 'magenta'
+set linetype 6 linecolor rgb 'white'
+set linetype 7 linecolor rgb 'yellow'
+set linetype 8 linecolor rgb 'orange'
+
+Ai = 0.0; Bi = 0.0;             # init angle
+mid = 0.0;                      # mid angle
+i = 0; j = 0;                   # color
+yi  = 0.0; yi2 = 0.0;           # label position
+
+plot filename u (0):(0):(1):(Ai):(Ai=Ai+ang($2)):(i=i+1) with circle linecolor var,\
+filename u (1.5):(yi=yi+0.5/STATS_records):($1) w labels,\
+filename u (1.0):(yi2=yi2+0.5/STATS_records):(j=j+1) w p pt 5 ps 2 linecolor var,\
+filename u (mid=Bi+ang($2)*pi/360.0, Bi=2.0*mid-Bi, 0.5*cos(mid)):(0.5*sin(mid)):(sprintf('%.0f (%.1f\%)', $2, perc($2))) w labels
