@@ -1,0 +1,5 @@
+%dir /usr/lib/debug
+%dir /usr/lib/debug/usr
+%dir /usr/lib/debug/usr/local
+%dir /usr/lib/debug/usr/local/bin
+/usr/lib/debug/usr/local/bin/scim-1.0-1.fc27.x86_64.debug

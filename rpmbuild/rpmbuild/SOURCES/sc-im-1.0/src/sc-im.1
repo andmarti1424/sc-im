@@ -1,0 +1,256 @@
+.\" This is the groff documentation source for SC-IM
+.\"
+.\" Preview with: groff -man -Tascii sc-im.1
+.\"           or: man -l sc-im.1
+.\"
+.
+.
+.TH SC-IM 1 "2016-02-09" "User Commands"
+.SH NAME
+sc-im \- A curses based, vim-like spreadsheet calculator
+.SH SYNOPSIS
+.B sc-im
+.RI [ OPTION ].\|.\|.\|
+.RI [ FILE ]
+.
+.SH DESCRIPTION
+.B sc-im
+Is a curses based spreadsheet calculator program with vim like key bindings.
+.PP
+SC-IM is a spreadsheet program based on SC
+
+A spreadsheet is an interactive computer application program for organization
+and analysis of data in tabular form. Spreadsheets are developed as computerized
+simulations of paper accounting worksheets. The program operates on data
+represented as cells of an array, organized in rows and columns. Each cell of
+the array is a model–view–controller element that can contain either numeric or
+text data, or the results of formulas that automatically calculate and display a
+value based on the contents of other cells.
+
+The user of the spreadsheet can make changes in any stored value and observe the
+effects on calculated values. This makes the spreadsheet useful for "what-if"
+analysis since many cases can be rapidly investigated without tedious manual
+recalculation. Modern spreadsheet software can have multiple interacting sheets,
+and can display data either as text and numerals, or in graphical form. SC-IM
+uses ncurses for visual interface and has vim-like keybindings and some
+functional similarities with vim text editor.
+.
+.SH OPTIONS
+.SS "Input Control"
+.TP
+.IR FILE
+The input file from where to read the spreadsheet.
+.SS "Version"
+.TP
+.BR \-\^\-version
+Print the version number of Sc-im and exit.
+It also shows which features were enabled when Sc-im was compiled.
+
+.SS "External scripts"
+.TP
+.BR \-\^\-nocurses
+Run interactive but without ncurses interface.
+.TP
+.BR \-\^\-output=FILE
+Save the results in FILE.
+.TP
+.BR \-\^\-quit_afterload
+Quit after loading all the files.
+Useful when sending scripts to SC-IM.
+
+.SS "Other configuration variables"
+.TP
+.BR \-\^\-autocalc
+Set variable 'autocalc'. Recalculations occur automatically.
+.TP
+.BR \-\^\-numeric
+Set variable 'numeric'. A digit starts a numeric value instead of a command
+multiplier.
+.TP
+.BR \-\^\-half_page_scroll
+Set variable 'half_page_scroll'. <c-f>, <c-b> and other scroll mappings scroll
+half page instead of full page.
+.TP
+.BR \-\^\-newline_action=VAL
+Set variable 'newline_action' VAL to
+.IR j
+to move the cursor down after an entry. Set to
+.IR l
+to move the cursor right after an entry.
+.TP
+.BR \-\^\-external_functions
+Set variable 'external_functions'. Enable external functions.
+.TP
+.BR \-\^\-xlsx_readformulas
+Set variable 'xlsx_readformulas'. SC-IM will try to import formulas, rather than
+the final values of a cell.
+
+.
+.
+.SH COLOR SUPPORT
+Most terminals are able to display 256 colors these days. But some of them
+enable only 16 colors by default. To enjoy
+.BR sc-im "'s"
+full capabilities, these terminals need to be signaled to enable 256 color
+mode. This is usually done by setting the TERM environment variable.
+.PP
+.BR "export TERM=xterm-256color"
+.
+.SH KEYBOARD CONTROLS
+.TP
+.BR "h, j, k, l, Arrow keys"
+Move between cells.
+.TP
+.BR "PgUp, pgDn"
+One page UP or DOWN.
+.TP
+.BR "gg"
+Jump to the first cell.
+.TP
+.BR "v"
+Starts visual selection.
+.TP
+.BR ^
+Move the cell cursor to row 0 of the current column.
+.TP
+.BR 0
+Move the cell cursor backward to column A of the current row.
+.TP
+.BR $
+Move the cell cursor forward to the last valid column of the current row.
+.TP
+.BR b
+Move the cell cursor back to the previous valid cell.
+.TP
+.BR w
+Move the cell cursor forward to the next valid cell.
+.TP
+.BR g0
+Move the cell cursor to the first visible column of the screen.
+.TP
+.BR g$
+Move the cell cursor to the last visible column of the screen.
+.TP
+.BR gM
+Move the cell cursor to the middle column of the screen.
+.TP
+.BR gH
+Go to fist visible row on the screen.
+.TP
+.BR gL
+Go to last visible row on the screen.
+.TP
+.BR gM
+Go to middle row on the screen.
+.TP
+.BI m x
+Mark the current cell.
+.TP
+.BI ' x
+Jump to a marked cell.
+.TP
+.BR =
+Enter a numeric constant or expression into the current cell.
+.TP
+.BR <
+Enter a label string into the current cell. Right aligned
+.TP
+.BR >
+Enter a label string into the current cell. Left aligned
+.TP
+.BR {
+Left justify the string in the current cell.
+.TP
+.BR }
+Right justify the string in the current cell.
+.TP
+.BR |
+Center the string in the current cell.
+.TP
+.BR e
+Edit the value associated with the current cell.
+This is identical to ``=''
+except that the command line starts out containing
+the old numeric value or expression associated with the cell.
+The editing in this mode is vi-like.
+.TP
+.BR E
+Edit the string associated with the current cell.
+This is identical to ``<'', ``\\'', or ``>''
+except that the command line starts out containing
+the old string value or expression associated with the cell.
+The editing in this mode is vi-like.
+.TP
+.BR x
+Clear the current cell.
+Deletes the numeric value, label string, and/or
+numeric or string expression.
+.TP
+.BR :
+Enter COMMAND mode.
+.TP
+.BR
+See
+.
+.B :help
+to get more help
+.TP
+.BR
+.
+.SH FEATURES
+.BR
+.IP \[bu] 2
+UNDO / REDO
+.IP \[bu]
+65.536 rows and 702 columns supported. (The number of rows can be expanded to 1.048.576 if wished)
+.IP \[bu]
+CSV / TAB delimited file import and export
+.IP \[bu]
+XLS / XLSX file import
+.IP \[bu]
+Key-mappings.
+.IP \[bu]
+Sort of rows
+.IP \[bu]
+Filter of rows
+.IP \[bu]
+Cell shifting
+.IP \[bu]
+More movements commands implemented
+.IP \[bu]
+Input and Output was completely rewritten
+.IP \[bu]
+Screen colors can be customized by user, even at runtime
+.IP \[bu]
+Colorize cells or give them format such as bold or underline
+.IP \[bu]
+Implement external functions in the language you prefer and use them in SC-IM
+.IP \[bu]
+Use SC-IM as a non-interactive calculator, reading its input from a external script
+.
+.SH ABOUT THE NAME
+The idea is that the program can be identified as another
+vim-like app. SC-IM stands for Spreadsheet Calculator Improvised.
+.
+.SH AUTHOR
+Written by Andrés Martinelli and collaborators.
+Original man page by Daniel Campoverde.
+.SH BUGS
+For known bugs look at
+.IR https://github.com/andmarti1424/sc-im/blob/master/KNOWN_ISSUES
+.TP
+Please report bugs at
+.IR https://github.com/andmarti1424/sc-im/issues
+.SH COPYRIGHT
+Copyright (c) 2013-2015, Andrés Martinelli <andmarti@gmail.com>
+.PP
+This software is provided by Andres Martinelli ''as is'' and any
+express or implied warranties, including, but not limited to, the implied
+warranties of merchantability and fitness for a particular purpose are
+disclaimed. In no event shall Andres Martinelli be liable for any
+direct, indirect, incidental, special, exemplary, or consequential damages
+(including, but not limited to, procurement of substitute goods or services;
+loss of use, data, or profits; or business interruption) however caused and
+on any theory of liability, whether in contract, strict liability, or tort
+(including negligence or otherwise) arising in any way out of the use of this
+software, even if advised of the possibility of such damage.

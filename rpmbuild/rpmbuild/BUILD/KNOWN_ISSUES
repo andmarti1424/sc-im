@@ -1,0 +1,5 @@
+Problem: It was detected that libxls can produce memory leaks.
+One example is when you try to read a non xls file, ex. xlsx file.
+
+Problem: Extended ascii chars not showing correctly.
+Compile sc-im against -lncursesw and not -lncurses.

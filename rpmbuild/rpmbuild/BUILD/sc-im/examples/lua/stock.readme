@@ -1,0 +1,9 @@
+This is an example of an "READ" trigger.
+Place the getstock.lua in $HOME/.scim/lua or /usr/local/share/scim/lua.
+Make sure the getstock.lua has sufficient permission for sc-im to read it.
+Start sc-im and load the stock.sc, after while depending on your internet
+Connection, you should get the current stock value of those tree example 
+Stocks and calculates there value depending on count. 
+
+Of course this can also be done using @lua function and for real life 
+@lua should be used.  

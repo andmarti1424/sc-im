@@ -1,0 +1,190 @@
+v0.7.0
+*Added 'copy to clipboard' feature: now content of a range can be copied to clipboard using the :ccopy command.
+*Added 'paste from clipboard' feature with :cpaste command.
+*Added :subtotal
+*Added autobackup feature
+*Added :plot command with the following types of chart: line, scatter, bar and pie.
+*Added :plotedit command
+*New "version" argument. --version can be passed to scim executable file as argv. This will show Sc-im version number
+and the different features enabled at compile time.
+*Change when moving in command mode and insert mode history:
+if inputline is not empty, up and down keys now recall older commands from history,
+but taking whose commands that beginning matches the current inputline content.
+*Changed default options for numeric, newline_action, numeric_decimal, numeric_zero.
+*Doxygen support
+*exit_app: only free histories if in ncurses ui. this fix a segfault when quitting.
+*replaced :i command. Now xlsx, xls, csv, tsv and tab files shall be imported with the :load command.
+*Ignore case when handing special keys in a map
+*Handle mappings with double quotes
+*Handle SIGTSTP and SIGCONT signals. #213
+*fix in csv import: little fix when importing csv files that had commas between quotes. sc-im used to ignore those comma during import process.
+*fix in auto numeric when using insert mode history.
+*Fix when saving cellcolors. #187
+*fix in nmap. #178
+*fix in sorting when no range is selected. #180
+*fix when displaying help page. #188
+*fix in @slen with wide chars. #196
+*fix when resizing terminal. #199
+*fix calculation when using @pi. #209
+*fix when numeric=0 and try to use 0 command. #212
+*fix : not initialize colors if working in interactive mode. #220
+*fix when :color is intended to be used without having set enough parameters. #219
+*fix when editing cells with string expressions. #197
+
+v0.6.0
+*Added new freeze feature (including new :freeze and :unfreeze commands).
+*Scripting support with LUA. Also with triggers and c dynamic linked modules.
+*Added new :trigger and :untrigger commands.
+*Insert mode history
+*Added xlsx file export
+*Added new :unformat command
+*Added new ignorecase configuration variable for string searches.
+*Double quotes can now be entered in SCIM backquoting them.
+*Change in exponential and unary - priority: Exponentials bind higher than unary -.
+*Change in how data coming from pipeline or redirection is processed.
+*let and slet functions now handle undo/redo.
+so that if you set a content with let or slet over script, you can also undo it.
+*Group cols and rows when saving hidden columns and rows to file
+*Added :wq command.
+*Added SHIFT command in parser.
+*sk and sh shift commands now saves in undo struct cells that depends on the range shifted.
+*Keep default background or fg color of terminal
+*Handle ESC key in EDIT and INSERT modes. Now it goes back to previous mode, instead of always returning to NORMAL MODE.
+*UI isolation. Added dumb ui example.
+*undo / redo are now ignored by the dot command.
+*Fix in :sort command when a range is selected and not specified within the command.
+*Fix in goto command. Removed unneeded free that made SCIM crash, and another crash when no result was found in search.
+*Fix in '!' command. Did not work properly when using a white space after the '!'.
+*Fix when saving cellcolors, locked cells and pad ranges in sc files. Sometimes colors and locked ranges did not get saved (most right column).
+*Fix in history. Last element typed could get written twice in history.
+*Fix crash with 'c' command after dc, dr, or shift command affecting cell A0.
+*Now scim print columns to latest col in COLS, maximizing the grid view.
+*Fixed crash because of syntax error when entering ". as text value. This also happened in sc.
+*Fix when entering a number and then a centered text in the same cell. This also happened in sc. Text appeared a column to the   right and aligned left.
+*Fixed setfunc when saving sc file.
+*Fix in deleterow
+*Fix in shift functions
+*Fix a memory leak in undo.c
+*Fix/mods in undo/redo
+*Fix in csv import
+*Cleaned deletecol
+*Fix in csv import: maxcol was not updated correctly during import.
+*Fix when saving csv files with :w. before it saved a csv file with sc format.
+
+v0.5.0
+*new @frow / @fcol functions.
+*Added :file special command.
+*:cellcolor command now can take a range as an argument.
+*Added gg command and HOME, END, PAGEUP and PAGEDOWN keys handling in help screen.
+*CSV load/import time improvements (noticeable in large files).
+*Fix error when ordering a range that had empty cells.
+*Fix in csv import (isnumeric function).
+*Fix when circular reference occurs:
+ Before it put @ERR in expression.
+ Now it preserves the var that makes the circular reference in the formula,
+ but keeps the "ERROR" label in the ent.
+ ERR errors propagate to other ents.
+*Changes when an ent referenced by other ents is removed:
+ Before, @ERR was set whereever the reference to a removed ent exists.
+ Now, if an ent is removed because of:
+    1. a dr dc sh sk command,
+    is_deleted flag is set on those ents.
+    eval return 0 for those cases, and CELLREF is put in e->op.
+    2. 'x' command, flag is_deleted is not set.
+    eval return 0 for those cases as well.
+ REF and ERR errors propagate to other ENDS. 
+ Another change: Now when deleting a cell, if they are referenced by others, vertex is not removed.
+ (is_deleted ents shall always go to freeents to be reused..)
+*Added check for not to copy duplicate ents in copy_to_undostruct.
+*Removed split function.
+*Removed unnecesary lookat in screen.c that made unneeded mallocs.
+*With "debug" configuration parameter set, now SC-IM quits after SIGINT.
+
+*Fix bug that prevented cells with "ERROR" get saved to file and loaded later on.
+*Fix BackSpace issue with some GNU/Linux distros.
+*Fix bug that create duplicates in commandline history, if the command recently typed was the latest used as well.
+*Fix bug that avoid processing $HOME/.scimrc after loading a file via commandline.
+*Fix bug with 'Pc' and 'c' commands of normal mode, not doing autocalc after paste.
+*Fix in possible buffer overflow in main.c.
+*Some fixes in xml files import.
+*Various fixes to avoid warnings during build.
+
+
+v0.4.0
+* Fix memory leak in functions that use seval. ex.: dosval docat. this used to happen also in SC !
+* Chain cells with equations into a new graph structure
+* Change how cell expressions are evaluated
+* New function to rebuilt graph
+* Added free() call in GOTO in gram.y
+* Added free() call in SORT in gram.y
+* Added rebuild_graph, print_graph, undo and redo to gram.y
+* Added function to remove elements in dep_graph. (specific vertex and linked edges)
+* Fix in shift functions
+* Handle circular reference with new Eval structure
+* Fix in shift functions. refs in enodes now update correctly
+* Undo correctly (keeping references) actions that impact in cells on which other cells depends on
+* New :sum special command
+* New overlap configuration parameter.
+  If overlap is set to true, the cell content that exceedes column width continues to show in the following column.
+* Fix a bug that prevented some info messages to be shown during loading
+* Fix a bug when repaiting a cell that has a wide char size over than one.
+* Changes in readfile function to fix issue that sometimes appeared
+  when working with scripting, that made null output of interpreter
+* Changes in sc_info sc_error and sc_debug functions..
+* Changed sc_error sc_info and sc_debug functions to MACROS.
+* Added new "debug" configuration parameter
+* White background support
+* Fix when undoing :sums that made no sums..
+* :w command now adds '.sc' extension if none is specified
+* Fix some #include's
+* Fix :load command
+* Expand filenames using wordexp
+* Restored old SC fill function
+* Fix in seval calls
+* New :fcopy special command
+* Added UNDO and LOCK check to fcopy special command. Added fcopy to gram.y
+* sum special command renamed to fsum
+* csv import now use isnumeric function
+* change in '#' command
+* new @replace string function
+* Change in lex to handle WORD
+* Fix in yyerror function
+* :set command improvement
+* Added set to gram.y
+* doc improvement
+* Fix when opening files with slash
+
+
+v0.3.0
+* FIX when importing large CSV files
+* SC-IM now supports wide chars, enabling the use of different alphabets.
+  The following alphabets are supported:
+  English, Spanish, French, Italian, German, Portuguese, Russian, Ukrainian, Greek, Turkish, Czech, Japanese, Chinese
+* Modification in padding of cells and how they are saved in files.
+* UNDO / REDO improvements. Now the following actions are supported:
+  Change in format of a column as a result of the 'f' command
+  Change in format of a column as a result of auto_jus
+  Change format of columns as a result of ic dc
+
+
+v0.2.2
+* Added plain text export.
+* Added padding between cells.
+* Added 256 color support and "redefine_color" special command.
+* Added "aa" command in normal mode to act as autojus special command.
+* Added "gl" for going to last position in normal mode.
+* Added SC-IM man page.
+* Added "refresh" special command to refresh UI.
+* Big fix in how extended ascii are chars shown.
+* Big changes in functions used for showing cell content.
+* Fix in autonumeric mode.
+* Fix bug when typing real long string (issue #32).
+* Fix when using QUIT command with external scripts.
+* "cellcolor" command now checks if a locked cell exists prior to change format.
+* Locked cells are stored after any other command when saving a file.
+* Saving sc file: cellcolor and lock commands now are stored by rows when saving a sc file.
+* "Pv" command now do not paste cellcolors.
+* Translated source code comments to English.
+* Various fixes when using SC-IM without UI (--nocurses).
+* Help documentation now can be loaded without making install SC-IM.
+* MAXROWS now can be defined in Makefile.

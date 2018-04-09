@@ -1,0 +1,12 @@
+set terminal dumb enhanced
+#set terminal caca driver ncurses color enhanced size 80,43 inverted charset ascii
+
+set datafile separator ","
+set key autotitle columnhead
+
+plot filename with points
+#plot filename using 1:2 with points #1=x 2=y
+#
+#plot filename using 1:2 with points lc rgb "red",\
+#     filename using 1:3 with points lc rgb "cyan",\
+#     filename using 1:4 with points lc rgb "white"
