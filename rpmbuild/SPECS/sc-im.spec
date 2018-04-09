@@ -7,7 +7,7 @@ URL:            https://github.com/andmarti1424/%{name}
 Source0:        %{name}-%{version}.tar.gz
 
 BuildRequires:  libzip-devel libxml2-devel ncurses-devel byacc gcc gnuplot
-Requires:       libzip-devel libxml2-devel ncurses-devel byacc gcc gnuplot
+Requires:       gnuplot
  
 
 %description
@@ -45,5 +45,5 @@ cd src
 
 
 %changelog
-* Sun Apr  1 2018 Stephen Reaves <reaves735@gmail.com> 1.0-1
+* Sun Apr 8 2018 Stephen Reaves <reaves735@gmail.com> 1.0-1
 - Initial package for Fedora 27
