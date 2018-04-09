@@ -6,7 +6,9 @@ License:        MIT
 URL:            https://github.com/andmarti1424/%{name}
 Source0:        %{name}-%{version}.tar.gz
 
-BuildRequires:  libzip-devel libxml2-devel ncurses-devel byacc git gcc gnuplot
+BuildRequires:  libzip-devel libxml2-devel ncurses-devel byacc gcc gnuplot
+Requires:       libzip-devel libxml2-devel ncurses-devel byacc gcc gnuplot
+ 
 
 %description
 SC-IM is a spreadsheet program that is based on SC (http://ibiblio.org/pub/Linux/apps/financial/spreadsheet/sc-7.16.tar.gz) SC original authors are James Gosling and Mark Weiser, and mods were later added by Chuck Martin.
