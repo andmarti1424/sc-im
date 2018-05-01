@@ -583,15 +583,16 @@ void write_cells(register FILE *f, int r0, int c0, int rn, int cn, int dr, int d
 }
 
 /**
- * \brief TODO Document readfile
+ * \brief Try to open a spreadsheet file.
  *
  * \param[in] fname file name
  * \param[in] eraseflg
  *
- * \return none
+ * \return SC_READFILE_SUCCESS if we loaded the file, SC_READFILE_ERROR if we failed,
+ * SC_READFILE_DOESNTEXIST if the file doesn't exist.
  */
 
-int readfile(char * fname, int eraseflg) {
+sc_readfile_result readfile(char * fname, int eraseflg) {
     if (!strlen(fname)) return 0;
     loading = 1;
 
@@ -603,7 +604,7 @@ int readfile(char * fname, int eraseflg) {
             // TODO - force load with '!' ??
             sc_error("There are changes unsaved. Cannot load file: %s", fname);
             loading = 0;
-            return 0;
+            return SC_READFILE_ERROR;
         }
         remove_backup(curfile);
     }
@@ -619,7 +620,7 @@ int readfile(char * fname, int eraseflg) {
                 loading = 0;
                 extern int shall_quit;
                 shall_quit = 1;
-                return 0;
+                return SC_READFILE_ERROR;
                 break;
             case L'e':
                 remove_backup(fname);
@@ -657,7 +658,7 @@ int readfile(char * fname, int eraseflg) {
         modflg = 0;
         #endif
         loading = 0;
-        return 1;
+        return SC_READFILE_SUCCESS;
 
     // If file is an xls file, we import it
     } else if (len > 4 && ! strcasecmp( & fname[len-4], ".xls")){
@@ -669,7 +670,7 @@ int readfile(char * fname, int eraseflg) {
         strcpy(curfile, fname);
         #endif
         loading = 0;
-        return 1;
+        return SC_READFILE_SUCCESS;
 
     // If file is an delimited text file, we import it
     } else if (len > 4 && ( ! strcasecmp( & fname[len-4], ".csv") ||
@@ -693,12 +694,12 @@ int readfile(char * fname, int eraseflg) {
         strcpy(curfile, fname);
         modflg = 0;
         loading = 0;
-        return 1;
+        return SC_READFILE_SUCCESS;
 
     } else {
         sc_info("\"%s\" is not a SC-IM compatible file", fname);
         loading = 0;
-        return 0;
+        return SC_READFILE_ERROR;
     }
 
     // We open an 'sc' format file
@@ -711,7 +712,7 @@ int readfile(char * fname, int eraseflg) {
     if (f == NULL) {
         loading = 0;
         strcpy(curfile, save);
-        return 0;
+        return SC_READFILE_DOESNTEXIST;
     } /* */
 
     if (eraseflg) erasedb();
@@ -732,7 +733,7 @@ int readfile(char * fname, int eraseflg) {
     strcpy(curfile, save);
     EvalAll();
     modflg = 0;
-    return 1;
+    return SC_READFILE_SUCCESS;
 }
 
 /**
