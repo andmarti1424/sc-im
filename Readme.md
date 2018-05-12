@@ -38,19 +38,19 @@ SC-IM stands for Spreadsheet Calculator Improvised. :-)
 
 ### Manual
 
-* Edit Makefile file according to your system and needs.
+* Edit [`src/Makefile`](src/Makefile) according to your system and needs:
 ```
-    vim /src/Makefile
-```
-
-* Inside /src folder run:
-```
-    make
+    vim src/Makefile
 ```
 
-* Optional: You can install the binary 'sc-im' in your system by typing with a privileged user:
+* Run `make`:
 ```
-    make install
+    make -C src
+```
+
+* Optional: You can install the binary `scim` in your system by typing with a privileged user:
+```
+    make -C src install
 ```
 
 
