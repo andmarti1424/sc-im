@@ -53,7 +53,14 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn);
 void write_cells(register FILE *f, int r0, int c0, int rn, int cn, int dr, int dc);
 void write_marks(register FILE *f);
 void write_franges(register FILE *f);
-int readfile(char *fname, int eraseflg);
+
+typedef enum {
+    SC_READFILE_ERROR = 0,
+    SC_READFILE_SUCCESS = 1,
+    SC_READFILE_DOESNTEXIST = 2
+} sc_readfile_result;
+sc_readfile_result readfile(char *fname, int eraseflg);
+
 int file_exists(const char * fname);
 char * findhome(char *path);
 int backup_file(char *path);

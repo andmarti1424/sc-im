@@ -560,8 +560,16 @@ void load_sc() {
         if (c) sprintf(word + strlen(word), " ");
         sprintf(word + strlen(word), "%s", p.we_wordv[c]);
     }
-    if (strlen(word) && ! readfile(word, 0) && ! atoi((char *) get_conf_value("nocurses"))) {
-        sc_info("New file: \"%s\"", word);     // file passed to scim executable does not exists
+    if (strlen(word) != 0) {
+        sc_readfile_result result = readfile(word, 0);
+        if (!atoi((char *) get_conf_value("nocurses"))) {
+            if (result == SC_READFILE_DOESNTEXIST) {
+                // It's a new record!
+                sc_info("New file: \"%s\"", word);
+            } else if (result == SC_READFILE_ERROR) {
+                sc_info("\"%s\" is not a SC-IM compatible file", word);
+            }
+        }
     }
     wordfree(&p);
     return;
