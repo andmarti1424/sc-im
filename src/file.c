@@ -1368,7 +1368,8 @@ int plugin_exists(char * name, int len, char * path) {
 void * do_autobackup() {
     int len = strlen(curfile);
     //if (loading || ! len) return (void *) -1;
-    if (! len || ! modflg) return (void *) -1;
+    //if (! len || ! modflg) return (void *) -1;
+    if (! len) return (void *) -1;
 
     char * pstr = strrchr(curfile, '/');
     int pos = pstr == NULL ? -1 : pstr - curfile;
