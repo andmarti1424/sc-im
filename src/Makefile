@@ -2,19 +2,19 @@
 name = sc-im
 
 # The base directory where everything should be installed.
-prefix	= /usr/local
+prefix  = /usr/local
 
-EXDIR		= $(prefix)/bin
+EXDIR   = $(prefix)/bin
 HELPDIR = $(prefix)/share/$(name)
-LIBDIR	= $(prefix)/share/doc/$(name)
+LIBDIR  = $(prefix)/share/doc/$(name)
 
 # This is where the man page goes.
-MANDIR	= $(prefix)/share/man/man1
+MANDIR  = $(prefix)/share/man/man1
 
 # Change these to your liking or use `make CC=gcc` etc
-#CC		= cc
+#CC   = cc
 #YACC = bison -y
-#SED	= sed
+#SED  = sed
 
 LDLIBS += -lm
 
@@ -69,70 +69,66 @@ CFLAGS += -DAUTOBACKUP
 CFLAGS += -DHAVE_PTHREAD
 
 ifneq ($(shell uname -s),Darwin)
-	LDLIBS += -pthread
+  LDLIBS += -pthread
 endif
 
 # NOTE: libxlsxwriter is required for xlsx file export support
 ifneq (,$(wildcard /usr/include/xlsxwriter.h))
-	CFLAGS += -DXLSX_EXPORT
-	LDLIBS += -lxlsxwriter
+  CFLAGS += -DXLSX_EXPORT
+  LDLIBS += -lxlsxwriter
 endif
 ifneq (,$(wildcard /usr/local/include/xlsxwriter.h))
-	CFLAGS += -DXLSX_EXPORT
-	LDLIBS += -lxlsxwriter
+  CFLAGS += -DXLSX_EXPORT
+  LDLIBS += -lxlsxwriter
 endif
 
 # Check for gnuplot existance
 ifneq (, $(shell which gnuplot))
-	CFLAGS += -DGNUPLOT
+  CFLAGS += -DGNUPLOT
 endif
 
 # dynamic linking (should not be used in FreeBSD
 ifneq ($(shell uname -s),FreeBSD)
-	LDLIBS += -ldl
+  LDLIBS += -ldl
 endif
 
 ifneq (, $(shell which pkg-config))
-	# Any system with pkg-config
+  # Any system with pkg-config
 
-	# NOTE: ncursesw (required)
-	ifeq ($(shell uname -s),Darwin)
-		# macOS' ncurses is built with wide-char support
-		LDFLAGS += -lncurses
-	else ifneq ($(shell pkg-config --exists ncursesw || echo 'no'),no)
-		CFLAGS += $(shell pkg-config --cflags ncursesw)
-		LDLIBS += $(shell pkg-config --libs ncursesw)
-	else ifneq ($(shell pkg-config --exists ncurses || echo 'no'),no)
-		# hopefully this includes wide character support then
-		CFLAGS += $(shell pkg-config --cflags ncurses)
-		LDLIBS += $(shell pkg-config --libs ncurses)
-	else
-		LDLIBS += -lncursesw
-	endif
+  # NOTE: ncursesw (required)
+  ifeq ($(shell uname -s),Darwin)
+    # macOS' ncurses is built with wide-char support
+    LDFLAGS += -lncurses
+  else ifneq ($(shell pkg-config --exists ncursesw || echo 'no'),no)
+    CFLAGS += $(shell pkg-config --cflags ncursesw)
+    LDLIBS += $(shell pkg-config --libs ncursesw)
+  else ifneq ($(shell pkg-config --exists ncurses || echo 'no'),no)
+    # hopefully this includes wide character support then
+    CFLAGS += $(shell pkg-config --cflags ncurses)
+    LDLIBS += $(shell pkg-config --libs ncurses)
+  else
+    LDLIBS += -lncursesw
+  endif
 
-	# NOTE: libxml and libzip are required for xlsx file import support
-	ifneq ($(shell pkg-config --exists libzip libxml-2.0 || echo 'no'),no)
-		CFLAGS += -DXLSX $(shell pkg-config --cflags libxml-2.0 libzip)
-		LDLIBS += $(shell pkg-config --libs libxml-2.0 libzip)
-	endif
+  # NOTE: libxml and libzip are required for xlsx file import support
+  ifneq ($(shell pkg-config --exists libzip libxml-2.0 || echo 'no'),no)
+    CFLAGS += -DXLSX $(shell pkg-config --cflags libxml-2.0 libzip)
+    LDLIBS += $(shell pkg-config --libs libxml-2.0 libzip)
+  endif
 
-	# NOTE: lua support
-	ifneq ($(shell pkg-config --exists lua51 || echo 'no'),no)
-		CFLAGS += -DXLUA $(shell pkg-config --cflags lua51)
-		LDLIBS += $(shell pkg-config --libs lua51) -Wl,--export-dynamic
-	else ifneq ($(shell pkg-config --exists lua-5.1 || echo 'no'),no) # FreeBSD
-		CFLAGS += -DXLUA $(shell pkg-config --cflags lua-5.1)
-		ifneq ($(shell uname -s),Darwin)
-			LDLIBS += $(shell pkg-config --libs lua-5.1) -Wl,--export-dynamic
-		else
-			LDLIBS += $(shell pkg-config --libs lua-5.1) -rdynamic
-		endif
-	endif
+  # NOTE: lua support
+  ifneq ($(shell pkg-config --exists lua51 || echo 'no'),no)
+    CFLAGS += -DXLUA $(shell pkg-config --cflags lua51)
+    LDLIBS += $(shell pkg-config --libs lua51) -Wl,--export-dynamic
+  else ifneq ($(shell pkg-config --exists lua-5.1 || echo 'no'),no) # FreeBSD
+    CFLAGS += -DXLUA $(shell pkg-config --cflags lua-5.1)
+    LDLIBS += $(shell pkg-config --libs lua-5.1) -Wl,--export-dynamic
+  endif
 else ifeq ($(shell uname -s),Darwin)
-	# macOS without pkg-config
+  # macOS without pkg-config
 
-	# macOS' ncurses is built with wide-char support
-	LDFLAGS += -lncurses
+  # macOS' ncurses is built with wide-char support
+  LDFLAGS += -lncurses
 endif
 
 OBJS = $(patsubst %.c, %.o, $(wildcard *.c) $(wildcard utils/*.c)) gram.o
