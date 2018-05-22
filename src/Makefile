@@ -1,5 +1,5 @@
 # Specify the name of the resulting executable file
-name = scim
+name = sc-im
 
 # The base directory where everything should be installed.
 prefix  = /usr/local
@@ -182,9 +182,9 @@ man_install:
 	@cp -r ../docs/man/man3/ /usr/local/share/man/
 	mandb
 
-# "scim" MUST match what is in Doxyfile `MAN_EXTENSION = .scim.3`
+# "sc-im" MUST match what is in Doxyfile `MAN_EXTENSION = .sc-im.3`
 man_uninstall:
-	@rm -rf /usr/local/share/man/man3/*scim.3
+	@rm -rf /usr/local/share/man/man3/*sc-im.3
 	@mandb
 
 clean:
