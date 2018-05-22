@@ -427,7 +427,7 @@ Commands for handling cell content:
 
      :version    Show SC-IM version number.
 
-                 If you start Sc-im with ./scim --version
+                 If you start Sc-im with ./sc-im --version
                  version number of Sc-im will be printed on screen, including
                  the different features that were enabled when Sc-im was compiled.
                  Afterwards Sc-im will exit.
@@ -1380,7 +1380,7 @@ Commands for handling cell content:
     Note: You can always override the delimiter used passing the --txtdelim
     parameter to SC-IM.
 
-    Example: ./scim --txtdelim="\t" file.txt
+    Example: ./sc-im --txtdelim="\t" file.txt
 
     Possible values are:
         --txtdelim="\t"
@@ -1411,22 +1411,22 @@ Commands for handling cell content:
     The following invocations demonstrate SC-IM's input and output options.
 
     Output to stdout, then quit:
-        cat script | ./scim --nocurses --quit_afterload
+        cat script | ./sc-im --nocurses --quit_afterload
 
     Receive data from a pipe and output results to a file:
-        cat script | ./scim --quit_afterload --output=return_file
+        cat script | ./sc-im --quit_afterload --output=return_file
 
     Receive data from a pipe and continue in non-ncurses mode:
-        cat script | ./scim --nocurses
+        cat script | ./sc-im --nocurses
 
     Read data from a script and output to a file:
-        ./scim a.sc --quit_afterload --output=return_file
+        ./sc-im a.sc --quit_afterload --output=return_file
 
     Receive data from both a pipe and a script, and output to file:
-        cat script | ./scim a.sc --quit_afterload --output=return_file
+        cat script | ./sc-im a.sc --quit_afterload --output=return_file
 
     Start interactive mode but with no ncurses interface:
-        ./scim --nocurses
+        ./sc-im --nocurses
 
     Note: Setting the --output parameter implies setting the --nocurses flag.
 
