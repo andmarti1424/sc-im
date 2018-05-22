@@ -122,7 +122,11 @@ ifneq (, $(shell which pkg-config))
     LDLIBS += $(shell pkg-config --libs lua51) -Wl,--export-dynamic
   else ifneq ($(shell pkg-config --exists lua-5.1 || echo 'no'),no) # FreeBSD
     CFLAGS += -DXLUA $(shell pkg-config --cflags lua-5.1)
-    LDLIBS += $(shell pkg-config --libs lua-5.1) -Wl,--export-dynamic
+    ifneq ($(shell uname -s),Darwin)
+      LDLIBS += $(shell pkg-config --libs lua-5.1) -Wl,--export-dynamic
+    else
+      LDLIBS += $(shell pkg-config --libs lua-5.1) -rdynamic
+    endif
   endif
 else ifeq ($(shell uname -s),Darwin)
   # macOS without pkg-config
