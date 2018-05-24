@@ -53,6 +53,16 @@ SC-IM stands for Spreadsheet Calculator Improvised. :-)
     make -C src install
 ```
 
+### Building on OS X
+
+You can follow the instructions as above, but if you would like Lua scripting
+support, you will need to install Lua 5.1, which you can do with,
+
+```
+    brew install lua@5.1
+```
+
+And then follow the instructions as above.
 
 ### Homebrew for OSX users
 
