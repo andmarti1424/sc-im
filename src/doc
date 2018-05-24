@@ -791,7 +791,7 @@ Commands for handling cell content:
                 available for dynamic linking with modules.
 
                 The search path for LUA trigger files is
-                $HOME/.scim/lua/ or /usr/local/share/scim/lua
+                $PWD/lua/ or $HOME/.scim/lua/ or /usr/local/share/scim/lua
                 (in that order) and for C Trigger
                 $HOME/.scim/module or /usr/local/share/scim/module
 
@@ -1284,7 +1284,7 @@ Commands for handling cell content:
     @lua("luascript",0)
         Executes a "luascript". Using Lua script scim can be extend with lot
         new functionality, such as complex programming, accessing databases etc.
-        The search patch for LUA scripts files is
+        The search patch for LUA scripts files is $PWD/lua/
         $HOME/.scim/lua/ or /usr/local/share/scim/lua (in that order)
         Always use it only with @ston see example:
         @ston(@lua("luascript",0))
@@ -1354,7 +1354,7 @@ Commands for handling cell content:
      sc.curcol()             - return current column
      sc.currow()             - return current row
 
-     The search patch for LUA scripts files is
+     The search patch for LUA scripts files is $PWD/lua or
      $HOME/.scim/lua/ or /usr/local/share/scim/lua (in that order)
      Example can be found in sc-im/examples/lua in source code tree.
 
