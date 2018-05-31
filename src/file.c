@@ -1339,7 +1339,17 @@ int max_length(FILE * f) {
 int plugin_exists(char * name, int len, char * path) {
     FILE * fp;
     static char * HomeDir;
+    char cwd[1024];
 
+    if (getcwd(cwd, sizeof(cwd)) != NULL) {
+        strcpy((char *) path, cwd);
+        strcat((char *) path, "/");
+        strncat((char *) path, name, len);
+        if ((fp = fopen((char *) path, "r"))) {
+            fclose(fp);
+            return 1;
+        }
+    }
     if ((HomeDir = getenv("HOME"))) {
         strcpy((char *) path, HomeDir);
         strcat((char *) path, "/.scim/");
