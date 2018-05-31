@@ -239,9 +239,9 @@ void ui_sc_msg(char * s, int type, ...) {
         }
         wrefresh(input_win);
 
-    } else if (get_conf_value("output") != NULL && fdoutput != NULL) {
+    } else if (type == VALUE_MSG && get_conf_value("output") != NULL && fdoutput != NULL) {
         fwprintf(fdoutput, L"%s\n", t);
-    } else {
+    } else if (type == VALUE_MSG) {
         if (fwide(stdout, 0) >0)
             //wprintf(L"wide %s\n", t);
             wprintf(L"%s\n", t);
@@ -249,6 +249,14 @@ void ui_sc_msg(char * s, int type, ...) {
             //printf("nowide %s\n", t);
             printf("%s\n", t);
         fflush(stdout);
+    } else {
+        if (fwide(stderr, 0) >0)
+            //wprintf(L"wide %s\n", t);
+            fwprintf(stderr, L"%s\n", t);
+        else
+            //printf("nowide %s\n", t);
+            fprintf(stderr, "%s\n", t);
+        fflush(stderr);
     }
     va_end(args);
     return;
