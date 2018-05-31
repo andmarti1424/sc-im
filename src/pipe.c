@@ -83,7 +83,7 @@ void getnum(int r0, int c0, int rn, int cn, FILE * fd) {
                     sprintf(line, "%.15g", p->v);
                 }
             }
-            sc_info("%s", line);
+            sc_value("%s", line);
             if (brokenpipe) {
                 linelim = -1;
                 return;
@@ -106,7 +106,7 @@ void getnum(int r0, int c0, int rn, int cn, FILE * fd) {
 void getformat(int col, FILE * fd) {
     sprintf(line, "%d %d %d\n", fwidth[col], precision[col], realfmt[col]);
     //write(fd, line, strlen(line));
-    sc_info("%s", line);
+    sc_value("%s", line);
     linelim = -1;
 }
 
@@ -130,7 +130,7 @@ void getfmt(int r0, int c0, int rn, int cn, FILE * fd) {
         for (c = c0, pp = ATBL(tbl, r, c); c <= cn; pp++, c++) {
             *line = '\0';
             if (*pp && (*pp)->format) sprintf(line, "%s", (*pp)->format);
-            sc_info("%s", line);
+            sc_value("%s", line);
             if (brokenpipe) {
                 linelim = -1;
                 return;
@@ -161,7 +161,7 @@ void getstring(int r0, int c0, int rn, int cn, FILE * fd) {
             *line = '\0';
             if (*pp && (*pp)->label)
                 sprintf(line, "%s", (*pp)->label);
-            sc_info("%s", line);
+            sc_value("%s", line);
             if (brokenpipe) {
                 linelim = -1;
                 return;
@@ -199,7 +199,7 @@ void getexp(int r0, int c0, int rn, int cn, FILE * fd) {
                 if (*line == '?')
                     *line = '\0';
             }
-            sc_info("%s", line);
+            sc_value("%s", line);
             if (brokenpipe) {
                 linelim = -1;
                 return;
