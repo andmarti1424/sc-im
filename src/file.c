@@ -206,7 +206,7 @@ int savefile() {
 
     #ifndef NO_WORDEXP
     wordexp(name, &p, 0);
-    if (pe.we_wordc < 1) {
+    if (p.we_wordc < 1) {
         sc_error("Failed expanding filepath");
         return -1;
     } else if (strlcpy(name, p.we_wordv[0], sizeof(name)) >= sizeof(name)) {
