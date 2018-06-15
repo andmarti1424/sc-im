@@ -87,9 +87,11 @@ ifneq (, $(shell which gnuplot))
   CFLAGS += -DGNUPLOT
 endif
 
-# dynamic linking (should not be used in FreeBSD
+# dynamic linking (not available in FreeBSD and OpenBSD)
 ifneq ($(shell uname -s),FreeBSD)
-  LDLIBS += -ldl
+  ifneq ($(shell uname -s),OpenBSD)
+    LDLIBS += -ldl
+  endif
 endif
 
 # OpenBSD does not implement wordexp()
