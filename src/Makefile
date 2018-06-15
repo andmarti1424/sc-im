@@ -133,6 +133,8 @@ else ifeq ($(shell uname -s),Darwin)
 
   # macOS' ncurses is built with wide-char support
   LDFLAGS += -lncurses
+else
+  LDFLAGS += -lncursesw
 endif
 
 OBJS = $(patsubst %.c, %.o, $(wildcard *.c) $(wildcard utils/*.c)) gram.o
