@@ -555,16 +555,19 @@ void read_argv(int argc, char ** argv) {
 
 void load_sc() {
     char name[PATHLEN];
+    #ifdef NO_WORDEXP
+    size_t len;
+    #else
     int c;
-    #ifndef NO_WORDEXP
     wordexp_t p;
     #endif
 
     #ifdef NO_WORDEXP
-    if (strlcpy(name, loadingfile, sizeof(name)) >= sizeof(name)) {
+    if ((len = strlen(loadingfile)) >= sizeof(name)) {
         sc_info("File path too long: '%s'", loadingfile);
         return;
     }
+    memcpy(name, loadingfile, len+1);
     #else
     wordexp(loadingfile, &p, 0);
     for (c=0; c < p.we_wordc; c++) {
