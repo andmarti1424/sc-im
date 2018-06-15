@@ -439,7 +439,7 @@ void do_commandmode(struct block * sb) {
                     sc_error("File path too long");
                     wordfree(&p);
                 } else {
-                    strncpy(name, p.we_wordv[0], len+1);
+                    memcpy(name, p.we_wordv[0], len+1);
                     name_ok = 1;
                     wordfree(&p);
                 }
@@ -877,7 +877,7 @@ void do_commandmode(struct block * sb) {
                 sc_error("File path too long");
                 wordfree(&p);
             } else {
-                strncpy(name, p.we_wordv[0], len+1);
+                memcpy(name, p.we_wordv[0], len+1);
                 name_ok = 1;
                 wordfree(&p);
             }

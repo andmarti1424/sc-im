@@ -216,7 +216,7 @@ int savefile() {
         wordfree(&p);
         return -1;
     }
-    strncpy(name, p.we_wordv[0], len+1);
+    memcpy(name, p.we_wordv[0], len+1);
     wordfree(&p);
     #endif
 
