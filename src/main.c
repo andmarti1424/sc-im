@@ -60,8 +60,11 @@
 #include <fcntl.h>   // for F_GETFL O_NONBLOCK F_SETFL
 #include <locale.h>
 #include <wchar.h>
-#include <wordexp.h>
 #include <sys/ioctl.h> // for ioctl
+
+#ifndef NO_WORDEXP
+#include <wordexp.h>
+#endif
 
 #include "main.h"
 #include "shift.h"
@@ -551,28 +554,37 @@ void read_argv(int argc, char ** argv) {
  */
 
 void load_sc() {
-    wordexp_t p;
-    wordexp(loadingfile, &p, 0);
-
+    char name[PATHLEN];
     int c;
-    char word[PATHLEN] = "";
-    for (c=0; c < p.we_wordc; c++) {
-        if (c) sprintf(word + strlen(word), " ");
-        sprintf(word + strlen(word), "%s", p.we_wordv[c]);
+    #ifndef NO_WORDEXP
+    wordexp_t p;
+    #endif
+
+    #ifdef NO_WORDEXP
+    if (strlcpy(name, loadingfile, sizeof(name)) >= sizeof(name)) {
+        sc_info("File path too long: '%s'", loadingfile);
+        return;
     }
-    if (strlen(word) != 0) {
-        sc_readfile_result result = readfile(word, 0);
+    #else
+    wordexp(loadingfile, &p, 0);
+    for (c=0; c < p.we_wordc; c++) {
+        if (c) sprintf(name + strlen(name), " ");
+        sprintf(name + strlen(name), "%s", p.we_wordv[c]);
+    }
+    wordfree(&p);
+    #endif
+
+    if (strlen(name) != 0) {
+        sc_readfile_result result = readfile(name, 0);
         if (!atoi((char *) get_conf_value("nocurses"))) {
             if (result == SC_READFILE_DOESNTEXIST) {
                 // It's a new record!
-                sc_info("New file: \"%s\"", word);
+                sc_info("New file: \"%s\"", name);
             } else if (result == SC_READFILE_ERROR) {
-                sc_info("\"%s\" is not a SC-IM compatible file", word);
+                sc_info("\"%s\" is not a SC-IM compatible file", name);
             }
         }
     }
-    wordfree(&p);
-    return;
 }
 
 /**

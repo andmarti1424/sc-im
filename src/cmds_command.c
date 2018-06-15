@@ -46,7 +46,11 @@
 #include <wchar.h>
 #include <stdlib.h>
 #include <ctype.h>         // for isprint()
+
+#ifndef NO_WORDEXP
 #include <wordexp.h>
+#endif
+
 #include "sc.h"            // for rescol
 #include "conf.h"
 #include "cmds_command.h"
@@ -404,33 +408,51 @@ void do_commandmode(struct block * sb) {
             send_to_interp(inputline);
 
         } else if ( ! wcsncmp(inputline, L"load", 4) ) {
-            char cline [BUFFERSIZE];
+            char name [BUFFERSIZE];
+            int name_ok = 0;
             int force_rewrite = 0;
+            #ifndef NO_WORDEXP
             wordexp_t p;
-            wcstombs(cline, inputline, BUFFERSIZE);
+            #endif
+
+            wcstombs(name, inputline, BUFFERSIZE);
             if ( ! wcsncmp(inputline, L"load! ", 6) ) {
                 force_rewrite = 1;
-                del_range_chars(cline, 4, 4);
+                del_range_chars(name, 4, 4);
             }
 
-            del_range_chars(cline, 0, 4);
-            wordexp(cline, &p, 0);
-            if ( ! strlen(cline) ) {
+            del_range_chars(name, 0, 4);
+            if ( ! strlen(name) ) {
                 sc_error("Path to file to load is missing !");
-            } else if ( p.we_wordc < 1 ) {
-                sc_error("Failed expanding filepath");
             } else if ( modflg && ! force_rewrite ) {
                 sc_error("Changes were made since last save. Use '!' to force the load");
-            } else if ( ! file_exists(p.we_wordv[0])) {
-                sc_error("File %s does not exists!", p.we_wordv[0]);
             } else {
-                delete_structures();
-                create_structures();
-                readfile(p.we_wordv[0], 0);
-                ui_show_header();
+                #ifdef NO_WORDEXP
+                name_ok = 1;
+                #else
+                if ( p.we_wordc < 1 ) {
+                    sc_error("Failed expanding filepath");
+                } else if ( strlcpy(name, p.we_wordv[0], sizeof(name))
+                               >= sizeof(name) ) {
+                    sc_error("File path too long");
+                    wordfree(&p);
+                } else {
+                    name_ok = 1;
+                    wordfree(&p);
+                }
+                #endif
             }
-            wordfree(&p);
 
+            if ( name_ok ) {
+                if ( ! file_exists(name)) {
+                    sc_error("File %s does not exists!", name);
+                } else {
+                    delete_structures();
+                    create_structures();
+                    readfile(name, 0);
+                    ui_show_header();
+                }
+            }
         } else if ( ! wcsncmp(inputline, L"hiderow ", 8) ||
                     ! wcsncmp(inputline, L"showrow ", 8) ||
                     ! wcsncmp(inputline, L"showcol ", 8) ||
@@ -832,25 +854,40 @@ void do_commandmode(struct block * sb) {
 
         } else if ( ! wcsncmp(inputline, L"file ", 5) ) {
 
-            char cline [BUFFERSIZE];
+            char name [BUFFERSIZE];
+            int name_ok = 0;
+            #ifndef NO_WORDEXP
             wordexp_t p;
+            #endif
 
-            wcstombs(cline, inputline, BUFFERSIZE);
-            del_range_chars(cline, 0, 4);
-            wordexp(cline, &p, 0);
+            wcstombs(name, inputline, BUFFERSIZE);
+            del_range_chars(name, 0, 4);
 
+            #ifdef NO_WORDEXP
+            name_ok = 1;
+            #else
+            wordexp(name, &p, 0);
             if ( p.we_wordc < 1 ) {
                 sc_error("Failed to expand filename");
+            } else if ( strlcpy(name, p.we_wordv[0], sizeof(name))
+                            >= sizeof(name) ) {
+                sc_error("File path too long");
+                wordfree(&p);
             } else {
+                name_ok = 1;
+                wordfree(&p);
+            }
+            #endif
+
+            if (name_ok) {
                 #ifdef AUTOBACKUP
                 // check if backup of curfile exists.
                 // if it exists, remove it.
                 if (strlen(curfile) && backup_exists(curfile)) remove_backup(curfile);
                 #endif
-                strncpy(curfile, p.we_wordv[0], PATHLEN - 1);
+                strncpy(curfile, name, PATHLEN - 1);
                 sc_info("File name set to \"%s\"", curfile);
             }
-            wordfree(&p);
 
         } else if ( ! wcscmp(inputline, L"file") ) {
 
