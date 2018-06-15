@@ -191,6 +191,7 @@ int savefile() {
     int force_rewrite = 0;
     char name[BUFFERSIZE];
     #ifndef NO_WORDEXP
+    size_t len;
     wordexp_t p;
     #endif
 
@@ -209,11 +210,13 @@ int savefile() {
     if (p.we_wordc < 1) {
         sc_error("Failed expanding filepath");
         return -1;
-    } else if (strlcpy(name, p.we_wordv[0], sizeof(name)) >= sizeof(name)) {
+    }
+    if ((len = strlen(p.we_wordv[0])) >= sizeof(name)) {
         sc_error("File path too long");
         wordfree(&p);
         return -1;
     }
+    strncpy(name, p.we_wordv[0], len+1);
     wordfree(&p);
     #endif
 

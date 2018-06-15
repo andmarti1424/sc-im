@@ -412,6 +412,7 @@ void do_commandmode(struct block * sb) {
             int name_ok = 0;
             int force_rewrite = 0;
             #ifndef NO_WORDEXP
+            size_t len;
             wordexp_t p;
             #endif
 
@@ -433,11 +434,12 @@ void do_commandmode(struct block * sb) {
                 wordexp(name, &p, 0);
                 if ( p.we_wordc < 1 ) {
                     sc_error("Failed expanding filepath");
-                } else if ( strlcpy(name, p.we_wordv[0], sizeof(name))
-                               >= sizeof(name) ) {
+
+                } else if ( (len = strlen(p.we_wordv[0])) >= sizeof(name) ) {
                     sc_error("File path too long");
                     wordfree(&p);
                 } else {
+                    strncpy(name, p.we_wordv[0], len+1);
                     name_ok = 1;
                     wordfree(&p);
                 }
@@ -858,6 +860,7 @@ void do_commandmode(struct block * sb) {
             char name [BUFFERSIZE];
             int name_ok = 0;
             #ifndef NO_WORDEXP
+            size_t len;
             wordexp_t p;
             #endif
 
@@ -870,11 +873,11 @@ void do_commandmode(struct block * sb) {
             wordexp(name, &p, 0);
             if ( p.we_wordc < 1 ) {
                 sc_error("Failed to expand filename");
-            } else if ( strlcpy(name, p.we_wordv[0], sizeof(name))
-                            >= sizeof(name) ) {
+            } else if ( (len = strlen(p.we_wordv[0])) >= sizeof(name) ) {
                 sc_error("File path too long");
                 wordfree(&p);
             } else {
+                strncpy(name, p.we_wordv[0], len+1);
                 name_ok = 1;
                 wordfree(&p);
             }
