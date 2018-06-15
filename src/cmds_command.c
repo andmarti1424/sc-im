@@ -430,6 +430,7 @@ void do_commandmode(struct block * sb) {
                 #ifdef NO_WORDEXP
                 name_ok = 1;
                 #else
+                wordexp(name, &p, 0);
                 if ( p.we_wordc < 1 ) {
                     sc_error("Failed expanding filepath");
                 } else if ( strlcpy(name, p.we_wordv[0], sizeof(name))
