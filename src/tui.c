@@ -810,6 +810,8 @@ void ui_show_content(WINDOW * win, int mxrow, int mxcol) {
                 ui_set_ucolor(win, &ucolors[EXPRESSION]);
             } else if ((*p) && (*p)->label) {                               // string
                 ui_set_ucolor(win, &ucolors[STRG]);
+            } else if ((*p) && (*p)->flags & is_valid && (*p)->v < 0) {     // cell negative
+                ui_set_ucolor(win, &ucolors[CELL_NEGATIVE]);
             } else if ((*p) && (*p)->flags & is_valid && ! (*p)->format) {  // numeric value
                 ui_set_ucolor(win, &ucolors[NUMB]);
             } else if ((*p) && (*p)->format && (*p)->format[0] == 'd') {    // date format
