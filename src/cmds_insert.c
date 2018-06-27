@@ -167,7 +167,7 @@ void do_insertmode(struct block * sb) {
         if (insert_history->pos == 0)
             del_wchar(get_line_from_history(insert_history, insert_history->pos), real_inputline_pos); // Clean history
 #endif
-        //ui_show_header();
+        ui_show_header();
 
     } else if (sb->value == OKEY_TAB) {    // TAB
         if (inputline_pos && wcslen(inputline) >= inputline_pos) {
