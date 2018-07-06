@@ -87,8 +87,8 @@ ifneq (, $(shell which gnuplot))
   CFLAGS += -DGNUPLOT
 endif
 
-# dynamic linking (should not be used in FreeBSD
-ifneq ($(shell uname -s),FreeBSD)
+# dynamic linking (not available in BSD)
+ifneq ($(shell uname -s | grep -o BSD),BSD)
   LDLIBS += -ldl
 endif
 
@@ -133,6 +133,16 @@ else ifeq ($(shell uname -s),Darwin)
 
   # macOS' ncurses is built with wide-char support
   LDFLAGS += -lncurses
+else ifeq ($(shell uname -s),NetBSD)
+  # NetBSD without pkg-config
+
+  CFLAGS  += -I/usr/pkg/include
+  CFLAGS  += -I/usr/pkg/include/ncursesw
+
+  LDFLAGS += -L/usr/pkg/lib
+  LDFLAGS += -Wl,-R/usr/pkg/lib
+
+  LDLIBS += -lncursesw
 endif
 
 OBJS = $(patsubst %.c, %.o, $(wildcard *.c) $(wildcard utils/*.c)) gram.o
