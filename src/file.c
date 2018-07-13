@@ -444,8 +444,17 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
                 }
 
 
-                // write locked cells
-                // lock should be stored after any other command
+
+
+            }
+    }
+
+    // write locked cells
+    // lock should be stored after any other command
+    for (r = r0; r <= rn; r++) {
+        pp = ATBL(tbl, r, c0);
+        for (c = c0; c <= cn; c++, pp++)
+            if (*pp) {
                 // previous implementation
                 //if ((*pp)->flags & is_locked)
                 //    (void) fprintf(f, "lock %s%d\n", coltoa((*pp)->col), (*pp)->row);
@@ -460,8 +469,6 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
                     else
                         fprintf(f, "\n");
                 }
-
-
             }
     }
 
