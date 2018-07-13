@@ -87,16 +87,14 @@ ifneq (, $(shell which gnuplot))
   CFLAGS += -DGNUPLOT
 endif
 
-# dynamic linking (not available in FreeBSD and OpenBSD)
-ifneq ($(shell uname -s),FreeBSD)
-  ifneq ($(shell uname -s),OpenBSD)
-    LDLIBS += -ldl
-  endif
-endif
-
 # OpenBSD does not implement wordexp()
 ifeq ($(shell uname -s),OpenBSD)
   CFLAGS += -DNO_WORDEXP
+endif
+
+# dynamic linking (not available in BSD)
+ifneq ($(shell uname -s | grep -o BSD),BSD)
+  LDLIBS += -ldl
 endif
 
 ifneq (, $(shell which pkg-config))
@@ -140,6 +138,16 @@ else ifeq ($(shell uname -s),Darwin)
 
   # macOS' ncurses is built with wide-char support
   LDFLAGS += -lncurses
+else ifeq ($(shell uname -s),NetBSD)
+  # NetBSD without pkg-config
+
+  CFLAGS  += -I/usr/pkg/include
+  CFLAGS  += -I/usr/pkg/include/ncursesw
+
+  LDFLAGS += -L/usr/pkg/lib
+  LDFLAGS += -Wl,-R/usr/pkg/lib
+
+  LDLIBS += -lncursesw
 endif
 
 OBJS = $(patsubst %.c, %.o, $(wildcard *.c) $(wildcard utils/*.c)) gram.o

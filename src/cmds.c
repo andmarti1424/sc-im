@@ -722,6 +722,10 @@ void formatcol(int c) {
         case 'h':
         case OKEY_LEFT:
             for (i = curcol; i < curcol + arg; i++) {
+                if (fwidth[i] == 1) {
+                    sc_error("Cannot resize column any longer");
+                    return;
+                }
                 fwidth[i]--;
                 if (fwidth[i] < 1)
                     fwidth[i] = 1;

@@ -806,6 +806,8 @@ void ui_show_content(WINDOW * win, int mxrow, int mxcol) {
             #ifdef USECOLORS
             if ((*p) && (*p)->cellerror) {                                  // cellerror
                 ui_set_ucolor(win, &ucolors[CELL_ERROR]);
+            } else if ((*p) && (*p)->v < 0) {     // cell negative
+                ui_set_ucolor(win, &ucolors[CELL_NEGATIVE]);
             } else if ((*p) && (*p)->expr) {
                 ui_set_ucolor(win, &ucolors[EXPRESSION]);
             } else if ((*p) && (*p)->label) {                               // string
