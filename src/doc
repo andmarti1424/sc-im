@@ -1374,7 +1374,7 @@ Commands for handling cell content:
     You can pass files of any of the above formats to SC-IM binary.
     If you pass a .txt or .csv file to SC-IM, it is imported using a comma as
     the delimiter.
-    If you pass a .tsb or .tab file to SC-IM, it is imported using the tab
+    If you pass a .tsv or .tab file to SC-IM, it is imported using the tab
     character as the delimiter.
 
     Note: You can always override the delimiter used passing the --txtdelim
