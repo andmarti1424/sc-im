@@ -143,6 +143,8 @@ else ifeq ($(shell uname -s),NetBSD)
   LDFLAGS += -Wl,-R/usr/pkg/lib
 
   LDLIBS += -lncursesw
+else
+  LDFLAGS += -lncursesw
 endif
 
 OBJS = $(patsubst %.c, %.o, $(wildcard *.c) $(wildcard utils/*.c)) gram.o
