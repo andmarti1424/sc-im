@@ -53,7 +53,10 @@
 #include <unistd.h>
 #include <wchar.h>
 #include <sys/wait.h>
+
+#ifndef NO_WORDEXP
 #include <wordexp.h>
+#endif
 
 #include "conf.h"
 #include "maps.h"
@@ -187,8 +190,10 @@ int modcheck() {
 int savefile() {
     int force_rewrite = 0;
     char name[BUFFERSIZE];
+    #ifndef NO_WORDEXP
+    size_t len;
     wordexp_t p;
-
+    #endif
 
     if (! curfile[0] && wcslen(inputline) < 3) { // casos ":w" ":w!" ":x" ":x!"
         sc_error("There is no filename");
@@ -198,13 +203,25 @@ int savefile() {
     if (inputline[1] == L'!') force_rewrite = 1;
 
     wcstombs(name, inputline, BUFFERSIZE);
-
     del_range_chars(name, 0, 1 + force_rewrite);
-    wordexp(name, &p, 0);
 
-    if (! force_rewrite && p.we_wordv[0] && file_exists(p.we_wordv[0])) {
-        sc_error("File already exists. Use \"!\" to force rewrite.");
+    #ifndef NO_WORDEXP
+    wordexp(name, &p, 0);
+    if (p.we_wordc < 1) {
+        sc_error("Failed expanding filepath");
+        return -1;
+    }
+    if ((len = strlen(p.we_wordv[0])) >= sizeof(name)) {
+        sc_error("File path too long");
         wordfree(&p);
+        return -1;
+    }
+    memcpy(name, p.we_wordv[0], len+1);
+    wordfree(&p);
+    #endif
+
+    if (! force_rewrite && file_exists(name)) {
+        sc_error("File already exists. Use \"!\" to force rewrite.");
         return -1;
     }
 
@@ -216,18 +233,17 @@ int savefile() {
     // check if backup of newfilename exists.
     // if it exists and '!' is set, remove it.
     // if it exists and no '!' is set, return.
-    if (!strlen(curfile) && backup_exists(p.we_wordv[0])) {
+    if (!strlen(curfile) && backup_exists(name)) {
         if (!force_rewrite) {
-            sc_error("Backup file of %s exists. Use \"!\" to force the write process.", p.we_wordv[0]);
-            wordfree(&p);
+            sc_error("Backup file of %s exists. Use \"!\" to force the write process.", name);
             return -1;
-        } else remove_backup(p.we_wordv[0]);
+        } else remove_backup(name);
     }
     #endif
 
     // copy newfilename to curfile
     if (wcslen(inputline) > 2) {
-        strcpy(curfile, p.we_wordv[0]);
+        strcpy(curfile, name);
     }
 
     // add sc extension if not present
@@ -239,23 +255,19 @@ int savefile() {
     } else if (strlen(curfile) > 4 && (! strcasecmp( & curfile[strlen(curfile)-4], ".csv"))) {
         export_delim(curfile, ',', 0, 0, maxrow, maxcol, 1);
         modflg = 0;
-        wordfree(&p);
         return 0;
     // treat tab
     } else if (strlen(curfile) > 4 && (! strcasecmp( & curfile[strlen(curfile)-4], ".tsv") ||
         ! strcasecmp( & curfile[strlen(curfile)-4], ".tab"))){
         export_delim(curfile, '\t', 0, 0, maxrow, maxcol, 1);
         modflg = 0;
-        wordfree(&p);
         return 0;
     }
     // save in sc format
     if (writefile(curfile, 0, 0, maxrow, maxcol, 1) < 0) {
         sc_error("File could not be saved");
-        wordfree(&p);
         return -1;
     }
-    wordfree(&p);
     return 0;
 }
 
