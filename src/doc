@@ -1340,8 +1340,9 @@ Commands for handling cell content:
                                returns value
      sc.lsetnum (c, r, val)  - set numeric value to a cell c,t
      sc.lsetform (c, r, str) - set formula to a cell. Basically it does "let cell= str"
-     sc.setstr(c, r, str)    - set string to a cell
-     sc.query(str)           - query input from user, but first prints str. Use with care!!
+     sc.lsetstr(c, r, str)   - set string to a cell
+     sc.lgetstr(c, r, str)   - get string from a cell
+     sc.lquery(str)          - query input from user, but first prints str. Use with care!!
                                Dont use this function within triggers!!
                                returns string
      sc.sc(str)              - send str to sc-im parser

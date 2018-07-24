@@ -6,6 +6,8 @@
 
   on the trigger the ent structure is passed and whether the trigger was on Write or on Read. Write trigger, when it was written to selected cells,
   or Read from selected cells.
+
+  Trigger functions return non-zero return value on error.
 */
 
 #include <stdio.h>
@@ -16,7 +18,6 @@
 #include "utils/string.h"
 #include "range.h"
 #include "color.h"
-#include "screen.h"
 #include "undo.h"
 #include "conf.h"
 #include "cmds.h"

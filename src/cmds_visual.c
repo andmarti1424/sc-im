@@ -223,8 +223,11 @@ void do_visualmode(struct block * buf) {
                 while (row_hidden[-- r->brrow]);
                 currow = r->brrow;
             } else if (r->tlrow <= r->brrow && r->tlrow-1 >= 0) {
-                while (row_hidden[-- r->tlrow]);
-                currow = r->tlrow;
+                int newrow = r->tlrow;
+                while (newrow > 0 && row_hidden[-- newrow]);
+                if (!row_hidden[newrow]) {
+                    currow = r->tlrow = newrow;
+                }
             }
 
     // DOWN - ctl('f')
@@ -236,8 +239,8 @@ void do_visualmode(struct block * buf) {
         } else n = 1;
 
         for (i=0; i < n; i++)
-            if (r->orig_row <= r->tlrow && r->tlrow <= r->brrow && r->brrow+1 < maxrows) {
-                while (row_hidden[++ r->brrow]);
+            if (r->orig_row <= r->tlrow && r->tlrow <= r->brrow) {
+                while (r->brrow+1 < maxrows && row_hidden[++ r->brrow]);
                 currow = r->brrow;
             } else if (r->tlrow <  r->brrow) {
                 while (row_hidden[++ r->tlrow]);

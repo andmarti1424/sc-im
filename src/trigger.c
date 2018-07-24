@@ -232,9 +232,12 @@ void do_trigger( struct ent *p , int rw) {
  */
 
 void do_C_Trigger_cell(struct ent * p, int rw) {
+    int status;
     int (*function)(struct ent *, int );
 
     function = p->trigger->c_function;
-    printf ("%d\n", (*function)(p,rw ));
+    if ( (status = (*function)(p,rw ))) {
+        sc_info("Trigger reported error code: %d", status);
+    }
     return;
 }

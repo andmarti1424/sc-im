@@ -429,6 +429,10 @@ command:
                                   $2.left.vp->flags |= is_changed;
                                   modflg++;
 
+                                  // clearing the value counts as a write, so run write triggers
+                                  if (( $2.left.vp->trigger  ) && (($2.left.vp->trigger->flag & TRG_WRITE) == TRG_WRITE))
+                                      do_trigger($2.left.vp,TRG_WRITE);
+
                                   #ifdef UNDO
                                   copy_to_undostruct($2.left.vp->row, $2.left.vp->col, $2.left.vp->row, $2.left.vp->col, 'a');
                                   // here we save in undostruct, all the ents that depends on the deleted one (after change)

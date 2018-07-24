@@ -160,14 +160,23 @@ int growtbl(int rowcol, int toprow, int topcol) {
 #ifndef PSC
     /* set how much to grow */
     if ((rowcol == GROWROW) || (rowcol == GROWBOTH)) {
+        if ((maxcols == MAXROWS) || (toprow >= MAXROWS)) {
+            sc_error(nolonger);
+            return (FALSE);
+        }
+
         if (toprow > maxrows)
             newrows = GROWAMT + toprow;
         else
             newrows += GROWAMT;
+
+        /* If we're close but less than MAXROWS, clip to max value */
+        if ( newrows > MAXROWS )
+            newrows = MAXROWS;
     }
 #endif /* !PSC */
     if ((rowcol == GROWCOL) || (rowcol == GROWBOTH)) {
-        if ((rowcol == GROWCOL) && ((maxcols == ABSMAXCOLS) || (topcol >= ABSMAXCOLS))) {
+        if ((maxcols == ABSMAXCOLS) || (topcol >= ABSMAXCOLS)) {
             sc_error(nowider);
             return (FALSE);
         }
@@ -179,11 +188,6 @@ int growtbl(int rowcol, int toprow, int topcol) {
 
         if (newcols > ABSMAXCOLS)
             newcols = ABSMAXCOLS;
-    }
-
-    if (newrows > MAXROWS) { // 08/12/2014
-        sc_error(nolonger);
-        return (FALSE);
     }
 
 #ifndef PSC
