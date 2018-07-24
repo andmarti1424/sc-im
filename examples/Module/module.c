@@ -16,7 +16,6 @@
 #include "utils/string.h"
 #include "range.h"
 #include "color.h"
-#include "screen.h"
 #include "undo.h"
 #include "conf.h"
 #include "cmds.h"
