@@ -173,11 +173,10 @@ int growtbl(int rowcol, int toprow, int topcol) {
         /* If we're close but less than MAXROWS, clip to max value */
         if ( newrows > MAXROWS )
             newrows = MAXROWS;
-
     }
 #endif /* !PSC */
     if ((rowcol == GROWCOL) || (rowcol == GROWBOTH)) {
-        if ((rowcol == GROWCOL) && ((maxcols == ABSMAXCOLS) || (topcol >= ABSMAXCOLS))) {
+        if ((maxcols == ABSMAXCOLS) || (topcol >= ABSMAXCOLS)) {
             sc_error(nowider);
             return (FALSE);
         }
