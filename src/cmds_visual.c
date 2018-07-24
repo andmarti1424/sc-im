@@ -223,8 +223,11 @@ void do_visualmode(struct block * buf) {
                 while (row_hidden[-- r->brrow]);
                 currow = r->brrow;
             } else if (r->tlrow <= r->brrow && r->tlrow-1 >= 0) {
-                while (row_hidden[-- r->tlrow]);
-                currow = r->tlrow;
+                int newrow = r->tlrow;
+                while (newrow > 0 && row_hidden[-- newrow]);
+                if (!row_hidden[newrow]) {
+                    currow = r->tlrow = newrow;
+                }
             }
 
     // DOWN - ctl('f')
