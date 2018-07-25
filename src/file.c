@@ -633,18 +633,21 @@ sc_readfile_result readfile(char * fname, int eraseflg) {
         swprintf(msg, BUFFERSIZE,
         // TODO - Open backup readonly ??
         L"Backup of %s file exists. Do you want to (E)dit the file and remove the backup, (R)ecover the backup or (Q)uit: ", fname);
-        wchar_t t = ui_query_opt(msg, L"qer");
+        wchar_t t = ui_query_opt(msg, L"qerQER");
         switch (t) {
             case L'q':
+            case L'Q':
                 loading = 0;
                 extern int shall_quit;
                 shall_quit = 1;
                 return SC_READFILE_ERROR;
                 break;
             case L'e':
+            case L'E':
                 remove_backup(fname);
                 break;
             case L'r':
+            case L'R':
                 ;
                 int len = strlen(fname);
                 if (!len) return 0;
