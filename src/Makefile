@@ -75,11 +75,11 @@ endif
 # NOTE: libxlsxwriter is required for xlsx file export support
 ifneq (,$(wildcard /usr/include/xlsxwriter.h))
   CFLAGS += -DXLSX_EXPORT
-  LDLIBS += -lxlsxwriter
+  LDLIBS += -lxlsxwriter -lz
 endif
 ifneq (,$(wildcard /usr/local/include/xlsxwriter.h))
   CFLAGS += -DXLSX_EXPORT
-  LDLIBS += -lxlsxwriter
+  LDLIBS += -lxlsxwriter -lz
 endif
 
 # Check for gnuplot existance
