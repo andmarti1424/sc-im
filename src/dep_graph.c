@@ -135,8 +135,7 @@ vertexT * GraphAddVertex(graphADT graph , struct ent * ent) {
         graph->vertices = newVertex;
 
     // append in first position
-    //} else if (ent->row < graph->vertices->ent->row || (ent->row == graph->vertices->ent->row && ent->col < graph->vertices->ent->col)) {
-    } else {
+    } else if (ent->row < graph->vertices->ent->row || (ent->row == graph->vertices->ent->row && ent->col < graph->vertices->ent->col)) {
         newVertex->next = graph->vertices;
         graph->vertices = newVertex;
 
