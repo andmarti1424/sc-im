@@ -115,6 +115,11 @@ graphADT GraphCreate() {
  */
 
 vertexT * GraphAddVertex(graphADT graph , struct ent * ent) {
+    //if (ent == NULL) {
+    //    sc_debug("add vertex-  null ent");
+    //    return NULL;
+    //}
+    //sc_debug("will add vertex %d %d ", ent->row, ent->col);
     vertexT * newVertex = (vertexT *) malloc(sizeof(vertexT));
     newVertex->visited = 0;
     newVertex->ent = ent;
@@ -130,7 +135,8 @@ vertexT * GraphAddVertex(graphADT graph , struct ent * ent) {
         graph->vertices = newVertex;
 
     // append in first position
-    } else if (ent->row < graph->vertices->ent->row || (ent->row == graph->vertices->ent->row && ent->col < graph->vertices->ent->col)) {
+    //} else if (ent->row < graph->vertices->ent->row || (ent->row == graph->vertices->ent->row && ent->col < graph->vertices->ent->col)) {
+    } else {
         newVertex->next = graph->vertices;
         graph->vertices = newVertex;
 
@@ -145,7 +151,7 @@ vertexT * GraphAddVertex(graphADT graph , struct ent * ent) {
         temp_ant->next = newVertex;
         newVertex->next = tempNode;
     }
-    //scinfo("Added the vertex %d %d in the graph", row, col) ;
+    //sc_debug("Added vertex %d %d in the graph", ent->row, ent->col) ;
     return newVertex;
 }
 
@@ -166,12 +172,23 @@ vertexT * GraphAddVertex(graphADT graph , struct ent * ent) {
  */
 
 vertexT * getVertex(graphADT graph, struct ent * ent, int create) {
-   if (graph == NULL || ent == NULL) return NULL;
+   if (graph == NULL || ent == NULL || graph->vertices == NULL) return NULL;
    vertexT * temp = graph->vertices;
-   while (temp != NULL && temp->ent != NULL && (temp->ent->row < ent->row || (temp->ent->row == ent->row && temp->ent->col <= ent->col))) {
-       if (temp->ent->row == ent->row && temp->ent->col == ent->col) return temp;
+   //sc_debug("getVertex - looking for %d %d, create:%d", ent->row, ent->col, create);
+   //while (temp != NULL && temp->ent != NULL) // temp->ent should not be NULL
+   while (temp != NULL
+          //in case it was inserted ordered
+          && (temp->ent->row < ent->row || (temp->ent->row == ent->row && temp->ent->col <= ent->col)))
+                       {
+       //sc_debug("this vertex exists: %d %d", temp->ent->row, temp->ent->col);
+       if (temp->ent->row == ent->row && temp->ent->col == ent->col) {
+           //sc_debug("found vertex: %d %d", temp->ent->row, temp->ent->col);
+           return temp;
+       }
        temp = temp->next;
    }
+   //sc_debug("not found vertex: %d %d", ent->row, ent->col);
+
 
    /*
     * if we get to here, there is not vertex representing ent
@@ -202,7 +219,7 @@ void GraphAddEdge(vertexT * from, vertexT * to) {
    // do we have to check this here? or shall we handle it outside from the caller?
    markAllVerticesNotVisited(); // needed to check if edge already exists
    if (GraphIsReachable(from, to, 0)) {
-      //sc_info("Error while adding edge: the edge already exists!") ;
+      sc_info("Error while adding edge: the edge already exists!") ;
       return;
    }
 
@@ -324,6 +341,7 @@ void print_vertexs() {
 
 void destroy_vertex(struct ent * ent) {
    if (graph == NULL || ent == NULL) return;
+   //sc_debug("destroying vertex %d %d", ent->row, ent->col);
 
    vertexT * v_prev, * v_cur = graph->vertices;
 
@@ -490,8 +508,10 @@ void rebuild_graph() {
 
     for (i = 0; i <= maxrow; i++)
         for (j = 0; j <= maxcol; j++)
-        if ((p = *ATBL(tbl, i, j)) && p->expr)
+        if ((p = *ATBL(tbl, i, j)) && p->expr) {
             EvalJustOneVertex(p, i, j, 1);
+            //sc_debug("%d %d", i, j);
+        }
     return;
 }
 
@@ -513,48 +533,36 @@ int All_vertexs_of_edges_visited(struct edgeTag * e) {
 
 
 /**
- * \brief TODO Document EvalBottomUp
+ * \brief EvalBottomUp
  * \return none
  */
 void EvalBottomUp() {
-    /*
-    struct ent * p;
+    //print_vertexs();
     vertexT * temp = graph->vertices;
+    struct ent * p;
 
-    if (temp == NULL) return;
     markAllVerticesNotVisited();
-
-    int evaluated = 0;
+    int evalDone = 0;
 
     while (temp != NULL) {
-        if (! temp->visited && (p = *ATBL(tbl, temp->ent->row, temp->ent->col)) && ! p->expr) {
-            //FIXME: min y max no figuran en p->expr?
-            evaluated = 1;
-            temp->visited = 1;
-            //sc_debug("1valuating: %d %d",  temp->ent->row, temp->ent->col);
-        } else if (! temp->visited && (temp->edges == NULL || All_vertexs_of_edges_visited(temp->edges)) ) {
+        //sc_debug("analizo %d %d", temp->ent->row, temp->ent->col);
+        if ( !temp->visited && (temp->edges == NULL || All_vertexs_of_edges_visited(temp->edges))) {
+            //sc_debug("visito %d %d", temp->ent->row, temp->ent->col);
 
             if ((p = *ATBL(tbl, temp->ent->row, temp->ent->col)) && p->expr) {
-                //sc_debug("evaluating: %d %d",  temp->ent->row, temp->ent->col);
-                EvalJustOneVertex(p, temp->ent->row, temp->ent->col, 1);
-                evaluated = 1;
-                temp->visited = 1;
-            } else {
-                //sc_debug("problem");
+                EvalJustOneVertex(temp->ent, temp->ent->row, temp->ent->col, 0);
+                evalDone = 1;
             }
+            temp->visited = 1;
         }
-
         temp = temp->next;
-
-        //
-        //if (temp == NULL && evaluated) { //end of cycle. if evaluated a vertex in this loop, loop again
-        //    //sc_debug("recycle");
-        //    evaluated = 0;
-        //    temp = graph->vertices;
-        //} else if (temp == NULL) return;
+        if (temp == NULL) {
+            if (!evalDone) return;
+            evalDone = 0;
+            temp = graph->vertices;
+        }
     }
-    //sc_debug("fin eval");
-    */
+    return;
 }
 
 
@@ -563,8 +571,8 @@ void EvalBottomUp() {
  * \return none
  */
 void EvalAll() {
-    EvalAllVertexs();
-    //EvalBottomUp();
+    //EvalAllVertexs();
+    EvalBottomUp();
     return;
 }
 
@@ -582,9 +590,9 @@ void EvalAllVertexs() {
     vertexT * temp = graph->vertices;
     //int i = 0;
     while (temp != NULL) {
-        //sc_debug("%d %d %d", temp->ent->row, temp->ent->col, i++);
+        //sc_debug("Evaluating cell %d %d: %d", temp->ent->row, temp->ent->col, ++i);
         if ((p = *ATBL(tbl, temp->ent->row, temp->ent->col)) && p->expr)
-            EvalJustOneVertex(p, temp->ent->row, temp->ent->col, 1);
+            EvalJustOneVertex(p, temp->ent->row, temp->ent->col, 0);
         temp = temp->next;
     }
     //(void) signal(SIGFPE, exit_app);
@@ -600,8 +608,9 @@ void EvalAllVertexs() {
  *
  * \return none
  */
-
+// no se está construyendo bien el graph.. ver $HOME/a.sc
 void EvalJustOneVertex(register struct ent * p, int i, int j, int rebuild_graph) {
+
     gmyrow=i; gmycol=j;
 
     if (p->flags & is_strexpr) {

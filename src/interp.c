@@ -1053,6 +1053,7 @@ double eval(register struct ent * ent, register struct enode * e) {
             return (e->e.k);
     case O_VAR:    {
             struct ent * vp = e->e.v.vp;
+            //FIXME sc_debug("vp %d %d", vp->row, vp->col);
             if (vp && ent && vp->row == ent->row && vp->col == ent->col && !(vp->flags & is_deleted) ) {
                 sc_error("Circular reference in eval (cell %s%d)", coltoa(vp->col), vp->row);
                 //ERR propagates. comment to make it not to.
@@ -1065,7 +1066,8 @@ double eval(register struct ent * ent, register struct enode * e) {
 
             if (vp && vp->cellerror == CELLERROR && !(vp->flags & is_deleted)) {
                 // here we store the dependences in a graph
-                if (ent && vp) GraphAddEdge( getVertex(graph, lookat(ent->row, ent->col), 1), getVertex(graph, lookat(vp->row, vp->col), 1) ) ;
+                if (ent && vp) GraphAddEdge( getVertex(graph, lookat(ent->row, ent->col), 1),
+                                             getVertex(graph, lookat(vp->row, vp->col), 1) ) ;
 
                 //does not change reference to @err in expression
                 //uncomment to do so
@@ -1099,7 +1101,9 @@ double eval(register struct ent * ent, register struct enode * e) {
             }
 
             // here we store the dependences in a graph
-            if (ent && vp) GraphAddEdge( getVertex(graph, lookat(ent->row, ent->col), 1), getVertex(graph, lookat(vp->row, vp->col), 1) ) ;
+            if (ent && vp) {
+                GraphAddEdge( getVertex(graph, lookat(ent->row, ent->col), 1), getVertex(graph, lookat(vp->row, vp->col), 1) ) ;
+            }
 
             if (vp->cellerror) {
                 cellerror = CELLINVALID;
@@ -2452,7 +2456,13 @@ void let(struct ent * v, struct enode * e) {
         }
     }
     #endif
-    if (getVertex(graph, lookat(v->row, v->col), 0) != NULL) destroy_vertex(lookat(v->row, v->col));
+    //if (getVertex(graph, lookat(v->row, v->col), 0) != NULL) {
+        // FIXME aca no debe borrarse el vertex
+        //destroy_vertex(lookat(v->row, v->col));
+        // porque por ejemplo pudo haberse creado el vertex de F5 para
+        // let C1 = F5 + A0
+        // y en esta llamada a let estamos haciendo let F5 = F1 + F3
+    //}
 
 
     double val;
@@ -2562,7 +2572,8 @@ void slet(struct ent * v, struct enode * se, int flushdir) {
         copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'd');
     }
     #endif
-    if (getVertex(graph, lookat(v->row, v->col), 0) != NULL) destroy_vertex(lookat(v->row, v->col));
+    // No debe borrarse el vertex. Ver comentario en LET
+    //if (getVertex(graph, lookat(v->row, v->col), 0) != NULL) destroy_vertex(lookat(v->row, v->col));
 
 
     char * p;
