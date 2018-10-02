@@ -47,6 +47,7 @@
 typedef struct vertexTag {
     struct ent * ent; /**< Add comment here */
     int visited; /**< Add comment here */
+    int eval_visited; // just to not to collide with previous. its used in EvalBottomUp.
     struct edgeTag * edges; /**< Add comment here */
     struct edgeTag * back_edges; /**< Add comment here */
     struct vertexTag * next; /**< Add comment here */
@@ -76,7 +77,7 @@ void destroy_graph (graphADT graph);
 void destroy_vertex(struct ent * ent);
 void delete_reference(vertexT * v_cur, vertexT * vc, int back_reference);
 
-void markAllVerticesNotVisited();
+void markAllVerticesNotVisited(int eval_visited);
 void ents_that_depends_on (struct ent * ent);
 void ents_that_depends_on_range (int r1, int c1, int r2, int c2);
 int GraphIsReachable(vertexT * src, vertexT * dest, int back_dep);
