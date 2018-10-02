@@ -219,7 +219,7 @@ void GraphAddEdge(vertexT * from, vertexT * to) {
    // do we have to check this here? or shall we handle it outside from the caller?
    markAllVerticesNotVisited(0); // needed to check if edge already exists
    if (GraphIsReachable(from, to, 0)) {
-      sc_info("Error while adding edge: the edge already exists! - %d %d - %d %d", from->ent->row, from->ent->col, to->ent->row, to->ent->col) ;
+      //sc_info("Error while adding edge: the edge already exists! - %d %d - %d %d", from->ent->row, from->ent->col, to->ent->row, to->ent->col) ;
       return;
    }
 
@@ -282,7 +282,7 @@ void print_vertexs() {
    strcpy(msg, "Content of graph:\n");
 
    while (temp != NULL) {
-      sprintf(det + strlen(det), "vertex: %d %d v:%d\n", temp->ent->row, temp->ent->col, temp->visited);
+      sprintf(det + strlen(det), "vertex: %d %d vis:%d eval_vis:%d\n", temp->ent->row, temp->ent->col, temp->visited, temp->eval_visited);
       etemp = temp->edges;
 
       /* check not overflow msg size. if so, just realloc. */
@@ -364,21 +364,25 @@ void destroy_vertex(struct ent * ent) {
        v_prev->next = v_cur->next;
    }
 
+   /*FIXME
    // for each edge in back_edges, we look for the reference to the vertex we are deleting, and we erase it!
    edgeT * e2 = v_cur->back_edges;
    while (e2 != NULL) {
     //   sc_debug("back_edge: we follow %d %d", e2->connectsTo->ent->row, e2->connectsTo->ent->col);
        delete_reference(v_cur, e2->connectsTo, 0);
        e2 = e2->next;
-   }
+   }*/
 
    // for each edge in edges, we look for the reference to the vertex we are deleting, and we erase it!
    edgeT * e = v_cur->edges;
-   while (e != NULL) {
-    //   sc_debug("edge: we follow %d %d", e->connectsTo->ent->row, e->connectsTo->ent->col);
+   if (v_cur->back_edges == NULL)
+   while (e != NULL && v_cur->back_edges == NULL) {
+    // sc_debug("edge: we follow %d %d", e->connectsTo->ent->row, e->connectsTo->ent->col);
        delete_reference(v_cur, e->connectsTo, 1);
 
-       if (e->connectsTo->edges == NULL && e->connectsTo->back_edges == NULL && !e->connectsTo->ent->expr) destroy_vertex(e->connectsTo->ent);
+       // delete vertex only if it end up having no edges, no expression, no value, no label....
+       if (e->connectsTo->edges == NULL && e->connectsTo->back_edges == NULL && !e->connectsTo->ent->expr && !(e->connectsTo->ent->flags & is_valid) && ! e->connectsTo->ent->label)
+           destroy_vertex(e->connectsTo->ent);
 //     WARNING: an orphan vertex now represents an ent that has an enode thats
 //     need to be evaluated, but do not depend in another cell.
        e = e->next;
