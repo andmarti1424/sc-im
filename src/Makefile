@@ -1,5 +1,5 @@
 # Specify the name of the resulting executable file
-name = sc-im
+name = scim
 
 # The base directory where everything should be installed.
 prefix  = /usr/local

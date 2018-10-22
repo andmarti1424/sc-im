@@ -530,7 +530,7 @@ void rebuild_graph() {
 int All_vertexs_of_edges_visited(struct edgeTag * e, int eval_visited) {
     struct edgeTag * edges = e;
     while (edges != NULL) {
-        //sc_debug("1 r:%d c:%d visited:%d", edges->connectsTo->ent->row, edges->connectsTo->ent->col, edges->connectsTo->visited);
+        //sc_debug("1 r:%d c:%d visited:%d", edges->connectsTo->ent->row, edges->connectsTo->ent->col, edges->connectsTo->eval_visited);
         if (eval_visited && ! edges->connectsTo->eval_visited) return 0;
         else if (!eval_visited && ! edges->connectsTo->visited) return 0;
         edges = edges->next;
@@ -553,18 +553,19 @@ void EvalBottomUp() {
 
     while (temp != NULL) {
         //sc_debug("analizo %d %d", temp->ent->row, temp->ent->col);
-        if ( !temp->eval_visited && (temp->edges == NULL || All_vertexs_of_edges_visited(temp->edges, 1))) {
+        if ( ! temp->eval_visited && (temp->edges == NULL || All_vertexs_of_edges_visited(temp->edges, 1))) {
             //sc_debug("visito %d %d", temp->ent->row, temp->ent->col);
 
             if ((p = *ATBL(tbl, temp->ent->row, temp->ent->col)) && p->expr) {
                 EvalJustOneVertex(temp->ent, temp->ent->row, temp->ent->col, 0);
-                evalDone = 1;
             }
             temp->eval_visited = 1;
+            evalDone = 1;
         }
         temp = temp->next;
         if (temp == NULL) {
-            if (!evalDone) return;
+            //sc_debug("temp is null. evaldone: %d", evalDone);
+            if (! evalDone) return;
             evalDone = 0;
             temp = graph->vertices;
         }
