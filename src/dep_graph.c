@@ -172,7 +172,7 @@ vertexT * GraphAddVertex(graphADT graph , struct ent * ent) {
  */
 
 vertexT * getVertex(graphADT graph, struct ent * ent, int create) {
-   if (graph == NULL || ent == NULL || graph->vertices == NULL) return NULL;
+   if (graph == NULL || ent == NULL || (graph->vertices == NULL && !create)) return NULL;
    vertexT * temp = graph->vertices;
    //sc_debug("getVertex - looking for %d %d, create:%d", ent->row, ent->col, create);
    //while (temp != NULL && temp->ent != NULL) // temp->ent should not be NULL
@@ -514,9 +514,13 @@ void rebuild_graph() {
 
     for (i = 0; i <= maxrow; i++)
         for (j = 0; j <= maxcol; j++)
+
         if ((p = *ATBL(tbl, i, j)) && p->expr) {
             EvalJustOneVertex(p, i, j, 1);
-            //sc_debug("%d %d", i, j);
+            //sc_debug("Expr %d %d", i, j);
+        } else if ((p = *ATBL(tbl, i, j)) && p->flags & is_valid && getVertex(graph, p, 0) == NULL) {
+            GraphAddVertex(graph, p);
+            //sc_debug("Val %d %d", i, j);
         }
     return;
 }
@@ -541,6 +545,8 @@ int All_vertexs_of_edges_visited(struct edgeTag * e, int eval_visited) {
 
 /**
  * \brief EvalBottomUp
+ * New Eval implementation. It operates bottom up.
+ * Replaces EvalAllVertexs()
  * \return none
  */
 void EvalBottomUp() {
@@ -616,7 +622,6 @@ void EvalAllVertexs() {
  *
  * \return none
  */
-// no se está construyendo bien el graph.. ver $HOME/a.sc
 void EvalJustOneVertex(register struct ent * p, int i, int j, int rebuild_graph) {
 
     gmyrow=i; gmycol=j;
