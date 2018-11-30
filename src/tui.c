@@ -1050,7 +1050,7 @@ void ui_show_celldetails() {
         linelim = 0;
         editexp(currow, curcol);  /* set line to expr */
         linelim = -1;
-        sprintf(head, "[%s] ", line);
+        sprintf(head, "[%.*s] ", FBUFLEN-4, line);
         mvwprintw(input_win, 0, inputline_pos, "%s", head);
         inputline_pos += strlen(head);
     }

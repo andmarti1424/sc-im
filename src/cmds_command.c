@@ -990,6 +990,7 @@ void do_commandmode(struct block * sb) {
 
         chg_mode('.');
         inputline[0]=L'\0';
+        inputline_pos = 0; //ADDED 08/10/2018
         set_comp(0); // unmark tab completion
         ui_update(TRUE);
     }

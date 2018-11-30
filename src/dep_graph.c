@@ -172,7 +172,7 @@ vertexT * GraphAddVertex(graphADT graph , struct ent * ent) {
  */
 
 vertexT * getVertex(graphADT graph, struct ent * ent, int create) {
-   if (graph == NULL || ent == NULL || graph->vertices == NULL) return NULL;
+   if (graph == NULL || ent == NULL || (graph->vertices == NULL && !create)) return NULL;
    vertexT * temp = graph->vertices;
    //sc_debug("getVertex - looking for %d %d, create:%d", ent->row, ent->col, create);
    //while (temp != NULL && temp->ent != NULL) // temp->ent should not be NULL
@@ -514,9 +514,13 @@ void rebuild_graph() {
 
     for (i = 0; i <= maxrow; i++)
         for (j = 0; j <= maxcol; j++)
+
         if ((p = *ATBL(tbl, i, j)) && p->expr) {
             EvalJustOneVertex(p, i, j, 1);
-            //sc_debug("%d %d", i, j);
+            //sc_debug("Expr %d %d", i, j);
+        } else if ((p = *ATBL(tbl, i, j)) && p->flags & is_valid && getVertex(graph, p, 0) == NULL) {
+            GraphAddVertex(graph, p);
+            //sc_debug("Val %d %d", i, j);
         }
     return;
 }
@@ -530,7 +534,7 @@ void rebuild_graph() {
 int All_vertexs_of_edges_visited(struct edgeTag * e, int eval_visited) {
     struct edgeTag * edges = e;
     while (edges != NULL) {
-        //sc_debug("1 r:%d c:%d visited:%d", edges->connectsTo->ent->row, edges->connectsTo->ent->col, edges->connectsTo->visited);
+        //sc_debug("1 r:%d c:%d visited:%d", edges->connectsTo->ent->row, edges->connectsTo->ent->col, edges->connectsTo->eval_visited);
         if (eval_visited && ! edges->connectsTo->eval_visited) return 0;
         else if (!eval_visited && ! edges->connectsTo->visited) return 0;
         edges = edges->next;
@@ -541,6 +545,8 @@ int All_vertexs_of_edges_visited(struct edgeTag * e, int eval_visited) {
 
 /**
  * \brief EvalBottomUp
+ * New Eval implementation. It operates bottom up.
+ * Replaces EvalAllVertexs()
  * \return none
  */
 void EvalBottomUp() {
@@ -553,18 +559,19 @@ void EvalBottomUp() {
 
     while (temp != NULL) {
         //sc_debug("analizo %d %d", temp->ent->row, temp->ent->col);
-        if ( !temp->eval_visited && (temp->edges == NULL || All_vertexs_of_edges_visited(temp->edges, 1))) {
+        if ( ! temp->eval_visited && (temp->edges == NULL || All_vertexs_of_edges_visited(temp->edges, 1))) {
             //sc_debug("visito %d %d", temp->ent->row, temp->ent->col);
 
             if ((p = *ATBL(tbl, temp->ent->row, temp->ent->col)) && p->expr) {
                 EvalJustOneVertex(temp->ent, temp->ent->row, temp->ent->col, 0);
-                evalDone = 1;
             }
             temp->eval_visited = 1;
+            evalDone = 1;
         }
         temp = temp->next;
         if (temp == NULL) {
-            if (!evalDone) return;
+            //sc_debug("temp is null. evaldone: %d", evalDone);
+            if (! evalDone) return;
             evalDone = 0;
             temp = graph->vertices;
         }
@@ -615,7 +622,6 @@ void EvalAllVertexs() {
  *
  * \return none
  */
-// no se está construyendo bien el graph.. ver $HOME/a.sc
 void EvalJustOneVertex(register struct ent * p, int i, int j, int rebuild_graph) {
 
     gmyrow=i; gmycol=j;

@@ -392,7 +392,7 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
                     decompile(e, 0);
                     uppercase(line);
                     del_char(line, 0);
-                    sprintf(strcolor, "fg=%s", &line[0]);
+                    sprintf(strcolor, "fg=%.*s", BUFFERSIZE-4, &line[0]);
                     free(e);
                     linelim=0;
                     e = new((*pp)->ucolor->bg, (struct enode *)0, (struct enode *)0);
@@ -1410,7 +1410,7 @@ void * do_autobackup() {
     strcpy(name, curfile);
     add_char(name, '.', pos+1);
     sprintf(name + strlen(name), ".bak");
-    sprintf(namenew, "%s.new", name);
+    sprintf(namenew, "%.*s.new", PATHLEN-5, name);
     //if (atoi(get_conf_value("debug"))) sc_info("doing autobackup of file:%s", name);
 
     // create new version
