@@ -510,10 +510,10 @@ void erase_area(int sr, int sc, int er, int ec, int ignorelock, int mark_as_dele
         if (*pp && (!((*pp)->flags & is_locked) || ignorelock)) {
 
             /* delete vertex in graph
-               unless vertex is referenced by other */
+               only if this vertex is not referenced by other */
             vertexT * v = getVertex(graph, *pp, 0);
-            //if (v != NULL && v->back_edges == NULL )
-            if (v != NULL ) destroy_vertex(*pp);
+            if (v != NULL && v->back_edges == NULL )
+                destroy_vertex(*pp);
 
             if (mark_as_deleted) {
                 mark_ent_as_deleted(*pp, TRUE);
