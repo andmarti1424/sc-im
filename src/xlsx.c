@@ -412,9 +412,15 @@ int open_xlsx(char * fname, char * encoding) {
     }
     zip_fclose(zf);
 
-
-    // open xl/worksheets/sheet1.xml
-    name = "xl/worksheets/sheet1.xml";
+    // open specified sheet
+    if (get_conf_value("sheet") != NULL){
+        char namebuf[256];
+        snprintf(namebuf,256,"xl/worksheets/%s.xml",get_conf_value("sheet"));
+        name = namebuf;
+    } else {
+        // open sheet1 if none specified
+        name = "xl/worksheets/sheet1.xml";
+    }
     zf = zip_fopen(za, name, ZIP_FL_UNCHANGED);
     if ( ! zf ) {
         sc_error("cannot open %s file.", name);
