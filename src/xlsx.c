@@ -412,10 +412,14 @@ int open_xlsx(char * fname, char * encoding) {
     }
     zip_fclose(zf);
 
-    // open specified sheet
+    // open specified sheet. Add "sheet" to name if given just a number.
     if (get_conf_value("sheet") != NULL){
         char namebuf[256];
-        snprintf(namebuf,256,"xl/worksheets/%s.xml",get_conf_value("sheet"));
+        name  = get_conf_value("sheet");
+        int i = strlen(name)-1;
+        while( --i >= 0 && isdigit(name[i]) > 0 );
+        name = i < 0 ? "sheet":"";
+        snprintf(namebuf,256,"xl/worksheets/%s%s.xml",name,get_conf_value("sheet"));
         name = namebuf;
     } else {
         // open sheet1 if none specified
