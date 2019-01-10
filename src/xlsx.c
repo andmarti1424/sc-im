@@ -364,7 +364,7 @@ void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) 
 int open_xlsx(char * fname, char * encoding) {
     struct zip * za;
     struct zip_file * zf;
-    struct zip_stat sb, sb_strings, sb_styles;
+    struct zip_stat sb, sb_strings, sb_styles, sh_strings;
     char buf[100];
     int err;
     int len;
@@ -412,19 +412,58 @@ int open_xlsx(char * fname, char * encoding) {
     }
     zip_fclose(zf);
 
-    // open specified sheet. Add "sheet" to name if given just a number.
+
+    // find specified sheet
     if (get_conf_value("sheet") != NULL){
+
+        //open xml file with sheet names
+        name = "xl/workbook.xml";
         char namebuf[256];
-        name  = get_conf_value("sheet");
-        int i = strlen(name)-1;
-        while( --i >= 0 && isdigit(name[i]) > 0 );
-        name = i < 0 ? "sheet":"";
-        snprintf(namebuf,256,"xl/worksheets/%s%s.xml",name,get_conf_value("sheet"));
-        name = namebuf;
+        int found = 0;
+        zf = zip_fopen(za, name, ZIP_FL_UNCHANGED);
+
+        if ( zf ) {
+            zip_stat(za, name, ZIP_FL_UNCHANGED, &sh_strings);
+            char * wb_strings = (char *) malloc(sh_strings.size);
+            len = zip_fread(zf, wb_strings, sh_strings.size);
+            if (len < 0) {
+                sc_error("cannot read file %s.", name);
+                free(wb_strings);
+                return -1;
+            }
+            zip_fclose(zf);
+
+            // search workbook xml for sheet with the right name
+            xmlDoc * sheet_search = xmlReadMemory(wb_strings, sh_strings.size, "noname.xml", NULL, XML_PARSE_NOBLANKS);
+            xmlNode * cur_node = xmlDocGetRootElement(sheet_search)->xmlChildrenNode;
+            while (cur_node != NULL && strcmp((char *) cur_node->name,"sheets"))
+                cur_node = cur_node->next;
+            cur_node = cur_node->xmlChildrenNode;
+            while (cur_node != NULL && cur_node->next != NULL && strcmp((char *) xmlGetProp(cur_node, (xmlChar *) "name"), get_conf_value("sheet")))
+                cur_node = cur_node->next;
+            if ( ! strcmp((char *)xmlGetProp(cur_node, (xmlChar *) "name"),get_conf_value("sheet")) ){
+                snprintf(namebuf,256,"xl/worksheets/sheet%s.xml",xmlGetProp(cur_node, (xmlChar *) "sheetId"));
+                name = namebuf;
+                found = 1;
+            }
+            xmlFreeDoc(sheet_search);
+            if (wb_strings != NULL) free(wb_strings);
+        }
+
+        if ( ! found ){
+            // use sheet number if sheet name does not match
+            name  = get_conf_value("sheet");
+            int i = strlen(name)-1;
+            while( --i >= 0 && isdigit(name[i]) > 0 );
+            name = i < 0 ? "sheet":"";
+            snprintf(namebuf,256,"xl/worksheets/%s%s.xml",name,get_conf_value("sheet"));
+            name = namebuf;
+        }
     } else {
-        // open sheet1 if none specified
+        // select sheet1 if none specified
         name = "xl/worksheets/sheet1.xml";
     }
+    //open sheet
     zf = zip_fopen(za, name, ZIP_FL_UNCHANGED);
     if ( ! zf ) {
         sc_error("cannot open %s file.", name);
