@@ -418,7 +418,7 @@ int open_xlsx(char * fname, char * encoding) {
 
         //open xml file with sheet names
         name = "xl/workbook.xml";
-        char namebuf[256];
+        char namebuf[30];
         int found = 0;
         zf = zip_fopen(za, name, ZIP_FL_UNCHANGED);
 
@@ -442,7 +442,7 @@ int open_xlsx(char * fname, char * encoding) {
             while (cur_node != NULL && cur_node->next != NULL && strcmp((char *) xmlGetProp(cur_node, (xmlChar *) "name"), get_conf_value("sheet")))
                 cur_node = cur_node->next;
             if ( ! strcmp((char *)xmlGetProp(cur_node, (xmlChar *) "name"),get_conf_value("sheet")) ){
-                snprintf(namebuf,256,"xl/worksheets/sheet%s.xml",xmlGetProp(cur_node, (xmlChar *) "sheetId"));
+                snprintf(namebuf,30,"xl/worksheets/sheet%s.xml",xmlGetProp(cur_node, (xmlChar *) "sheetId"));
                 name = namebuf;
                 found = 1;
             }
@@ -456,7 +456,7 @@ int open_xlsx(char * fname, char * encoding) {
             int i = strlen(name)-1;
             while( --i >= 0 && isdigit(name[i]) > 0 );
             name = i < 0 ? "sheet":"";
-            snprintf(namebuf,256,"xl/worksheets/%s%s.xml",name,get_conf_value("sheet"));
+            snprintf(namebuf,30,"xl/worksheets/%s%s.xml",name,get_conf_value("sheet"));
             name = namebuf;
         }
     } else {
