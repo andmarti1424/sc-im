@@ -453,7 +453,7 @@ int open_xlsx(char * fname, char * encoding) {
         if ( ! found ){
             // use sheet number if sheet name does not match
             name  = get_conf_value("sheet");
-            int i = strlen(name)-1;
+            int i = strlen(name);
             while( --i >= 0 && isdigit(name[i]) > 0 );
             name = i < 0 ? "sheet":"";
             snprintf(namebuf,30,"xl/worksheets/%s%s.xml",name,get_conf_value("sheet"));
