@@ -2169,6 +2169,12 @@ int fcopy() {
     }
 
     if (p == -1) { // no range selected
+        // fail if the cursor is on the first column
+        if (curcol == 0) {
+            sc_error("Can't fcopy with no arguments while on column 'A'");
+            return -1;
+        }
+
         ri = currow;
         ci = curcol;
         cf = curcol;
