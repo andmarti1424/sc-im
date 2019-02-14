@@ -814,6 +814,15 @@ Commands for handling cell content:
                 If a range is selected, the formula in the top left cell will
                 be copied down to the end of the range.
 
+    :fcopy {action}
+                Copy the formulas of multiple selected cells into a direction.
+
+                Use "c" or "columns" to copy every formula in the first
+                selected row down its column, "r" or "rows" to copy every
+                formula in the first selected column to the right in its row
+                or "cells" to copy the formula of the first selected cell into
+                all cells of the selected range.
+
     :plot {type}
                 Plot a graphic using a selected range.
                 Right now, only 'line', 'scatter', 'bar' and 'pie' types are allowed.

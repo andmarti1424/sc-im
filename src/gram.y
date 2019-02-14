@@ -662,7 +662,8 @@ command:
                                          redefine_color($2, $3, $4, $5);
                                          scxfree($2); }
 
-    |    S_FCOPY                   { fcopy(); }
+    |    S_FCOPY                   { fcopy(""); }
+    |    S_FCOPY strarg            { fcopy($2); }
     |    S_FSUM                    { fsum();  }
     |    S_PAD NUMBER COL ':' COL  { pad($2, 0, $3, maxrow, $5); }
     |    S_PAD NUMBER COL          { pad($2, 0, $3, maxrow, $3); }

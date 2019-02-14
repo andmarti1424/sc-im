@@ -2150,23 +2150,18 @@ int fsum() {
 /**
  * \brief fcopy special command
  *
+ * \param[in] action
+ *
  * \return -1 on error; 0 otherwise
  */
 
-int fcopy() {
-    int r, ri, rf, ci, cf;
+int fcopy(char * action) {
+    int r, ri, rf, c, ci, cf;
     struct ent * pdest;
     struct ent * pact;
     int p = is_range_selected();
     struct srange * sr = NULL;
     if (p != -1) sr = get_range_by_pos(p);
-
-    if ( ( p == -1 && (*ATBL(tbl, currow, curcol) == NULL || ! (*ATBL(tbl, currow, curcol))->expr))
-            ||   ( p != -1 && (*ATBL(tbl, sr->tlrow, sr->tlcol) == NULL || ! (*ATBL(tbl, sr->tlrow, sr->tlcol))->expr) )
-       ) {
-        sc_error("Formula not found. Nothing changed");
-        return -1;
-    }
 
     if (p == -1) { // no range selected
         ri = currow;
@@ -2177,9 +2172,36 @@ int fcopy() {
     } else { // range is selected
         ri = sr->tlrow;
         ci = sr->tlcol;
-        cf = sr->tlcol;
+        cf = sr->brcol;
         rf = sr->brrow;
     }
+
+    // check if all cells that will be copied to somewhere have a formula in them
+    if (! strcmp(action, "") || ! strcmp(action, "cells")) {
+        if (!  *ATBL(tbl, ri, ci)       ) goto formula_not_found;
+        if (! (*ATBL(tbl, ri, ci))->expr) goto formula_not_found;
+    } else if (! strcmp(action, "c") || ! strcmp(action, "columns")) {
+        for (c=ci; c<=cf; c++) {
+            if (!  *ATBL(tbl, ri, c)       ) goto formula_not_found;
+            if (! (*ATBL(tbl, ri, c))->expr) goto formula_not_found;
+        }
+    } else if (! strcmp(action, "r") || ! strcmp(action, "rows")) {
+        for (r=ri; r<=rf; r++) {
+            if (!  *ATBL(tbl, r, ci)       ) goto formula_not_found;
+            if (! (*ATBL(tbl, r, ci))->expr) goto formula_not_found;
+        }
+    } else {
+        sc_error("Invalid parameter");
+    }
+
+    goto all_formulas_found;
+
+    formula_not_found:
+    sc_error("At least 1 formula not found. Nothing changed");
+    return -1;
+
+    all_formulas_found:
+
 
     if (any_locked_cells(ri, ci, rf, cf)) {
         swprintf(interp_line, BUFFERSIZE, L"");
@@ -2191,11 +2213,40 @@ int fcopy() {
     copy_to_undostruct(ri, ci, rf, cf, 'd');
 #endif
 
-    //do
-    pact = *ATBL(tbl, ri, ci);
-    for (r=ri+1; r<=rf; r++) {
-        pdest = lookat(r, ci);
-        copyent(pdest, pact, r - ri, 0, 0, 0, maxrows, maxcols, 'c');
+    if (! strcmp(action, "")) {
+        // copy first column down (old behavior), for backwards compatibility
+        pact = *ATBL(tbl, ri, ci);
+        for (r=ri+1; r<=rf; r++) {
+            pdest = lookat(r, ci);
+            copyent(pdest, pact, r - ri, 0, 0, 0, maxrows, maxcols, 'c');
+        }
+    } else if (! strcmp(action, "c") || ! strcmp(action, "columns")) {
+        // copy all selected columns down
+        for (c=ci; c<=cf; c++) {
+            pact = *ATBL(tbl, ri, c);
+            for (r=ri+1; r<=rf; r++) {
+                pdest = lookat(r, c);
+                copyent(pdest, pact, r - ri, 0, 0, 0, maxrows, maxcols, 'c');
+            }
+        }
+    } else if (! strcmp(action, "r") || ! strcmp(action, "rows")) {
+        // copy all selected rows right
+        for (r=ri; r<=rf; r++) {
+            pact = *ATBL(tbl, r, ci);
+            for (c=ci+1; c<=cf; c++) {
+                pdest = lookat(r, c);
+                copyent(pdest, pact, 0, c - ci, 0, 0, maxrows, maxcols, 'c');
+            }
+        }
+    } else if (! strcmp(action, "cells")) {
+        // copy selected cell down and right
+        pact = *ATBL(tbl, ri, ci);
+        for (r=ri; r<=rf; r++) {
+            for(c=(r==ri?ci+1:ci); c<=cf; c++) {
+                pdest = lookat(r, c);
+                copyent(pdest, pact, r - ri, c - ci, 0, 0, maxrows, maxcols, 'c');
+            }
+        }
     }
 
 #ifdef UNDO
