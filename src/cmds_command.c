@@ -905,7 +905,16 @@ void do_commandmode(struct block * sb) {
             if (savefile() == 0) shall_quit = 1;
 
         } else if ( ! wcscmp(inputline, L"fcopy") ) {
-            fcopy();
+            fcopy("");
+
+        } else if ( ! wcsncmp(inputline, L"fcopy ", 6)) {
+
+            wchar_t line [BUFFERSIZE];
+            wcscpy(line, inputline);
+            del_range_wchars(line, 0, 5);
+            char action[BUFFERSIZE];
+            wcstombs(action, line, BUFFERSIZE);
+            fcopy(action);
 
         } else if ( ! wcscmp(inputline, L"fsum") ) {
             fsum();
