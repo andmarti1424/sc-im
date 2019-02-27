@@ -75,6 +75,7 @@
 #include "xlsx.h"
 #include "xls.h"
 #include "tui.h"
+#include "trigger.h"
 
 extern struct ent * freeents;
 extern int yyparse(void);
@@ -323,7 +324,7 @@ int writefile(char * fname, int r0, int c0, int rn, int cn, int verbose) {
  * \param[in] c0
  * \param[in] rn
  * \param[in] cn
- * 
+ *
  * \return none
  */
 
@@ -506,7 +507,7 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
  * \brief TODO Document write_franges()
  *
  * \param[in] f file pointer
- * 
+ *
  * \return none
  */
 
@@ -543,7 +544,7 @@ void write_marks(register FILE *f) {
         m = get_mark((char) i);
 
         // m->rng should never be NULL if both m->col and m->row are -1 !!
-        if ( m->row == -1 && m->col == -1) { // && m->rng != NULL ) {  
+        if ( m->row == -1 && m->col == -1) { // && m->rng != NULL ) {
             fprintf(f, "mark %c %s%d ", i, coltoa(m->rng->tlcol), m->rng->tlrow);
             fprintf(f, "%s%d\n", coltoa(m->rng->brcol), m->rng->brrow);
         } else if ( m->row != 0 && m->row != 0) { // && m->rng == NULL) {
@@ -603,6 +604,18 @@ void write_cells(register FILE *f, int r0, int c0, int rn, int cn, int dr, int d
                 if ((*pp)->format) {
                     editfmt(r, c);
                     (void) fprintf(f, "%s\n",line);
+                }
+                if ((*pp)->trigger != NULL) {
+                    char* mode;
+                    char* type;
+                    struct trigger* t;
+                    t = (*pp)->trigger;
+                    if ((t->flag & (TRG_READ | TRG_WRITE)) == (TRG_READ | TRG_WRITE)) mode = "RW";
+                    if ((t->flag & TRG_WRITE) == TRG_WRITE) mode = "W";
+                    if ((t->flag & TRG_READ) == TRG_READ) mode = "R";
+                    if ((t->flag & TRG_LUA) == TRG_LUA) type = "LUA";
+                    else type = "C";
+                    (void) fprintf(f, "trigger %s%d \"mode=%s type=%s file=%s function=%s\"\n", coltoa(c), r, mode, type, t->file, t->function);
                 }
             }
     }
@@ -1144,7 +1157,7 @@ void do_export(int r0, int c0, int rn, int cn) {
  * \param[in] c0
  * \param[in] rn
  * \param[in] cn
- * 
+ *
  * \return none
  */
 
@@ -1328,9 +1341,9 @@ void unspecial(FILE * f, char * str, int delim) {
 }
 
 /**
- * \brief Check the mas length of lines in a file
+ * \brief Check the max length of lines in a file
  *
- * \details Check masimum length of lines in a file. Note: 
+ * \details Check maximum length of lines in a file. Note:
  * FILE * f shall be opened.
  *
  * \param[in] f file pointer
