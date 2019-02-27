@@ -606,9 +606,9 @@ void write_cells(register FILE *f, int r0, int c0, int rn, int cn, int dr, int d
                     (void) fprintf(f, "%s\n",line);
                 }
                 if ((*pp)->trigger != NULL) {
+                    struct trigger* t;
                     char* mode;
                     char* type;
-                    struct trigger* t;
                     t = (*pp)->trigger;
                     if ((t->flag & (TRG_READ | TRG_WRITE)) == (TRG_READ | TRG_WRITE)) mode = "RW";
                     if ((t->flag & TRG_WRITE) == TRG_WRITE) mode = "W";
