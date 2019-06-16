@@ -775,6 +775,9 @@ void show_version_and_quit() {
 #ifdef DFLT_PAGER
     sc_info("-DDFLT_PAGER=\"%s\"", DFLT_PAGER);
 #endif
+#ifdef HISTORY_FOLDER
+    sc_info("-DHISTORY_FOLDER=\"%s\"", HISTORY_FOLDER);
+#endif
 #ifdef HISTORY_FILE
     sc_info("-DHISTORY_FILE=\"%s\"", HISTORY_FILE);
 #endif
