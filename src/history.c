@@ -157,7 +157,7 @@ void load_history(struct history * h, wchar_t mode) {
     FILE * f;
 
     if ((home = getenv("HOME"))) {
-        sprintf(infofile, "%s/%s/%s", home,HISTORY_FOLDER,HISTORY_FILE);
+        sprintf(infofile, "%s/%s/%s", home,HISTORY_DIR,HISTORY_FILE);
         if ((c = open(infofile, O_RDONLY)) > -1) {
             close(c);
             f = fopen(infofile, "r");
@@ -194,10 +194,10 @@ int save_history(struct history * h, char * mode) {
     int i;
     struct hlist * nl = h->list;
     if ((home = getenv("HOME"))) {
-        char history_folder[PATHLEN];
-        sprintf(history_folder, "%s/%s", home,HISTORY_FOLDER);
-        mkdir(history_folder,0777);
-        sprintf(infofile, "%s/%s/%s", home,HISTORY_FOLDER,HISTORY_FILE);
+        char history_dir[PATHLEN];
+        sprintf(history_dir, "%s/%s", home,HISTORY_DIR);
+        mkdir(history_dir,0777);
+        sprintf(infofile, "%s/%s/%s", home,HISTORY_DIR,HISTORY_FILE);
         f = fopen(infofile, mode);
         if (f == NULL) return 0;
         // Go to the end

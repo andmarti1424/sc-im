@@ -136,10 +136,10 @@ void loadrc(void) {
     char * home;
 
     if ((home = getenv("HOME"))) {
-        char config_folder[PATHLEN];
-        sprintf(config_folder, "%s/%s", home,CONFIG_FOLDER);
-        mkdir(config_folder,0777);
-        sprintf(rcpath, "%s/%s/%s", home,CONFIG_FOLDER,CONFIG_FILE);
+        char config_dir[PATHLEN];
+        sprintf(config_dir, "%s/%s", home,CONFIG_DIR);
+        mkdir(config_dir,0777);
+        sprintf(rcpath, "%s/%s/%s", home,CONFIG_DIR,CONFIG_FILE);
         (void) readfile(rcpath, 0);
     }
     *curfile = '\0';
