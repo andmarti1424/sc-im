@@ -775,6 +775,12 @@ void show_version_and_quit() {
 #ifdef DFLT_PAGER
     sc_info("-DDFLT_PAGER=\"%s\"", DFLT_PAGER);
 #endif
+#ifdef CONFIG_DIR
+    sc_info("-DCONFIG_DIR=\"%s\"", CONFIG_DIR);
+#endif
+#ifdef CONFIG_FILE
+    sc_info("-DCONFIG_FILE=\"%s\"", CONFIG_FILE);
+#endif
 #ifdef HISTORY_DIR
     sc_info("-DHISTORY_DIR=\"%s\"", HISTORY_DIR);
 #endif
