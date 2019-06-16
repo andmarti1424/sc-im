@@ -11,10 +11,8 @@ LIBDIR  = $(prefix)/share/doc/$(name)
 # This is where the man page goes.
 MANDIR  = $(prefix)/share/man/man1
 
-# This is where the config files go
-CONFIG_FOLDER = $(name)
 # This is where the history files go
-HISTORY_FOLDER= .cache/$(name)
+HISTORY_FOLDER= .cache
 
 # Change these to your liking or use `make CC=gcc` etc
 #CC   = cc
@@ -37,9 +35,10 @@ CFLAGS += -DDFLT_EDITOR=\"vim\"
 # Comment out to disable color support
 CFLAGS += -DUSECOLORS
 # Command history file, relative to home directory. Comment out to disable commandline history
-CFLAGS += -DHISTORY_FILE=\"$(HISTORY_FOLDER)/info\"
+CFLAGS += -DHISTORY_FILE=\"$(HISTORY_FOLDER)/sc-iminfo\"
+CFLAGS += -DHISTORY_FOLDER=\"$(HISTORY_FOLDER)\"
 # Input mode history. Same as previous, but for insert mode commands
-CFLAGS += -DINS_HISTORY_FILE=\"$(HISTORY_FOLDER)/info\"
+CFLAGS += -DINS_HISTORY_FILE=\"$(HISTORY_FOLDER)/sc-iminfo\"
 # Comment out to disable undo/redo support
 CFLAGS += -DUNDO
 # Maximum number of rows in spreadsheet. Up to 1048576
