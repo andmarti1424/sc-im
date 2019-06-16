@@ -13,6 +13,8 @@ MANDIR  = $(prefix)/share/man/man1
 
 # This is where the history file go
 HISTORY_FOLDER= .cache
+# This is where the config file go
+CONFIG_FOLDER= .config
 
 # Change these to your liking or use `make CC=gcc` etc
 #CC   = cc
@@ -36,6 +38,8 @@ CFLAGS += -DDFLT_EDITOR=\"vim\"
 CFLAGS += -DUSECOLORS
 # Command history file, relative to HISTORY_FOLDER directory. Comment out to disable commandline history
 CFLAGS += -DHISTORY_FILE=\"sc-iminfo\" -DHISTORY_FOLDER=\"$(HISTORY_FOLDER)\"
+# Configuration file, relative to CONFIG_FOLDER directory
+CFLAGS += -DCONFIG_FILE=\"scimrc\" -DCONFIG_FOLDER=\"$(CONFIG_FOLDER)\"
 # Input mode history. Same as previous, but for insert mode commands
 CFLAGS += -DINS_HISTORY_FILE=\"sc-iminfo\"
 # Comment out to disable undo/redo support
