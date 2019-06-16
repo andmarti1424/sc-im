@@ -11,7 +11,7 @@ LIBDIR  = $(prefix)/share/doc/$(name)
 # This is where the man page goes.
 MANDIR  = $(prefix)/share/man/man1
 
-# This is where the history files go
+# This is where the history file go
 HISTORY_FOLDER= .cache
 
 # Change these to your liking or use `make CC=gcc` etc
@@ -34,9 +34,8 @@ CFLAGS += -DDFLT_PAGER=\"less\"
 CFLAGS += -DDFLT_EDITOR=\"vim\"
 # Comment out to disable color support
 CFLAGS += -DUSECOLORS
-# Command history file, relative to home directory. Comment out to disable commandline history
-CFLAGS += -DHISTORY_FILE=\"sc-iminfo\"
-CFLAGS += -DHISTORY_FOLDER=\"$(HISTORY_FOLDER)\"
+# Command history file, relative to HISTORY_FOLDER directory. Comment out to disable commandline history
+CFLAGS += -DHISTORY_FILE=\"sc-iminfo\" -DHISTORY_FOLDER=\"$(HISTORY_FOLDER)\"
 # Input mode history. Same as previous, but for insert mode commands
 CFLAGS += -DINS_HISTORY_FILE=\"sc-iminfo\"
 # Comment out to disable undo/redo support
