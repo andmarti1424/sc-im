@@ -35,7 +35,7 @@ CFLAGS += -DDFLT_EDITOR=\"vim\"
 # Comment out to disable color support
 CFLAGS += -DUSECOLORS
 # Command history file, relative to home directory. Comment out to disable commandline history
-CFLAGS += -DHISTORY_FILE=\"$(HISTORY_FOLDER)/sc-iminfo\"
+CFLAGS += -DHISTORY_FILE=\"sc-iminfo\"
 CFLAGS += -DHISTORY_FOLDER=\"$(HISTORY_FOLDER)\"
 # Input mode history. Same as previous, but for insert mode commands
 CFLAGS += -DINS_HISTORY_FILE=\"$(HISTORY_FOLDER)/sc-iminfo\"
