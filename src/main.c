@@ -463,7 +463,7 @@ void delete_structures() {
 int exit_app(int status) {
 
     // free history
-    if (! atoi((char *) get_conf_value("nocurses"))) {
+    if (! atoi((char *) (get_conf_value("nocurses")))) {
 
 #ifdef HISTORY_FILE
         if (! save_history(commandline_history, "w")) sc_error("Could not save commandline history");
