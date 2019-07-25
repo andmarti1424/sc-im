@@ -38,6 +38,13 @@ SC-IM stands for Spreadsheet Calculator Improvised. :-)
 
 ### Manual
 
+* Install the following dependencies:
+- `yacc`
+- `ncurses`
+- `libxml2`
+- `libzip`
+- `libxls`
+
 * Edit [`src/Makefile`](src/Makefile) according to your system and needs:
 ```
     vim src/Makefile
