@@ -38,7 +38,8 @@ SC-IM stands for Spreadsheet Calculator Improvised. :-)
 
 ### Manual
 
-* Install the following dependencies:
+#### Dependencies
+
 - `yacc`
 - `ncurses`
 - `libxml2`
