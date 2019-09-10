@@ -233,8 +233,8 @@ token S_YANKCOL
 %token K_NONUMERIC_ZERO
 %token K_OVERLAP
 %token K_NOOVERLAP
-%token K_TRUNCATE_CELLS
-%token K_NOTRUNCATE_CELLS
+%token K_TRUNCATE
+%token K_NOTRUNCATE
 %token K_QUIT_AFTERLOAD
 %token K_NOQUIT_AFTERLOAD
 %token K_XLSX_READFORMULAS
@@ -1022,8 +1022,10 @@ setitem :
                                      else         parse_str(user_conf_d, "overlap=1", TRUE); }
     |    K_OVERLAP                {               parse_str(user_conf_d, "overlap=1", TRUE); }
     |    K_NOOVERLAP              {               parse_str(user_conf_d, "overlap=0", TRUE); }
-    |    K_TRUNCATE_CELLS         {               parse_str(user_conf_d, "truncate_cells=1", TRUE); }
-    |    K_NOTRUNCATE_CELLS       {               parse_str(user_conf_d, "truncate_cells=0", TRUE); }
+    |    K_TRUNCATE '=' NUMBER     {  if ($3 == 0) parse_str(user_conf_d, "truncate=0", TRUE);
+                                     else         parse_str(user_conf_d, "truncate=1", TRUE); }
+    |    K_TRUNCATE               {               parse_str(user_conf_d, "truncate=1", TRUE); }
+    |    K_NOTRUNCATE             {               parse_str(user_conf_d, "truncate=0", TRUE); }
     |    K_AUTOBACKUP '=' NUMBER  {
                                                   char cmd[MAXCMD];
                                                   sprintf(cmd, "autobackup=%d", $3);
