@@ -1020,6 +1020,8 @@ setitem :
                                      else         parse_str(user_conf_d, "overlap=1", TRUE); }
     |    K_OVERLAP                {               parse_str(user_conf_d, "overlap=1", TRUE); }
     |    K_NOOVERLAP              {               parse_str(user_conf_d, "overlap=0", TRUE); }
+    |    K_TRUNCATE_CELLS         {               parse_str(user_conf_d, "truncate_cells=1", TRUE); }
+    |    K_NOTRUNCATE_CELLS       {               parse_str(user_conf_d, "truncate_cells=0", TRUE); }
     |    K_AUTOBACKUP '=' NUMBER  {
                                                   char cmd[MAXCMD];
                                                   sprintf(cmd, "autobackup=%d", $3);
