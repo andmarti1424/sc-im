@@ -58,12 +58,15 @@
 #include "utils/string.h"
 #include "cmds_visual.h"
 #include "buffer.h"
+#include "digraphs.h"
 
 static wint_t wd;          // char read from stdin
 static int d;              // char read from stdin
 int return_value;          // return value of getch()
 int cmd_multiplier = 0;    // Multiplier
 int cmd_pending = 0;       // Command pending
+int cmd_digraph = 0;
+static wint_t digraph;
 int shall_quit;            // Break loop if ESC key is pressed
 
 /**
@@ -141,6 +144,20 @@ void handle_input(struct block * buffer) {
                      (curmode == VISUAL_MODE && d >= ' ') ) {
                     cmd_pending = 1;
                 }
+                if (cmd_digraph) {
+                    if (digraph == 0) {
+                        digraph = wd;
+                        continue;
+                    }
+                    wd = get_digraph(digraph, wd);
+                    cmd_digraph = 0;
+                    digraph = 0;
+
+                } else if (! cmd_digraph && wd == ctl('k')) {
+                    cmd_digraph = 1;
+                    continue;
+                }
+
                 addto_buf(buffer, wd);
 
                 // Replace maps in buffer
