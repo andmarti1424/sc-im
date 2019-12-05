@@ -295,7 +295,7 @@ LC_NUMBER2(curcol,curcol)
 LC_NUMBER2(maxcols,maxcols)
 LC_NUMBER2(maxrows,maxrows)
 
-static const luaL_reg sclib[] = {
+static const luaL_Reg sclib[] = {
     { "lgetnum", l_getnum },
     { "lsetnum", l_setnum },
     { "lsetform", l_setform },
@@ -311,6 +311,15 @@ static const luaL_reg sclib[] = {
     { "sc", l_sc},
     {NULL,NULL}
 };
+
+static int registerLuaFuncs(lua_State *L) {
+#if LUA_VERSION_NUM >= 502
+    luaL_newlib(L, sclib);                          /* Load SC specific LUA commands after init.lua exec*/
+#else
+    luaL_register(L, "sc", sclib);                  /* Load SC specific LUA commands after init.lua exec*/
+#endif
+    return 1;
+}
 
 /**
  * \brief TODO Document doLuainit()
@@ -334,7 +343,7 @@ void doLuainit() {
         if (lua_pcall(L, 0, 0, 0))                  /* PRIMING RUN. FORGET THIS AND YOU'RE TOAST */
             fprintf(stderr, "\nFATAL ERROR:\n  Couldn't initialized Lua: %s\n\n", lua_tostring(L,-1));
     }
-    luaL_register(L, "sc", sclib);                  /* Load SC specific LUA commands after init.lua exec*/
+    luaL_requiref(L, "sc", registerLuaFuncs, 1);    /* sc = require("sc") */
 
     return;
 }
