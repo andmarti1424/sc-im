@@ -44,6 +44,7 @@
 
 #include <ctype.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "yank.h"
 #include "marks.h"

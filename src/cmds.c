@@ -43,6 +43,7 @@
  */
 
 #include <stdlib.h>
+#include <string.h>
 #include <ctype.h>   // for isdigit
 #include <wchar.h>
 #include <wctype.h>

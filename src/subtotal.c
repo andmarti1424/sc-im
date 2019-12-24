@@ -42,6 +42,7 @@
  * \brief TODO Write a tbrief file description.
  */
 
+#include <string.h>
 #include <wchar.h>
 #include "sc.h"
 #include "macros.h"
@@ -51,7 +52,6 @@
 
 /*
 #include <sys/types.h>
-#include <string.h>
 #include <stdio.h>
 #include <ctype.h>
 #include <stdlib.h>
