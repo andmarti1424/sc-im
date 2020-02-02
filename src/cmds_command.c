@@ -97,10 +97,12 @@ L"cpaste",
 L"e csv",
 L"e tab",
 L"e txt",
+L"e mkd",
 L"e xlsx",
 L"e! csv",
 L"e! tab",
 L"e! txt",
+L"e! mkd",
 L"e! xlsx",
 L"datefmt",
 L"delfilter",
@@ -924,6 +926,8 @@ void do_commandmode(struct block * sb) {
                 ! wcsncmp(inputline, L"e! csv" , 6) ||
                 ! wcsncmp(inputline, L"e tab"  , 5) ||
                 ! wcsncmp(inputline, L"e! tab" , 6) ||
+                ! wcsncmp(inputline, L"e mkd"  , 4) ||
+                ! wcsncmp(inputline, L"e! mkd" , 5) ||
                 ! wcsncmp(inputline, L"e txt" , 5) ||
                 ! wcsncmp(inputline, L"e! txt" , 6) ) {
                 do_export( p == -1 ? 0 : sr->tlrow, p == -1 ? 0 : sr->tlcol,
