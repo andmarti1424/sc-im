@@ -2554,7 +2554,10 @@ void pad_and_align (char * str_value, char * numeric_value, int col_width, int a
 
     // spaces after string value
     int spaces = col_width - padding - str_len - num_len;
-    if (align == 1) spaces += str_len;
+    if (align == 1){
+      if(num_len) spaces += str_len;
+      else spaces = 0;
+    }
     if (align == 0) spaces -= (col_width - padding - str_len) / 2;
     while (spaces-- > 0) add_wchar(str_out, L' ', wcslen(str_out));
 
