@@ -1172,6 +1172,7 @@ void export_markdown(char * fname, int r0, int c0, int rn, int cn) {
     char num [FBUFLEN] = "";
     char text[FBUFLEN] = "";
     char formated_s[FBUFLEN] = "";
+    char dashline[FBUFLEN] = "";
     int res = -1;
     int align = 1;
     int dash_num;
@@ -1223,33 +1224,38 @@ void export_markdown(char * fname, int r0, int c0, int rn, int cn) {
                     }
                 }
 
+                //make header border of dashes with alignment characters
+                if (row == 0) {
+                  if (col == 0) strcat (dashline, "|");
+                  if(align == 0){
+                    strcat (dashline, ":");
+                  }
+                  else {
+                    strcat (dashline, "-");
+                  }
+                  for (dash_num = 0; dash_num < fwidth[col]; dash_num++) {
+                    strcat (dashline, "-");
+                  }
+                  if(align >= 0){
+                    strcat (dashline, ":");
+                  }
+                  else {
+                    strcat (dashline, "-");
+                  }
+                  strcat (dashline, "|");
+                }
+
                 pad_and_align (text, num, fwidth[col], align, 0, out);
                 (void) fprintf (f, "%ls", out);
 
             } else {
-                (void) fprintf (f, "%*s", fwidth[col], " ");
+              (void) fprintf (f, "%*s", fwidth[col], " ");
             }
         }
 
         (void) fprintf(f," |\n");
 
-        if (row == 0) {
-          for (hcol = c0; hcol <= cn; hcol++) {
-
-            if (hcol == 0) {
-              (void) fprintf (f, "|-");
-            } else if (hcol <= cn) {
-              (void) fprintf (f, "-|-");
-            }
-
-            for (dash_num = 0; dash_num < fwidth[hcol]; dash_num++) {
-              (void) fprintf (f, "-");
-            }
-
-          }
-          (void) fprintf(f,"-|\n");
-        }
-
+        if (row == 0) (void) fprintf(f,"%s\n",dashline);
     }
     closefile(f, pid, 0);
 
