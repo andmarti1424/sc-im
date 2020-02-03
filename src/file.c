@@ -1085,6 +1085,8 @@ void do_export(int r0, int c0, int rn, int cn) {
         strcpy(type_export, "tab");
     } else if (str_in_str(linea, "txt") == 0) {
         strcpy(type_export, "txt");
+    } else if (str_in_str(linea, "mkd") == 0) {
+        strcpy(type_export, "mkd");
     }
 
     // Get route and file name to write.
@@ -1133,9 +1135,135 @@ void do_export(int r0, int c0, int rn, int cn) {
         export_delim(ruta, '\t', r0, c0, rn, cn, 1);
     } else if (strcmp(type_export, "txt") == 0) {
         export_plain(ruta, r0, c0, rn, cn);
+    } else if (strcmp(type_export, "mkd") == 0) {
+        export_markdown(ruta, r0, c0, rn, cn);
     }
 }
 
+
+/**
+ * \brief Export to md file with markdown table
+ *
+ * \param[in] fname file name
+ * \param[in] r0
+ * \param[in] c0
+ * \param[in] rn
+ * \param[in] cn
+ *
+ * \return none
+ */
+
+void export_markdown(char * fname, int r0, int c0, int rn, int cn) {
+    FILE * f;
+    int row, col,hcol;
+    register struct ent ** pp;
+    int pid;
+    wchar_t out[FBUFLEN] = L"";
+
+    sc_info("Writing file \"%s\"...", fname);
+
+    if ((f = openfile(fname, &pid, NULL)) == (FILE *)0) {
+        sc_error ("Can't create file \"%s\"", fname);
+        return;
+    }
+    struct ent * ent = go_end();
+    if (rn > ent->row) rn = ent->row;
+
+    char num [FBUFLEN] = "";
+    char text[FBUFLEN] = "";
+    char formated_s[FBUFLEN] = "";
+    char dashline[FBUFLEN] = "";
+    int res = -1;
+    int align = 1;
+    int dash_num;
+
+    for (row = r0; row <= rn; row++) {
+        // ignore hidden rows
+        //if (row_hidden[row]) continue;
+
+        for (pp = ATBL(tbl, row, col = c0); col <= cn; col++, pp++) {
+            // ignore hidden cols
+            //if (col_hidden[col]) continue;
+            if (*pp) {
+
+                num [0] = '\0';
+                text[0] = '\0';
+                out [0] = L'\0';
+                formated_s[0] = '\0';
+                res = -1;
+                align = 1;
+
+                if (col == 0) {
+                  (void) fprintf (f, "| ");
+                } else if (col <= cn) {
+                  (void) fprintf (f, " | ");
+                }
+
+                // If a numeric value exists
+                if ( (*pp)->flags & is_valid) {
+                    res = ui_get_formated_value(pp, col, formated_s);
+                    // res = 0, indicates that in num we store a date
+                    // res = 1, indicates a format is applied in num
+                    if (res == 0 || res == 1) {
+                        strcpy(num, formated_s);
+                    } else if (res == -1) {
+                        sprintf(num, "%.*f", precision[col], (*pp)->v);
+                    }
+                }
+
+                // If a string exists
+                if ((*pp)->label) {
+                    strcpy(text, (*pp)->label);
+                    align = 1;                                // right alignment
+                    if ((*pp)->flags & is_label) {            // center alignment
+                        align = 0;
+                    } else if ((*pp)->flags & is_leftflush) { // left alignment
+                        align = -1;
+                    } else if (res == 0) {                    // res must ¿NOT? be zero for label to be printed
+                        text[0] = '\0';
+                    }
+                }
+
+                //make header border of dashes with alignment characters
+                if (row == 0) {
+                  if (col == 0) strcat (dashline, "|");
+                  if(align == 0){
+                    strcat (dashline, ":");
+                  }
+                  else {
+                    strcat (dashline, "-");
+                  }
+                  for (dash_num = 0; dash_num < fwidth[col]; dash_num++) {
+                    strcat (dashline, "-");
+                  }
+                  if(align >= 0){
+                    strcat (dashline, ":");
+                  }
+                  else {
+                    strcat (dashline, "-");
+                  }
+                  strcat (dashline, "|");
+                }
+
+                pad_and_align (text, num, fwidth[col], align, 0, out);
+                (void) fprintf (f, "%ls", out);
+
+            } else {
+              (void) fprintf (f, "%*s", fwidth[col], " ");
+            }
+        }
+
+        (void) fprintf(f," |\n");
+
+        if (row == 0) (void) fprintf(f,"%s\n",dashline);
+    }
+    closefile(f, pid, 0);
+
+    if (! pid) {
+        sc_info("File \"%s\" written", fname);
+    }
+
+}
 /**
  * \brief Export to plain TXT
  *
