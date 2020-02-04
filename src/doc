@@ -367,7 +367,11 @@ Commands for handling cell content:
                  NOTE: If you do an export with the :e command, current file name stays unchaged.
                  See :file command for more details.
 
-     :e txt      Export current spreadsheet to plain text.
+     :e tab {file}
+                 Export the current spreadsheet to tab-separated file {file}.
+
+     :e! tab {file}
+                 Like ":e tab", but overwrite {file} if it exists.
                  If a range is selected, only that range is exported.
 
      :e csv {file}
@@ -377,11 +381,7 @@ Commands for handling cell content:
      :e! csv {file}
                  Like ":e csv", but overwrite {file} if it exists.
 
-     :e tab {file}
-                 Export the current spreadsheet to tab-separated file {file}.
-
-     :e! tab {file}
-                 Like ":e tab", but overwrite {file} if it exists.
+     :e txt      Export current spreadsheet to plain text.
                  If a range is selected, only that range is exported.
 
      :e txt {file}
