@@ -392,6 +392,19 @@ Commands for handling cell content:
 
      :e! txt {file}
                  Like ":e txt", but overwrite {file} if it exists.
+
+     :e mkd      Export the current spreadsheet to a markdown file solely
+                 containing a single markdown table.
+                 The column alignments come from the cells on the row. All
+                 other alignments are ignored as markdown tables do do not
+                 support cell level alignment.
+
+     :e mkd {file}
+                 Export the current spreadsheet to markdown file {file}.
+
+     :e! mkd {file}
+                 Like ":e mkd", but overwrite {file} if it exists.
+
      :e xlsx {file}
                  Export the current spreadsheet to xlsx file {file}.
                  If 'xlsx_readformulas' is set, SC-IM tries to export
