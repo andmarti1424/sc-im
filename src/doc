@@ -364,7 +364,8 @@ Commands for handling cell content:
                  The name of the created file comes from the current
                  spreadsheet, with ".tab" appended.
                  If a range is selected, only that range is exported.
-                 NOTE: If you do an export with the :e command, current file name stays unchaged.
+                 NOTE: If you do an export with the :e command, current file
+                 name stays unchaged.
                  See :file command for more details.
 
      :e tab {file}
@@ -406,8 +407,9 @@ Commands for handling cell content:
                  That value contains a system command that is executed to copy
                  to an specific clipboard. See in Makefile the different
                  options available.
-                 You can also set a different value of 'default_copy_to_clipboard_cmd'
-                 configuration variable at runtime, using the :set command.
+                 You can also set a different value of
+                 'default_copy_to_clipboard_cmd' configuration variable at
+                 runtime, using the :set command.
                  This process will export content as plain text.
                  It will not delimit columns with '\t' chars.
                  If you wish to delimit columns with tabs, to paste content
@@ -416,22 +418,23 @@ Commands for handling cell content:
 
      :cpaste     Paste clipboard content to Sc-im.
                  When 'cpaste' command is executed, the default value of macro
-                 DEFAULT_PASTE_FROM_CLIPBOARD_CMD (set in Makefile during build)
-                 is executed.
+                 DEFAULT_PASTE_FROM_CLIPBOARD_CMD (set in Makefile during
+                 build) is executed.
                  That value contains a system command that is executed to
                  paste content of a specific clipboard to Sc-im.
                  See in Makefile the different options available.
-                 You can also set a different value of 'default_paste_from_clipboard_cmd'
-                 configuration variable at runtime, using the :set command.
-                 This process will treat '\t' chars as column delimiter, and '\n' chars
-                 as rows delimiters.
+                 You can also set a different value of
+                 'default_paste_from_clipboard_cmd' configuration variable at
+                 runtime, using the :set command.
+                 This process will treat '\t' chars as column delimiter, and
+                 '\n' chars as rows delimiters.
 
      :version    Show SC-IM version number.
 
                  If you start Sc-im with ./sc-im --version
                  version number of Sc-im will be printed on screen, including
-                 the different features that were enabled when Sc-im was compiled.
-                 Afterwards Sc-im will exit.
+                 the different features that were enabled when Sc-im was
+                 compiled. Afterwards Sc-im will exit.
 
      :refresh    Refresh the UI. Acts like the <C-l> command of NORMAL_MODE.
 
@@ -672,17 +675,20 @@ Commands for handling cell content:
     :freeze {column}
     :freeze {column:column}
                 Freeze the column or column range given. (Case insensitive).
-                (the rest of the screen scrolls but the column/s stays fixed on the screen).
+                (the rest of the screen scrolls but the column/s stays fixed
+                on the screen).
                 NOTE: there can be only just one frozen range defined.
 
     :freeze {row}
     :freeze {row:row}
                 Freeze the row or row range given.
-                (the rest of the screen scrolls but the row/s stays fixed on the screen).
+                (the rest of the screen scrolls but the row/s stays fixed on
+                the screen).
 
     :freeze {range}
                 Freeze a range given.  (Case insensitive).
-                (the rest of the screen scrolls but the range stays fixed on the screen).
+                (the rest of the screen scrolls but the range stays fixed on
+                the screen).
 
     :unfreeze
                 Remove a previous frozen row / col or range.
@@ -705,7 +711,8 @@ Commands for handling cell content:
                      CELL_FORMAT, CELL_CONTENT, WELCOME, NORMAL, INPUT.
 
                 The value of fg and bg shall be one of the following:
-                     WHITE, BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN or DEFAULT_COLOR.
+                     WHITE, BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN or
+                     DEFAULT_COLOR.
                      DEFAULT_COLOR just takes the default color of your
                      terminal. If you set it as fg color it will take default
                      color of your foreground. If you set it as bg color it
@@ -730,7 +737,8 @@ Commands for handling cell content:
     :unformat
     :unformat {range}
                 Removes a previous format set over a range.
-                If not range is specified, it removes the format over current cell.
+                If not range is specified, it removes the format over current
+                cell.
 
     :redefine_color "{color}" {R} {G} {B}
                 Change the RGB values of the colors defined by ncurses.
@@ -747,8 +755,8 @@ Commands for handling cell content:
                 add it to $HOME/.scimrc:
                             REDEFINE_COLOR "RED" 700 100 100
 
-                Redefining the BLACK color itself is another way to change the default
-                background color of SC-IM.
+                Redefining the BLACK color itself is another way to change the
+                default background color of SC-IM.
 
     :lock       Lock the current cell or range.  Locked cells are immune to
                 any type of editing and can't be changed in any way until
@@ -826,7 +834,8 @@ Commands for handling cell content:
 
     :plot {type}
                 Plot a graphic using a selected range.
-                Right now, only 'line', 'scatter', 'bar' and 'pie' types are allowed.
+                Right now, only 'line', 'scatter', 'bar' and 'pie' types are
+                allowed.
 
                 Ex. of use:     :plot line
                 This command calls gnuplot using the file called 'plotline'
@@ -853,8 +862,9 @@ Commands for handling cell content:
 
     c-p
     <UP>        Go back in command line history.
-                NOTE: if inputline is not empty, up and down keys recall older commands from history,
-                but taking whose commands that beginning matches the current inputline content.
+                NOTE: if inputline is not empty, up and down keys recall older
+                commands from history, but taking whose commands that
+                beginning matches the current inputline content.
 
     c-n
     <DOWN>      Go forward in command line history.
@@ -1029,7 +1039,8 @@ Commands for handling cell content:
     set this to ignore case in searches done with '/' command.
 
     'autobackup' [default 0 (no autobackup)]
-    set this to a number in seconds 'n', to backup current file every 'n' seconds.
+    set this to a number in seconds 'n', to backup current file every 'n'
+    seconds.
     AUTOBACKUP must be set during Sc-im build for this feature to be
     available.
     If you set this to 0 but AUTOBACKUP was set during build, it still will
@@ -1041,9 +1052,9 @@ Commands for handling cell content:
     The following functions return the result of performing an operation on
     all valid (nonblank) entries in the given {range}. The optional second
     argument {expr} is an expression that is to be evaluated for each cell
-    in the specified range to determine which cells to include in the function.
-    Only those cells for which the expression evaluates to true (non-zero)
-    will be used in calculating the value of the function.
+    in the specified range to determine which cells to include in the
+    function. Only those cells for which the expression evaluates to true
+    (non-zero) will be used in calculating the value of the function.
 
 
     @sum({range})
@@ -1293,7 +1304,8 @@ Commands for handling cell content:
 
     @lua("luascript",0)
         Executes a "luascript". Using Lua script scim can be extend with lot
-        new functionality, such as complex programming, accessing databases etc.
+        new functionality, such as complex programming, accessing databases
+        etc.
         The search patch for LUA scripts files is $PWD/lua/
         $HOME/.scim/lua/ or /usr/local/share/scim/lua (in that order)
         Always use it only with @ston see example:
@@ -1346,20 +1358,23 @@ Commands for handling cell content:
 
      Function provided to lua script/triggers :
 
-     sc.lgetnum (c, r)       - get numeric value of cell c,r (c/r is number column/row)
-                               returns value
+     sc.lgetnum (c, r)       - get numeric value of cell c,r (c/r is number
+                               column/row) returns value
      sc.lsetnum (c, r, val)  - set numeric value to a cell c,t
-     sc.lsetform (c, r, str) - set formula to a cell. Basically it does "let cell= str"
+     sc.lsetform (c, r, str) - set formula to a cell. Basically it does "let
+                               cell= str"
      sc.lsetstr(c, r, str)   - set string to a cell
      sc.lgetstr(c, r, str)   - get string from a cell
-     sc.lquery(str)          - query input from user, but first prints str. Use with care!!
+     sc.lquery(str)          - query input from user, but first prints str.
+                               Use with care!!
                                Dont use this function within triggers!!
                                returns string
      sc.sc(str)              - send str to sc-im parser
-     sc.a2colrow(str)        - convert ascii cell representation to numeric column/row
-                               returns column, row example:
+     sc.a2colrow(str)        - convert ascii cell representation to numeric
+                               column/row returns column, row example:
                                c,r=sc.a2colrow("c5")
-     sc.colrow2a(c,r)        - returns ascii representation of numeric column/row
+     sc.colrow2a(c,r)        - returns ascii representation of numeric
+                               column/row
      sc.maxcols()            - return current maximum columns
      sc.maxrows()            - return current maximum rows
      sc.curcol()             - return current column
