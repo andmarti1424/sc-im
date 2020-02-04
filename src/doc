@@ -374,6 +374,8 @@ Commands for handling cell content:
                  Like ":e tab", but overwrite {file} if it exists.
                  If a range is selected, only that range is exported.
 
+     :e csv      Export the current spreadsheet to a comma-separated file.
+
      :e csv {file}
                  Export the current spreadsheet to comma-separated file
                  {file}.
@@ -389,7 +391,6 @@ Commands for handling cell content:
 
      :e! txt {file}
                  Like ":e txt", but overwrite {file} if it exists.
-
      :e xlsx {file}
                  Export the current spreadsheet to xlsx file {file}.
                  If 'xlsx_readformulas' is set, SC-IM tries to export
