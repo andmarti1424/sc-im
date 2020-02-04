@@ -340,14 +340,17 @@ Commands for handling cell content:
      :load {file}
                  Load {file} into the SC-IM database.
 
-                 {file} can be an sc format file (.sc), a comma-separated file (.csv),
-                 a tab-separated file (.tab, .tsv), an xlsx or xls file.
+                 {file} can be an sc format file (.sc), a comma-separated file
+                 (.csv), a tab-separated file (.tab, .tsv), an xlsx or xls
+                 file.
 
-                 If loading a csv, tab or tsv file and 'import_delimited_as_text' configuration variable is set
+                 If loading a csv, tab or tsv file and
+                 'import_delimited_as_text' configuration variable is set
                  Sc-im will import numbers as text.
 
-                 If loading an xlsx file and 'xlsx_readformulas' is set, Sc-im will try to import
-                 formulas, rather than the final values of a cell.
+                 If loading an xlsx file and 'xlsx_readformulas' is set, Sc-im
+                 will try to import formulas, rather than the final values of
+                 a cell.
 
      :load! {file}
                  Same as previous, but ignore changes done to the current
