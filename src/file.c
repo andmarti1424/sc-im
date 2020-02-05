@@ -1283,12 +1283,16 @@ void export_plain(char * fname, int r0, int c0, int rn, int cn) {
     int pid;
     wchar_t out[FBUFLEN] = L"";
 
-    sc_info("Writing file \"%s\"...", fname);
-
-    if ((f = openfile(fname, &pid, NULL)) == (FILE *)0) {
-        sc_error ("Can't create file \"%s\"", fname);
-        return;
+    if (fname == NULL)
+        f = stdout;
+    else {
+        sc_info("Writing file \"%s\"...", fname);
+        if ((f = openfile(fname, &pid, NULL)) == (FILE *)0) {
+            sc_error ("Can't create file \"%s\"", fname);
+            return;
+        }
     }
+
     struct ent * ent = go_end();
     if (rn > ent->row) rn = ent->row;
 
@@ -1349,10 +1353,11 @@ void export_plain(char * fname, int r0, int c0, int rn, int cn) {
         }
         (void) fprintf(f,"\n");
     }
-    closefile(f, pid, 0);
-
-    if (! pid) {
-        sc_info("File \"%s\" written", fname);
+    if (fname != NULL) {
+        closefile(f, pid, 0);
+        if (! pid) {
+            sc_info("File \"%s\" written", fname);
+        }
     }
 
 }
@@ -1381,9 +1386,13 @@ void export_delim(char * fname, char coldelim, int r0, int c0, int rn, int cn, i
 
     if (verbose) sc_info("Writing file \"%s\"...", fname);
 
-    if ((f = openfile(fname, &pid, NULL)) == (FILE *)0) {
-        if (verbose) sc_error ("Can't create file \"%s\"", fname);
-        return;
+    if (fname == NULL)
+        f = stdout;
+    else {
+        if ((f = openfile(fname, &pid, NULL)) == (FILE *)0) {
+            if (verbose) sc_error ("Can't create file \"%s\"", fname);
+            return;
+        }
     }
 
     struct ent * ent = go_end();
@@ -1423,7 +1432,8 @@ void export_delim(char * fname, char coldelim, int r0, int c0, int rn, int cn, i
         }
         (void) fprintf(f,"\n");
     }
-    closefile(f, pid, 0);
+    if (fname != NULL)
+        closefile(f, pid, 0);
 
     if (! pid && verbose) {
         sc_info("File \"%s\" written", fname);
