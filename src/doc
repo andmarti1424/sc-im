@@ -1450,4 +1450,9 @@ Commands for handling cell content:
 
     Note: Setting the --output parameter implies setting the --nocurses flag.
 
+    Export to csv, tab or plain text formats without interaction:
+        ./sc-im --quit_afterload --nocurses --export_csv
+        ./sc-im --quit_afterload --nocurses --export_tab
+        ./sc-im --quit_afterload --nocurses --export_txt   # (or just --export)
+        
  vim:tw=78:ts=8:ft=help:norl:
