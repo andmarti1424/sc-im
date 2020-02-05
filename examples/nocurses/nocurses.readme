@@ -1,0 +1,18 @@
+These are examples how to run sc-im with the -nocurses option
+
+COMMAND:
+cat examples/nocurses/export_to_mkd.sc | sc-im --nocurses examples/sc/subtotals.sc && cat /tmp/test.md
+
+STDOUT:
+Writing file "/tmp/test.md"...
+File "/tmp/test.md" written
+quitting. unsaved changes will be lost.
+|    Col1    |    Col2    |
+|:----------:|:----------:|
+|       0.00 |       2.00 |
+
+COMMAND:
+echo "let A0=1\nlet A1=1\nlet A2=A0+A1\nrecalc\nexecute \"version\"\n\n"| ./src/sc-im --nocurses --quit_afterload
+
+STDOUT:
+Prints version end waits for quit.
