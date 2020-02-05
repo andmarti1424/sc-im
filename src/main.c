@@ -334,7 +334,7 @@ int main (int argc, char ** argv) {
 
         // if we are not in ncurses
         } else if (fgetws(nocurses_buffer, BUFFERSIZE, f) != NULL) {
-            sc_info("Interp will receive: %ls", nocurses_buffer);
+            sc_debug("Interp will receive: %ls", nocurses_buffer);
             send_to_interp(nocurses_buffer);
         }
 
@@ -397,7 +397,7 @@ void read_stdin() {
     if (select(1, &readfds, NULL, NULL, &timeout)) {
         //sc_debug("there is data");
         while (f != NULL && fgetws(stdin_buffer, BUFFERSIZE, f) != NULL) {
-            sc_info("Interp will receive: %ls", stdin_buffer);
+            sc_debug("Interp will receive: %ls", stdin_buffer);
             send_to_interp(stdin_buffer);
         }
         fflush(f);
