@@ -1,0 +1,82 @@
+
+                               Yacc to LaTeX
+     _________________________________________________________________
+   
+Contents
+
+     * What is y2l?
+     * What is the purpose of y2l?
+     * What about portability?
+     * Where to download y2l?
+     * How to use y2l?
+       
+   The master copy of this document is available at the following URL:
+   http://www.alchar.org/~aedil/Projects/y2l.html.
+   
+What is y2l?
+
+   The Yacc to LaTeX utility takes (hopefully) any yacc source file, and
+   derives an Extended Backus-Naur Form (EBNF) description from it. This
+   EBNF is written out as LaTeX source. The output is a LaTeX "longtable"
+   environment, that can be included in any LaTeX document, typically
+   using an \input{} statement.
+   
+What is the purpose of y2l?
+
+   Questions about the purpose of things are so common, so here is the
+   answer to this very frequently asked question. When designing Abyss, I
+   found that I was continuously updating the grammar in two places. The
+   yacc description was of course the final authority. But I made it a
+   point to ensure that I would have decent and up-to-date documentation
+   for the language. Which led to the first incarnation of y2l.
+   
+   Then came the well known moment of truth when that first version was
+   used to try and generate an EBNF description for someone else's
+   grammar. That failed quite miserably because of implicit dependencies
+   on the format of the Abyss grammar description. A new y2l was written,
+   based around a strict yacc source file parser. It is designed to be
+   able to turn any yacc source file into an EBNF description, yet it
+   might choke on some Bison source files, because of large liberties the
+   authors of Bison have taken compared to the "original" yacc. This is
+   considered to be a "known bug" and might be solved in the future.
+   
+What about portability?
+
+   How portable is this little utility? Well, it's pretty portable in the
+   sense that is has been written in good ol' AWK! As long as you have a
+   machine with a sensible AWK (such as Gawk, or the one true AWK on
+   Brian Kernighan's homepage (http://plan9.bell-labs.com/cm/cs/who/bwk),
+   it will work.
+   
+   You may have to manually update the first line of the y2l script to
+   point to the proper AWK executable on your system. Not every system
+   has a sensible AWK as /usr/bin/awk!
+   
+Where to download y2l?
+
+   The latest release of y2l is available here for download
+   (http://y2l.sourceforge.net/download/y2l.tar.gz).
+   
+   The PGP signature for y2l is available at
+   http://y2l.sourceforge.net/download/y2l.tar.gz.asc. The signing key
+   can be found at the author's homepage (http://www.alchar.org/~aedil/).
+   
+   Anonymous read-only CVS access is available from SourceForge. Follow
+   these easy steps:
+     * cvs -d:pserver:anonymous@cvs.y2l.sourceforge.net:/cvsroot/y2l
+       login
+     * cvs -d:pserver:anonymous@cvs.y2l.sourceforge.net:/cvsroot/y2l co
+       y2l
+     * cvs update
+       You can use this in the y2l directory any time you wish to update
+       your local copy against the CVS repository.
+       
+How to use y2l?
+
+   The y2l manual is included in the distribution in Unix manpage format
+   and as an HTML file. The link in this section will bring you to the
+   most current HTML version of the y2l manual.
+     _________________________________________________________________
+   
+                                             Last modified: Mar 7th, 2000
+                                                      ©1995-2000 by Aedil
