@@ -321,6 +321,18 @@ int main (int argc, char ** argv) {
     lastbackup_tv = (struct timeval) {0};
     #endif
 
+    if (get_conf_value("export_csv")) {
+        export_delim(NULL, ',', 0, 0, maxrow, maxcol, 0);
+    }
+
+    if (get_conf_value("export_tab")) {
+        export_delim(NULL, '\t', 0, 0, maxrow, maxcol, 0);
+    }
+
+    if (get_conf_value("export") || get_conf_value("export_txt")) {
+        export_plain(NULL, 0, 0, maxrow, maxcol);
+    }
+
     while ( ! shall_quit && ! atoi((char *) get_conf_value("quit_afterload"))) {
         // save current time for runtime timer
         gettimeofday(&current_tv, NULL);
