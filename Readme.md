@@ -1,6 +1,6 @@
 ## SC-IM
 
-[![Build Status](https://travis-ci.org/mipmip/sc-im.svg?branch=freeze)](https://travis-ci.org/mipmip/sc-im)
+[![Build Status](https://travis-ci.org/andmarti1424/sc-im.svg?branch=freeze)](https://travis-ci.org/andmarti1424/sc-im)
 
 SC-IM is a spreadsheet program that is based on SC (http://ibiblio.org/pub/Linux/apps/financial/spreadsheet/sc-7.16.tar.gz)
 SC original authors are James Gosling and Mark Weiser, and mods were later added by Chuck Martin.
