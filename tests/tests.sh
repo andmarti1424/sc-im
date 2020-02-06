@@ -2,6 +2,7 @@
 
 ## SEE https://github.com/lehmannro/assert.sh for usage
 
+
 set -e
 
 ROOTDIR=`pwd`
