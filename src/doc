@@ -1452,9 +1452,10 @@ Commands for handling cell content:
 
     You can set the --output parameter to save the results to a file.
 
-    Export to csv, tab or plain text formats without interaction:
+    Export to csv, tab, markdown or plain text formats without interaction:
         ./sc-im --quit_afterload --nocurses --export_csv
         ./sc-im --quit_afterload --nocurses --export_tab
+        ./sc-im --quit_afterload --nocurses --export_mkd
         ./sc-im --quit_afterload --nocurses --export_txt # (or just --export)
 
     If you set the --quit_afterload flag, SC-IM will quit after loading all

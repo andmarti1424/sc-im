@@ -333,9 +333,14 @@ int main (int argc, char ** argv) {
         export_delim(NULL, '\t', 0, 0, maxrow, maxcol, 0);
     }
 
+    if (get_conf_value("export_mkd")) {
+        export_markdown(NULL, 0, 0, maxrow, maxcol);
+    }
+
     if (get_conf_value("export") || get_conf_value("export_txt")) {
         export_plain(NULL, 0, 0, maxrow, maxcol);
     }
+
 
     while ( ! shall_quit && ! atoi((char *) get_conf_value("quit_afterload"))) {
         // save current time for runtime timer
