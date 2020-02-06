@@ -1160,12 +1160,16 @@ void export_markdown(char * fname, int r0, int c0, int rn, int cn) {
     int pid;
     wchar_t out[FBUFLEN] = L"";
 
-    sc_info("Writing file \"%s\"...", fname);
-
-    if ((f = openfile(fname, &pid, NULL)) == (FILE *)0) {
-        sc_error ("Can't create file \"%s\"", fname);
-        return;
+    if (fname == NULL)
+        f = stdout;
+    else {
+        sc_info("Writing file \"%s\"...", fname);
+        if ((f = openfile(fname, &pid, NULL)) == (FILE *)0) {
+            sc_error ("Can't create file \"%s\"", fname);
+            return;
+        }
     }
+
     struct ent * ent = go_end();
     if (rn > ent->row) rn = ent->row;
 
