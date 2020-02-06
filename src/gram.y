@@ -26,6 +26,8 @@
 #include "plot.h"
 #include "subtotal.h"
 
+#include "cmds_command.h"
+
 void yyerror(char *err);               // error routine for yacc (gram.y)
 int yylex();
 
@@ -189,6 +191,7 @@ token S_YANKCOL
 %token S_GETFMT
 %token S_GETFORMAT
 %token S_RECALC
+%token S_EXECUTE
 %token S_QUIT
 %token S_REBUILD_GRAPH
 %token S_PRINT_GRAPH
@@ -698,6 +701,30 @@ command:
     |    S_EVAL e                  {
                                      eval_result = eval(NULL, $2);
                                      efree($2);
+                                   }
+    |    S_EXECUTE STRING          {
+
+                                     inputline[0]=L'\0';
+
+                                     #ifdef HISTORY_FILE
+                                            commandline_history = (struct history *) create_history(':');
+                                            load_history(commandline_history, ':'); // load the command history file
+                                     #endif
+                                     #ifdef INS_HISTORY_FILE
+                                            insert_history = (struct history *) create_history('=');
+                                            load_history(insert_history, '='); // load the insert history file
+                                     #endif
+
+                                     (void) swprintf(inputline, BUFFERSIZE, L"%s", $2);
+
+                                     struct block * auxb = (struct block *) create_buf();
+                                     addto_buf(auxb, OKEY_ENTER);
+                                     do_commandmode(auxb);
+                                     flush_buf(auxb);
+                                     erase_buf(auxb);
+                                     auxb = NULL;
+                                     inputline[0]=L'\0';
+                                     scxfree($2);
                                    }
     |    S_QUIT                    {
                                      printf("quitting. unsaved changes will be lost.\n");

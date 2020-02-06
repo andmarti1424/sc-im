@@ -1155,7 +1155,7 @@ void do_export(int r0, int c0, int rn, int cn) {
 
 void export_markdown(char * fname, int r0, int c0, int rn, int cn) {
     FILE * f;
-    int row, col,hcol;
+    int row, col;
     register struct ent ** pp;
     int pid;
     wchar_t out[FBUFLEN] = L"";

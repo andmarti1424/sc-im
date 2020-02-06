@@ -455,7 +455,10 @@ void do_commandmode(struct block * sb) {
                     delete_structures();
                     create_structures();
                     readfile(name, 0);
-                    ui_show_header();
+
+                    if (! atoi(get_conf_value("nocurses"))) {
+                      ui_show_header();
+                    }
                 }
             }
         } else if ( ! wcsncmp(inputline, L"hiderow ", 8) ||

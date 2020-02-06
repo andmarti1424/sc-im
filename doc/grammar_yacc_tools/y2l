@@ -1,0 +1,1150 @@
+#!/usr/bin/awk -f
+
+###############################################################################
+#
+#  FILE:	y2l
+#  DESCRIPTION: Yacc-to-LaTeX grammar processor
+#
+#  Copyright (c) 1994-2000 by Kris Van Hees, Belgium.  All rights reserved.
+#  See the "Artistic License" included in this package (file: "Artistic") for
+#  terms and conditions.
+#
+#  $Id: y2l,v 1.1.1.1 2000/03/07 16:40:33 aedil Exp $
+#
+###############################################################################
+
+#
+# Reserved variables:
+#	_debug		Debug level
+#	_exit		Exiting due to an error
+#	_line		Current line being processed
+#	_spclen		Length of string holding padding spaces
+#	_spcstr		String to hold padding spaces
+#
+
+###############################################################################
+# Support functions
+###############################################################################
+
+#
+#  NAME:	SPACES()
+#  DESCRIPTION: return a given number of spaces
+#
+function SPACES(snum) {
+    if (!_spclen) {				# uninitialized (first use)
+	_spcstr = " ";
+	_spclen = 1;
+    }
+
+    while (_spclen < snum) {			# extend the string of spaces
+	_spcstr = _spcstr _spcstr;		# double the spaces
+	_spclen *= 2;				# update the string length
+    }
+
+     return substr(_spcstr, 1, snum);		# requested number of spaces
+}
+
+#
+#  NAME:	DBG()
+#  DESCRIPTION: write debug output to standard error (if debugging is enabled)
+#
+function DBG(dlvl, dmsg) {
+    if (!_debug)				# debugging is disabled
+	return;
+
+    print "DBG:" SPACES(dlvl * 2 + 1) dmsg			>"/dev/stderr";
+}
+
+#
+#  NAME:	error()
+#  DESCRIPTION: write an error message to standard error
+#
+function error(emsg) {
+    print "ERROR: " emsg					>"/dev/stderr";
+
+    if (_line)
+	print "       Line is (on or about) " _line		>"/dev/stderr";
+
+    _exit = 1;					# mark program as exiting
+    exit;
+}
+
+#
+#  NAME:	exiting()
+#  DESCRIPTION: return whether the program is exiting
+#
+function exiting() {
+    return _exit;				# exit status
+}
+
+#
+#  NAME:	exists()
+#  DESCRIPTION: return whether a file exists
+#
+function exists(fname) {
+    return !system("ls " fname " >/dev/null 2>&1");
+}
+
+###############################################################################
+# Yacc-to-LaTeX initialization
+###############################################################################
+
+#
+#  NAME:	init()
+#  DESCRIPTION: initialization
+#
+function init() {
+    PERC_PERC			= 257;
+    PERC_LACC			= 258;
+    PERC_RACC			= 259;
+    PERC_LEFT			= 260;
+    PERC_ASSC			= 261;
+    PERC_RGHT			= 262;
+    PERC_STRT			= 263;
+    PERC_TOKN			= 264;
+    PERC_TYPE			= 265;
+    PERC_UNIO			= 266;
+    PERC_PREC			= 267;
+
+    CHAR			= 268;
+    IDENT			= 269;
+    STRING			= 270;
+    TYPE			= 271;
+
+    EOF				= -1;
+    BAD				= -2;
+
+    reserved["%%"]		= PERC_PERC;
+    reserved["%{"]		= PERC_LACC;
+    reserved["%}"]		= PERC_RACC;
+    reserved["%left"]		= PERC_LEFT;
+    reserved["%nonassoc"]	= PERC_ASSC;
+    reserved["%right"]		= PERC_RGHT;
+    reserved["%start"]		= PERC_STRT;
+    reserved["%token"]		= PERC_TOKN;
+    reserved["%type"]		= PERC_TYPE;
+    reserved["%union"]		= PERC_UNIO;
+    reserved["%prec"]		= PERC_PREC;
+}
+
+###############################################################################
+# Yacc-to-LaTeX processor functions
+###############################################################################
+
+#
+#  NAME:	token()
+#  DESCRIPTION: verify whether something is a valid token
+#
+function token(tokname) {
+    return tokname ~ /^[_\.A-Za-z][_\.A-Za-z0-9]*$/;
+}
+
+#
+#  NAME:	read()
+#  DESCRIPTION: read another (non-blank) line from the input file
+#
+function read() {
+    while (getline < grammar_file == 1) {
+	_line++;
+
+	if ($1 != "")
+	    return;
+    }
+
+    return grammar_eof = 1;
+}
+
+#
+#  NAME:	skip_ws()
+#  DESCRIPTION: skip a continuous block of whitespace
+#
+function skip_ws() {
+    in_comment = 0;
+
+    while (!grammar_eof) {
+	sub(/^[ \t]+/, "");			# remove leading whitespace
+
+	if ($1 != "") {
+	    if (/^\/\//) {			# C++ comment
+		$0 = "";
+	    } else if (in_comment) {		# in a comment
+		if (match($0, /\*\//)) {	# end of a comment
+		    $0 = substr($0, RSTART + RLENGTH);
+		    in_comment = 0;
+		} else
+		    $0 = "";
+	    } else if (/^\/\*"[^"]+"\*\//) {	# special marker
+		sub(/\/\*"/, "\"");
+		sub(/"\*\//, "\"");
+
+		return;
+	    } else if (/^\/\*/) {		# regular comment
+		$0 = substr($0, 3);
+		in_comment = 1;
+	    } else
+		return;
+
+	    sub(/[ \t]+$/, "");			# remove trailing whitespace
+	}
+
+	if ($1 == "")
+	    read();
+    }
+}
+
+#
+#  NAME:	lex()
+#  DESCRIPTION: read the next token from the input
+#
+function lex() {
+    if (tok_prev) {
+	tok = tok_prev;
+	tok_str = tok_pstr;
+	tok_prev = 0;
+
+	return tok;
+    }
+
+    skip_ws();
+
+    if (grammar_eof)
+	return EOF;
+
+    if (/^%/)
+	if (match($0, /^%(%|{|}|left|nonassoc|right|start|token|type|union)/)) {
+	    tok_str = substr($0, 1, RLENGTH);
+	    $0 = substr($0, RLENGTH + 1);
+
+	    return reserved[tok_str];
+	} else if (match($0, /^%[_A-Za-z][_A-Za-z0-9]*/)) {
+	    tok_str = substr($0, 1, RLENGTH);
+	    $0 = substr($0, RLENGTH + 1);
+
+	    return BAD;
+	}
+
+    if (match($0, /^[_\.A-Za-z][_\.A-zA-z0-9]*/)) {
+	tok_str = substr($0, 1, RLENGTH);
+	$0 = substr($0, RLENGTH + 1);
+
+	return IDENT;
+    }
+
+    if (match($0, /^<[_\.A-Za-z][_\.A-zA-z0-9]*>/)) {
+	tok_str = substr($0, 1, RLENGTH);
+	$0 = substr($0, RLENGTH + 1);
+
+	return TYPE;
+    }
+
+    if (/^'/)
+	if (match($0, /^'(.|\\([tnarfbv\\'"]|[0-7][0-7]*))'/)) {
+	    tok_str = "@C" (consts++);
+	    transtab[tok_str] = "\"" substr($0, 2, RLENGTH - 2) "\"";
+	    $0 = substr($0, RLENGTH + 1);
+
+	    return CHAR;
+	} else
+	    error("Excuse me, but this character constant is a bit weird.");
+
+    if (/^"/)
+	if (match($0, /([^\\]|[ \t]+)(\\\\)*"/)) {
+	    tok_str = "@S" (strings++);
+	    transtab[tok_str] = substr($0, 1, RSTART + RLENGTH - 1);
+	    $0 = substr($0, RSTART + RLENGTH);
+
+	    return STRING;
+	} else
+	    error("Newlines in strings are interesting, but not allowed.");
+
+    tok_str = substr($0, 1, 1);
+    $0 = substr($0, 2);
+
+    return tok_str;
+}
+
+#
+#  NAME:	unlex()
+#  DESCRIPTION: return a token to the input stream
+#
+function unlex(tok) {
+    tok_prev = tok;
+    tok_pstr = tok_str;
+}
+
+#
+#  NAME:	skip_definition()
+#  DESCRIPTION: skip the contents of a %{ ... %} block
+#
+function skip_definition() {
+    do {
+	skip = lex();
+    } while (skip != PERC_RACC && skip != EOF);
+}
+
+#
+#  NAME:	decl_token()
+#  DESCRIPTION: read a token declaration
+#
+function decl_token() {
+    first = 1;
+
+    do {
+	tok = lex();
+
+	if (tok == ",") {
+	    symbol = 0;
+	} else if (tok == CHAR) {
+	    DBG(1, transtab[tok_str] ": No need to remember this token.");
+	} else if (tok == IDENT) {
+	    if (_tkpat && tok_str !~ _tkpat) {
+		if (transtab[tok_str])
+		    DBG(2, "WARNING: Redefining '" tok_str "'.");
+
+		transtab[tok_str] = "\"" tolower(tok_str) "\"";
+		DBG(1, tok_str ": Defined as " transtab[tok_str] ".");
+	    }
+
+	    symbol = tok_str;
+	} else if (tok == NUMBER) {
+	    if (!symbol)
+		error("How about giving a token first?");
+
+	    symbol = 0;
+	} else if (tok == STRING) {
+	    if (!symbol)
+		error("How about giving a token first?");
+
+	    str = transtab[tok_str];
+	    transtab[symbol] = "\"" substr(str, 2, length(str) - 2) "\"";
+	    DBG(1, SPACES(length(symbol) + 2)				      \
+		   "Defined as " transtab[symbol] ".");
+
+	    symbol = 0;
+	} else if (tok == TYPE) {
+	    if (!first)
+		error("This is no place for a type name.");
+	} else {
+	    unlex(tok);
+	    return;
+	}
+
+	first = 0;
+    } while (tok != EOF);
+}
+
+#
+#  NAME:	decl_start()
+#  DESCRIPTION: read a start rule declaration
+#
+function decl_start() {
+    if (grammar_start)
+	error("Hm, you want the grammar to start with two rules?");
+    else if (lex() == IDENT) {
+	grammar_start = tok_str;
+	DBG(2, "The grammar start rule is '" grammar_start "'.");
+    } else
+	error("How about a nice juicy identifier?");
+}
+
+#
+#  NAME:	decl_type()
+#  DESCRIPTION: read a type declaration
+#
+function decl_type() {
+    if (lex() != TYPE)
+	error("So where is the typename?");
+
+    do {
+	tok = lex();
+
+	if (tok == ",") {
+	    symbol = 0;
+	} else if (tok == CHAR) {
+	    error("Bison etc may accept literals in a %type declaration, "    \
+		  "but the Unix 7th\n       Ed manual clearly indicates "     \
+		  "that it is NOT legal.  And I think that the\n       Bell " \
+		  "Labs guys know what they are talking about; but anyway, "  \
+		  "do you\n       really spend the time reading this long "   \
+		  "error message?");
+	} else if (tok == IDENT) {
+	    if (_tkpat && tok_str !~ _tkpat) {
+		if (transtab[tok_str])
+		    DBG(2, "WARNING: Redefining '" tok_str "'.");
+
+		transtab[tok_str] = "\"" tolower(tok_str) "\"";
+		DBG(1, tok_str ": Defined as " transtab[tok_str] ".");
+	    }
+
+	    symbol = tok_str;
+	} else if (tok == NUMBER) {
+	    if (!symbol)
+		error("How about giving a token first?");
+
+	    symbol = 0;
+	} else if (tok == STRING) {
+	    if (!symbol)
+		error("How about giving a token first?");
+
+	    str = transtab[tok_str];
+	    transtab[symbol] = "\"" substr(str, 2, length(str) - 2) "\"";
+	    DBG(1, SPACES(length(symbol) + 2)				      \
+		   "Defined as " transtab[symbol] ".");
+
+	    symbol = 0;
+	} else {
+	    unlex(tok);
+	    return;
+	}
+    } while (tok != EOF);
+}
+
+#
+#  NAME:	decl_union()
+#  DESCRIPTION: read a union declaration
+#
+function decl_union() {
+    if (grammar_union)
+	error("How about sticking to one single union declaration?");
+
+    grammar_union = 1;
+    DBG(2, "Extended types have been registered with a union declaration.");
+
+    do {
+	tok = lex();
+
+	if (tok == "{")
+	    block++;
+	else if (tok == "}") {
+	    if (!block)
+		error("Why close an unopened block?");
+	    if (--block <= 0)
+		return;
+	} else if (tok == EOF)
+	    error("The file ends before the union is finished.  How rude!");
+    } while (1);
+}
+
+#
+#  NAME:	read_declarations()
+#  DESCRIPTION: read the yacc declarations
+#
+function read_declarations() {
+    do {
+	tok = lex();				# next token
+
+	if (tok == PERC_PERC || tok == EOF)	# end of the declarations
+	    return;
+	if (tok == PERC_LACC) {			# definition block
+	    skip_definition();
+	} else if (tok == PERC_LEFT) {		# left associative declaration
+	    decl_token();
+	} else if (tok == PERC_ASSC) {		# non-associative declaration
+	    decl_token();
+	} else if (tok == PERC_RGHT) {		# right associative declaration
+	    decl_token();
+	} else if (tok == PERC_STRT) {		# start rule declaration
+	    decl_start();
+	} else if (tok == PERC_TOKN) {		# token declaration(s)
+	    decl_token();
+	} else if (tok == PERC_TYPE) {		# type declaration
+	    decl_type();
+	} else if (tok == PERC_UNIO) {		# union declaration
+	    decl_union();
+	} else
+	    DBG(2, "WARNING: Ignoring the unknown token '" tok_str "'.");
+    } while (1);
+}
+
+#
+#  NAME:	skip_action()
+#  DESCRIPTION: skip the contents of an action block
+#
+function skip_action() {
+    block = 1;
+
+    do {
+	tok = lex();
+
+	if (tok == "{")
+	    block++;
+	else if (tok == "}") {
+	    if (!block)
+		error("Why close an unopened block?");
+	    if (--block <= 0)
+		return;
+	} else if (tok == EOF)
+	    error("The file ends before the action is finished.  How rude!");
+    } while (tok != EOF);
+}
+
+#
+#  NAME:	read_grammar()
+#  DESCRIPTION: read the yacc grammar
+#
+function read_grammar() {
+    tok = lex();
+
+    do {
+	if (tok == PERC_PERC || tok == EOF)	# end of the grammar
+	    return;
+
+	if (tok == IDENT) {			# rule begins here
+	    if (!(rule_idx = rule_ref[tok_str])) {
+		rule_idx = ++rule_cnt;		# new rule
+		rule_lhs[rule_idx] = tok_str;
+		rule_ref[tok_str] = rule_idx;
+		rule_sub = ++rule_len[rule_idx];
+
+		if (!grammar_start)
+		    grammar_start = tok_str;
+	    }
+
+	    if (lex() != ":")
+		error("The LHS and RHS would like to be separated by a colon.");
+	} else if (tok == "|") {		# alternative RHS for a rule
+	    if (!rule_cnt)
+		error("The grammar shouldn't start with a |.");
+
+	    rule_sub = ++rule_len[rule_idx];
+	} else
+	    error("You could at least give a valid token.");
+
+	rule_rhs[rule_cnt] = "";		# empty RHS
+
+	do {					# read the RHS
+	    tok = lex();
+
+	    if (tok == PERC_PREC) {		# %prec
+		tok = lex();
+
+		if (tok != IDENT && tok != CHAR)
+		    error("What precedence are you talking about?");
+
+		tok = lex();			# continue with the rest
+	    }
+
+	    if (tok == IDENT) {			# might be a new rule
+		old_str = tok_str;
+		nxt = lex();			# look ahead
+		unlex(nxt);
+		tok_str = old_str;
+
+		if (nxt == ":")			# yup, a new rule started
+		    break;
+
+		rule_rhs[rule_idx, rule_sub] = rule_rhs[rule_idx, rule_sub]   \
+					       " " tok_str;
+	    } else if (tok == CHAR) {
+		if (tok_str ~ /^@/)
+		    tok_str = transtab[tok_str];
+
+		rule_rhs[rule_idx, rule_sub] = rule_rhs[rule_idx, rule_sub]   \
+					       " " tok_str;
+	    } else if (tok == "{") {		# an action block
+		skip_action();
+	    } else				# can't be part of a rule
+		break;
+	} while (1);
+
+	sub(/^ /, "", rule_rhs[rule_idx, rule_sub]);
+
+	if (rule_rhs[rule_idx, rule_sub] ~				      \
+	    /(^|[^_\.A-Za-z0-9])error($|[^_\.A-Za-z0-9])/) {
+	    DBG(1, rule_lhs[rule_idx] ": " rule_rhs[rule_idx, rule_sub]	      \
+		   " [IGNORED]");
+
+	    rule_rhs[rule_idx, rule_sub] = "";
+	    rule_len[rule_idx]--;
+	} else
+	    DBG(1, rule_lhs[rule_idx] ": " rule_rhs[rule_idx, rule_sub]);
+
+	if (tok == ";")
+	    tok = lex();
+    } while (1);
+}
+
+#
+#  NAME:	is_optional()
+#  DESCRIPTION: check whether the given non-terminal is optional
+#
+function is_optional(idx) {
+    if ((len = rule_len[idx]) <= 1)
+	return 0;
+
+    #
+    # One or more empty rules for a non-terminal indicate that the other  rules
+    # are in fact optional.  There shouldn't be multiple empty rules, but it is
+    # is technically possible.
+    #
+    for (rule_sub = 1; rule_sub <= len; rule_sub++)
+	if (rule_rhs[idx, rule_sub] == "") {
+	    while (++rule_sub <= len)
+		rule_rhs[idx, rule_sub - 1] = rule_rhs[idx, rule_sub];
+
+	    rule_len[idx]--;
+	}
+
+    return rule_len[idx] < len;
+}
+
+#
+#  NAME:	get_prefix()
+#  DESCRIPTION: check whether the given non-terminal has a common prefix
+#
+function get_prefix(idx) {
+    if ((len = rule_len[idx]) <= 1)
+	return 0;
+
+    #
+    # Split up the first rule into tokens.  These will be compared with all the
+    # other rules for this non-terminal.
+    #
+    gp_last = split(rule_rhs[idx, 1], arr);
+    gp_pref = gp_last;
+
+    #
+    # Look for the longest common prefix.
+    #
+    for (rule_sub = 2; rule_sub <= len; rule_sub++) {
+	$0 = rule_rhs[idx, rule_sub];
+	gp_tokc = NF;
+
+	if (gp_tokc < gp_pref)
+	    gp_pref = gp_tokc;
+
+	for (j = 1; j <= gp_pref; j++)
+	    if (arr[j] != $j) {
+		if (!(gp_pref = j - 1))
+		    return 0;
+
+		break;
+	    }
+    }
+
+    #
+    # Construct the prefix string.
+    #
+    gp_pstr = arr[1];
+    for (j = 2; j <= gp_pref; j++)
+	gp_pstr = gp_pstr " " arr[j];
+
+    #
+    # Remove the common prefix from all rules for this non-terminal.
+    #
+    for (rule_sub = 1; rule_sub <= len; rule_sub++) {
+	$0 = rule_rhs[idx, rule_sub];
+
+	for (j = 1; j <= gp_pref; j++)
+	    $j = "";
+
+	sub(/^ +/, "");
+	rule_rhs[idx, rule_sub] = $0;
+    }
+
+    return gp_pstr;
+}
+
+#
+#  NAME:	get_suffix()
+#  DESCRIPTION: check whether the given non-terminal has a common suffix
+#
+function get_suffix(idx) {
+    if ((len = rule_len[idx]) <= 1)
+	return 0;
+
+    #
+    # Split up the first rule into tokens.  These will be compared with all the
+    # other rules for this non-terminal.
+    #
+    gs_last = split(rule_rhs[idx, 1], arr);
+    gs_suff = gs_last;
+
+    #
+    # Look for the longest common suffix.
+    #
+    for (rule_sub = 2; rule_sub <= len; rule_sub++) {
+	$0 = rule_rhs[idx, rule_sub];
+	gs_tokc = NF;
+
+	if (gs_tokc < gs_suff)
+	    gs_suff = gs_tokc;
+
+	for (j = 0; j < gs_suff; j++)
+	    if (arr[gs_last - j] != $(gs_tokc - j)) {
+		if (!(gs_suff = j))
+		    return 0;
+
+		break;
+	    }
+    }
+
+    #
+    # Construct the suffix string.
+    #
+    gs_sstr = arr[gs_last];
+    for (j = 1; j < gs_suff; j++)
+	gs_sstr = arr[gs_last - j] " " gs_sstr;
+
+    #
+    # Remove the common suffix from all rules for this non-terminal.
+    #
+    for (rule_sub = 1; rule_sub <= len; rule_sub++) {
+	$0 = rule_rhs[idx, rule_sub];
+
+	for (j = 0; j < gs_suff; j++)
+	    $(NF - j) = "";
+
+	sub(/ +$/, "");
+	rule_rhs[idx, rule_sub] = $0;
+    }
+
+    return gs_sstr;
+}
+
+#
+#  NAME:	optimize1()
+#  DESCRIPTION: first pass of the optimizer
+#
+function optimize1() {
+    DBG(0, "Optimization pass 1...");
+
+    for (rule_idx = 1; rule_idx <= rule_cnt; rule_idx++) {
+	#
+	# Non-terminals with only a single rule can't be optimized here.
+	#
+	if ((len = rule_len[rule_idx]) <= 1)
+	    continue;
+
+	#
+	# First record whether the entire non-terminal might be optional.
+	#
+	rule_opt[rule_idx] = is_optional(rule_idx);
+
+	#
+	# The actual optimization takes place in this endless loop.  It will in
+	# fact end when an iteration does not yield an optional ruleset.   This
+	# is a proper and correct stop criteria, since a  non-optional  ruleset
+	# cannot have any common prefix or suffix.  If it did, those would have
+	# been added to the already present prefix or suffix.
+	#
+	pref = "";
+	suff = "";
+	do {
+	    if (pstr = get_prefix(rule_idx))
+		pref = pref " " pstr;
+	    else if (sstr = get_suffix(rule_idx))
+		suff = sstr " " suff;
+
+	    if (is_optional(rule_idx)) {
+		pref = pref " [";
+		suff = "] " suff;
+	    } else {
+		if (pstr || sstr) {
+		    pref = pref " (";
+		    suff = ") " suff;
+		}
+
+		break;
+	    }
+	} while (1);
+
+	#
+	# Compose the single composite rule for this non-terminal, if a  common
+	# prefix or suffix was found.
+	#
+	if (pref != "" || suff != "") {
+	    sub(/^ /, "", pref);
+	    sub(/ $/, "", suff);
+
+	    DBG(2, "Rules for '" rule_lhs[rule_idx] "' have:");
+
+	    if (pref != "")
+		DBG(3, "Prefix '" pref "'");
+	    if (suff != "")
+		DBG(3, "Suffix '" suff "'");
+
+	    len = rule_len[rule_idx];
+	    pref = pref " " rule_rhs[rule_idx, 1];
+
+	    for (rule_sub = 2; rule_sub <= len; rule_sub++)
+		pref = pref " | " rule_rhs[rule_idx, rule_sub];
+
+	    rule_rhs[rule_idx, 1] = pref " " suff;
+	    rule_len[rule_idx] = 1;
+
+	    DBG(3, "Combined rule '" rule_rhs[rule_idx, 1] "'");
+
+	    if (rule_opt[rule_idx])
+		DBG(3, "(The non-terminal is optional.)");
+	}
+    }
+}
+
+#
+#  NAME:	optimize2()
+#  DESCRIPTION: second pass of the optimizer
+#
+function optimize2() {
+    DBG(0, "Optimization pass 2...");
+
+    for (rule_idx = 1; rule_idx <= rule_cnt; rule_idx++) {
+	$0 = rule_rhs[rule_idx, 1];
+
+	if ((len = rule_len[rule_idx]) > 1)
+	    for (rule_sub = 2; rule_sub <= len; rule_sub++)
+		$0 = $0 " | " rule_rhs[rule_idx, rule_sub];
+
+	if ($1 != "[" && rule_opt[rule_idx]) {
+	    $0 = "[ " $0 " ]";
+	    rule_opt[rule_idx] = 0;
+	}
+
+	if ($1 == "[")
+	    if ($2 == rule_lhs[rule_idx]) {
+		for (i = NF; i > 0; i--)
+		    if ($i == "]")
+			break;
+
+		if ((NF - i) < 3) {
+		    $1 = "";
+		    subst = "{";
+		    $i = "}";
+
+		    while (++i <= NF)
+			subst = subst " " $i;
+
+		    $2 = subst;
+
+		    sub(/^ +/, "");
+		}
+	    }
+
+	if ($NF == "]")
+	    if ($(NF - 1) == rule_lhs[rule_idx]) {
+		for (i = 1; i <= NF; i++)
+		    if ($i == "[")
+			break;
+
+		if (i < 3) {
+		    $i = "{";
+		    subst = "}";
+		    $NF = "";
+
+		    while (--i > 0)
+			subst = $i " " subst;
+
+		    $(NF - 1) = subst;
+
+		    sub(/ +$/, "");
+		}
+	    }
+
+	if (rule_opt[rule_idx]) {
+	    $0 = "[ " $0 " ]";
+	    rule_opt[rule_idx] = 0;
+	}
+
+	rule_rhs[rule_idx, 1] = $0;
+	rule_len[rule_idx] = 1;
+    }
+}
+
+#
+#  NAME:	latexify()
+#  DESCRIPTION: make substitutions to ensure that the string is LaTeX ok
+#
+function latexify(txt) {
+    gsub(/[{&%}]/, "$\\\\&$", txt);
+    gsub(/[!|[\]=+\-*\/<>]/, "$&$", txt);
+    gsub(/\$\$/, "\\!", txt);
+    gsub(/"[^"]+"/, "``{\\bf &}''", txt);
+    gsub(/_/, "\\_", txt);
+    gsub(/\^/, "\\verb+^+", txt);
+    gsub(/"/, "", txt);
+
+    return txt;
+}
+
+#
+#  NAME:	break_string()
+#  DESCRIPTION: possibly break up a string in multiple lines
+#
+function break_string(str) {
+    match(str, /^([_A-Za-z][_A-Za-z0-9]* +| +)(::=|\|)/);
+    bs_len = RLENGTH;
+    bs_str = substr(str, 1, RLENGTH);
+    bs_pln = RLENGTH;
+    bs_pre = SPACES(RLENGTH);
+
+    $0 = substr(str, RLENGTH + 2);
+    for (i = 1; i <= NF; i++) {
+	if (bs_len + 1 + length($i) > 79) {
+	    bs_str = bs_str "\n" bs_pre;
+	    bs_len = bs_pln;
+	}
+
+	bs_str = bs_str " " $i;
+	bs_len += 1 + length($i);
+   }
+
+    return bs_str;
+}
+
+#
+#  NAME:	output()
+#  DESCRIPTION: write out the rewritten rules
+#
+function output(LaTeX) {
+    rule_use[grammar_start] = 1;
+
+    for (rule_idx = 1; rule_idx <= rule_cnt; rule_idx++) {
+	len = rule_len[rule_idx];
+
+	if (rule_opt[rule_idx]) {
+	    rule_rhs[rule_idx, 1] = "[ "  rule_rhs[rule_idx, 1];
+	    rule_rhs[rule_idx, len] = rule_rhs[rule_idx, len] " ]";
+	}
+
+	str = LaTeX ? latexify(rule_lhs[rule_idx])			      \
+		    : rule_lhs[rule_idx];
+
+	if (length(str) > rule_max) {
+	    rule_max = length(str);
+	    rule_mls = str;
+	}
+
+	for (rule_sub = 1; rule_sub <= len; rule_sub++) {
+	    $0 = rule_rhs[rule_idx, rule_sub];
+
+	    for (j = 1; j <= NF; j++) {
+		#
+		# A couple of notes here...  Non-terminals that merely  have  a
+		# single terminal as definition are substituted  anywhere  they
+		# are used.  And some special casing is needed  for  situations
+		# where someone actually defines the non-terminals  as  tokens.
+		# Those should definitely not be quotated.
+		#
+		if ((idx = rule_ref[$j]) &&
+		    rule_len[$j] == 1 && rule_rhs[idx, 1] ~ /^[^ ]+$/)
+		    $j = rule_rhs[idx, 1];
+		else if ((str = transtab[$j]) && !rule_ref[$j])
+		    $j = str;
+
+		rule_use[$j] = 1;
+	    }
+
+	    rule_rhs[rule_idx, rule_sub] = $0;
+	}
+    }
+
+    if (LaTeX)
+	#
+	# Some LaTeX magic...  We calculate the available size for the  RHS  of
+	# the rules.  This will be provided as argument to the  minipages  used
+	# for each independent rule.
+	#
+	# The formula is fairly easy:
+	#	textwidth - width(LHS) - width("::=") - 6 * tabcolsep
+	#
+	print "\\newlength\\rulelhs\n"					      \
+	      "\\newlength\\rulemid\n"					      \
+	      "\\newlength\\rulerhs\n"					      \
+	      "\\settowidth\\rulelhs{" rule_mls "}\n"			      \
+	      "\\settowidth\\rulemid{::=}\n"				      \
+	      "\\setlength\\rulerhs{\\textwidth}\n"			      \
+	      "\\addtolength\\rulerhs{-\\rulelhs}\n"			      \
+	      "\\addtolength\\rulerhs{-\\rulemid}\n"			      \
+	      "\\addtolength\\rulerhs{-6\\tabcolsep}\n\n"		      \
+	      "\\begin{longtable}{lrl}";
+
+    for (rule_idx = 1; rule_idx <= rule_cnt; rule_idx++) {
+	if (!rule_use[rule_lhs[rule_idx]])
+	    continue;
+
+	len = rule_len[rule_idx];
+
+	for (rule_sub = 1; rule_sub <= len; rule_sub++) {
+	    if (LaTeX) {
+		str = latexify(rule_lhs[rule_idx]);
+		out = str SPACES(rule_max - length(str)) " & ::= &\n"	      \
+		      "  \\begin{minipage}[t]{\\rulerhs}\n"		      \
+		      "    \\raggedright\n    ";
+	    } else {
+		str = rule_lhs[rule_idx];
+		out = str SPACES(rule_max - length(str)) " ::= ";
+	    }
+
+	    rhs = rule_rhs[rule_idx, rule_sub];
+	    lvl = 0;
+
+	    while (match(rhs, /(^[\(\{\[] | [\(\{\[\|\]\}\)] | [\]\}\)]$)/)) {
+		o_beg = RSTART;
+		o_len = RLENGTH;
+
+		if (substr(rhs, o_beg) ~ /(^[\(\{\[] | [\(\{\[] )/) {
+		    lvl++;
+
+		    str = LaTeX ? latexify(substr(rhs, 1, o_beg + o_len - 1)) \
+				: substr(rhs, 1, o_beg + o_len - 1);
+
+		    out = out str;
+		    rhs = substr(rhs, o_beg + o_len);
+		} else if (substr(rhs, o_beg) ~ /( [\]\}\)] | [\]\}\)]$)/) {
+		    lvl--;
+
+		    str = LaTeX ? latexify(substr(rhs, 1, o_beg + o_len - 1)) \
+				: substr(rhs, 1, o_beg + o_len - 1);
+
+		    out = out str;
+		    rhs = substr(rhs, o_beg + o_len);
+		} else if (substr(rhs, o_beg + 1, 1) == "|") {
+		    if (lvl) {
+			out = out substr(rhs, 1, o_beg + o_len - 1);
+			rhs = substr(rhs, o_beg + o_len);
+		    } else {
+			if (LaTeX) {
+			    str = latexify(substr(rhs, 1, o_beg - 1));
+
+			    print out str				      \
+				  SPACES(64 - rule_max - length(str)) "\n"    \
+				  "  \\end{minipage}" SPACES(60) " \\\\";
+
+			    out = SPACES(rule_max) " & $|$ &\n"		      \
+				  "  \\begin{minipage}[t]{\\rulerhs}\n"	      \
+				  "    \\raggedright\n    ";
+			} else {
+			    print break_string(out substr(rhs, 1, o_beg - 1));
+
+			    out = SPACES(rule_max + 1) "  | ";
+			}
+
+			rhs = substr(rhs, o_beg + o_len);
+		    }
+		}
+	    }
+
+	    if (LaTeX) {
+		str = latexify(rhs);
+
+		print out str SPACES(76 - length(out) - length(str)) "\n"     \
+		      "  \\end{minipage}" SPACES(60) " \\\\";
+	    } else
+		print break_string(out rhs);
+	}
+    }
+
+    if (LaTeX)
+	print "\\end{longtable}";
+}
+
+#
+#  NAME:	process()
+#  DESCRIPTION: process a given yacc grammar definition file
+#
+function process(grammar_file) {
+    if (!exists(grammar_file))
+	error("So where exactly is this file?");
+
+    DBG(0, "Reading grammar from '" grammar_file "'.");
+
+    read_declarations();
+    read_grammar();
+
+    if (_optim >= 1)
+	optimize1();
+    if (_optim >= 2)
+	optimize2();
+
+    output(!_plain);
+}
+
+#
+#  NAME:	load_tokens()
+#  DESCRIPTION: load a list of literal tokens from a file
+#
+function load_tokens(file) {
+    while (getline < file == 1)
+	transtab[$1] = "\"" $2 "\"";
+
+    close(file);
+}
+
+#
+#  NAME:	give_help()
+#  DISCRIPTION: offer some help to the poor user
+#
+function give_help() {
+    print "Usage: y2l -- [options] yacc-file\n"				      \
+	  "Options:\n"							      \
+	  "    -d\n"							      \
+	  "\tWrite debugging output to the standard error stream.  One  can\n"\
+	  "\tsupply a numeric argument to this option to set an indentation\n"\
+	  "\tlevel for the messages.\n"					      \
+	  "    -h\n"							      \
+	  "\tDisplay this help information.\n"				      \
+	  "    -O, -O[012]\n"u						      \
+	  "\tOptimize the grammar to get more typical EBNF.  If no argument\n"\
+	  "\tis provided, the highest optimization level is selected.\n"      \
+	  "    -p\n"							      \
+	  "\tGive basic ASCII output rather than LaTeX output.\n"	      \
+	  "    -t/regexp/, -tfile\n"					      \
+	  "\tIn the first form, the regular expression is used  to  decide\n" \
+	  "\twhether a terminal in the grammar is a real token or rather a\n" \
+	  "\tliteral.  The second variant specifies a file which  contains\n" \
+	  "\tlines listing a token and the literal it represents.\n"	      \
+	  "    -v\n"							      \
+	  "\tPrint out version information.";
+    exit;
+}
+
+#
+#  All processing is done from the BEGIN block.  The  one  and  only  mandatory
+#  argument to the program is passed on to the grammar processor.
+#
+BEGIN {
+    _debug = 0;					# no debugging
+    _optim = 0;					# no optimization
+    _plain = 0;					# no plain output
+    _tkpat = 0;					# no token pattern
+
+    _bannr = "Yacc-to-LaTeX grammar processor v1.0";
+
+    for (i = 1; i < ARGC; i++)			# loop over all arguments
+	if (ARGV[i] ~ /^-d$/)			# debugging
+	    _debug = 1;
+	else if (ARGV[i] ~ /^-h$/)		# help the user
+	    give_help();
+	else if (ARGV[i] ~ /^-O([012]|$)/)	# optimization level
+	    if (length(ARGV[i]) > 2)
+		_optim = substr(ARGV[i], 3, 1);
+	    else
+		_optim = 1;			# default optimization level
+	else if (ARGV[i] ~ /^-p$/)		# non-LaTeX output
+	    _plain = 1;
+	else if (ARGV[i] ~ /^-t/)		# regexp or file for tokens
+	    if (ARGV[i] ~ /^-t(\/\^|\/)[_\.A-Za-z][_\.A-zA-z0-9]*(\/|\$\/)$/) {
+		l = length(ARGV[i]);
+		_tkpat = substr(ARGV[i], 4, l - 4);
+	    } else if (exists(file = substr(ARGV[i], 3)))
+		load_tokens(file);
+	    else
+		error("So where is the token regexp pattern or file?");
+	else if (ARGV[i] ~ /^-v$/)		# version
+	    print _bannr					>"/dev/stderr";
+	else if (ARGV[i] ~ /^-/)		# unknown option
+	    error("Am I supposed to do something with '" ARGV[i] "'?");
+	else if (grammar_file)			# more than one grammar
+	    error("How about just processing one grammar at a time?");
+	else
+	    grammar_file = ARGV[i];		# name of the grammar file
+
+    if (!grammar_file)				# no grammar file provided
+	error("Any particular grammar you have in mind?");
+
+    init();					# initialization
+
+    process(grammar_file)			# process the given grammar
+
+    exit;
+}
