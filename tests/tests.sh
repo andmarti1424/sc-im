@@ -12,7 +12,6 @@ rm -f str.md
 cd examples/csv
 assert_raises "cat csv2markdown.sc | ../../src/sc-im --nocurses" 0 ""
 assert "cat str.md|wc -l|awk '{\$1=\$1};1'" "23"
-cat str.md
 rm -f str.md
 cd $ROOTDIR
 
