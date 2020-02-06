@@ -80,6 +80,7 @@ void store_default_config_values() {
     put(user_conf_d, "ignorecase", "0");
     put(user_conf_d, "trigger", "1");
     put(user_conf_d, "version", "0");
+    put(user_conf_d, "help", "0");
     #ifdef AUTOBACKUP
     put(user_conf_d, "autobackup", "0"); // 0:noautobackup, n>0: backup every n in seconds
     #endif

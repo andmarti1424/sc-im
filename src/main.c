@@ -204,6 +204,10 @@ int main (int argc, char ** argv) {
     // Read the main() parameters and replace values in user_conf_d as necessary
     read_argv(argc, argv);
 
+    // check if help is in argv. if so, show usage and quit
+    if (atoi((char *) get_conf_value("help"))) // atoi converts string to an int
+        show_usage_and_quit();
+
     // check if version is in argv. if so, show version and quit
     if (atoi((char *) get_conf_value("version"))) // atoi converts string to an int
         show_version_and_quit();
@@ -799,5 +803,55 @@ void show_version_and_quit() {
 #ifdef AUTOBACKUP
     sc_info("-DAUTOBACKUP");
 #endif
+    put(user_conf_d, "quit_afterload", "1");
+}
+
+/**
+ * \brief Print usage message to stdout text and quit
+ *
+ * \return none
+ */
+
+// NOTE this is a quick and dirty command to search for arguments used in the sources (macOS 10.14)
+// grep "get_conf_value(\"" -r ./src/*.c | grep get_conf_value |sed 's/"//g' |sed 's/.*get_conf_value(//g'|cut -d ')' -f1 |sort|uniq|sed 's/^/--/g'
+void show_usage_and_quit(){
+  put(user_conf_d, "nocurses", "1");
+  printf("\
+\nSC-IM - SC Improved\
+\n\
+\nUsage: sc-im [arguments] [file]          specified file\
+\n   or: sc-im [arguments] -               read text from stdin\
+\n\
+\nArguments:\
+\n\
+\n  --autocalc                  Set variable 'autocalc'.\
+\n  --copy_to_clipboard_delimited_tab  Set variable 'copy_to_clipboard_delimited_tab'\
+\n  --debug                     Set variable 'debug'\
+\n  --default_copy_to_clipboard_cmd=COMMAND  set variable 'default_copy_from_clipboard_cmd'\
+\n  --default_paste_from_clipboard_cmd=COMMAND  set variable 'default_paste_from_clipboard_cmd'\
+\n  --export_csv                Export to csv without interaction\
+\n  --export_tab                Export to tab without interaction\
+\n  --export_txt                Export to txt without interaction\
+\n  --external_functions        Set variable 'external_functions'\
+\n  --half_page_scroll          Set variable 'half_page_scroll'\
+\n  --ignorecase                Set variable 'ignorecase'\
+\n  --import_delimited_as_text Import text as\
+\n  --newline_action={j or l}   Set variable 'newline_action'\
+\n  --nocurses                  Run interactive but without ncurses interface.\
+\n  --numeric                   Set variable 'numeric'\
+\n  --numeric_decimal           Set variable 'numeric_decimal'\
+\n  --output=FILE               Save the results in FILE\
+\n  --overlap                   Set variable 'overlap variable'\
+\n  --quit_afterload            Quit after loading all the files\
+\n  --sheet=SHEET               Open SHEET when loading xlsx file. Default is 1.\
+\n  --tm_gmtoff={seconds}       set gmt offset used for converting datetimes to localtime.\
+\n  --txtdelim={\",\" or \";\" or \"\\t\"}  Sets delimiter when opening a .tab of .scv file");
+#ifdef XLSX
+  printf("\n\
+\n  --xlsx_readformulas         Set variable 'xlsx_readformulas'");
+#endif
+  printf("\n\
+\n  --version                   Print version information and exit\
+\n  --help                      Print Help (this message) and exit\n");
     put(user_conf_d, "quit_afterload", "1");
 }
