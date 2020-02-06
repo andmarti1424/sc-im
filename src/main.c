@@ -852,6 +852,6 @@ void show_usage_and_quit(){
 #endif
   printf("\n\
 \n  --version                   Print version information and exit\
-\n  --help                      Print Help (this message) and exit");
+\n  --help                      Print Help (this message) and exit\n");
     put(user_conf_d, "quit_afterload", "1");
 }
