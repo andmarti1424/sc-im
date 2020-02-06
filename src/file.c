@@ -1263,10 +1263,12 @@ void export_markdown(char * fname, int r0, int c0, int rn, int cn) {
     }
     closefile(f, pid, 0);
 
-    if (! pid) {
-        sc_info("File \"%s\" written", fname);
+    if (fname != NULL) {
+        closefile(f, pid, 0);
+        if (! pid) {
+            sc_info("File \"%s\" written", fname);
+        }
     }
-
 }
 /**
  * \brief Export to plain TXT
