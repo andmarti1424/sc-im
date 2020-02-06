@@ -1,0 +1,3 @@
+language: C
+
+script: make -C src && make test
