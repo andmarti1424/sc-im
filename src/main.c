@@ -429,8 +429,10 @@ void read_stdin() {
     if (f != NULL) fclose(f);
 
     if ( ! freopen("/dev/tty", "rw", stdin)) {
+      if (! atoi((char *) get_conf_value("notty"))) {
         perror(NULL);
         exit(-1);
+      }
     }
     //sc_debug("finish reading");
 }
@@ -842,14 +844,15 @@ void show_usage_and_quit(){
 \n  --ignorecase                Set variable 'ignorecase'\
 \n  --import_delimited_as_text Import text as\
 \n  --newline_action={j or l}   Set variable 'newline_action'\
-\n  --nocurses                  Run interactive but without ncurses interface.\
+\n  --nocurses                  Run but without ncurses interface\
+\n  --notty                     Run without /dev/tty device, e.g. GVIM\
 \n  --numeric                   Set variable 'numeric'\
 \n  --numeric_decimal           Set variable 'numeric_decimal'\
 \n  --output=FILE               Save the results in FILE\
 \n  --overlap                   Set variable 'overlap variable'\
 \n  --quit_afterload            Quit after loading all the files\
-\n  --sheet=SHEET               Open SHEET when loading xlsx file. Default is 1.\
-\n  --tm_gmtoff={seconds}       set gmt offset used for converting datetimes to localtime.\
+\n  --sheet=SHEET               Open SHEET when loading xlsx file. Default is 1\
+\n  --tm_gmtoff={seconds}       set gmt offset used for converting datetimes to localtime\
 \n  --txtdelim={\",\" or \";\" or \"\\t\"}  Sets delimiter when opening a .tab of .scv file");
 #ifdef XLSX
   printf("\n\

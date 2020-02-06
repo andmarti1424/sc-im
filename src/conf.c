@@ -68,6 +68,7 @@ void store_default_config_values() {
     put(user_conf_d, "autocalc", "1");
     put(user_conf_d, "numeric", "0");
     put(user_conf_d, "nocurses", "0");
+    put(user_conf_d, "notty", "0");
     put(user_conf_d, "newline_action", "j");
     put(user_conf_d, "external_functions", "0");
     put(user_conf_d, "xlsx_readformulas", "0");
