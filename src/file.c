@@ -1261,10 +1261,12 @@ void export_markdown(char * fname, int r0, int c0, int rn, int cn) {
 
         if (row == 0) (void) fprintf(f,"%s\n",dashline);
     }
-    closefile(f, pid, 0);
 
-    if (! pid) {
+    if (fname != NULL) {
+      closefile(f, pid, 0);
+      if (! pid) {
         sc_info("File \"%s\" written", fname);
+      }
     }
 
 }
