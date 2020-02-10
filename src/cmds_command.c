@@ -857,8 +857,12 @@ void do_commandmode(struct block * sb) {
             del_range_chars(line, 0, found);
             exec_cmd(line);
 
+        } else if ( ! wcscmp(inputline, L"wq") ) {
+          wcscpy(inputline, L"x");
+          if (savefile() == 0) shall_quit = 1;
+
         } else if ( inputline[0] == L'w' ) {
-            if (savefile() == 0 && ! wcscmp(inputline, L"wq")) shall_quit = 1;
+          savefile();
 
         } else if ( ! wcsncmp(inputline, L"file ", 5) ) {
 
