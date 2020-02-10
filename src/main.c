@@ -282,12 +282,12 @@ int main (int argc, char ** argv) {
     // 2. loadrc
     loadrc();
 
-    // 3. check input from stdin (pipeline)
+    // 3. read sc file passed as argv
+    load_sc();
+
+    // 4. check input from stdin (pipeline)
     // and send it to interp
     read_stdin();
-
-    // 4. read sc file passed as argv
-    load_sc();
 
     // change curmode to NORMAL_MODE
     chg_mode('.');
@@ -576,6 +576,7 @@ void read_argv(int argc, char ** argv) {
 
 void load_sc() {
     char name[PATHLEN];
+    strcpy(name, ""); //force name to be empty
     #ifdef NO_WORDEXP
     size_t len;
     #else
