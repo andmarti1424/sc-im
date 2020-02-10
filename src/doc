@@ -1511,22 +1511,31 @@ Commands for handling cell content:
         EXECUTE "e! mkd /path/test.md"
 
     RECALC
-        Recalculates a formulas in all cells
+        Recalculates a formulas in all cells.
 
     GETNUM {[COL][ROW]}
-        Get numeric value from cell and print to STDOUT
+        Get numeric value from cell and print to STDOUT.
 
     GETSTRING {[COL][ROW]}
-        Get text value from cell and print to STDOUT
+        Get text value from cell and print to STDOUT.
 
     GETEXP {[COL][ROW]}
-        Get expression from cell and print to STDOUT
+        Get expression from cell and print to STDOUT.
 
     GETFORMAT {COL}
-        Get format from cell and print to STDOUT
+        Get format from cell and print to STDOUT.
 
     GETFMT {[COL][ROW]}
-        Get format from cell and print to STDOUT
+        Get format from cell and print to STDOUT.
+
+    DELETECOL {COL}
+        Delete column. Example: DELETECOL B
+
+    DELETEROW {NUMBER}
+        Delete row, starts at 0. Example: DELETEROW 2 (deletes third row)
+
+    VALUEIZEALL
+        Converts expressions to values in all cells.
 
     QUIT
         Quits SC-IM.
