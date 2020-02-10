@@ -90,9 +90,9 @@ int yylex();
 /*
 token S_INSERTCOL
 token S_OPENCOL
-token S_DELETECOL
 token S_YANKCOL
 */
+%token S_DELETECOL
 %token S_DATEFMT
 %token S_SUBTOTAL
 %token S_RSUBTOTAL
@@ -162,7 +162,9 @@ token S_YANKCOL
  token S_SELECT
  token S_INSERTROW
  token S_OPENROW
- token S_DELETEROW
+*/
+%token S_DELETEROW
+/*
  token S_YANKROW
  token S_PULL
  token S_PULLMERGE
@@ -184,6 +186,7 @@ token S_YANKCOL
  token S_PLUGIN
  token S_PLUGOUT
 */
+%token S_VALUEIZEALL
 %token S_SHIFT
 %token S_GETNUM
 %token S_GETSTRING
@@ -472,6 +475,11 @@ command:
     |    S_SHOW COL                  { show_col($2, 1); }        // show de una unica columna
     |    S_SHOW NUMBER               { show_row($2, 1); }        // show de una unica fila
 
+/* more scripting commands */
+    |    S_DELETECOL COL             { deletecol($2, 1); }
+    |    S_DELETEROW NUMBER          { deleterow($2, 1); }
+
+
 /* agregados para scim */
     |    S_HIDECOL COL               {
                                        hide_col($2, 1); }        // hide de una unica columna
@@ -510,6 +518,7 @@ command:
                                        currow = r < currow ? r : r < currow + arg ? currow : r - arg;
                                      }
 
+    |    S_VALUEIZEALL              { valueize_area(0, 0, maxrow, maxcol); }
     |    S_SHIFT var_or_range STRING {
                                        if (strlen($3) != 1 || ($3[0] != 'h' && $3[0] != 'j' && $3[0] != 'k' && $3[0] != 'l')) {
                                            sc_error("wrong parameter for shift command");
