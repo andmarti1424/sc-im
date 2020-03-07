@@ -79,6 +79,8 @@
 extern struct ent * freeents;
 extern int yyparse(void);
 
+char config_file[PATHLEN];
+
 #ifdef HAVE_PTHREAD
 #include <pthread.h>
 extern pthread_t fthread;
@@ -131,16 +133,85 @@ void erasedb() {
     *curfile = '\0';
 }
 
+/*
+ * Search path for scimrc:
+ * 1. $XDG_CONFIG_HOME/scim/scimrc (only when wordexp enabled)
+ * 2. $XDG_CONFIG_HOME/scimrc (only when wordexp enabled)
+ * 3. $HOME/.scim/scimrc
+ * 4. $HOME/.scimrc
+ */
+
 void loadrc(void) {
     char rcpath[PATHLEN];
     char * home;
 
-    if ((home = getenv("HOME"))) {
+    memset(config_file, 0, PATHLEN);
+
+    char * xdg_path;
+    int is_found = 0;
+
+#ifndef NO_WORDEXP
+    static const char * xdg_suffix1 = "/scim/scimrc";
+    static const char * xdg_suffix2 = "/scimrc";
+    wordexp_t we;
+    if ((xdg_path = getenv("XDG_CONFIG_HOME")) && xdg_path != NULL) {
+        if (wordexp(xdg_path, &we, 0)) {
+            sc_error("Can't expand rc path");
+        } else {
+            memset(rcpath, 0, sizeof(rcpath));
+            strncpy(rcpath, we.we_wordv[0], PATHLEN - 1);
+
+            /* check xdg_path + xdgsuffix1 */
+            strcat(rcpath, xdg_suffix1);
+            if (access(rcpath, R_OK) != -1) {
+                is_found = 1;
+            } else {
+                memset(rcpath + strlen(xdg_path), 0, strlen(xdg_suffix1));
+            }
+            /* check xdg_path + xdgsuffix2 */
+            if (! is_found) {
+                strcat(rcpath, xdg_suffix2);
+                if (access(rcpath, R_OK) != -1) {
+                    is_found = 1;
+                } else {
+                    memset(rcpath, 0, strlen(rcpath));
+                }
+            }
+        }
+    }
+#endif
+
+    static const char * home_suffix1 = "/.scim/scimrc";
+    static const char * home_suffix2 = "/.scimrc";
+
+    if (! is_found && (home = getenv("HOME"))) {
         memset(rcpath, 0, sizeof(rcpath));
-        strncpy(rcpath, home, sizeof(rcpath) - (sizeof("/.scimrc") + 1));
-        strcat(rcpath, "/.scimrc");
+        strncpy(rcpath, home, PATHLEN - 1);
+
+        /* check home + home_suffix1 */
+        strcat(rcpath, home_suffix1);
+        if (access(rcpath, R_OK) != -1) {
+            is_found = 1;
+        } else {
+            memset(rcpath + strlen(home), 0, strlen(home_suffix1));
+        }
+
+        /* check home + home_suffix2 */
+        if (! is_found) {
+            strcat(rcpath, home_suffix2);
+            if (access(rcpath, R_OK) != -1) {
+                is_found = 1;
+            } else {
+                memset(rcpath + strlen(home), 0, strlen(home_suffix2));
+            }
+        }
+    }
+
+    if (is_found) { // check if works without rc file
+        strcpy(config_file, rcpath);
         (void) readfile(rcpath, 0);
     }
+
     *curfile = '\0';
 }
 
@@ -625,7 +696,7 @@ sc_readfile_result readfile(char * fname, int eraseflg) {
 
 #ifdef AUTOBACKUP
     // Check if curfile is set and backup exists..
-    if (str_in_str(fname, ".scimrc") == -1 && strlen(curfile) &&
+    if (str_in_str(fname, "scimrc") == -1 && strlen(curfile) &&
     backup_exists(curfile) && strcmp(fname, curfile)) {
         if (modflg) {
             // TODO - force load with '!' ??
@@ -675,7 +746,7 @@ sc_readfile_result readfile(char * fname, int eraseflg) {
     // Check if file is a correct format
     int len = strlen(fname);
     if (! strcmp( & fname[len-3], ".sc") ||
-        (len > 6 && ! strcasecmp( & fname[len-7], ".scimrc"))) {
+        (len > 5 && ! strcasecmp( & fname[len-6], "scimrc"))) {
         // pass
 
     // If file is an xlsx file, we import it
