@@ -134,11 +134,15 @@ void erasedb() {
 }
 
 /*
- * Search path for scimrc:
+ * \brief Loads config file
+ *
+ * \detail Search path for scimrc:
  * 1. $XDG_CONFIG_HOME/scim/scimrc (only when wordexp enabled)
  * 2. $XDG_CONFIG_HOME/scimrc (only when wordexp enabled)
  * 3. $HOME/.scim/scimrc
  * 4. $HOME/.scimrc
+ *
+ * \return none
  */
 
 void loadrc(void) {

@@ -235,6 +235,24 @@ Use SC-IM as a non-interactive calculator, reading its input from a external scr
 The idea is that the program can be identified as another
 vim-like app. SC-IM stands for Spreadsheet Calculator Improvised.
 .
+.
+.SH CONFIG
+SC-IM searches for config file in the following order:
+.IP 1.
+.B
+$XDG_CONFIG_HOME/scim/scimrc
+(with wordexp enabled)
+.IP 2.
+.B
+$XDG_CONFIG_HOME/scimrc
+(with wordexp enabled)
+.IP 3.
+.B
+$HOME/.scim/scimrc
+.IP 4.
+.B
+$HOME/.scimrc
+.
 .SH AUTHOR
 Written by Andrés Martinelli and collaborators.
 Original man page by Daniel Campoverde.
