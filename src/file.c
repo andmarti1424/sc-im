@@ -79,8 +79,6 @@
 extern struct ent * freeents;
 extern int yyparse(void);
 
-char config_file[PATHLEN];
-
 #ifdef HAVE_PTHREAD
 #include <pthread.h>
 extern pthread_t fthread;
@@ -137,59 +135,56 @@ void erasedb() {
  * \brief Loads config file
  *
  * \detail Search path for scimrc:
- * 1. $XDG_CONFIG_HOME/scim/scimrc (only when wordexp enabled)
- * 2. $XDG_CONFIG_HOME/scimrc (only when wordexp enabled)
+ * 1. $XDG_CONFIG_HOME/scim/scimrc (defaults to $HOME/.config/scim/scimrc)
+ * 2. $XDG_CONFIG_HOME/scimrc (defaults to $HOME/.config/scimrc)
  * 3. $HOME/.scim/scimrc
  * 4. $HOME/.scimrc
  *
  * \return none
  */
-
 void loadrc(void) {
     char rcpath[PATHLEN];
     char * home;
-
-    memset(config_file, 0, PATHLEN);
-
-    char * xdg_path;
+    char * configs;
     int is_found = 0;
 
-#ifndef NO_WORDEXP
-    static const char * xdg_suffix1 = "/scim/scimrc";
-    static const char * xdg_suffix2 = "/scimrc";
-    wordexp_t we;
-    if ((xdg_path = getenv("XDG_CONFIG_HOME")) && xdg_path != NULL) {
-        if (wordexp(xdg_path, &we, 0)) {
-            sc_error("Can't expand rc path");
-        } else {
-            memset(rcpath, 0, sizeof(rcpath));
-            strncpy(rcpath, we.we_wordv[0], PATHLEN - 1);
+    const char * cfg_suffix1 = "/scim/scimrc";
+    const char * cfg_suffix2 = "/scimrc";
+    const char * home_suffix1 = "/.scim/scimrc";
+    const char * home_suffix2 = "/.scimrc";
 
-            /* check xdg_path + xdgsuffix1 */
-            strcat(rcpath, xdg_suffix1);
-            if (access(rcpath, R_OK) != -1) {
-                is_found = 1;
-            } else {
-                memset(rcpath + strlen(xdg_path), 0, strlen(xdg_suffix1));
-            }
-            /* check xdg_path + xdgsuffix2 */
-            if (! is_found) {
-                strcat(rcpath, xdg_suffix2);
-                if (access(rcpath, R_OK) != -1) {
-                    is_found = 1;
-                } else {
-                    memset(rcpath, 0, strlen(rcpath));
-                }
-            }
+    memset(rcpath, 0, sizeof(rcpath));
+    home = getenv("HOME");
+    configs = getenv("XDG_CONFIG_HOME");
+
+    if (!configs) {
+        strncpy(rcpath, configs, PATHLEN - 1);
+    } else {
+        strncpy(rcpath, home, PATHLEN - 1);
+        strcat(rcpath + strlen(home), "/.config");
+    }
+
+    int cfg_len = strlen(rcpath);
+
+    /* check configs + cfg_suffix1 */
+    strcat(rcpath, cfg_suffix1);
+    if (access(rcpath, R_OK) != -1) {
+        is_found = 1;
+    } else {
+        memset(rcpath + cfg_len, 0, strlen(cfg_suffix1));
+    }
+
+    if (!is_found) {
+        /* check configs + cfg_suffix2 */
+        strcat(rcpath, cfg_suffix2);
+        if (access(rcpath, R_OK) != -1) {
+            is_found = 1;
+        } else {
+            memset(rcpath, 0, strlen(rcpath));
         }
     }
-#endif
 
-    static const char * home_suffix1 = "/.scim/scimrc";
-    static const char * home_suffix2 = "/.scimrc";
-
-    if (! is_found && (home = getenv("HOME"))) {
-        memset(rcpath, 0, sizeof(rcpath));
+    if (!is_found) {
         strncpy(rcpath, home, PATHLEN - 1);
 
         /* check home + home_suffix1 */
@@ -199,20 +194,16 @@ void loadrc(void) {
         } else {
             memset(rcpath + strlen(home), 0, strlen(home_suffix1));
         }
-
-        /* check home + home_suffix2 */
-        if (! is_found) {
-            strcat(rcpath, home_suffix2);
-            if (access(rcpath, R_OK) != -1) {
-                is_found = 1;
-            } else {
-                memset(rcpath + strlen(home), 0, strlen(home_suffix2));
-            }
-        }
     }
 
-    if (is_found) { // check if works without rc file
-        strcpy(config_file, rcpath);
+    if (!is_found) {
+        /* check home + home_suffix2 */
+        strcat(rcpath, home_suffix2);
+        if (access(rcpath, R_OK) != -1)
+            is_found = 1;
+    }
+
+    if (is_found) {
         (void) readfile(rcpath, 0);
     }
 

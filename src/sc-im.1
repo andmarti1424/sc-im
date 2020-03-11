@@ -241,11 +241,17 @@ SC-IM searches for config file in the following order:
 .IP 1.
 .B
 $XDG_CONFIG_HOME/scim/scimrc
-(with wordexp enabled)
+(defaults to
+.B
+$HOME/.config/scim/scimrc
+)
 .IP 2.
 .B
 $XDG_CONFIG_HOME/scimrc
-(with wordexp enabled)
+(defaults to
+.B
+$HOME/.config/scimrc
+)
 .IP 3.
 .B
 $HOME/.scim/scimrc
@@ -253,6 +259,18 @@ $HOME/.scim/scimrc
 .B
 $HOME/.scimrc
 .
+.PP
+Example of config file:
+
+.RS 4
+.nf
+\fB
+set autocalc
+set numeric
+set numeric_decimal=0
+set overlap
+set xlsx_readformulas
+
 .SH AUTHOR
 Written by Andrés Martinelli and collaborators.
 Original man page by Daniel Campoverde.
