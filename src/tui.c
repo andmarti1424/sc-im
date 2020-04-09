@@ -92,6 +92,7 @@
 #include "file.h"
 #include "format.h"
 #include "utils/string.h"
+#include "digraphs.h"
 
 extern struct dictionary * d_colors_param;
 extern int cmd_pending;
@@ -200,9 +201,19 @@ int ui_getch(wint_t * wd) {
  */
 
 int ui_getch_b(wint_t * wd) {
+    wint_t digraph = 0;
     wtimeout(input_win, -1);
     move(0, rescol + inputline_pos + 1);
     wget_wch(input_win, wd);
+    if (*wd == ctl('k')) {
+        wget_wch(input_win, wd);
+        if (*wd != OKEY_ESC) {
+            digraph = *wd;
+            wget_wch(input_win, wd);
+            if (*wd != OKEY_ESC)
+                *wd = get_digraph(digraph, *wd);
+        }
+    }
     wtimeout(input_win, TIMEOUT_CURSES);
     if ( *wd != OKEY_ESC ) return 0;
     return -1;
