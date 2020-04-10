@@ -100,6 +100,7 @@ void set_comp(int i) {
 #include <stdlib.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <sys/stat.h>
 
 #include "history.h"
 #include "sc.h"
@@ -156,8 +157,7 @@ void load_history(struct history * h, wchar_t mode) {
     FILE * f;
 
     if ((home = getenv("HOME"))) {
-        sprintf(infofile, "%s/", home);
-        strcat(infofile, HISTORY_FILE);
+        sprintf(infofile, "%s/%s/%s", home,HISTORY_DIR,HISTORY_FILE);
         if ((c = open(infofile, O_RDONLY)) > -1) {
             close(c);
             f = fopen(infofile, "r");
@@ -193,13 +193,13 @@ int save_history(struct history * h, char * mode) {
     FILE * f;
     int i;
     struct hlist * nl = h->list;
-
     if ((home = getenv("HOME"))) {
-        sprintf(infofile, "%s/", home);
-        strcat(infofile, HISTORY_FILE);
+        char history_dir[PATHLEN];
+        sprintf(history_dir, "%s/%s", home,HISTORY_DIR);
+        mkdir(history_dir,0777);
+        sprintf(infofile, "%s/%s/%s", home,HISTORY_DIR,HISTORY_FILE);
         f = fopen(infofile, mode);
         if (f == NULL) return 0;
-
         // Go to the end
         for (i=1; i < h->len; i++) {
             nl = nl->pnext;

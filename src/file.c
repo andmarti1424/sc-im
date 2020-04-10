@@ -136,9 +136,10 @@ void loadrc(void) {
     char * home;
 
     if ((home = getenv("HOME"))) {
-        memset(rcpath, 0, sizeof(rcpath));
-        strncpy(rcpath, home, sizeof(rcpath) - (sizeof("/.scimrc") + 1));
-        strcat(rcpath, "/.scimrc");
+        char config_dir[PATHLEN];
+        sprintf(config_dir, "%s/%s", home,CONFIG_DIR);
+        mkdir(config_dir,0777);
+        sprintf(rcpath, "%s/%s/%s", home,CONFIG_DIR,CONFIG_FILE);
         (void) readfile(rcpath, 0);
     }
     *curfile = '\0';
@@ -625,7 +626,7 @@ sc_readfile_result readfile(char * fname, int eraseflg) {
 
 #ifdef AUTOBACKUP
     // Check if curfile is set and backup exists..
-    if (str_in_str(fname, ".scimrc") == -1 && strlen(curfile) &&
+    if (str_in_str(fname, CONFIG_FILE) == -1 && strlen(curfile) &&
     backup_exists(curfile) && strcmp(fname, curfile)) {
         if (modflg) {
             // TODO - force load with '!' ??
@@ -675,7 +676,7 @@ sc_readfile_result readfile(char * fname, int eraseflg) {
     // Check if file is a correct format
     int len = strlen(fname);
     if (! strcmp( & fname[len-3], ".sc") ||
-        (len > 6 && ! strcasecmp( & fname[len-7], ".scimrc"))) {
+        (len >= strlen(CONFIG_FILE) && ! strcasecmp( & fname[len-strlen(CONFIG_FILE)], CONFIG_FILE))) {
         // pass
 
     // If file is an xlsx file, we import it

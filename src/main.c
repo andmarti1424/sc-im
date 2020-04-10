@@ -484,7 +484,7 @@ void delete_structures() {
 int exit_app(int status) {
 
     // free history
-    if (! atoi((char *) get_conf_value("nocurses"))) {
+    if (! atoi((char *) (get_conf_value("nocurses")))) {
 
 #ifdef HISTORY_FILE
         if (! save_history(commandline_history, "w")) sc_error("Could not save commandline history");
@@ -795,6 +795,15 @@ void show_version_and_quit() {
 #endif
 #ifdef DFLT_PAGER
     sc_info("-DDFLT_PAGER=\"%s\"", DFLT_PAGER);
+#endif
+#ifdef CONFIG_DIR
+    sc_info("-DCONFIG_DIR=\"%s\"", CONFIG_DIR);
+#endif
+#ifdef CONFIG_FILE
+    sc_info("-DCONFIG_FILE=\"%s\"", CONFIG_FILE);
+#endif
+#ifdef HISTORY_DIR
+    sc_info("-DHISTORY_DIR=\"%s\"", HISTORY_DIR);
 #endif
 #ifdef HISTORY_FILE
     sc_info("-DHISTORY_FILE=\"%s\"", HISTORY_FILE);
