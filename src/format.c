@@ -580,7 +580,7 @@ int engformat(int fmt, int width, int lprecision, double val, char *buf, int buf
     if (fmt == REFMTFIX)
         (void) sprintf(buf,"%*.*f", width, lprecision, val);
     if (fmt == REFMTFLT)
-        (void) sprintf(buf,"%*.*E", width, lprecision, val);
+        (void) sprintf(buf,"%*.*e", width, lprecision, val);
     if (fmt == REFMTENG) {
         if (val == 0e0) {    /* Hack to get zeroes to line up in engr fmt */
             (void) sprintf((buf-1),"%*.*f ", width, lprecision, val);

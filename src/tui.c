@@ -1123,7 +1123,8 @@ int ui_get_formated_value(struct ent ** p, int col, char * value) {
             return 1;
         }
     } else { // there is no format
-        return -1;
+        engformat(realfmt[col], fwidth[col], precision[col], (*p)->v, value, sizeof(char) * FBUFLEN);
+        return 1;
     }
 }
 
