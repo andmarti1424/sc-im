@@ -162,8 +162,8 @@ install :
 	install -d $(DESTDIR)$(prefix)/bin
 	install $(name) $(DESTDIR)$(prefix)/bin/$(name)
 	install -d $(DESTDIR)$(HELPDIR)
-	install doc $(DESTDIR)$(HELPDIR)/$(name)_help
-	install plot_* $(DESTDIR)$(HELPDIR)/
+	install -m 644 doc $(DESTDIR)$(HELPDIR)/$(name)_help
+	install -m 644 plot_* $(DESTDIR)$(HELPDIR)/
 	install -d $(DESTDIR)$(MANDIR)/
 	install -m 644 sc-im.1 $(DESTDIR)$(MANDIR)/$(name).1
 
