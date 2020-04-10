@@ -602,7 +602,7 @@ int engformat(int fmt, int width, int lprecision, double val, char *buf, int buf
             if ((engabs >= 1e18)  && (engabs <  1e21 )) engind=12;
             if ((engabs < 1e-18)  || (engabs >= 1e21 )) {
                 /* Revert to floating point */
-                (void) sprintf(buf,"%*.*E", width, lprecision, val);
+                (void) sprintf(buf,"%*.*e", width, lprecision, val);
             } else {
                 engexp = (double) (engind-6)*3;
                 engmant = val/pow(10.0e0,engexp);

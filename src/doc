@@ -1011,6 +1011,64 @@ Commands for handling cell content:
     described above, but uses the locale's D_FMT format.
 
 ==============================================================================
+&NUMBER FORMATS&
+
+    Numbers follow cell-specific format if set by the :format command.
+    Otherwise they default to column specific format, which can be set by the
+    scripting command FORMAT. The scripting FORMAT command has the syntax
+        FORMAT {COLUMN} {WIDTH} {PRECISION} {TYPE}
+        where TYPE is one of:
+            0   Fixed-point
+            1   Scientific format
+            2   Engineering format
+    The default column format is (10 2 0), meaning width 10, precision 2, and
+    fixed-point. The column format width follows changes to the column width.
+
+    Note: If the exponent is too large (>10^21) or too small (<10^-18), the
+    scientific format is used.
+
+==============================================================================
+&Entering Greek and Math operator symbols&
+
+    Greek letters and a large set of math symbols available in UTF-8
+    can be entered and will display, provided your terminal supports them.
+
+    The full list is given below. In each column, left of the equal sign is
+    the keyboard sequence to be entered, to obtain the character on the right
+    of the equal sign.
+
+    Ctrl-K a * = α	Ctrl-K b * = β	Ctrl-K c * = ξ	Ctrl-K d * = δ
+    Ctrl-K e * = ε	Ctrl-K f * = φ	Ctrl-K g * = γ	Ctrl-K h * = θ
+    Ctrl-K i * = ι	Ctrl-K j * = ϊ	Ctrl-K k * = κ	Ctrl-K l * = λ
+    Ctrl-K m * = μ	Ctrl-K n * = ν	Ctrl-K o * = ο	Ctrl-K p * = π
+    Ctrl-K q * = ψ	Ctrl-K r * = ρ	Ctrl-K s * = σ	Ctrl-K t * = τ
+    Ctrl-K u * = υ	Ctrl-K v * = ϋ	Ctrl-K w * = ω	Ctrl-K x * = χ
+    Ctrl-K y * = η	Ctrl-K z * = ζ
+
+    Ctrl-K A * = Α	Ctrl-K B * = Β	Ctrl-K C * = Ξ	Ctrl-K D * = Δ
+    Ctrl-K E * = Ε	Ctrl-K F * = Φ	Ctrl-K G * = Γ	Ctrl-K H * = Θ
+    Ctrl-K I * = Ι	Ctrl-K J * = Ϊ	Ctrl-K K * = Κ	Ctrl-K L * = Λ
+    Ctrl-K M * = Μ	Ctrl-K N * = Ν	Ctrl-K O * = Ο	Ctrl-K P * = Π
+    Ctrl-K Q * = Ψ	Ctrl-K R * = Ρ	Ctrl-K S * = Σ	Ctrl-K T * = Τ
+    Ctrl-K U * = Υ	Ctrl-K V * = Ϋ	Ctrl-K W * = Ω	Ctrl-K X * = Χ
+    Ctrl-K Y * = Η	Ctrl-K Z * = Ζ
+
+    Ctrl-K * s = ς	Ctrl-K R T = √	Ctrl-K F A = ∀	Ctrl-K T E = ∃
+    Ctrl-K N B = ∇	Ctrl-K ( - = ∈	Ctrl-K - ) = ∋	Ctrl-K d P = ∂
+    Ctrl-K I n = ∫	Ctrl-K I o = ∮	Ctrl-K D I = ∬	Ctrl-K * P = ∏
+    Ctrl-K + Z = ∑	Ctrl-K + - = ±	Ctrl-K - + = ∓	Ctrl-K 0 ( = ∝
+    Ctrl-K 0 0 = ∞	Ctrl-K - L = ∟	Ctrl-K - V = ∠	Ctrl-K P P = ∥
+    Ctrl-K A N = ∧	Ctrl-K O R = ∨	Ctrl-K ) U = ∪	Ctrl-K ( U = ∩
+    Ctrl-K ) C = ⊃	Ctrl-K ( C = ⊂	Ctrl-K ) _ = ⊇	Ctrl-K ( _ = ⊆
+    Ctrl-K . : = ∴	Ctrl-K . : = ∴	Ctrl-K : . = ∵	Ctrl-K ? - = ≃
+    Ctrl-K ? - = ≃	Ctrl-K ! = = ≠	Ctrl-K = 3 = ≡	Ctrl-K = < = ≤
+    Ctrl-K > = = ≥	Ctrl-K < * = ≪	Ctrl-K > * = ≫	Ctrl-K ! < = ≮
+    Ctrl-K ! > = ≯
+
+    Note: It is possible to enter these characters also in the command mode,
+    but your OS may not support filenames containing them.
+
+==============================================================================
 &Other configuration variables&
 
     'autocalc'
@@ -1725,4 +1783,5 @@ Commands for handling cell content:
     NEWLINE_ACTION = {NUMBER}
     TM_GMTOFF
     TM_GMTOFF = {num}
- vim:tw=78:ts=8:ft=help:norl:
+
+vim:tw=78:sw=4:ts=4:et:ft=help:norl:
