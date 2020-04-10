@@ -76,6 +76,7 @@ void store_default_config_values() {
     put(user_conf_d, "numeric_zero", "1");
     put(user_conf_d, "numeric_decimal", "1");
     put(user_conf_d, "overlap", "0");
+    put(user_conf_d, "truncate", "0");
     put(user_conf_d, "debug", "0");
     put(user_conf_d, "ignorecase", "0");
     put(user_conf_d, "trigger", "1");
