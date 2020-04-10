@@ -116,7 +116,8 @@ wint_t get_digraph(wint_t x, wint_t y) {
         if (x >= L'A' && x <= L'Z')
             return digraphs[x - L'A' + 26][1];
     }
-    for (wint_t (*tp)[3] = trigraphs; *tp[0] != L'\0'; tp++) {
+    wint_t (*tp)[3] = trigraphs;
+    for (; *tp[0] != L'\0'; tp++) {
         if (tp[0][0] == x && tp[0][1] == y)
             return tp[0][2];
     }
