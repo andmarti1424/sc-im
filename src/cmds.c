@@ -2758,6 +2758,7 @@ int is_single_command (struct block * buf, long timeout) {
     } else if (curmode == NORMAL_MODE) {
 
         if (buf->value == L'g' && bs == 2 && (
+                 buf->pnext->value == L'f' ||
                  buf->pnext->value == L'M' ||
                  buf->pnext->value == L'g' ||
                  buf->pnext->value == L'G' ||
