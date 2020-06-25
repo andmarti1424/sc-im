@@ -24,6 +24,7 @@ CONFIG_DIR= .config
 LDLIBS += -lm
 
 CFLAGS += -Wall -g
+CFLAGS += -fcommon
 CFLAGS += -DNCURSES
 CFLAGS += -D_XOPEN_SOURCE_EXTENDED -D_GNU_SOURCE
 CFLAGS += -DSNAME=\"$(name)\"
