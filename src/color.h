@@ -57,7 +57,7 @@ struct ucolor {
     int blink;
 };
 
-struct ucolor ucolors[N_INIT_PAIRS];
+extern struct ucolor ucolors[N_INIT_PAIRS];
 
 struct dictionary * get_d_colors_param();
 void start_default_ucolors();

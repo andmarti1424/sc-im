@@ -103,7 +103,6 @@ WINDOW * main_win;
 WINDOW * input_win;
 SCREEN * sstderr;
 SCREEN * sstdout;
-srange * ranges;
 
 /**
  * \brief Called to start UI

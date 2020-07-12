@@ -67,7 +67,6 @@ int cmd_multiplier = 0;    // Multiplier
 int cmd_pending = 0;       // Command pending
 int cmd_digraph = 0;
 static wint_t digraph;
-int shall_quit;            // Break loop if ESC key is pressed
 
 /**
  * \brief Reads stdin for a valid command
