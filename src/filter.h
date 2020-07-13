@@ -44,7 +44,7 @@
 
 struct filter_item {
     char * eval;
-} * filters;
+};
 
 void show_filters();
 void add_filter(char * criteria);

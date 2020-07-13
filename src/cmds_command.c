@@ -81,7 +81,7 @@ extern char * rev;
 extern struct dictionary * user_conf_d;
 
 wchar_t inputline[BUFFERSIZE];
-wchar_t interp_line[BUFFERSIZE];
+extern wchar_t interp_line[BUFFERSIZE];
 int inputline_pos; /**< Position in window. Some chars has 2 chars width */
 // see https://en.wikipedia.org/wiki/Halfwidth_and_fullwidth_forms
 int real_inputline_pos; /**<  Real position in inputline */
