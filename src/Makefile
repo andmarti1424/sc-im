@@ -188,11 +188,14 @@ $(name)qref: sc.h
 
 $(OBJS) : y.tab.h experres.h statres.h
 
-y.tab.h : gram.c
-
-gram.c : gram.y
+y.tab.c: gram.y
 	$(YACC) -d $<
-	test -f y.tab.c && mv y.tab.c gram.c
+
+y.tab.h:	y.tab.c
+	touch $@
+
+gram.c:	y.tab.c
+	mv $< $@
 
 pvmtbl.o: sc.h pvmtbl.c
 	$(CC) ${CFLAGS} -c -DPSC pvmtbl.c
