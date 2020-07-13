@@ -186,22 +186,21 @@ $(name) : $(OBJS)
 $(name)qref: sc.h
 	$(CC) $(CFLAGS) $(LDFLAGS) -DQREF $(QREF_FMT) -DSCNAME=\"$(name)\" -o $(name)qref help.c $(LDLIBS)
 
-$(OBJS) : y.tab.h experres.h statres.h
+$(OBJS) : Makefile gram.h experres.h statres.h
 
-y.tab.h : gram.y gram.c
-	if test -f y.tab.c; then mv y.tab.c gram.c; fi
+gram.h : gram.y | gram.c
 
 gram.c : gram.y
-	$(YACC) -d $<
+	$(YACC) -d $< -o $@
 
 pvmtbl.o: sc.h pvmtbl.c
 	$(CC) ${CFLAGS} -c -DPSC pvmtbl.c
 
-experres.h : gram.y
-	sed -f eres.sed < gram.y > experres.h
+experres.h : gram.y eres.sed
+	sed -f eres.sed < $< > $@
 
-statres.h : gram.y
-	sed -f sres.sed < gram.y > statres.h
+statres.h : gram.y sres.sed
+	sed -f sres.sed < $< > $@
 
 docs:
 	doxygen Doxyfile
@@ -217,7 +216,7 @@ man_uninstall:
 
 clean:
 	rm -f $(OBJS)
-	rm -f *res.h y.tab.h
+	rm -f experres.h statres.h gram.h
 	rm -f core gram.c y.output pxmalloc.c pvmtbl.c tags $(name)qref
 	rm -f qhelp.c $(name)
 	rm -rf ../docs/ 

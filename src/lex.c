@@ -61,7 +61,7 @@
 typedef int bool;
 enum { false, true };
 
-#include "y.tab.h"
+#include "gram.h"
 
 jmp_buf wakeup;
 jmp_buf fpe_buf;

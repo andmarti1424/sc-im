@@ -57,7 +57,7 @@
 #include "xmalloc.h" // for scxfree
 #include "vmtbl.h"   // for growtbl
 #include "utils/string.h" // for add_char
-#include "y.tab.h"   // for yyparse
+#include "gram.h"   // for yyparse
 #include "dep_graph.h"
 #include "freeze.h"
 #ifdef UNDO

@@ -71,7 +71,7 @@
 #include "utils/dictionary.h"
 #include "cmds_edit.h"
 #include "xmalloc.h"
-#include "y.tab.h"
+#include "gram.h"
 #include "xlsx.h"
 #include "xls.h"
 #include "tui.h"
