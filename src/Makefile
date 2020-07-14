@@ -198,10 +198,10 @@ gram.c : y.tab.c
 y.tab.h : gram.y | gram.c
 
 experres.h : gram.y eres.sed
-	sed -f $(lastword $^) < $< > $@
+	sed -f $(word 2, $^) < $< > $@
 
 statres.h : gram.y sres.sed
-	sed -f $(lastword $^) < $< > $@
+	sed -f $(word 2, $^) < $< > $@
 
 pvmtbl.o: pvmtbl.c sc.h
 	$(CC) ${CFLAGS} -c -DPSC $<
