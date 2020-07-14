@@ -188,20 +188,23 @@ $(name)qref: sc.h
 
 $(OBJS) : y.tab.h experres.h statres.h
 
-y.tab.h : gram.y gram.c
-	if test -f y.tab.c; then mv y.tab.c gram.c; fi
-
-gram.c : gram.y
+.INTERMEDIATE: y.tab.c
+y.tab.c	: gram.y
 	$(YACC) -d $<
+
+gram.c : y.tab.c
+	mv $< $@
+
+y.tab.h : gram.y | gram.c
+
+experres.h : gram.y eres.sed
+	sed -f eres.sed < $< > $@
+
+statres.h : gram.y sres.sed
+	sed -f sres.sed < $< > $@
 
 pvmtbl.o: sc.h pvmtbl.c
 	$(CC) ${CFLAGS} -c -DPSC pvmtbl.c
-
-experres.h : gram.y
-	sed -f eres.sed < gram.y > experres.h
-
-statres.h : gram.y
-	sed -f sres.sed < gram.y > statres.h
 
 docs:
 	doxygen Doxyfile
@@ -217,7 +220,7 @@ man_uninstall:
 
 clean:
 	rm -f $(OBJS)
-	rm -f *res.h y.tab.h
+	rm -f experres.h statres.h y.tab.h
 	rm -f core gram.c y.output pxmalloc.c pvmtbl.c tags $(name)qref
 	rm -f qhelp.c $(name)
 	rm -rf ../docs/ 
