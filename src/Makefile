@@ -203,8 +203,8 @@ experres.h : gram.y eres.sed
 statres.h : gram.y sres.sed
 	sed -f $(lastword $^) < $< > $@
 
-pvmtbl.o: sc.h pvmtbl.c
-	$(CC) ${CFLAGS} -c -DPSC $(lastword $^)
+pvmtbl.o: pvmtbl.c sc.h
+	$(CC) ${CFLAGS} -c -DPSC $<
 
 docs:
 	doxygen Doxyfile
