@@ -198,13 +198,13 @@ gram.c : y.tab.c
 y.tab.h : gram.y | gram.c
 
 experres.h : gram.y eres.sed
-	sed -f eres.sed < $< > $@
+	sed -f $(lastword $^) < $< > $@
 
 statres.h : gram.y sres.sed
-	sed -f sres.sed < $< > $@
+	sed -f $(lastword $^) < $< > $@
 
 pvmtbl.o: sc.h pvmtbl.c
-	$(CC) ${CFLAGS} -c -DPSC pvmtbl.c
+	$(CC) ${CFLAGS} -c -DPSC $(lastword $^)
 
 docs:
 	doxygen Doxyfile
