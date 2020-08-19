@@ -92,7 +92,7 @@ void store_default_config_values() {
     put(user_conf_d, "default_copy_to_clipboard_cmd", "");
     #endif
 
-    put(user_conf_d, "copy_to_clipboard_delimited_tab", "0");
+    put(user_conf_d, "copy_to_clipboard_delimited_tab", "1");
 
     #ifdef DEFAULT_PASTE_FROM_CLIPBOARD_CMD
     put(user_conf_d, "default_paste_from_clipboard_cmd", DEFAULT_PASTE_FROM_CLIPBOARD_CMD);
