@@ -156,6 +156,7 @@ L"w",
 L"wq",
 L"x",
 L"valueize",
+L"strtonum",
 (wchar_t *) 0
 };
 
@@ -709,6 +710,18 @@ void do_commandmode(struct block * sb) {
             swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%s%d", coltoa(cf), rf);
             send_to_interp(interp_line);
 
+        } else if ( ! wcsncmp(inputline, L"strtonum", 8) ) {
+            int r = currow, c = curcol, rf = currow, cf = curcol;
+            if (p != -1) {
+                c = sr->tlcol;
+                r = sr->tlrow;
+                rf = sr->brrow;
+                cf = sr->brcol;
+            }
+            swprintf(interp_line, BUFFERSIZE, L"strtonum %s%d:", coltoa(c), r);
+            swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%s%d", coltoa(cf), rf);
+            send_to_interp(interp_line);
+        
         } else if ( ! wcsncmp(inputline, L"cpaste", 6) ) {
             swprintf(interp_line, BUFFERSIZE, L"cpaste");
             send_to_interp(interp_line);

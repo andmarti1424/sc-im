@@ -120,6 +120,7 @@ token S_YANKCOL
 %token S_SEVAL
 %token S_ERROR
 %token S_FILL
+%token S_STRTONUM
 /*
  token S_ADDNOTE
  token S_DELNOTE
@@ -582,6 +583,7 @@ command:
  //   |    S_GOTO WORD             { /* don't repeat last goto on "unintelligible word" */ ; }
 
     |    S_CCOPY range           { copy_to_clipboard($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col); }
+|    S_STRTONUM range           {  convert_string_to_number($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col); } 
     |    S_CPASTE                { paste_from_clipboard(); }
     |    S_LOCK var_or_range     { lock_cells($2.left.vp, $2.right.vp); }
     |    S_UNLOCK var_or_range   { unlock_cells($2.left.vp, $2.right.vp); }

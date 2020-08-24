@@ -58,6 +58,35 @@
 #include "conf.h"
 #include "utils/string.h"
 
+int convert_string_to_number( int r0, int c0, int rn, int cn) {
+	int row, col;
+	register struct ent ** pp;
+    	wchar_t out[FBUFLEN] = L"";
+    for (row = r0; row <= rn; row++) {
+        // ignore hidden rows
+        //if (row_hidden[row]) continue;
+
+        for (pp = ATBL(tbl, row, col = c0); col <= cn; col++, pp++) {
+            // ignore hidden cols
+            //if (col_hidden[col]) continue;
+
+            if (*pp) {
+
+                // If a string exists
+                if ((*pp)->label) {
+		char * num = str_replace((*pp)->label," ","");
+		(*pp)->label ='\0';
+                swprintf(out, BUFFERSIZE, L"let %s%d=%s", coltoa(col), row, num);
+		send_to_interp(out);
+                    }
+		}
+	}
+} 
+
+	return 0;
+
+}
+
 /**
 * \brief Pastes from clipboard
 *
