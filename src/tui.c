@@ -573,7 +573,7 @@ void ui_print_mode() {
     #endif
 
     strm[0] = '\0';
-    if (atoi(get_conf_value("filename_in_status")) && curfile[0]) {
+    if (atoi(get_conf_value("filename_with_mode")) && curfile[0]) {
         sprintf(strm, "%s ", curfile);
     }
 

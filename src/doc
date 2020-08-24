@@ -1092,7 +1092,7 @@ Commands for handling cell content:
     Disabled by default, set this variable to enable external functions.  See
     @ext function below.
 
-    'filename_in_status' [default 0]
+    'filename_with_mode' [default 0]
     Set it to '1' to display current filename along with the current mode at
     the right end of the status line.
     Set it to '0', to display the current mode only.
