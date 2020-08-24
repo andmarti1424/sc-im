@@ -566,11 +566,16 @@ void ui_clr_header(int i) {
 
 void ui_print_mode() {
     unsigned int row = 0; // Print mode in first row
-    char strm[22] = "";
+    char strm[PATHLEN+22] = "";
 
     #ifdef USECOLORS
     ui_set_ucolor(input_win, &ucolors[MODE]);
     #endif
+
+    strm[0] = '\0';
+    if (atoi(get_conf_value("filename_with_mode")) && curfile[0]) {
+        sprintf(strm, "%s ", curfile);
+    }
 
     if (curmode == NORMAL_MODE) {
         strcat(strm, " -- NORMAL --");
