@@ -572,7 +572,8 @@ void ui_print_mode() {
     ui_set_ucolor(input_win, &ucolors[MODE]);
     #endif
 
-    if (curfile[0]) {
+    strm[0] = '\0';
+    if (atoi(get_conf_value("filename_in_status")) && curfile[0]) {
         sprintf(strm, "%s ", curfile);
     }
 

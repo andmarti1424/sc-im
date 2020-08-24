@@ -234,6 +234,7 @@ token S_YANKCOL
 %token K_NONUMERIC_DECIMAL
 %token K_NUMERIC_ZERO
 %token K_NONUMERIC_ZERO
+%token K_FILENAME_IN_STATUS
 %token K_OVERLAP
 %token K_NOOVERLAP
 %token K_TRUNCATE
@@ -1045,10 +1046,15 @@ setlist :
 
 /* things that you can 'set' */
 setitem :
-         K_OVERLAP '=' NUMBER     {  if ($3 == 0) parse_str(user_conf_d, "overlap=0", TRUE);
+         K_FILENAME_IN_STATUS '=' NUMBER {  if ($3 == 0) parse_str(user_conf_d, "filename_in_status=0", TRUE);
+                                     else         parse_str(user_conf_d, "filename_in_status=1", TRUE); }
+    |    K_FILENAME_IN_STATUS     {               parse_str(user_conf_d, "filename_in_status=1", TRUE); }
+
+    |    K_OVERLAP '=' NUMBER     {  if ($3 == 0) parse_str(user_conf_d, "overlap=0", TRUE);
                                      else         parse_str(user_conf_d, "overlap=1", TRUE); }
     |    K_OVERLAP                {               parse_str(user_conf_d, "overlap=1", TRUE); }
     |    K_NOOVERLAP              {               parse_str(user_conf_d, "overlap=0", TRUE); }
+
     |    K_TRUNCATE '=' NUMBER     {  if ($3 == 0) parse_str(user_conf_d, "truncate=0", TRUE);
                                      else         parse_str(user_conf_d, "truncate=1", TRUE); }
     |    K_TRUNCATE               {               parse_str(user_conf_d, "truncate=1", TRUE); }
