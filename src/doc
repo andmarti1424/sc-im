@@ -661,6 +661,12 @@ Commands for handling cell content:
 
                 ":filteroff" turns off the filters.
 
+    :strtonum {range}
+                Converts string field containing digits to a numeric field.
+                So you can calculate with it. 
+                Example: 
+                label A0 = "5" -> let A0 = 5 (internal representation)
+
     :int "{string}"
                 Send a command to the interpreter.
                 Example:          :int goto B2
