@@ -385,10 +385,11 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
                 // Write ucolors
                 if ((*pp)->ucolor != NULL) {
 
-                    char strcolor[BUFFERSIZE];
+                    char strcolorbuf[BUFFERSIZE];
+                    char * strcolor = strcolorbuf;
                     strcolor[0] = 0;
+                    strcolor[1] = 0;
 
-                    char * gap_to_previous = "";
                     // decompile int value of color to its string description
                     if ((*pp)->ucolor->fg != NONE_COLOR && (*pp)->ucolor->fg != DEFAULT_COLOR) {
                         linelim=0;
@@ -396,9 +397,8 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
                         decompile(e, 0);
                         uppercase(line);
                         del_char(line, 0);
-                        sprintf(strcolor, "fg=%.*s", BUFFERSIZE-4, &line[0]);
+                        sprintf(strcolor, " fg=%.*s", BUFFERSIZE-5, &line[0]);
                         free(e);
-                        gap_to_previous = " ";
                     }
                     if ((*pp)->ucolor->bg != NONE_COLOR && (*pp)->ucolor->bg != DEFAULT_COLOR) {
                         linelim=0;
@@ -406,17 +406,19 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
                         decompile(e, 0);
                         uppercase(line);
                         del_char(line, 0);
-                        sprintf(strcolor + strlen(strcolor), "%sbg=%s", gap_to_previous, &line[0]);
+                        sprintf(strcolor + strlen(strcolor), " bg=%s", &line[0]);
                         free(e);
-                        gap_to_previous = " ";
                     }
 
-                    if ((*pp)->ucolor->bold)      sprintf(strcolor + strlen(strcolor), "%sbold=1", gap_to_previous);
-                    if ((*pp)->ucolor->dim)       sprintf(strcolor + strlen(strcolor), "%sdim=1", gap_to_previous);
-                    if ((*pp)->ucolor->reverse)   sprintf(strcolor + strlen(strcolor), "%sreverse=1", gap_to_previous);
-                    if ((*pp)->ucolor->standout)  sprintf(strcolor + strlen(strcolor), "%sstandout=1", gap_to_previous);
-                    if ((*pp)->ucolor->underline) sprintf(strcolor + strlen(strcolor), "%sunderline=1", gap_to_previous);
-                    if ((*pp)->ucolor->blink)     sprintf(strcolor + strlen(strcolor), "%sblink=1", gap_to_previous);
+                    if ((*pp)->ucolor->bold)      sprintf(strcolor + strlen(strcolor), " bold=1");
+                    if ((*pp)->ucolor->dim)       sprintf(strcolor + strlen(strcolor), " dim=1");
+                    if ((*pp)->ucolor->reverse)   sprintf(strcolor + strlen(strcolor), " reverse=1");
+                    if ((*pp)->ucolor->standout)  sprintf(strcolor + strlen(strcolor), " standout=1");
+                    if ((*pp)->ucolor->underline) sprintf(strcolor + strlen(strcolor), " underline=1");
+                    if ((*pp)->ucolor->blink)     sprintf(strcolor + strlen(strcolor), " blink=1");
+
+                    // Remove the leading space
+                    strcolor++;
 
                     // previous implementation
                     //(void) fprintf(f, "cellcolor %s%d \"%s\"\n", coltoa((*pp)->col), (*pp)->row, strcolor);
