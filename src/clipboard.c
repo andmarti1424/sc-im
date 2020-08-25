@@ -58,6 +58,35 @@
 #include "conf.h"
 #include "utils/string.h"
 
+int convert_string_to_number( int r0, int c0, int rn, int cn) {
+	int row, col;
+	register struct ent ** pp;
+    	wchar_t out[FBUFLEN] = L"";
+    for (row = r0; row <= rn; row++) {
+        // ignore hidden rows
+        //if (row_hidden[row]) continue;
+
+        for (pp = ATBL(tbl, row, col = c0); col <= cn; col++, pp++) {
+            // ignore hidden cols
+            //if (col_hidden[col]) continue;
+
+            if (*pp) {
+
+                // If a string exists
+                if ((*pp)->label) {
+		char * num = str_replace((*pp)->label," ","");
+		(*pp)->label ='\0';
+                swprintf(out, BUFFERSIZE, L"let %s%d=%s", coltoa(col), row, num);
+		send_to_interp(out);
+                    }
+		}
+	}
+} 
+
+	return 0;
+
+}
+
 /**
 * \brief Pastes from clipboard
 *
@@ -99,10 +128,10 @@ int paste_from_clipboard() {
         while( token != NULL ) {
             if (r > MAXROWS - GROWAMT - 1 || c > ABSMAXCOLS - 1) break;
             clean_carrier(token);
-            //char * st = str_replace (token, " ", ""); //trim
+            char * num = str_replace (token, " ", ""); //trim
             char * st = token;
-            if (strlen(st) && isnumeric(st))
-                swprintf(line_interp, BUFFERSIZE, L"let %s%d=%s", coltoa(c), r, st);
+            if (strlen(num) && isnumeric(num))
+                swprintf(line_interp, BUFFERSIZE, L"let %s%d=%s", coltoa(c), r, num);
             else
                 swprintf(line_interp, BUFFERSIZE, L"label %s%d=\"%s\"", coltoa(c), r, st);
             if (strlen(st)) send_to_interp(line_interp);
@@ -191,6 +220,7 @@ int save_plain(FILE * fout, int r0, int c0, int rn, int cn) {
     char formated_s[FBUFLEN] = "";
     int res = -1;
     int align = 1;
+    int emptyfield=-1;	
 
     for (row = r0; row <= rn; row++) {
         // ignore hidden rows
@@ -199,6 +229,7 @@ int save_plain(FILE * fout, int r0, int c0, int rn, int cn) {
         for (pp = ATBL(tbl, row, col = c0); col <= cn; col++, pp++) {
             // ignore hidden cols
             //if (col_hidden[col]) continue;
+	    emptyfield=-1;
 
             if (*pp) {
                 num [0] = '\0';
@@ -219,6 +250,9 @@ int save_plain(FILE * fout, int r0, int c0, int rn, int cn) {
                         sprintf(num, "%.*f", precision[col], (*pp)->v);
                     }
                 }
+                else {
+                     emptyfield++;
+               }
 
                 // If a string exists
                 if ((*pp)->label) {
@@ -231,6 +265,12 @@ int save_plain(FILE * fout, int r0, int c0, int rn, int cn) {
                     } else if (res == 0) {                    // res must ¿NOT? be zero for label to be printed
                         text[0] = '\0';
                     }
+                }
+                else {
+                     emptyfield++;
+               }
+                if(emptyfield){
+                   fwprintf(fout, L"\t");
                 }
                 if (! atoi(get_conf_value("copy_to_clipboard_delimited_tab"))) {
                     pad_and_align(text, num, fwidth[col], align, 0, out);
