@@ -3041,6 +3041,10 @@ void decompile(register struct enode *e, int priority) {
             for (s = "@white"; (line[linelim++] = *s++); );
             linelim--;
             break;
+    case DEFAULT_COLOR:
+            for (s = "@default_color"; (line[linelim++] = *s++); );
+            linelim--;
+            break;
     default:
             decompile(e->e.o.left, mypriority);
             line[linelim++] = e->op;

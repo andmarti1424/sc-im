@@ -391,7 +391,7 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
                     strcolor[1] = 0;
 
                     // decompile int value of color to its string description
-                    if ((*pp)->ucolor->fg != NONE_COLOR && (*pp)->ucolor->fg != DEFAULT_COLOR) {
+                    if ((*pp)->ucolor->fg != NONE_COLOR) {
                         linelim=0;
                         struct enode * e = new((*pp)->ucolor->fg, (struct enode *)0, (struct enode *)0);
                         decompile(e, 0);
@@ -400,7 +400,7 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
                         sprintf(strcolor, " fg=%.*s", BUFFERSIZE-5, &line[0]);
                         free(e);
                     }
-                    if ((*pp)->ucolor->bg != NONE_COLOR && (*pp)->ucolor->bg != DEFAULT_COLOR) {
+                    if ((*pp)->ucolor->bg != NONE_COLOR) {
                         linelim=0;
                         struct enode * e = new((*pp)->ucolor->bg, (struct enode *)0, (struct enode *)0);
                         decompile(e, 0);
