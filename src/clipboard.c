@@ -56,13 +56,18 @@
 #include "cmds.h"
 #include "file.h"
 #include "conf.h"
+#include "undo.h"
 #include "utils/string.h"
 
+
+// 
 int convert_string_to_number( int r0, int c0, int rn, int cn) {
 	int row, col;
 	register struct ent ** pp;
-    	wchar_t out[FBUFLEN] = L"";
-    for (row = r0; row <= rn; row++) {
+	#ifdef UNDO
+	create_undo_action();
+	#endif
+    		for (row = r0; row <= rn; row++) {
         // ignore hidden rows
         //if (row_hidden[row]) continue;
 
@@ -72,17 +77,25 @@ int convert_string_to_number( int r0, int c0, int rn, int cn) {
 
             if (*pp) {
 
-                // If a string exists
-                if ((*pp)->label) {
-		char * num = str_replace((*pp)->label," ","");
-		(*pp)->label ='\0';
-                swprintf(out, BUFFERSIZE, L"let %s%d=%s", coltoa(col), row, num);
-		send_to_interp(out);
+                if (isnumeric((*pp)->label)) {
+			#ifdef UNDO
+			copy_to_undostruct(row,col,row,col,'d');
+			#endif
+			char * num = str_replace((*pp)->label," ","");
+			(*pp)->label ='\0'; //This updates the label clears it
+			(*pp)->v = atof(num);
+			(*pp)->flags |= (is_changed|is_valid); //You need to set the flags to see the changes
+			(*pp)->flags &= ~(iscleared);
+			#ifdef UNDO
+			copy_to_undostruct(row,col,row,col,'a');
+			#endif
                     }
 		}
 	}
 } 
-
+	#ifdef UNDO
+	end_undo_action();
+	#endif
 	return 0;
 
 }

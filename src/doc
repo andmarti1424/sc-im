@@ -664,6 +664,9 @@ Commands for handling cell content:
     :strtonum {range}
                 Converts string field containing digits to a numeric field.
                 So you can calculate with it. 
+                When a field is not a digit the field is unchanged
+                So you can select your entire spreadsheet and convert without
+                changing the textfields
                 Example: 
                 label A0 = "5" -> let A0 = 5 (internal representation)
 
