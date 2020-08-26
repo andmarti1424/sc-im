@@ -431,7 +431,7 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
                     if ( c > 0 && *ATBL(tbl, r, c-1) != NULL)
                          a = (*ATBL(tbl, r, c-1))->ucolor;
 
-                    if ( (u != NULL) && (c <= maxcol) && ( c == 0 || ( a == NULL ) || ( a != NULL && ! same_ucolor( a, u ) ))) {
+                    if ( *strcolor != '\0' && (u != NULL) && (c <= maxcol) && ( c == 0 || ( a == NULL ) || ( a != NULL && ! same_ucolor( a, u ) ))) {
                         while (c_aux <= maxcol && *ATBL(tbl, r, c_aux) != NULL && same_ucolor( (*ATBL(tbl, r, c_aux))->ucolor, (*pp)->ucolor ))
                             c_aux++;
                         fprintf(f, "cellcolor %s%d", coltoa((*pp)->col), (*pp)->row);
