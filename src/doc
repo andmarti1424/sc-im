@@ -921,6 +921,11 @@ Commands for handling cell content:
     c-a         Moves to first cell of spreadsheet.
 
     y           Yank the selected cell or range and exit Visual mode.
+    p           Paste the previously yanked cell or range into the Visual
+                Range repeating to fill up the range
+    P           Works like 'p' except that all cell references are adjusted
+                in the same way that they are for the copy command.
+
     x , dd      Delete the current range, saving its content to the
                 yankbuffer.
     H           Move to the first row visible on screen.

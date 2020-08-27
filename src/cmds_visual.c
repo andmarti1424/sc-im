@@ -433,6 +433,45 @@ void do_visualmode(struct block * buf) {
         exit_visualmode();
         chg_mode('.');
         ui_show_header();
+	
+   // 'p' normal paste
+   // 'P' Works like 'p' except that all cell references are adjusted.
+    } else if (buf->value == 'P' || buf->value == 'p') {
+	struct ent * yl = get_yanklist();
+	int type_paste = (buf->value == 'P') ? 'c' : 'a' ;
+	if( yl != NULL) { 
+		int colsize = -(yl->col); //calculate colsize for correct repeating if paste area is bigger than yank area  
+		int rowsize = -(yl->row); //calculate rowsize
+		while (yl->next != NULL) {yl = yl->next;} //get the last one to calculated size of yank_area
+		colsize +=  (yl->col +1); //calculate size
+		rowsize +=  (yl->row +1); //calculate size    
+#ifdef DEBUG
+		char str[20];
+		sprintf(str,"RowSize:%d ColSize:%d Type Paste:%d",rowsize,colsize,type_paste);
+#endif
+		for (int row = r->tlrow; row <= r->brrow; row+=rowsize){
+			for (int col = r->tlcol; col <= r->brcol; col+=colsize) {
+				currow = row;
+				curcol = col;
+				paste_yanked_ents(0,type_paste);
+			}
+		}
+		exit_visualmode();
+		chg_mode('.');
+		ui_show_header();
+#ifdef DEBUG
+		sc_info(str);
+#endif
+#ifndef DEBUG
+		sc_info("Nice Pasting :-)");
+#endif
+	}
+	else{
+		exit_visualmode();
+		chg_mode('.');
+		ui_show_header();
+		sc_info("Nothing to Paste");
+	}
 
     // left / right / center align
     } else if (buf->value == L'{' || buf->value == L'}' || buf->value == L'|') {
