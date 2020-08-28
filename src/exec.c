@@ -57,6 +57,8 @@
 #include "sc.h"
 #include "main.h"     // exit_app
 
+#include "clipboard.h"
+
 /**
  * \brief TODO Document exec_cmd()
  *
@@ -65,7 +67,7 @@
  * \return none
  */
 
-int exec_cmd (char * line) {
+int exec_cmd(char * line) {
 #ifdef NCURSES
     int waitres;
 
@@ -132,4 +134,23 @@ int exec_cmd (char * line) {
     }
 #endif
     return 0;
+}
+
+int read_external_cmd(char * cmd_line){
+	FILE *p;
+
+	p = popen(cmd_line,"r"); //Execute external command
+
+	if( p == NULL)
+	{
+	return 1;
+	}
+	paste_into_worksheet_from_file(p);
+	pclose(p);
+	return(0);
+
+
+
+
+
 }

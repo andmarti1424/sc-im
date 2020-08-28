@@ -126,38 +126,10 @@ int paste_from_clipboard() {
     sprintf(syscmd + strlen(syscmd), " >> %s", template);
     system(syscmd);
 
-    // traverse the temp file
-    FILE * fp = fdopen(fd, "r");
-    char line_in[BUFFERSIZE];
-    wchar_t line_interp[FBUFLEN] = L"";
-    int c, r = currow;
-    char * token;
-    char delim[2] = { '\t', '\0' } ;
 
-    while ( ! feof(fp) && (fgets(line_in, sizeof(line_in), fp) != NULL) ) {
-        // Split string using the delimiter
-        token = xstrtok(line_in, delim);
-        c = curcol;
-        while( token != NULL ) {
-            if (r > MAXROWS - GROWAMT - 1 || c > ABSMAXCOLS - 1) break;
-            clean_carrier(token);
-            char * num = str_replace (token, " ", ""); //trim
-            char * st = token;
-            if (strlen(num) && isnumeric(num))
-                swprintf(line_interp, BUFFERSIZE, L"let %s%d=%s", coltoa(c), r, num);
-            else
-                swprintf(line_interp, BUFFERSIZE, L"label %s%d=\"%s\"", coltoa(c), r, st);
-            if (strlen(st)) send_to_interp(line_interp);
-            c++;
-            token = xstrtok(NULL, delim);
-            //free(st);
-            if (c > maxcol) maxcol = c;
-        }
-        r++;
-        if (r > maxrow) maxrow = r;
-        if (r > MAXROWS - GROWAMT - 1 || c > ABSMAXCOLS - 1) break;
-    }
-    sc_info("Content pasted from clipboard");
+
+ FILE * fp = fdopen(fd, "r");
+if (!paste_into_worksheet_from_file(fp)){ sc_info("Content pasted from clipboard");}
 
     // close file descriptor
     close(fd);
@@ -196,6 +168,9 @@ int copy_to_clipboard(int r0, int c0, int rn, int cn) {
     sprintf(syscmd, "%s", get_conf_value("default_copy_to_clipboard_cmd"));
     sprintf(syscmd + strlen(syscmd), " %s", template);
     system(syscmd);
+
+
+	paste_into_worksheet_from_file(fp);
 
     sc_info("Content copied to clipboard");
 
@@ -302,4 +277,44 @@ int save_plain(FILE * fout, int r0, int c0, int rn, int cn) {
         if (row != rn) fwprintf(fout, L"\n");
     }
     return 0;
+}
+int paste_into_worksheet_from_file(FILE * fp){
+
+    char line_in[BUFFERSIZE];
+    wchar_t line_interp[FBUFLEN] = L"";
+    int c, r = currow;
+    char * token;
+    char delim[2] = { '\t', '\0' } ;
+
+    while ( ! feof(fp) && (fgets(line_in, sizeof(line_in), fp) != NULL) ) {
+        // Split string using the delimiter
+        token = xstrtok(line_in, delim);
+        c = curcol;
+        while( token != NULL ) {
+            if (r > MAXROWS - GROWAMT - 1 || c > ABSMAXCOLS - 1) {
+		sc_error("Max Capacity of Spreadsheet reached"); 
+		return 1;
+		}
+
+            clean_carrier(token);
+            char * num = str_replace (token, " ", ""); //trim
+            char * st = token;
+            if (strlen(num) && isnumeric(num))
+                swprintf(line_interp, BUFFERSIZE, L"let %s%d=%s", coltoa(c), r, num);
+            else
+                swprintf(line_interp, BUFFERSIZE, L"label %s%d=\"%s\"", coltoa(c), r, st);
+            if (strlen(st)) send_to_interp(line_interp);
+            c++;
+            token = xstrtok(NULL, delim);
+            //free(st);
+            if (c > maxcol) maxcol = c;
+        }
+        r++;
+        if (r > maxrow) maxrow = r;
+        if (r > MAXROWS - GROWAMT - 1 || c > ABSMAXCOLS - 1) {
+		sc_error("Max Capacity of Spreadsheet reached"); 
+		return 1;
+		}
+    }
+	return 0;
 }

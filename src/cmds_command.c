@@ -862,6 +862,14 @@ void do_commandmode(struct block * sb) {
                     ! wcsncmp(inputline, L"nunmap", 6) ) {
             send_to_interp(inputline);
 
+        } else if ( ! wcsncmp(inputline, L"r!", 2) ) {
+            char line [BUFFERSIZE];
+            wcstombs(line, inputline, BUFFERSIZE);
+            int found = str_in_str(line, " ");
+            if (found == -1) found++;
+            del_range_chars(line, 0, found);
+            read_external_cmd(line);
+
         } else if ( ! wcsncmp(inputline, L"!", 1) ) {
             char line [BUFFERSIZE];
             wcstombs(line, inputline, BUFFERSIZE);

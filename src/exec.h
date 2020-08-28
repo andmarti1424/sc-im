@@ -43,3 +43,4 @@
  */
 
 int exec_cmd (char * line);
+int read_external_cmd(char * line);
