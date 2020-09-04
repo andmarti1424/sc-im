@@ -2818,6 +2818,8 @@ int is_single_command (struct block * buf, long timeout) {
                  buf->value == L'#' ||
                  buf->value == L'^' ||
                  buf->value == L'y' ||
+                 buf->value == L'p' ||
+                 buf->value == L'P' ||
                  buf->value == L'x' ||
                  buf->value == L'w' ||
                  buf->value == L'b' ||
