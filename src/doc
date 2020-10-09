@@ -1447,8 +1447,8 @@ Commands for handling cell content:
 &LUA Scripts and Triggers&
 
         SC-IM was extended with LUA capabilities and also provided with helper
-        Function for manipulate SC-IM data with Lua at runtime. Since it is a
-        fully functional Lua, you can use all Lua packages also for sc-im lua
+        functions to manipulate SC-IM data with Lua at runtime. Since it is a
+        fully functional Lua, you can also use all Lua packages for sc-im lua
         scripts. Use luarocks to install additional packages.
 
         Function provided to lua script/triggers :
