@@ -792,6 +792,9 @@ Commands for handling cell content:
 
     :! {cmd}    Executes shell command {cmd}.
 
+    :!r {cmd}   Executes shell command {cmd} and reads the result back into
+                the spreadsheet like the :cpaste function does.
+
     :autojus {column}
     :autojus {column}:{column}
                 Auto-resize the column or column range to fit their contents.

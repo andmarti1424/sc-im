@@ -56,13 +56,18 @@
 #include "cmds.h"
 #include "file.h"
 #include "conf.h"
+#include "undo.h"
 #include "utils/string.h"
 
+
+// 
 int convert_string_to_number( int r0, int c0, int rn, int cn) {
 	int row, col;
 	register struct ent ** pp;
-    	wchar_t out[FBUFLEN] = L"";
-    for (row = r0; row <= rn; row++) {
+	#ifdef UNDO
+	create_undo_action();
+	#endif
+    		for (row = r0; row <= rn; row++) {
         // ignore hidden rows
         //if (row_hidden[row]) continue;
 
@@ -72,17 +77,25 @@ int convert_string_to_number( int r0, int c0, int rn, int cn) {
 
             if (*pp) {
 
-                // If a string exists
-                if ((*pp)->label) {
-		char * num = str_replace((*pp)->label," ","");
-		(*pp)->label ='\0';
-                swprintf(out, BUFFERSIZE, L"let %s%d=%s", coltoa(col), row, num);
-		send_to_interp(out);
+                if (isnumeric((*pp)->label)) {
+			#ifdef UNDO
+			copy_to_undostruct(row,col,row,col,'d');
+			#endif
+			char * num = str_replace((*pp)->label," ","");
+			(*pp)->label ='\0'; //This updates the label clears it
+			(*pp)->v = atof(num);
+			(*pp)->flags |= (is_changed|is_valid); //You need to set the flags to see the changes
+			(*pp)->flags &= ~(iscleared);
+			#ifdef UNDO
+			copy_to_undostruct(row,col,row,col,'a');
+			#endif
                     }
 		}
 	}
 } 
-
+	#ifdef UNDO
+	end_undo_action();
+	#endif
 	return 0;
 
 }
@@ -183,6 +196,9 @@ int copy_to_clipboard(int r0, int c0, int rn, int cn) {
     sprintf(syscmd, "%s", get_conf_value("default_copy_to_clipboard_cmd"));
     sprintf(syscmd + strlen(syscmd), " %s", template);
     system(syscmd);
+
+
+	paste_into_worksheet_from_file(fp);
 
     sc_info("Content copied to clipboard");
 
@@ -289,4 +305,44 @@ int save_plain(FILE * fout, int r0, int c0, int rn, int cn) {
         if (row != rn) fwprintf(fout, L"\n");
     }
     return 0;
+}
+int paste_into_worksheet_from_file(FILE * fp){
+
+    char line_in[BUFFERSIZE];
+    wchar_t line_interp[FBUFLEN] = L"";
+    int c, r = currow;
+    char * token;
+    char delim[2] = { '\t', '\0' } ;
+
+    while ( ! feof(fp) && (fgets(line_in, sizeof(line_in), fp) != NULL) ) {
+        // Split string using the delimiter
+        token = xstrtok(line_in, delim);
+        c = curcol;
+        while( token != NULL ) {
+            if (r > MAXROWS - GROWAMT - 1 || c > ABSMAXCOLS - 1) {
+		sc_error("Max Capacity of Spreadsheet reached"); 
+		return 1;
+		}
+
+            clean_carrier(token);
+            char * num = str_replace (token, " ", ""); //trim
+            char * st = token;
+            if (strlen(num) && isnumeric(num))
+                swprintf(line_interp, BUFFERSIZE, L"let %s%d=%s", coltoa(c), r, num);
+            else
+                swprintf(line_interp, BUFFERSIZE, L"label %s%d=\"%s\"", coltoa(c), r, st);
+            if (strlen(st)) send_to_interp(line_interp);
+            c++;
+            token = xstrtok(NULL, delim);
+            //free(st);
+            if (c > maxcol) maxcol = c;
+        }
+        r++;
+        if (r > maxrow) maxrow = r;
+        if (r > MAXROWS - GROWAMT - 1 || c > ABSMAXCOLS - 1) {
+		sc_error("Max Capacity of Spreadsheet reached"); 
+		return 1;
+		}
+    }
+	return 0;
 }
