@@ -133,3 +133,16 @@ int exec_cmd (char * line) {
 #endif
     return 0;
 }
+int read_external_cmd(char * cmd_line){
+	FILE *p;
+
+	p = popen(cmd_line,"r"); //Execute external command
+
+	if( p == NULL)
+	{
+	return 1;
+	}
+	paste_into_worksheet_from_file(p);
+	pclose(p);
+	return(0);
+}
