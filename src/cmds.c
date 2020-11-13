@@ -400,6 +400,7 @@ void copyent(register struct ent * n, register struct ent * p, int dr, int dc, i
             n->ucolor->fg = p->ucolor->fg;
             n->ucolor->bg = p->ucolor->bg;
             n->ucolor->bold = p->ucolor->bold;
+            n->ucolor->italic = p->ucolor->italic;
             n->ucolor->dim = p->ucolor->dim;
             n->ucolor->reverse = p->ucolor->reverse;
             n->ucolor->standout = p->ucolor->standout;

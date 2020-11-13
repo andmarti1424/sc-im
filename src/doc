@@ -723,7 +723,8 @@ Commands for handling cell content:
                 Change a color definition.
 
                 {key} is one of the following:
-                type, fg, bg, bold, dim, reverse, standout, underline, blink
+                type, fg, bg, bold, italic, dim, reverse, standout, underline,
+                blink
                 Note: The type, fg, and bg keys are mandatory.
 
                 The value of type shall be one of the following:

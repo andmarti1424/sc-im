@@ -573,9 +573,11 @@ int export_xlsx(char * filename, int r0, int c0, int rn, int cn) {
                 else if ((*pp)->label)                                // right align
                     format_set_align(format, LXW_ALIGN_RIGHT);
 
-                // handle bold and underline
+                // handle bold, italic and underline
                 if ((*pp)->ucolor != NULL && (*pp)->ucolor->bold)
                     format_set_bold(format);
+                else if ((*pp)->ucolor != NULL && (*pp)->ucolor->italic)
+                    format_set_italic(format);
                 else if ((*pp)->ucolor != NULL && (*pp)->ucolor->underline)
                     format_set_underline(format, LXW_UNDERLINE_SINGLE);
 
