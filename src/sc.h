@@ -283,6 +283,7 @@ struct go_save {
 #define FROW        (OP_BASE + 82)
 #define FCOL        (OP_BASE + 83)
 #define LUA         (OP_BASE + 84)
+#define FACT        (OP_BASE + 85)
 
 /* flag values */
 #define is_valid      0001

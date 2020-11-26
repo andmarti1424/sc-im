@@ -1289,6 +1289,14 @@ double eval(register struct ent * ent, register struct enode * e) {
     case MAGENTA: return ((double) COLOR_MAGENTA);
     case CYAN:   return ((double) COLOR_CYAN);
     case WHITE:  return ((double) COLOR_WHITE);
+    case FACT:
+        {
+            int total = eval(ent, e->e.o.left);
+            for (int i = eval(ent, e->e.o.left) - 1; i > 0; i--) {
+                total *= i;
+	    }
+	    return total > 0 ? total : 1;
+        }
     default:    sc_error ("Illegal numeric expression");
                 exprerr = 1;
     }
@@ -3045,6 +3053,7 @@ void decompile(register struct enode *e, int priority) {
             for (s = "@default_color"; (line[linelim++] = *s++); );
             linelim--;
             break;
+    case FACT:    one_arg("@fact(", e); break;
     default:
             decompile(e->e.o.left, mypriority);
             line[linelim++] = e->op;
