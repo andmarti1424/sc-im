@@ -1528,9 +1528,7 @@ int plugin_exists(char * name, int len, char * path) {
         }
     }
     if ((HomeDir = getenv("HOME"))) {
-        strcpy((char *) path, HomeDir);
-        strcat((char *) path, "/.scim/");
-        strncat((char *) path, name, len);
+        sprintf((char *) path, "%s/%s/%s/%s", HomeDir, CONFIG_DIR, "sc-im", name);
         if ((fp = fopen((char *) path, "r"))) {
             fclose(fp);
             return 1;
