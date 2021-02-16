@@ -153,34 +153,34 @@ void load_history(struct history * h, wchar_t mode) {
     char infofile[PATHLEN];
     wchar_t linea[FBUFLEN];
     int c;
-    char * home, *xdghome;
+    char * home;
     FILE * f;
 
-    if ((home = getenv("HOME"))) {
-        if ((xdghome = getenv("XDG_CACHE_HOME"))) {
-            sprintf(infofile, "%s/%s", xdghome,HISTORY_FILE);
-        } else {
-            /* Default to compile time HISTORY_DIR if XDG_CACHE_HOME isn't set. */
-            sprintf(infofile, "%s/%s/%s", home,HISTORY_DIR,HISTORY_FILE);
-        }
-        if ((c = open(infofile, O_RDONLY)) > -1) {
-            close(c);
-            f = fopen(infofile, "r");
-            if (f == NULL) return;
-            while ( feof(f) == 0 ) {
-                if (!fgetws(linea, sizeof(linea) / sizeof(*linea), f)) break;
-                int s = wcslen(linea)-1;
-                del_range_wchars(linea, s, s);
+    if ((home = getenv("XDG_CACHE_HOME"))) {
+        /* Try XDG_CACHE_HOME first */
+         sprintf(infofile, "%s/%s", home,HISTORY_FILE);
+    } else if ((home = getenv("HOME"))) {
+        /* Fallback */
+        sprintf(infofile, "%s/%s/%s", home,HISTORY_DIR,HISTORY_FILE);
+    }
 
-                if (linea[0] == mode && mode == L':') {
-                    del_range_wchars(linea, 0, 0);
-                    add(h, linea);
-                } else if (mode != L':' && (linea[0] == L'=' || linea[0] == L'<' || linea[0] == L'>' || linea[0] == L'\\')) {
-                    add(h, linea);
-                }
+    if ((c = open(infofile, O_RDONLY)) > -1) {
+        close(c);
+        f = fopen(infofile, "r");
+        if (f == NULL) return;
+        while ( feof(f) == 0 ) {
+            if (!fgetws(linea, sizeof(linea) / sizeof(*linea), f)) break;
+            int s = wcslen(linea)-1;
+            del_range_wchars(linea, s, s);
+
+            if (linea[0] == mode && mode == L':') {
+                del_range_wchars(linea, 0, 0);
+                add(h, linea);
+            } else if (mode != L':' && (linea[0] == L'=' || linea[0] == L'<' || linea[0] == L'>' || linea[0] == L'\\')) {
+                add(h, linea);
             }
-            fclose(f);
         }
+        fclose(f);
     }
 
     return;
@@ -194,37 +194,39 @@ void load_history(struct history * h, wchar_t mode) {
 
 int save_history(struct history * h, char * mode) {
     char infofile [PATHLEN];
-    char * home, * xdghome;
+    char * home;
     FILE * f;
     int i;
     struct hlist * nl = h->list;
-    if ((home = getenv("HOME"))) {
-        char history_dir[PATHLEN];
-        if ((xdghome = getenv("XDG_CACHE_HOME"))) {
-            sprintf(history_dir, "%s/%s", home,xdghome);
-            mkdir(history_dir,0777);
-            sprintf(infofile, "%s/%s", history_dir,HISTORY_FILE);
-        } else {
-            sprintf(history_dir, "%s/%s", home,HISTORY_DIR);
-            mkdir(history_dir,0777);
-            sprintf(infofile, "%s/%s/%s", home,HISTORY_DIR,HISTORY_FILE);
-        }
-        f = fopen(infofile, mode);
-        if (f == NULL) return 0;
-        // Go to the end
-        for (i=1; i < h->len; i++) {
-            nl = nl->pnext;
-        }
-        // Traverse list back to front, so the history is saved in chronological order
-        for (i=0; i < h->len; i++) {
-            if (! strcmp(mode, "w")) fwprintf(f, L":"); // mode 'w' means we are saving the command mode history
-            fwprintf(f, L"%ls\n", nl->line);
-            nl = nl->pant;
-        }
-        fclose(f);
-        return 1;
+    char history_dir[PATHLEN];
+
+    if ((home = getenv("XDG_CACHE_HOME"))) {
+        sprintf(history_dir, "%s", home);
+        mkdir(history_dir,0777);
+        sprintf(infofile, "%s/%s", history_dir, HISTORY_FILE);
+    } else if ((home = getenv("HOME"))) {
+        sprintf(history_dir, "%s/%s", home, HISTORY_DIR);
+        mkdir(history_dir,0777);
+        sprintf(infofile, "%s/%s", history_dir, HISTORY_FILE);
+    } else {
+        /* If both HOME and XDG_CACHE_HOME aren't set, abandon all hope */
+        return 0;
     }
-    return 0;
+
+    f = fopen(infofile, mode);
+    if (f == NULL) return 0;
+    // Go to the end
+    for (i=1; i < h->len; i++) {
+        nl = nl->pnext;
+    }
+    // Traverse list back to front, so the history is saved in chronological order
+    for (i=0; i < h->len; i++) {
+        if (! strcmp(mode, "w")) fwprintf(f, L":"); // mode 'w' means we are saving the command mode history
+        fwprintf(f, L"%ls\n", nl->line);
+        nl = nl->pant;
+    }
+    fclose(f);
+    return 1;
 }
 
 /**
