@@ -14,7 +14,7 @@ MANDIR  = $(prefix)/share/man/man1
 # This is where the history file go
 HISTORY_DIR= .cache
 # This is where the config file go
-CONFIG_DIR= .config
+CONFIG_DIR= .config/sc-im
 
 # Change these to your liking or use `make CC=gcc` etc
 #CC   = cc
