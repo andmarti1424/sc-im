@@ -11,10 +11,10 @@ LIBDIR  = $(prefix)/share/doc/$(name)
 # This is where the man page goes.
 MANDIR  = $(prefix)/share/man/man1
 
-# This is where the history file go
+# History directory, relative to $HOME
 HISTORY_DIR= .cache
 HISTORY_FILE=sc-iminfo
-# This is where the config file go
+# Configuration directory, relative to $HOME
 CONFIG_DIR= .config/sc-im
 CONFIG_FILE=scimrc
 
