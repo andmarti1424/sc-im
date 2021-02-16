@@ -153,11 +153,16 @@ void load_history(struct history * h, wchar_t mode) {
     char infofile[PATHLEN];
     wchar_t linea[FBUFLEN];
     int c;
-    char * home;
+    char * home, *xdghome;
     FILE * f;
 
     if ((home = getenv("HOME"))) {
-        sprintf(infofile, "%s/%s/%s", home,HISTORY_DIR,HISTORY_FILE);
+        if ((xdghome = getenv("XDG_CACHE_HOME"))) {
+            sprintf(infofile, "%s/%s", xdghome,HISTORY_FILE);
+        } else {
+            /* Default to compile time HISTORY_DIR if XDG_CACHE_HOME isn't set. */
+            sprintf(infofile, "%s/%s/%s", home,HISTORY_DIR,HISTORY_FILE);
+        }
         if ((c = open(infofile, O_RDONLY)) > -1) {
             close(c);
             f = fopen(infofile, "r");
@@ -189,15 +194,21 @@ void load_history(struct history * h, wchar_t mode) {
 
 int save_history(struct history * h, char * mode) {
     char infofile [PATHLEN];
-    char * home;
+    char * home, * xdghome;
     FILE * f;
     int i;
     struct hlist * nl = h->list;
     if ((home = getenv("HOME"))) {
         char history_dir[PATHLEN];
-        sprintf(history_dir, "%s/%s", home,HISTORY_DIR);
-        mkdir(history_dir,0777);
-        sprintf(infofile, "%s/%s/%s", home,HISTORY_DIR,HISTORY_FILE);
+        if ((xdghome = getenv("XDG_CACHE_HOME"))) {
+            sprintf(history_dir, "%s/%s", home,xdghome);
+            mkdir(history_dir,0777);
+            sprintf(infofile, "%s/%s", history_dir,HISTORY_FILE);
+        } else {
+            sprintf(history_dir, "%s/%s", home,HISTORY_DIR);
+            mkdir(history_dir,0777);
+            sprintf(infofile, "%s/%s/%s", home,HISTORY_DIR,HISTORY_FILE);
+        }
         f = fopen(infofile, mode);
         if (f == NULL) return 0;
         // Go to the end
