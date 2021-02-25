@@ -1266,8 +1266,12 @@ double eval(register struct ent * ent, register struct enode * e) {
     case LMAX:   return dolmax(ent, e);
     case LMIN:   return dolmin(ent, e);
     case NVAL:   return (donval(seval(ent, e->e.o.left), eval(ent, e->e.o.right)));
-    case MYROW:  return ((double) (gmyrow + rowoffset));
-    case MYCOL:  return ((double) (gmycol + coloffset));
+    case MYROW:
+                 if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
+                 return ((double) (gmyrow + rowoffset));
+    case MYCOL:
+                 if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
+                 return ((double) (gmycol + coloffset));
     case LASTROW: return ((double) maxrow);
     case LASTCOL: return ((double) maxcol);
     case ERR_:
