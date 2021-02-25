@@ -1272,8 +1272,12 @@ double eval(register struct ent * ent, register struct enode * e) {
     case MYCOL:
                  if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
                  return ((double) (gmycol + coloffset));
-    case LASTROW: return ((double) maxrow);
-    case LASTCOL: return ((double) maxcol);
+    case LASTROW:
+                 if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
+                 return ((double) maxrow);
+    case LASTCOL:
+                 if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
+                 return ((double) maxcol);
     case ERR_:
                  cellerror = CELLERROR;
                  if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
@@ -1773,8 +1777,10 @@ char * seval(register struct ent * ent, register struct enode * se) {
     case SUBSTR: return (dosubstr(seval(ent, se->e.o.left),
                 (int) eval(NULL, se->e.o.right->e.o.left) - 1,
                 (int) eval(NULL, se->e.o.right->e.o.right) - 1));
-    case COLTOA: return (strcpy(scxmalloc( (size_t) 10),
-                   coltoa((int) eval(NULL, se->e.o.left))));
+    case COLTOA:
+                 if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
+                 return (strcpy(scxmalloc( (size_t) 10),
+                             coltoa((int) eval(NULL, se->e.o.left))));
     case CHR: return (strcpy(scxmalloc( (size_t) 10), dochr(eval(NULL, se->e.o.left))));
     case FILENAME: {
              int n = eval(NULL, se->e.o.left);
