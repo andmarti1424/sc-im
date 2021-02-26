@@ -1731,7 +1731,8 @@ char * seval(register struct ent * ent, register struct enode * se) {
             }
             return (p);
     }
-    case '#':    return (docat(seval(ent, se->e.o.left), seval(ent, se->e.o.right)));
+    case '#':
+            return (docat(seval(ent, se->e.o.left), seval(ent, se->e.o.right)));
     case 'f':
              {
              int rtmp = rowoffset;
@@ -1781,7 +1782,9 @@ char * seval(register struct ent * ent, register struct enode * se) {
                  if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
                  return (strcpy(scxmalloc( (size_t) 10),
                              coltoa((int) eval(NULL, se->e.o.left))));
-    case CHR: return (strcpy(scxmalloc( (size_t) 10), dochr(eval(NULL, se->e.o.left))));
+    case CHR:
+             if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
+             return (strcpy(scxmalloc( (size_t) 10), dochr(eval(NULL, se->e.o.left))));
     case FILENAME: {
              int n = eval(NULL, se->e.o.left);
              char *s = strrchr(curfile, '/');
@@ -3306,7 +3309,7 @@ void edits(int row, int col, int saveinfile) {
         (void) sprintf(line+linelim, "\"");
         linelim += 1;
     }
-}
+ }
 
 /**
  * \brief TODO Document dateformat()
