@@ -439,6 +439,7 @@ void do_visualmode(struct block * buf) {
     } else if (buf->value == 'P' || buf->value == 'p') {
 	struct ent * yl = get_yanklist();
 	int type_paste = (buf->value == 'P') ? 'c' : 'a' ;
+    int row, col;
 	if( yl != NULL) { 
 		int colsize = -(yl->col); //calculate colsize for correct repeating if paste area is bigger than yank area  
 		int rowsize = -(yl->row); //calculate rowsize
@@ -449,8 +450,8 @@ void do_visualmode(struct block * buf) {
 		char str[20];
 		sprintf(str,"RowSize:%d ColSize:%d Type Paste:%d",rowsize,colsize,type_paste);
 #endif
-		for (int row = r->tlrow; row <= r->brrow; row+=rowsize){
-			for (int col = r->tlcol; col <= r->brcol; col+=colsize) {
+		for (row = r->tlrow; row <= r->brrow; row+=rowsize){
+			for (col = r->tlcol; col <= r->brcol; col+=colsize) {
 				currow = row;
 				curcol = col;
 				paste_yanked_ents(0,type_paste);
