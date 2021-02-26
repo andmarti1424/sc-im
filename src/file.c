@@ -411,6 +411,7 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
                     }
 
                     if ((*pp)->ucolor->bold)      sprintf(strcolor + strlen(strcolor), " bold=1");
+                    if ((*pp)->ucolor->italic)    sprintf(strcolor + strlen(strcolor), " italic=1");
                     if ((*pp)->ucolor->dim)       sprintf(strcolor + strlen(strcolor), " dim=1");
                     if ((*pp)->ucolor->reverse)   sprintf(strcolor + strlen(strcolor), " reverse=1");
                     if ((*pp)->ucolor->standout)  sprintf(strcolor + strlen(strcolor), " standout=1");

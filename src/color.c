@@ -86,6 +86,7 @@ void start_default_ucolors() {
     int i;
     for (i=0; i < N_INIT_PAIRS; i++) {
         ucolors[ i ].bold      = 0;
+        ucolors[ i ].italic    = 0;
         ucolors[ i ].dim       = 0;
         ucolors[ i ].reverse   = 0;
         ucolors[ i ].standout  = 0;
@@ -291,6 +292,7 @@ void chg_color(char * str) {
     ucolors[ type ].fg = atoi(get(d_colors_param, get(d, "fg")));
     ucolors[ type ].bg = atoi(get(d_colors_param, get(d, "bg")));
     if (((cl = get(d, "bold")) != NULL)      && cl[0] != '\0')     ucolors[ type ].bold      = atoi(get(d, "bold"));
+    if (((cl = get(d, "italic")) != NULL)    && cl[0] != '\0')     ucolors[ type ].italic    = atoi(get(d, "italic"));
     if (((cl = get(d, "dim")) != NULL)       && cl[0] != '\0')     ucolors[ type ].dim       = atoi(get(d, "dim"));
     if (((cl = get(d, "reverse")) != NULL)   && cl[0] != '\0')     ucolors[ type ].reverse   = atoi(get(d, "reverse"));
     if (((cl = get(d, "standout")) != NULL)  && cl[0] != '\0')     ucolors[ type ].standout  = atoi(get(d, "standout"));
@@ -372,6 +374,7 @@ void color_cell(int r, int c, int rf, int cf, char * str) {
                 n->ucolor->fg = NONE_COLOR;
                 n->ucolor->bg = NONE_COLOR;
                 n->ucolor->bold = 0;
+                n->ucolor->italic = 0;
                 n->ucolor->dim = 0;
                 n->ucolor->reverse = 0;
                 n->ucolor->standout = 0;
@@ -386,6 +389,7 @@ void color_cell(int r, int c, int rf, int cf, char * str) {
                 n->ucolor->fg = atoi(get(d_colors_param, get(d, "fg")));
 
             if ((cl = get(d, "bold"))      != NULL && cl[0] != '\0')   n->ucolor->bold      = atoi(get(d, "bold"));
+            if ((cl = get(d, "italic"))    != NULL && cl[0] != '\0')   n->ucolor->italic    = atoi(get(d, "italic"));
             if ((cl = get(d, "dim") )      != NULL && cl[0] != '\0')   n->ucolor->dim       = atoi(get(d, "dim"));
             if ((cl = get(d, "reverse"))   != NULL && cl[0] != '\0')   n->ucolor->reverse   = atoi(get(d, "reverse"));
             if ((cl = get(d, "standout"))  != NULL && cl[0] != '\0')   n->ucolor->standout  = atoi(get(d, "standout"));
@@ -486,6 +490,7 @@ int same_ucolor(struct ucolor * u, struct ucolor * v) {
     if (u->fg != v->fg)               return 0;
     if (u->bg != v->bg)               return 0;
     if (u->bold != v->bold)           return 0;
+    if (u->italic != v->italic)       return 0;
     if (u->dim != v->dim)             return 0;
     if (u->reverse != v->reverse)     return 0;
     if (u->standout != v->standout)   return 0;

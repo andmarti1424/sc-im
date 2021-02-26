@@ -1331,6 +1331,7 @@ void ui_set_ucolor(WINDOW * w, struct ucolor * uc) {
     short color;
     long attr = A_NORMAL;
     if (uc->bold)      attr |= A_BOLD;
+    if (uc->italic)    attr |= A_ITALIC;
     if (uc->dim)       attr |= A_DIM;
     if (uc->reverse)   attr |= A_REVERSE;
     if (uc->standout)  attr |= A_STANDOUT;

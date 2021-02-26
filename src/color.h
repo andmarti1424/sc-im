@@ -50,6 +50,7 @@ struct ucolor {
     int fg;
     int bg;
     int bold;
+    int italic;
     int dim;
     int reverse;
     int standout;
