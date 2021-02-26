@@ -11,6 +11,11 @@ Use '/' to search for a pattern in the help.
 
 Use ':q<Enter>' to go back to the spreadsheet.
 
+
+
+Important !!:
+    Please keep your config file in ~/.config/scimrc, and not in ~/.scimrc
+
 ==============================================================================
 SC-IM has the following modes:
 
