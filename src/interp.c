@@ -1252,7 +1252,9 @@ double eval(register struct ent * ent, register struct enode * e) {
     case MONTH:  return (dotime(MONTH, eval(ent, e->e.o.left)));
     case DAY:    return (dotime(DAY, eval(ent, e->e.o.left)));
     case YEAR:   return (dotime(YEAR, eval(ent, e->e.o.left)));
-    case NOW:    return (dotime(NOW, (double) 0.0));
+    case NOW:
+                 if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
+                 return (dotime(NOW, (double) 0.0));
     case DTS:    return (dodts((int) eval(ent, e->e.o.left),
                     (int)eval(ent, e->e.o.right->e.o.left),
                     (int)eval(ent, e->e.o.right->e.o.right)));
