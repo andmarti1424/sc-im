@@ -376,6 +376,7 @@ token K_WHITE
 %token K_SET8BIT
 %token K_ASCII
 %token K_CHR
+%token K_FACT
 
 %right ';'
 %left '?' ':'
@@ -969,6 +970,7 @@ term:     var                     { $$ = new_var(O_VAR, $1); }
         | '@' K_CYAN              { $$ = new(CYAN, ENULL, ENULL); }
         | '@' K_WHITE             { $$ = new(WHITE, ENULL, ENULL); }
 */
+        | '@' K_FACT '(' e ')'     { $$ = new(FACT, $4, ENULL); }
         ;
 
 /* expressions */
