@@ -1585,8 +1585,7 @@ Commands for handling cell content:
 
     EXECUTE "{STRING}"
         Call an internal COMMAND MODE command. Examples:
-        EXECUTE "load! /tmp/test.xls"
-        EXECUTE "e! mkd /path/test.md"
+        EXECUTE "load /tmp/test.csv"
 
     RECALC
         Recalculates a formulas in all cells
