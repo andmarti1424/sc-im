@@ -730,7 +730,8 @@ Commands for handling cell content:
                 {key} is one of the following:
                 type, fg, bg, bold, italic, dim, reverse, standout, underline,
                 blink
-                Note: The type, fg, and bg keys are mandatory.
+                Notes: The type, fg, and bg keys are mandatory.
+                       Some terminal dont support some attributes, such as italic.
 
                 The value of type shall be one of the following:
                      HEADINGS, MODE, NUMB, STRG, DATEF, EXPRESSION,
