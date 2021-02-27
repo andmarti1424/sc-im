@@ -77,7 +77,7 @@ See [this wiki page](https://github.com/andmarti1424/sc-im/wiki/Ubuntu-with-XLSX
 
 ### Configuration
 
-The `scimrc` file can be used to confire `SC-IM`. The file should be placed in the `~/.config` directory. 
+The `scimrc` file can be used to configure `SC-IM`. The file should be placed in the `~/.config` directory. 
 
 Here is an example `~/.config/scimrc` :
 
