@@ -472,6 +472,7 @@ double doprod(int minr, int minc, int maxr, int maxc, struct enode * e) {
     return v;
 }
 
+
 /**
  * \brief TODO Document doavg()
  *
@@ -1262,7 +1263,7 @@ double eval(register struct ent * ent, register struct enode * e) {
                     (int)eval(ent, e->e.o.right->e.o.left),
                     (int)eval(ent, e->e.o.right->e.o.right)));
     case STON:
-                 if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
+                 //if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
                  return (doston(seval(ent, e->e.o.left)));
     case ASCII:  return (doascii(seval(ent, e->e.o.left)));
     case SLEN:   return (doslen(seval(ent, e->e.o.left)));
