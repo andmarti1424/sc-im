@@ -1229,6 +1229,8 @@ void send_to_interp(wchar_t * oper) {
 
     linelim = 0;
     yyparse();
+    linelim = -1;
+    line[0]='\0';
     if (atoi(get_conf_value("autocalc")) && ! loading) EvalAll();
     return;
 }

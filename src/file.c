@@ -324,7 +324,7 @@ int writefile(char * fname, int r0, int c0, int rn, int cn, int verbose) {
  * \param[in] c0
  * \param[in] rn
  * \param[in] cn
- * 
+ *
  * \return none
  */
 
@@ -510,7 +510,7 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
  * \brief TODO Document write_franges()
  *
  * \param[in] f file pointer
- * 
+ *
  * \return none
  */
 
@@ -964,7 +964,7 @@ void print_options(FILE *f) {
  * \brief Import csv to sc
  *
  * \param[in] fname file name
- * \param[in] d
+ * \param[in] d = delim character
  *
  * \return 0 on success; -1 on error
  */
@@ -993,8 +993,18 @@ int import_csv(char * fname, char d) {
     char line_in[max];
     rewind(f);
 
+    // Check the numbers of lines in file
+    int max_lines = count_lines(f);
+    rewind(f);
+
+    int i=0;
+
     // CSV file traversing
     while ( ! feof(f) && (fgets(line_in, sizeof(line_in), f) != NULL) ) {
+        // show file loading progress
+        i++; // increase number of line;
+        if (i % 10 == 0 ) sc_info("loading line %d of %d", i, max_lines);
+
         // this hack is for importing file that have DOS eol
         int l = strlen(line_in);
         while (l--)
@@ -1028,7 +1038,7 @@ int import_csv(char * fname, char d) {
             char * st = str_replace (token, "\"", "''"); //replace double quotes inside string
 
             // number import
-            if (isnumeric(st) && strlen(st) && ! atoi(get_conf_value("import_delimited_as_text"))
+            if (strlen(st) && isnumeric(st) && ! atoi(get_conf_value("import_delimited_as_text"))
             ) {
                 //wide char
                 swprintf(line_interp, BUFFERSIZE, L"let %s%d=%s", coltoa(c), r, st);
@@ -1282,7 +1292,7 @@ void export_markdown(char * fname, int r0, int c0, int rn, int cn) {
  * \param[in] c0
  * \param[in] rn
  * \param[in] cn
- * 
+ *
  * \return none
  */
 
@@ -1476,9 +1486,9 @@ void unspecial(FILE * f, char * str, int delim) {
 }
 
 /**
- * \brief Check the mas length of lines in a file
+ * \brief Check what is the max length of all the lines in a file
  *
- * \details Check masimum length of lines in a file. Note: 
+ * \details Check the maximum length of lines in a file. Note:
  * FILE * f shall be opened.
  *
  * \param[in] f file pointer
@@ -1502,6 +1512,28 @@ int max_length(FILE * f) {
         c = fgetc(f);
     }
     return max + 1;
+}
+
+/**
+ * \brief Check the number of lines of a file
+ *
+ * \details Check the numbers of lines of a file. it count \n chars.
+ * FILE * f shall be opened.
+ *
+ * \param[in] f file pointer
+ * \return number
+ */
+
+int count_lines(FILE * f) {
+    int count = 0;
+    if (f == NULL) return count;
+    int c = fgetc(f);
+
+    while (c != EOF) {
+        if (c == '\n') count++;
+        c = fgetc(f);
+    }
+    return count;
 }
 
 /**

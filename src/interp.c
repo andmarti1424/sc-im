@@ -713,7 +713,7 @@ double dotts(int hr, int min, int sec) {
 
 /**
  * \brief TODO Document dorow()
- * 
+ *
  * \param[in] ep
  *
  * \return none
@@ -1049,8 +1049,8 @@ double eval(register struct ent * ent, register struct enode * e) {
                 e->e.k = (double) 0;
                 cellerror = CELLERROR;
             }
-            if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
-
+            //if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
+            // Commented 06/03/2021 for #issue 499
             return (e->e.k);
     case GETENT:
             if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
