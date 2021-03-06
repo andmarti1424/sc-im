@@ -321,6 +321,7 @@ token S_YANKCOL
 %token K_VLOOKUP
 %token K_INDEX
 %token K_STINDEX
+%token K_GETENT
 /*
 token K_AUTO
 token K_AUTOINSERT
@@ -798,6 +799,16 @@ term:     var                     { $$ = new_var(O_VAR, $1); }
         | '@' K_FIXED term        { $$ = new('f', $3, ENULL); }
         | '(' '@' K_FIXED ')' term
                                   { $$ = new('F', $5, ENULL); }
+        | '@' K_GETENT '(' NUMBER ',' NUMBER ')' {
+                                      struct ent_ptr ep;
+                                      ep.vp = lookat($4, $6);
+                                      ep.vf = 0;
+                                      $$ = new(GETENT, new_var(O_VAR, ep), ENULL);
+
+                                      // Work on issue #451.
+                                      // @sum(A0:@getent(@lastrow, 2))
+                                      // @sum(A0:@getent("A",@lastrow))
+                                  }
         | '@' K_SUM '(' var_or_range ')'
                                   { $$ = new(SUM, new_range(REDUCE | SUM, $4), ENULL); }
         | '@' K_SUM  '(' range ',' e ')'

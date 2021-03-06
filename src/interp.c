@@ -1052,6 +1052,9 @@ double eval(register struct ent * ent, register struct enode * e) {
             if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
 
             return (e->e.k);
+    case GETENT:
+            if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
+            return (eval(ent, e->e.o.left));
     case O_VAR:    {
             struct ent * vp = e->e.v.vp;
             //FIXME sc_debug("vp %d %d", vp->row, vp->col);
@@ -2921,7 +2924,12 @@ void decompile(register struct enode *e, int priority) {
             (void) sprintf(line+linelim, "\"%s\"", e->e.s);
             linelim += strlen(line+linelim);
             break;
-
+    case GETENT:
+            ;
+            struct enode * a = e->e.o.left;
+            (void) sprintf(line+linelim, "%s(%d,%d)", "@getent", a->e.v.vp->row, a->e.v.vp->col);
+            linelim += strlen(line+linelim);
+            break;
     case SUM    : index_arg("@sum", e); break;
     case PROD   : index_arg("@prod", e); break;
     case AVG    : index_arg("@avg", e); break;
@@ -2931,7 +2939,6 @@ void decompile(register struct enode *e, int priority) {
     case MIN    : index_arg("@min", e); break;
     case REDUCE | 'R': range_arg("@rows(", e); break;
     case REDUCE | 'C': range_arg("@cols(", e); break;
-
     case FROW:   one_arg("@frow(", e); break;
     case FCOL:   one_arg("@fcol(", e); break;
     case ABS:    one_arg("@abs(", e); break;

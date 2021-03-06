@@ -61,6 +61,7 @@ double doston(char * s);
 int    doslen(char * s);
 double doeqs(char * s1, char * s2);
 struct ent * getent(char * colstr, double rowdoub);
+struct ent * dogetent(int r, int c);
 double donval(char * colstr, double rowdoub);
 double dolmax(struct ent * e, struct enode * ep);
 double dolmin(struct ent * e, struct enode * ep);
