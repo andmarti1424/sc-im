@@ -1308,7 +1308,8 @@ double eval(register struct ent * ent, register struct enode * e) {
     case FACT:
         {
             double total = eval(ent, e->e.o.left);
-            for (int i = eval(ent, e->e.o.left) - 1; i > 0; i--) {
+            int i;
+            for (i = eval(ent, e->e.o.left) - 1; i > 0; i--) {
                 total *= i;
             }
             return total > 0 ? total : 1;
