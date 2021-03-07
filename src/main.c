@@ -282,12 +282,12 @@ int main (int argc, char ** argv) {
     // 2. loadrc
     loadrc();
 
-    // 3. check input from stdin (pipeline)
+    // 3. read sc file passed as argv
+    load_sc();
+
+    // 4. check input from stdin (pipeline)
     // and send it to interp
     read_stdin();
-
-    // 4. read sc file passed as argv
-    load_sc();
 
     // change curmode to NORMAL_MODE
     chg_mode('.');
@@ -576,6 +576,7 @@ void read_argv(int argc, char ** argv) {
 
 void load_sc() {
     char name[PATHLEN];
+    strcpy(name, ""); //force name to be empty
     #ifdef NO_WORDEXP
     size_t len;
     #else
@@ -846,6 +847,7 @@ void show_usage_and_quit(){
 \n  --export_csv                Export to csv without interaction\
 \n  --export_tab                Export to tab without interaction\
 \n  --export_txt                Export to txt without interaction\
+\n  --export_mkd                Export to markdown without interaction\
 \n  --external_functions        Set variable 'external_functions'\
 \n  --half_page_scroll          Set variable 'half_page_scroll'\
 \n  --ignorecase                Set variable 'ignorecase'\
