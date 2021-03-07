@@ -68,9 +68,11 @@ CFLAGS += -DDEFAULT_PASTE_FROM_CLIPBOARD_CMD=\""tmux show-buffer"\"
 #CFLAGS += -DDEFAULT_PASTE_FROM_CLIPBOARD_CMD=\""xclip -o -selection clipboard"\"
 #CFLAGS += -DDEFAULT_PASTE_FROM_CLIPBOARD_CMD=\""pbpaste"\"
 
-# Uncomment for basic XLS import. Requires libxlsreader
-#CFLAGS += -DXLS
-#LDLIBS += -lxlsreader
+# NOTE: libxlsreader (libxls) is required for xls file reading support
+ifneq (,$(wildcard /usr/include/xls.h)$(wildcard /usr/local/include/xls.h))
+  CFLAGS += -DXLS
+  LDLIBS += -lxlsreader
+endif
 
 # Autobackup. If you unset this, no backup check nor autobackup feature will be available.
 CFLAGS += -DAUTOBACKUP
