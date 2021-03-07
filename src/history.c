@@ -198,16 +198,16 @@ int save_history(struct history * h, char * mode) {
     FILE * f;
     int i;
     struct hlist * nl = h->list;
-    char history_dir[PATHLEN];
+    char history_dir[PATHLEN-(sizeof HISTORY_FILE)];
 
     if ((home = getenv("XDG_CACHE_HOME"))) {
-        sprintf(history_dir, "%s", home);
+        snprintf(history_dir, PATHLEN-(sizeof HISTORY_FILE), "%s", home);
         mkdir(history_dir,0777);
-        sprintf(infofile, "%s/%s", history_dir, HISTORY_FILE);
+        snprintf(infofile, PATHLEN, "%s/%s", history_dir, HISTORY_FILE);
     } else if ((home = getenv("HOME"))) {
-        sprintf(history_dir, "%s/%s", home, HISTORY_DIR);
+        snprintf(history_dir, PATHLEN-(sizeof HISTORY_FILE), "%s/%s", home, HISTORY_DIR);
         mkdir(history_dir,0777);
-        sprintf(infofile, "%s/%s", history_dir, HISTORY_FILE);
+        snprintf(infofile, PATHLEN, "%s/%s", history_dir, HISTORY_FILE);
     } else {
         /* If both HOME and XDG_CACHE_HOME aren't set, abandon all hope */
         return 0;
