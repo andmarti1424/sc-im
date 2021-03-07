@@ -181,6 +181,31 @@ int modcheck() {
 }
 
 /**
+ * \brief Return the proper delimiter for delimiter separated files.
+ *
+ * \details This function checks the type of a file as well as txtdelim conf value
+ *
+ * \return one of , ; \t
+ */
+
+char get_delim(char *type) {
+    char delim = ',';
+    if (!strcasecmp(type, "tsv") || !strcasecmp(type, "tab"))
+        delim = '\t';
+
+    if (get_conf_value("txtdelim") != NULL) {
+        if (!strcasecmp(get_conf_value("txtdelim"), "\\t")) {
+            delim = '\t';
+        } else if (!strcasecmp(get_conf_value("txtdelim"), ",")) {
+            delim = ',';
+        } else if (!strcasecmp(get_conf_value("txtdelim"), ";")) {
+            delim = ';';
+        }
+    }
+    return delim;
+}
+
+/**
  * \brief TODO Handle the save file process
  *
  * This funciton handles the save file process in SC-IM format..
@@ -254,7 +279,7 @@ int savefile() {
 
     // treat csv
     } else if (strlen(curfile) > 4 && (! strcasecmp( & curfile[strlen(curfile)-4], ".csv"))) {
-        export_delim(curfile, ',', 0, 0, maxrow, maxcol, 1);
+        export_delim(curfile, get_delim("csv"), 0, 0, maxrow, maxcol, 1);
         modflg = 0;
         return 0;
     // treat tab
@@ -711,20 +736,7 @@ sc_readfile_result readfile(char * fname, int eraseflg) {
         ! strcasecmp( & fname[len-4], ".tsv") || ! strcasecmp( & fname[len-4], ".tab") ||
         ! strcasecmp( & fname[len-4], ".txt") )){
 
-        char delim = ',';
-        if ( ! strcasecmp( & fname[len-4], ".tsv") ||  ! strcasecmp( & fname[len-4], ".tab"))
-            delim = '\t';
-
-        if (get_conf_value("txtdelim") != NULL) {
-            if (! strcasecmp(get_conf_value("txtdelim"), "\\t")) {
-                delim = '\t';
-            } else if (! strcasecmp(get_conf_value("txtdelim"), ",")) {
-                delim = ',';
-            } else if (! strcasecmp(get_conf_value("txtdelim"), ";")) {
-                delim = ';';
-            }
-        }
-        import_csv(fname, delim); // csv tsv tab txt delim import
+        import_csv(fname, get_delim(&fname[len-3])); // csv tsv tab txt delim import
         strcpy(curfile, fname);
         modflg = 0;
         loading = 0;
@@ -1144,7 +1156,7 @@ void do_export(int r0, int c0, int rn, int cn) {
 
     // Call export routines
     if (strcmp(type_export, "csv") == 0) {
-        export_delim(ruta, ',', r0, c0, rn, cn, 1);
+        export_delim(ruta, get_delim("csv"), r0, c0, rn, cn, 1);
     } else if (strcmp(type_export, "tab") == 0) {
         export_delim(ruta, '\t', r0, c0, rn, cn, 1);
     } else if (strcmp(type_export, "txt") == 0) {
@@ -1608,7 +1620,7 @@ void * do_autobackup() {
         write_fd(f, 0, 0, maxrow, maxcol);
         fclose(f);
     } else if (! strcmp(&name[strlen(name)-8], ".csv.bak")) {
-        export_delim(namenew, ',', 1, 0, maxrow, maxcol, 0);
+        export_delim(namenew, get_delim("csv"), 1, 0, maxrow, maxcol, 0);
 #ifdef XLSX_EXPORT
     } else if (! strcmp(&name[strlen(name)-9], ".xlsx.bak")) {
         export_delim(namenew, ',', 0, 0, maxrow, maxcol, 0);
