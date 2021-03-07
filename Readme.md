@@ -77,16 +77,16 @@ See [this wiki page](https://github.com/andmarti1424/sc-im/wiki/Ubuntu-with-XLSX
 
 ### Configuration
 
-The `scimrc` file can be used to configure `SC-IM`. The file should be placed in the `~/.config` directory. 
+The `scimrc` file can be used to configure `SC-IM`. The file should be placed in the `~/.config/sc-im` directory.
 
-Here is an example `~/.config/scimrc` :
+Here is an example `~/.config/sc-im/scimrc` :
 
     set autocalc
     set numeric
     set numeric_decimal=0
     set overlap
     set xlsx_readformulas
-    
+
 Other configuration variables are listed in the [help file](https://raw.githubusercontent.com/andmarti1424/sc-im/freeze/src/doc).
 
 ### Helping us
