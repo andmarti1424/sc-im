@@ -135,7 +135,15 @@ void loadrc(void) {
     char rcpath[PATHLEN];
     char * home;
 
-    if ((home = getenv("HOME"))) {
+    if ((home = getenv("XDG_CONFIG_HOME"))) {
+        char config_dir[PATHLEN];
+        sprintf(config_dir, "%s/sc-im", home);
+        mkdir(config_dir,0777);
+        sprintf(rcpath, "%s/%s", config_dir, CONFIG_FILE);
+        (void) readfile(rcpath, 0);
+    }
+    /* Default to compile time if XDG_CONFIG_HOME not found */
+    else if ((home = getenv("HOME"))) {
         char config_dir[PATHLEN];
         sprintf(config_dir, "%s/%s", home,CONFIG_DIR);
         mkdir(config_dir,0777);
@@ -1572,10 +1580,25 @@ int plugin_exists(char * name, int len, char * path) {
             return 1;
         }
     }
+    /* Check XDG_CONFIG_HOME */
+    if ((HomeDir = getenv("XDG_CONFIG_HOME"))) {
+        sprintf((char *) path, "%s/sc-im/%s", HomeDir, name);
+        if ((fp = fopen((char *) path, "r"))) {
+            fclose(fp);
+            return 1;
+        }
+    }
+    /* Check compile time path (default ~/.config/sc-im) */
     if ((HomeDir = getenv("HOME"))) {
-        strcpy((char *) path, HomeDir);
-        strcat((char *) path, "/.scim/");
-        strncat((char *) path, name, len);
+        sprintf((char *) path, "%s/%s/%s", HomeDir, CONFIG_DIR, name);
+        if ((fp = fopen((char *) path, "r"))) {
+            fclose(fp);
+            return 1;
+        }
+    }
+    /* LEGACY PATH */
+    if ((HomeDir = getenv("HOME"))) {
+        sprintf((char *) path, "%s/.scim/%s", HomeDir, name);
         if ((fp = fopen((char *) path, "r"))) {
             fclose(fp);
             return 1;
