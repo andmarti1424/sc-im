@@ -136,10 +136,10 @@ void loadrc(void) {
     char * home;
 
     if ((home = getenv("XDG_CONFIG_HOME"))) {
-        char config_dir[PATHLEN];
-        sprintf(config_dir, "%s/sc-im", home);
+        char config_dir[PATHLEN-(sizeof CONFIG_FILE)];
+        snprintf(config_dir, PATHLEN-(sizeof CONFIG_FILE), "%s/sc-im", home);
         mkdir(config_dir,0777);
-        sprintf(rcpath, "%s/%s", config_dir, CONFIG_FILE);
+        snprintf(rcpath, PATHLEN, "%s/%s", config_dir, CONFIG_FILE);
         (void) readfile(rcpath, 0);
     }
     /* Default to compile time if XDG_CONFIG_HOME not found */
@@ -147,7 +147,7 @@ void loadrc(void) {
         char config_dir[PATHLEN];
         sprintf(config_dir, "%s/%s", home,CONFIG_DIR);
         mkdir(config_dir,0777);
-        sprintf(rcpath, "%s/%s/%s", home,CONFIG_DIR,CONFIG_FILE);
+        snprintf(rcpath, PATHLEN, "%s/%s/%s", home,CONFIG_DIR,CONFIG_FILE);
         (void) readfile(rcpath, 0);
     }
     *curfile = '\0';
