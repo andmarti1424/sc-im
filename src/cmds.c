@@ -2532,7 +2532,7 @@ void pad_and_align (char * str_value, char * numeric_value, int col_width, int a
     }
 
     // If content exceedes column width, outputs n number of '*' needed to fill column width
-    if (str_len + num_len + padding > col_width && !atoi(get_conf_value("truncate")) && ( (! atoi(get_conf_value("overlap"))) || align == 1) ) {
+    if (str_len + num_len + padding > col_width && !atoi(get_conf_value("truncate")) && ( (! atoi(get_conf_value("overlap")))) ) {
         if (padding) wmemset(str_out + wcslen(str_out), L'#', padding);
         wmemset(str_out + wcslen(str_out), L'*', col_width - padding);
         return;
