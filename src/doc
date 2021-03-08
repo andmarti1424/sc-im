@@ -1079,9 +1079,9 @@ Commands for handling cell content:
     Ctrl-K 0 0 = ∞	Ctrl-K - L = ∟	Ctrl-K - V = ∠	Ctrl-K P P = ∥
     Ctrl-K A N = ∧	Ctrl-K O R = ∨	Ctrl-K ) U = ∪	Ctrl-K ( U = ∩
     Ctrl-K ) C = ⊃	Ctrl-K ( C = ⊂	Ctrl-K ) _ = ⊇	Ctrl-K ( _ = ⊆
-    Ctrl-K . : = ∴	Ctrl-K . : = ∴	Ctrl-K : . = ∵	Ctrl-K ? - = ≃
-    Ctrl-K ! = = ≠	Ctrl-K = 3 = ≡	Ctrl-K = < = ≤  Ctrl-K > = = ≥
-    Ctrl-K < * = ≪	Ctrl-K > * = ≫	Ctrl-K ! < = ≮  Ctrl-K ! > = ≯
+    Ctrl-K . : = ∴	Ctrl-K : . = ∵	Ctrl-K ? - = ≃	Ctrl-K ! = = ≠
+    Ctrl-K = 3 = ≡	Ctrl-K = < = ≤	Ctrl-K > = = ≥	Ctrl-K < * = ≪
+    Ctrl-K > * = ≫	Ctrl-K ! < = ≮	Ctrl-K ! > = ≯
 
     Note: It is possible to enter these characters also in the command mode,
     but your OS may not support filenames containing them.
