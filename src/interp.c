@@ -140,6 +140,7 @@ extern int find_range(char * name, int len, struct ent * lmatch, struct ent * rm
 #include "dep_graph.h"
 extern graphADT graph;
 
+extern WINDOW * input_win;
 /**
  * \brief TODO Document finfunc()
  *
@@ -973,7 +974,6 @@ double eval(register struct ent * ent, register struct enode * e) {
 //    if (cellerror == CELLERROR) {
 //        return (double) 0;
 //    }
-
     if (e == (struct enode *) 0) {
         cellerror = CELLINVALID;
         return (double) 0;
@@ -1049,8 +1049,9 @@ double eval(register struct ent * ent, register struct enode * e) {
                 e->e.k = (double) 0;
                 cellerror = CELLERROR;
             }
-            //if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
-            // Commented 06/03/2021 for #issue 499
+            // Changed 06/03/2021 for #issue 499
+            if (ent && ent->expr != NULL && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
+
             return (e->e.k);
     case GETENT:
             if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
