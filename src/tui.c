@@ -155,8 +155,8 @@ void ui_start_screen() {
 
 void ui_stop_screen() {
     #ifdef USECOLORS
-        if (get_d_colors_param() != NULL)
-            free_colors_param_dict();
+        //if (get_d_colors_param() != NULL)
+        free_colors_param_dict();
     #endif
     move(0, 0);
     clrtobot();
