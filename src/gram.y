@@ -212,6 +212,7 @@ token S_YANKCOL
 %token S_CELLCOLOR
 %token S_UNFORMAT
 %token S_REDEFINE_COLOR
+%token S_DEFINE_COLOR
 %token S_SET
 %token S_FCOPY
 %token S_FSUM
@@ -343,14 +344,6 @@ token K_COLOR
 token K_COLORNEG
 token K_COLORERR
 token K_BRAILLE
-token K_BLACK
-token K_RED
-token K_GREEN
-token K_YELLOW
-token K_BLUE
-token K_MAGENTA
-token K_CYAN
-token K_WHITE
 */
 %token K_TBLSTYLE
 %token K_TBL
@@ -371,9 +364,6 @@ token K_WHITE
 %token K_ROWLIMIT
 %token K_COLLIMIT
 %token K_PAGESIZE
-/*
- token K_NUMITER
-*/
 %token K_ERR
 %token K_REF
 %token K_LOCALE
@@ -681,7 +671,9 @@ command:
     |    S_REDEFINE_COLOR STRING NUMBER NUMBER NUMBER {
                                          redefine_color($2, $3, $4, $5);
                                          scxfree($2); }
-
+    |    S_DEFINE_COLOR STRING NUMBER NUMBER NUMBER {
+                                         define_color($2, $3, $4, $5);
+                                         scxfree($2); }
     |    S_FCOPY                   { fcopy(""); }
     |    S_FCOPY strarg            { fcopy($2); }
     |    S_FSUM                    { fsum();  }
@@ -979,17 +971,6 @@ term:     var                     { $$ = new_var(O_VAR, $1); }
         |     K_ERR               { $$ = new(ERR_, ENULL, ENULL); }
         | '@' K_REF               { $$ = new(REF_, ENULL, ENULL); }
         |     K_REF               { $$ = new(REF_, ENULL, ENULL); }
-/*
-        | '@' K_NUMITER           { $$ = new(NUMITER, ENULL, ENULL);}
-        | '@' K_BLACK             { $$ = new(BLACK, ENULL, ENULL); }
-        | '@' K_RED               { $$ = new(RED, ENULL, ENULL); }
-        | '@' K_GREEN             { $$ = new(GREEN, ENULL, ENULL); }
-        | '@' K_YELLOW            { $$ = new(YELLOW, ENULL, ENULL); }
-        | '@' K_BLUE              { $$ = new(BLUE, ENULL, ENULL); }
-        | '@' K_MAGENTA           { $$ = new(MAGENTA, ENULL, ENULL); }
-        | '@' K_CYAN              { $$ = new(CYAN, ENULL, ENULL); }
-        | '@' K_WHITE             { $$ = new(WHITE, ENULL, ENULL); }
-*/
         | '@' K_FACT '(' e ')'     { $$ = new(FACT, $4, ENULL); }
         ;
 

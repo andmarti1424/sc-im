@@ -39,7 +39,7 @@
  * \file tui.c
  * \author Andrés Martinelli <andmarti@gmail.com>
  * \date 2017-07-18
- * \brief TODO Write a brief file description.
+ * \brief  This is the ncurses implementation of sc-im user interface,
  *
  * \details This is the ncurses implementation of sc-im user interface,
  * or called tui. It mainly consists on the following two windows:
@@ -131,8 +131,8 @@ void ui_start_screen() {
             // values defined in '.sc' files
             set_colors_param_dict();
         }
-        wbkgd(main_win, COLOR_PAIR((ucolors[DEFAULT].fg+1) * 9 + ucolors[DEFAULT].bg + 2));
-        wbkgd(input_win, COLOR_PAIR((ucolors[DEFAULT].fg+1) * 9 + ucolors[DEFAULT].bg + 2));
+        ////wbkgd(main_win, COLOR_PAIR((ucolors[DEFAULT].fg+1) * (COLORS+1) + ucolors[DEFAULT].bg + 2));
+        ////wbkgd(input_win, COLOR_PAIR((ucolors[DEFAULT].fg+1) * (COLORS+1) + ucolors[DEFAULT].bg + 2));
     }
     #endif
 
@@ -155,8 +155,8 @@ void ui_start_screen() {
 
 void ui_stop_screen() {
     #ifdef USECOLORS
-        //if (get_d_colors_param() != NULL)
-        free_colors_param_dict();
+        if (get_d_colors_param() != NULL)
+            free_colors_param_dict();
     #endif
     move(0, 0);
     clrtobot();
@@ -242,7 +242,7 @@ void ui_sc_msg(char * s, int type, ...) {
         mvwprintw(input_win, 1, 0, "%s", t);
         wclrtoeol(input_win);
 
-        if (type == DEBUG_MSG) {
+        if (type == DEBUG_MSG || (loading && type == ERROR_MSG)) {
             wtimeout(input_win, -1);
             wgetch(input_win);
             wtimeout(input_win, TIMEOUT_CURSES);
@@ -288,8 +288,8 @@ void ui_do_welcome() {
     int i;
 
     #ifdef USECOLORS
-    wbkgd(main_win, COLOR_PAIR((ucolors[DEFAULT].fg+1) * 9 + ucolors[DEFAULT].bg + 2));
-    wbkgd(input_win, COLOR_PAIR((ucolors[DEFAULT].fg+1) * 9 + ucolors[DEFAULT].bg + 2));
+////    wbkgd(main_win, COLOR_PAIR((ucolors[DEFAULT].fg+1) * (COLORS+1) + ucolors[DEFAULT].bg + 2));
+////    wbkgd(input_win, COLOR_PAIR((ucolors[DEFAULT].fg+1) * (COLORS+1) + ucolors[DEFAULT].bg + 2));
     #endif
 
     // show headings
@@ -359,10 +359,11 @@ void ui_update(int header) {
 
     if (header) {
     #ifdef USECOLORS
-        wbkgd(main_win, COLOR_PAIR((ucolors[DEFAULT].fg+1) * 9 + ucolors[DEFAULT].bg + 2));
+////    wbkgd(main_win, COLOR_PAIR((ucolors[DEFAULT].fg+1) * (COLORS+1) + ucolors[DEFAULT].bg + 2));
         // comment this to prevent bold to be reset
-        //wbkgd(input_win, COLOR_PAIR((ucolors[DEFAULT].fg+1) * 9 + ucolors[DEFAULT].bg + 2));
+        //wbkgd(input_win, COLOR_PAIR((ucolors[DEFAULT].fg+1) * (COLORS+1) + ucolors[DEFAULT].bg + 2));
     #endif
+
         // Clean from top to bottom
         wmove(main_win, 0, rescol);
         wclrtobot(main_win);
@@ -1224,8 +1225,8 @@ void ui_bail(lua_State *L, char * msg) {
  * \brief Show a message in the screen
  *
  * \details This function shows a message on the screen and waits for user
- * confirmation between a coupld of options defined on valie (wchar *).
- *
+ * confirmation between a couple of options defined on valid (wchar *)
+ * parameter.
  * \return wchar_t indicating user answer
  */
 
@@ -1337,29 +1338,51 @@ void ui_set_ucolor(WINDOW * w, struct ucolor * uc) {
     if (uc->standout)  attr |= A_STANDOUT;
     if (uc->blink)     attr |= A_BLINK;
     if (uc->underline) attr |= A_UNDERLINE;
+
+    // see in ui_start_colors() the explanation of this
+    int def = 9;
+    if (COLORS > 8) def = 33;
+    //
+
     if (uc->bg == NONE_COLOR || uc->fg == NONE_COLOR) {
-        // get current window color;
+        // leave colors intact
+        // just apply other ncurses attributes
         attr_t a;
         wattr_get(w, &a, &color, NULL);
-    } else {
-        color = (uc->fg+1)*9 + uc->bg + 2;
-    }
-    wattrset (w, attr | COLOR_PAIR(color));
+    } else
+        color = (uc->fg+1)*def + uc->bg + 2;
+    wattr_set (w, attr | COLOR_PAIR(color), color, NULL);
 }
 
 /**
- * \brief TODO Document ui_start_colors()
+ * \brief ui_start_colors()
  *
  * \return none
  */
 void ui_start_colors() {
     if (! has_colors()) return;
     int i, j;
+
     // Initialize all possible 81 init pairs
     use_default_colors();
-    for (i=0; i < 9; i++)      // fg
-        for (j=0; j < 9; j++)  // bg
-            init_pair( i*9+j+1, i-1, j-1); // i is fg and j is bg
+
+    /* ncurses has 8 colors, but we need to keep 1 slot more for
+     * default terminal background and foreground.
+     * bg can be other than black.
+     * we also have 24 custom colors.
+     * that makes 33 x 33 combinations
+     */
+    int def = 9;
+    if (COLORS > 8) def = 33;
+    for (i=0; i < def; i++) {     // fg
+        for (j=0; j < def; j++) { // bg
+            /*
+             * NOTE: calling init_pair with -1 sets it with default
+             * terminal foreground and background colors
+             */
+            init_extended_pair( i*def+j+1, i-1, j-1); // i is fg and j is bg
+        }
+    }
 }
 
 /**
@@ -1388,4 +1411,3 @@ void ui_resume() {
     ui_update(TRUE);
     return;
 }
-

@@ -39,9 +39,8 @@
  * @file color.c
  * @author Andrés Martinelli <andmarti@gmail.com>
  * @date 2017-07-18
- * @brief TODO Write a brief file description.
+ * @brief File containing color functions
  *
- * TODO Write a longer file description here.
  */
 
 #include <sys/types.h>
@@ -68,6 +67,7 @@ struct dictionary * get_d_colors_param() {
     return d_colors_param;
 }
 
+static struct custom_color * custom_colors = NULL;
 /**
  * @brief Generate DEFAULT 'initcolor' colors
  *
@@ -97,15 +97,16 @@ void start_default_ucolors() {
     // Set some colors attributes
     ucolors[ DEFAULT         ].fg = WHITE;
     ucolors[ DEFAULT         ].bg = DEFAULT_COLOR;
-    ucolors[ HEADINGS        ].fg = WHITE;
-    ucolors[ HEADINGS        ].bg = RED;
+    ucolors[ HEADINGS        ].fg = RED;
+    ucolors[ HEADINGS        ].bg = WHITE;
     ucolors[ WELCOME         ].fg = WHITE;
     ucolors[ WELCOME         ].bg = DEFAULT_COLOR;
     ucolors[ WELCOME         ].bold = 1;
-    ucolors[ CELL_SELECTION  ].fg = BLUE;         // cell selection in headings
-    ucolors[ CELL_SELECTION  ].bg = WHITE;
-    ucolors[ CELL_SELECTION_SC ].fg = BLACK;      // cell selection in spreadsheet
-    ucolors[ CELL_SELECTION_SC ].bg = WHITE;
+    ucolors[ CELL_SELECTION  ].bg = BLUE;                 // cell selection in headings
+    ucolors[ CELL_SELECTION  ].fg = WHITE;
+    ucolors[ CELL_SELECTION  ].bold = 1;
+    ucolors[ CELL_SELECTION_SC ].fg = DEFAULT_COLOR;      // cell selection in spreadsheet
+    ucolors[ CELL_SELECTION_SC ].bg = BLUE;
     ucolors[ NUMB            ].fg = CYAN;
     ucolors[ NUMB            ].bg = DEFAULT_COLOR;
     ucolors[ STRG            ].fg = BLUE;
@@ -124,10 +125,10 @@ void start_default_ucolors() {
     ucolors[ MODE            ].fg = WHITE;
     ucolors[ MODE            ].bg = DEFAULT_COLOR;
     ucolors[ MODE            ].bold = 1;
-    ucolors[ CELL_ID         ].fg = RED;
-    ucolors[ CELL_ID         ].bg = DEFAULT_COLOR;
+    ucolors[ CELL_ID         ].fg = WHITE;
+    ucolors[ CELL_ID         ].bg = BLACK;
     ucolors[ CELL_ID         ].bold = 1;
-    ucolors[ CELL_FORMAT     ].fg = CYAN;
+    ucolors[ CELL_FORMAT     ].fg = RED;
     ucolors[ CELL_FORMAT     ].bg = DEFAULT_COLOR;
     ucolors[ CELL_CONTENT    ].fg = CYAN;
     ucolors[ CELL_CONTENT    ].bg = DEFAULT_COLOR;
@@ -146,7 +147,7 @@ void start_default_ucolors() {
 }
 
 /**
- * @brief TODO <brief function description>
+ * @brief Create a dictionary that stores correspondence between macros and key values
  *
  * Create a dictionary that stores the correspondence between macros and key
  * values (integers) defined in '.sc' files or through the color command.
@@ -159,6 +160,7 @@ void start_default_ucolors() {
  */
 
 void set_colors_param_dict() {
+
     d_colors_param = create_dictionary();
     char str[3];
     str[0]='\0';
@@ -222,9 +224,9 @@ void set_colors_param_dict() {
 }
 
 /**
- * @brief TODO <brief function description>
+ * @brief free the colors parameters dictionary
  *
- * TODO Write longer function description.
+ * Free the colors parameters dictionary
  *
  * Example usage:
  * @code
@@ -239,7 +241,7 @@ void free_colors_param_dict() {
 }
 
 /**
- * @brief TODO <brief function description>
+ * @brief Function that colorize the different types shown on screen
  *
  * Change color definition with user's one STR: color definition from '.sc'
  * file. It can be obtained at run time with the ':color str' command.
@@ -275,22 +277,41 @@ void chg_color(char * str) {
     }
 
     // Validate the values for those keys are correct
-    if (
-        (get(d_colors_param, get(d, "type")) == NULL) ||
-        (get(d_colors_param, get(d, "fg")) == NULL) ||
-        (get(d_colors_param, get(d, "bg")) == NULL) ||
-        (atoi(get(d_colors_param, get(d, "fg"))) > WHITE) ||
-        (atoi(get(d_colors_param, get(d, "bg"))) > WHITE)
-    ) {
-        sc_error("One of the values specified is wrong. Please check the values of type, fg and bg.");
+    // bg, fg should have valid values BLACK(0) to WHITE(7) for ncurses stock colors
+    // or a custom color name, or -1, indicating default TERMINAL color
+    if (get(d_colors_param, get(d, "type")) == NULL) {
+        sc_error("Error setting color. Invalid type value.");
+        destroy_dictionary(d);
+        return;
+    }
+
+    if (get(d_colors_param, get(d, "fg")) == NULL && get_custom_color(get(d, "fg")) == NULL) {
+        sc_error("Error setting color. Invalid fg value. It is not and ncurses color nor user defined color.");
+        destroy_dictionary(d);
+        return;
+    }
+
+    if (get(d_colors_param, get(d, "bg")) == NULL && get_custom_color(get(d, "bg")) == NULL) {
+        sc_error("Error setting color. Invalid bg value. It is not and ncurses color nor user defined color.");
         destroy_dictionary(d);
         return;
     }
 
     // Change the color
     int type = atoi(get(d_colors_param, get(d, "type")));
-    ucolors[ type ].fg = atoi(get(d_colors_param, get(d, "fg")));
-    ucolors[ type ].bg = atoi(get(d_colors_param, get(d, "bg")));
+    struct custom_color * cc;
+    if ((cc = get_custom_color(get(d, "bg"))) != NULL) { // bg is custom color
+        ucolors[ type ].bg = 7 + cc->number;
+    } else { // bg is stock ncurses color
+        ucolors[ type ].bg = atoi(get(d_colors_param, get(d, "bg")));
+    }
+
+    if ((cc = get_custom_color(get(d, "fg"))) != NULL) { // fg is custom color
+        ucolors[ type ].fg = 7 + cc->number;
+    } else { // fg is stock ncurses color
+        ucolors[ type ].fg = atoi(get(d_colors_param, get(d, "fg")));
+    }
+
     if (((cl = get(d, "bold")) != NULL)      && cl[0] != '\0')     ucolors[ type ].bold      = atoi(get(d, "bold"));
     if (((cl = get(d, "italic")) != NULL)    && cl[0] != '\0')     ucolors[ type ].italic    = atoi(get(d, "italic"));
     if (((cl = get(d, "dim")) != NULL)       && cl[0] != '\0')     ucolors[ type ].dim       = atoi(get(d, "dim"));
@@ -344,8 +365,9 @@ void color_cell(int r, int c, int rf, int cf, char * str) {
 
     // Validations
     if (
-         ((cl = get(d, "fg")) != NULL && cl[0] != '\0' && get(d_colors_param, get(d, "fg")) == NULL) ||
-         ((cl = get(d, "bg")) != NULL && cl[0] != '\0' && get(d_colors_param, get(d, "bg")) == NULL)) {
+       ((cl = get(d, "fg")) != NULL && cl[0] != '\0' && get(d_colors_param, get(d, "fg")) == NULL && get_custom_color(cl) == NULL) ||
+       ((cl = get(d, "bg")) != NULL && cl[0] != '\0' && get(d_colors_param, get(d, "bg")) == NULL && get_custom_color(cl) == NULL)
+       ) {
             sc_error("One of the values specified is wrong. Please check the values of type, fg and bg.");
             destroy_dictionary(d);
             return;
@@ -382,11 +404,27 @@ void color_cell(int r, int c, int rf, int cf, char * str) {
                 n->ucolor->blink = 0;
             }
 
-            if ((cl = get(d, "bg")) != NULL && cl[0] != '\0')
-                n->ucolor->bg = atoi(get(d_colors_param, get(d, "bg")));
-
-            if ((cl = get(d, "fg")) != NULL && cl[0] != '\0')
-                n->ucolor->fg = atoi(get(d_colors_param, get(d, "fg")));
+            struct custom_color * cc;
+            if ((cl = get(d, "bg")) != NULL && cl[0] != '\0') {
+                if (get(d_colors_param, get(d, "bg")) != NULL) {
+                    n->ucolor->bg = atoi(get(d_colors_param, get(d, "bg")));
+                } else if ((cc = get_custom_color(get(d, "bg"))) != NULL) {
+                    n->ucolor->bg = 7 + cc->number;
+                } else {
+                    sc_error("error setting bg color. we should not be here.");
+                    n->ucolor->bg = DEFAULT_COLOR;
+                }
+            }
+            if ((cl = get(d, "fg")) != NULL && cl[0] != '\0') {
+                if (get(d_colors_param, get(d, "fg")) != NULL) {
+                    n->ucolor->fg = atoi(get(d_colors_param, get(d, "fg")));
+                } else if ((cc = get_custom_color(get(d, "fg"))) != NULL) {
+                    n->ucolor->fg = 7 + cc->number;
+                } else {
+                    sc_error("error setting fg color. we should not be here.");
+                    n->ucolor->fg = DEFAULT_COLOR;
+                }
+            }
 
             if ((cl = get(d, "bold"))      != NULL && cl[0] != '\0')   n->ucolor->bold      = atoi(get(d, "bold"));
             if ((cl = get(d, "italic"))    != NULL && cl[0] != '\0')   n->ucolor->italic    = atoi(get(d, "italic"));
@@ -501,13 +539,14 @@ int same_ucolor(struct ucolor * u, struct ucolor * v) {
 }
 
 /**
- * @brief TODO <brief function description>
+ * @brief Redefine one of the 8 ncurses colors to a new RGB value.
  *
- * TODO Write longer function description.
+ * Redefine stock ncurses color to a new RGB value. Only if terminal supports it.
+ * RGB values must be between 0 and 1000.
  *
  * Example usage:
  * @code
- *     redefine_color(<color>,<var1>,<var2>,<var3>);
+ *     redefine_color(<color>,<r>,<g>,<b>);
  * @endcode
  * returns: 0 on success, -1 on error
  */
@@ -533,4 +572,144 @@ int redefine_color(char * color, int r, int g, int b) {
        if (! loading) sc_error("Could not redefine color");
     #endif
     return -1;
+}
+
+/**
+ * @brief Define a custom color
+ *
+ * Define a custom color. If terminal does not support 256 colors, return.
+ *
+ * Example usage:
+ * @code
+ *     define_color(<color>,<r>,<g>,<b>);
+ * @endcode
+ * returns: 0 on success, -1 on error
+ */
+int define_color(char * color, int r, int g, int b) {
+
+#if defined(NCURSES) && defined(USECOLORS)
+    if (atoi(get_conf_value("nocurses"))) {
+        sc_error("Could not define color %s. Not using NCURSES.", color);
+        return -1;
+    } else if (! has_colors () || ! can_change_color() || COLORS < 9) {
+        sc_error("Could not define color %s. Not supported by terminal.", color);
+        return -1;
+    } else if (r < 0 || r > 255 || g < 0 || g > 255 || b < 0 || b > 255) {
+        sc_error("Could not define color %s. One of the RGB values is invalid.", color);
+        return -1;
+    }
+
+    int number_defined_colors;
+    struct custom_color * cc;
+
+    // update color value if it already exists
+    if ((cc = get_custom_color(color)) != NULL) {
+        sc_debug("Color '%s' already defined. Updating its RGB values.", color);
+    } else if ((number_defined_colors = count_custom_colors()) == 24) {
+        sc_error("Could not define color %s. There are already 24 custom colors defined.", color);
+        return -1;
+    } else { // we create a new custom color
+        cc = malloc (sizeof(struct custom_color));
+        cc->number = number_defined_colors+1;
+        cc->name =  (char *) malloc (sizeof(char) * (strlen(color) + 1));
+        strcpy(cc->name, color);
+        cc->p_next = custom_colors;
+        custom_colors = cc;
+    }
+    cc->r = r;
+    cc->g = g;
+    cc->b = b;
+    //sc_debug("modified extended color: %d", 7 + cc->number);
+    init_extended_color(7 + cc->number, RGB(r, g, b));
+
+    if (! loading) sc_info("Defined custom color #%d with name '%s' and RGB values %d %d %d", cc->number, cc->name, cc->r, cc->g, cc->b);
+    return 0;
+#endif
+    sc_error("Could not define color %s", color);
+    return -1;
+}
+
+/**
+ * @brief Free memory of custom_colors
+ *
+ * Free custom_colors memory
+ *
+ * Example usage:
+ * @code
+ *     free_custom_colors();
+ * @endcode
+ * returns 0
+ */
+int free_custom_colors() {
+    struct custom_color * aux;
+    while (custom_colors != NULL) {
+        aux = custom_colors->p_next;
+        free(custom_colors->name);
+        free(custom_colors);
+        custom_colors = aux;
+    }
+    return 0;
+}
+
+/**
+ * @brief get custom color by name
+ *
+ * get custom color by name
+ *
+ * Example usage:
+ * @code
+       get_custom_color("skyblue")
+ * @endcode
+ * returns struct custom_color * if found
+ * returns NULL otherwise
+ */
+struct custom_color * get_custom_color(char * name) {
+    struct custom_color * aux = custom_colors;
+    while (aux != NULL) {
+        if (! strcasecmp(name, aux->name)) return aux;
+        aux=aux->p_next;
+    }
+    return NULL;
+}
+
+/**
+ * @brief count the defined custom colors
+ *
+ * count the defined custom colors
+ *
+ * Example usage:
+ * @code
+       count_custom_colors()
+ * @endcode
+ * returns int
+ */
+int count_custom_colors() {
+    int c = 0;
+    struct custom_color * aux = custom_colors;
+    while (aux != NULL) {
+        aux=aux->p_next;
+        c++;
+    }
+    return c;
+}
+
+/**
+ * @brief get custom color by number
+ *
+ * get custom color by number
+ *
+ * Example usage:
+ * @code
+       get_custom_color_by_number(2)
+ * @endcode
+ * returns struct custom_color * if found
+ * returns NULL otherwise
+ */
+struct custom_color * get_custom_color_by_number(int number) {
+    struct custom_color * aux = custom_colors;
+    while (aux != NULL) {
+        if (number == aux->number) return aux;
+        aux=aux->p_next;
+    }
+    return NULL;
 }

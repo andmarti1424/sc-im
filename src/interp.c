@@ -40,7 +40,7 @@
  * \author Andrés Martinelli <andmarti@gmail.com>
  * \date 2017-07-18
  * \brief TODO Write a tbrief file description.
- * 
+ *
  * \details Expression interpreter and assorted support routines
  * Based on SC
  * \details Original by James Gosling, September 1982
@@ -1298,6 +1298,7 @@ double eval(register struct ent * ent, register struct enode * e) {
     case PI_:
                  if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
                  return ((double) M_PI);
+                 /*
     case BLACK:  return ((double) COLOR_BLACK);
     case RED:    return ((double) COLOR_RED);
     case GREEN:  return ((double) COLOR_GREEN);
@@ -1306,6 +1307,7 @@ double eval(register struct ent * ent, register struct enode * e) {
     case MAGENTA: return ((double) COLOR_MAGENTA);
     case CYAN:   return ((double) COLOR_CYAN);
     case WHITE:  return ((double) COLOR_WHITE);
+    case DEFAULT_COLOR: return ((double) DEFAULT_COLOR);
     case FACT:
         {
             double total = eval(ent, e->e.o.left);
@@ -3044,6 +3046,7 @@ void decompile(register struct enode *e, int priority) {
             for (s = "@pi"; (line[linelim++] = *s++); );
             linelim--;
             break;
+            /*
     case BLACK:
             for (s = "@black"; (line[linelim++] = *s++); );
             linelim--;
@@ -3080,6 +3083,7 @@ void decompile(register struct enode *e, int priority) {
             for (s = "@default_color"; (line[linelim++] = *s++); );
             linelim--;
             break;
+            */
     case FACT:    one_arg("@fact(", e); break;
     default:
             decompile(e->e.o.left, mypriority);

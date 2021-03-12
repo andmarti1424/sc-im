@@ -741,12 +741,19 @@ Commands for handling cell content:
                      CELL_FORMAT, CELL_CONTENT, WELCOME, NORMAL, INPUT.
 
                 The value of fg and bg shall be one of the following:
-                     WHITE, BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN or
-                     DEFAULT_COLOR.
+                     WHITE, BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN,
+                     DEFAULT_COLOR or NONE_COLOR.
+
                      DEFAULT_COLOR just takes the default color of your
                      terminal. If you set it as fg color it will take default
                      color of your foreground. If you set it as bg color it
                      will take the default background color of your terminal.
+
+
+                     If you set fg or bg value to NONE_COLOR. Colors will be kept
+                     intact and will not be changed. Just bold, italic and other
+                     attributes will be applied.
+
 
                 The value of other parameters are booleans, 1 or 0.
 
@@ -770,6 +777,28 @@ Commands for handling cell content:
                 If not range is specified, it removes the format over current
                 cell.
 
+    :define_color "{color} {R} {G} {B}
+                Create a custom color named {color} with {R} {G} {B} RGB
+                values.
+                RGB values range from 0 to 255.
+
+                Note: This requires that ncurses is built with --enable-ext-colors,
+                and the terminal must support 256 colors. For example, TERM=xterm-256color.
+                You can check how many colors your terminal supports with: 'tput colors' command.
+                SC-IM must also be linked to ncursesw library and not the common ncurses library.
+
+                Example of use:   :define_color "skyblue" 75 50 200
+
+                To make this take effect every time SC-IM is started, you can
+                add it to $HOME/.config/sc-im/scimrc:
+                            DEFINE_COLOR "skyblue" 75 50 200
+
+                You then can use the color defined above to colorize a type, like this:
+                            :color "type=HEADINGS fg=skyblue bg=BLACK"
+                or adding in $HOME/.config/sc-im/scimrc:
+                            color "type=HEADINGS fg=skyblue bg=BLACK"
+
+
     :redefine_color "{color}" {R} {G} {B}
                 Change the RGB values of the colors defined by ncurses.
                 RGB values range from 0 to 1000.
@@ -782,7 +811,7 @@ Commands for handling cell content:
                 Example:   :redefine_color "RED" 700 100 100
 
                 To make this take effect every time SC-IM is started, you can
-                add it to $HOME/.scimrc:
+                add it to $HOME/.config/sc-im/scimrc:
                             REDEFINE_COLOR "RED" 700 100 100
 
                 Redefining the BLACK color itself is another way to change the

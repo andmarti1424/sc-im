@@ -44,6 +44,9 @@
 
 #include "macros.h"
 
+#include <math.h>
+#define RGB(r, g, b)    floor(r*999/255), floor(g*999/255), floor(b*999/255)
+
 #define N_INIT_PAIRS      19
 
 struct ucolor {
@@ -58,6 +61,24 @@ struct ucolor {
     int blink;
 };
 
+struct custom_color {
+    int number; // this is the custom color number. since we max have 24 user custom colors.
+    char * name;
+    int r;
+    int g;
+    int b;
+
+    /* TODO we actually could store rgb values in just one int
+       int rgb = ((r & 0x0ff) << 16) | ((g & 0x0ff) << 8) | (b & 0x0ff);
+       int red = (rgb >> 16) & 0x0ff;
+       int green = (rgb >> 8) & 0x0ff;
+       int blue = (rgb) & 0x0ff;
+     */
+
+    struct custom_color * p_next;
+};
+
+
 extern struct ucolor ucolors[N_INIT_PAIRS];
 
 struct dictionary * get_d_colors_param();
@@ -69,3 +90,9 @@ void free_colors_param_dict();
 void chg_color(char * str);
 int same_ucolor(struct ucolor * u, struct ucolor * v);
 int redefine_color(char * color, int r, int g, int b);
+
+int define_color(char * color, int r, int g, int b);
+int free_custom_colors();
+struct custom_color * get_custom_color(char * name);
+int count_custom_colors();
+struct custom_color * get_custom_color_by_number(int number);

@@ -162,7 +162,7 @@ extern char * rev;
 
 /**
  * \brief The main() function
- * 
+ *
  * \details The main() function of sc-im. It is the first function called when
  * the applicaiton is executed.
  *
@@ -230,7 +230,6 @@ int main (int argc, char ** argv) {
     // setup the spreadsheet arrays (tbl)
     if (! growtbl(GROWNEW, 0, 0)) return exit_app(1);
 
-
     // initiate NCURSES if that is what is wanted
     if (! atoi((char *) get_conf_value("nocurses"))) {
         ui_start_screen();
@@ -288,6 +287,7 @@ int main (int argc, char ** argv) {
     // 4. check input from stdin (pipeline)
     // and send it to interp
     read_stdin();
+
 
     // change curmode to NORMAL_MODE
     chg_mode('.');
@@ -470,6 +470,9 @@ void delete_structures() {
 
     // Free ents of tbl
     erasedb();
+
+    // free custom_colors
+    free_custom_colors();
 }
 
 /**
