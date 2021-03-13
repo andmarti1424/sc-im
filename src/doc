@@ -1148,6 +1148,9 @@ Commands for handling cell content:
     If cell content exceedes column width it gets cut off to fit the column
     width.  If overlap is set, the content overflows into the next column.
 
+    'input_bar_bottom' [default off]
+    Place the input bar at the bottom of the screen.
+
     'truncate' [default off]
     If cell content exceedes column width it gets replaced by asterisks '*'.
     If truncate is set, the content is cut off at the end of the cell.

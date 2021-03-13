@@ -116,10 +116,8 @@ void ui_start_screen() {
     sstdout = newterm(NULL, stdout, stdin);
     set_term(sstdout);
 
-    //main_win = newwin(LINES - RESROW, COLS, RESROW, 0);
-    //input_win = newwin(RESROW, COLS, 0, 0); // just 2 rows (RESROW = 2)
-    main_win = newwin(LINES - RESROW, COLS, 0, 0);
-    input_win = newwin(RESROW, COLS, LINES-RESROW, 0);
+    main_win = newwin(LINES - RESROW, COLS, atoi(get_conf_value("input_bar_bottom")) ? 0 : RESROW, 0);
+    input_win = newwin(RESROW, COLS, atoi(get_conf_value("input_bar_bottom")) ? LINES-RESROW : 0, 0);
 
     #ifdef USECOLORS
     if (has_colors()) {
@@ -1411,5 +1409,16 @@ void ui_resume() {
     clearok(stdscr, TRUE);
     ui_show_header();
     ui_update(TRUE);
+    return;
+}
+
+/**
+ * \brief
+ * UI function thats moves input bar to bottom or back to the top
+ * \return none
+ */
+void ui_mv_bottom_bar() {
+    mvwin(main_win, atoi(get_conf_value("input_bar_bottom")) ? 0 : RESROW, 0);
+    mvwin(input_win, atoi(get_conf_value("input_bar_bottom")) ? LINES-RESROW : 0, 0);
     return;
 }
