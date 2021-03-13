@@ -39,6 +39,7 @@ SC-IM stands for Spreadsheet Calculator Improvised. :-)
 ### Dependencies
 
 * Requirements:
+
     ncurses (best if compiled with wide chars support)
 
     bison or yacc
@@ -48,6 +49,7 @@ SC-IM stands for Spreadsheet Calculator Improvised. :-)
     make
 
 * Optionals:
+
     tmux / xclip / pbpaste (for clipboard copy/paste)
 
     gnuplot (for plots)
