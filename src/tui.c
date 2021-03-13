@@ -116,8 +116,10 @@ void ui_start_screen() {
     sstdout = newterm(NULL, stdout, stdin);
     set_term(sstdout);
 
-    main_win = newwin(LINES - RESROW, COLS, RESROW, 0);
-    input_win = newwin(RESROW, COLS, 0, 0); // just 2 rows (RESROW = 2)
+    //main_win = newwin(LINES - RESROW, COLS, RESROW, 0);
+    //input_win = newwin(RESROW, COLS, 0, 0); // just 2 rows (RESROW = 2)
+    main_win = newwin(LINES - RESROW, COLS, 0, 0);
+    input_win = newwin(RESROW, COLS, LINES-RESROW, 0);
 
     #ifdef USECOLORS
     if (has_colors()) {

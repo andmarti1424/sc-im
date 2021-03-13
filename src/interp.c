@@ -1308,6 +1308,7 @@ double eval(register struct ent * ent, register struct enode * e) {
     case CYAN:   return ((double) COLOR_CYAN);
     case WHITE:  return ((double) COLOR_WHITE);
     case DEFAULT_COLOR: return ((double) DEFAULT_COLOR);
+    */
     case FACT:
         {
             double total = eval(ent, e->e.o.left);
@@ -1324,7 +1325,7 @@ double eval(register struct ent * ent, register struct enode * e) {
     return ((double) 0.0);
 }
 
-/**
+/*
  * \brief TODO Document eval_fpe()
  *
  * \return none
