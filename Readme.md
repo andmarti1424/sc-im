@@ -37,13 +37,17 @@ SC-IM stands for Spreadsheet Calculator Improvised. :-)
 ## Installation
 
 ### Dependencies
+
 * Requirements:
+```
     ncurses (best if compiled with wide chars support)
     bison or yacc
     gcc
     make
+```
 
 * Optionals:
+```
     tmux / xclip / pbpaste (for clipboard copy/paste)
     gnuplot (for plots)
     libxlsxreader (for xls support)
@@ -51,6 +55,7 @@ SC-IM stands for Spreadsheet Calculator Improvised. :-)
     libxml-2.0 and libzip (for xlsx import support)
     lua (for Lua scripting)
     threads support (in case you want to test this in Minix, just disable autobackup and HAVE_PTHREAD)
+```
 
 ### Manual
 
