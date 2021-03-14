@@ -97,8 +97,14 @@ void start_default_ucolors() {
     // Set some colors attributes
     ucolors[ DEFAULT         ].fg = WHITE;
     ucolors[ DEFAULT         ].bg = DEFAULT_COLOR;
-    ucolors[ HEADINGS        ].fg = RED;
-    ucolors[ HEADINGS        ].bg = WHITE;
+    ucolors[ HEADINGS        ].bg = RED;
+    ucolors[ HEADINGS        ].fg = WHITE;
+    ucolors[ HEADINGS_ODD    ].bg = RED;
+    ucolors[ HEADINGS_ODD    ].fg = WHITE;
+    ucolors[ GRID_PAIR       ].fg = WHITE;
+    ucolors[ GRID_PAIR       ].bg = DEFAULT_COLOR;
+    ucolors[ GRID_ODD        ].fg = WHITE;
+    ucolors[ GRID_ODD        ].bg = DEFAULT_COLOR;
     ucolors[ WELCOME         ].fg = WHITE;
     ucolors[ WELCOME         ].bg = DEFAULT_COLOR;
     ucolors[ WELCOME         ].bold = 1;
@@ -126,7 +132,7 @@ void start_default_ucolors() {
     ucolors[ MODE            ].bg = DEFAULT_COLOR;
     ucolors[ MODE            ].bold = 1;
     ucolors[ CELL_ID         ].fg = WHITE;
-    ucolors[ CELL_ID         ].bg = BLACK;
+    ucolors[ CELL_ID         ].bg = DEFAULT_COLOR;
     ucolors[ CELL_ID         ].bold = 1;
     ucolors[ CELL_FORMAT     ].fg = RED;
     ucolors[ CELL_FORMAT     ].bg = DEFAULT_COLOR;
@@ -185,6 +191,12 @@ void set_colors_param_dict() {
     put(d_colors_param, "WHITE", str);
     sprintf(str, "%d", HEADINGS);
     put(d_colors_param, "HEADINGS", str);
+    sprintf(str, "%d", HEADINGS_ODD);
+    put(d_colors_param, "HEADINGS_ODD", str);
+    sprintf(str, "%d", GRID_PAIR);
+    put(d_colors_param, "GRID_PAIR", str);
+    sprintf(str, "%d", GRID_ODD);
+    put(d_colors_param, "GRID_ODD", str);
     sprintf(str, "%d", WELCOME);
     put(d_colors_param, "WELCOME", str);
     sprintf(str, "%d", CELL_SELECTION);
@@ -619,7 +631,6 @@ int define_color(char * color, int r, int g, int b) {
     cc->r = r;
     cc->g = g;
     cc->b = b;
-    //sc_debug("modified extended color: %d", 7 + cc->number);
     init_extended_color(7 + cc->number, RGB(r, g, b));
 
     if (! loading) sc_info("Defined custom color #%d with name '%s' and RGB values %d %d %d", cc->number, cc->name, cc->r, cc->g, cc->b);

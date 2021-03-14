@@ -88,7 +88,7 @@ char * ui_query(char * initial_msg);
 void ui_start_colors();
 void ui_sc_msg(char * s, int type, ...);
 
-void ui_set_ucolor(WINDOW * w, struct ucolor * uc);
+void ui_set_ucolor(WINDOW * w, struct ucolor * uc, int bg_override);
 void ui_show_content(WINDOW * win, int mxrow, int mxcol);
 void ui_show_sc_row_headings(WINDOW * win, int mxrow);
 void ui_show_sc_col_headings(WINDOW * win, int mxcol);

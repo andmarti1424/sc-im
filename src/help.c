@@ -156,7 +156,7 @@ void help() {
     wclrtobot(input_win);
     wrefresh(input_win);
 
-    ui_set_ucolor(main_win, &ucolors[NORMAL]);
+    ui_set_ucolor(main_win, &ucolors[NORMAL], DEFAULT_COLOR);
     wtimeout(input_win, -1);
     noecho();
     curs_set(0);
@@ -337,7 +337,7 @@ void find_word(char * word, char order) {
     if (look_result == -1) {
         sc_info("Pattern not found.");
     }
-    ui_set_ucolor(input_win, &ucolors[NORMAL]);
+    ui_set_ucolor(input_win, &ucolors[NORMAL], DEFAULT_COLOR);
     return;
 }
 
@@ -366,8 +366,8 @@ int show_lines() {
 
             #ifdef USECOLORS
             bold && ! key?
-            ui_set_ucolor(main_win, &ucolors[CELL_SELECTION_SC]) :
-            ui_set_ucolor(main_win, &ucolors[NORMAL]);
+            ui_set_ucolor(main_win, &ucolors[CELL_SELECTION_SC], DEFAULT_COLOR) :
+            ui_set_ucolor(main_win, &ucolors[NORMAL], DEFAULT_COLOR);
             #endif
 
             if (long_help[lineno + delta][i] == '<' || long_help[lineno + delta][i] == '{') {
@@ -383,17 +383,17 @@ int show_lines() {
 
             if (long_help[lineno + delta][i] == '&') {
                 #ifdef USECOLORS
-                ui_set_ucolor(main_win, &ucolors[NORMAL]);
+                ui_set_ucolor(main_win, &ucolors[NORMAL], DEFAULT_COLOR);
                 #endif
                 continue;
             } else if (look_result != -1 && i >= look_result &&
                 i < look_result + strlen(word_looked) ) {
                 #ifdef USECOLORS
-                ui_set_ucolor(main_win, &ucolors[CELL_SELECTION_SC]);
+                ui_set_ucolor(main_win, &ucolors[CELL_SELECTION_SC], DEFAULT_COLOR);
                 #endif
             } else if (key) {
                 #ifdef USECOLORS
-                ui_set_ucolor(main_win, &ucolors[NUMB]);
+                ui_set_ucolor(main_win, &ucolors[NUMB], DEFAULT_COLOR);
                 #endif
             }
 

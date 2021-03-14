@@ -47,7 +47,7 @@
 #include <math.h>
 #define RGB(r, g, b)    floor(r*999/255), floor(g*999/255), floor(b*999/255)
 
-#define N_INIT_PAIRS      19
+#define N_INIT_PAIRS      24
 
 struct ucolor {
     int fg;

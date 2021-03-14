@@ -104,6 +104,9 @@
 #define DEFAULT           18
 #define DEBUG_MSG         19
 #define VALUE_MSG         20
+#define GRID_PAIR         21
+#define GRID_ODD          22
+#define HEADINGS_ODD      23
 
 void ui_sc_msg(char * s, int type, ...);
 #define sc_error(x, ...)     ui_sc_msg(x, ERROR_MSG, ##__VA_ARGS__)
