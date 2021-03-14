@@ -28,6 +28,7 @@ SC original authors are James Gosling and Mark Weiser, and mods were later added
 About the name, the idea is that the program can be identified as another vim-like app.
 SC-IM stands for Spreadsheet Calculator Improvised. :-)
 
+![demo image](screenshots/scim6.png?raw=true)
 ![demo image](screenshots/scim5.png?raw=true)
 ![demo image](screenshots/scim4.png?raw=true)
 ![demo image](screenshots/scimp1.png?raw=true)
