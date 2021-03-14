@@ -411,13 +411,13 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
 
     write_cells(f, r0, c0, rn, cn, r0, c0);
 
+    struct custom_color * cc;
     for (r = r0; r <= rn; r++) {
         pp = ATBL(tbl, r, c0);
         for (c = c0; c <= cn; c++, pp++)
             if (*pp) {
                 // Write ucolors
                 if ((*pp)->ucolor != NULL) {
-
                     char strcolorbuf[BUFFERSIZE];
                     char * strcolor = strcolorbuf;
                     strcolor[0] = 0;
@@ -425,22 +425,31 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
 
                     // decompile int value of color to its string description
                     if ((*pp)->ucolor->fg != NONE_COLOR) {
-                        linelim=0;
-                        struct enode * e = new((*pp)->ucolor->fg, (struct enode *)0, (struct enode *)0);
-                        decompile(e, 0);
-                        uppercase(line);
-                        del_char(line, 0);
-                        sprintf(strcolor, " fg=%.*s", BUFFERSIZE-5, &line[0]);
-                        free(e);
+                        if ((*pp)->ucolor->fg <= 8) {
+                            linelim=0;
+                            struct enode * e = new((*pp)->ucolor->fg, (struct enode *)0, (struct enode *)0);
+                            decompile(e, 0);
+                            uppercase(line);
+                            del_char(line, 0);
+                            sprintf(strcolor, " fg=%.*s", BUFFERSIZE-5, &line[0]);
+                            free(e);
+                        } else if ((cc = get_custom_color_by_number((*pp)->ucolor->fg - 7)) != NULL) {
+                            sprintf(strcolor, " fg=%.*s", BUFFERSIZE, cc->name);
+                        }
                     }
+
                     if ((*pp)->ucolor->bg != NONE_COLOR) {
-                        linelim=0;
-                        struct enode * e = new((*pp)->ucolor->bg, (struct enode *)0, (struct enode *)0);
-                        decompile(e, 0);
-                        uppercase(line);
-                        del_char(line, 0);
-                        sprintf(strcolor + strlen(strcolor), " bg=%s", &line[0]);
-                        free(e);
+                        if ((*pp)->ucolor->bg <= WHITE) {
+                            linelim=0;
+                            struct enode * e = new((*pp)->ucolor->bg, (struct enode *)0, (struct enode *)0);
+                            decompile(e, 0);
+                            uppercase(line);
+                            del_char(line, 0);
+                            sprintf(strcolor + strlen(strcolor), " bg=%s", &line[0]);
+                            free(e);
+                        } else if ((cc = get_custom_color_by_number((*pp)->ucolor->bg - 7)) != NULL) {
+                            sprintf(strcolor + strlen(strcolor), " bg=%.*s", BUFFERSIZE, cc->name);
+                        }
                     }
 
                     if ((*pp)->ucolor->bold)      sprintf(strcolor + strlen(strcolor), " bold=1");
