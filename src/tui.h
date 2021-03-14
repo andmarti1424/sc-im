@@ -99,3 +99,6 @@ void ui_pause();
 void ui_resume();
 wchar_t ui_query_opt(wchar_t * initial_msg, wchar_t * valid);
 void ui_mv_bottom_bar();
+#ifdef MOUSE
+void ui_handle_mouse(MEVENT event);
+#endif

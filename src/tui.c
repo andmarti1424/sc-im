@@ -140,6 +140,10 @@ void ui_start_screen() {
     noecho();
     curs_set(0);
 
+    // Mouse support
+    mmask_t old;
+    mousemask (ALL_MOUSE_EVENTS, &old);
+
     #ifndef NETBSD
     if ((char *) getenv ("ESCDELAY") == NULL) set_escdelay(ESC_DELAY);
     #endif
@@ -1474,3 +1478,60 @@ void ui_mv_bottom_bar() {
     mvwin(input_win, atoi(get_conf_value("input_bar_bottom")) ? LINES-RESROW : 0, 0);
     return;
 }
+
+#ifdef MOUSE
+void ui_handle_mouse(MEVENT event) {
+    int i, r = 0, c = 0;
+    if ( event.x < RESCOL || ( atoi(get_conf_value("input_bar_bottom")) && (event.y == 0 || event.y >= LINES - RESROW)) ||
+       ( !atoi(get_conf_value("input_bar_bottom")) && (event.y <= RESROW))) return;
+
+    if (event.bstate & BUTTON4_PRESSED || // scroll up
+        event.bstate & BUTTON5_PRESSED) { // scroll down
+            int n = LINES - RESROW - 1;
+            if (atoi(get_conf_value("half_page_scroll"))) n = n / 2;
+            lastcol = curcol;
+            lastrow = currow;
+            currow = event.bstate & BUTTON5_PRESSED ? forw_row(n)->row : back_row(n)->row;
+            unselect_ranges();
+            if (event.bstate & BUTTON5_PRESSED) scroll_down(n);
+            else scroll_up(n);
+            unselect_ranges();
+            ui_update(TRUE);
+        return;
+    }
+
+    // not single click
+    if (! (event.bstate & BUTTON1_CLICKED)) return;
+
+    c = event.x - RESCOL;
+    r = event.y - RESROW + (atoi(get_conf_value("input_bar_bottom")) ? 1 : - 1);
+
+
+    int mxcol = offscr_sc_cols + calc_offscr_sc_cols() - 1;
+    int col = 0;
+    int freeze = freeze_ranges && (freeze_ranges->type == 'c' ||  freeze_ranges->type == 'a') ? 1 : 0;
+
+    for (i = 0; i <= mxcol; i++) {
+        if (i >= maxcols) {
+            sc_error("i >= maxcols in ui_show_sc_col_headings. please check calc_offscr_sc_cols.");
+            break;
+        }
+        //if (i < offscr_sc_cols && !(freeze && i >= freeze_ranges->tl->col && i <= freeze_ranges->br->col)) continue;
+
+        if (col_hidden[i]) continue;
+
+        // skip center_hidden_cols
+        if (freeze && ((
+         i > freeze_ranges->br->col && i <= freeze_ranges->br->col + center_hidden_cols) || (
+         i < freeze_ranges->tl->col && i >= freeze_ranges->tl->col - center_hidden_cols))) continue;
+
+
+//        sc_debug("i:%d off%d mxcol:%d col:%d c:%d", i,  offscr_sc_cols, mxcol, col, c);
+        col += fwidth[i];
+        if (col > c + 1) break;
+    }
+    currow = r;
+    curcol = i;
+    ui_update(TRUE);
+}
+#endif

@@ -89,6 +89,9 @@ void handle_input(struct block * buffer) {
 
     cmd_multiplier = 0;
     cmd_pending = 0;
+#ifdef MOUSE
+    MEVENT event; // mouse event
+#endif
 
     while ( ! has_cmd(buffer, msec) && msec <= CMDTIMEOUT ) {
             // if command pending, refresh 'ef' only. Multiplier and cmd pending
@@ -100,7 +103,14 @@ void handle_input(struct block * buffer) {
             // Read new character from stdin
             return_value = ui_getch(&wd);
             d = wd;
-            if ( d == OKEY_ESC || d == ctl('g')) {
+#ifdef MOUSE
+            if (d == KEY_MOUSE) {
+                getmouse (&event);
+                ui_handle_mouse(event);
+                return;
+            } else
+#endif
+                if ( d == OKEY_ESC || d == ctl('g')) {
                 break_waitcmd_loop(buffer);
                 ui_print_mult_pend();
                 return;

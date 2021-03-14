@@ -50,6 +50,8 @@ CFLAGS += -DUNDO
 CFLAGS += -DMAXROWS=65536
 # Used for date formatting with C-d shortcut using you local d_fmt
 CFLAGS += -DUSELOCALE
+# Comment out to enable mouse support on virtual terminal.
+CFLAGS += -DMOUSE
 
 # Clipboard support is OS dependent.
 #
