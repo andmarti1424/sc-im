@@ -84,6 +84,7 @@ void store_default_config_values() {
     put(user_conf_d, "version", "0");
     put(user_conf_d, "help", "0");
     put(user_conf_d, "input_bar_bottom", "0");
+    put(user_conf_d, "underline_grid", "0");
     #ifdef AUTOBACKUP
     put(user_conf_d, "autobackup", "0"); // 0:noautobackup, n>0: backup every n in seconds
     #endif

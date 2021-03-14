@@ -1151,6 +1151,9 @@ Commands for handling cell content:
     'input_bar_bottom' [default off]
     Place the input bar at the bottom of the screen.
 
+    'underline_grid' [default off]
+    Underline cells to make a nicer grid
+
     'truncate' [default off]
     If cell content exceedes column width it gets replaced by asterisks '*'.
     If truncate is set, the content is cut off at the end of the cell.

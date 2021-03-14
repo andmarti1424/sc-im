@@ -845,9 +845,10 @@ void ui_show_content(WINDOW * win, int mxrow, int mxcol) {
 
             // Clean format
             #ifdef USECOLORS
+
             if ((*p) && (*p)->cellerror) {                                  // cellerror
                 ui_set_ucolor(win, &ucolors[CELL_ERROR], ucolors[CELL_ERROR].bg != DEFAULT_COLOR ? DEFAULT_COLOR : col % 2 == 0 ? ucolors[GRID_PAIR].bg : ucolors[GRID_ODD].bg);
-            } else if ((*p) && (*p)->v < 0) {     // cell negative
+            } else if ((*p) && (*p)->v < 0) {                               // cell negative
                 ui_set_ucolor(win, &ucolors[CELL_NEGATIVE], ucolors[CELL_NEGATIVE].bg != DEFAULT_COLOR ? DEFAULT_COLOR : col % 2 == 0 ? ucolors[GRID_PAIR].bg : ucolors[GRID_ODD].bg);
             } else if ((*p) && (*p)->expr) {
                 ui_set_ucolor(win, &ucolors[EXPRESSION], ucolors[EXPRESSION].bg != DEFAULT_COLOR ? DEFAULT_COLOR : col % 2 == 0 ? ucolors[GRID_PAIR].bg : ucolors[GRID_ODD].bg);
@@ -948,7 +949,6 @@ void ui_show_content(WINDOW * win, int mxrow, int mxcol) {
             }
 
 
-
             // repaint a blank cell, because of in range, or because we have a coloured empty cell!
             if ( !(*p) || (( !((*p)->flags & is_valid) && !(*p)->label ) && !((*p)->cellerror == CELLERROR)) ) {
                 if ( (currow == row && curcol == col) ||
@@ -966,6 +966,15 @@ void ui_show_content(WINDOW * win, int mxrow, int mxcol) {
                     #endif
                 }
 
+                #ifdef USECOLORS
+                if (has_colors() && atoi(get_conf_value("underline_grid"))) {
+                    attr_t attr;
+                    short color;
+                    wattr_get(win, &attr, &color, NULL);
+                    wattr_set(win, attr | A_UNDERLINE, color, NULL);
+                }
+                #endif
+
                 // new implementation for wide char support
                 cchar_t cht[fieldlen];
                 wchar_t w;
@@ -979,11 +988,20 @@ void ui_show_content(WINDOW * win, int mxrow, int mxcol) {
                     i+= wcwidth(w);
                 }
 
-            // we print text and number
+                // we print text and number
             } else {
                 pad_and_align(text, num, fwidth[col], align, (*p)->pad, out);
                 if (col == mxcol && wcswidth(out, wcslen(out)) > fwidth[col])
                     out[ count_width_widestring(out, fwidth[col]) ] = L'\0';
+
+            #ifdef USECOLORS
+                if (has_colors() && atoi(get_conf_value("underline_grid"))) {
+                    attr_t attr;
+                    short color;
+                    wattr_get(win, &attr, &color, NULL);
+                    wattr_set(win, attr | A_UNDERLINE, color, NULL);
+                }
+            #endif
 
                 mvwprintw(win, row + 1 - offscr_sc_rows - q_row_hidden, c, "%ls", out);
                 wclrtoeol(win);
@@ -991,7 +1009,7 @@ void ui_show_content(WINDOW * win, int mxrow, int mxcol) {
 
             // clean format
             #ifndef USECOLORS
-                wattroff(win, A_REVERSE);
+            wattroff(win, A_REVERSE);
             #endif
         }
     }
