@@ -1494,7 +1494,6 @@ void ui_handle_mouse(MEVENT event) {
             lastcol = curcol;
             lastrow = currow;
             currow = event.bstate & BUTTON5_PRESSED ? forw_row(n)->row : back_row(n)->row;
-            unselect_ranges();
             if (event.bstate & BUTTON5_PRESSED) scroll_down(n);
             else scroll_up(n);
             unselect_ranges();
@@ -1502,12 +1501,11 @@ void ui_handle_mouse(MEVENT event) {
         return;
     }
 
-    // not single click
+    // return if not a single click
     if (! (event.bstate & BUTTON1_CLICKED)) return;
 
     c = event.x - RESCOL;
     r = event.y - RESROW + (atoi(get_conf_value("input_bar_bottom")) ? 1 : - 1);
-
 
     int mxcol = offscr_sc_cols + calc_offscr_sc_cols() - 1;
     int col = 0;
