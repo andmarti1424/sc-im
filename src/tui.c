@@ -1532,7 +1532,7 @@ void ui_handle_mouse(MEVENT event) {
         col += fwidth[i];
         if (col > c + 1) break;
     }
-    currow = r;
+    currow = offscr_sc_rows + r;
     curcol = i;
     unselect_ranges();
     ui_update(TRUE);
