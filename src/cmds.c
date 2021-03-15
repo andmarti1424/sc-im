@@ -2584,9 +2584,9 @@ void pad_and_align (char * str_value, char * numeric_value, int col_width, int a
  * \brief Check if the buffer content is a valid command
  *
  * \details Check if the buffer content is a valid command
- * res = 0 or NO_CMD : buf has no command
- * res = 1 or EDITION_CMD : buf has a command
- * res = 2 or MOVEMENT_CMD : buf has a movement command or a command that do not
+ * result = 0 or NO_CMD : buf has no command
+ * result = 1 or EDITION_CMD : buf has a command
+ * result = 2 or MOVEMENT_CMD : buf has a movement command or a command that do not
  * change cell content, and should not be considered by the '.' command
  *
  * \return result
@@ -2594,97 +2594,97 @@ void pad_and_align (char * str_value, char * numeric_value, int col_width, int a
 
 int is_single_command (struct block * buf, long timeout) {
     if (buf->value == L'\0') return NO_CMD;
-    int res = NO_CMD;
+    int result = NO_CMD;
     int bs = get_bufsize(buf);
 
     if (curmode == COMMAND_MODE && bs == 1 && ( buf->value != ctl('r') ||
         buf->value == ctl('v')) ) {
-        res = MOVEMENT_CMD;
+        result = MOVEMENT_CMD;
 
     } else if ( curmode == COMMAND_MODE && bs == 2 && buf->value == ctl('r') &&
         (buf->pnext->value - (L'a' - 1) < 1 || buf->pnext->value > 26)) {
-        res = MOVEMENT_CMD;
+        result = MOVEMENT_CMD;
 
     } else if (curmode == INSERT_MODE && bs == 1 && ( buf->value != ctl('r') ||
         buf->value == ctl('v')) ) {
-        res = MOVEMENT_CMD;
+        result = MOVEMENT_CMD;
 
     } else if (curmode == INSERT_MODE && bs == 2 && buf->value == ctl('r') &&
         (buf->pnext->value - (L'a' - 1) < 1 || buf->pnext->value > 26)) {
-        res = MOVEMENT_CMD;
+        result = MOVEMENT_CMD;
 
     } else if (curmode == EDIT_MODE && bs == 1) {
-        res = MOVEMENT_CMD;
+        result = MOVEMENT_CMD;
 
     } else if (curmode == NORMAL_MODE && bs == 1) {
         // commands for changing mode
-        if (buf->value == L':')             res = MOVEMENT_CMD;
-        else if (buf->value == L'\\')       res = MOVEMENT_CMD;
-        else if (buf->value == L'<')        res = MOVEMENT_CMD;
-        else if (buf->value == L'>')        res = MOVEMENT_CMD;
-        else if (buf->value == L'=')        res = MOVEMENT_CMD;
-        else if (buf->value == L'e')        res = MOVEMENT_CMD;
-        else if (buf->value == L'E')        res = MOVEMENT_CMD;
-        else if (buf->value == L'v')        res = MOVEMENT_CMD;
+        if (buf->value == L':')             result = MOVEMENT_CMD;
+        else if (buf->value == L'\\')       result = MOVEMENT_CMD;
+        else if (buf->value == L'<')        result = MOVEMENT_CMD;
+        else if (buf->value == L'>')        result = MOVEMENT_CMD;
+        else if (buf->value == L'=')        result = MOVEMENT_CMD;
+        else if (buf->value == L'e')        result = MOVEMENT_CMD;
+        else if (buf->value == L'E')        result = MOVEMENT_CMD;
+        else if (buf->value == L'v')        result = MOVEMENT_CMD;
 
-        else if (buf->value == L'Q')        res = MOVEMENT_CMD;  /* FOR TEST PURPOSES */
-        else if (buf->value == L'A')        res = MOVEMENT_CMD;  /* FOR TEST PURPOSES */
-        else if (buf->value == L'W')        res = MOVEMENT_CMD;  /* FOR TEST PURPOSES */
+        else if (buf->value == L'Q')        result = MOVEMENT_CMD;  /* FOR TEST PURPOSES */
+        else if (buf->value == L'A')        result = MOVEMENT_CMD;  /* FOR TEST PURPOSES */
+        else if (buf->value == L'W')        result = MOVEMENT_CMD;  /* FOR TEST PURPOSES */
 
         // movement commands
-        else if (buf->value == L'j')        res = MOVEMENT_CMD;
-        else if (buf->value == L'k')        res = MOVEMENT_CMD;
-        else if (buf->value == L'h')        res = MOVEMENT_CMD;
-        else if (buf->value == L'l')        res = MOVEMENT_CMD;
-        else if (buf->value == L'0')        res = MOVEMENT_CMD;
-        else if (buf->value == L'$')        res = MOVEMENT_CMD;
-        else if (buf->value == OKEY_HOME)   res = MOVEMENT_CMD;
-        else if (buf->value == OKEY_END)    res = MOVEMENT_CMD;
-        else if (buf->value == L'#')        res = MOVEMENT_CMD;
-        else if (buf->value == L'^')        res = MOVEMENT_CMD;
-        else if (buf->value == OKEY_LEFT)   res = MOVEMENT_CMD;
-        else if (buf->value == OKEY_RIGHT)  res = MOVEMENT_CMD;
-        else if (buf->value == OKEY_DOWN)   res = MOVEMENT_CMD;
-        else if (buf->value == OKEY_UP)     res = MOVEMENT_CMD;
-        else if (buf->value == OKEY_PGUP)   res = MOVEMENT_CMD;
-        else if (buf->value == OKEY_PGDOWN) res = MOVEMENT_CMD;
-        else if (buf->value == ctl('f'))    res = MOVEMENT_CMD;
-        else if (buf->value == ctl('j'))    res = EDITION_CMD;
-        else if (buf->value == ctl('d'))    res = EDITION_CMD;
-        else if (buf->value == ctl('b'))    res = MOVEMENT_CMD;
-        else if (buf->value == ctl('a'))    res = MOVEMENT_CMD;
-        else if (buf->value == L'G')        res = MOVEMENT_CMD;
-        else if (buf->value == L'H')        res = MOVEMENT_CMD;
-        else if (buf->value == L'M')        res = MOVEMENT_CMD;
-        else if (buf->value == L'L')        res = MOVEMENT_CMD;
-        else if (buf->value == ctl('y'))    res = MOVEMENT_CMD;
-        else if (buf->value == ctl('e'))    res = MOVEMENT_CMD;
-        else if (buf->value == ctl('l'))    res = MOVEMENT_CMD;
-        else if (buf->value == L'w')        res = MOVEMENT_CMD;
-        else if (buf->value == L'b')        res = MOVEMENT_CMD;
-        else if (buf->value == L'/')        res = MOVEMENT_CMD; // search
-        else if (buf->value == L'n')        res = MOVEMENT_CMD; // repeat last goto cmd
-        else if (buf->value == L'N')        res = MOVEMENT_CMD; // repeat last goto cmd - backwards
+        else if (buf->value == L'j')        result = MOVEMENT_CMD;
+        else if (buf->value == L'k')        result = MOVEMENT_CMD;
+        else if (buf->value == L'h')        result = MOVEMENT_CMD;
+        else if (buf->value == L'l')        result = MOVEMENT_CMD;
+        else if (buf->value == L'0')        result = MOVEMENT_CMD;
+        else if (buf->value == L'$')        result = MOVEMENT_CMD;
+        else if (buf->value == OKEY_HOME)   result = MOVEMENT_CMD;
+        else if (buf->value == OKEY_END)    result = MOVEMENT_CMD;
+        else if (buf->value == L'#')        result = MOVEMENT_CMD;
+        else if (buf->value == L'^')        result = MOVEMENT_CMD;
+        else if (buf->value == OKEY_LEFT)   result = MOVEMENT_CMD;
+        else if (buf->value == OKEY_RIGHT)  result = MOVEMENT_CMD;
+        else if (buf->value == OKEY_DOWN)   result = MOVEMENT_CMD;
+        else if (buf->value == OKEY_UP)     result = MOVEMENT_CMD;
+        else if (buf->value == OKEY_PGUP)   result = MOVEMENT_CMD;
+        else if (buf->value == OKEY_PGDOWN) result = MOVEMENT_CMD;
+        else if (buf->value == ctl('f'))    result = MOVEMENT_CMD;
+        else if (buf->value == ctl('j'))    result = EDITION_CMD;
+        else if (buf->value == ctl('d'))    result = EDITION_CMD;
+        else if (buf->value == ctl('b'))    result = MOVEMENT_CMD;
+        else if (buf->value == ctl('a'))    result = MOVEMENT_CMD;
+        else if (buf->value == L'G')        result = MOVEMENT_CMD;
+        else if (buf->value == L'H')        result = MOVEMENT_CMD;
+        else if (buf->value == L'M')        result = MOVEMENT_CMD;
+        else if (buf->value == L'L')        result = MOVEMENT_CMD;
+        else if (buf->value == ctl('y'))    result = MOVEMENT_CMD;
+        else if (buf->value == ctl('e'))    result = MOVEMENT_CMD;
+        else if (buf->value == ctl('l'))    result = MOVEMENT_CMD;
+        else if (buf->value == L'w')        result = MOVEMENT_CMD;
+        else if (buf->value == L'b')        result = MOVEMENT_CMD;
+        else if (buf->value == L'/')        result = MOVEMENT_CMD; // search
+        else if (buf->value == L'n')        result = MOVEMENT_CMD; // repeat last goto cmd
+        else if (buf->value == L'N')        result = MOVEMENT_CMD; // repeat last goto cmd - backwards
 
         // edition commands
-        else if (buf->value == L'x')        res = EDITION_CMD;  // cuts a cell
-        else if (buf->value == L'u')        res = MOVEMENT_CMD; // undo
-        else if (buf->value == ctl('r'))    res = MOVEMENT_CMD; // redo
-        else if (buf->value == L'@')        res = EDITION_CMD;  // EvalAll
-        else if (buf->value == L'{')        res = EDITION_CMD;
-        else if (buf->value == L'}')        res = EDITION_CMD;
-        else if (buf->value == L'|')        res = EDITION_CMD;
-        else if (buf->value == L'p')        res = EDITION_CMD;  // paste yanked cells below or left
-        else if (buf->value == L't')        res = EDITION_CMD;  // paste yanked cells above or right
-        else if (buf->value == L'-')        res = EDITION_CMD;
-        else if (buf->value == L'+')        res = EDITION_CMD;
+        else if (buf->value == L'x')        result = EDITION_CMD;  // cuts a cell
+        else if (buf->value == L'u')        result = MOVEMENT_CMD; // undo
+        else if (buf->value == ctl('r'))    result = MOVEMENT_CMD; // redo
+        else if (buf->value == L'@')        result = EDITION_CMD;  // EvalAll
+        else if (buf->value == L'{')        result = EDITION_CMD;
+        else if (buf->value == L'}')        result = EDITION_CMD;
+        else if (buf->value == L'|')        result = EDITION_CMD;
+        else if (buf->value == L'p')        result = EDITION_CMD;  // paste yanked cells below or left
+        else if (buf->value == L't')        result = EDITION_CMD;  // paste yanked cells above or right
+        else if (buf->value == L'-')        result = EDITION_CMD;
+        else if (buf->value == L'+')        result = EDITION_CMD;
 
         else if (isdigit(buf->value) && atoi(get_conf_value("numeric")) )
-                                            res = MOVEMENT_CMD; // repeat last command
+                                            result = MOVEMENT_CMD; // repeat last command
 
-        else if (buf->value == L'.')        res = MOVEMENT_CMD; // repeat last command
+        else if (buf->value == L'.')        result = MOVEMENT_CMD; // repeat last command
         else if (buf->value == L'y' && is_range_selected() != -1)
-                                            res = EDITION_CMD;  // yank range
+                                            result = EDITION_CMD;  // yank range
 
     } else if (curmode == NORMAL_MODE) {
 
@@ -2695,44 +2695,44 @@ int is_single_command (struct block * buf, long timeout) {
                  buf->pnext->value == L'0' ||
                  buf->pnext->value == L'l' ||
                  buf->pnext->value == L'$'))
-                 res = MOVEMENT_CMD;
+                 result = MOVEMENT_CMD;
 
         else if (buf->value == L'g' && bs > 2 && timeout >= COMPLETECMDTIMEOUT)
-                 res = MOVEMENT_CMD; // goto cell
+                 result = MOVEMENT_CMD; // goto cell
                  // TODO add validation: buf->pnext->value must be a letter
 
         else if (buf->value == L'P' && bs == 2 && (
             buf->pnext->value == L'v' ||
             buf->pnext->value == L'f' ||
-            buf->pnext->value == L'c' ) )   res = EDITION_CMD;  // paste yanked cells below or left
+            buf->pnext->value == L'c' ) )   result = EDITION_CMD;  // paste yanked cells below or left
 
         else if (buf->value == L'T' && bs == 2 && (
             buf->pnext->value == L'v' ||
             buf->pnext->value == L'f' ||
-            buf->pnext->value == L'c' ) )   res = EDITION_CMD;  // paste yanked cells above or right
+            buf->pnext->value == L'c' ) )   result = EDITION_CMD;  // paste yanked cells above or right
 
         else if (buf->value == L'a' && bs == 2 &&    // autojus
-                 buf->pnext->value == L'a') res = EDITION_CMD;
+                 buf->pnext->value == L'a') result = EDITION_CMD;
 
         else if (buf->value == L'Z' && bs == 2 && timeout >= COMPLETECMDTIMEOUT &&  // Zap (or hide) col or row
                ( buf->pnext->value == L'c' ||
-                 buf->pnext->value == L'r')) res = EDITION_CMD;
+                 buf->pnext->value == L'r')) result = EDITION_CMD;
 
         else if (buf->value == L'S' && bs == 2 && timeout >= COMPLETECMDTIMEOUT &&  // Zap (or hide) col or row
                ( buf->pnext->value == L'c' ||
-                 buf->pnext->value == L'r')) res = EDITION_CMD;
+                 buf->pnext->value == L'r')) result = EDITION_CMD;
 
         else if (buf->value == L'y' && bs == 2 &&    // yank cell
                ( buf->pnext->value == L'y' ||
                  buf->pnext->value == L'r' ||
-                 buf->pnext->value == L'c') ) res = EDITION_CMD;
+                 buf->pnext->value == L'c') ) result = EDITION_CMD;
 
         else if (buf->value == L'm' && bs == 2 &&    // mark
                ((buf->pnext->value - (L'a' - 1)) < 1 ||
-                 buf->pnext->value > 26)) res = MOVEMENT_CMD;
+                 buf->pnext->value > 26)) result = MOVEMENT_CMD;
 
         else if (buf->value == L'c' && bs == 2 &&    // mark
-               ((buf->pnext->value - (L'a' - 1)) < 1 || buf->pnext->value > 26)) res = EDITION_CMD;
+               ((buf->pnext->value - (L'a' - 1)) < 1 || buf->pnext->value > 26)) result = EDITION_CMD;
 
         else if (buf->value == L'z' && bs == 2 &&    // scrolling
                ( buf->pnext->value == L'h' ||
@@ -2744,49 +2744,49 @@ int is_single_command (struct block * buf, long timeout) {
                  buf->pnext->value == L'b' ||
                  buf->pnext->value == L'H' ||
                  buf->pnext->value == L'L')
-               ) res = MOVEMENT_CMD;
+               ) result = MOVEMENT_CMD;
 
         else if (buf->value == L'V' && bs == 3 &&    // Vir
                  buf->pnext->value == L'i' &&
                  buf->pnext->pnext->value == L'r')
-                 res = MOVEMENT_CMD;
+                 result = MOVEMENT_CMD;
 
         else if (buf->value == L'd' && bs == 2 &&    // cuts a cell
-                 buf->pnext->value == L'd') res = EDITION_CMD;
+                 buf->pnext->value == L'd') result = EDITION_CMD;
 
         else if (buf->value == L'\'' && bs == 2 &&   // tick
                ((buf->pnext->value - (L'a' - 1)) < 1 ||
-                 buf->pnext->value > 26)) res = MOVEMENT_CMD;
+                 buf->pnext->value > 26)) result = MOVEMENT_CMD;
 
         else if (buf->value == L's' && bs == 2 &&    // shift cell down or up
                ( buf->pnext->value == L'j' ||
                  buf->pnext->value == L'k' ||
                  buf->pnext->value == L'h' ||
-                 buf->pnext->value == L'l')) res = EDITION_CMD;
+                 buf->pnext->value == L'l')) result = EDITION_CMD;
 
         else if (buf->value == L'i' && bs == 2 &&    // Insert row or column
                ( buf->pnext->value == L'r' ||
-                 buf->pnext->value == L'c' )) res = EDITION_CMD;
+                 buf->pnext->value == L'c' )) result = EDITION_CMD;
 
         else if (buf->value == L'o' && bs == 2 &&    // Open row or column
                ( buf->pnext->value == L'r' ||
-                 buf->pnext->value == L'c' )) res = EDITION_CMD;
+                 buf->pnext->value == L'c' )) result = EDITION_CMD;
 
         else if (buf->value == L'd' && bs == 2 &&    // Delete row or column
                ( buf->pnext->value == L'r' ||
-                 buf->pnext->value == L'c' )) res = EDITION_CMD;
+                 buf->pnext->value == L'c' )) result = EDITION_CMD;
 
         else if (buf->value == L'r' && bs == 2 &&    // range lock / unlock / valueize
                ( buf->pnext->value == L'l' ||
                  buf->pnext->value == L'u' ||
-                 buf->pnext->value == L'v' )) res = EDITION_CMD;
+                 buf->pnext->value == L'v' )) result = EDITION_CMD;
 
         else if (buf->value == L'R' && bs == 3 &&    // Create range with two marks
             //  FIXME add validation
                ((buf->pnext->value - (L'a' - 1)) < 1 ||
                  buf->pnext->value > 26) &&
                ((buf->pnext->pnext->value - (L'a' - 1)) < 1 ||
-                 buf->pnext->pnext->value > 26)) res = EDITION_CMD;
+                 buf->pnext->pnext->value > 26)) result = EDITION_CMD;
 
         else if (buf->value == L'f' && bs == 2 &&    // Format col
                ( buf->pnext->value == L'>' ||
@@ -2805,7 +2805,7 @@ int is_single_command (struct block * buf, long timeout) {
                  buf->pnext->value == L'c' ||
                  buf->pnext->value == L'a'
                  )
-               ) res = EDITION_CMD;
+               ) result = EDITION_CMD;
 
     } else if (curmode == VISUAL_MODE && bs == 1) {
              if (buf->value == L'j' ||
@@ -2839,11 +2839,11 @@ int is_single_command (struct block * buf, long timeout) {
                  buf->value == ctl('k') ||
                  buf->value == L':'
              )
-                 res = MOVEMENT_CMD;
+                 result = MOVEMENT_CMD;
         else if (buf->value == L'{' ||
                  buf->value == L'}' ||
                  buf->value == L'|')
-                 res = EDITION_CMD;
+                 result = EDITION_CMD;
 
     } else if (curmode == VISUAL_MODE && bs == 2) {
             if ((buf->value == L'\'') ||
@@ -2855,24 +2855,24 @@ int is_single_command (struct block * buf, long timeout) {
                  buf->pnext->value == L'k' ||
                  buf->pnext->value == L'l' ))
             ) {
-                 res = MOVEMENT_CMD;
+                 result = MOVEMENT_CMD;
             } else if ((buf->value == L'Z' && (
                  buf->pnext->value == L'r' ||
                  buf->pnext->value == L'c' )) ||
                 (buf->value == L'S' && (
                  buf->pnext->value == L'r' ||
                  buf->pnext->value == L'c' )) ) {
-                 res = EDITION_CMD;
+                 result = EDITION_CMD;
             } else if (buf->value == L'r' && (
                  buf->pnext->value == L'l' ||
                  buf->pnext->value == L'u' ||
                  buf->pnext->value == L'v' )) {
-                 res = EDITION_CMD;
+                 result = EDITION_CMD;
             } else if (buf->value == L'm' && // mark
                ((buf->pnext->value - (L'a' - 1)) < 1 ||
                  buf->pnext->value > 26)) {
-                 res = MOVEMENT_CMD;
+                 result = MOVEMENT_CMD;
             }
     }
-    return res;
+    return result;
 }
