@@ -606,6 +606,11 @@ int define_color(char * color, int r, int g, int b) {
     } else if (! has_colors () || ! can_change_color() || COLORS < 9) {
         sc_error("Could not define color %s. Not supported by terminal.", color);
         return -1;
+
+    } else if (get(d_colors_param, color) != NULL) {
+        sc_error("Could not define custom color %s. That is an ncurses color. Use :redefine for that purpose.", color);
+        return -1;
+
     } else if (r < 0 || r > 255 || g < 0 || g > 255 || b < 0 || b > 255) {
         sc_error("Could not define color %s. One of the RGB values is invalid.", color);
         return -1;
