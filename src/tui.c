@@ -141,8 +141,10 @@ void ui_start_screen() {
     curs_set(0);
 
     // Mouse support
+    #ifdef MOUSE
     mmask_t old;
     mousemask (ALL_MOUSE_EVENTS, &old);
+    #endif
 
     #ifndef NETBSD
     if ((char *) getenv ("ESCDELAY") == NULL) set_escdelay(ESC_DELAY);
