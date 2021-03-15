@@ -1481,6 +1481,11 @@ void ui_mv_bottom_bar() {
     return;
 }
 
+/**
+ * \brief
+ * function thats handles mouse movements
+ * \return none
+ */
 #ifdef MOUSE
 void ui_handle_mouse(MEVENT event) {
     int i, r = 0, c = 0;
@@ -1526,9 +1531,9 @@ void ui_handle_mouse(MEVENT event) {
          i < freeze_ranges->tl->col && i >= freeze_ranges->tl->col - center_hidden_cols))) continue;
 
 
-//        sc_debug("i:%d off%d mxcol:%d col:%d c:%d", i,  offscr_sc_cols, mxcol, col, c);
+        //sc_debug("i:%d off%d mxcol:%d col:%d c:%d", i,  offscr_sc_cols, mxcol, col, c);
         col += fwidth[i];
-        if (col > c + 1) break;
+        if (col >= c + 1) break;
     }
     currow = offscr_sc_rows + r;
     curcol = i;
