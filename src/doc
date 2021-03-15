@@ -201,7 +201,11 @@ Commands for handling cell content:
                  Or type '/"value"' to look for cells that has "value" as
                  label content.
                  You can quote a regular expression, and SC-IM will search for
-                 a cell containing a string matching the regular expression.
+                 a cell containing a string matching that regular expression.
+                 Example: Type / followed by "[_mente]" (with the double
+                  quotes). That will look up for cells that has one character
+                 and finish with 'mente'
+
                  You can search for formatted numbers or expressions using
                  regular expressions by preceding the opening quotes of the
                  regular expression with a '#' (for formatted numbers) or a
