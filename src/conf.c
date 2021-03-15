@@ -64,7 +64,7 @@
 // argument rather than using user_conf_d directly.
 
 void store_default_config_values() {
-    put(user_conf_d, "half_page_scroll", "0");
+    put(user_conf_d, "half_page_scroll", "1");
     put(user_conf_d, "autocalc", "1");
     put(user_conf_d, "numeric", "0");
     put(user_conf_d, "nocurses", "0");
