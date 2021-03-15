@@ -554,7 +554,7 @@ int same_ucolor(struct ucolor * u, struct ucolor * v) {
  * @brief Redefine one of the 8 ncurses colors to a new RGB value.
  *
  * Redefine stock ncurses color to a new RGB value. Only if terminal supports it.
- * RGB values must be between 0 and 1000.
+ * RGB values must be between 0 and 255.
  *
  * Example usage:
  * @code
@@ -575,7 +575,7 @@ int redefine_color(char * color, int r, int g, int b) {
                sc_error("Color not found");
                return -1;
            }
-           if (init_color(atoi(s), r, g, b) == 0) {
+           if (init_extended_color(atoi(s), RGB(r, g, b)) == 0) {
                sig_winchg();
                if (! loading) sc_info("Color %s redefined to %d %d %d.", color, r, g, b);
                return 0;

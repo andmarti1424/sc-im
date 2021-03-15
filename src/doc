@@ -801,18 +801,18 @@ Commands for handling cell content:
 
     :redefine_color "{color}" {R} {G} {B}
                 Change the RGB values of the colors defined by ncurses.
-                RGB values range from 0 to 1000.
+                RGB values range from 0 to 255.
 
                 Note: This requires that ncurses is built with
                 --enable-ext-colors, and the terminal must support 256 colors.
                 For example, TERM=xterm-256color.  SC-IM must link to
                 ncursesw library and not the common ncurses library.
 
-                Example:   :redefine_color "RED" 700 100 100
+                Example:   :redefine_color "RED" 250 0 0
 
                 To make this take effect every time SC-IM is started, you can
                 add it to $HOME/.config/sc-im/scimrc:
-                            REDEFINE_COLOR "RED" 700 100 100
+                            REDEFINE_COLOR "RED" 250 0 0
 
                 Redefining the BLACK color itself is another way to change the
                 default background color of SC-IM.
