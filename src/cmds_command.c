@@ -105,6 +105,7 @@ L"e! txt",
 L"e! mkd",
 L"e! xlsx",
 L"datefmt",
+L"define_color",
 L"delfilter",
 L"delfilters",
 L"file",
@@ -406,6 +407,9 @@ void do_commandmode(struct block * sb) {
                 swprintf(cline + wcslen(cline), BUFFERSIZE, L"%s", coltoa(cf));
             }
             send_to_interp(cline);
+
+        } else if ( ! wcsncmp(inputline, L"define_color", 12) ) {
+            send_to_interp(inputline);
 
         } else if ( ! wcsncmp(inputline, L"redefine_color", 14) ) {
             send_to_interp(inputline);
