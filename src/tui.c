@@ -1534,6 +1534,7 @@ void ui_handle_mouse(MEVENT event) {
     }
     currow = r;
     curcol = i;
+    unselect_ranges();
     ui_update(TRUE);
 }
 #endif
