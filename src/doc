@@ -288,6 +288,8 @@ Commands for handling cell content:
      d<RIGHT>    Delete the character under the cursor.
      dh          Delete the character before the cursor.
      d<LEFT>     Delete the character before the cursor.
+     df{char}    Delete until the first occurence of {char} to the right.
+
 
      ce          Same as "de", then enter Insert mode.
      cw          Same as "dw", then enter Insert mode.
@@ -301,6 +303,7 @@ Commands for handling cell content:
      c<RIGHT>    Same as "d<RIGHT>", then enter Insert mode.
      ch          Same as "dh", then enter Insert mode.
      c<LEFT>     Same as "d<LEFT>", then enter Insert mode.
+     cf{char}    Same as "df{char}", then enter Insert mode.
 
      x           Delete the character under the cursor.
      X           Delete the character before the cursor.
