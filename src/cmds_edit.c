@@ -230,7 +230,7 @@ void do_editmode(struct block * sb) {
         return;
 
     } else if (sb->value == L'f') {         // f
-        if (ui_getch_b(&wi) != -1) return;
+        if (ui_getch_b(&wi) == -1) return;
         int pos = look_for((wchar_t) wi); // this returns real_inputline_pos !
         if (pos != -1) {
             real_inputline_pos = pos;
@@ -277,7 +277,7 @@ void do_editmode(struct block * sb) {
 
     } else if (sb->value == L'R') {         // R
         //curs_set(1);
-        if (ui_getch_b(&wi) != -1) return;
+        if (ui_getch_b(&wi) == -1) return;
         wint_t c = wi;
         while (c != OKEY_ENTER && c != -1) {
             if (iswprint(c)) {
@@ -286,7 +286,7 @@ void do_editmode(struct block * sb) {
                 inputline_pos = wcswidth(inputline, real_inputline_pos);
                 ui_show_header();
             }
-            if (ui_getch_b(&wi) != -1) return;
+            if (ui_getch_b(&wi) == -1) return;
             c = wi;
         }
         //curs_set(2);
@@ -297,6 +297,14 @@ void do_editmode(struct block * sb) {
         if (ui_getch_b(&wi) != -1) {
             c = wi;
             switch (c) {
+
+            case L'f':
+                if (ui_getch_b(&wi) == -1) return;
+                d = wi;
+                int pos = look_for((wchar_t) d); // this returns real_inputline_pos !
+                if (pos != -1) del_range_wchars(inputline, real_inputline_pos, pos);
+                break;
+
             case L'e':                     // de or ce
                 del_range_wchars(inputline, real_inputline_pos, for_word(1, 0, 0));
                 break;
