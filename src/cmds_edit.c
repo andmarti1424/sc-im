@@ -74,6 +74,8 @@ static wint_t wi; /**< char read from stdin */
  */
 
 void do_editmode(struct block * sb) {
+    int pos;
+
     if (sb->value == L'h' || sb->value == OKEY_LEFT) {         // LEFT
         if (real_inputline_pos) {
             real_inputline_pos--;
@@ -231,7 +233,18 @@ void do_editmode(struct block * sb) {
 
     } else if (sb->value == L'f') {         // f
         if (ui_getch_b(&wi) == -1) return;
-        int pos = look_for((wchar_t) wi); // this returns real_inputline_pos !
+        pos = look_for((wchar_t) wi); // this returns real_inputline_pos !
+        if (pos != -1) {
+            real_inputline_pos = pos;
+            inputline_pos = wcswidth(inputline, real_inputline_pos);
+            ui_show_header();
+        }
+        return;
+
+
+    } else if (sb->value == L'F') {         // F
+        if (ui_getch_b(&wi) == -1) return;
+        pos = look_back((wchar_t) wi); // this returns real_inputline_pos !
         if (pos != -1) {
             real_inputline_pos = pos;
             inputline_pos = wcswidth(inputline, real_inputline_pos);
@@ -301,7 +314,7 @@ void do_editmode(struct block * sb) {
             case L'f':
                 if (ui_getch_b(&wi) == -1) return;
                 d = wi;
-                int pos = look_for((wchar_t) d); // this returns real_inputline_pos !
+                pos = look_for((wchar_t) d); // this returns real_inputline_pos !
                 if (pos != -1) del_range_wchars(inputline, real_inputline_pos, pos);
                 break;
 
@@ -336,6 +349,14 @@ void do_editmode(struct block * sb) {
                 d = back_word(1);
                 del_range_wchars(inputline, d, real_inputline_pos-1);
                 real_inputline_pos = d;
+                inputline_pos = wcswidth(inputline, real_inputline_pos);
+                break;
+
+            case L'F':
+                if (ui_getch_b(&wi) == -1) return;
+                pos = look_back((wchar_t) wi);
+                if (pos != -1) del_range_wchars(inputline, pos, real_inputline_pos-1);
+                real_inputline_pos = pos;
                 inputline_pos = wcswidth(inputline, real_inputline_pos);
                 break;
 
@@ -380,11 +401,11 @@ void do_editmode(struct block * sb) {
 }
 
 /**
- * \brief Looks for a char in inputline
+ * \brief Looks (forward) for a char in inputline
  *
  * \param[in] cb
  *
- * \return position; -1 otherwise 
+ * \return position; -1 otherwise
  */
 
 int look_for(wchar_t cb) {
@@ -394,6 +415,23 @@ int look_for(wchar_t cb) {
     if (cpos > 0 && cpos == wcslen(inputline)) return real_inputline_pos;
     return -1;
 }
+
+/**
+ * \brief Looks (backwards) for a char in inputline
+ *
+ * \param[in] cb
+ *
+ * \return position; -1 otherwise
+ */
+
+int look_back(wchar_t cb) {
+    int c, cpos = inputline_pos;
+    while (--cpos >= 0)
+        if ((c = inputline[cpos]) && c == cb) return cpos;
+    return -1;
+}
+
+
 
 /**
  * \brief Move backward one word
