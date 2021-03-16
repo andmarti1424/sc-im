@@ -1387,7 +1387,12 @@ void ui_set_ucolor(WINDOW * w, struct ucolor * uc, int bg_override) {
     short color;
     long attr = A_NORMAL;
     if (uc->bold)      attr |= A_BOLD;
+
+#ifdef A_ITALIC
     if (uc->italic)    attr |= A_ITALIC;
+#else
+    sc_error("Cannot handle italic attribute. Please update your ncurses library");
+#endif
     if (uc->dim)       attr |= A_DIM;
     if (uc->reverse)   attr |= A_REVERSE;
     if (uc->standout)  attr |= A_STANDOUT;
@@ -1492,6 +1497,7 @@ void ui_handle_mouse(MEVENT event) {
     if ( event.x < RESCOL || ( atoi(get_conf_value("input_bar_bottom")) && (event.y == 0 || event.y >= LINES - RESROW)) ||
        ( !atoi(get_conf_value("input_bar_bottom")) && (event.y <= RESROW))) return;
 
+#ifdef BUTTON_5_PRESSED
     if (event.bstate & BUTTON4_PRESSED || // scroll up
         event.bstate & BUTTON5_PRESSED) { // scroll down
             int n = LINES - RESROW - 1;
@@ -1505,6 +1511,10 @@ void ui_handle_mouse(MEVENT event) {
             ui_update(TRUE);
         return;
     }
+#else
+    sc_error("Cannot handle mouse scroll. Please update your ncurses library");
+    return;
+#endif
 
     // return if not a single click
     if (! (event.bstate & BUTTON1_CLICKED)) return;
