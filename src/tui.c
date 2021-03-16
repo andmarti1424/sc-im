@@ -1498,7 +1498,7 @@ void ui_handle_mouse(MEVENT event) {
     if ( event.x < RESCOL || ( atoi(get_conf_value("input_bar_bottom")) && (event.y == 0 || event.y >= LINES - RESROW)) ||
        ( !atoi(get_conf_value("input_bar_bottom")) && (event.y <= RESROW))) return;
 
-#ifdef BUTTON_5_PRESSED
+#ifdef BUTTON5_PRESSED
     if (event.bstate & BUTTON4_PRESSED || // scroll up
         event.bstate & BUTTON5_PRESSED) { // scroll down
             int n = LINES - RESROW - 1;
