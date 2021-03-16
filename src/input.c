@@ -348,7 +348,11 @@ void handle_mult(int * cmd_multiplier, struct block * buf, long timeout) {
     //if (is_single_command(buf, timeout) == EDITION_CMD)
     //    copybuffer(buf, lastcmd_buffer); // save stdin buffer content in lastcmd buffer
     exec_mult(buf, timeout);
-    if (*cmd_multiplier > 1) { *cmd_multiplier = 1; ui_update(TRUE); }
+    if (*cmd_multiplier > 1) {
+        *cmd_multiplier = 1;
+        if (curmode != EDIT_MODE) ui_update(TRUE);
+    }
+
     *cmd_multiplier = 0;
 
     return;

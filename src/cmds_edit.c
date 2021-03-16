@@ -75,6 +75,7 @@ static wint_t wi; /**< char read from stdin */
 
 void do_editmode(struct block * sb) {
     int pos;
+    int initial_position;
 
     if (sb->value == L'h' || sb->value == OKEY_LEFT) {         // LEFT
         if (real_inputline_pos) {
@@ -241,6 +242,19 @@ void do_editmode(struct block * sb) {
         }
         return;
 
+    } else if (sb->value == L't') {         // t
+        if (ui_getch_b(&wi) == -1) return;
+        int initial_position = inputline_pos;
+        if (inputline_pos < wcswidth(inputline, wcslen(inputline))) inputline_pos++ ;
+        pos = look_for((wchar_t) wi); // this returns real_inputline_pos !
+        if (pos != -1) {
+            real_inputline_pos = pos - 1;
+            inputline_pos = wcswidth(inputline, real_inputline_pos);
+        } else {
+            inputline_pos = initial_position;
+        }
+        ui_show_header();
+        return;
 
     } else if (sb->value == L'F') {         // F
         if (ui_getch_b(&wi) == -1) return;
@@ -250,6 +264,20 @@ void do_editmode(struct block * sb) {
             inputline_pos = wcswidth(inputline, real_inputline_pos);
             ui_show_header();
         }
+        return;
+
+    } else if (sb->value == L'T') {         // T
+        if (ui_getch_b(&wi) == -1) return;
+        int initial_position = inputline_pos;
+        if (inputline_pos) inputline_pos--;
+        pos = look_back((wchar_t) wi); // this returns real_inputline_pos !
+        if (pos != -1) {
+            real_inputline_pos = pos + 1;
+            inputline_pos = wcswidth(inputline, real_inputline_pos);
+        } else {
+            inputline_pos = initial_position;
+        }
+        ui_show_header();
         return;
 
     } else if (sb->value == L'w') {         // w
@@ -324,6 +352,19 @@ void do_editmode(struct block * sb) {
                 if (pos != -1) del_range_wchars(inputline, real_inputline_pos, pos);
                 break;
 
+            case L't':
+                if (ui_getch_b(&wi) == -1) return;
+                initial_position = inputline_pos;
+                if (inputline_pos < wcswidth(inputline, wcslen(inputline))) inputline_pos++ ;
+                pos = look_for((wchar_t) wi);
+                if (pos != -1) {
+                    del_range_wchars(inputline, real_inputline_pos, pos - 1);
+                    inputline_pos = wcswidth(inputline, real_inputline_pos);
+                } else {
+                    inputline_pos = initial_position;
+                }
+                break;
+
             case L'0':                     // 0
                 del_range_wchars(inputline, 0, real_inputline_pos-1);
                 real_inputline_pos = 0;
@@ -370,6 +411,21 @@ void do_editmode(struct block * sb) {
                 if (pos != -1) del_range_wchars(inputline, pos, real_inputline_pos-1);
                 real_inputline_pos = pos;
                 inputline_pos = wcswidth(inputline, real_inputline_pos);
+                break;
+
+            case L'T':
+                if (ui_getch_b(&wi) == -1) return;
+                initial_position = inputline_pos;
+                if (inputline_pos) inputline_pos--;
+                pos = look_back((wchar_t) wi);
+
+                if (pos != -1) {
+                    del_range_wchars(inputline, pos+1, real_inputline_pos-1);
+                    real_inputline_pos = pos;
+                    inputline_pos = wcswidth(inputline, real_inputline_pos);
+                } else {
+                    inputline_pos = initial_position;
+                }
                 break;
 
             case L'l':                     // dl or cl
@@ -424,7 +480,7 @@ int look_for(wchar_t cb) {
     int c, cpos = inputline_pos;
     while (++cpos < wcslen(inputline))
         if ((c = inputline[cpos]) && c == cb) return cpos;
-    if (cpos > 0 && cpos == wcslen(inputline)) return real_inputline_pos;
+    //if (cpos > 0 && cpos == wcslen(inputline)) return real_inputline_pos;
     return -1;
 }
 

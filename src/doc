@@ -267,6 +267,8 @@ Commands for handling cell content:
      $           Move to the end of the line.
      f{char}     Move to the next occurrence of {char} to the right.
      F{char}     Move to the previous occurrence of {char} to the left.
+     t{char}     Move until the next occurrence of {char} to the right.
+     T{char}     Move until the previous occurrence of {char} to the left.
      r{char}     Replaces the character under the cursor with {char}.
      R{word}     Each character you type replaces an existing character,
                  starting with the character under the cursor.
@@ -293,6 +295,8 @@ Commands for handling cell content:
      d<LEFT>     Delete the character before the cursor.
      df{char}    Delete until the first occurence of {char} to the right.
      dF{char}    Delete until the previous occurence of {char} to the left.
+     dt{char}    Delete until the next occurrence of {char} to the right.
+     dT{char}    Delete until the previous occurrence of {char} to the left.
 
 
      ce          Same as "de", then enter Insert mode.
@@ -311,6 +315,8 @@ Commands for handling cell content:
      c<LEFT>     Same as "d<LEFT>", then enter Insert mode.
      cf{char}    Same as "df{char}", then enter Insert mode.
      cF{char}    Same as "dF{char}", then enter Insert mode.
+     ct{char}    Same as "dt{char}", then enter Insert mode.
+     cT{char}    Same as "dT{char}", then enter Insert mode.
 
      x           Delete the character under the cursor.
      X           Delete the character before the cursor.
