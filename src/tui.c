@@ -1182,6 +1182,7 @@ int ui_get_formated_value(struct ent ** p, int col, char * value) {
     } else { // there is no format
         // FIXME: error with number and text in same cell and no overlap
         engformat(realfmt[col], fwidth[col], precision[col], (*p)->v, value, sizeof(char) * FBUFLEN);
+        ltrim(value, ' ');
         return 1;
     }
 }
