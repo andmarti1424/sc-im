@@ -41,29 +41,20 @@ SC-IM stands for Spreadsheet Calculator Improvised. :-)
 
 * Requirements:
 
-    ncurses (best if compiled with wide chars support)
-
-    bison or yacc
-
-    gcc
-
-    make
+  - `ncurses` (best if compiled with wide chars support)
+  - `bison` or `yacc`
+  - `gcc`
+  - `make`
 
 * Optionals:
 
-    tmux / xclip / pbpaste (for clipboard copy/paste)
-
-    gnuplot (for plots)
-
-    libxlsxreader (for xls support)
-
-    xlsxwriter (for xlsx export support)
-
-    libxml-2.0 and libzip (for xlsx import support)
-
-    lua (for Lua scripting)
-
-    threads support (in case you want to test this in Minix, just disable autobackup and HAVE_PTHREAD)
+  - `tmux` / `xclip` / `pbpaste` (for clipboard copy/paste)
+  - `gnuplot` (for plots)
+  - `libxlsxreader` (for xls support)
+  - `xlsxwriter` (for xlsx export support)
+  - `libxml-2.0` and `libzip` (for xlsx import support)
+  - `lua` (for Lua scripting)
+  - threads support (in case you want to test this in Minix, just disable autobackup and HAVE_PTHREAD)
 
 ### Manual
 
