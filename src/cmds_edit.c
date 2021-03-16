@@ -310,12 +310,24 @@ void do_editmode(struct block * sb) {
         if (ui_getch_b(&wi) != -1) {
             c = wi;
             switch (c) {
+            case L'$':
+                pos = wcswidth(inputline, wcslen(inputline)) - 1;
+                del_range_wchars(inputline, real_inputline_pos, pos);
+                if (real_inputline_pos == wcslen(inputline) && real_inputline_pos) real_inputline_pos--;
+                inputline_pos = wcswidth(inputline, real_inputline_pos);
+                break;
 
             case L'f':
                 if (ui_getch_b(&wi) == -1) return;
                 d = wi;
                 pos = look_for((wchar_t) d); // this returns real_inputline_pos !
                 if (pos != -1) del_range_wchars(inputline, real_inputline_pos, pos);
+                break;
+
+            case L'0':                     // 0
+                del_range_wchars(inputline, 0, real_inputline_pos-1);
+                real_inputline_pos = 0;
+                inputline_pos = wcswidth(inputline, real_inputline_pos);
                 break;
 
             case L'e':                     // de or ce
