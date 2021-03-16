@@ -55,4 +55,7 @@ int back_word(int big_word);
 void del_back_char();
 void del_for_char();
 
+int first_nonblank_char();
+int last_nonblank_char();
+
 wint_t get_key();

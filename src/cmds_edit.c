@@ -98,6 +98,23 @@ void do_editmode(struct block * sb) {
         ui_show_header();
         return;
 
+    } else if (sb->value == L'^') {                                   // ^
+        pos = first_nonblank_char();
+        if (pos == -1) return;
+        real_inputline_pos = pos;
+        inputline_pos = wcswidth(inputline, real_inputline_pos);
+        ui_show_header();
+        return;
+
+    } else if (sb->value == L'g') {                                   // ^
+        if (ui_getch_b(&wi) == -1 || wi != L'_') return;
+        pos = last_nonblank_char();
+        if (pos == -1) return;
+        real_inputline_pos = pos;
+        inputline_pos = wcswidth(inputline, real_inputline_pos);
+        ui_show_header();
+        return;
+
     } else if (sb->value == L'0' || sb->value == OKEY_HOME) {         // 0
         inputline_pos = 0;
         real_inputline_pos = 0;
@@ -499,7 +516,30 @@ int look_back(wchar_t cb) {
     return -1;
 }
 
+/**
+ * \brief Looks for a first non blank char in inputline
+ *
+ * \return position if found; -1 otherwise
+ */
+int first_nonblank_char() {
+    int cpos = -1;
+    while (++cpos < wcslen(inputline))
+        if (inputline[cpos] && inputline[cpos] != L' ') return cpos;
+    return -1;
+}
 
+
+/**
+ * \brief Looks for the last non blank char in inputline
+ *
+ * \return position if found; -1 otherwise
+ */
+int last_nonblank_char() {
+    int cpos = wcslen(inputline);
+    while (--cpos > 0)
+        if (inputline[cpos] && inputline[cpos] != L' ') return cpos;
+    return -1;
+}
 
 /**
  * \brief Move backward one word
@@ -554,7 +594,7 @@ int for_word(int end_of_word, int delete, int big_word) {
 }
 
 /**
- * \brief TODO Cocument del_back_char()
+ * \brief TODO Document del_back_char()
  *
  * \return none
  */

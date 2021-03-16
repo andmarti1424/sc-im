@@ -264,7 +264,9 @@ Commands for handling cell content:
                  previous word. Otherwise, move to beginning of word under the
                  cursor.
      0           Move to the beginning of the line.
+     ^           Go to the first non blank character of the line
      $           Move to the end of the line.
+     g_          Go to the last non blank character of the line
      f{char}     Move to the next occurrence of {char} to the right.
      F{char}     Move to the previous occurrence of {char} to the left.
      t{char}     Move until the next occurrence of {char} to the right.
