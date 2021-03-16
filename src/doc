@@ -1,6 +1,6 @@
                          This is the SC-IM help file.
 
-Use the cursor keys to move around, or 'j' to go down and 'k' to go up.
+Use the arrow keys to move around, or 'j' to go down and 'k' to go up.
 You can also use the <ENTER> key to go one line down and <DEL> to go up.
 
 <SPACE> moves a page down, while <C-f> and <C-b> move half page down or up.
@@ -40,6 +40,10 @@ SC-IM has the following modes:
 
 Navigation commands:
      j k l h     Move cursor down, up, right or left.
+     <UP>        Move cursor up
+     <DOWN>      Move cursor down
+     <LEFT>      Move cursor left
+     <RIGHT>     Move cursor right
      ^           Go up to row 0 of the current column.
      #           Go down to the last valid row of the current column.  If
                  already in last valid row of the current column, then jump to
@@ -673,8 +677,8 @@ Commands for handling cell content:
 
     :strtonum {range}
                 Converts string field containing digits to a numeric field.
-                So you can calculate with it. 
-                Example: 
+                So you can calculate with it.
+                Example:
                 label A0 = "5" -> let A0 = 5 (internal representation)
 
     :int "{string}"
