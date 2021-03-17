@@ -601,7 +601,8 @@ int define_color(char * color, int r, int g, int b) {
 
 #if defined(NCURSES) && defined(USECOLORS)
     if (atoi(get_conf_value("nocurses"))) {
-        sc_error("Could not define color %s. Not using NCURSES.", color);
+        // this should not be alerted.
+        //sc_error("Could not define color %s. Not using NCURSES.", color);
         return -1;
     } else if (! has_colors () || ! can_change_color() || COLORS < 9) {
         sc_error("Could not define color %s. Not supported by terminal.", color);
