@@ -388,6 +388,23 @@ void do_editmode(struct block * sb) {
                 inputline_pos = wcswidth(inputline, real_inputline_pos);
                 break;
 
+            case L'^':
+                pos = first_nonblank_char();
+                if (pos == -1) return;
+                del_range_wchars(inputline, pos, real_inputline_pos-1);
+                real_inputline_pos = pos;
+                inputline_pos = wcswidth(inputline, real_inputline_pos);
+                break;
+
+            case L'g':
+                if (ui_getch_b(&wi) == -1 || wi != L'_') return;
+                pos = last_nonblank_char();
+                if (pos == -1) return;
+                del_range_wchars(inputline, real_inputline_pos, pos);
+                real_inputline_pos = pos;
+                inputline_pos = wcswidth(inputline, real_inputline_pos);
+                break;
+
             case L'e':                     // de or ce
                 del_range_wchars(inputline, real_inputline_pos, for_word(1, 0, 0));
                 break;

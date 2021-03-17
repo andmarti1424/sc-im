@@ -279,14 +279,19 @@ Commands for handling cell content:
 
      de          Delete until the end of the word.
      dw          Delete until the beginning of the next word.
+
      d0          Delete until the beginning of the line.
+     d$          Delete until the end of the line.
+     d^          Delete from position until the first non blank character of the line
+     dg_         Delete from position until the last non blank character of the line
+
      db          If at the beginning of a word, delete until the beginning of
                  the previous word. Otherwise, delete until the beginning of
                  the word under the cursor.
      daw         Delete the word under the cursor.
      dE          Delete until the end of WORD.
      dW          Delete until the beginning of the next WORD.
-     d$          Delete until the end of the line.
+
      dB          If at the beginning of a word, delete until the beginning of
                  previous WORD. Otherwise, delete until the beginning of the
                  WORD under the cursor.
@@ -309,6 +314,8 @@ Commands for handling cell content:
      cE          Same as "dE", then enter Insert mode.
      cW          Same as "dW", then enter Insert mode.
      c$          Same as "d$", then enter Insert mode.
+     c^          Same as "d^", then enter Insert mode.
+     cg_         Same as "dg_", then enter Insert mode.
      cB          Same as "dB", then enter Insert mode.
      caW         Same as "daW", then enter Insert mode.
      cl          Same as "dl", then enter Insert mode.
