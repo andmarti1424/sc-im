@@ -97,10 +97,12 @@ void start_default_ucolors() {
     // Set some colors attributes
     ucolors[ DEFAULT         ].fg = WHITE;
     ucolors[ DEFAULT         ].bg = DEFAULT_COLOR;
-    ucolors[ HEADINGS        ].bg = RED;
+    ucolors[ HEADINGS        ].bg = YELLOW;
     ucolors[ HEADINGS        ].fg = WHITE;
-    ucolors[ HEADINGS_ODD    ].bg = RED;
+    ucolors[ HEADINGS        ].bold = 1;
+    ucolors[ HEADINGS_ODD    ].bg = YELLOW;
     ucolors[ HEADINGS_ODD    ].fg = WHITE;
+    ucolors[ HEADINGS_ODD    ].bold = 1;
     ucolors[ GRID_PAIR       ].fg = WHITE;
     ucolors[ GRID_PAIR       ].bg = DEFAULT_COLOR;
     ucolors[ GRID_ODD        ].fg = WHITE;

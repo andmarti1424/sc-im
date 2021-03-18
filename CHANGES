@@ -1,3 +1,88 @@
+v0.8.0
+Released March 17th 2021
+
+
+New features
+------------
++New motions in edit mode: df cf F dF cF d0 d$ c0 c$ t T dt dT ct cT ^ g_ d^ dg_ c^ cg_
++Simple mouse support. Can handle selection of single cells and scroll.
++Added markdown export.
++Add custom colors with RGB definitions.
++Add support for italic attribute to be appled to cells.
++Added digraphs.
++Added EXECUTE command.
++Added --export_csv --export_tab --export_txt parameters.
++New input_bar_bottom config variable.
++New underline_grid config variable.
++Added filename in status bar (filename_with_mode config variable).
++Added option to truncate cells.
++Added xlsx sheet parameter.
++New @fact function.
+
+Other
+-----
++modified config and history file locations
++renamed winch to sig_winch.
++current fg and bg colors are kept if they are not specified in :cellcolor.
++OpenBSD support (mostly wordexp() workaround)
++Correct lua api function names in doc
++always generate backup file when opening file
++renamed scim to sc-im in Makefile
++Document trigger return value convention
+
+Issues fixed
+------------
+fix bug when deleting an ent that for instance has a @sum()... it used to remove its vertex and THE ENTS LINKED to THEM!
+fix error messages when using "scim --version" and color definitions are intented to be applied from .scimrc.
+fix in waiting for valid command to complete after pressing ESC key.
+fix in parse_str so a word with white space can be stored in dictionary value
+fix when setting default_paste_from_clipboard_cmd
+Don't clobber startup message w/ err opening file
+Allow for lua scripts in local .sc directory #259
+Send informational messages to stderr rather than the output when used in non-interactive mode #263
+fixed cell_negative color      #271
+fixed locked cells when saving #261
+fixed DEL key in insert mode   #272
+fix when resizing column       #266
+"Autobackup - case insensitive QER options when backup exists"
+fixed segfault when fcopy'ing with no selection while on first column
+Call write triggers on value clear
+Use sc_info to report trigger exit code
+fixed #277
+Grow table up to MAXROWS exactly
+Remove redundant if clause (God only knows where that was).
+
+fix in getVertex that prevented rebuild_graph to work properly.
+fix annoying bug because of not resetting inputline_pos to 0 when confirming a command in COMMAND_MODE
+fix in let and slet. existing vertexs should not be removed.
+
+added "eval_visited" in vertex struct for not to collide with current "visited", since:
+    EvalAll uses EvalBottomUp
+    EvalBottomUp uses EvalJustOneVertex
+    EvalJustOneVertex uses eval
+    eval uses GraphAddEdge
+    GraphAddEdge uses GraphIsReachable
+    GraphIsReachable uses visited
+    and EvalBottomUp also uses uses visited!
+Also changed markAllVerticesNotVisited and All_vertexs_of_edges_visited functions.
+
+Some other issues fixed: #228, #234, #239, #240, #244, #246, #260, #295, #308
+.. and many other fixes and improvements!
+
+PENDING
+-------
+The most significative issue is regarding circular references.
+This have to be deeply analyzed and with the collaboration of the community
+it would be hopefully fixed by v0.9.
+
+Thanks to all that helped and created PR.
+Thanks to all who support and use this program.
+
+Andrés Martinelli
+andmarti1424
+
+****************************************************************************************
+
 v0.7.0
 *Added 'copy to clipboard' feature: now content of a range can be copied to clipboard using the :ccopy command.
 *Added 'paste from clipboard' feature with :cpaste command.
@@ -188,3 +273,4 @@ v0.2.2
 * Various fixes when using SC-IM without UI (--nocurses).
 * Help documentation now can be loaded without making install SC-IM.
 * MAXROWS now can be defined in Makefile.
+
