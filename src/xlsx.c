@@ -250,9 +250,9 @@ void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) 
                 if (fmtId != NULL && child_node->xmlChildrenNode != NULL &&
                 ! strcmp((char *) child_node->xmlChildrenNode->name, "v")
                 && (
-                (atoi(fmtId) >= 14 && atoi(fmtId) <= 17) || 
+                (atoi(fmtId) >= 14 && atoi(fmtId) <= 17) ||
                 atoi(fmtId) == 278 || atoi(fmtId) == 185 ||
-                atoi(fmtId) == 196 ||
+                atoi(fmtId) == 196 || atoi(fmtId) == 164 ||
                 atoi(fmtId) == 217 || atoi(fmtId) == 326 ||
                 (((atoi(fmtId) >= 165 && atoi(fmtId) <= 180) ||
                 atoi(fmtId) == 100) && numberFmt != NULL // 100,165-180 are user defined formats!!
@@ -260,7 +260,7 @@ void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) 
                 )) {
                     long l = strtol((char *) child_node->xmlChildrenNode->xmlChildrenNode->content, (char **) NULL, 10);
 
-                    swprintf(line_interp, FBUFLEN, L"let %s%d=%.15ld", coltoa(c), r, (l - 25569) * 86400 - atoi(get_conf_value("tm_gmtoff")));
+                    swprintf(line_interp, FBUFLEN, L"let %s%d=%.15ld", coltoa(c), r, (l - 25568) * 86400 - atoi(get_conf_value("tm_gmtoff")));
                     send_to_interp(line_interp);
                     struct ent * n = lookat(r, c);
                     n->format = 0;
@@ -666,7 +666,7 @@ int export_xlsx(char * filename, int r0, int c0, int rn, int cn) {
                     strcpy(sc_format, st);
                     free(st);
                     format_set_num_format(format, sc_format);
-                    worksheet_write_number(worksheet, row-1, col, (((*pp)->v + atoi(get_conf_value("tm_gmtoff"))) / 86400 + 25569) , format);
+                    worksheet_write_number(worksheet, row-1, col, (((*pp)->v + atoi(get_conf_value("tm_gmtoff"))) / 86400 + 25568) , format);
 
                 // formula
                 } else if ((*pp) && (*pp)->expr && atoi(get_conf_value("xlsx_readformulas")))  {
