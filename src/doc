@@ -768,7 +768,8 @@ Commands for handling cell content:
                        Some terminal dont support some attributes, such as italic.
 
                 The value of type shall be one of the following:
-                     HEADINGS, MODE, NUMB, STRG, DATEF, EXPRESSION,
+                     HEADINGS, HEADINGD_ODD, MODE, NUMB, STRG, DATEF,
+                     EXPRESSION, GRID_PAIR, GRID_ODD,
                      CELL_ERROR, CELL_NEGATIVE, CELL_SELECTION,
                      CELL_SELECTION_SC, INFO_MSG, ERROR_MSG, CELL_ID,
                      CELL_FORMAT, CELL_CONTENT, WELCOME, NORMAL, INPUT.
@@ -797,6 +798,52 @@ Commands for handling cell content:
                      b. the current .sc file.
 
                 color "type=HEADINGS fg=WHITE bg=CYAN"
+
+
+                The different types and its details:
+                        - HEADINGS Topmost (header) row that lists column names
+                          (only for even columns), and leftmost (header) column
+                          that lists row numbers.                          
+                        - HEADINGS_ODD The same that above but shown for odd columns.
+                        - MODE The text in the top right that indicates which
+                          mode SC-IM is currently in.
+                        - NUMB The cell styling used for cells formatted as
+                          numbers (That are positive)
+                        - STRG The cell styling used for cells formatted as
+                          strings.
+                        - DATEF The cell styling used for cells formated as
+                          dates.
+                        - CELL_SELECTION - The row and column selection styling
+                          used on the HEADINGS to indicate the coordinates of the
+                          selected row.
+                        - CELL_SELECTION_SC The currently (focussed) cell.
+                        - GRID_PAIR: Color shown for even columns itself.
+                        - GRID_ODD: Color shown for odd columns itself.
+                        - EXPRESSION The cell styling used for cells that are
+                          the result of an expression.
+                        - CELL_ERROR The cell styling used for when an expression
+                          results in an error (like dividing by zero)
+                        - CELL_NEGATIVE The cell that is used when a number (or
+                          expression) is a negative value.
+                        - INFO_MSG The text in the top left corner just above "A"
+                          that will provide info messages "At column A" when you
+                          try and go past the farthest column to the left
+                        - ERROR_MSG The text that will display in the top left
+                          corner when a command fails for some reason.
+                        - CELL_ID The coordinates of the currently selected cell
+                          that displays in the upper top left corner. Just to the
+                          left of the CELL_FORMAT and CELL_CONTENT.
+                        - CELL_FORMAT The text just to the right of the CELL_ID
+                          and left of the CELL_CONTENT in the top left corner that
+                          shows the formatting of the currently selected cell.
+                        - CELL_CONTENT The text just to the right of the CELL_ID
+                          and CELL_FORMAT that shows the content of the currently
+                          selected cell. This will show the expression used to get
+                          the current cell.
+                        - WELCOME The text that shows up when you first open SC-IM
+                        - NORMAL Text that shows on top of the terminal (like in :help)
+                        - INPUT The text that shows up while you type text in the
+                          input bar at the top left of the screen.
 
     :cellcolor "{key}={arg} .."
                 Change the color of the current cell or range.
