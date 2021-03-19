@@ -1629,6 +1629,7 @@ Commands for handling cell content:
         --txtdelim="\t"
         --txtdelim=","
         --txtdelim=";"
+        --txtdelim="|"
 
     If you pass a .xlsx file to SC-IM, you can specify which sheet to load
     with the --sheet parameter, which can be the name or number of a sheet.

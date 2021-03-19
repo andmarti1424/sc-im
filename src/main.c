@@ -864,7 +864,7 @@ void show_usage_and_quit(){
 \n  --quit_afterload            Quit after loading all the files\
 \n  --sheet=SHEET               Open SHEET when loading xlsx file. Default is 1.\
 \n  --tm_gmtoff={seconds}       set gmt offset used for converting datetimes to localtime.\
-\n  --txtdelim={\",\" or \";\" or \"\\t\"}  Sets delimiter when opening a .tab of .csv file");
+\n  --txtdelim={\",\" or \";\" or \"\\t\" or \"|\"}  Sets delimiter when opening a .tab of .csv file");
 #ifdef XLSX
   printf("\n\
 \n  --xlsx_readformulas         Set variable 'xlsx_readformulas'");

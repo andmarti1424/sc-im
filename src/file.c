@@ -193,7 +193,7 @@ int modcheck() {
  *
  * \details This function checks the type of a file as well as txtdelim conf value
  *
- * \return one of , ; \t
+ * \return one of , ; \t |
  */
 
 char get_delim(char *type) {
@@ -208,6 +208,8 @@ char get_delim(char *type) {
             delim = ',';
         } else if (!strcasecmp(get_conf_value("txtdelim"), ";")) {
             delim = ';';
+        } else if (!strcasecmp(get_conf_value("txtdelim"), "|")) {
+            delim = '|';
         }
     }
     return delim;
