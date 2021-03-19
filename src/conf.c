@@ -132,14 +132,14 @@ char * get_conf_values(char * salida) {
    if (user_conf_d == NULL) return NULL;
    struct nlist * nl;
 
-   nl = user_conf_d->list;
    salida[0]='\0';
-   while (nl != NULL) {
-       // ignore version conf variable here so that its not shown in :set command
-       if (! strcmp(nl->key, "version")) { nl = nl->next; continue; }
 
-       sprintf(salida + strlen(salida), "%s=%s\n", nl->key, nl->val);
-       nl = nl->next;
+   char *buf = salida;
+   for (nl = user_conf_d->list; nl != NULL; nl = nl->next) {
+       // ignore version conf variable here so that its not shown in :set command
+       if (! strcmp(nl->key, "version")) continue;
+
+       buf += sprintf(buf, "%s=%s\n", nl->key, nl->val);
    }
    return salida;
 }
@@ -161,7 +161,7 @@ char * get_conf_values(char * salida) {
 char * get_conf_value(char * key) {
    char * val = get(user_conf_d, key);
 
-   if ( val == NULL || *(&val[0]) == '\0')
+   if (val == NULL || val[0] == '\0')
        return get(predefined_conf_d, key);
    else
        return val;
