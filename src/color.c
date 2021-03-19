@@ -577,7 +577,11 @@ int redefine_color(char * color, int r, int g, int b) {
                sc_error("Color not found");
                return -1;
            }
+#if defined(NCURSES_VERSION_MAJOR) && (( NCURSES_VERSION_MAJOR > 5 && defined(NCURSES_VERSION_MINOR) && NCURSES_VERSION_MINOR > 0) || NCURSES_VERSION_MAJOR > 6)
            if (init_extended_color(atoi(s), RGB(r, g, b)) == 0) {
+#else
+           if (init_color(atoi(s), RGB(r, g, b)) == 0) {
+#endif
                sig_winchg();
                if (! loading) sc_info("Color %s redefined to %d %d %d.", color, r, g, b);
                return 0;
@@ -639,7 +643,11 @@ int define_color(char * color, int r, int g, int b) {
     cc->r = r;
     cc->g = g;
     cc->b = b;
+#if defined(NCURSES_VERSION_MAJOR) && (( NCURSES_VERSION_MAJOR > 5 && defined(NCURSES_VERSION_MINOR) && NCURSES_VERSION_MINOR > 0) || NCURSES_VERSION_MAJOR > 6)
     init_extended_color(7 + cc->number, RGB(r, g, b));
+#else
+    init_color(7 + cc->number, RGB(r, g, b));
+#endif
 
     if (! loading) sc_info("Defined custom color #%d with name '%s' and RGB values %d %d %d", cc->number, cc->name, cc->r, cc->g, cc->b);
     return 0;
