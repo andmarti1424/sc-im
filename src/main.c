@@ -197,8 +197,8 @@ int main (int argc, char ** argv) {
 #endif
 
     // start configuration dictionaries
-    user_conf_d = (struct dictionary *) create_dictionary();
-    predefined_conf_d = (struct dictionary *) create_dictionary();
+    user_conf_d = create_dictionary();
+    predefined_conf_d = create_dictionary();
     store_default_config_values(); // Stores default values in user_conf_d
 
     // Read the main() parameters and replace values in user_conf_d as necessary
