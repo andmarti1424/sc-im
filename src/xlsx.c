@@ -221,7 +221,9 @@ void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) 
             // string
             if ( s != NULL && ! strcmp(s, "s") ) {
                 char * st = NULL;
-                char * strvalue =  get_xlsx_string(doc_strings, atoi((char *) child_node->xmlChildrenNode->xmlChildrenNode->content));
+                char * strvalue = NULL;
+                if (child_node->xmlChildrenNode != NULL)
+                    strvalue =  get_xlsx_string(doc_strings, atoi((char *) child_node-> xmlChildrenNode-> xmlChildrenNode->content));
                 if (strvalue != NULL && strvalue[0] != '\0') {
                     st = str_replace (strvalue, "\"", "''");
                     clean_carrier(st); // we handle padding
