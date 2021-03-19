@@ -407,6 +407,7 @@ int show_lines() {
         wclrtobot(main_win);
     }
 
+    wmove(main_win, 0, 0);
     (void) wrefresh(main_win);
     return wgetch(input_win);
 }

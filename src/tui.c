@@ -104,6 +104,11 @@ WINDOW * input_win;
 SCREEN * sstderr;
 SCREEN * sstdout;
 
+#ifdef BRAILLE
+int status_line_empty;
+int curwinrow, curwincol;
+#endif
+
 /**
  * \brief Called to start UI
  *
@@ -118,6 +123,9 @@ void ui_start_screen() {
 
     main_win = newwin(LINES - RESROW, COLS, atoi(get_conf_value("input_bar_bottom")) ? 0 : RESROW, 0);
     input_win = newwin(RESROW, COLS, atoi(get_conf_value("input_bar_bottom")) ? LINES-RESROW : 0, 0);
+#ifdef BRAILLE
+    status_line_empty = 1;
+#endif
 
     #ifdef USECOLORS
     if (has_colors()) {
@@ -247,6 +255,10 @@ void ui_sc_msg(char * s, int type, ...) {
 #endif
         mvwprintw(input_win, 1, 0, "%s", t);
         wclrtoeol(input_win);
+        wmove(input_win, 1, 0);
+#ifdef BRAILLE
+        status_line_empty = 0;
+#endif
 
         if (type == DEBUG_MSG || (loading && type == ERROR_MSG)) {
             wtimeout(input_win, -1);
@@ -343,6 +355,14 @@ void ui_do_welcome() {
         }
     }
     wrefresh(main_win);
+
+#ifdef BRAILLE
+    /* land cursor next to the help line */
+    curwinrow = LINES/2;
+    curwincol = COLS/2-strlen(msg_help)/2-1;
+    status_line_empty = 1;
+#endif
+
     return;
 }
 
@@ -418,6 +438,11 @@ void ui_update(int header) {
 
     // Show sc_row headings: 0, 1, 2, 3..
     ui_show_sc_row_headings(main_win, mxrow);
+
+#ifdef BRAILLE
+    // Leave cursor on selected cell when no status message
+    if (status_line_empty) wmove(main_win, curwinrow, curwincol);
+#endif
 
     // Refresh curses windows
     wrefresh(main_win);
@@ -506,6 +531,14 @@ void ui_print_mult_pend() {
     // Return cursor to previous position
     wmove(input_win, row_orig, col_orig);
     wrefresh(input_win);
+
+#ifdef BRAILLE
+    if (status_line_empty && curmode != EDIT_MODE) {
+        // Leave cursor on selected cell when no status message
+        wmove(main_win, curwinrow, curwincol);
+        wrefresh(main_win);
+    }
+#endif
 }
 
 /**
@@ -559,6 +592,10 @@ void ui_clr_header(int i) {
 
     // Return cursor to previous position
     wmove(input_win, row_orig, col_orig);
+
+#ifdef BRAILLE
+    if (i == 1) status_line_empty = 1;
+#endif
 
     return;
 }
@@ -1013,6 +1050,13 @@ void ui_show_content(WINDOW * win, int mxrow, int mxcol) {
                 wclrtoeol(win);
             }
 
+#ifdef BRAILLE
+            if (currow == row && curcol == col) {
+                curwinrow = row + 1 - offscr_sc_rows - q_row_hidden;
+                curwincol = c + ((align == 1) ? (fieldlen - 1) : 0);
+            }
+#endif
+
             // clean format
             #ifndef USECOLORS
             wattroff(win, A_REVERSE);
@@ -1262,6 +1306,9 @@ void ui_bail(lua_State *L, char * msg) {
     set_term(sstderr);
     move(0, 0);
     clrtobot();
+#ifdef BRAILLE
+    status_line_empty = 1;
+#endif
     clearok(stdscr, TRUE);
     mvprintw(0, 0, "%s", stderr_buffer);
     stderr_buffer[0]='\0';
@@ -1370,6 +1417,9 @@ char * ui_query(char * initial_msg) {
     wclrtoeol(input_win);
     wmove(input_win, 1,0);
     wclrtoeol(input_win);
+#ifdef BRAILLE
+    status_line_empty = 1;
+#endif
     wrefresh(input_win);
     return hline;
 }
