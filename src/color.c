@@ -117,7 +117,7 @@ void start_default_ucolors() {
     ucolors[ CELL_SELECTION_SC ].bg = WHITE;
     ucolors[ NUMB            ].fg = CYAN;
     ucolors[ NUMB            ].bg = DEFAULT_COLOR;
-    ucolors[ STRG            ].fg = BLACK;
+    ucolors[ STRG            ].fg = MAGENTA;
     ucolors[ STRG            ].bg = DEFAULT_COLOR;
     ucolors[ STRG            ].bold = 0;
     ucolors[ DATEF           ].fg = YELLOW;
