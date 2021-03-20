@@ -142,7 +142,6 @@ int rescol = RESCOL; /**< Columns reserved for row numbers */
 struct block * buffer;
 struct block * lastcmd_buffer;
 struct dictionary * user_conf_d; /**< User's configuration dictionary */
-struct dictionary * predefined_conf_d; /**< Predefined configuration dictionary */
 struct history * commandline_history;
 struct history * insert_history;
 char stderr_buffer[1024] = "";
@@ -198,7 +197,6 @@ int main (int argc, char ** argv) {
 
     // start configuration dictionaries
     user_conf_d = create_dictionary();
-    predefined_conf_d = create_dictionary();
     store_default_config_values(); // Stores default values in user_conf_d
 
     // Read the main() parameters and replace values in user_conf_d as necessary
@@ -528,8 +526,7 @@ int exit_app(int status) {
         fclose(fdoutput);
     }
 
-    // delete user and predefined config dictionaries
-    destroy_dictionary(predefined_conf_d);
+    // delete user config dictionaries
     destroy_dictionary(user_conf_d);
 
     return status;

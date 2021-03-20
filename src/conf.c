@@ -42,7 +42,7 @@
  * \brief Configuration functions
  *
  * \details This file contains functions that operate on  the user's configuration
- * dictionary (user_conf_d) and the predefined dictionary (predefined_conf_d).
+ * dictionary (user_conf_d).
  */
 
 #include <stdlib.h>
@@ -167,10 +167,5 @@ char * get_conf_values(char * salida) {
 // argument rather than using user_conf_d directly.
 
 char * get_conf_value(char * key) {
-   char * val = get(user_conf_d, key);
-
-   if (val == NULL || val[0] == '\0')
-       return get(predefined_conf_d, key);
-   else
-       return val;
+   return get(user_conf_d, key);
 }
