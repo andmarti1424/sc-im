@@ -52,6 +52,49 @@
 #include "conf.h"
 #include "utils/dictionary.h"
 
+
+const char default_config[] =
+	"half_page_scroll=1\n"
+	"autocalc=1\n"
+	"numeric=0\n"
+	"nocurses=0\n"
+	"newline_action=j\n"
+	"external_functions=0\n"
+	"xlsx_readformulas=0\n"
+	"import_delimited_as_text=0\n"
+	"quit_afterload=0\n"
+	"numeric_zero=1\n"
+	"numeric_decimal=1\n"
+	"filename_with_mode=0\n"
+	"overlap=0\n"
+	"truncate=0\n"
+	"debug=0\n"
+	"ignorecase=0\n"
+	"trigger=1\n"
+	"version=0\n"
+	"help=0\n"
+	"input_bar_bottom=0\n"
+	"underline_grid=0\n"
+    #ifdef AUTOBACKUP
+	"autobackup=0\n"  // 0:noautobackup, n>0: backup every n in seconds
+    #endif
+
+    #ifdef DEFAULT_COPY_TO_CLIPBOARD_CMD
+	"default_copy_to_clipboard_cmd=" DEFAULT_COPY_TO_CLIPBOARD_CMD "\n"
+    #else
+	"default_copy_to_clipboard_cmd=\n"
+    #endif
+
+	"copy_to_clipboard_delimited_tab=0\n"
+
+    #ifdef DEFAULT_PASTE_FROM_CLIPBOARD_CMD
+	"default_paste_from_clipboard_cmd=" DEFAULT_PASTE_FROM_CLIPBOARD_CMD "\n"
+    #else
+	"default_paste_from_clipboard_cmd=\n"
+    #endif
+
+	"tm_gmtoff=0\n";
+
 /**
  * \brief Populates user_conf_d with default values
  *
@@ -64,45 +107,13 @@
 // argument rather than using user_conf_d directly.
 
 void store_default_config_values() {
-    put(user_conf_d, "half_page_scroll", "1");
-    put(user_conf_d, "autocalc", "1");
-    put(user_conf_d, "numeric", "0");
-    put(user_conf_d, "nocurses", "0");
-    put(user_conf_d, "newline_action", "j");
-    put(user_conf_d, "external_functions", "0");
-    put(user_conf_d, "xlsx_readformulas", "0");
-    put(user_conf_d, "import_delimited_as_text", "0");
-    put(user_conf_d, "quit_afterload", "0");
-    put(user_conf_d, "numeric_zero", "1");
-    put(user_conf_d, "numeric_decimal", "1");
-    put(user_conf_d, "filename_with_mode", "0");
-    put(user_conf_d, "overlap", "0");
-    put(user_conf_d, "truncate", "0");
-    put(user_conf_d, "debug", "0");
-    put(user_conf_d, "ignorecase", "0");
-    put(user_conf_d, "trigger", "1");
-    put(user_conf_d, "version", "0");
-    put(user_conf_d, "help", "0");
-    put(user_conf_d, "input_bar_bottom", "0");
-    put(user_conf_d, "underline_grid", "0");
-    #ifdef AUTOBACKUP
-    put(user_conf_d, "autobackup", "0"); // 0:noautobackup, n>0: backup every n in seconds
-    #endif
+    char *line = default_config;
 
-    #ifdef DEFAULT_COPY_TO_CLIPBOARD_CMD
-    put(user_conf_d, "default_copy_to_clipboard_cmd", DEFAULT_COPY_TO_CLIPBOARD_CMD);
-    #else
-    put(user_conf_d, "default_copy_to_clipboard_cmd", "");
-    #endif
-
-    put(user_conf_d, "copy_to_clipboard_delimited_tab", "0");
-
-    #ifdef DEFAULT_PASTE_FROM_CLIPBOARD_CMD
-    put(user_conf_d, "default_paste_from_clipboard_cmd", DEFAULT_PASTE_FROM_CLIPBOARD_CMD);
-    #else
-    put(user_conf_d, "default_paste_from_clipboard_cmd", "");
-    #endif
-
+    do {
+        parse_str(user_conf_d, line, 0);
+	line = strchr(line, '\n');
+    } while(line && *++line != 0);
+	
     // Calculate GMT offset (not on Solaris, doesn't have tm_gmtoff)
     #if defined(USELOCALE) && !defined(__sun)
     time_t t = time(NULL);
@@ -110,10 +121,7 @@ void store_default_config_values() {
     char strgmtoff[7];
     sprintf(strgmtoff, "%ld", lt->tm_gmtoff);
     put(user_conf_d, "tm_gmtoff", strgmtoff);
-    #else
-    put(user_conf_d, "tm_gmtoff", "0");
     #endif
-
 }
 
 /**

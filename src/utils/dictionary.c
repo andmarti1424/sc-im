@@ -192,14 +192,15 @@ void parse_str(struct dictionary * d, char * str, int no_blanks) {
     int i;
 
     i = 0;
-    while (*str != 0 && *str != '=' && i < sizeof(key)) {
+    while (*str != 0 && *str != '=' && *str != '\n' && i < sizeof(key)) {
        key[i++] = *str++;
     }
     if (i >= sizeof(key) || *str++ != '=') return;
     key[i] = 0;
 
     i = 0;
-    while (*str != 0 && i < sizeof(value) && !(no_blanks && *str == ' ')) {
+    while (*str != 0 && *str != '\n' && i < sizeof(value)
+	   && !(no_blanks && *str == ' ')) {
        value[i++] = *str++;
     }
     if (i >= sizeof(value)) return;
