@@ -748,7 +748,7 @@ void sig_term() {
 
 void show_version_and_quit() {
     put(user_conf_d, "nocurses", "1");
-    sc_info("Sc-im - %s", rev);
+    sc_info("SC-IM - %s", rev);
 #ifdef NCURSES
     sc_info("-DNCURSES");
 #endif
@@ -779,6 +779,12 @@ void show_version_and_quit() {
 #ifdef USELOCALE
     sc_info("-DUSELOCALE");
 #endif
+#ifdef MOUSE
+    sc_info("-DMOUSE");
+#endif
+#ifdef BRAILLE
+    sc_info("-DBRAILLE");
+#endif
 #ifdef USECOLORS
     sc_info("-DUSECOLORS");
 #endif
@@ -799,6 +805,9 @@ void show_version_and_quit() {
 #endif
 #ifdef DFLT_PAGER
     sc_info("-DDFLT_PAGER=\"%s\"", DFLT_PAGER);
+#endif
+#ifdef DFLT_EDITOR
+    sc_info("-DDFLT_EDITOR=\"%s\"", DFLT_EDITOR);
 #endif
 #ifdef CONFIG_DIR
     sc_info("-DCONFIG_DIR=\"%s\"", CONFIG_DIR);
@@ -862,11 +871,11 @@ void show_usage_and_quit(){
 \n  --output=FILE               Save the results in FILE\
 \n  --overlap                   Set variable 'overlap variable'\
 \n  --quit_afterload            Quit after loading all the files\
-\n  --sheet=SHEET               Open SHEET when loading xlsx file. Default is 1.\
 \n  --tm_gmtoff={seconds}       set gmt offset used for converting datetimes to localtime.\
 \n  --txtdelim={\",\" or \";\" or \"\\t\" or \"|\"}  Sets delimiter when opening a .tab of .csv file");
 #ifdef XLSX
   printf("\n\
+\n  --sheet=SHEET               Open SHEET when loading xlsx file. Default is 1.\
 \n  --xlsx_readformulas         Set variable 'xlsx_readformulas'");
 #endif
   printf("\n\
