@@ -99,10 +99,8 @@ void start_default_ucolors() {
     ucolors[ DEFAULT         ].bg = DEFAULT_COLOR;
     ucolors[ HEADINGS        ].bg = YELLOW;
     ucolors[ HEADINGS        ].fg = BLACK;
-    ucolors[ HEADINGS        ].dim = 1;
     ucolors[ HEADINGS_ODD    ].bg = YELLOW;
     ucolors[ HEADINGS_ODD    ].fg = BLACK;
-    ucolors[ HEADINGS_ODD    ].dim = 1;
     ucolors[ GRID_PAIR       ].fg = WHITE;
     ucolors[ GRID_PAIR       ].bg = DEFAULT_COLOR;
     ucolors[ GRID_ODD        ].fg = WHITE;
@@ -114,7 +112,7 @@ void start_default_ucolors() {
     ucolors[ CELL_SELECTION  ].fg = YELLOW;
     ucolors[ CELL_SELECTION  ].bold = 0;
     ucolors[ CELL_SELECTION_SC ].fg = BLACK;               // cell selection in spreadsheet
-    ucolors[ CELL_SELECTION_SC ].bg = WHITE;
+    ucolors[ CELL_SELECTION_SC ].bg = YELLOW;
     ucolors[ NUMB            ].fg = CYAN;
     ucolors[ NUMB            ].bg = DEFAULT_COLOR;
     ucolors[ STRG            ].fg = MAGENTA;
