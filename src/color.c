@@ -266,7 +266,7 @@ void free_colors_param_dict() {
  */
 
 void chg_color(char * str) {
-    if (atoi((char *) get_conf_value("nocurses"))) return;
+    if (get_conf_int("nocurses")) return;
 
     // Create key-value dictionary for the content of the string
     struct dictionary * d = create_dictionary();

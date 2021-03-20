@@ -203,15 +203,15 @@ int main (int argc, char ** argv) {
     read_argv(argc, argv);
 
     // check if help is in argv. if so, show usage and quit
-    if (atoi((char *) get_conf_value("help"))) // atoi converts string to an int
+    if (get_conf_int("help"))
         show_usage_and_quit();
 
     // check if version is in argv. if so, show version and quit
-    if (atoi((char *) get_conf_value("version"))) // atoi converts string to an int
+    if (get_conf_int("version"))
         show_version_and_quit();
 
     // create command line history structure
-    if (! atoi((char *) get_conf_value("nocurses"))) {
+    if (! get_conf_int("nocurses")) {
 #ifdef HISTORY_FILE
         commandline_history = (struct history *) create_history(':');
         load_history(commandline_history, ':'); // load the command history file
@@ -229,7 +229,7 @@ int main (int argc, char ** argv) {
     if (! growtbl(GROWNEW, 0, 0)) return exit_app(1);
 
     // initiate NCURSES if that is what is wanted
-    if (! atoi((char *) get_conf_value("nocurses"))) {
+    if (! get_conf_int("nocurses")) {
         ui_start_screen();
 
 #ifdef USECOLORS
@@ -258,7 +258,7 @@ int main (int argc, char ** argv) {
             return exit_app(-1);
         }
 
-        if (! atoi((char *) get_conf_value("nocurses"))) { // WE MUST STOP SCREEN!
+        if (! get_conf_int("nocurses")) { // WE MUST STOP SCREEN!
             ui_stop_screen();
 
             // if output is set, nocurses should always be 1 !
@@ -292,7 +292,7 @@ int main (int argc, char ** argv) {
 
     // initiate ui
     FILE * f;
-    if ( ! atoi((char *) get_conf_value("nocurses"))) {
+    if ( ! get_conf_int("nocurses")) {
         // we show welcome screen if no spreadsheet was passed to SC-IM
         // and no input was sent throw pipeline
         if ( ! curfile[0] && ! wcslen(stdin_buffer)) {
@@ -310,7 +310,7 @@ int main (int argc, char ** argv) {
     }
 
     // handle input from keyboard
-    if (! atoi((char *) get_conf_value("nocurses")))
+    if (! get_conf_int("nocurses"))
         buffer = (struct block *) create_buf(); // this should only take place if curses ui
 
     wchar_t nocurses_buffer[BUFFERSIZE];
@@ -340,7 +340,7 @@ int main (int argc, char ** argv) {
     }
 
 
-    while ( ! shall_quit && ! atoi((char *) get_conf_value("quit_afterload"))) {
+    while ( ! shall_quit && ! get_conf_int("quit_afterload")) {
         // save current time for runtime timer
         gettimeofday(&current_tv, NULL);
 
@@ -348,7 +348,7 @@ int main (int argc, char ** argv) {
         handle_backup();
 
         // if we are in ncurses
-        if (! atoi((char *) get_conf_value("nocurses"))) {
+        if (! get_conf_int("nocurses")) {
             handle_input(buffer);
 
         // if we are not in ncurses
@@ -361,7 +361,7 @@ int main (int argc, char ** argv) {
            shall_quit=2 means :q! */
         if (shall_quit == 1 && modcheck()) shall_quit = 0;
     }
-    if (atoi((char *) get_conf_value("nocurses")) && f != NULL) fclose(f);
+    if (get_conf_int("nocurses") && f != NULL) fclose(f);
 
     return shall_quit == -1 ? exit_app(-1) : exit_app(0);
 }
@@ -485,7 +485,7 @@ void delete_structures() {
 int exit_app(int status) {
 
     // free history
-    if (! atoi((char *) (get_conf_value("nocurses")))) {
+    if (! get_conf_int("nocurses")) {
 
 #ifdef HISTORY_FILE
         if (! save_history(commandline_history, "w")) sc_error("Could not save commandline history");
@@ -518,7 +518,7 @@ int exit_app(int status) {
     erase_buf(buffer);
 
     // stop CURSES screen
-    if (! atoi((char *) (get_conf_value("nocurses"))))
+    if (! get_conf_int("nocurses"))
         ui_stop_screen();
 
     // close fdoutput
@@ -601,7 +601,7 @@ void load_sc() {
 
     if (strlen(name) != 0) {
         sc_readfile_result result = readfile(name, 0);
-        if (!atoi((char *) get_conf_value("nocurses"))) {
+        if (!get_conf_int("nocurses")) {
             if (result == SC_READFILE_DOESNTEXIST) {
                 // It's a new record!
                 sc_info("New file: \"%s\"", name);
@@ -703,7 +703,7 @@ void sig_cont() {
  */
 
 void sig_int() {
-    if ( ! atoi((char *) get_conf_value("debug")))
+    if ( ! get_conf_int("debug"))
         sc_error("Got SIGINT. Press «:q<Enter>» to quit SC-IM");
     else
         shall_quit = 2;
