@@ -86,6 +86,7 @@ void put(struct dictionary * d, char * k, char * v) {
       // If an existing key is inserted, the value is overwritten.
       free(nl->val);
       nl->val = strdup(v);
+      nl->intval = atoi(v);
       return;
    }
 
@@ -93,6 +94,7 @@ void put(struct dictionary * d, char * k, char * v) {
    nl = malloc(sizeof(struct nlist));
    nl->key = strdup(k);
    nl->val = strdup(v);
+   nl->intval = atoi(v);
    nl->next = *p_nl;
    *p_nl = nl;
    d->len++;
@@ -143,7 +145,7 @@ int get_dict_buffer_size(struct dictionary * d) {
 }
 
 /**
- * \brief Get the value for KEY
+ * \brief Get the string value for KEY
  *
  * \param[in] d
  * \param[in] key
@@ -161,6 +163,27 @@ char * get(struct dictionary * d, char * key) {
       return nl->val;
    }
    return NULL;
+}
+
+/**
+ * \brief Get the integer value for KEY
+ *
+ * \param[in] d
+ * \param[in] key
+ *
+ * \return value for the key
+ */
+
+int get_int(struct dictionary * d, char * key) {
+   struct nlist * nl;
+
+   for (nl = d->list; nl != NULL; nl = nl->next) {
+      int cmp = strcmp(key, nl->key);
+      if (cmp > 0) continue;
+      if (cmp < 0) break;
+      return nl->intval;
+   }
+   return 0;
 }
 
 /* Get the key name from a value

@@ -153,7 +153,7 @@ char * get_conf_values(char * salida) {
 }
 
 /**
- * \brief Retreive the value of a given key in user_conf_d
+ * \brief Retreive the string value of a given key in user_conf_d
  *
  * \details This function will look for a given key in the user_conf_d
  * dictionary. If the key is found it will return the value of that
@@ -168,4 +168,22 @@ char * get_conf_values(char * salida) {
 
 char * get_conf_value(char * key) {
    return get(user_conf_d, key);
+}
+
+/**
+ * \brief Retreive the integer value of a given key in user_conf_d
+ *
+ * \details This function will look for a given key in the user_conf_d
+ * dictionary. If the key is found it will return the value of that
+ * dictionary entry, or 0 otherwise.
+ *
+ * \param[in] key The key to search for in user_conf_d
+ *
+ * \return key value
+ */
+// TODO Make this function take a pointer to a dictionary as an
+// argument rather than using user_conf_d directly.
+
+int get_conf_int(char * key) {
+   return get_int(user_conf_d, key);
 }
