@@ -147,7 +147,7 @@ void do_normalmode(struct block * buf) {
             break;
 
         case L'0':
-            if (atoi(get_conf_value("numeric_zero")) == 1 && atoi(get_conf_value("numeric")) == 1) goto numeric;
+            if (get_conf_int("numeric_zero") == 1 && get_conf_int("numeric") == 1) goto numeric;
         case OKEY_HOME:
             ;
             int freeze = freeze_ranges && (freeze_ranges->type == 'c' ||  freeze_ranges->type == 'a') ? 1 : 0;
@@ -262,7 +262,7 @@ void do_normalmode(struct block * buf) {
         case OKEY_PGDOWN:
             {
             int n = LINES - RESROW - 1;
-            if (atoi(get_conf_value("half_page_scroll"))) n = n / 2;
+            if (get_conf_int("half_page_scroll")) n = n / 2;
             lastcol = curcol;
             lastrow = currow;
             currow = forw_row(n)->row;
@@ -277,7 +277,7 @@ void do_normalmode(struct block * buf) {
         case OKEY_PGUP:
             {
             int n = LINES - RESROW - 1;
-            if (atoi(get_conf_value("half_page_scroll"))) n = n / 2;
+            if (get_conf_int("half_page_scroll")) n = n / 2;
             lastcol = curcol;
             lastrow = currow;
             currow = back_row(n)->row;
@@ -435,7 +435,7 @@ void do_normalmode(struct block * buf) {
 
         // repeat last command
         case L'.':
-            if (atoi(get_conf_value("numeric_decimal")) == 1 && atoi(get_conf_value("numeric")) == 1) goto numeric;
+            if (get_conf_int("numeric_decimal") == 1 && get_conf_int("numeric") == 1) goto numeric;
             copybuffer(lastcmd_buffer, buf); // nose graba en lastcmd_buffer!!
             cmd_multiplier = 1;
             exec_mult(buf, COMPLETECMDTIMEOUT);
@@ -640,7 +640,7 @@ void do_normalmode(struct block * buf) {
 #endif
             }
 
-            //if (atoi(get_conf_value("autocalc"))) EvalAll();
+            //if (get_conf_int("autocalc")) EvalAll();
             ui_update(TRUE);
             break;
             }
@@ -737,7 +737,7 @@ void do_normalmode(struct block * buf) {
 
             } else if (buf->pnext->value == L'd') {
                 del_selected_cells();
-                if (atoi(get_conf_value("autocalc")) && ! loading) EvalAll();
+                if (get_conf_int("autocalc") && ! loading) EvalAll();
             }
 
             ui_update(TRUE);
@@ -920,13 +920,13 @@ void do_normalmode(struct block * buf) {
 
                 case L'H':
                     scroll = calc_offscr_sc_cols() - center_hidden_cols;
-                    if (atoi(get_conf_value("half_page_scroll"))) scroll /= 2;
+                    if (get_conf_int("half_page_scroll")) scroll /= 2;
                     scroll_left(scroll);
                     break;
 
                 case L'L':
                     scroll = calc_offscr_sc_cols() - center_hidden_cols;
-                    if (atoi(get_conf_value("half_page_scroll"))) scroll /= 2;
+                    if (get_conf_int("half_page_scroll")) scroll /= 2;
                     scroll_right(scroll);
                     break;
 
@@ -1106,7 +1106,7 @@ void do_normalmode(struct block * buf) {
                 sc_error("Locked cells encountered. Nothing changed");
                 return;
             }
-            if (atoi(get_conf_value("numeric")) == 1) goto numeric;
+            if (get_conf_int("numeric") == 1) goto numeric;
             struct ent * p;
 #ifdef UNDO
             create_undo_action();
@@ -1136,7 +1136,7 @@ void do_normalmode(struct block * buf) {
 #ifdef UNDO
             end_undo_action();
 #endif
-            if (atoi(get_conf_value("autocalc"))) EvalAll();
+            if (get_conf_int("autocalc")) EvalAll();
             cmd_multiplier = 0;
             ui_update(TRUE);
             }
@@ -1146,8 +1146,8 @@ void do_normalmode(struct block * buf) {
         default:
         numeric:
             if ( (isdigit(buf->value) || buf->value == L'-' || buf->value == L'+' ||
-                  ( buf->value == L'.' &&  atoi(get_conf_value("numeric_decimal")) )) &&
-                atoi(get_conf_value("numeric")) ) {
+                  ( buf->value == L'.' &&  get_conf_int("numeric_decimal") )) &&
+                get_conf_int("numeric") ) {
                 if (locked_cell(currow, curcol)) return;
                 insert_edit_submode='=';
                 chg_mode(insert_edit_submode);

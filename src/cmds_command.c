@@ -461,7 +461,7 @@ void do_commandmode(struct block * sb) {
                     create_structures();
                     readfile(name, 0);
 
-                    if (! atoi(get_conf_value("nocurses"))) {
+                    if (! get_conf_int("nocurses")) {
                       ui_show_header();
                     }
                 }

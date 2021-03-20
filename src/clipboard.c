@@ -272,7 +272,7 @@ int save_plain(FILE * fout, int r0, int c0, int rn, int cn) {
                 if(emptyfield){
                    fwprintf(fout, L"\t");
                 }
-                if (! atoi(get_conf_value("copy_to_clipboard_delimited_tab"))) {
+                if (! get_conf_int("copy_to_clipboard_delimited_tab")) {
                     pad_and_align(text, num, fwidth[col], align, 0, out);
                     fwprintf(fout, L"%ls", out);
                 } else if ( (*pp)->flags & is_valid) {
@@ -280,7 +280,7 @@ int save_plain(FILE * fout, int r0, int c0, int rn, int cn) {
                 } else if ( (*pp)->label) {
                     fwprintf(fout, L"%s\t", text);
                 }
-            } else if (! atoi(get_conf_value("copy_to_clipboard_delimited_tab"))) {
+            } else if (! get_conf_int("copy_to_clipboard_delimited_tab")) {
                 fwprintf(fout, L"%*s", fwidth[col], " ");
             } else {
                 fwprintf(fout, L"\t");

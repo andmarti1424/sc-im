@@ -121,8 +121,8 @@ void ui_start_screen() {
     sstdout = newterm(NULL, stdout, stdin);
     set_term(sstdout);
 
-    main_win = newwin(LINES - RESROW, COLS, atoi(get_conf_value("input_bar_bottom")) ? 0 : RESROW, 0);
-    input_win = newwin(RESROW, COLS, atoi(get_conf_value("input_bar_bottom")) ? LINES-RESROW : 0, 0);
+    main_win = newwin(LINES - RESROW, COLS, get_conf_int("input_bar_bottom") ? 0 : RESROW, 0);
+    input_win = newwin(RESROW, COLS, get_conf_int("input_bar_bottom") ? LINES-RESROW : 0, 0);
 #ifdef BRAILLE
     status_line_empty = 1;
 #endif
@@ -241,12 +241,12 @@ int ui_getch_b(wint_t * wd) {
  */
 
 void ui_sc_msg(char * s, int type, ...) {
-    if (type == DEBUG_MSG && ! atoi(get_conf_value("debug"))) return;
+    if (type == DEBUG_MSG && ! get_conf_int("debug")) return;
     char t[BUFFERSIZE];
     va_list args;
     va_start(args, type);
     vsprintf (t, s, args);
-    if ( ! atoi(get_conf_value("nocurses"))) {
+    if ( ! get_conf_int("nocurses")) {
 #ifdef USECOLORS
         if (type == ERROR_MSG)
             ui_set_ucolor(input_win, &ucolors[ERROR_MSG], DEFAULT_COLOR);
@@ -381,7 +381,7 @@ void ui_do_welcome() {
 void ui_update(int header) {
     if (loading) return;
     if (cmd_multiplier > 1) return;
-    if (atoi(get_conf_value("nocurses"))) return;
+    if (get_conf_int("nocurses")) return;
 
     if (header) {
     #ifdef USECOLORS
@@ -618,7 +618,7 @@ void ui_print_mode() {
     #endif
 
     strm[0] = '\0';
-    if (atoi(get_conf_value("filename_with_mode")) && curfile[0]) {
+    if (get_conf_int("filename_with_mode") && curfile[0]) {
         sprintf(strm, "%s ", curfile);
     }
 
@@ -1010,7 +1010,7 @@ void ui_show_content(WINDOW * win, int mxrow, int mxcol) {
                 }
 
                 #ifdef USECOLORS
-                if (has_colors() && atoi(get_conf_value("underline_grid"))) {
+                if (has_colors() && get_conf_int("underline_grid")) {
                     attr_t attr;
                     short color;
                     wattr_get(win, &attr, &color, NULL);
@@ -1038,7 +1038,7 @@ void ui_show_content(WINDOW * win, int mxrow, int mxcol) {
                     out[ count_width_widestring(out, fwidth[col]) ] = L'\0';
 
             #ifdef USECOLORS
-                if (has_colors() && atoi(get_conf_value("underline_grid"))) {
+                if (has_colors() && get_conf_int("underline_grid")) {
                     attr_t attr;
                     short color;
                     wattr_get(win, &attr, &color, NULL);
@@ -1364,7 +1364,7 @@ char * ui_query(char * initial_msg) {
     hline[0]='\0';
 
     // curses is not enabled
-    if ( atoi(get_conf_value("nocurses"))) {
+    if ( get_conf_int("nocurses")) {
         if (strlen(initial_msg)) wprintf(L"%s", initial_msg);
 
         if (fgets(hline, BUFFERSIZE-1, stdin) == NULL)
@@ -1532,8 +1532,8 @@ void ui_resume() {
  * \return none
  */
 void ui_mv_bottom_bar() {
-    mvwin(main_win, atoi(get_conf_value("input_bar_bottom")) ? 0 : RESROW, 0);
-    mvwin(input_win, atoi(get_conf_value("input_bar_bottom")) ? LINES-RESROW : 0, 0);
+    mvwin(main_win, get_conf_int("input_bar_bottom") ? 0 : RESROW, 0);
+    mvwin(input_win, get_conf_int("input_bar_bottom") ? LINES-RESROW : 0, 0);
     return;
 }
 
@@ -1545,14 +1545,14 @@ void ui_mv_bottom_bar() {
 #ifdef MOUSE
 void ui_handle_mouse(MEVENT event) {
     int i, r = 0, c = 0;
-    if ( event.x < RESCOL || ( atoi(get_conf_value("input_bar_bottom")) && (event.y == 0 || event.y >= LINES - RESROW)) ||
-       ( !atoi(get_conf_value("input_bar_bottom")) && (event.y <= RESROW))) return;
+    if ( event.x < RESCOL || ( get_conf_int("input_bar_bottom") && (event.y == 0 || event.y >= LINES - RESROW)) ||
+       ( !get_conf_int("input_bar_bottom") && (event.y <= RESROW))) return;
 
 #ifdef BUTTON5_PRESSED
     if (event.bstate & BUTTON4_PRESSED || // scroll up
         event.bstate & BUTTON5_PRESSED) { // scroll down
             int n = LINES - RESROW - 1;
-            if (atoi(get_conf_value("half_page_scroll"))) n = n / 2;
+            if (get_conf_int("half_page_scroll")) n = n / 2;
             lastcol = curcol;
             lastrow = currow;
             currow = event.bstate & BUTTON5_PRESSED ? forw_row(n)->row : back_row(n)->row;
@@ -1571,7 +1571,7 @@ void ui_handle_mouse(MEVENT event) {
     if (! (event.bstate & BUTTON1_CLICKED)) return;
 
     c = event.x - RESCOL;
-    r = event.y - RESROW + (atoi(get_conf_value("input_bar_bottom")) ? 1 : - 1);
+    r = event.y - RESROW + (get_conf_int("input_bar_bottom") ? 1 : - 1);
 
     int mxcol = offscr_sc_cols + calc_offscr_sc_cols() - 1;
     int col = 0;

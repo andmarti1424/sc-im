@@ -567,7 +567,7 @@ int redefine_color(char * color, int r, int g, int b) {
     #if defined(NCURSES) && defined(USECOLORS)
     extern void sig_winchg();
     if (
-        ! atoi(get_conf_value("nocurses"))
+        ! get_conf_int("nocurses")
         && has_colors() && can_change_color()
        ) {
            char * s = get(d_colors_param, color);
@@ -604,7 +604,7 @@ int redefine_color(char * color, int r, int g, int b) {
 int define_color(char * color, int r, int g, int b) {
 
 #if defined(NCURSES) && defined(USECOLORS)
-    if (atoi(get_conf_value("nocurses"))) {
+    if (get_conf_int("nocurses")) {
         // this should not be alerted.
         //sc_error("Could not define color %s. Not using NCURSES.", color);
         return -1;

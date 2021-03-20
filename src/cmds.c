@@ -682,7 +682,7 @@ void doformat(int c1, int c2, int w, int p, int r) {
         w = 1;
     }
 
-    if (! atoi(get_conf_value("nocurses")) && w > COLS - rescol - 2) {
+    if (! get_conf_int("nocurses") && w > COLS - rescol - 2) {
         sc_info("Width too large - Maximum = %d", COLS - rescol - 2);
         w = COLS - rescol - 2;
     }
@@ -950,7 +950,7 @@ void int_deleterow(int row, int mult) {
         }
         rebuild_graph(); //FIXME CHECK HERE WHY REBUILD IS NEEDED. See NOTE1 in shift.c
         sync_refs();
-        //if (atoi(get_conf_value("autocalc")) && ! loading) EvalAll();
+        //if (get_conf_int("autocalc") && ! loading) EvalAll();
         EvalAll();
         maxrow--;
     }
@@ -1218,7 +1218,7 @@ void enter_cell_content(int r, int c, char * submode,  wchar_t * content) {
  */
 
 void send_to_interp(wchar_t * oper) {
-    if (atoi(get_conf_value("nocurses"))) {
+    if (get_conf_int("nocurses")) {
         int pos = -1;
         if ((pos = wstr_in_wstr(oper, L"\n")) != -1)
             oper[pos] = L'\0';
@@ -1231,7 +1231,7 @@ void send_to_interp(wchar_t * oper) {
     yyparse();
     linelim = -1;
     line[0]='\0';
-    if (atoi(get_conf_value("autocalc")) && ! loading) EvalAll();
+    if (get_conf_int("autocalc") && ! loading) EvalAll();
     return;
 }
 
@@ -2532,7 +2532,7 @@ void pad_and_align (char * str_value, char * numeric_value, int col_width, int a
     }
 
     // If content exceedes column width, outputs n number of '*' needed to fill column width
-    if (str_len + num_len + padding > col_width && !atoi(get_conf_value("truncate")) && ( (! atoi(get_conf_value("overlap")))) ) {
+    if (str_len + num_len + padding > col_width && !get_conf_int("truncate") && ( (! get_conf_int("overlap"))) ) {
         if (padding) wmemset(str_out + wcslen(str_out), L'#', padding);
         wmemset(str_out + wcslen(str_out), L'*', col_width - padding);
         return;
@@ -2573,7 +2573,7 @@ void pad_and_align (char * str_value, char * numeric_value, int col_width, int a
     }
 
     // Similar condition to max width '*' condition above, but just trims instead
-    if (str_len + num_len + padding > col_width && atoi(get_conf_value("truncate"))) {
+    if (str_len + num_len + padding > col_width && get_conf_int("truncate")) {
       str_out[col_width] = '\0';
     }
 
@@ -2679,7 +2679,7 @@ int is_single_command (struct block * buf, long timeout) {
         else if (buf->value == L'-')        result = EDITION_CMD;
         else if (buf->value == L'+')        result = EDITION_CMD;
 
-        else if (isdigit(buf->value) && atoi(get_conf_value("numeric")) )
+        else if (isdigit(buf->value) && get_conf_int("numeric") )
                                             result = MOVEMENT_CMD; // repeat last command
 
         else if (buf->value == L'.')        result = MOVEMENT_CMD; // repeat last command

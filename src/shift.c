@@ -107,7 +107,7 @@ void shift(int r, int c, int rf, int cf, wchar_t type) {
                 copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'd');
 #endif
             while (ic--) shift_range(-ic, 0, r, c, rf, cf);
-            if (atoi(get_conf_value("autocalc")) && ! loading) EvalAll();
+            if (get_conf_int("autocalc") && ! loading) EvalAll();
 #ifdef UNDO
             // update(TRUE); this is used just to make debugging easier
             for (i = 0; deps != NULL && i < deps->vf; i++) // TODO here save just ents that are off the shifted range
@@ -128,7 +128,7 @@ void shift(int r, int c, int rf, int cf, wchar_t type) {
 #endif
             while (ic--) shift_range(0, -ic, r, c, rf, cf);
 
-            if (atoi(get_conf_value("autocalc")) && ! loading) EvalAll();
+            if (get_conf_int("autocalc") && ! loading) EvalAll();
             //update(TRUE); // this is used just to make debugging easier
 #ifdef UNDO
             for (i = 0; deps != NULL && i < deps->vf; i++) {

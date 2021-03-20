@@ -121,7 +121,7 @@ void handle_input(struct block * buffer) {
                && ( buffer->value == L'\0' || iswdigit((wchar_t) buffer->value))
                && ( curmode == NORMAL_MODE || curmode == VISUAL_MODE || curmode == EDIT_MODE )
                && ( cmd_multiplier || d != L'0' )
-               && ( ! atoi(get_conf_value("numeric")))
+               && ( ! get_conf_int("numeric"))
                ) {
                     cmd_multiplier *= 10;
                     cmd_multiplier += (int) (d - '0');
