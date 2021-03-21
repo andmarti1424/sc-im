@@ -310,27 +310,27 @@ void chg_color(char * str) {
     }
 
     // Change the color
-    int type = atoi(get(d_colors_param, get(d, "type")));
+    int type = get_int(d_colors_param, get(d, "type"));
     struct custom_color * cc;
     if ((cc = get_custom_color(get(d, "bg"))) != NULL) { // bg is custom color
         ucolors[ type ].bg = 7 + cc->number;
     } else { // bg is stock ncurses color
-        ucolors[ type ].bg = atoi(get(d_colors_param, get(d, "bg")));
+        ucolors[ type ].bg = get_int(d_colors_param, get(d, "bg"));
     }
 
     if ((cc = get_custom_color(get(d, "fg"))) != NULL) { // fg is custom color
         ucolors[ type ].fg = 7 + cc->number;
     } else { // fg is stock ncurses color
-        ucolors[ type ].fg = atoi(get(d_colors_param, get(d, "fg")));
+        ucolors[ type ].fg = get_int(d_colors_param, get(d, "fg"));
     }
 
-    if (((cl = get(d, "bold")) != NULL)      && cl[0] != '\0')     ucolors[ type ].bold      = atoi(get(d, "bold"));
-    if (((cl = get(d, "italic")) != NULL)    && cl[0] != '\0')     ucolors[ type ].italic    = atoi(get(d, "italic"));
-    if (((cl = get(d, "dim")) != NULL)       && cl[0] != '\0')     ucolors[ type ].dim       = atoi(get(d, "dim"));
-    if (((cl = get(d, "reverse")) != NULL)   && cl[0] != '\0')     ucolors[ type ].reverse   = atoi(get(d, "reverse"));
-    if (((cl = get(d, "standout")) != NULL)  && cl[0] != '\0')     ucolors[ type ].standout  = atoi(get(d, "standout"));
-    if (((cl = get(d, "blink")) != NULL)     && cl[0] != '\0')     ucolors[ type ].blink     = atoi(get(d, "blink"));
-    if (((cl = get(d, "underline")) != NULL) && cl[0] != '\0')     ucolors[ type ].underline = atoi(get(d, "underline"));
+    if (((cl = get(d, "bold")) != NULL)      && cl[0] != '\0')     ucolors[ type ].bold      = get_int(d, "bold");
+    if (((cl = get(d, "italic")) != NULL)    && cl[0] != '\0')     ucolors[ type ].italic    = get_int(d, "italic");
+    if (((cl = get(d, "dim")) != NULL)       && cl[0] != '\0')     ucolors[ type ].dim       = get_int(d, "dim");
+    if (((cl = get(d, "reverse")) != NULL)   && cl[0] != '\0')     ucolors[ type ].reverse   = get_int(d, "reverse");
+    if (((cl = get(d, "standout")) != NULL)  && cl[0] != '\0')     ucolors[ type ].standout  = get_int(d, "standout");
+    if (((cl = get(d, "blink")) != NULL)     && cl[0] != '\0')     ucolors[ type ].blink     = get_int(d, "blink");
+    if (((cl = get(d, "underline")) != NULL) && cl[0] != '\0')     ucolors[ type ].underline = get_int(d, "underline");
 
     // clean temp variable
     destroy_dictionary(d);
@@ -419,7 +419,7 @@ void color_cell(int r, int c, int rf, int cf, char * str) {
             struct custom_color * cc;
             if ((cl = get(d, "bg")) != NULL && cl[0] != '\0') {
                 if (get(d_colors_param, get(d, "bg")) != NULL) {
-                    n->ucolor->bg = atoi(get(d_colors_param, get(d, "bg")));
+                    n->ucolor->bg = get_int(d_colors_param, get(d, "bg"));
                 } else if ((cc = get_custom_color(get(d, "bg"))) != NULL) {
                     n->ucolor->bg = 7 + cc->number;
                 } else {
@@ -429,7 +429,7 @@ void color_cell(int r, int c, int rf, int cf, char * str) {
             }
             if ((cl = get(d, "fg")) != NULL && cl[0] != '\0') {
                 if (get(d_colors_param, get(d, "fg")) != NULL) {
-                    n->ucolor->fg = atoi(get(d_colors_param, get(d, "fg")));
+                    n->ucolor->fg = get_int(d_colors_param, get(d, "fg"));
                 } else if ((cc = get_custom_color(get(d, "fg"))) != NULL) {
                     n->ucolor->fg = 7 + cc->number;
                 } else {
@@ -438,13 +438,13 @@ void color_cell(int r, int c, int rf, int cf, char * str) {
                 }
             }
 
-            if ((cl = get(d, "bold"))      != NULL && cl[0] != '\0')   n->ucolor->bold      = atoi(get(d, "bold"));
-            if ((cl = get(d, "italic"))    != NULL && cl[0] != '\0')   n->ucolor->italic    = atoi(get(d, "italic"));
-            if ((cl = get(d, "dim") )      != NULL && cl[0] != '\0')   n->ucolor->dim       = atoi(get(d, "dim"));
-            if ((cl = get(d, "reverse"))   != NULL && cl[0] != '\0')   n->ucolor->reverse   = atoi(get(d, "reverse"));
-            if ((cl = get(d, "standout"))  != NULL && cl[0] != '\0')   n->ucolor->standout  = atoi(get(d, "standout"));
-            if ((cl = get(d, "blink"))     != NULL && cl[0] != '\0')   n->ucolor->blink     = atoi(get(d, "blink"));
-            if ((cl = get(d, "underline")) != NULL && cl[0] != '\0')   n->ucolor->underline = atoi(get(d, "underline"));
+            if ((cl = get(d, "bold"))      != NULL && cl[0] != '\0')   n->ucolor->bold      = get_int(d, "bold");
+            if ((cl = get(d, "italic"))    != NULL && cl[0] != '\0')   n->ucolor->italic    = get_int(d, "italic");
+            if ((cl = get(d, "dim") )      != NULL && cl[0] != '\0')   n->ucolor->dim       = get_int(d, "dim");
+            if ((cl = get(d, "reverse"))   != NULL && cl[0] != '\0')   n->ucolor->reverse   = get_int(d, "reverse");
+            if ((cl = get(d, "standout"))  != NULL && cl[0] != '\0')   n->ucolor->standout  = get_int(d, "standout");
+            if ((cl = get(d, "blink"))     != NULL && cl[0] != '\0')   n->ucolor->blink     = get_int(d, "blink");
+            if ((cl = get(d, "underline")) != NULL && cl[0] != '\0')   n->ucolor->underline = get_int(d, "underline");
 
             if (! loading) {
                 #ifdef UNDO
