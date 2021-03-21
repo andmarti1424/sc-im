@@ -107,7 +107,7 @@ void start_default_ucolors() {
     ucolors[ GRID_ODD        ].bg = DEFAULT_COLOR;
     ucolors[ WELCOME         ].fg = YELLOW;
     ucolors[ WELCOME         ].bg = DEFAULT_COLOR;
-    ucolors[ WELCOME         ].dim = 1;
+    ucolors[ WELCOME         ].bold = 0;
     ucolors[ CELL_SELECTION  ].bg = BLACK;                 // cell selection in headings
     ucolors[ CELL_SELECTION  ].fg = YELLOW;
     ucolors[ CELL_SELECTION  ].bold = 0;
