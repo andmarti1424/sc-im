@@ -755,7 +755,6 @@ void ui_show_sc_col_headings(WINDOW * win, int mxcol) {
          i > freeze_ranges->br->col && i <= freeze_ranges->br->col + center_hidden_cols) || (
          i < freeze_ranges->tl->col && i >= freeze_ranges->tl->col - center_hidden_cols))) continue;
 
-        int k = fwidth[i] / 2;
         srange * s = get_selected_range();
         if ( (s != NULL && i >= s->tlcol && i <= s->brcol) || i == curcol ) {
             #ifdef USECOLORS
@@ -764,7 +763,9 @@ void ui_show_sc_col_headings(WINDOW * win, int mxcol) {
             wattron(win, A_REVERSE);
             #endif
         }
-        (void) mvwprintw(win, 0, col, "%*s%-*s", k-1, " ", fwidth[i] - k + 1, coltoa(i));
+
+        int k = (fwidth[i] - 1) / 2;
+        mvwprintw(win, 0, col, "%*s%-*s", k, "", fwidth[i] - k, coltoa(i));
 
         /* We also colorize the columns with alternate color
         #ifdef USECOLORS
