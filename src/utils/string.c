@@ -350,10 +350,11 @@ char * ltrim(char * string, char junk) {
 
 int isnumeric(char * string) {
     int i, len = strlen(string);
-    int res = true;
+    int result = true;
     bool has_dot = false;
-    bool has_dash = false;
+    bool has_sign = false;
     bool has_digit = false;
+    bool has_exponent = false;
     for (i=0; i<len; i++) {
 
         if ( string[i] == '.' && ! has_dot ) {
@@ -361,15 +362,21 @@ int isnumeric(char * string) {
             continue;
         }
 
-        if ( string[i] == '-' ) {
-            if (has_digit) {
-                res = false;
+        if ( (string[i] == 'e' || string[i] == 'E') && ! has_exponent ) {
+            has_exponent = true;
+            has_sign = false; // allow sign for exponent
+            continue;
+        }
+
+        if ( (string[i] == '-' || string[i] == '+') ) {
+            if (has_digit && ! has_exponent ) {
+                result = false;
                 break;
             }
-            if (! has_dash) {
-                has_dash = true;
+            if (! has_sign) {
+                has_sign = true;
             } else {
-                res = false;
+                result = false;
                 break;
             }
             continue;
@@ -380,10 +387,10 @@ int isnumeric(char * string) {
             continue;
         }
 
-        res = false;
+        result = false;
         break;
     }
-    return res;
+    return result;
 }
 
 /**
