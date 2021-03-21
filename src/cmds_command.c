@@ -343,7 +343,7 @@ void do_commandmode(struct block * sb) {
                 wcscpy(inputline, get_curcmd());
                 continue;
             }
-            if ( ! wcsncmp(inputline, valid_commands[i], wcslen(inputline)) 
+            if ( ! wcsncmp(inputline, valid_commands[i], wcslen(inputline))
                ) {
                 wcscpy(inputline, valid_commands[i]);
                 real_inputline_pos = wcslen(inputline);
@@ -860,9 +860,12 @@ void do_commandmode(struct block * sb) {
 
         } else if ( ! wcsncmp(inputline, L"nmap", 4) ||
                     ! wcsncmp(inputline, L"imap", 4) ||
+                    ! wcsncmp(inputline, L"vmap", 4) ||
                     ! wcsncmp(inputline, L"inoremap", 8) ||
                     ! wcsncmp(inputline, L"nnoremap", 8) ||
+                    ! wcsncmp(inputline, L"vnoremap", 8) ||
                     ! wcsncmp(inputline, L"iunmap", 6) ||
+                    ! wcsncmp(inputline, L"vunmap", 6) ||
                     ! wcsncmp(inputline, L"nunmap", 6) ) {
             send_to_interp(inputline);
 

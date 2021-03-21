@@ -515,12 +515,21 @@ Commands for handling cell content:
                  only in INSERT_MODE.
                  Example:  :imap "<C-f>" "format"
 
+     :vmap {lhs} {rhs}
+                 Map the key sequence {lhs} to {rhs} This mapping takes effect
+                 only in VISUAL_MODE.
+                 Example:  :vmap "e" "y"
+
      :nnoremap {lhs} {rhs}
                  This is the non-recursive version of ":nmap". See NOTES on
                  MAPPING below
 
      :inoremap {lhs} {rhs}
                  This is the non-recursive version of ":imap". See NOTES on
+                 MAPPING below
+
+     :vnoremap {lhs} {rhs}
+                 This is the non-recursive version of ":vmap". See NOTES on
                  MAPPING below
 
      :nunmap {lhs}
@@ -530,6 +539,10 @@ Commands for handling cell content:
      :iunmap {lhs}
                  Remove the map sequence {lhs} that takes effect in
                  INSERT_MODE.
+
+     :vunmap {lhs}
+                 Remove the map sequence {lhs} that takes effect in
+                 VISUAL_MODE.
 
      :file [{file}]
                  If {file} is given, expand {file}, and set the current file
@@ -1085,11 +1098,12 @@ Commands for handling cell content:
     Mapping can be done in any SC-IM file or in a .scimrc file in the home
     directory.
 
-    Maps can be added with the :nmap and :imap commands and removed with
-    the :nunmap and :iunmap commands.
+    Maps can be added with the :nmap, :imap, and :vmap commands and removed
+    with the :nunmap, :iunmap, and :vunmap commands.
     Example:
         :nmap "d" ":h<cr>"  ->   Maps d to ':help<cr>' in Normal mode.
         :imap "f" "foo"     ->   Maps f to the string 'foo' in Insert mode.
+        :vmap "e" "y"       ->   Maps e to y in Visual mode.
 
     Some notes:
     The Left and Right sequence of a mapping cannot contain numbers.
@@ -1099,8 +1113,8 @@ Commands for handling cell content:
     <PGDOWN> <PGUP>
 
     If an existing map sequence is remapped, it is replaced with the new one.
-    Mapping is recursive by default. The non-recursive versions of :nmap and
-    :imap are :nnoremap and :inoremap.
+    Mapping is recursive by default. The non-recursive versions of :nmap,
+    :imap, and :vmap are :nnoremap, :inoremap, and :vnoremap.
     Example:
         nmap "a" "b",
         nnoremap "b" "j"

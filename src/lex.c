@@ -177,7 +177,10 @@ int yylex() {
             }
 
             if (ret == WORD) {
-                if (tokenst && ( ! strncmp(line, "nmap", 4) || ! strncmp(line, "imap", 4) )) {
+                if (tokenst && ( ! strncmp(line, "nmap", 4) ||
+                        ! strncmp(line, "imap", 4) ||
+                        ! strncmp(line, "vmap", 4) )
+                    ) {
                     char * p = tokenst;
                     char * ptr = p;
                     while (*ptr && (
