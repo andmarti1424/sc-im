@@ -1545,6 +1545,14 @@ Commands for handling cell content:
         Always use it only with @ston see example:
         @ston(@lua("luascript",0))
 
+    @fmt("{se}", {e})
+        Convert a number to a string. The argument se must be a valid
+        printf(3) format string. e is converted according to the standard
+        rules.  For example, the expression
+        @fmt("∗∗%6.3f∗∗", 10.5)
+        yields the string ``∗∗10.500∗∗''. e is a double, so applicable
+        formats are e, E, f, g, and G.  Try ``%g'' as a starting point.
+
 ==============================================================================
 &Built-in Date and Time Functions&
 
