@@ -2503,6 +2503,7 @@ int calc_offscr_sc_rows() {
  * \return resulting string to be printed to the screen
  */
 
+//FIXME when str_value len == 0
 void pad_and_align (char * str_value, char * numeric_value, int col_width, int align, int padding, wchar_t * str_out) {
     int str_len  = 0;
     int num_len  = strlen(numeric_value);
@@ -2543,7 +2544,8 @@ void pad_and_align (char * str_value, char * numeric_value, int col_width, int a
 
     // left spaces
     int left_spaces = 0;
-    if (align == 0 && str_len) {                           // center align
+    //if (align == 0) && str_len) {                             // center align
+    if (align == 0) {                                           // center align
         left_spaces = (col_width - padding - str_len) / 2;
         if (num_len > left_spaces) left_spaces = col_width - padding - str_len - num_len;
     } else if (align == 1 && str_len && ! num_len) {       // right align
