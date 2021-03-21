@@ -52,8 +52,6 @@ CFLAGS += -DMAXROWS=65536
 CFLAGS += -DUSELOCALE
 # Comment out to enable mouse support on virtual terminal.
 CFLAGS += -DMOUSE
-# Comment out to enable BRAILLE support
-CFLAGS += -DBRAILLE
 
 # Clipboard support is OS dependent.
 #
