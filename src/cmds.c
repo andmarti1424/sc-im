@@ -2503,7 +2503,6 @@ int calc_offscr_sc_rows() {
  * \return resulting string to be printed to the screen
  */
 
-//FIXME when str_value len == 0
 void pad_and_align (char * str_value, char * numeric_value, int col_width, int align, int padding, wchar_t * str_out) {
     int str_len  = 0;
     int num_len  = strlen(numeric_value);
