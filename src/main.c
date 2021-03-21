@@ -779,9 +779,6 @@ void show_version_and_quit() {
 #ifdef MOUSE
     sc_info("-DMOUSE");
 #endif
-#ifdef BRAILLE
-    sc_info("-DBRAILLE");
-#endif
 #ifdef USECOLORS
     sc_info("-DUSECOLORS");
 #endif
@@ -868,6 +865,7 @@ void show_usage_and_quit(){
 \n  --output=FILE               Save the results in FILE\
 \n  --overlap                   Set variable 'overlap variable'\
 \n  --quit_afterload            Quit after loading all the files\
+\n  --show_cursor               Make the screen cursor follow the active cell\
 \n  --tm_gmtoff={seconds}       set gmt offset used for converting datetimes to localtime.\
 \n  --txtdelim={\",\" or \";\" or \"\\t\" or \"|\"}  Sets delimiter when opening a .tab of .csv file");
 #ifdef XLSX
