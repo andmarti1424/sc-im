@@ -55,10 +55,10 @@ struct nlist {
 };
 
 struct dictionary * create_dictionary();
-void put(struct dictionary * d, char * k, char * v);
+void put(struct dictionary * d, const char * k, const char * v);
 void destroy_dictionary(struct dictionary * d);
-char * get(struct dictionary * d, char * key);
-int get_int(struct dictionary * d, char * key); 
-//char * get_key_name(struct dictionary * d, char * value);
-void parse_str(struct dictionary * d, char * str, int blank_space);
+char * get(struct dictionary * d, const char * key);
+int get_int(struct dictionary * d, const char * key); 
+//char * get_key_name(struct dictionary * d, const char * value);
+void parse_str(struct dictionary * d, const char * str, int no_blanks);
 int get_dict_buffer_size(struct dictionary * d); 
