@@ -107,7 +107,7 @@ const char default_config[] =
 // argument rather than using user_conf_d directly.
 
 void store_default_config_values() {
-    char *line = default_config;
+    const char *line = default_config;
 
     do {
         parse_str(user_conf_d, line, 0);
@@ -166,7 +166,7 @@ char * get_conf_values(char * salida) {
 // TODO Make this function take a pointer to a dictionary as an
 // argument rather than using user_conf_d directly.
 
-char * get_conf_value(char * key) {
+char * get_conf_value(const char * key) {
    return get(user_conf_d, key);
 }
 
@@ -184,6 +184,6 @@ char * get_conf_value(char * key) {
 // TODO Make this function take a pointer to a dictionary as an
 // argument rather than using user_conf_d directly.
 
-int get_conf_int(char * key) {
+int get_conf_int(const char * key) {
    return get_int(user_conf_d, key);
 }

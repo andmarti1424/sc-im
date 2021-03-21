@@ -70,7 +70,7 @@ struct dictionary * create_dictionary() {
  * \return none
  */
 
-void put(struct dictionary * d, char * k, char * v) {
+void put(struct dictionary * d, const char * k, const char * v) {
    struct nlist *nl, **p_nl;
 
    if (*k == 0) return;
@@ -153,7 +153,7 @@ int get_dict_buffer_size(struct dictionary * d) {
  * \return value for the key
  */
 
-char * get(struct dictionary * d, char * key) {
+char * get(struct dictionary * d, const char * key) {
    struct nlist * nl;
 
    for (nl = d->list; nl != NULL; nl = nl->next) {
@@ -174,7 +174,7 @@ char * get(struct dictionary * d, char * key) {
  * \return value for the key
  */
 
-int get_int(struct dictionary * d, char * key) {
+int get_int(struct dictionary * d, const char * key) {
    struct nlist * nl;
 
    for (nl = d->list; nl != NULL; nl = nl->next) {
@@ -187,7 +187,7 @@ int get_int(struct dictionary * d, char * key) {
 }
 
 /* Get the key name from a value
-char * get_key_name(struct dictionary * d, char * value) {
+char * get_key_name(struct dictionary * d, const char * value) {
    struct nlist * nl;
 
    for (nl = d->list; nl != NULL; nl = nl->next) {
@@ -209,7 +209,7 @@ char * get_key_name(struct dictionary * d, char * value) {
  * \return dictionary
  */
 
-void parse_str(struct dictionary * d, char * str, int no_blanks) {
+void parse_str(struct dictionary * d, const char * str, int no_blanks) {
     char key[90];
     char value[90];
     int i;
