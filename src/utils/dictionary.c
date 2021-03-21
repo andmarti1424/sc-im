@@ -214,21 +214,22 @@ void parse_str(struct dictionary * d, const char * str, int no_blanks) {
     char value[90];
     int i;
 
-    i = 0;
-    while (*str != 0 && *str != '=' && *str != '\n' && i < sizeof(key)) {
-       key[i++] = *str++;
-    }
-    if (i >= sizeof(key) || *str++ != '=') return;
-    key[i] = 0;
+    while (*str != '\0') {
+        i = 0;
+        while (*str != 0 && *str != '=' && *str != '\n' && i < sizeof(key) && *str != ' ') {
+            key[i++] = *str++;
+        }
+        if (i >= sizeof(key) || *str++ != '=') continue;
+        key[i] = 0;
 
-    i = 0;
-    while (*str != 0 && *str != '\n' && i < sizeof(value)
-	   && !(no_blanks && *str == ' ')) {
-       value[i++] = *str++;
-    }
-    if (i >= sizeof(value)) return;
-    value[i] = 0;
+        i = 0;
+        while (*str != 0 && *str != '\n' && i < sizeof(value) && !(no_blanks && *str == ' ')) {
+            value[i++] = *str++;
+        }
+        if (i >= sizeof(value)) return;
+        value[i] = 0;
 
-    // Create the dictionary
-    put(d, key, value);
+        // Create the dictionary
+        put(d, key, value);
+    }
 }
