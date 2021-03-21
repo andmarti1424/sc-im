@@ -792,25 +792,30 @@ void do_commandmode(struct block * sb) {
             }
             swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%ls", line);
             send_to_interp(interp_line);
+
         }  else if ( ! wcsncmp(inputline, L"untrigger ", 10) ) {
             wcscpy(interp_line, inputline);
             send_to_interp(interp_line);
-        }  else if ( ! wcsncmp(inputline, L"set ", 4) ) {
 
+        }  else if ( ! wcsncmp(inputline, L"set ", 4) ) {
             wchar_t line [BUFFERSIZE];
             wcscpy(line, inputline);
             del_range_wchars(line, 0, 3);
+
             wchar_t * l;
             char oper[BUFFERSIZE];
             if ((l = wcschr(line, L' ')) != NULL) l[0] = L'\0';
             if ((l = wcschr(line, L'=')) != NULL) l[0] = L'\0';
+
+            wcscpy(interp_line, inputline);
+            send_to_interp(interp_line);
+
             wcstombs(oper, line, BUFFERSIZE);
             if (get_conf_value(oper)) {
                 sc_info("Config value changed: %s", oper);
-                wcscpy(interp_line, inputline);
-                send_to_interp(interp_line);
-            } else
-                sc_error("Invalid configuration parameter");
+            } else if (strlen(oper) > 2 && ! wcsncmp(inputline, L"set no", 6)) {
+                sc_info("Config value changed: %s", &oper[2]);
+            }
 
         } else if ( ! wcsncmp(inputline, L"pad ", 4) ) {
             int c = curcol, cf = curcol;
