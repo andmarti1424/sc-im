@@ -42,7 +42,7 @@
  * \brief Configuration functions
  *
  * \details This file contains functions that operate on  the user's configuration
- * dictionary (user_conf_d) and the predefined dictionary (predefined_conf_d).
+ * dictionary (user_conf_d).
  */
 
 #include <stdlib.h>
@@ -51,6 +51,49 @@
 #include <time.h>
 #include "conf.h"
 #include "utils/dictionary.h"
+
+
+const char default_config[] =
+	"half_page_scroll=1\n"
+	"autocalc=1\n"
+	"numeric=0\n"
+	"nocurses=0\n"
+	"newline_action=j\n"
+	"external_functions=0\n"
+	"xlsx_readformulas=0\n"
+	"import_delimited_as_text=0\n"
+	"quit_afterload=0\n"
+	"numeric_zero=1\n"
+	"numeric_decimal=1\n"
+	"filename_with_mode=0\n"
+	"overlap=0\n"
+	"truncate=0\n"
+	"debug=0\n"
+	"ignorecase=0\n"
+	"trigger=1\n"
+	"version=0\n"
+	"help=0\n"
+	"input_bar_bottom=0\n"
+	"underline_grid=0\n"
+    #ifdef AUTOBACKUP
+	"autobackup=0\n"  // 0:noautobackup, n>0: backup every n in seconds
+    #endif
+
+    #ifdef DEFAULT_COPY_TO_CLIPBOARD_CMD
+	"default_copy_to_clipboard_cmd=" DEFAULT_COPY_TO_CLIPBOARD_CMD "\n"
+    #else
+	"default_copy_to_clipboard_cmd=\n"
+    #endif
+
+	"copy_to_clipboard_delimited_tab=0\n"
+
+    #ifdef DEFAULT_PASTE_FROM_CLIPBOARD_CMD
+	"default_paste_from_clipboard_cmd=" DEFAULT_PASTE_FROM_CLIPBOARD_CMD "\n"
+    #else
+	"default_paste_from_clipboard_cmd=\n"
+    #endif
+
+	"tm_gmtoff=0\n";
 
 /**
  * \brief Populates user_conf_d with default values
@@ -64,45 +107,13 @@
 // argument rather than using user_conf_d directly.
 
 void store_default_config_values() {
-    put(user_conf_d, "half_page_scroll", "1");
-    put(user_conf_d, "autocalc", "1");
-    put(user_conf_d, "numeric", "0");
-    put(user_conf_d, "nocurses", "0");
-    put(user_conf_d, "newline_action", "j");
-    put(user_conf_d, "external_functions", "0");
-    put(user_conf_d, "xlsx_readformulas", "0");
-    put(user_conf_d, "import_delimited_as_text", "0");
-    put(user_conf_d, "quit_afterload", "0");
-    put(user_conf_d, "numeric_zero", "1");
-    put(user_conf_d, "numeric_decimal", "1");
-    put(user_conf_d, "filename_with_mode", "0");
-    put(user_conf_d, "overlap", "0");
-    put(user_conf_d, "truncate", "0");
-    put(user_conf_d, "debug", "0");
-    put(user_conf_d, "ignorecase", "0");
-    put(user_conf_d, "trigger", "1");
-    put(user_conf_d, "version", "0");
-    put(user_conf_d, "help", "0");
-    put(user_conf_d, "input_bar_bottom", "0");
-    put(user_conf_d, "underline_grid", "0");
-    #ifdef AUTOBACKUP
-    put(user_conf_d, "autobackup", "0"); // 0:noautobackup, n>0: backup every n in seconds
-    #endif
+    char *line = default_config;
 
-    #ifdef DEFAULT_COPY_TO_CLIPBOARD_CMD
-    put(user_conf_d, "default_copy_to_clipboard_cmd", DEFAULT_COPY_TO_CLIPBOARD_CMD);
-    #else
-    put(user_conf_d, "default_copy_to_clipboard_cmd", "");
-    #endif
-
-    put(user_conf_d, "copy_to_clipboard_delimited_tab", "0");
-
-    #ifdef DEFAULT_PASTE_FROM_CLIPBOARD_CMD
-    put(user_conf_d, "default_paste_from_clipboard_cmd", DEFAULT_PASTE_FROM_CLIPBOARD_CMD);
-    #else
-    put(user_conf_d, "default_paste_from_clipboard_cmd", "");
-    #endif
-
+    do {
+        parse_str(user_conf_d, line, 0);
+	line = strchr(line, '\n');
+    } while(line && *++line != 0);
+	
     // Calculate GMT offset (not on Solaris, doesn't have tm_gmtoff)
     #if defined(USELOCALE) && !defined(__sun)
     time_t t = time(NULL);
@@ -110,10 +121,7 @@ void store_default_config_values() {
     char strgmtoff[7];
     sprintf(strgmtoff, "%ld", lt->tm_gmtoff);
     put(user_conf_d, "tm_gmtoff", strgmtoff);
-    #else
-    put(user_conf_d, "tm_gmtoff", "0");
     #endif
-
 }
 
 /**
@@ -132,20 +140,20 @@ char * get_conf_values(char * salida) {
    if (user_conf_d == NULL) return NULL;
    struct nlist * nl;
 
-   nl = user_conf_d->list;
    salida[0]='\0';
-   while (nl != NULL) {
-       // ignore version conf variable here so that its not shown in :set command
-       if (! strcmp(nl->key, "version")) { nl = nl->next; continue; }
 
-       sprintf(salida + strlen(salida), "%s=%s\n", nl->key, nl->val);
-       nl = nl->next;
+   char *buf = salida;
+   for (nl = user_conf_d->list; nl != NULL; nl = nl->next) {
+       // ignore version conf variable here so that its not shown in :set command
+       if (! strcmp(nl->key, "version")) continue;
+
+       buf += sprintf(buf, "%s=%s\n", nl->key, nl->val);
    }
    return salida;
 }
 
 /**
- * \brief Retreive the value of a given key in user_conf_d
+ * \brief Retreive the string value of a given key in user_conf_d
  *
  * \details This function will look for a given key in the user_conf_d
  * dictionary. If the key is found it will return the value of that
@@ -159,10 +167,23 @@ char * get_conf_values(char * salida) {
 // argument rather than using user_conf_d directly.
 
 char * get_conf_value(char * key) {
-   char * val = get(user_conf_d, key);
+   return get(user_conf_d, key);
+}
 
-   if ( val == NULL || *(&val[0]) == '\0')
-       return get(predefined_conf_d, key);
-   else
-       return val;
+/**
+ * \brief Retreive the integer value of a given key in user_conf_d
+ *
+ * \details This function will look for a given key in the user_conf_d
+ * dictionary. If the key is found it will return the value of that
+ * dictionary entry, or 0 otherwise.
+ *
+ * \param[in] key The key to search for in user_conf_d
+ *
+ * \return key value
+ */
+// TODO Make this function take a pointer to a dictionary as an
+// argument rather than using user_conf_d directly.
+
+int get_conf_int(char * key) {
+   return get_int(user_conf_d, key);
 }

@@ -181,7 +181,7 @@ int file_exists(const char * fname) {
  */
 
 int modcheck() {
-    if (modflg && ! atoi(get_conf_value("nocurses"))) {
+    if (modflg && ! get_conf_int("nocurses")) {
         sc_error("File not saved since last change. Add '!' to force");
         return(1);
     }
@@ -947,7 +947,7 @@ void closefile(FILE *f, int pid, int rfd) {
         } else {
             close(rfd);
 #ifdef NCURSES
-            if (! atoi(get_conf_value("nocurses"))) {
+            if (! get_conf_int("nocurses")) {
                 cbreak();
                 nonl();
                 noecho ();
@@ -975,7 +975,7 @@ void print_options(FILE *f) {
         ! rndtoeven &&
         calc_order == BYROWS &&
         prescale == 1.0 &&
-        ! atoi(get_conf_value("external_functions")) &&
+        ! get_conf_int("external_functions") &&
         tbl_style == 0
        )
     return; // No reason to do this
@@ -985,7 +985,7 @@ void print_options(FILE *f) {
     if (rndtoeven)             (void) fprintf(f, " rndtoeven");
     if (calc_order != BYROWS ) (void) fprintf(f, " bycols");
     if (prescale != 1.0)       (void) fprintf(f, " prescale");
-    if ( atoi(get_conf_value("external_functions")) ) (void) fprintf(f, " external_functions");
+    if ( get_conf_int("external_functions") ) (void) fprintf(f, " external_functions");
     if (tbl_style)             (void) fprintf(f, " tblstyle = %s", tbl_style == TBL ? "tbl" : tbl_style == LATEX ? "latex" : tbl_style == SLATEX ? "slatex" : tbl_style == TEX ? "tex" : tbl_style == FRAME ? "frame" : "0" );
     (void) fprintf(f, "\n");
 }
@@ -1069,7 +1069,7 @@ int import_csv(char * fname, char d) {
             char * st = str_replace (token, "\"", "''"); //replace double quotes inside string
 
             // number import
-            if (strlen(st) && isnumeric(st) && ! atoi(get_conf_value("import_delimited_as_text"))
+            if (strlen(st) && isnumeric(st) && ! get_conf_int("import_delimited_as_text")
             ) {
                 //wide char
                 swprintf(line_interp, BUFFERSIZE, L"let %s%d=%s", coltoa(c), r, st);
@@ -1645,7 +1645,7 @@ void * do_autobackup() {
     add_char(name, '.', pos+1);
     sprintf(name + strlen(name), ".bak");
     sprintf(namenew, "%.*s.new", PATHLEN-5, name);
-    //if (atoi(get_conf_value("debug"))) sc_info("doing autobackup of file:%s", name);
+    //if (get_conf_int("debug")) sc_info("doing autobackup of file:%s", name);
 
     // create new version
     if (! strcmp(&name[strlen(name)-7], ".sc.bak")) {
@@ -1684,7 +1684,7 @@ void handle_backup() {
     extern struct timeval lastbackup_tv; // last backup timer
     extern struct timeval current_tv; //runtime timer
 
-    int autobackup = atoi(get_conf_value ("autobackup"));
+    int autobackup = get_conf_int("autobackup");
     if (autobackup && autobackup > 0 && (current_tv.tv_sec - lastbackup_tv.tv_sec > autobackup || (lastbackup_tv.tv_sec == 0 && lastbackup_tv.tv_usec == 0))) {
         #ifdef HAVE_PTHREAD
             if (pthread_exists) pthread_join (fthread, NULL);

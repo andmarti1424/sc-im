@@ -1507,7 +1507,7 @@ char * doext(struct enode *se) {
 
     command = seval(NULL, se->e.o.left);
     value = eval(NULL, se->e.o.right);
-    if ( ! atoi(get_conf_value("external_functions")) ) {
+    if ( ! get_conf_int("external_functions") ) {
         sc_error("Warning: external functions disabled; using %s value",
         (se->e.o.s && *se->e.o.s) ? "previous" : "null");
 
@@ -2182,7 +2182,7 @@ void str_search(char *s, int firstrow, int firstcol, int lastrow_, int lastcol_,
     regex_t preg;
     int errcode;
 
-    if ( atoi(get_conf_value("ignorecase")))
+    if ( get_conf_int("ignorecase"))
         errcode = regcomp(&preg, s, REG_EXTENDED | REG_ICASE);
     else
         errcode = regcomp(&preg, s, REG_EXTENDED);

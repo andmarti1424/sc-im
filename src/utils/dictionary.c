@@ -44,9 +44,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include "string.h"
 #include "dictionary.h"
-#include "../macros.h"
 
 /**
  * \brief TODO Document create_dictionary()
@@ -54,8 +52,8 @@
  * \return dictionary
  */
 
- struct dictionary * create_dictionary() {
-   struct dictionary * d = (struct dictionary *) malloc (sizeof (struct dictionary));
+struct dictionary * create_dictionary() {
+   struct dictionary * d = malloc(sizeof(struct dictionary));
    d->len = 0;
    d->list = NULL;
 
@@ -73,63 +71,33 @@
  */
 
 void put(struct dictionary * d, char * k, char * v) {
-   if ( ! strlen (k) || ! strlen(v) ) return;
-   //if ( ! strlen (k) ) return;
+   struct nlist *nl, **p_nl;
 
-   struct nlist * nl;
-   char * cl;
+   if (*k == 0) return;
 
-   // Insert the first element
-   if (d->list == NULL) {
-       nl = (struct nlist *) malloc(sizeof(struct nlist));
-       nl->next = NULL;
-       d->list = nl;
+   // locate the key position
+   for (p_nl = &d->list; *p_nl; p_nl = &(*p_nl)->next) {
+      nl = *p_nl;
+      int cmp = strcmp(k, nl->key);
+      if (cmp > 0) continue;
+      if (cmp < 0) break;
 
-       d->len++;
-       char * key = (char *) malloc(sizeof(char) * strlen(k)+1);
-       key[0] = '\0';
-       strcpy(key, k);
-       nl->key = key;
-
-   // Duplicated keys are not allowed.
-   // If an existent key is inserted, the value is overwritten.
-   } else if ( (cl = get(d, k)) != NULL && cl[0] != '\0' ) {
-       nl = get_nl(d, k);
-       free(nl->val);
-
-   // If the key doesn't exists, Create it.
-   } else {
-       nl = (struct nlist *) malloc(sizeof(struct nlist));
-
-       // Insert at the beginning
-       if (strcmp(k, d->list->key) < 0) {
-           nl->next = d->list;
-           d->list = nl; 
-       // Traverse and insert in the middle or at the end
-       } else {
-           struct nlist * nant = d->list;
-           struct nlist * nact = d->list->next;
-           while ( nact != NULL && strcmp(k, nact->key) > 0 ) {
-               nant = nact;
-               nact = nact->next;
-           }
-           nl->next = nact;
-           nant->next = nl;
-       }
-
-       d->len++;
-       char * key = (char *) malloc(sizeof(char) * strlen(k)+1);
-       key[0] = '\0';
-       strcpy(key, k);
-       nl->key = key;
+      // Duplicated keys are not allowed.
+      // If an existing key is inserted, the value is overwritten.
+      free(nl->val);
+      nl->val = strdup(v);
+      nl->intval = atoi(v);
+      return;
    }
 
-   // Always save the value
-   char * val = (char *) malloc(sizeof(char) * strlen(v)+1);
-   val[0] = '\0';
-   strcpy(val, v);
-   nl->val = val;
-   return;
+   // The key doesn't exists, Create it.
+   nl = malloc(sizeof(struct nlist));
+   nl->key = strdup(k);
+   nl->val = strdup(v);
+   nl->intval = atoi(v);
+   nl->next = *p_nl;
+   *p_nl = nl;
+   d->len++;
 }
 
 /**
@@ -141,7 +109,6 @@ void put(struct dictionary * d, char * k, char * v) {
  */
 
 void destroy_dictionary(struct dictionary * d) {
-   //if (d == NULL) return;
    struct nlist * nl;
    struct nlist * n_next;
 
@@ -159,67 +126,26 @@ void destroy_dictionary(struct dictionary * d) {
 }
 
 /**
- * \brief TODO Document get_nl()
- *
- * \param[in] d
- * \param[in] key
- *
- * \return nl
- */
-
-struct nlist * get_nl(struct dictionary * d, char * key) {
-   int i=0;
-   struct nlist * nl = d->list;
-   while ( i++ < d->len && strcmp(key, nl->key) >= 0 ) {
-       if (strcmp(nl->key, key) == 0)
-           return nl;
-       nl = nl->next;
-  }
-   return nl; // just in case d->list == NULL
-}
-
-/**
- * \brief Get max length of keys in a dictionary
+ * \brief Get the size in bytes needed to export a dictionary
  *
  * \param[in] d
  *
  * \return count
  */
 
-int get_maxkey_length(struct dictionary * d) {
-   int i = 0, len, count = 0;
-   if (d == NULL || d->list == NULL) return count;
+int get_dict_buffer_size(struct dictionary * d) {
+   struct nlist * nl;
+   int count = 0;
 
-   struct nlist * nl = d->list;
-   while ( i++ < d->len ) {
-       if ((len = strlen(nl->key)) > count) count = len;
-       nl = nl->next;
+   for (nl = d->list; nl != NULL; nl = nl->next) {
+      /* <key> + '=' + <val> + '\n' */
+      count += strlen(nl->key) + 1 + strlen(nl->val) + 1;
    }
    return count;
 }
 
 /**
- * \brief Get max length of value of dictionary
- *
- * \param[in] d
- *
- * \return count
- */
-
-int get_maxvalue_length(struct dictionary * d) {
-   int i = 0, len, count = 0;
-   if (d == NULL || d->list == NULL) return count;
-
-   struct nlist * nl = d->list;
-   while ( i++ < d->len ) {
-       if ((len = strlen(nl->val)) > count) count = len;
-       nl = nl->next;
-   }
-   return count;
-}
-
-/**
- * \brief Get the value for KEY
+ * \brief Get the string value for KEY
  *
  * \param[in] d
  * \param[in] key
@@ -228,27 +154,45 @@ int get_maxvalue_length(struct dictionary * d) {
  */
 
 char * get(struct dictionary * d, char * key) {
-   int i=0;
-   if (d == NULL || d->list == NULL) return NULL;
+   struct nlist * nl;
 
-   struct nlist * nl = d->list;
-   while ( i++ < d->len ) { // && strcmp(key, nl->key) >= 0 ) {
-       if (strcmp(nl->key, key) == 0)
-           return nl->val;
-       nl = nl->next;
+   for (nl = d->list; nl != NULL; nl = nl->next) {
+      int cmp = strcmp(key, nl->key);
+      if (cmp > 0) continue;
+      if (cmp < 0) break;
+      return nl->val;
    }
    return NULL;
 }
 
+/**
+ * \brief Get the integer value for KEY
+ *
+ * \param[in] d
+ * \param[in] key
+ *
+ * \return value for the key
+ */
+
+int get_int(struct dictionary * d, char * key) {
+   struct nlist * nl;
+
+   for (nl = d->list; nl != NULL; nl = nl->next) {
+      int cmp = strcmp(key, nl->key);
+      if (cmp > 0) continue;
+      if (cmp < 0) break;
+      return nl->intval;
+   }
+   return 0;
+}
+
 /* Get the key name from a value
 char * get_key_name(struct dictionary * d, char * value) {
-   int i=0;
-   if (d == NULL || d->list == NULL) return NULL;
-   struct nlist * nl = d->list;
-   while ( i++ < d->len ) {
+   struct nlist * nl;
+
+   for (nl = d->list; nl != NULL; nl = nl->next) {
        if (! strcmp(nl->val, value))
            return nl->key;
-       nl = nl->next;
    }
    return NULL;
 }
@@ -265,31 +209,26 @@ char * get_key_name(struct dictionary * d, char * value) {
  * \return dictionary
  */
 
-void parse_str(struct dictionary * d, char * str, int blank_space) {
-    char c = str[0];
+void parse_str(struct dictionary * d, char * str, int no_blanks) {
     char key[90];
     char value[90];
-    key[0] = '\0';
-    value[0] = '\0';
+    int i;
+
+    i = 0;
+    while (*str != 0 && *str != '=' && *str != '\n' && i < sizeof(key)) {
+       key[i++] = *str++;
+    }
+    if (i >= sizeof(key) || *str++ != '=') return;
+    key[i] = 0;
+
+    i = 0;
+    while (*str != 0 && *str != '\n' && i < sizeof(value)
+	   && !(no_blanks && *str == ' ')) {
+       value[i++] = *str++;
+    }
+    if (i >= sizeof(value)) return;
+    value[i] = 0;
 
     // Create the dictionary
-    while (c != '\0') {
-        while (c != '=' && c != '\0') {
-            add_char(key, c, strlen(key));
-            c = *++str;
-        }
-        if (c == '\0') break;
-        c = *++str;
-        while (c != '\0') {
-            if (blank_space && c == ' ') break;
-            add_char(value, c, strlen(value));
-            c = *++str;
-        }
-        if (c != '\0') c = *++str;
-
-        put(d, key, value);
-
-        key[0] = '\0';
-        value[0] = '\0';
-    }
+    put(d, key, value);
 }

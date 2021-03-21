@@ -461,7 +461,7 @@ void do_commandmode(struct block * sb) {
                     create_structures();
                     readfile(name, 0);
 
-                    if (! atoi(get_conf_value("nocurses"))) {
+                    if (! get_conf_int("nocurses")) {
                       ui_show_header();
                     }
                 }
@@ -845,7 +845,7 @@ void do_commandmode(struct block * sb) {
             plotedit(aux);
 
         } else if ( ! wcscmp(inputline, L"set") ) {
-            char valores[ (get_maxkey_length(user_conf_d) + get_maxvalue_length(user_conf_d) + 1) * user_conf_d->len ];
+            char valores[get_dict_buffer_size(user_conf_d) + 1];
             get_conf_values(valores);
             ui_show_text(valores);
 

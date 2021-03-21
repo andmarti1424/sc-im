@@ -635,7 +635,7 @@ command:
     |    S_CELLCOLOR var_or_range STRING
                                    {
 #ifdef USECOLORS
-                                   if ( ! atoi(get_conf_value("nocurses")))
+                                   if ( ! get_conf_int("nocurses"))
                                        color_cell($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col, $3);
 #endif
                                    scxfree($3);
@@ -652,7 +652,7 @@ command:
 
     |    S_CELLCOLOR STRING        {
 #ifdef USECOLORS
-                                   if ( ! atoi(get_conf_value("nocurses")))
+                                   if ( ! get_conf_int("nocurses"))
                                        color_cell(currow, curcol, currow, curcol, $2);
 #endif
                                    scxfree($2);
@@ -660,13 +660,13 @@ command:
 
     |    S_UNFORMAT var_or_range   {
 #ifdef USECOLORS
-                                   if ( ! atoi(get_conf_value("nocurses"))) unformat($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col);
+                                   if ( ! get_conf_int("nocurses")) unformat($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col);
 #endif
                                    }
 
     |    S_UNFORMAT                {
 #ifdef USECOLORS
-                                   if ( ! atoi(get_conf_value("nocurses"))) unformat(currow, curcol, currow, curcol);
+                                   if ( ! get_conf_int("nocurses")) unformat(currow, curcol, currow, curcol);
 #endif
                                    }
 
