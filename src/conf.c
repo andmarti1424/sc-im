@@ -107,12 +107,7 @@ const char default_config[] =
 // argument rather than using user_conf_d directly.
 
 void store_default_config_values() {
-    const char *line = default_config;
-
-    do {
-        parse_str(user_conf_d, line, 0);
-	line = strchr(line, '\n');
-    } while(line && *++line != 0);
+    parse_str(user_conf_d, default_config, 0);
 	
     // Calculate GMT offset (not on Solaris, doesn't have tm_gmtoff)
     #if defined(USELOCALE) && !defined(__sun)

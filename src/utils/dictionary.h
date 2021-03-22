@@ -60,5 +60,5 @@ void destroy_dictionary(struct dictionary * d);
 char * get(struct dictionary * d, const char * key);
 int get_int(struct dictionary * d, const char * key); 
 //char * get_key_name(struct dictionary * d, const char * value);
-void parse_str(struct dictionary * d, const char * str, int no_blanks);
+void parse_str(struct dictionary * d, const char * str, int split_on_blanks);
 int get_dict_buffer_size(struct dictionary * d); 
