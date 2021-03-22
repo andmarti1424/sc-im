@@ -262,6 +262,8 @@ token S_YANKCOL
 %token K_NOIGNORECASE
 %token K_TM_GMTOFF
 %token K_NEWLINE_ACTION
+%token K_SHOW_CURSOR
+%token K_NOSHOW_CURSOR
 %token K_ERROR
 %token K_INVALID
 %token K_FIXED
@@ -348,7 +350,6 @@ token K_TOPROW
 token K_COLOR
 token K_COLORNEG
 token K_COLORERR
-token K_BRAILLE
 */
 %token K_TBLSTYLE
 %token K_TBL
@@ -1195,5 +1196,9 @@ setitem :
                                      parse_str(user_conf_d, s, TRUE);
                                      scxfree(s);
                                   }
+    |    K_SHOW_CURSOR '=' NUMBER {  if ($3 == 0) parse_str(user_conf_d, "show_cursor=0", TRUE);
+                                     else         parse_str(user_conf_d, "show_cursor=1", TRUE); }
+    |    K_SHOW_CURSOR            {               parse_str(user_conf_d, "show_cursor=1", TRUE); }
+    |    K_NOSHOW_CURSOR          {               parse_str(user_conf_d, "show_cursor=0", TRUE); }
 
     ;
