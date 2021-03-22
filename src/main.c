@@ -551,15 +551,7 @@ void read_argv(int argc, char ** argv) {
     int i;
     for (i = 1; i < argc; i++) {
         if ( ! strncmp(argv[i], "--", 2) ) {       // it was passed a parameter
-            char *dup = strdup(argv[i]);
-            char *rest = dup;
-            char *name = strsep(&rest, "=");
-            if (rest) {
-                put(user_conf_d, &name[2], rest);  // --parameter=value
-            } else {
-                put(user_conf_d, &name[2], "1");   // --parameter
-            }
-            free(dup);
+            parse_str(user_conf_d, argv[i] + 2, 0);
         } else {                                   // it was passed a file
             strncpy(loadingfile, argv[i], PATHLEN-1);
         }

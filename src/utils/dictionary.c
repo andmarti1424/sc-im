@@ -204,32 +204,68 @@ char * get_key_name(struct dictionary * d, const char * value) {
  *
  * \param[in] d
  * \param[in] str
- * \param[in] blank_space
+ * \param[in] split_on_blanks
  *
  * \return dictionary
  */
 
-void parse_str(struct dictionary * d, const char * str, int no_blanks) {
+void parse_str(struct dictionary *d, const char *str, int split_on_blanks) {
     char key[90];
     char value[90];
     int i;
 
-    while (*str != '\0') {
+    while (*str != 0) {
+        /* remove leading field separators */
+        if (*str == ' ' || *str == '\n') {
+            str++;
+            continue;
+        }
+
+        /* collect the key */
         i = 0;
-        while (*str != 0 && *str != '=' && *str != '\n' && i < sizeof(key) && *str != ' ') {
+        for (;;) {
+            if (*str == '=') {
+                /* we are done with the key */
+                key[i] = 0;
+                break;
+            }
+            if (*str == 0 || *str == '\n' || (split_on_blanks && *str == ' ')) {
+                /* got only a key: pretend the value is 1 */
+                key[i] = 0;
+                put(d, key, "1");
+                break;
+            }
+            if (*str == ' ') {
+                /* spaces in the key are invalid */
+                return;
+            }
+            if (i >= sizeof(key) - 1) {
+                /* won't have room for final '\0' */
+                return;
+            }
             key[i++] = *str++;
         }
-        if (i >= sizeof(key) || *str++ != '=') continue;
-        key[i] = 0;
 
+        if (*str != '=') {
+            /* no value to collect */
+            continue;
+        }
+	str++;
+
+        /* collect the value */
         i = 0;
-        while (*str != 0 && *str != '\n' && i < sizeof(value) && !(no_blanks && *str == ' ')) {
+        for (;;) {
+            if (*str == 0 || *str == '\n' || (split_on_blanks && *str == ' ')) {
+                /* we are done with the value */
+                value[i] = 0;
+                put(d, key, value);
+                break;
+            }
+            if (i >= sizeof(value) - 1) {
+                /* won't have room for final '\0' */
+                return;
+            }
             value[i++] = *str++;
         }
-        if (i >= sizeof(value)) return;
-        value[i] = 0;
-
-        // Create the dictionary
-        put(d, key, value);
     }
 }
