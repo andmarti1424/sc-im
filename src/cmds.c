@@ -933,22 +933,36 @@ void deleterow(int row, int mult) {
 
 void int_deleterow(int row, int mult) {
     register struct ent ** pp;
+    register struct ent * q;
     int r, c;
 
     //if (currow > maxrow) return;
 
     while (mult--) {
+        // we need to decrease row of the row that we delete if
+        // other cells refers to this one.
+        for (c = 0; c < maxcols; c++) {
+            if (row <= maxrow) {
+                pp = ATBL(tbl, row, c);
+                if ((q = *ATBL(tbl, row, c)) != NULL) q->row--;
+            }
+        }
+        sync_refs();
+
+        // and after that the erase_area of the deleted row
         erase_area(row, 0, row, maxcol, 0, 1); //important: this mark the ents as deleted
+
+        // and we decrease ->row of all rows after the deleted one
         for (r = row; r < maxrows - 1; r++) {
             for (c = 0; c < maxcols; c++) {
                 if (r <= maxrow) {
                     pp = ATBL(tbl, r, c);
-                    pp[0] = *ATBL(tbl, r + 1, c);
+                    pp[0] = *ATBL(tbl, r+1, c);
                     if ( pp[0] ) pp[0]->row--;
                 }
             }
         }
-        rebuild_graph(); //FIXME CHECK HERE WHY REBUILD IS NEEDED. See NOTE1 in shift.c
+        rebuild_graph(); //TODO CHECK HERE WHY REBUILD IS NEEDED. See NOTE1 in shift.c
         sync_refs();
         //if (get_conf_int("autocalc") && ! loading) EvalAll();
         EvalAll();
