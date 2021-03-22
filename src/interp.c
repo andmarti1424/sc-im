@@ -1153,6 +1153,7 @@ double eval(register struct ent * ent, register struct enode * e) {
                 if (ent == NULL) continue;
                 if (ent->row == row && ent->col == col) {
                     sc_error("Circular reference in eval (cell %s%d)", coltoa(col), row);
+                    e->op = ERR_;
                     cellerror = CELLERROR;
                     return (double) 0;
                 }
