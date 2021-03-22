@@ -1051,14 +1051,14 @@ double eval(register struct ent * ent, register struct enode * e) {
             }
             // Changed 06/03/2021 for #issue 499
             if (ent && ent->expr != NULL && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
-
             return (e->e.k);
+
     case GETENT:
             if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
             return (eval(ent, e->e.o.left));
     case O_VAR:    {
             struct ent * vp = e->e.v.vp;
-            //FIXME sc_debug("vp %d %d", vp->row, vp->col);
+            //sc_debug("var %d %d", vp->row, vp->col);
             if (vp && ent && vp->row == ent->row && vp->col == ent->col && !(vp->flags & is_deleted) ) {
                 sc_error("Circular reference in eval (cell %s%d)", coltoa(vp->col), vp->row);
                 //ERR propagates. comment to make it not to.
@@ -1068,7 +1068,6 @@ double eval(register struct ent * ent, register struct enode * e) {
                 GraphAddEdge( getVertex(graph, lookat(ent->row, ent->col), 1), getVertex(graph, lookat(vp->row, vp->col), 1) ) ;
                 return (double) 0;
             }
-
             if (vp && vp->cellerror == CELLERROR && !(vp->flags & is_deleted)) {
                 // here we store the dependences in a graph
                 if (ent && vp) GraphAddEdge( getVertex(graph, lookat(ent->row, ent->col), 1),
@@ -1107,6 +1106,14 @@ double eval(register struct ent * ent, register struct enode * e) {
 
             // here we store the dependences in a graph
             if (ent && vp) {
+                if (GraphIsReachable(getVertex(graph, lookat(ent->row, ent->col), 0), getVertex(graph, lookat(vp->row, vp->col), 0), 1)) {
+                    sc_debug("Circular reference in eval (cell %s%d)", coltoa(vp->col), vp->row);
+                    e->op = ERR_;
+                    e->e.o.left = NULL;
+                    e->e.o.right = NULL;
+                    cellerror = CELLERROR;
+                    return (double) 0;
+                }
                 GraphAddEdge( getVertex(graph, lookat(ent->row, ent->col), 1), getVertex(graph, lookat(vp->row, vp->col), 1) ) ;
             }
 
@@ -1117,6 +1124,7 @@ double eval(register struct ent * ent, register struct enode * e) {
             if (vp->cellerror == CELLERROR) {
                 return (double) 0;
             }
+
             return (vp->v);
             }
     case SUM:
@@ -1143,6 +1151,11 @@ double eval(register struct ent * ent, register struct enode * e) {
         for (row=minr; row <= maxr; row++) {
             for (col=minc; col <= maxc; col++) {
                 if (ent == NULL) continue;
+                if (ent->row == row && ent->col == col) {
+                    sc_error("Circular reference in eval (cell %s%d)", coltoa(col), row);
+                    cellerror = CELLERROR;
+                    return (double) 0;
+                }
                 GraphAddEdge(getVertex(graph, lookat(ent->row, ent->col), 1), getVertex(graph, lookat(row, col), 1));
             }
         }

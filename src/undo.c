@@ -407,7 +407,6 @@ void copy_to_undostruct (int row_desde, int col_desde, int row_hasta, int col_ha
             // not repeated - we malloc an ent and add it to list
             struct ent * e = (struct ent *) malloc( (unsigned) sizeof(struct ent) );
             cleanent(e);
-            //copyent(e, lookat(r, c), 0, 0, 0, 0, 0, 0, 0);
             copyent(e, lookat(r, c), 0, 0, 0, 0, 0, 0, 'u');
 
             // Append 'ent' element at the beginning
