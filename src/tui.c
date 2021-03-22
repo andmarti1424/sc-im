@@ -838,7 +838,8 @@ void ui_show_content(WINDOW * win, int mxrow, int mxcol) {
             continue;
         }
 
-        register int c = rescol;
+        int r = row + 1 - offscr_sc_rows - q_row_hidden;
+        int c = rescol;
         int nextcol;
         int fieldlen;
         col = 0;
@@ -854,7 +855,7 @@ void ui_show_content(WINDOW * win, int mxrow, int mxcol) {
             nextcol = col + 1;
             fieldlen = fwidth[col];
 
-            // print cols in case freezen columns are before offscr_sc_cols
+            // print cols in case frozen columns are before offscr_sc_cols
             if (col < offscr_sc_cols
                 && !(freezec
                 && col >= freeze_ranges->tl->col
@@ -945,7 +946,7 @@ void ui_show_content(WINDOW * win, int mxrow, int mxcol) {
 
             // If a numeric value exists
             if ( (*p) && (*p)->flags & is_valid) {
-                //show_numeric_content_of_cell(win, p, col, row + 1 - offscr_sc_rows - q_row_hidden, c);
+                //show_numeric_content_of_cell(win, p, col, r, c);
 
                 res = ui_get_formated_value(p, col, formated_s);
                 // res = 0, indicates that in num we store a date
@@ -971,13 +972,13 @@ void ui_show_content(WINDOW * win, int mxrow, int mxcol) {
             }
 
             if ((*p) && (*p)->cellerror == CELLERROR) {
-               (void) mvprintw(row + RESROW + 1 - offscr_sc_rows, c, "%*.*s", fwidth[col], fwidth[col], "ERROR");
+               (void) mvprintw(row + RESROW + 1 - offscr_sc_rows, c, "%*.*s", fieldlen, fieldlen, "ERROR");
                align = 0;
                strcpy(text, "ERROR");
                num[0]='\0';
             }
             if ((*p) && (*p)->cellerror == CELLREF) {
-               (void) mvprintw(row + RESROW + 1 - offscr_sc_rows, c, "%*.*s", fwidth[col], fwidth[col], "REF");
+               (void) mvprintw(row + RESROW + 1 - offscr_sc_rows, c, "%*.*s", fieldlen, fieldlen, "REF");
                align = 0;
                strcpy(text, "REF");
                num[0]='\0';
@@ -1016,18 +1017,18 @@ void ui_show_content(WINDOW * win, int mxrow, int mxcol) {
                 int i, j;
                 for (i = 0; i < fieldlen; ) {
                     w = L' ';
-                    j = mvwin_wchnstr (win,  row + 1 - offscr_sc_rows - q_row_hidden, c + i, cht, 1);
+                    j = mvwin_wchnstr (win, r, c + i, cht, 1);
                     if (j == OK && cht[0].chars[0] != L'\0')
                         w = cht[0].chars[0];
-                    mvwprintw(win, row + 1 - offscr_sc_rows - q_row_hidden, c+i, "%lc", w);
-                    i+= wcwidth(w);
+                    mvwprintw(win, r, c+i, "%lc", w);
+                    i += wcwidth(w);
                 }
 
                 // we print text and number
             } else {
-                pad_and_align(text, num, fwidth[col], align, (*p)->pad, out);
-                if (col == mxcol && wcswidth(out, wcslen(out)) > fwidth[col])
-                    out[ count_width_widestring(out, fwidth[col]) ] = L'\0';
+                pad_and_align(text, num, fieldlen, align, (*p)->pad, out);
+                if (col == mxcol && wcswidth(out, wcslen(out)) > fieldlen)
+                    out[ count_width_widestring(out, fieldlen) ] = L'\0';
 
             #ifdef USECOLORS
                 if (has_colors() && get_conf_int("underline_grid")) {
@@ -1038,13 +1039,22 @@ void ui_show_content(WINDOW * win, int mxrow, int mxcol) {
                 }
             #endif
 
-                mvwprintw(win, row + 1 - offscr_sc_rows - q_row_hidden, c, "%ls", out);
+                mvwprintw(win, r, c, "%ls", out);
                 wclrtoeol(win);
             }
 
             if (currow == row && curcol == col) {
-                curwinrow = row + 1 - offscr_sc_rows - q_row_hidden;
-                curwincol = c + ((align == 1) ? (fieldlen - 1) : 0);
+                curwinrow = r;
+                curwincol = c;
+                if (out[0] == L'\0') {
+                    // center the cursor on empty cells
+                    curwincol += (fieldlen - 1)/2;;
+                } else if (out[0] == L' ') {
+                    // cursor on last space but not beyond the middle
+                    int i;
+                    for (i = 0; i < (fieldlen - 1)/2 && out[i+1] == L' '; i++);
+                    curwincol += i;
+                }
             }
 
             // clean format
