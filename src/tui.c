@@ -1480,7 +1480,11 @@ void ui_start_colors() {
              * NOTE: calling init_pair with -1 sets it with default
              * terminal foreground and background colors
              */
+#if defined(NCURSES_VERSION_MAJOR) && (( NCURSES_VERSION_MAJOR > 5 && defined(NCURSES_VERSION_MINOR) && NCURSES_VERSION_MINOR > 0) || NCURSES_VERSION_MAJOR > 6)
             init_extended_pair( i*def+j+1, i-1, j-1); // i is fg and j is bg
+#else
+            init_pair(i*def+j+1, i-1, j-1); // i is fg and j is bg
+#endif
         }
     }
 }
