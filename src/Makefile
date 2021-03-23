@@ -135,15 +135,19 @@ ifneq (, $(shell which pkg-config))
   endif
 
   # NOTE: lua support
-  ifneq ($(shell pkg-config --exists lua51 || echo 'no'),no)
-    CFLAGS += -DXLUA $(shell pkg-config --cflags lua51)
-    LDLIBS += $(shell pkg-config --libs lua51) -Wl,--export-dynamic
-  else ifneq ($(shell pkg-config --exists lua-5.1 || echo 'no'),no) # FreeBSD
-    CFLAGS += -DXLUA $(shell pkg-config --cflags lua-5.1)
+  ifneq ($(shell pkg-config --exists lua || echo 'no'),no) # Check for user's default lua
+    CFLAGS += -DXLUA $(shell pkg-config --cflags lua)
     ifneq ($(shell uname -s),Darwin)
-      LDLIBS += $(shell pkg-config --libs lua-5.1) -Wl,--export-dynamic
+      LDLIBS += $(shell pkg-config --libs lua) -Wl,--export-dynamic
     else
-      LDLIBS += $(shell pkg-config --libs lua-5.1) -rdynamic
+      LDLIBS += $(shell pkg-config --libs lua) -rdynamic
+    endif
+  else ifneq ($(shell pkg-config --exists luajit || echo 'no'),no) # If not found, check for luajit
+    CFLAGS += -DXLUA $(shell pkg-config --cflags luajit)
+    ifneq ($(shell uname -s),Darwin)
+      LDLIBS += $(shell pkg-config --libs luajit) -Wl,--export-dynamic
+    else
+      LDLIBS += $(shell pkg-config --libs luajit) -rdynamic
     endif
   endif
 else ifeq ($(shell uname -s),Darwin)
