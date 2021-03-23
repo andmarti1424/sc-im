@@ -247,12 +247,12 @@ int paste_yanked_ents(int above, int type_paste) {
     struct ent * yl = yanklist;
     struct ent * yll = yl;
     int diffr = 0, diffc = 0 , ignorelock = 0;
+
+#ifdef UNDO
     extern struct ent_ptr * deps;
     int i;
-
-    #ifdef UNDO
     create_undo_action();
-    #endif
+#endif
 
     if (type_of_yank == 's') {                               // paste a range that was yanked in the sort function
         diffr = 0;
@@ -265,30 +265,30 @@ int paste_yanked_ents(int above, int type_paste) {
 
     } else if (type_of_yank == 'r') {                        // paste row
         int c = yank_arg;
-        #ifdef UNDO
+#ifdef UNDO
         copy_to_undostruct(currow + ! above, 0, currow + ! above - 1 + yank_arg, maxcol, 'd');
-        #endif
+#endif
         while (c--) above ? insert_row(0) : insert_row(1);
         if (! above) currow = forw_row(1)->row;              // paste below
         diffr = currow - yl->row;
         diffc = yl->col;
         fix_marks(yank_arg, 0, currow, maxrow, 0, maxcol);
-        #ifdef UNDO
+#ifdef UNDO
         save_undo_range_shift(yank_arg, 0, currow, 0, currow - 1 + yank_arg, maxcol);
-        #endif
+#endif
 
     } else if (type_of_yank == 'c') {                        // paste col
         int c = yank_arg;
-        #ifdef UNDO
+#ifdef UNDO
         copy_to_undostruct(0, curcol + above, maxrow, curcol + above - 1 + yank_arg, 'd');
-        #endif
+#endif
         while (c--) above ? insert_col(1) : insert_col(0);   // insert cols to the right if above or to the left
         diffr = yl->row;
         diffc = curcol - yl->col;
         fix_marks(0, yank_arg, 0, maxrow, curcol, maxcol);
-        #ifdef UNDO
+#ifdef UNDO
         save_undo_range_shift(0, yank_arg, 0, curcol, maxrow, curcol - 1 + yank_arg);
-        #endif
+#endif
     }
 
     // first check if there are any locked cells
@@ -309,9 +309,8 @@ int paste_yanked_ents(int above, int type_paste) {
     while (yl != NULL) {
 
 
-        #ifdef UNDO
+#ifdef UNDO
         copy_to_undostruct(yl->row + diffr, yl->col + diffc, yl->row + diffr, yl->col + diffc, 'd');
-        #endif
 
 
         // save graph dependencies as well
@@ -319,10 +318,9 @@ int paste_yanked_ents(int above, int type_paste) {
         ents_that_depends_on_range(yl->row + diffr, yl->col + diffc, yl->row + diffr, yl->col + diffc);
         if (deps != NULL) {
             for (i = 0; i < deps->vf; i++)
-#ifdef UNDO
                 copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'd');
-#endif
         }
+#endif
 
         // here we delete current content of "destino" ent
         if (type_paste == 'a' || type_paste == 's')
@@ -355,25 +353,18 @@ int paste_yanked_ents(int above, int type_paste) {
             EvalJustOneVertex(destino, destino->row, destino->col, 1);
         }
 
-        #ifdef UNDO
+#ifdef UNDO
         copy_to_undostruct(yl->row + diffr, yl->col + diffc, yl->row + diffr, yl->col + diffc, 'a');
-        #endif
 
         // store dependencies after the change as well
         // added for #244 - 22/03/2018
         if (deps != NULL) {
             for (i = 0; i < deps->vf; i++) {
                 EvalJustOneVertex(deps[i].vp, deps[i].vp->row, deps[i].vp->col, 0);
-#ifdef UNDO
                 copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'a');
-#endif
             }
         }
-
-
-
-
-
+#endif
         yl = yl->next;
 
         // TODO save graph dependencies as well

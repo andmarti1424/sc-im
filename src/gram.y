@@ -768,17 +768,20 @@ command:
     |    S_PRINT_GRAPH             { print_vertexs(); }
     |    S_SYNCREFS                { sync_refs(); }
     |    S_UNDO                    {
+#ifdef UNDO
                                      do_undo();
                                      // sync_refs();
                                      EvalAll();
                                      ui_update(TRUE);
+#endif
                                    }
-
     |    S_REDO                    {
+#ifdef UNDO
                                      do_redo();
                                      // sync_refs();
                                      EvalAll();
                                      ui_update(TRUE);
+#endif
                                    }
 
 // For scripting and piping
