@@ -238,6 +238,8 @@ void deletecol(int col, int mult) {
     // do the job
     int_deletecol(col, mult);
 
+    //EvalAll();
+
     if (!loading) modflg++;
 
 #ifdef UNDO
@@ -281,7 +283,7 @@ void int_deletecol(int col, int mult) {
             }
         }
 
-        EvalAll();
+        rebuild_graph(); // Rebuild of graph is needed
 
         // Copy references from right column cells to left column (which gets removed)
         for (r = 0; r <= maxrow; r++) {
@@ -315,8 +317,9 @@ void int_deletecol(int col, int mult) {
 
         maxcol--;
         sync_refs();
+        EvalAll();
         //flush_saved(); // we have to flush_saved only at exit.
-        //this is because we have to keep ents in case we want to UNDO?
+        //this is because we have to keep ents in case we want to UNDO
     }
 
     return;
@@ -564,7 +567,9 @@ struct enode * copye(register struct enode *e, int Rdelta, int Cdelta, int r1, i
         newcol = e->e.r.left.vf & FIX_COL || e->e.r.left.vp->row < r1 || e->e.r.left.vp->row > r2 || e->e.r.left.vp->col < c1 || e->e.r.left.vp->col > c2 ?  e->e.r.left.vp->col : special == 1 ? c1 + Cdelta + e->e.r.left.vp->row - r1 : e->e.r.left.vp->col + Cdelta;
         ret->e.r.left.vp =
 #ifdef UNDO
-        special == 2 ? add_undo_aux_ent(lookat(newrow, newcol)) :
+        // Commented for issue #433
+        // track down in what cases this was needed and change it
+        //special == 2 ? add_undo_aux_ent(lookat(newrow, newcol)) :
 #endif
         lookat(newrow, newcol);
         ret->e.r.left.vf = e->e.r.left.vf;
@@ -572,7 +577,9 @@ struct enode * copye(register struct enode *e, int Rdelta, int Cdelta, int r1, i
         newcol = e->e.r.right.vf & FIX_COL || e->e.r.right.vp->row < r1 || e->e.r.right.vp->row > r2 || e->e.r.right.vp->col < c1 || e->e.r.right.vp->col > c2 ?  e->e.r.right.vp->col : special == 1 ? c1 + Cdelta + e->e.r.right.vp->row - r1 : e->e.r.right.vp->col + Cdelta;
         ret->e.r.right.vp =
 #ifdef UNDO
-        special == 2 ? add_undo_aux_ent(lookat(newrow, newcol)) :
+        // Commented for issue #433
+        // track down in what cases this was needed and change it
+        //special == 2 ? add_undo_aux_ent(lookat(newrow, newcol)) :
 #endif
         lookat(newrow, newcol);
         ret->e.r.right.vf = e->e.r.right.vf;
@@ -608,7 +615,9 @@ struct enode * copye(register struct enode *e, int Rdelta, int Cdelta, int r1, i
                     }
                     ret->e.v.vp =
 #ifdef UNDO
-                        special == 2 ? add_undo_aux_ent(lookat(newrow, newcol)) :
+                        // Commented for issue #433
+                        // track down in what cases this was needed and change it
+                        //special == 2 ? add_undo_aux_ent(lookat(newrow, newcol)) :
 #endif
                         lookat(newrow, newcol);
                     ret->e.v.vf = e->e.v.vf;
