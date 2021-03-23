@@ -239,11 +239,13 @@ void parse_str(struct dictionary *d, const char *str, int split_on_blanks) {
                 /* spaces in the key are invalid */
                 return;
             }
-            if (i >= sizeof(key) - 1) {
+
+            key[i++] = *str++;
+
+            if (i >= sizeof(key)) {
                 /* won't have room for final '\0' */
                 return;
             }
-            key[i++] = *str++;
         }
 
         if (*str != '=') {
@@ -261,11 +263,13 @@ void parse_str(struct dictionary *d, const char *str, int split_on_blanks) {
                 put(d, key, value);
                 break;
             }
-            if (i >= sizeof(value) - 1) {
+
+            value[i++] = *str++;
+
+            if (i >= sizeof(value)) {
                 /* won't have room for final '\0' */
                 return;
             }
-            value[i++] = *str++;
         }
     }
 }
