@@ -399,8 +399,8 @@ void do_normalmode(struct block * buf) {
                 currow = lastrow;
                 lastrow = newlr;
                 lastcol = newlc;
-            } else {                                                      // gA4 (goto cell)
-                (void) swprintf(interp_line, BUFFERSIZE, L"goto %s", parse_cell_name(1, buf));
+            } else if (buf->pnext->value == L't') {                        // gtA4 (goto cell A4)
+                (void) swprintf(interp_line, BUFFERSIZE, L"goto %s", parse_cell_name(2, buf));
                 send_to_interp(interp_line);
             }
             unselect_ranges();

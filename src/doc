@@ -54,7 +54,7 @@ Navigation commands:
      w           Go forward to the next valid cell.
      '{a-zA-Z}   Go to the cell or range marked previously with the character.
                  See 'm' for details.
-     gab24       Go to cell AB24.  (There is no need to press <ENTER>.)
+     gtab24      Go to cell AB24.  (There is no need to press <ENTER>.)
      g0          Go to the leftmost column visible on screen.
      g$          Go to the rightmost column visible on screen.
      gM          Go to the middle column on the screen.
