@@ -1106,7 +1106,9 @@ double eval(register struct ent * ent, register struct enode * e) {
 
             // here we store the dependences in a graph
             if (ent && vp) {
-                if (GraphIsReachable(getVertex(graph, lookat(ent->row, ent->col), 0), getVertex(graph, lookat(vp->row, vp->col), 0), 1)) {
+                vertexT * v_ent = getVertex(graph, lookat(ent->row, ent->col), 0);
+                vertexT * v_vp = getVertex(graph, lookat(vp->row, vp->col), 0);
+                if (v_ent != NULL && v_vp != NULL && GraphIsReachable(v_ent, v_vp, 1)) {
                     sc_debug("Circular reference in eval (cell %s%d)", coltoa(vp->col), vp->row);
                     e->op = ERR_;
                     e->e.o.left = NULL;
