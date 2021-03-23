@@ -1782,11 +1782,10 @@ struct ent * right_limit() {
  *
  * \return lookat
  */
-
-// FIXME to handle freeze rows/cols
-
 struct ent * goto_top() {
     int r = 0;
+    center_hidden_rows=0;
+    center_hidden_cols=0;
     while ( row_hidden[r] && r < currow ) r++;
     return lookat(r, curcol);
 }
@@ -1798,7 +1797,6 @@ struct ent * goto_top() {
  */
 
 // FIXME to handle freeze rows/cols
-
 struct ent * goto_bottom() {
     register struct ent *p;
     int r = maxrows - 1;

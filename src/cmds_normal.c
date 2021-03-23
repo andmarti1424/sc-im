@@ -309,7 +309,11 @@ void do_normalmode(struct block * buf) {
 
         case L'H':
             lastrow = currow;
-            currow = vert_top()->row;
+            int currow_h = vert_top()->row;
+            if (currow_h < center_hidden_rows) {
+                center_hidden_rows=0;
+            }
+            currow = currow_h;
             unselect_ranges();
             ui_update(TRUE);
             break;
