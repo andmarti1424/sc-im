@@ -227,7 +227,7 @@ void help() {
             curs_set(1);
             char hline [100];
             hline[0]='\0';
-            mvwprintw(input_win, 0, rescol, ":%s", hline);
+            mvwprintw(input_win, 0, 0, ":%s", hline);
             wclrtoeol(input_win);
             wrefresh(input_win);
 
@@ -238,7 +238,7 @@ void help() {
                 } else {
                     sprintf(hline + strlen(hline), "%c", d);
                 }
-                mvwprintw(input_win, 0, rescol, ":%s", hline);
+                mvwprintw(input_win, 0, 0, ":%s", hline);
                 wclrtoeol(input_win);
                 wrefresh(input_win);
                 d = wgetch(input_win);
@@ -246,7 +246,7 @@ void help() {
             if (d == OKEY_ENTER && ( ! strcmp(hline, "q") || ! strcmp(hline, "quit") || ! strcmp(hline, "q!") )) {
                 quit_help_now = TRUE;
             } else if (d == OKEY_ESC) {
-                wmove(input_win, 0, rescol);
+                wmove(input_win, 0, 0);
                 wclrtoeol(input_win);
                 wrefresh(input_win);
                 //d = wgetch(input_win);
@@ -257,7 +257,7 @@ void help() {
         case '/':
             curs_set(1);
             word_looked[0]='\0';
-            mvwprintw(input_win, 0, rescol, "/%s", word_looked);
+            mvwprintw(input_win, 0, 0, "/%s", word_looked);
             wrefresh(input_win);
             d = wgetch(input_win);
             while (d != OKEY_ENTER && d != OKEY_ESC) {
@@ -267,7 +267,7 @@ void help() {
                     //sprintf(word_looked, "%s%c", word_looked, d);
                     sprintf(word_looked + strlen(word_looked), "%c", d);
                 }
-                mvwprintw(input_win, 0, rescol, "/%s", word_looked);
+                mvwprintw(input_win, 0, 0, "/%s", word_looked);
                 wclrtoeol(input_win);
                 wrefresh(input_win);
                 d = wgetch(input_win);
@@ -276,7 +276,7 @@ void help() {
             if (d == OKEY_ENTER && strlen(word_looked)) {
                 find_word(word_looked, 'f');
             }
-            mvwprintw(input_win, 0, rescol, "");
+            mvwprintw(input_win, 0, 0, "");
             wclrtoeol(input_win);
             wrefresh(input_win);
             curs_set(0);

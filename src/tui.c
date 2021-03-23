@@ -213,7 +213,7 @@ int ui_getch(wint_t * wd) {
 int ui_getch_b(wint_t * wd) {
     wint_t digraph = 0;
     wtimeout(input_win, -1);
-    move(0, rescol + inputline_pos + 1);
+    move(0, inputline_pos + 1);
     wget_wch(input_win, wd);
     if (*wd == ctl('k')) {
         wget_wch(input_win, wd);
@@ -386,7 +386,7 @@ void ui_update(int header) {
     #endif
 
         // Clean from top to bottom
-        wmove(main_win, 0, rescol);
+        wmove(main_win, 0, 0);
         wclrtobot(main_win);
         // comment this to prevent info message to be erased
         //wmove(input_win, 0, 0);
@@ -521,7 +521,7 @@ void ui_print_mult_pend() {
     subst(field, '0', ' ');
     strcat(strm, field);
 
-    mvwprintw(input_win, 0, 0, "%s", strm);
+    mvwprintw(input_win, 0, COLS - rescol - 14, "%s", strm);
 
     // Return cursor to previous position
     wmove(input_win, row_orig, col_orig);
@@ -552,16 +552,16 @@ void ui_show_header() {
     // Print input text
     switch (curmode) {
         case COMMAND_MODE:
-            mvwprintw(input_win, 0, rescol, ":%ls", inputline);
-            wmove(input_win, 0, inputline_pos + 1 + rescol);
+            mvwprintw(input_win, 0, 0, ":%ls", inputline);
+            wmove(input_win, 0, inputline_pos + 1);
             break;
         case INSERT_MODE:
-            mvwprintw(input_win, 0, 1 + rescol, "%ls", inputline);
-            wmove(input_win, 0, inputline_pos + 1 + rescol);
+            mvwprintw(input_win, 0, 1, "%ls", inputline);
+            wmove(input_win, 0, inputline_pos + 1);
             break;
         case EDIT_MODE:
-            mvwprintw(input_win, 0, rescol, " %ls", inputline);
-            wmove(input_win, 0, inputline_pos + 1 + rescol);
+            mvwprintw(input_win, 0, 0, " %ls", inputline);
+            wmove(input_win, 0, inputline_pos + 1);
     }
     wrefresh(input_win);
     return;
@@ -625,8 +625,7 @@ void ui_print_mode() {
         ui_set_ucolor(input_win, &ucolors[INPUT], DEFAULT_COLOR);
         #endif
         // Show submode (INSERT)
-        mvwprintw(input_win, 0, 0 + rescol, "%c", insert_edit_submode);
-        //wmove(input_win, 0, 1); commented on 01/06
+        mvwprintw(input_win, 0, 0, "%c", insert_edit_submode);
 
     } else if (curmode == EDIT_MODE) {
         strcat(strm, "   -- EDIT --");
@@ -646,8 +645,8 @@ void ui_print_mode() {
         ui_set_ucolor(input_win, &ucolors[INPUT], DEFAULT_COLOR);
         #endif
         // muestro ':'
-        mvwprintw(input_win, 0, 0 + rescol, ":");
-        wmove(input_win, 0, 1 + rescol);
+        mvwprintw(input_win, 0, 0, ":");
+        wmove(input_win, 0, 1);
     }
 
     return;
@@ -1130,8 +1129,8 @@ void ui_show_celldetails() {
         ui_set_ucolor(input_win, &ucolors[CELL_ID], DEFAULT_COLOR);
     #endif
     sprintf(head, "%s%d ", coltoa(curcol), currow);
-    mvwprintw(input_win, 0, 0 + rescol, "%s", head);
-    inputline_pos += strlen(head) + rescol;
+    mvwprintw(input_win, 0, 0, "%s", head);
+    inputline_pos += strlen(head);
 
     // show the current cell's format
     #ifdef USECOLORS
@@ -1339,7 +1338,7 @@ wchar_t ui_query_opt(wchar_t * initial_msg, wchar_t * valid) {
 
     curs_set(1);
     wtimeout(input_win, -1);
-    move(0, rescol + wcslen(initial_msg) + 1);
+    move(0, wcslen(initial_msg) + 1);
     while ((res = wstr_in_wstr(valid, wdc)) == -1) {
         wget_wch(input_win, &wd);
         swprintf(wdc, FBUFLEN, L"%lc", wd);
@@ -1388,7 +1387,7 @@ char * ui_query(char * initial_msg) {
     // ask for input
     wtimeout(input_win, -1);
     notimeout(input_win, TRUE);
-    wmove(input_win, 0, rescol);
+    wmove(input_win, 0, 0);
     wclrtoeol(input_win);
     wrefresh(input_win);
     int d = wgetch(input_win);
@@ -1400,7 +1399,7 @@ char * ui_query(char * initial_msg) {
             sprintf(hline + strlen(hline), "%c", d);
         }
 
-        mvwprintw(input_win, 0, rescol, "%s", hline);
+        mvwprintw(input_win, 0, 0, "%s", hline);
         wclrtoeol(input_win);
         wrefresh(input_win);
         d = wgetch(input_win);
