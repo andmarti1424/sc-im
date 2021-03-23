@@ -2008,7 +2008,33 @@ void valueize_area(int sr, int sc, int er, int ec) {
                 efree(p->expr);
                 p->expr = (struct enode *)0;
                 p->flags &= ~is_strexpr;
+
+                // TODO move this to depgraph ?
+                vertexT * v_cur = getVertex(graph, p, 0);
+                if (v_cur != NULL) { // just in case
+
+                    // for each edge in edges, we look for the reference to the vertex we are deleting, and we erase it!
+                    edgeT * e = v_cur->edges;
+                    while (e != NULL) { // && v_cur->back_edges == NULL) {
+                        delete_reference(v_cur, e->connectsTo, 1);
+
+                        // delete vertex only if it end up having no edges, no expression, no value, no label....
+                        if (e->connectsTo->edges == NULL && e->connectsTo->back_edges == NULL && !e->connectsTo->ent->expr && !(e->connectsTo->ent->flags & is_valid) && ! e->connectsTo->ent->label)
+                            destroy_vertex(e->connectsTo->ent);
+                        //     WARNING: an orphan vertex now represents an ent that has an enode thats
+                        //     need to be evaluated, but do not depend in another cell.
+                        e = e->next;
+                    }
+
+                    destroy_list_edges(v_cur->edges);
+                    v_cur->edges = NULL;
+
+                    /* delete vertex in graph
+                       only if this vertex is not referenced by other */
+                    if (v_cur->back_edges == NULL ) destroy_vertex(p);
+                    }
             }
+
     #ifdef UNDO
             copy_to_undostruct(r, c, r, c, 'a');
     #endif
