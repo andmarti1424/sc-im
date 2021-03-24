@@ -1436,8 +1436,6 @@ void ui_set_ucolor(WINDOW * w, struct ucolor * uc, int bg_override) {
 
 #ifdef A_ITALIC
     if (uc->italic)    attr |= A_ITALIC;
-#else
-    sc_error("Cannot handle italic attribute. Please update your ncurses library");
 #endif
     if (uc->dim)       attr |= A_DIM;
     if (uc->reverse)   attr |= A_REVERSE;
