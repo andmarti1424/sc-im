@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013-2017, Andrés Martinelli <andmarti@gmail.com              *
+ * Copyright (c) 2013-2021, Andrés Martinelli <andmarti@gmail.com>             *
  * All rights reserved.                                                        *
  *                                                                             *
  * This file is a part of SC-IM                                                *

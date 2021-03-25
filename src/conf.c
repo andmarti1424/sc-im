@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013-2017, Andrés Martinelli <andmarti@gmail.com              *
+ * Copyright (c) 2013-2021, Andrés Martinelli <andmarti@gmail.com>             *
  * All rights reserved.                                                        *
  *                                                                             *
  * This file is a part of SC-IM                                                *
@@ -54,46 +54,46 @@
 
 
 const char default_config[] =
-	"half_page_scroll=1\n"
-	"autocalc=1\n"
-	"numeric=0\n"
-	"nocurses=0\n"
-	"newline_action=j\n"
-	"external_functions=0\n"
-	"xlsx_readformulas=0\n"
-	"import_delimited_as_text=0\n"
-	"quit_afterload=0\n"
-	"numeric_zero=1\n"
-	"numeric_decimal=1\n"
-	"filename_with_mode=0\n"
-	"overlap=0\n"
-	"truncate=0\n"
-	"debug=0\n"
-	"ignorecase=0\n"
-	"trigger=1\n"
-	"version=0\n"
-	"help=0\n"
-	"input_bar_bottom=0\n"
-	"underline_grid=0\n"
-    #ifdef AUTOBACKUP
-	"autobackup=0\n"  // 0:noautobackup, n>0: backup every n in seconds
-    #endif
+    "half_page_scroll=1\n"
+    "autocalc=1\n"
+    "numeric=0\n"
+    "nocurses=0\n"
+    "newline_action=j\n"
+    "external_functions=0\n"
+    "xlsx_readformulas=0\n"
+    "import_delimited_as_text=0\n"
+    "quit_afterload=0\n"
+    "numeric_zero=1\n"
+    "numeric_decimal=1\n"
+    "filename_with_mode=0\n"
+    "overlap=0\n"
+    "truncate=0\n"
+    "debug=0\n"
+    "ignorecase=0\n"
+    "trigger=1\n"
+    "version=0\n"
+    "help=0\n"
+    "input_bar_bottom=0\n"
+    "underline_grid=0\n"
+#ifdef AUTOBACKUP
+    "autobackup=0\n"  // 0:noautobackup, n>0: backup every n in seconds
+#endif
 
-    #ifdef DEFAULT_COPY_TO_CLIPBOARD_CMD
-	"default_copy_to_clipboard_cmd=" DEFAULT_COPY_TO_CLIPBOARD_CMD "\n"
-    #else
-	"default_copy_to_clipboard_cmd=\n"
-    #endif
+#ifdef DEFAULT_COPY_TO_CLIPBOARD_CMD
+    "default_copy_to_clipboard_cmd=" DEFAULT_COPY_TO_CLIPBOARD_CMD "\n"
+#else
+    "default_copy_to_clipboard_cmd=\n"
+#endif
 
-	"copy_to_clipboard_delimited_tab=0\n"
+    "copy_to_clipboard_delimited_tab=0\n"
 
-    #ifdef DEFAULT_PASTE_FROM_CLIPBOARD_CMD
-	"default_paste_from_clipboard_cmd=" DEFAULT_PASTE_FROM_CLIPBOARD_CMD "\n"
-    #else
-	"default_paste_from_clipboard_cmd=\n"
-    #endif
+#ifdef DEFAULT_PASTE_FROM_CLIPBOARD_CMD
+    "default_paste_from_clipboard_cmd=" DEFAULT_PASTE_FROM_CLIPBOARD_CMD "\n"
+#else
+    "default_paste_from_clipboard_cmd=\n"
+#endif
 
-	"tm_gmtoff=0\n";
+    "tm_gmtoff=0\n";
 
 /**
  * \brief Populates user_conf_d with default values
@@ -108,15 +108,15 @@ const char default_config[] =
 
 void store_default_config_values() {
     parse_str(user_conf_d, default_config, 0);
-	
+
     // Calculate GMT offset (not on Solaris, doesn't have tm_gmtoff)
-    #if defined(USELOCALE) && !defined(__sun)
+#if defined(USELOCALE) && !defined(__sun)
     time_t t = time(NULL);
     struct tm * lt = localtime(&t);
     char strgmtoff[7];
     sprintf(strgmtoff, "%ld", lt->tm_gmtoff);
     put(user_conf_d, "tm_gmtoff", strgmtoff);
-    #endif
+#endif
 }
 
 /**

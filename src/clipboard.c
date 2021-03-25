@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013-2017, Andrés Martinelli <andmarti@gmail.com              *
+ * Copyright (c) 2013-2021, Andrés Martinelli <andmarti@gmail.com>             *
  * All rights reserved.                                                        *
  *                                                                             *
  * This file is a part of SC-IM                                                *
@@ -36,7 +36,7 @@
  *******************************************************************************/
 
 /**
- * \file clipboard.c 
+ * \file clipboard.c
  * \author Andrés Martinelli <andmarti@gmail.com>
  * \date 2017-07-18
  * \brief Clipboard functions
@@ -59,9 +59,9 @@
 #include "utils/string.h"
 
 int convert_string_to_number( int r0, int c0, int rn, int cn) {
-	int row, col;
-	register struct ent ** pp;
-    	wchar_t out[FBUFLEN] = L"";
+    int row, col;
+    register struct ent ** pp;
+    wchar_t out[FBUFLEN] = L"";
     for (row = r0; row <= rn; row++) {
         // ignore hidden rows
         //if (row_hidden[row]) continue;
@@ -74,16 +74,16 @@ int convert_string_to_number( int r0, int c0, int rn, int cn) {
 
                 // If a string exists
                 if ((*pp)->label) {
-		char * num = str_replace((*pp)->label," ","");
-		(*pp)->label ='\0';
-                swprintf(out, BUFFERSIZE, L"let %s%d=%s", coltoa(col), row, num);
-		send_to_interp(out);
-                    }
-		}
-	}
-} 
+                    char * num = str_replace((*pp)->label," ","");
+                    (*pp)->label ='\0';
+                    swprintf(out, BUFFERSIZE, L"let %s%d=%s", coltoa(col), row, num);
+                    send_to_interp(out);
+                }
+            }
+        }
+    }
 
-	return 0;
+    return 0;
 
 }
 
@@ -220,7 +220,7 @@ int save_plain(FILE * fout, int r0, int c0, int rn, int cn) {
     char formated_s[FBUFLEN] = "";
     int res = -1;
     int align = 1;
-    int emptyfield=-1;	
+    int emptyfield=-1;
 
     for (row = r0; row <= rn; row++) {
         // ignore hidden rows
@@ -229,7 +229,7 @@ int save_plain(FILE * fout, int r0, int c0, int rn, int cn) {
         for (pp = ATBL(tbl, row, col = c0); col <= cn; col++, pp++) {
             // ignore hidden cols
             //if (col_hidden[col]) continue;
-	    emptyfield=-1;
+            emptyfield=-1;
 
             if (*pp) {
                 num [0] = '\0';

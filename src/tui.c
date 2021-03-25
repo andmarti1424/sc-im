@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013-2017, Andrés Martinelli <andmarti@gmail.com              *
+ * Copyright (c) 2013-2021, Andrés Martinelli <andmarti@gmail.com>             *
  * All rights reserved.                                                        *
  *                                                                             *
  * This file is a part of SC-IM                                                *
@@ -804,7 +804,6 @@ void ui_show_content(WINDOW * win, int mxrow, int mxcol) {
     int freezer = freeze_ranges && (freeze_ranges->type == 'r' ||  freeze_ranges->type == 'a') ? 1 : 0;
     int freezec = freeze_ranges && (freeze_ranges->type == 'c' ||  freeze_ranges->type == 'a') ? 1 : 0;
 
-    //for (row = 0; row <= mxrow && row < maxrows; row++) {
     for (row = 0; row <= mxrow; row++) {
         if (row >= maxrows) {
             sc_error("i >= maxrows in show_content. please check calc_offscr_sc_rows.");
@@ -844,7 +843,6 @@ void ui_show_content(WINDOW * win, int mxrow, int mxcol) {
         col = 0;
 
         for (p = ATBL(tbl, row, col); col <= mxcol; p += nextcol - col, col = nextcol, c += fieldlen) {
-        //for (p = ATBL(tbl, row, col); col <= mxcol && col < maxcols; p += nextcol - col, col = nextcol, c += fieldlen) {
             if (col >= maxcols) {
                 sc_error("i >= maxcols in show_content. please check calc_offscr_sc_cols.");
                 break;
@@ -1023,7 +1021,7 @@ void ui_show_content(WINDOW * win, int mxrow, int mxcol) {
                     i += wcwidth(w);
                 }
 
-                // we print text and number
+            // we print text and number
             } else {
                 pad_and_align(text, num, fieldlen, align, (*p)->pad, out);
                 if (col == mxcol && wcswidth(out, wcslen(out)) > fieldlen)
