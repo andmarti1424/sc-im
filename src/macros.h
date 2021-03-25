@@ -62,6 +62,7 @@
 #define OKEY_ESC         '\033'
 #define OKEY_TAB         '\011'
 #define OKEY_ENTER       10
+#define OKEY_SPACE       L' '
 #define OKEY_LEFT        0x104
 #define OKEY_RIGHT       0x105
 #define OKEY_DOWN        0x102
@@ -73,6 +74,7 @@
 #define OKEY_END         0x168
 #define OKEY_PGUP        0x153
 #define OKEY_PGDOWN      0x152
+#define OKEY_F(x)        KEY_F(x)
 
 //#define metak(x) ((x) | 0x80)
 #define LEFT             0

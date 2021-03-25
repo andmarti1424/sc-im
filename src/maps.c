@@ -153,6 +153,8 @@ struct block * get_mapbuf_str (char * str) {
                addto_buf(buffer, OKEY_ESC);
            else if (! strcasecmp(sk, "TAB"))                            // TAB
                addto_buf(buffer, OKEY_TAB);
+           else if (! strcasecmp(sk, "SPACE"))                          // SPACE
+               addto_buf(buffer, OKEY_SPACE);
            else if (! strcasecmp(sk, "LEFT"))                           // LEFT
                addto_buf(buffer, OKEY_LEFT);
            else if (! strcasecmp(sk, "RIGHT"))                          // RIGHT
@@ -371,12 +373,12 @@ void get_mapstr_buf (struct block * b, char * str) {
 
     str[0]='\0';
     for (i=0; i < len; i++) {
-        if (sc_isprint(a->value)) {
-            sprintf(str + strlen(str), "%lc", a->value);
-        } else if (a->value == OKEY_ENTER) {
+        if (a->value == OKEY_ENTER) {
             strcat(str, "<CR>");                                 // CR - ENTER
         } else if (a->value == OKEY_TAB) {
             strcat(str, "<TAB>");                                // TAB
+        } else if (a->value == OKEY_SPACE) {
+            strcat(str, "<SPACE>");                              // SPACE
         } else if (a->value == OKEY_LEFT) {
             strcat(str, "<LEFT>");                               // LEFT
         } else if (a->value == OKEY_RIGHT) {
@@ -399,8 +401,10 @@ void get_mapstr_buf (struct block * b, char * str) {
             strcat(str, "<PGUP>");                               // PGUP
         } else if (a->value == OKEY_ESC) {
             strcat(str, "<ESC>");                                // ESC
-        } else if ( a->value == (uncl(a->value) & 0x1f)) {       // C-x
-            sprintf(str + strlen(str), "<C-%c>", uncl(a->value));
+        } else if (sc_isprint(a->value)) {
+            sprintf(str + strlen(str), "%lc", a->value);         // ISPRINT
+        } else if ( a->value == (uncl(a->value) & 0x1f)) {
+            sprintf(str + strlen(str), "<C-%c>", uncl(a->value));// C-x
         }
         a = a->pnext;
     }
