@@ -831,9 +831,10 @@ command:
     |    error   {
                      sc_error("syntax error");
                      line[0]='\0';
-                     linelim = 0;
-                     yyparse();
+                     //linelim = 0;
+                     //yyparse();
                      linelim = -1;
+                     yyclearin;
                      yyerrok;
                  };
 
