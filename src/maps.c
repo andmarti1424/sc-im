@@ -39,7 +39,7 @@
  * \file maps.c
  * \author Andrés Martinelli <andmarti@gmail.com>
  * \date 2017-07-18
- * \brief TODO Write a tbrief file description.
+ * \brief file that contain the different functions to support mappings
  */
 
 #include <stdlib.h>
@@ -57,6 +57,30 @@
 static map * maps;
 static int mapdepth = 0;
 int len_maps = 0;
+
+
+/**
+ * \brief could_be_mapping
+ * a buffer may contain a valid command (for instance, just a letter in insert mode)
+ * but that buffer beginning may also be a possible mapping
+ *
+ * \param[in] struct block * (b)
+ * \return 0 if false. 1 otherwise
+ */
+
+int could_be_mapping(struct block * b) {
+    // Traverse session mappings
+    map * m = maps;
+
+    while (m != NULL) {
+        // Check if 'b' buffer might be in mapping
+        if (block_in_block(m->in, b) == 0 && m->mode == curmode)
+            return 1;
+        m = m->psig;
+    }
+    return 0;
+}
+
 
 /**
  * \brief TODO Document replace_maps()
@@ -124,6 +148,8 @@ struct block * get_mapbuf_str (char * str) {
            is_specialkey = 0;
            if (! strcasecmp(sk, "CR"))                                  // CR - ENTER key
                addto_buf(buffer, OKEY_ENTER);
+           else if (! strcasecmp(sk, "ESC"))                            // ESC
+               addto_buf(buffer, OKEY_ESC);
            else if (! strcasecmp(sk, "TAB"))                            // TAB
                addto_buf(buffer, OKEY_TAB);
            else if (! strcasecmp(sk, "LEFT"))                           // LEFT
@@ -232,7 +258,7 @@ int exists_map(char * in, int mode) {
 }
 
 /**
- * \brief Ammend a mapping to the curren session
+ * \brief Ammend a mapping to the current session
  *
  * \param[in] in
  * \param[in] out
@@ -350,8 +376,6 @@ void get_mapstr_buf (struct block * b, char * str) {
             sprintf(str + strlen(str), "%c", (char) a->value);
         } else if (a->value == OKEY_ENTER) {
             strcat(str, "<CR>");                                 // CR - ENTER
-        } else if ( a->value == (uncl(a->value) & 0x1f)) {       // C-x
-            sprintf(str + strlen(str), "<C-%c>", uncl(a->value));
         } else if (a->value == OKEY_TAB) {
             strcat(str, "<TAB>");                                // TAB
         } else if (a->value == OKEY_LEFT) {
@@ -374,6 +398,10 @@ void get_mapstr_buf (struct block * b, char * str) {
             strcat(str, "<PGDOWN>");                             // PGDOWN
         } else if (a->value == OKEY_PGUP) {
             strcat(str, "<PGUP>");                               // PGUP
+        } else if (a->value == OKEY_ESC) {
+            strcat(str, "<ESC>");                                // ESC
+        } else if ( a->value == (uncl(a->value) & 0x1f)) {       // C-x
+            sprintf(str + strlen(str), "<C-%c>", uncl(a->value));
         }
         a = a->pnext;
     }
@@ -410,6 +438,14 @@ void get_mappings(char * salida) {
 
             case INSERT_MODE:
                 mode = 'i';
+                break;
+
+            case VISUAL_MODE:
+                mode = 'v';
+                break;
+
+            case COMMAND_MODE:
+                mode = 'c';
                 break;
        }
        get_mapstr_buf(m->in, min);

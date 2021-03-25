@@ -50,7 +50,7 @@
 #include "utils/string.h"
 
 /**
-* \brief Create buffer as list of blocks 
+* \brief Create buffer as list of blocks
 *
 * \return b
 */
@@ -106,6 +106,7 @@ void copybuffer(struct block * origen, struct block * destino) {
     return;
 }
 
+
 /**
 * \brief Replace the element of a buffer at 'pos' with a '\0'
 *
@@ -136,7 +137,7 @@ void del_buf (struct block * buf, int pos) {
 }
 
 /**
-* \brief TODO Document fludh_buf()
+* \brief TODO Document flush_buf()
 *
 * \param[in] buf
 *
@@ -147,8 +148,7 @@ void flush_buf (struct block * buf) {
     if (buf == NULL) return;
 
     struct block * aux, * np;
-    for (aux = buf->pnext; aux != NULL; aux = np)
-    {
+    for (aux = buf->pnext; aux != NULL; aux = np) {
         np = aux->pnext;
         free(aux);
     }
@@ -175,7 +175,7 @@ void erase_buf (struct block * buf) {
 }
 
 /**
-* \brief Get size of buffer (indlucded special chars)
+* \brief Get size of buffer (included special chars)
 *
 * \param[in] buf
 *
@@ -247,7 +247,7 @@ int find_val(struct block * buf, int value) {
         if (b_aux->value == value) return 1;
         b_aux = b_aux->pnext;
     }
-    return 0; 
+    return 0;
 }
 
 /**

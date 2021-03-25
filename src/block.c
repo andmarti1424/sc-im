@@ -39,7 +39,7 @@
  * \file block.c
  * \author Andrés Martinelli <andmarti@gmail.com>
  * \date 2017-07-18
- * \brief TODO Write a brief file description.
+ * \brief functions used for handling input
  */
 
 #include "block.h"
@@ -47,20 +47,17 @@
 #include "utils/string.h"
 
 /**
- * \brief TODO Document block_in_block()
- *
- * \details Find out if the int elements in the bus list are inside the
- * ori list. If so, return the original ori position of it.
- *
+ * \brief Function that tells if 'b' buffer is inside 'o' buffer
+ * \details Find out if the int elements in the 'b' list are inside the
+ * ori list.
+ * Since the b list could be in the middle of the o list, and not
+ * only at the beginning.
  * \param[in] o
  * \param[in] b
- *
- * \return TODO What does this return?
+ * \return the position in the 'o' list if found. returns -1 if not in block
  */
-
 // TODO: IMPROVE this. Use two while statements in order to create an array
 // from a block, and make them work separately. Leave the logic unmodified
-
 int block_in_block (struct block * o, struct block * b) {
     int lori = get_bufsize(o);
     int lbus = get_bufsize(b);

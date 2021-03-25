@@ -94,6 +94,9 @@ L"ccopy",
 L"cellcolor",
 L"color",
 L"cpaste",
+L"cmap",
+L"cnoremap",
+L"cunmap",
 L"e csv",
 L"e tab",
 L"e txt",
@@ -866,11 +869,14 @@ void do_commandmode(struct block * sb) {
         } else if ( ! wcsncmp(inputline, L"nmap", 4) ||
                     ! wcsncmp(inputline, L"imap", 4) ||
                     ! wcsncmp(inputline, L"vmap", 4) ||
+                    ! wcsncmp(inputline, L"cmap", 4) ||
                     ! wcsncmp(inputline, L"inoremap", 8) ||
                     ! wcsncmp(inputline, L"nnoremap", 8) ||
                     ! wcsncmp(inputline, L"vnoremap", 8) ||
+                    ! wcsncmp(inputline, L"cnoremap", 8) ||
                     ! wcsncmp(inputline, L"iunmap", 6) ||
                     ! wcsncmp(inputline, L"vunmap", 6) ||
+                    ! wcsncmp(inputline, L"cunmap", 6) ||
                     ! wcsncmp(inputline, L"nunmap", 6) ) {
             send_to_interp(inputline);
 

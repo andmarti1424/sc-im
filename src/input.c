@@ -67,6 +67,9 @@ int cmd_multiplier = 0;    // Multiplier
 int cmd_pending = 0;       // Command pending
 int cmd_digraph = 0;
 static wint_t digraph;
+#ifdef MOUSE
+MEVENT event;              // mouse event
+#endif
 
 /**
  * \brief Reads stdin for a valid command
@@ -81,19 +84,29 @@ static wint_t digraph;
  */
 
 void handle_input(struct block * buffer) {
-    struct timeval start_tv, m_tv; // For measuring timeout
+    struct timeval start_tv, m_tv, init_tv; // For measuring timeout
     gettimeofday(&start_tv, NULL);
     gettimeofday(&m_tv, NULL);
+    gettimeofday(&init_tv, NULL); // keep time when entering handle_input
     long msec = (m_tv.tv_sec - start_tv.tv_sec) * 1000L +
                 (m_tv.tv_usec - start_tv.tv_usec) / 1000L;
+    long msec_init = (m_tv.tv_sec - init_tv.tv_sec) * 1000L +
+                (m_tv.tv_usec - init_tv.tv_usec) / 1000L;
 
     cmd_multiplier = 0;
     cmd_pending = 0;
-#ifdef MOUSE
-    MEVENT event; // mouse event
-#endif
 
-    while ( ! has_cmd(buffer, msec) && msec <= CMDTIMEOUT ) {
+    /* add char to buffer until valid command found.
+     * important: buffer may contain a valid command (for instance,
+     * just a letter in insert mode) but that buffer start may also
+     * be a possible mapping! (for instace kj in insert mode to exit the mode).
+     * if so, wait a 800ms, before triggering has_cmd..
+     */
+    while (
+              ( ! has_cmd(buffer, msec) && msec <= CMDTIMEOUT) ||
+              ( could_be_mapping(buffer) && msec_init < 800)
+          ) {
+
             // if command pending, refresh 'ef' only. Multiplier and cmd pending
             if (cmd_pending) ui_print_mult_pend();
 
@@ -110,13 +123,14 @@ void handle_input(struct block * buffer) {
                 return;
             } else
 #endif
-                if ( d == OKEY_ESC || d == ctl('g')) {
+
+            if ( d == OKEY_ESC || d == ctl('g')) {
                 break_waitcmd_loop(buffer);
                 ui_print_mult_pend();
                 return;
             }
 
-            // Handle multiplier of commands in NORMAL mode.
+            // Handle multiplier of commands in NORMAL VISUAL and EDIT modes
             if ( return_value != -1 && isdigit(d)
                && ( buffer->value == L'\0' || iswdigit((wchar_t) buffer->value))
                && ( curmode == NORMAL_MODE || curmode == VISUAL_MODE || curmode == EDIT_MODE )
@@ -135,19 +149,13 @@ void handle_input(struct block * buffer) {
                     continue;
             }
 
-            /*
-             * Update time stap to reset timeout after each loop
-             * (Only if current mode is COMMAND, INSERT or EDIT) and for each
-             * user input as well.
-             */
-            fix_timeout(&start_tv);
 
             /*
-             * Handle special characters input: BS TAG ENTER HOME END DEL PGUP
+             * Handle special characters input: BS TAB ENTER HOME END DEL PGUP
              * PGDOWN and alphanumeric characters
              */
             if (is_idchar(d) || return_value != -1) {
-                // If in NORMAL, VISUAL or EDITION mode , change top left corner indicator
+                // If in NORMAL, VISUAL or EDITION mode, added '?' cmd_pending at the left of MODE
                 if ( (curmode == NORMAL_MODE && d >= ' ') || //FIXME
                      (curmode == EDIT_MODE   && d >= ' ') ||
                      (curmode == VISUAL_MODE && d >= ' ') ) {
@@ -173,9 +181,27 @@ void handle_input(struct block * buffer) {
                 replace_maps(buffer);
             }
 
+            /*
+             * Update time stamp to reset timeout after each loop
+             * (start_tv changes only if current mode is COMMAND, INSERT or
+             * EDIT) and for each user input as well.
+             */
             gettimeofday(&m_tv, NULL);
             msec = (m_tv.tv_sec - start_tv.tv_sec) * 1000L +
                    (m_tv.tv_usec - start_tv.tv_usec) / 1000L;
+
+            msec_init = (m_tv.tv_sec - init_tv.tv_sec) * 1000L +
+                (m_tv.tv_usec - init_tv.tv_usec) / 1000L;
+            if (msec_init > 4000) gettimeofday(&init_tv, NULL); // just to avoid overload
+            fix_timeout(&start_tv);
+
+            // to handle map of ESC
+            if ( buffer->value == OKEY_ESC || buffer->value == ctl('g')) {
+                break_waitcmd_loop(buffer);
+                ui_print_mult_pend();
+                return;
+            }
+
     }
     if (msec >= CMDTIMEOUT) { // timeout. Command incomplete
         cmd_pending = 0;      // No longer wait for a command, set flag.

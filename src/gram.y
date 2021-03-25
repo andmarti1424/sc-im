@@ -203,13 +203,16 @@ token S_YANKCOL
 %token S_REDO
 %token S_UNDO
 %token S_IMAP
+%token S_CMAP
 %token S_NMAP
 %token S_VMAP
 %token S_INOREMAP
+%token S_CNOREMAP
 %token S_NNOREMAP
 %token S_VNOREMAP
 %token S_NUNMAP
 %token S_IUNMAP
+%token S_CUNMAP
 %token S_VUNMAP
 %token S_COLOR
 %token S_CELLCOLOR
@@ -612,6 +615,11 @@ command:
                                    scxfree($2);
                                    scxfree($3);
                                  }
+    |    S_CMAP STRING STRING    {
+                                   add_map($2, $3, COMMAND_MODE, 1);
+                                   scxfree($2);
+                                   scxfree($3);
+                                 }
     |    S_NNOREMAP STRING STRING  {
                                    add_map($2, $3, NORMAL_MODE, 0);
                                    scxfree($2);
@@ -625,6 +633,11 @@ command:
                                    }
     |    S_VNOREMAP STRING STRING  {
                                    add_map($2, $3, VISUAL_MODE, 0);
+                                   scxfree($2);
+                                   scxfree($3);
+                                   }
+    |    S_CNOREMAP STRING STRING  {
+                                   add_map($2, $3, COMMAND_MODE, 0);
                                    scxfree($2);
                                    scxfree($3);
                                    }
@@ -643,6 +656,10 @@ command:
                                    scxfree($2);
                                    }
 
+    |    S_CUNMAP STRING           {
+                                   del_map($2, COMMAND_MODE);
+                                   scxfree($2);
+                                   }
     |    S_COLOR STRING            {
 #ifdef USECOLORS
                                    chg_color($2);

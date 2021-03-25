@@ -55,6 +55,7 @@ typedef struct map map;
 
 extern unsigned int curmode;
 
+int could_be_mapping(struct block * b);
 int replace_maps (struct block * b);
 struct block * get_mapbuf_str (char * str);
 void del_maps ();
