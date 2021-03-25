@@ -84,9 +84,7 @@ int could_be_mapping(struct block * b) {
 
 /**
  * \brief TODO Document replace_maps()
- *
  * \param[in] b
- *
  * \return r
  */
 
@@ -124,19 +122,22 @@ int replace_maps (struct block * b) {
 
 /**
  * \brief Create list of blocks based on map strings
- *
  * \param[in] str
- *
  * \return buffer
  */
 
 struct block * get_mapbuf_str (char * str) {
+
     struct block * buffer = create_buf();
-    unsigned short l = strlen(str);
     unsigned short i, j;
     unsigned short is_specialkey = 0;
     char sk[MAXSC+1];
     sk[0] = '\0';
+    const size_t size = strlen(str) + 1;
+    wchar_t wc[BUFFERSIZE] = { L'\0' };
+    size_t result = mbstowcs(wc, str, size);
+    if (result == (size_t)-1 ) return buffer;
+    unsigned short l = wcslen(wc);
 
     for (i=0; i<l; i++) {
 
@@ -172,7 +173,7 @@ struct block * get_mapbuf_str (char * str) {
                addto_buf(buffer, OKEY_PGDOWN);
            else if (! strcasecmp(sk, "PGUP"))                           // PGUP
                addto_buf(buffer, OKEY_PGUP);
-           else if (! strncmp(sk, "C-", 2) && strlen(sk) == 3       // C-X
+           else if (! strncmp(sk, "C-", 2) && strlen(sk) == 3           // C-X
                     && ( (sk[2] > 64 && sk[2] < 91) || (sk[2] > 96 && sk[2] < 123)) )
                addto_buf(buffer, ctl(tolower(sk[2])));
 
@@ -183,7 +184,7 @@ struct block * get_mapbuf_str (char * str) {
 
         // Add some other characters
         } else {
-           addto_buf(buffer, (int) str[i]);
+                addto_buf(buffer, (wint_t) wc[i]);
         }
     }
 
@@ -198,7 +199,6 @@ struct block * get_mapbuf_str (char * str) {
 
 /**
  * \brief Remove mappings and free corresponding memory
- *
  * \return none
  */
 
@@ -217,7 +217,6 @@ void del_maps () {
 
 /**
  * \brief Removes the last mapping of the current session
- *
  * \return none
  */
 
@@ -372,8 +371,8 @@ void get_mapstr_buf (struct block * b, char * str) {
 
     str[0]='\0';
     for (i=0; i < len; i++) {
-        if (isprint(a->value)) {
-            sprintf(str + strlen(str), "%c", (char) a->value);
+        if (sc_isprint(a->value)) {
+            sprintf(str + strlen(str), "%lc", a->value);
         } else if (a->value == OKEY_ENTER) {
             strcat(str, "<CR>");                                 // CR - ENTER
         } else if (a->value == OKEY_TAB) {
@@ -411,9 +410,7 @@ void get_mapstr_buf (struct block * b, char * str) {
 // Save mapping's details in a char*
 /**
  * \brief Save mapping's details in a char*
- *
  * \param[in] salida
- *
  * \return none
  */
 
