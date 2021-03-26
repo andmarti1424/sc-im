@@ -1221,6 +1221,8 @@ void export_markdown(char * fname, int r0, int c0, int rn, int cn) {
 
     struct ent * ent = go_end();
     if (rn > ent->row) rn = ent->row;
+    ent = goto_last_col();
+    if (cn > ent->col) cn = ent->col;
 
     char num [FBUFLEN] = "";
     char text[FBUFLEN] = "";
@@ -1350,6 +1352,8 @@ void export_plain(char * fname, int r0, int c0, int rn, int cn) {
 
     struct ent * ent = go_end();
     if (rn > ent->row) rn = ent->row;
+    ent = goto_last_col();
+    if (cn > ent->col) cn = ent->col;
 
     char num [FBUFLEN] = "";
     char text[FBUFLEN] = "";
@@ -1426,6 +1430,8 @@ void export_latex(char * fname, int r0, int c0, int rn, int cn, int verbose) {
     // to prevent empty lines at the end of the file
     struct ent * ent = go_end();
     if (rn > ent->row) rn = ent->row;
+    ent = goto_last_col();
+    if (cn > ent->col) cn = ent->col;
 
     if (verbose) sc_info("Writing file \"%s\"...", fname);
 
