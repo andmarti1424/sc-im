@@ -90,7 +90,6 @@ extern int pthread_exists;
  *
  * \return none
  */
-
 void erasedb() {
     int  r, c;
 
@@ -131,6 +130,11 @@ void erasedb() {
     *curfile = '\0';
 }
 
+/**
+ * \brief load rc config file
+ *
+ * \return none
+ */
 void loadrc(void) {
     char rcpath[PATHLEN];
     char * home;
@@ -179,7 +183,6 @@ int file_exists(const char * fname) {
  *
  * \return 0 if not modified; 1 if modified
  */
-
 int modcheck() {
     if (modflg && ! get_conf_int("nocurses")) {
         sc_error("File not saved since last change. Add '!' to force");
@@ -195,7 +198,6 @@ int modcheck() {
  *
  * \return one of , ; \t |
  */
-
 char get_delim(char *type) {
     char delim = ',';
     if (!strcasecmp(type, "tsv") || !strcasecmp(type, "tab"))
@@ -222,7 +224,6 @@ char get_delim(char *type) {
  *
  * \return 0 on OK; -1 on error
  */
-
 int savefile() {
     int force_rewrite = 0;
     char name[BUFFERSIZE];
@@ -321,7 +322,6 @@ int savefile() {
  *
  * \return 0 on success; -1 on error
  */
-
 int writefile(char * fname, int r0, int c0, int rn, int cn, int verbose) {
     register FILE *f;
     char save[PATHLEN];
@@ -362,7 +362,6 @@ int writefile(char * fname, int r0, int c0, int rn, int cn, int verbose) {
  *
  * \return none
  */
-
 void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
     register struct ent **pp;
     int r, c;
@@ -510,10 +509,6 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
                     else
                         fprintf(f, "\n");
                 }
-
-
-
-
             }
     }
 
@@ -557,7 +552,6 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
  *
  * \return none
  */
-
 void write_franges(register FILE *f) {
     if (! freeze_ranges) return;
     if (freeze_ranges->type == 'a') {
@@ -582,7 +576,6 @@ void write_franges(register FILE *f) {
  *
  * \return none
  */
-
 void write_marks(register FILE *f) {
     int i;
     struct mark * m;
@@ -615,7 +608,6 @@ void write_marks(register FILE *f) {
  *
  * \return none
  */
-
 void write_cells(register FILE *f, int r0, int c0, int rn, int cn, int dr, int dc) {
     register struct ent **pp;
     int r, c;
@@ -666,7 +658,6 @@ void write_cells(register FILE *f, int r0, int c0, int rn, int cn, int dr, int d
  * \return SC_READFILE_SUCCESS if we loaded the file, SC_READFILE_ERROR if we failed,
  * SC_READFILE_DOESNTEXIST if the file doesn't exist.
  */
-
 sc_readfile_result readfile(char * fname, int eraseflg) {
     if (!strlen(fname)) return 0;
     loading = 1;
@@ -808,7 +799,6 @@ sc_readfile_result readfile(char * fname, int eraseflg) {
  *
  * \return path
  */
-
 char * findhome(char * path) {
     static char * HomeDir = NULL;
 
@@ -856,7 +846,6 @@ char * findhome(char * path) {
  *
  * \return file pointer
  */
-
 FILE * openfile(char *fname, int *rpid, int *rfd) {
     int pipefd[4];
     int pid;
@@ -929,7 +918,6 @@ FILE * openfile(char *fname, int *rpid, int *rfd) {
  *
  * \return none
  */
-
 void closefile(FILE *f, int pid, int rfd) {
     int temp;
     wint_t wi;
@@ -968,7 +956,6 @@ void closefile(FILE *f, int pid, int rfd) {
  *
  * \return none
  */
-
 void print_options(FILE *f) {
     if (
         ! optimize &&
@@ -999,7 +986,6 @@ void print_options(FILE *f) {
  *
  * \return 0 on success; -1 on error
  */
-
 int import_csv(char * fname, char d) {
     register FILE * f;
     int r = 0, c = 0, cf = 0;
@@ -1112,7 +1098,6 @@ int import_csv(char * fname, char d) {
  *
  * \return none
  */
-
 void do_export(int r0, int c0, int rn, int cn) {
     int force_rewrite = 0;
     char type_export[4] = "";
@@ -1201,7 +1186,6 @@ void do_export(int r0, int c0, int rn, int cn) {
  *
  * \return none
  */
-
 void export_markdown(char * fname, int r0, int c0, int rn, int cn) {
     FILE * f;
     int row, col;
@@ -1219,9 +1203,10 @@ void export_markdown(char * fname, int r0, int c0, int rn, int cn) {
         }
     }
 
+    // to prevent empty lines at the end of the file
     struct ent * ent = go_end();
     if (rn > ent->row) rn = ent->row;
-    ent = goto_last_col();
+    ent = goto_last_col(); // idem with columns
     if (cn > ent->col) cn = ent->col;
 
     char num [FBUFLEN] = "";
@@ -1319,8 +1304,8 @@ void export_markdown(char * fname, int r0, int c0, int rn, int cn) {
         sc_info("File \"%s\" written", fname);
       }
     }
-
 }
+
 /**
  * \brief Export to plain TXT
  *
@@ -1332,7 +1317,6 @@ void export_markdown(char * fname, int r0, int c0, int rn, int cn) {
  *
  * \return none
  */
-
 void export_plain(char * fname, int r0, int c0, int rn, int cn) {
     FILE * f;
     int row, col;
@@ -1350,9 +1334,10 @@ void export_plain(char * fname, int r0, int c0, int rn, int cn) {
         }
     }
 
+    // to prevent empty lines at the end of the file
     struct ent * ent = go_end();
     if (rn > ent->row) rn = ent->row;
-    ent = goto_last_col();
+    ent = goto_last_col(); // idem with columns
     if (cn > ent->col) cn = ent->col;
 
     char num [FBUFLEN] = "";
@@ -1430,7 +1415,7 @@ void export_latex(char * fname, int r0, int c0, int rn, int cn, int verbose) {
     // to prevent empty lines at the end of the file
     struct ent * ent = go_end();
     if (rn > ent->row) rn = ent->row;
-    ent = goto_last_col();
+    ent = goto_last_col(); // idem with columns
     if (cn > ent->col) cn = ent->col;
 
     if (verbose) sc_info("Writing file \"%s\"...", fname);
@@ -1445,7 +1430,6 @@ void export_latex(char * fname, int r0, int c0, int rn, int cn, int verbose) {
     }
 
     // do the stuff
-
     fprintf(f,"%% ** SC-IM spreadsheet output\n\\begin{tabular}{");
     for (col=c0;col<=cn; col++) fprintf(f,"c");
     fprintf(f, "}\n");
@@ -1464,12 +1448,10 @@ void export_latex(char * fname, int r0, int c0, int rn, int cn, int verbose) {
                             strftime(field, sizeof(field), ((*pp)->format)+1, localtime(&v));
                         } else
                             format((*pp)->format, precision[col], (*pp)->v, field, sizeof(field));
-                        //FIXME
                         unspecial(f, field, coldelim);
                     } else {
                         char field[FBUFLEN];
                         (void) engformat(realfmt[col], fwidth[col], precision[col], (*pp) -> v, field, sizeof(field));
-                        //FIXME
                         unspecial(f, field, coldelim);
                     }
                 }
@@ -1530,7 +1512,6 @@ void unspecial(FILE * f, char * str, int delim) {
  *
  * \return none
  */
-
 void export_delim(char * fname, char coldelim, int r0, int c0, int rn, int cn, int verbose) {
     FILE * f;
     int row, col;
@@ -1540,7 +1521,7 @@ void export_delim(char * fname, char coldelim, int r0, int c0, int rn, int cn, i
     // to prevent empty lines at the end of the file
     struct ent * ent = go_end();
     if (rn > ent->row) rn = ent->row;
-    ent = goto_last_col();
+    ent = goto_last_col(); // idem with columns
     if (cn > ent->col) cn = ent->col;
 
     if (verbose) sc_info("Writing file \"%s\"...", fname);
@@ -1605,7 +1586,6 @@ void export_delim(char * fname, char coldelim, int r0, int c0, int rn, int cn, i
  * \param[in] f file pointer
  * \return file length + 1
  */
-
 int max_length(FILE * f) {
     if (f == NULL) return -1;
     int count = 0, max = 0;
@@ -1634,7 +1614,6 @@ int max_length(FILE * f) {
  * \param[in] f file pointer
  * \return number
  */
-
 int count_lines(FILE * f) {
     int count = 0;
     if (f == NULL) return count;
@@ -1656,7 +1635,6 @@ int count_lines(FILE * f) {
  *
  * \return none
  */
-
 int plugin_exists(char * name, int len, char * path) {
     FILE * fp;
     static char * HomeDir;
@@ -1707,10 +1685,8 @@ int plugin_exists(char * name, int len, char * path) {
 
 /**
  * \brief TODO Document do_autobackup()
- *
  * \return none
  */
-
 void * do_autobackup() {
     int len = strlen(curfile);
     //if (loading || ! len) return (void *) -1;
@@ -1755,10 +1731,8 @@ void * do_autobackup() {
 
 /**
  * \brief Check if it is time to do an autobackup
- *
  * \return none
  */
-
 void handle_backup() {
     #ifdef AUTOBACKUP
     extern struct timeval lastbackup_tv; // last backup timer
@@ -1780,14 +1754,11 @@ void handle_backup() {
 
 /**
  * \brief Remove autobackup file
- *
  * \details Remove autobackup file. Used when quitting or when loading
  * a new file.
- *
  * \param[in] file file pointer
  * \return none
  */
-
 void remove_backup(char * file) {
     int len = strlen(file);
     if (!len) return;
@@ -1803,12 +1774,9 @@ void remove_backup(char * file) {
 
 /**
  * \brief TODO Document backup_exists()
- *
  * \param[in] file file pointer
- *
  * \return none
  */
-
 int backup_exists(char * file) {
     int len = strlen(file);
     if (!len) return 0;
