@@ -1812,14 +1812,14 @@ struct ent * goto_bottom() {
  * \return lookat
  */
 struct ent * goto_last_col() {
-    int r, mr = maxrows - 1;
+    int r, mr = maxrows;
     int c, mc = 0;
     register struct ent *p;
     int rf = 0;
 
     for (r=0; r<mr; r++) {
-        for (c=0; c<maxcol; c++) {
-            if (c > mc && VALID_CELL(p, r, c)) { mc = c; rf = r; }
+        for (c=0; c<maxcols; c++) {
+            if (c >= mc && VALID_CELL(p, r, c)) { mc = c; rf = r; }
         }
     }
     return lookat(rf, mc);
