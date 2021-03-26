@@ -1434,6 +1434,9 @@ void export_delim(char * fname, char coldelim, int r0, int c0, int rn, int cn, i
     register struct ent ** pp;
     int pid;
 
+    // to prevent empty lines at the end of the file
+    struct ent * ent = go_end();
+    if (rn > ent->row) rn = ent->row;
 
     if (verbose) sc_info("Writing file \"%s\"...", fname);
 

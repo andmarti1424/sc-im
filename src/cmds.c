@@ -1633,7 +1633,7 @@ struct ent * vert_middle() {
  */
 
 struct ent * go_end() {
-    int r = currow, c = curcol;
+    int r = 0, c = 0;
     int raux = r, caux = c;
     register struct ent *p;
     do {
