@@ -1467,18 +1467,48 @@ void export_latex(char * fname, int r0, int c0, int rn, int cn, int verbose) {
                         unspecial(f, field, coldelim);
                     }
                 }
-                if ((s = (*pp)->label)) {
-                    unspecial(f, s, coldelim);
-                }
+                if ((s = (*pp)->label)) unspecial(f, s, coldelim);
             }
+                if (col < cn) fprintf(f,"%c", coldelim);
         }
+        if (row < rn) (void) fprintf (f, "\\\\");
+        fprintf(f,"\n");
     }
 
-        (void) fprintf(f,"\\end{tabular}\n%% ** end of SC-IM spreadsheet output\n");
+    fprintf(f,"\\end{tabular}\n%% ** end of SC-IM spreadsheet output\n");
 
     if (fname != NULL) closefile(f, pid, 0);
 
     if (! pid && verbose) sc_info("File \"%s\" written", fname);
+}
+
+/**
+ * \brief TODO Document unspecial()
+ *
+ * \details Unspecial (backquotes - > ") things that are special
+ * chars in a table
+ *
+ * \param[in] f file pointer
+ * \param[in] srt string pointer
+ * \param[in] delim
+ *
+ * \return none
+ */
+void unspecial(FILE * f, char * str, int delim) {
+    int backquote = 0;
+
+    if (str_in_str(str, ",") != -1) backquote = 1;
+    if (backquote) putc('\"', f);
+    if (*str == '\\') str++; // delete wheeling string operator, OK?
+    while (*str) {
+        // for LATEX export
+        if (delim == '&' && ( (*str == '&') || (*str == '$') ||
+           (*str == '#') || (*str == '%') || (*str == '{') || (*str == '}') || (*str == '&')))
+           putc('\\', f);
+        putc(*str, f);
+        str++;
+    }
+    if (backquote) putc('\"', f);
 }
 
 /**
@@ -1556,31 +1586,6 @@ void export_delim(char * fname, char coldelim, int r0, int c0, int rn, int cn, i
     if (! pid && verbose) {
         sc_info("File \"%s\" written", fname);
     }
-}
-
-/**
- * \brief TODO Document unspecial()
- *
- * \details Unxpecial (backquotes - > ") things that are special
- * chars in a table
- *
- * \param[in] f file pointer
- * \param[in] srt string pointer
- * \param[in] delim
- *
- * \return none
- */
-
-void unspecial(FILE * f, char * str, int delim) {
-    int backquote = 0;
-
-    if (str_in_str(str, ",") != -1) backquote = 1;
-    if (backquote) putc('\"', f);
-    while (*str) {
-        putc(*str, f);
-        str++;
-    }
-    if (backquote) putc('\"', f);
 }
 
 /**
