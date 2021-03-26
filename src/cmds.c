@@ -1805,6 +1805,27 @@ struct ent * goto_bottom() {
 }
 
 /**
+ * \brief TODO Document goto_last_col()
+ * traverse the table and see which is the max column that has content
+ * this is because maxcol changes when moving cursor.
+ * this function is used when exporting files
+ * \return lookat
+ */
+struct ent * goto_last_col() {
+    int r, mr = maxrows - 1;
+    int c, mc = 0;
+    register struct ent *p;
+    int rf = 0;
+
+    for (r=0; r<mr; r++) {
+        for (c=0; c<maxcol; c++) {
+            if (c > mc && VALID_CELL(p, r, c)) { mc = c; rf = r; }
+        }
+    }
+    return lookat(rf, mc);
+}
+
+/**
  * @brief TODO Document go_forward()
  *
  * \return lookat

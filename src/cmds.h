@@ -97,6 +97,7 @@ struct ent * vert_bottom();
 struct ent * go_bol();
 struct ent * go_eol();
 struct ent * horiz_middle();
+struct ent * goto_last_col();
 void select_inner_range(int * vir_tlrow, int * vir_tlcol, int * vir_brrow, int * vir_brcol);
 void ljustify(int sr, int sc, int er, int ec);
 void rjustify(int sr, int sc, int er, int ec);
