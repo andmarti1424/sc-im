@@ -98,14 +98,16 @@ L"cmap",
 L"cnoremap",
 L"cunmap",
 L"e csv",
-L"e tab",
-L"e txt",
 L"e mkd",
+L"e tab",
+L"e tex",
+L"e txt",
 L"e xlsx",
 L"e! csv",
-L"e! tab",
-L"e! txt",
 L"e! mkd",
+L"e! tab",
+L"e! tex",
+L"e! txt",
 L"e! xlsx",
 L"datefmt",
 L"define_color",
@@ -962,6 +964,8 @@ void do_commandmode(struct block * sb) {
         } else if (
                 ! wcsncmp(inputline, L"e csv"  , 5) ||
                 ! wcsncmp(inputline, L"e! csv" , 6) ||
+                ! wcsncmp(inputline, L"e tex"  , 5) ||
+                ! wcsncmp(inputline, L"e! tex" , 6) ||
                 ! wcsncmp(inputline, L"e tab"  , 5) ||
                 ! wcsncmp(inputline, L"e! tab" , 6) ||
                 ! wcsncmp(inputline, L"e mkd"  , 4) ||

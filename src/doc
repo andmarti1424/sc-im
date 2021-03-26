@@ -435,6 +435,15 @@ Commands for handling cell content:
      :e! txt {file}
                  Like ":e txt", but overwrite {file} if it exists.
 
+     :e tex      Export current spreadsheet to Latex file.
+                 If a range is selected, only that range is exported.
+
+     :e tex {file}
+                 Export the current spreadsheet to Latex file {file}.
+
+     :e! tex {file}
+                 Like ":e tex", but overwrite {file} if it exists.
+
      :e mkd      Export the current spreadsheet to a markdown file solely
                  containing a single markdown table.
                  The column alignments come from the cells on the row. All

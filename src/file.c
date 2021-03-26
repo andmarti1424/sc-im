@@ -1128,6 +1128,8 @@ void do_export(int r0, int c0, int rn, int cn) {
         strcpy(type_export, "csv");
     } else if (str_in_str(linea, "tab") == 0) {
         strcpy(type_export, "tab");
+    } else if (str_in_str(linea, "tex") == 0) {
+        strcpy(type_export, "tex");
     } else if (str_in_str(linea, "txt") == 0) {
         strcpy(type_export, "txt");
     } else if (str_in_str(linea, "mkd") == 0) {
@@ -1178,6 +1180,8 @@ void do_export(int r0, int c0, int rn, int cn) {
         export_delim(ruta, get_delim("csv"), r0, c0, rn, cn, 1);
     } else if (strcmp(type_export, "tab") == 0) {
         export_delim(ruta, '\t', r0, c0, rn, cn, 1);
+    } else if (strcmp(type_export, "tex") == 0) {
+        export_latex(ruta, r0, c0, rn, cn, 1);
     } else if (strcmp(type_export, "txt") == 0) {
         export_plain(ruta, r0, c0, rn, cn);
     } else if (strcmp(type_export, "mkd") == 0) {
@@ -1413,7 +1417,70 @@ void export_plain(char * fname, int r0, int c0, int rn, int cn) {
 
 }
 
-// fname is the path and name of file
+void export_latex(char * fname, int r0, int c0, int rn, int cn, int verbose) {
+    FILE * f;
+    int row, col;
+    register struct ent ** pp;
+    int pid;
+
+    // to prevent empty lines at the end of the file
+    struct ent * ent = go_end();
+    if (rn > ent->row) rn = ent->row;
+
+    if (verbose) sc_info("Writing file \"%s\"...", fname);
+
+    if (fname == NULL)
+        f = stdout;
+    else {
+        if ((f = openfile(fname, &pid, NULL)) == (FILE *)0) {
+            if (verbose) sc_error ("Can't create file \"%s\"", fname);
+            return;
+        }
+    }
+
+    // do the stuff
+
+    fprintf(f,"%% ** SC-IM spreadsheet output\n\\begin{tabular}{");
+    for (col=c0;col<=cn; col++) fprintf(f,"c");
+    fprintf(f, "}\n");
+    char coldelim = '&';
+    for (row=r0; row<=rn; row++) {
+        for (pp = ATBL(tbl, row, col=c0); col<=cn; col++, pp++) {
+            if (*pp) {
+                char *s;
+                if ((*pp)->flags & is_valid) {
+                    if ((*pp)->cellerror) {
+                        (void) fprintf (f, "%*s", fwidth[col], ((*pp)->cellerror == CELLERROR ? "ERROR" : "INVALID"));
+                    } else if ((*pp)->format) {
+                        char field[FBUFLEN];
+                        if (*((*pp)->format) == ctl('d')) {
+                            time_t v = (time_t) ((*pp)->v);
+                            strftime(field, sizeof(field), ((*pp)->format)+1, localtime(&v));
+                        } else
+                            format((*pp)->format, precision[col], (*pp)->v, field, sizeof(field));
+                        //FIXME
+                        unspecial(f, field, coldelim);
+                    } else {
+                        char field[FBUFLEN];
+                        (void) engformat(realfmt[col], fwidth[col], precision[col], (*pp) -> v, field, sizeof(field));
+                        //FIXME
+                        unspecial(f, field, coldelim);
+                    }
+                }
+                if ((s = (*pp)->label)) {
+                    unspecial(f, s, coldelim);
+                }
+            }
+        }
+    }
+
+        (void) fprintf(f,"\\end{tabular}\n%% ** end of SC-IM spreadsheet output\n");
+
+    if (fname != NULL) closefile(f, pid, 0);
+
+    if (! pid && verbose) sc_info("File \"%s\" written", fname);
+}
+
 /**
  * \brief TODO Document export_delim
  *
@@ -1448,9 +1515,6 @@ void export_delim(char * fname, char coldelim, int r0, int c0, int rn, int cn, i
             return;
         }
     }
-
-    struct ent * ent = go_end();
-    if (rn > ent->row) rn = ent->row;
 
     for (row = r0; row <= rn; row++) {
         for (pp = ATBL(tbl, row, col = c0); col <= cn; col++, pp++) {
