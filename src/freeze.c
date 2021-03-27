@@ -60,7 +60,7 @@ struct frange * freeze_ranges = NULL;
  * \param[in] tl_ent
  * \param[in] br_ent
  * \param[in] type
- * 
+ *
  * \return none
  */
 
@@ -70,6 +70,7 @@ void add_frange(struct ent * tl_ent, struct ent * br_ent, char type) {
     f->br = br_ent;
     f->type = type;
     f->next = freeze_ranges;
+    if (freeze_ranges != NULL) free(freeze_ranges);
     freeze_ranges = f;
 
     //sc_debug("freeze range: %d %d %d %d - type:%c", freeze_ranges->tl->row, freeze_ranges->tl->col, freeze_ranges->br->row, freeze_ranges->br->col, type);
