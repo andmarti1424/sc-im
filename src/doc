@@ -1092,6 +1092,7 @@ Commands for handling cell content:
                 special command can be entered.
     Zr          Zap (hides) the rows covered by the selected range.
     Zc          Zap (hides) the columns covered by the selected range.
+    f           Freeze the selected range
     Sr          Show rows that are hidden and that are covered by the selected
                 range.
     Sc          Show columns that are hidden and that are covered by the

@@ -2911,6 +2911,7 @@ int is_single_command (struct block * buf, long timeout) {
                  result = MOVEMENT_CMD;
         else if (buf->value == L'{' ||
                  buf->value == L'}' ||
+                 buf->value == L'f' ||
                  buf->value == L'|')
                  result = EDITION_CMD;
 

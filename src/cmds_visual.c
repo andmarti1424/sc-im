@@ -53,6 +53,7 @@
 #include "conf.h"
 #include "hide_show.h"
 #include "shift.h"
+#include "freeze.h"
 #include "yank.h"
 #include "history.h"
 #include "interp.h"
@@ -494,6 +495,17 @@ void do_visualmode(struct block * buf) {
         copy_to_undostruct(r->tlrow, r->tlcol, r->brrow, r->brcol, 'a');
         end_undo_action();
 #endif
+        cmd_multiplier = 0;
+
+        exit_visualmode();
+        chg_mode('.');
+        ui_show_header();
+
+    // freeze a range
+    } else if (buf->value == L'f') {
+        add_frange(lookat(r->tlrow, r->tlcol), lookat(r->brrow, r->brcol), 'a');
+        center_hidden_rows = 0;
+        center_hidden_cols = 0;
         cmd_multiplier = 0;
 
         exit_visualmode();
