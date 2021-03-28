@@ -57,7 +57,7 @@
 #endif
 
 /**
- * \brief TODO Document open_ods()
+ * \brief open_ods() files
  *
  * \param[in] fname
  * \param[in] encoding
@@ -133,6 +133,7 @@ int open_ods(char * fname, char * encoding) {
     char * strtype = NULL;
     char * value = NULL;
     char * strf;
+    char * value_type = NULL;
 
     // here traverse table content
     while (cur_node != NULL) {
@@ -145,15 +146,15 @@ int open_ods(char * fname, char * encoding) {
 
             while (child_node != NULL) {
                c++;
-               if (xmlGetProp(child_node, (xmlChar *) "value-type") == NULL) { child_node = child_node->next; continue; };
+               if ((value_type = (char *) xmlGetProp(child_node, (xmlChar *) "value-type")) == NULL) { child_node = child_node->next; continue; };
                // each of these is table-cell (a column)
 
-               //sc_debug("node name: %s", child_node->name);
-               //sc_debug("type: %s", (char *) xmlGetProp(child_node, (xmlChar *) "value-type")); // type
-               strtype = (char *) xmlGetProp(child_node, (xmlChar *) "value-type"); // type
+               strtype = value_type; // type
 
                //if (!strcmp(strtype, "time") //get time-value
+               //TODO
                //if (!strcmp(strtype, "date") //get date-value
+               //TODO
                if (!strcmp(strtype, "float")) {
                    char * formula = (char *) xmlGetProp(child_node, (xmlChar *) "formula");
                    if (formula != NULL) {
@@ -198,24 +199,30 @@ int open_ods(char * fname, char * encoding) {
                        strcpy(formula, strf);
                        free(strf);
                        swprintf(line_interp, FBUFLEN, L"let %s%d=%s", coltoa(c), r, formula);
+                       xmlFree(formula);
+                       formula = NULL;
                    } else {
-                       //value = (char *) xmlNodeGetContent(child_node->xmlChildrenNode);
                        value = (char *) xmlGetProp(child_node, (xmlChar *) "value"); // type
-                       //sc_debug("value: %s", value);
                        double l = atof((char *) value);
                        swprintf(line_interp, FBUFLEN, L"let %s%d=%.15f", coltoa(c), r, l);
+                       xmlFree(value);
+                       value = NULL;
                    }
                    send_to_interp(line_interp);
                } else if (!strcmp(strtype, "string") && !strcmp((char *) child_node->xmlChildrenNode->name, "p")) {
                    strvalue = (char *) xmlNodeGetContent(child_node->xmlChildrenNode);
-                   //sc_debug("string: %s", strvalue);
                    st = str_replace (strvalue, "\"", "''");
                    clean_carrier(st); // we handle padding
                    swprintf(line_interp, FBUFLEN, L"label %s%d=\"%s\"", coltoa(c), r, st);
                    send_to_interp(line_interp);
                    free(st);
+                   xmlFree(strvalue);
+                   strvalue = NULL;
                }
                child_node = child_node->next;
+
+               xmlFree(value_type);
+               value_type = NULL;
             }
         }
         cur_node = cur_node->next; // forward until reach table
