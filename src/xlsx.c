@@ -214,6 +214,7 @@ void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) 
             style = (char *) xmlGetProp(child_node, (xmlChar *) "s");    // style
             char * fmtId = style == NULL ? NULL : get_xlsx_styles(doc_styles, atoi(style)); // numfmtId by style number
             char * numberFmt = NULL;
+            char * shared = NULL;
             if (fmtId != NULL && atoi(fmtId) != 0) {
                 numberFmt = get_xlsx_number_format_by_id(doc_styles, atoi(fmtId));
             }
@@ -301,7 +302,7 @@ void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) 
                     if (get_conf_int("xlsx_readformulas") &&
                         // dont handle shared formulas right now
                         ! (xmlHasProp(child_node->xmlChildrenNode, (xmlChar *) "t") &&
-                        ! strcmp((char *) xmlGetProp(child_node->xmlChildrenNode, (xmlChar *) "t"), "shared"))
+                        ! strcmp((shared = (char *) xmlGetProp(child_node->xmlChildrenNode, (xmlChar *) "t")), "shared"))
                     ) {
                         char * formula = (char *) child_node->xmlChildrenNode->xmlChildrenNode->content;
                         char * strf;
@@ -348,6 +349,7 @@ void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) 
             xmlFree(fmtId);
             xmlFree(style);
             xmlFree(numberFmt);
+            xmlFree(shared);
 
             child_node = child_node->next;
             xmlFree(col);
@@ -445,12 +447,23 @@ int open_xlsx(char * fname, char * encoding) {
             while (cur_node != NULL && strcmp((char *) cur_node->name,"sheets"))
                 cur_node = cur_node->next;
             cur_node = cur_node->xmlChildrenNode;
-            while (cur_node != NULL && cur_node->next != NULL && strcmp((char *) xmlGetProp(cur_node, (xmlChar *) "name"), get_conf_value("sheet")))
-                cur_node = cur_node->next;
-            if ( ! strcmp((char *)xmlGetProp(cur_node, (xmlChar *) "name"),get_conf_value("sheet")) ){
-                snprintf(namebuf,30,"xl/worksheets/sheet%s.xml",xmlGetProp(cur_node, (xmlChar *) "sheetId"));
+
+            char * sheet_name = NULL;
+            while (cur_node != NULL && cur_node->next != NULL && sheet_name == NULL) {
+                sheet_name = (char *) xmlGetProp(cur_node, (xmlChar *) "name");
+                if (strcmp(sheet_name, get_conf_value("sheet"))) {
+                    xmlFree(sheet_name);
+                    sheet_name = NULL;
+                    cur_node = cur_node->next;
+                }
+            }
+            if (sheet_name != NULL){
+                char * sheet_id = (char *) xmlGetProp(cur_node, (xmlChar *) "sheetId");
+                snprintf(namebuf,30,"xl/worksheets/sheet%s.xml", sheet_id);
                 name = namebuf;
                 found = 1;
+                xmlFree(sheet_id);
+                xmlFree(sheet_name);
             }
             xmlFreeDoc(sheet_search);
             if (wb_strings != NULL) free(wb_strings);
@@ -469,6 +482,7 @@ int open_xlsx(char * fname, char * encoding) {
         // select sheet1 if none specified
         name = "xl/worksheets/sheet1.xml";
     }
+
     //open sheet
     zf = zip_fopen(za, name, ZIP_FL_UNCHANGED);
     if ( ! zf ) {
