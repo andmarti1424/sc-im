@@ -298,7 +298,11 @@ void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) 
                 child_node->xmlChildrenNode != NULL && ! strcmp((char *) child_node->xmlChildrenNode->name, "f")) {
 
                     // handle the formula if that is whats desidered!!
-                    if (get_conf_int("xlsx_readformulas")) {
+                    if (get_conf_int("xlsx_readformulas") &&
+                        // dont handle shared formulas right now
+                        ! (xmlHasProp(child_node->xmlChildrenNode, (xmlChar *) "t") &&
+                        ! strcmp((char *) xmlGetProp(child_node->xmlChildrenNode, (xmlChar *) "t"), "shared"))
+                    ) {
                         char * formula = (char *) child_node->xmlChildrenNode->xmlChildrenNode->content;
                         char * strf;
 
