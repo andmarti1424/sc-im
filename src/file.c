@@ -731,7 +731,7 @@ sc_readfile_result readfile(char * fname, int eraseflg) {
         return SC_READFILE_SUCCESS;
 
     // If file is an ODS file, we import it
-    } else if (len > 5 && ! strcasecmp( & fname[len-4], ".ods")){
+    } else if (len > 4 && ! strcasecmp( & fname[len-4], ".ods")){
         #ifndef ODS
         sc_error("ODS import support not compiled in");
         #else

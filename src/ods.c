@@ -39,7 +39,7 @@
  * \file xlsx.c
  * \author Andrés Martinelli <andmarti@gmail.com>
  * \date 2021-03-27
- * \brief TODO Write a brief file description.
+ * \brief file that contains the functions to support ods file import
  *
  * \details ods import requires:
  * - libzip-dev
@@ -54,8 +54,8 @@
 #include "sc.h"
 #include "utils/string.h"
 #include <libxml/parser.h>
-//#include <libxml/tree.h>
 #endif
+
 /**
  * \brief TODO Document open_ods()
  *
@@ -66,6 +66,7 @@
  */
 
 int open_ods(char * fname, char * encoding) {
+#ifdef ODS
     struct zip * za;
     struct zip_file * zf;
     struct zip_stat sb_content;
@@ -134,7 +135,6 @@ int open_ods(char * fname, char * encoding) {
     char * strf;
 
     // here traverse table content
-    //while (cur_node != NULL && strcmp((char *) cur_node->name, "table-row")) cur_node = cur_node->next; // forward until reach table
     while (cur_node != NULL) {
         if (! strcmp((char *) cur_node->name, "table-row")) {
             // we are inside a table-row
@@ -172,8 +172,7 @@ int open_ods(char * fname, char * encoding) {
                        strf = str_replace (formula, "]","");
                        strcpy(formula, strf);
                        free(strf);
-                       // we take some excel common function and adds a @ to them
-                       // we replace count sum avg with @count, @sum, @prod, @avg, @min, @max
+                       // we take some common function and adds a @ to them
                        strf = str_replace (formula, "COUNT","@COUNT");
                        strcpy(formula, strf);
                        free(strf);
@@ -223,15 +222,6 @@ int open_ods(char * fname, char * encoding) {
     }
     int_deleterow(currow, 1); /* delete the first row */
 
-
-    //char * style = NULL;
-    //char * style = (char *) xmlGetProp(child_node, (xmlChar *) "s");    // style
-
-
-
-
-
-
     // free the document
     xmlFreeDoc(doc);
 
@@ -245,6 +235,6 @@ int open_ods(char * fname, char * encoding) {
         sc_error("cannot close zip archive `%s'", fname);
         return -1;
     }
-
+#endif
     return 0;
 }
