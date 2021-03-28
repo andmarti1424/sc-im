@@ -73,6 +73,7 @@
 #include "xmalloc.h"
 #include "y.tab.h"
 #include "xlsx.h"
+#include "ods.h"
 #include "xls.h"
 #include "tui.h"
 
@@ -723,6 +724,18 @@ sc_readfile_result readfile(char * fname, int eraseflg) {
         sc_error("XLSX import support not compiled in");
         #else
         open_xlsx(fname, "UTF-8");
+        strcpy(curfile, fname);
+        modflg = 0;
+        #endif
+        loading = 0;
+        return SC_READFILE_SUCCESS;
+
+    // If file is an ODS file, we import it
+    } else if (len > 5 && ! strcasecmp( & fname[len-4], ".ods")){
+        #ifndef ODS
+        sc_error("ODS import support not compiled in");
+        #else
+        open_ods(fname, "UTF-8");
         strcpy(curfile, fname);
         modflg = 0;
         #endif
