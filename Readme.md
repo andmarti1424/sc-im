@@ -45,6 +45,7 @@ SC-IM stands for Spreadsheet Calculator Improvised. :-)
   - `bison` or `yacc`
   - `gcc`
   - `make`
+  - `pkg-config` and `which` (for make to do its job)
 
 * Optionals:
 
