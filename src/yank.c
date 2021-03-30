@@ -52,6 +52,7 @@
 #include "stdlib.h"
 #include "marks.h"
 #include "cmds.h"
+#include "yank.h"
 #include "dep_graph.h"
 #include "xmalloc.h" // for scxfree
 
@@ -67,6 +68,7 @@ extern struct ent * back_col(int arg);
 int yank_arg;                 // number of rows and columns yanked. Used for commands like `4yr`
 char type_of_yank;            // yank type. c=col, r=row, a=range, e=cell, '\0'=no yanking
 static struct ent * yanklist;
+struct ent * yanklist_tail;   // so we can always add ents at the end of the list easily
 
 /**
  * \brief TODO Document init_yanklist()
@@ -75,8 +77,9 @@ static struct ent * yanklist;
  */
 
 void init_yanklist() {
-    type_of_yank = '\0';
+    type_of_yank = YANK_NULL;
     yanklist = NULL;
+    yanklist_tail = NULL;
 }
 
 /**
@@ -119,24 +122,8 @@ void free_yanklist () {
     }
 
     yanklist = NULL;
+    yanklist_tail = NULL;
     return;
-}
-
-/**
- * \brief Count and return number of entries in the yanklist
- *
- * \return number of yanklist entries
- */
-
-int count_yank_ents() {
-    int i = 0;
-
-    struct ent * r = yanklist;
-    while (r != NULL) {
-        i++;
-        r = r->next;
-    }
-    return i;
 }
 
 /**
@@ -167,20 +154,17 @@ void add_ent_to_yanklist(struct ent * item) {
     (i_ent)->row = item->row;
     (i_ent)->col = item->col;
 
-    // If yanklist is empty, insert at the beginning
+   // If yanklist is empty, insert at the beginning
     if (yanklist == NULL) {
         yanklist = i_ent;
+        yanklist_tail = i_ent;
         return;
     }
 
     // If yanklist is NOT empty, insert at the end
-    struct ent * r = yanklist;
-    struct ent * ant;
-    while (r != NULL) {
-        ant = r;
-        r = r->next;
-    }
-    ant->next = i_ent;
+    // insert at the end
+    yanklist_tail->next = i_ent;
+    yanklist_tail = i_ent;
     return;
 }
 
@@ -210,9 +194,11 @@ void yank_area(int tlrow, int tlcol, int brrow, int brcol, char type, int arg) {
             struct ent * elm = *ATBL(tbl, r, c);
 
             // Important: each 'ent' element keeps the corresponding row and col
-            if (elm == NULL) elm = lookat(r, c);
 
-            add_ent_to_yanklist(elm);
+            //if (elm == NULL) elm = lookat(r, c);
+            //why create an empty ent where is not one?
+            //better this:
+            if (elm != NULL) add_ent_to_yanklist(elm);
         }
     return;
 }
@@ -242,7 +228,7 @@ void yank_area(int tlrow, int tlcol, int brrow, int brcol, char type, int arg) {
  */
 
 int paste_yanked_ents(int above, int type_paste) {
-    if (! count_yank_ents()) return 0;
+    if (yanklist == NULL) return 0;
 
     struct ent * yl = yanklist;
     struct ent * yll = yl;
@@ -254,22 +240,22 @@ int paste_yanked_ents(int above, int type_paste) {
     create_undo_action();
 #endif
 
-    if (type_of_yank == 's') {                               // paste a range that was yanked in the sort function
+    if (type_of_yank == YANK_SORT) {                              // paste a range that was yanked in the sort function
         diffr = 0;
         diffc = curcol - yl->col;
         ignorelock = 1;
 
-    } else if (type_of_yank == 'a' || type_of_yank == 'e') { // paste cell or range
+    } else if (type_of_yank == YANK_RANGE || type_of_yank == YANK_CELL) { // paste cell or range
         diffr = currow - yl->row;
         diffc = curcol - yl->col;
 
-    } else if (type_of_yank == 'r') {                        // paste row
+    } else if (type_of_yank == YANK_ROW) {                        // paste row
         int c = yank_arg;
 #ifdef UNDO
-        copy_to_undostruct(currow + ! above, 0, currow + ! above - 1 + yank_arg, maxcol, 'd');
+        copy_to_undostruct(currow + ! above, 0, currow + ! above - 1 + yank_arg, maxcol, UNDO_DEL);
 #endif
         while (c--) above ? insert_row(0) : insert_row(1);
-        if (! above) currow = forw_row(1)->row;              // paste below
+        if (! above) currow = forw_row(1)->row;                   // paste below
         diffr = currow - yl->row;
         diffc = yl->col;
         fix_marks(yank_arg, 0, currow, maxrow, 0, maxcol);
@@ -277,12 +263,12 @@ int paste_yanked_ents(int above, int type_paste) {
         save_undo_range_shift(yank_arg, 0, currow, 0, currow - 1 + yank_arg, maxcol);
 #endif
 
-    } else if (type_of_yank == 'c') {                        // paste col
+    } else if (type_of_yank == YANK_COL) {                        // paste col
         int c = yank_arg;
 #ifdef UNDO
-        copy_to_undostruct(0, curcol + above, maxrow, curcol + above - 1 + yank_arg, 'd');
+        copy_to_undostruct(0, curcol + above, maxrow, curcol + above - 1 + yank_arg, UNDO_DEL);
 #endif
-        while (c--) above ? insert_col(1) : insert_col(0);   // insert cols to the right if above or to the left
+        while (c--) above ? insert_col(1) : insert_col(0);        // insert cols to the right if above or to the left
         diffr = yl->row;
         diffc = curcol - yl->col;
         fix_marks(0, yank_arg, 0, maxrow, curcol, maxcol);
@@ -291,26 +277,26 @@ int paste_yanked_ents(int above, int type_paste) {
 #endif
     }
 
-    // first check if there are any locked cells
+    // first check if there are any locked cells over destination
     // if so, just return
-    if (type_of_yank == 'a' || type_of_yank == 'e') {
+    if (type_of_yank == YANK_RANGE || type_of_yank == YANK_CELL) {
         while (yll != NULL) {
             int r = yll->row + diffr;
             int c = yll->col + diffc;
             checkbounds(&r, &c);
             if (any_locked_cells(yll->row + diffr, yll->col + diffc, yll->row + diffr, yll->col + diffc))
+                // TODO: dismiss UNDO here
                 return -1;
             yll = yll->next;
         }
     }
 
     // otherwise continue
-    // por cada ent en yanklist
+    // for each ent in yanklist
     while (yl != NULL) {
 
-
 #ifdef UNDO
-        copy_to_undostruct(yl->row + diffr, yl->col + diffc, yl->row + diffr, yl->col + diffc, 'd');
+        copy_to_undostruct(yl->row + diffr, yl->col + diffc, yl->row + diffr, yl->col + diffc, UNDO_DEL);
 
 
         // save graph dependencies as well
@@ -318,12 +304,12 @@ int paste_yanked_ents(int above, int type_paste) {
         ents_that_depends_on_range(yl->row + diffr, yl->col + diffc, yl->row + diffr, yl->col + diffc);
         if (deps != NULL) {
             for (i = 0; i < deps->vf; i++)
-                copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'd');
+                copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, UNDO_DEL);
         }
 #endif
 
         // here we delete current content of "destino" ent
-        if (type_paste == 'a' || type_paste == 's')
+        if (type_paste == YANK_RANGE || type_paste == YANK_SORT)
             erase_area(yl->row + diffr, yl->col + diffc, yl->row + diffr, yl->col + diffc, ignorelock, 0);
 
         /*struct ent **pp = ATBL(tbl, yl->row + diffr, yl->col + diffc);
@@ -334,13 +320,13 @@ int paste_yanked_ents(int above, int type_paste) {
 
         struct ent * destino = lookat(yl->row + diffr, yl->col + diffc);
 
-        if (type_paste == 'a' || type_paste == 's') {
+        if (type_paste == YANK_RANGE || type_paste == YANK_SORT) {
             (void) copyent(destino, yl, 0, 0, 0, 0, 0, 0, 0);
-        } else if (type_paste == 'f') {
+        } else if (type_paste == YANK_FORMAT) {
             (void) copyent(destino, yl, 0, 0, 0, 0, 0, 0, 'f');
-        } else if (type_paste == 'v') {
+        } else if (type_paste == YANK_VALUE) {
             (void) copyent(destino, yl, 0, 0, 0, 0, 0, 0, 'v');
-        } else if (type_paste == 'c') {
+        } else if (type_paste == YANK_REF) {
             (void) copyent(destino, yl, diffr, diffc, 0, 0, maxrows, maxcols, 'c');
         }
 
@@ -354,14 +340,14 @@ int paste_yanked_ents(int above, int type_paste) {
         }
 
 #ifdef UNDO
-        copy_to_undostruct(yl->row + diffr, yl->col + diffc, yl->row + diffr, yl->col + diffc, 'a');
+        copy_to_undostruct(yl->row + diffr, yl->col + diffc, yl->row + diffr, yl->col + diffc, UNDO_ADD);
 
         // store dependencies after the change as well
         // added for #244 - 22/03/2018
         if (deps != NULL) {
             for (i = 0; i < deps->vf; i++) {
                 EvalJustOneVertex(deps[i].vp, deps[i].vp->row, deps[i].vp->col, 0);
-                copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'a');
+                copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, UNDO_ADD);
             }
         }
 #endif

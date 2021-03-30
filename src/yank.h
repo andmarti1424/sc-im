@@ -44,12 +44,19 @@
 
 #include "sc.h"
 
-extern struct ent * yanklist;
+#define YANK_COL    'c'
+#define YANK_ROW    'r'
+#define YANK_RANGE  'a'
+#define YANK_CELL   'e'
+#define YANK_SORT   's'
+#define YANK_NULL   '\0'
+#define YANK_FORMAT 'f'
+#define YANK_VALUE  'v'
+#define YANK_REF    'c'
 
 void init_yanklist();
 struct ent * get_yanklist();
 void free_yanklist ();
-int count_yank_ents();
 void add_ent_to_yanklist(struct ent * item);
 void yank_area(int tlrow, int tlcol, int brrow, int brcol, char c, int arg);
 int paste_yanked_ents(int above, int type_paste);

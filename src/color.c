@@ -397,7 +397,7 @@ void color_cell(int r, int c, int rf, int cf, char * str) {
 
                 #ifdef UNDO
                 create_undo_action();
-                copy_to_undostruct(i, j, i, j, 'd');
+                copy_to_undostruct(i, j, i, j, UNDO_DEL);
                 #endif
             }
 
@@ -448,7 +448,7 @@ void color_cell(int r, int c, int rf, int cf, char * str) {
 
             if (! loading) {
                 #ifdef UNDO
-                copy_to_undostruct(i, j, i, j, 'a');
+                copy_to_undostruct(i, j, i, j, UNDO_ADD);
                 end_undo_action();
                 #endif
             }
@@ -496,7 +496,7 @@ void unformat(int r, int c, int rf, int cf) {
             if ( (n = *ATBL(tbl, i, j)) && n->ucolor != NULL) {
                 if (! loading) {
                     #ifdef UNDO
-                    copy_to_undostruct(i, j, i, j, 'd');
+                    copy_to_undostruct(i, j, i, j, UNDO_DEL);
                     #endif
                 }
 
@@ -505,7 +505,7 @@ void unformat(int r, int c, int rf, int cf) {
 
                 if (! loading) {
                     #ifdef UNDO
-                    copy_to_undostruct(i, j, i, j, 'a');
+                    copy_to_undostruct(i, j, i, j, UNDO_ADD);
                     #endif
                 }
             }

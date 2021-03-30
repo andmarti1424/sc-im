@@ -605,7 +605,7 @@ void do_normalmode(struct block * buf) {
                         n = lookat(currow, c1);
                     }
 #ifdef UNDO
-                    copy_to_undostruct(currow, c1, currow, c1, 'd');
+                    copy_to_undostruct(currow, c1, currow, c1, UNDO_DEL);
 #endif
                     copyent(n, p, currow - get_mark(buf->pnext->value)->row, c1 - get_mark(buf->pnext->value)->col, 0, 0, maxrow, maxcol, 0);
 
@@ -616,7 +616,7 @@ void do_normalmode(struct block * buf) {
                     if (n->expr) EvalJustOneVertex(n, n->row, n->col, 1);
 
 #ifdef UNDO
-                    copy_to_undostruct(currow, c1, currow, c1, 'a');
+                    copy_to_undostruct(currow, c1, currow, c1, UNDO_ADD);
 #endif
 
                     // added for #244 - 22/03/2018
@@ -624,11 +624,11 @@ void do_normalmode(struct block * buf) {
                     if (deps != NULL) {
                         for (i = 0; i < deps->vf; i++) {
 #ifdef UNDO
-                            copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'd');
+                            copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, UNDO_DEL);
 #endif
                             EvalJustOneVertex(deps[i].vp, deps[i].vp->row, deps[i].vp->col, 0);
 #ifdef UNDO
-                            copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'a');
+                            copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, UNDO_ADD);
 #endif
                             }
                     }
@@ -1071,11 +1071,11 @@ void do_normalmode(struct block * buf) {
             else if (buf->value == L'|') swprintf(interp_line, BUFFERSIZE, L"center %s", v_name(r, c));
             if (p != -1) swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L":%s", v_name(rf, cf));
 #ifdef UNDO
-            copy_to_undostruct(r, c, rf, cf, 'd');
+            copy_to_undostruct(r, c, rf, cf, UNDO_DEL);
 #endif
             send_to_interp(interp_line);
 #ifdef UNDO
-            copy_to_undostruct(r, c, rf, cf, 'a');
+            copy_to_undostruct(r, c, rf, cf, UNDO_ADD);
             end_undo_action();
 #endif
             cmd_multiplier = 0;
@@ -1125,11 +1125,11 @@ void do_normalmode(struct block * buf) {
                         continue;
                     } else if (p->flags & is_valid) {
 #ifdef UNDO
-                        copy_to_undostruct(r, c, r, c, 'd');
+                        copy_to_undostruct(r, c, r, c, UNDO_DEL);
 #endif
                         p->v += buf->value == L'+' ? (double) arg : - 1 * (double) arg;
 #ifdef UNDO
-                        copy_to_undostruct(r, c, r, c, 'a');
+                        copy_to_undostruct(r, c, r, c, UNDO_ADD);
 #endif
                         if (mf == modflg) modflg++; // increase just one time
                     }

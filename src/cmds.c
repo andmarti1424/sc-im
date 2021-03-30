@@ -219,7 +219,7 @@ void deletecol(int col, int mult) {
     }
 #ifdef UNDO
     create_undo_action();
-    copy_to_undostruct(0, col, maxrow, col - 1 + mult, 'd');
+    copy_to_undostruct(0, col, maxrow, col - 1 + mult, UNDO_DEL);
     save_undo_range_shift(0, -mult, 0, col, maxrow, col - 1 + mult);
 
     // here we save in undostruct, all the ents that depends on the deleted one (before change)
@@ -227,7 +227,7 @@ void deletecol(int col, int mult) {
     int i;
     ents_that_depends_on_range(0, col, maxrow, col+mult);
     for (i = 0; deps != NULL && i < deps->vf; i++)
-        copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'd');
+        copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, UNDO_DEL);
     for (i=col; i < col + mult; i++)
         add_undo_col_format(i, 'R', fwidth[i], precision[i], realfmt[i]);
 #endif
@@ -245,7 +245,7 @@ void deletecol(int col, int mult) {
 #ifdef UNDO
     // here we save in undostruct, all the ents that depends on the deleted one (after change)
     for (i = 0; deps != NULL && i < deps->vf; i++) // TODO here save just ents that are off the shifted range
-        copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'a');
+        copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, UNDO_ADD);
 
     if (deps != NULL) free(deps);
     deps = NULL;
@@ -895,7 +895,7 @@ void deleterow(int row, int mult) {
     }
 #ifdef UNDO
     create_undo_action();
-    copy_to_undostruct(row, 0, row + mult - 1, maxcol, 'd');
+    copy_to_undostruct(row, 0, row + mult - 1, maxcol, UNDO_DEL);
     save_undo_range_shift(-mult, 0, row, 0, row - 1 + mult, maxcol);
 
     // here we save in undostruct, all the ents that depends on the deleted one (before change)
@@ -903,7 +903,7 @@ void deleterow(int row, int mult) {
     int i;
     ents_that_depends_on_range(row, 0, row + mult - 1, maxcol);
     for (i = 0; deps != NULL && i < deps->vf; i++)
-        copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'd');
+        copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, UNDO_DEL);
 #endif
 
     fix_marks(-mult, 0, row + mult - 1, maxrow, 0, maxcol);
@@ -919,7 +919,7 @@ void deleterow(int row, int mult) {
 #ifdef UNDO
     // here we save in undostruct, all the ents that depends on the deleted one (after the change)
     for (i = 0; deps != NULL && i < deps->vf; i++) // TODO here save just ents that are off the shifted range
-        copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'a');
+        copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, UNDO_ADD);
 
     if (deps != NULL) free(deps);
     deps = NULL;
@@ -1171,7 +1171,7 @@ void del_selected_cells() {
 
     #ifdef UNDO
     create_undo_action();
-    copy_to_undostruct(tlrow, tlcol, brrow, brcol, 'd');
+    copy_to_undostruct(tlrow, tlcol, brrow, brcol, UNDO_DEL);
 
     // here we save in undostruct, all the ents that depends on the deleted one (before change)
     extern struct ent_ptr * deps;
@@ -1180,7 +1180,7 @@ void del_selected_cells() {
     if (deps != NULL) {
         n = deps->vf;
         for (i = 0; i < n; i++)
-            copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'd');
+            copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, UNDO_DEL);
     }
     #endif
 
@@ -1194,7 +1194,7 @@ void del_selected_cells() {
     #ifdef UNDO
     // here we save in undostruct, all the ents that depends on the deleted one (after the change)
     for (i = 0; i < n; i++)
-        copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, 'a');
+        copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, UNDO_ADD);
 
     if (deps != NULL) free(deps);
     deps = NULL;
@@ -1202,7 +1202,7 @@ void del_selected_cells() {
 
 
     #ifdef UNDO
-    copy_to_undostruct(tlrow, tlcol, brrow, brcol, 'a');
+    copy_to_undostruct(tlrow, tlcol, brrow, brcol, UNDO_ADD);
     end_undo_action();
     #endif
 
@@ -2030,7 +2030,7 @@ void valueize_area(int sr, int sc, int er, int ec) {
                 continue;
             }
     #ifdef UNDO
-            copy_to_undostruct(r, c, r, c, 'd');
+            copy_to_undostruct(r, c, r, c, UNDO_DEL);
     #endif
             if (p && p->expr) {
                 efree(p->expr);
@@ -2064,7 +2064,7 @@ void valueize_area(int sr, int sc, int er, int ec) {
             }
 
     #ifdef UNDO
-            copy_to_undostruct(r, c, r, c, 'a');
+            copy_to_undostruct(r, c, r, c, UNDO_ADD);
     #endif
         }
     }
@@ -2174,7 +2174,7 @@ int fsum() {
 
 #ifdef UNDO
     create_undo_action();
-    copy_to_undostruct(currow, curcol, currow, curcol, 'd');
+    copy_to_undostruct(currow, curcol, currow, curcol, UNDO_DEL);
 #endif
     if (r > 0 && (*ATBL(tbl, r-1, c) != NULL) && (*ATBL(tbl, r-1, c))->flags & is_valid) {
         for (r = currow-1; r >= 0; r--) {
@@ -2211,7 +2211,7 @@ int fsum() {
     if ((currow != r || curcol != c) && wcslen(interp_line)) {
         send_to_interp(interp_line);
 #ifdef UNDO
-        copy_to_undostruct(currow, curcol, currow, curcol, 'a');
+        copy_to_undostruct(currow, curcol, currow, curcol, UNDO_ADD);
         end_undo_action();
 #endif
     }
@@ -2287,7 +2287,7 @@ int fcopy(char * action) {
     }
 #ifdef UNDO
     create_undo_action();
-    copy_to_undostruct(ri, ci, rf, cf, 'd');
+    copy_to_undostruct(ri, ci, rf, cf, UNDO_DEL);
 #endif
 
     if (! strcmp(action, "")) {
@@ -2327,7 +2327,7 @@ int fcopy(char * action) {
     }
 
 #ifdef UNDO
-    copy_to_undostruct(ri, ci, rf, cf, 'a');
+    copy_to_undostruct(ri, ci, rf, cf, UNDO_ADD);
     end_undo_action();
 #endif
 
@@ -2366,11 +2366,11 @@ int pad(int n, int r1, int c1, int r2, int c2) {
             //p = lookat(r, c);
             if ((p = *ATBL(tbl, r, c)) != NULL) {
 #ifdef UNDO
-                copy_to_undostruct(r, c, r, c, 'd');
+                copy_to_undostruct(r, c, r, c, UNDO_DEL);
 #endif
                 p->pad = n;
 #ifdef UNDO
-                copy_to_undostruct(r, c, r, c, 'a');
+                copy_to_undostruct(r, c, r, c, UNDO_ADD);
 #endif
             }
             modflg++;

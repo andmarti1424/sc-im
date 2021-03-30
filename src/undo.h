@@ -42,6 +42,9 @@
  * \brief Header file for undo.c
  */
 
+#define UNDO_ADD 'a'
+#define UNDO_DEL 'd'
+
 struct undo {
     struct undo * p_ant;
     struct ent * added;

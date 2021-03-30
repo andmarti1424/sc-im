@@ -488,11 +488,11 @@ void do_visualmode(struct block * buf) {
         swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L":%s", v_name(r->brrow, r->brcol));
 #ifdef UNDO
         create_undo_action();
-        copy_to_undostruct(r->tlrow, r->tlcol, r->brrow, r->brcol, 'd');
+        copy_to_undostruct(r->tlrow, r->tlcol, r->brrow, r->brcol, UNDO_DEL);
 #endif
         send_to_interp(interp_line);
 #ifdef UNDO
-        copy_to_undostruct(r->tlrow, r->tlcol, r->brrow, r->brcol, 'a');
+        copy_to_undostruct(r->tlrow, r->tlcol, r->brrow, r->brcol, UNDO_ADD);
         end_undo_action();
 #endif
         cmd_multiplier = 0;
@@ -503,7 +503,7 @@ void do_visualmode(struct block * buf) {
 
     // freeze a range
     } else if (buf->value == L'f') {
-        add_frange(lookat(r->tlrow, r->tlcol), lookat(r->brrow, r->brcol), 'a');
+        add_frange(lookat(r->tlrow, r->tlcol), lookat(r->brrow, r->brcol), UNDO_ADD);
         center_hidden_rows = 0;
         center_hidden_cols = 0;
         cmd_multiplier = 0;
