@@ -391,7 +391,7 @@ void copy_to_undostruct (int row_desde, int col_desde, int row_hasta, int col_ha
             p = *ATBL(tbl, r, c);
             if (p == NULL) continue;
 
-            // here check that ent to add is not already in the list
+            /* here check that ent to add is not already in the list
             // if so, avoid to add a duplicate ent
             struct ent * lista = type == 'a' ? undo_item.added : undo_item.removed;
             repeated = 0;
@@ -403,8 +403,13 @@ void copy_to_undostruct (int row_desde, int col_desde, int row_hasta, int col_ha
                 lista = lista->next;
             }
             if (repeated) continue;
+            // is the above really neccesary? i believe its harmless to duplicate it.
+            // and no resources consuming..
+            */
 
             // not repeated - we malloc an ent and add it to list
+            // FIXME: improve this. ask memory for the whole range at once.
+            // do not malloc for every single cell in the range..
             struct ent * e = (struct ent *) malloc( (unsigned) sizeof(struct ent) );
             cleanent(e);
             copyent(e, lookat(r, c), 0, 0, 0, 0, 0, 0, 'u');

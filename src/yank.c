@@ -101,6 +101,8 @@ struct ent * get_yanklist() {
 void free_yanklist () {
     if (yanklist == NULL) return;
     int c;
+
+    // free each ent internally
     struct ent * r = yanklist;
     struct ent * e;
     while (r != NULL) {
@@ -111,7 +113,7 @@ void free_yanklist () {
         if (r->expr) efree(r->expr);
         if (r->ucolor) free(r->ucolor);
 
-        free(r);
+        //free(r);
         r = e;
     }
 
@@ -121,50 +123,33 @@ void free_yanklist () {
         colformat[c] = NULL;
     }
 
+    // free yanklist
+    free(yanklist);
     yanklist = NULL;
     yanklist_tail = NULL;
     return;
 }
 
 /**
- * \brief Add 'ent' element to the yanklist
+ * \brief Add an already alloc'ed 'ent' element to the yanklist
  *
  * \param[in] item 'ent' element to add to the yanklist
  * \return none
  */
 
 void add_ent_to_yanklist(struct ent * item) {
-    // Create and initialize the 'ent'
-    struct ent * i_ent = (struct ent *) malloc (sizeof(struct ent));
-    (i_ent)->label = (char *)0;
-    (i_ent)->row = 0;
-    (i_ent)->col = 0;
-    (i_ent)->flags = may_sync;
-    (i_ent)->expr = (struct enode *)0;
-    (i_ent)->v = (double) 0.0;
-    (i_ent)->format = (char *)0;
-    (i_ent)->cellerror = CELLOK;
-    (i_ent)->next = NULL;
-    (i_ent)->ucolor = NULL;
-    (i_ent)->pad = 0;
-
-    // Copy 'item' content to 'i_ent'
-    (void) copyent(i_ent, item, 0, 0, 0, 0, 0, 0, 0);
-
-    (i_ent)->row = item->row;
-    (i_ent)->col = item->col;
 
    // If yanklist is empty, insert at the beginning
     if (yanklist == NULL) {
-        yanklist = i_ent;
-        yanklist_tail = i_ent;
+        yanklist = item;
+        yanklist_tail = item;
         return;
     }
 
     // If yanklist is NOT empty, insert at the end
     // insert at the end
-    yanklist_tail->next = i_ent;
-    yanklist_tail = i_ent;
+    yanklist_tail->next = item;
+    yanklist_tail = item;
     return;
 }
 
@@ -185,20 +170,40 @@ void add_ent_to_yanklist(struct ent * item) {
 
 void yank_area(int tlrow, int tlcol, int brrow, int brcol, char type, int arg) {
     int r,c;
-    free_yanklist();
     type_of_yank = type;
     yank_arg = arg;
+    free_yanklist();
+
+    struct ent * e_ori;
+    // ask for memory to keep struct ent * for the whole range
+    struct ent * y_cells = (struct ent *) calloc((brrow-tlrow+1)*(brcol-tlcol+1), sizeof(struct ent));
 
     for (r = tlrow; r <= brrow; r++)
         for (c = tlcol; c <= brcol; c++) {
-            struct ent * elm = *ATBL(tbl, r, c);
+            e_ori = *ATBL(tbl, r, c);
+            if (e_ori != NULL) {
+                // Create and initialize the 'ent'
+                (y_cells)->label = (char *)0;
+                (y_cells)->row = 0;
+                (y_cells)->col = 0;
+                (y_cells)->flags = may_sync;
+                (y_cells)->expr = (struct enode *)0;
+                (y_cells)->v = (double) 0.0;
+                (y_cells)->format = (char *)0;
+                (y_cells)->cellerror = CELLOK;
+                (y_cells)->next = NULL;
+                (y_cells)->ucolor = NULL;
+                (y_cells)->pad = 0;
 
-            // Important: each 'ent' element keeps the corresponding row and col
+                // Copy 'e_ori' content to 'y_cells'
+                (void) copyent(y_cells, e_ori, 0, 0, 0, 0, 0, 0, 0);
 
-            //if (elm == NULL) elm = lookat(r, c);
-            //why create an empty ent where is not one?
-            //better this:
-            if (elm != NULL) add_ent_to_yanklist(elm);
+                // Important: each 'ent' element keeps the corresponding row and col
+                (y_cells)->row = e_ori->row;
+                (y_cells)->col = e_ori->col;
+
+                add_ent_to_yanklist(y_cells++);
+            }
         }
     return;
 }
@@ -284,9 +289,12 @@ int paste_yanked_ents(int above, int type_paste) {
             int r = yll->row + diffr;
             int c = yll->col + diffc;
             checkbounds(&r, &c);
-            if (any_locked_cells(yll->row + diffr, yll->col + diffc, yll->row + diffr, yll->col + diffc))
-                // TODO: dismiss UNDO here
+            if (any_locked_cells(yll->row + diffr, yll->col + diffc, yll->row + diffr, yll->col + diffc)) {
+#ifdef UNDO
+                dismiss_undo_item(NULL);
+#endif
                 return -1;
+            }
             yll = yll->next;
         }
     }
@@ -298,7 +306,6 @@ int paste_yanked_ents(int above, int type_paste) {
 #ifdef UNDO
         copy_to_undostruct(yl->row + diffr, yl->col + diffc, yl->row + diffr, yl->col + diffc, UNDO_DEL);
 
-
         // save graph dependencies as well
         // added for #244 - 22/03/2018
         ents_that_depends_on_range(yl->row + diffr, yl->col + diffc, yl->row + diffr, yl->col + diffc);
@@ -308,7 +315,7 @@ int paste_yanked_ents(int above, int type_paste) {
         }
 #endif
 
-        // here we delete current content of "destino" ent
+        // here we delete current content of "destino" ent.
         if (type_paste == YANK_RANGE || type_paste == YANK_SORT)
             erase_area(yl->row + diffr, yl->col + diffc, yl->row + diffr, yl->col + diffc, ignorelock, 0);
 

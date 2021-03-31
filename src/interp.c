@@ -2340,16 +2340,14 @@ void fill(struct ent *v1, struct ent *v2, double start, double inc) {
     if (minr < 0) minr = 0;
     if (minc < 0) minc = 0;
 
-    #ifdef UNDO
+#ifdef UNDO
     create_undo_action();
-    #endif
+    copy_to_undostruct(minr, minc, maxr, maxc, UNDO_DEL);
+#endif
 
     if (calc_order == BYROWS) {
         for (r = minr; r<=maxr; r++)
             for (c = minc; c<=maxc; c++) {
-                #ifdef UNDO
-                copy_to_undostruct(r, c, r, c, UNDO_DEL);
-                #endif
                 n = lookat(r, c);
                 if (n->flags&is_locked) continue;
                 (void) clearent(n);
@@ -2357,34 +2355,26 @@ void fill(struct ent *v1, struct ent *v2, double start, double inc) {
                 start += inc;
                 n->flags |= (is_changed|is_valid);
                 n->flags &= ~(iscleared);
-                #ifdef UNDO
-                copy_to_undostruct(r, c, r, c, UNDO_ADD);
-                #endif
             }
     }
     else if (calc_order == BYCOLS) {
         for (c = minc; c<=maxc; c++)
             for (r = minr; r<=maxr; r++) {
-                #ifdef UNDO
-                copy_to_undostruct(r, c, r, c, UNDO_DEL);
-                #endif
                 n = lookat(r, c);
                 (void) clearent(n);
                 n->v = start;
                 start += inc;
                 n->flags |= (is_changed|is_valid);
                 n->flags &= ~(iscleared);
-                #ifdef UNDO
-                copy_to_undostruct(r, c, r, c, UNDO_ADD);
-                #endif
             }
     }
     else {
         sc_error(" Internal error calc_order");
     }
-    #ifdef UNDO
+#ifdef UNDO
+    copy_to_undostruct(minr, minc, maxr, maxc, UNDO_ADD);
     end_undo_action();
-    #endif
+#endif
 }
 
 /**
@@ -2412,23 +2402,19 @@ void lock_cells(struct ent * v1, struct ent * v2) {
     if (minr < 0) minr = 0;
     if (minc < 0) minc = 0;
 
-    #ifdef UNDO
+#ifdef UNDO
     create_undo_action();
-    #endif
+    copy_to_undostruct(minr, minc, maxr, maxc, UNDO_DEL);
+#endif
     for (r = minr; r <= maxr; r++)
         for (c = minc; c <= maxc; c++) {
             n = lookat(r, c);
-    #ifdef UNDO
-            copy_to_undostruct(r, c, r, c, UNDO_DEL);
-    #endif
             n->flags |= is_locked;
-    #ifdef UNDO
-            copy_to_undostruct(r, c, r, c, UNDO_ADD);
-    #endif
         }
-    #ifdef UNDO
+#ifdef UNDO
+    copy_to_undostruct(minr, minc, maxr, maxc, UNDO_ADD);
     end_undo_action();
-    #endif
+#endif
 }
 
 /**
@@ -2456,23 +2442,19 @@ void unlock_cells(struct ent * v1, struct ent * v2) {
     if (minr < 0) minr = 0;
     if (minc < 0) minc = 0;
 
-    #ifdef UNDO
+#ifdef UNDO
     create_undo_action();
-    #endif
+    copy_to_undostruct(minr, minc, maxr, maxc, UNDO_DEL);
+#endif
     for (r = minr; r <= maxr; r++)
         for (c = minc; c <= maxc; c++) {
             n = lookat(r, c);
-    #ifdef UNDO
-            copy_to_undostruct(r, c, r, c, UNDO_DEL);
-    #endif
             n->flags &= ~is_locked;
-    #ifdef UNDO
-            copy_to_undostruct(r, c, r, c, UNDO_ADD);
-    #endif
         }
-    #ifdef UNDO
+#ifdef UNDO
+    copy_to_undostruct(minr, minc, maxr, maxc, UNDO_ADD);
     end_undo_action();
-    #endif
+#endif
 }
 
 /* set the numeric part of a cell */
@@ -2498,10 +2480,9 @@ void let(struct ent * v, struct enode * e) {
 
         // here we save in undostruct, all the ents that depends on the deleted one (before change)
         ents_that_depends_on_range(v->row, v->col, v->row, v->col);
-        if (deps != NULL) {
+        if (deps != NULL)
             for (i = 0; i < deps->vf; i++)
                 copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, UNDO_DEL);
-        }
     }
     #endif
     //if (getVertex(graph, lookat(v->row, v->col), 0) != NULL) {
@@ -2511,7 +2492,6 @@ void let(struct ent * v, struct enode * e) {
         // let C1 = F5 + A0
         // y en esta llamada a let estamos haciendo let F5 = F1 + F3
     //}
-
 
     double val;
     unsigned isconstant = constant(e);
@@ -2579,8 +2559,6 @@ void let(struct ent * v, struct enode * e) {
     if (!loading) {
         copy_to_undostruct(v->row, v->col, v->row, v->col, UNDO_ADD);
         // here we save in undostruct, all the ents that depends on the deleted one (after change)
-        if (deps != NULL) free(deps);
-        ents_that_depends_on_range(v->row, v->col, v->row, v->col);
         if (deps != NULL) {
             for (i = 0; i < deps->vf; i++)
                 copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, UNDO_ADD);
@@ -2611,18 +2589,17 @@ void slet(struct ent * v, struct enode * se, int flushdir) {
     extern struct ent_ptr * deps;
     int i;
     if (!loading) {
-    create_undo_action();
-    copy_to_undostruct(v->row, v->col, v->row, v->col, UNDO_DEL);
+        create_undo_action();
+        copy_to_undostruct(v->row, v->col, v->row, v->col, UNDO_DEL);
 
-    // here we save in undostruct, all the ents that depends on the deleted one (before change)
-    ents_that_depends_on_range(v->row, v->col, v->row, v->col);
-    for (i = 0; deps != NULL && i < deps->vf; i++)
-        copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, UNDO_DEL);
+        // here we save in undostruct, all the ents that depends on the deleted one (before change)
+        ents_that_depends_on_range(v->row, v->col, v->row, v->col);
+        for (i = 0; deps != NULL && i < deps->vf; i++)
+            copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, UNDO_DEL);
     }
     #endif
     // No debe borrarse el vertex. Ver comentario en LET
     //if (getVertex(graph, lookat(v->row, v->col), 0) != NULL) destroy_vertex(lookat(v->row, v->col));
-
 
     char * p;
     if (v->row == currow && v->col == curcol) cellassign = 1;
@@ -2677,17 +2654,15 @@ void slet(struct ent * v, struct enode * se, int flushdir) {
 
     #ifdef UNDO
     if (!loading) {
-    copy_to_undostruct(v->row, v->col, v->row, v->col, UNDO_ADD);
-    // here we save in undostruct, all the ents that depends on the deleted one (after change)
-    if (deps != NULL) free(deps);
-    ents_that_depends_on_range(v->row, v->col, v->row, v->col);
-    if (deps != NULL) {
-        for (i = 0; i < deps->vf; i++)
-            copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, UNDO_ADD);
-        free(deps);
-        deps = NULL;
-    }
-    end_undo_action();
+        copy_to_undostruct(v->row, v->col, v->row, v->col, UNDO_ADD);
+        // here we save in undostruct, all the ents that depends on the deleted one (after change)
+        if (deps != NULL) {
+            for (i = 0; i < deps->vf; i++)
+                copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, UNDO_ADD);
+            free(deps);
+            deps = NULL;
+        }
+        end_undo_action();
     }
     #endif
 
@@ -3382,13 +3357,11 @@ int dateformat(struct ent *v1, struct ent *v2, char * fmt) {
 
     #ifdef UNDO
     create_undo_action();
+    copy_to_undostruct(minr, minc, maxr, maxc, UNDO_DEL);
     #endif
     for (r = minr; r <= maxr; r++) {
         for (c = minc; c <= maxc; c++) {
             n = lookat(r, c);
-    #ifdef UNDO
-            copy_to_undostruct(r, c, r, c, UNDO_DEL);
-    #endif
             if ( locked_cell(n->row, n->col) || ! (n)->label ) continue;
 
             // free all ent content but its label
@@ -3409,16 +3382,13 @@ int dateformat(struct ent *v1, struct ent *v2, char * fmt) {
             sprintf(s, "%c", 'd');
             strcat(s, fmt);
             n->format = s;
-
-    #ifdef UNDO
-            copy_to_undostruct(r, c, r, c, UNDO_ADD);
-    #endif
         }
     }
-    modflg++; // increase just one time
     #ifdef UNDO
-    end_undo_action();
+        copy_to_undostruct(minr, minc, maxr, maxc, UNDO_DEL);
+        end_undo_action();
     #endif
+    modflg++; // increase just one time
     return 0;
 }
 

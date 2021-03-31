@@ -424,10 +424,9 @@ command:
                                   extern struct ent_ptr * deps;
                                   int i, n = 0;
                                   ents_that_depends_on_range($2.left.vp->row, $2.left.vp->col, $2.left.vp->row, $2.left.vp->col);
-                                  if (deps != NULL) {
+                                  if (deps != NULL)
                                       for (i = 0, n = deps->vf; i < n; i++)
                                           copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, UNDO_DEL);
-                                  }
                                   #endif
                                   if (getVertex(graph, lookat($2.left.vp->row, $2.left.vp->col), 0) != NULL) destroy_vertex(lookat($2.left.vp->row, $2.left.vp->col));
 
@@ -443,13 +442,11 @@ command:
 
                                   // clearing the value counts as a write, so run write triggers
                                   if (( $2.left.vp->trigger  ) && (($2.left.vp->trigger->flag & TRG_WRITE) == TRG_WRITE))
-                                      do_trigger($2.left.vp,TRG_WRITE);
+                                      do_trigger($2.left.vp, TRG_WRITE);
 
                                   #ifdef UNDO
                                   copy_to_undostruct($2.left.vp->row, $2.left.vp->col, $2.left.vp->row, $2.left.vp->col, UNDO_ADD);
                                   // here we save in undostruct, all the ents that depends on the deleted one (after change)
-                                  if (deps != NULL) free(deps);
-                                  ents_that_depends_on_range($2.left.vp->row, $2.left.vp->col, $2.left.vp->row, $2.left.vp->col);
                                   if (deps != NULL) {
                                       for (i = 0, n = deps->vf; i < n; i++)
                                           copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, UNDO_ADD);

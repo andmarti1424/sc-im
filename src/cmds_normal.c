@@ -621,20 +621,19 @@ void do_normalmode(struct block * buf) {
 
                     // added for #244 - 22/03/2018
                     ents_that_depends_on_range(n->row, n->col, n->row, n->col);
-                    if (deps != NULL) {
-                        for (i = 0; i < deps->vf; i++) {
+
 #ifdef UNDO
+                    if (deps != NULL)
+                        for (i = 0; i < deps->vf; i++)
                             copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, UNDO_DEL);
 #endif
-                            EvalJustOneVertex(deps[i].vp, deps[i].vp->row, deps[i].vp->col, 0);
+
+                    EvalJustOneVertex(deps[i].vp, deps[i].vp->row, deps[i].vp->col, 0);
 #ifdef UNDO
+                    if (deps != NULL)
+                        for (i = 0; i < deps->vf; i++)
                             copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, UNDO_ADD);
 #endif
-                            }
-                    }
-
-
-
 
                 }
 #ifdef UNDO
