@@ -1539,6 +1539,7 @@ void ui_mv_bottom_bar() {
  */
 #ifdef MOUSE
 void ui_handle_mouse(MEVENT event) {
+    if (curmode != NORMAL_MODE) return;
     int i, r = 0, c = 0;
     if ( event.x < RESCOL || ( get_conf_int("input_bar_bottom") && (event.y == 0 || event.y >= LINES - RESROW)) ||
        ( !get_conf_int("input_bar_bottom") && (event.y <= RESROW))) return;
