@@ -39,25 +39,25 @@
  * \file undo.c
  * \author Andrés Martinelli <andmarti@gmail.com>
  * \date 2017-07-18
- * \brief TODO Write a tbrief file description.
+ * \brief This file contains the main functions to support the undo/redo feature.
  */
 
-#ifdef UNDO
 /*
- * UNDO and REDO features works with an 'undo' struct list.
+ * UNDO and REDO feature works with an 'undo' struct list.
  * Which contains:
  *       p_ant: pointer to 'undo' struct. If NULL, this node is the first change
  *              for the session.
  *       struct ent * added: 'ent' elements added by the change
  *       struct ent * removed: 'ent' elements removed by the change
- *       struct ent * aux_ents: 'ent' elements that needs to be around, but out of tbl.
- *                               these are used to update formulas correctly, upon shift/deletion of ents.
  *       struct undo_range_shift * range_shift: range shifted by change
  *       row_hidded: integers list (int *) hidden rows on screen
  *       row_showed: integers list (int *) visible rows on screen
  *       col_hidded: integers list (int *) hidden columns on screen
  *       col_showed: integers list (int *) visible columns on screen
  *              NOTE: the first position of the lists contains (number of elements - 1) in the list
+ *       struct ent_ptr * allocations: since we alloc over added and removed
+ *              list in batches. we need to keep the first position in memory of each calloc.
+ *       int alloc_size: the number of batch allocations.
  *       struct undo_cols_format * cols_format: list of 'undo_col_info' elements used for
  *              undoing / redoing changes in columns format (fwidth, precision y realfmt)
  *       p_sig: pointer to 'undo' struct, If NULL, this node is the last change in
@@ -114,6 +114,8 @@
  * 1. undo of freeze / unfreeze command
  */
 
+#ifdef UNDO
+
 #include <stdlib.h>
 #include "undo.h"
 #include "macros.h"
@@ -142,15 +144,15 @@ static struct undo undo_item;
  *
  * \return none
  */
-
 void create_undo_action() {
     undo_item.added       = NULL;
     undo_item.removed     = NULL;
+    undo_item.allocations = NULL;
+    undo_item.alloc_size  = 0;
     undo_item.p_ant       = NULL;
     undo_item.p_sig       = NULL;
     undo_item.range_shift = NULL;
     undo_item.cols_format = NULL;
-    undo_item.aux_ents    = NULL;
 
     undo_item.row_hidded  = NULL;
     undo_item.row_showed  = NULL;
@@ -171,8 +173,8 @@ void create_undo_action() {
 void end_undo_action() {
     add_to_undolist(undo_item);
 
-    // in case we need to dismissed this undo_item!
-    if ((undo_item.added      == NULL && undo_item.aux_ents == NULL &&
+    // in case we need to dismiss this undo_item!
+    if ((undo_item.added      == NULL && undo_item.allocations == NULL &&
         undo_item.removed     == NULL && undo_item.range_shift == NULL &&
         undo_item.row_hidded  == NULL && undo_item.row_showed  == NULL &&
         undo_item.cols_format == NULL &&
@@ -208,7 +210,8 @@ void add_to_undolist(struct undo u) {
     // Add 'ent' elements
     ul->added = u.added;
     ul->removed = u.removed;
-    ul->aux_ents = u.aux_ents;
+    ul->allocations = u.allocations;
+    ul->alloc_size = u.alloc_size;
     ul->range_shift = u.range_shift;
     ul->cols_format = u.cols_format;
     ul->row_hidded = u.row_hidded;
@@ -223,6 +226,7 @@ void add_to_undolist(struct undo u) {
         ul->p_ant = undo_list;
 
         // go to end of list
+        // TODO we can improve this by keeping always the last pointer at hand
         while (undo_list->p_sig != NULL) undo_list = undo_list->p_sig;
 
         undo_list->p_sig = ul;
@@ -236,11 +240,10 @@ void add_to_undolist(struct undo u) {
 /**
  * \brief Dismiss current undo_item
  *
- * \details This function frees memory of a struct unto. It is used
- * in function free_undo_node for that purpose. But as well, this 
- * function shall be called instead of end_undo_action in case we want
- * to cancel a previous create_undo_action. If called for this purpose,
- * argument shall be NULL.
+ * \details This function frees memory of a struct unto. It is internally used
+ * by free_undo_node(). But as well, this function shall be called instead
+ * of end_undo_action in case we want to cancel a previous create_undo_action.
+ * If called for this purpose, argument shall be NULL.
  *
  * \param[in] ul
  *
@@ -248,32 +251,41 @@ void add_to_undolist(struct undo u) {
  */
 
 void dismiss_undo_item(struct undo * ul) {
-    struct ent * en;
-    struct ent * de;
 
     if (ul == NULL) ul = &undo_item;
 
+    // first free inside each added and removed ents
+    // (their labels, expressions, etc.
+    struct ent * en;
+    struct ent * de;
     en = ul->added;     // free added
     while (en != NULL) {
         de = en->next;
         clearent(en);
-        free(en);
+        //free(en); // do not free the struct * ent. thats get freed later in batches
         en = de;
     }
+
     en = ul->removed;   // free removed
     while (en != NULL) {
         de = en->next;
         clearent(en);
-        free(en);
+        //free(en); // do not free the struct * ent. thats get freed below in batches
         en = de;
     }
-    en = ul->aux_ents; // free aux_ents
-    while (en != NULL) {
-        de = en->next;
-        clearent(en);
-        free(en);
-        en = de;
+
+    // now free added and removed lists
+    // in the way they were alloc'ed (as batches)
+    int i, size = ul->allocations != NULL ? ul->allocations[0].vf : 0;
+    struct ent_ptr * alls = ul->allocations;
+    for (i = 0; i < size; i++) {
+        free(alls->vp);
+        alls->vp = NULL;
+        alls++;
     }
+    free(ul->allocations);
+    ul->allocations = NULL;
+
     if (ul->range_shift != NULL) free(ul->range_shift); // Free undo_range_shift memory
     if (ul->cols_format != NULL) {                      // Free cols_format memory
         free(ul->cols_format->cols);
@@ -331,7 +343,6 @@ void clear_from_current_pos() {
     return;
 }
 
-// Remove undolist content
 /**
  * \brief Remove undolist content
  *
@@ -357,7 +368,7 @@ void clear_undo_list() {
 }
 
 /**
- * \brief Returnt the length of the undo list
+ * \brief Return the length of the undo list
  *
  * \return length of undolist
  */
@@ -367,32 +378,50 @@ int len_undo_list() {
 }
 
 /**
- * \brief TODO Document copy_to_undostruct()
+ * \brief copy_to_undostruct()
  *
- * \details Take a range of 'ent' elements and create new ones (as many
- * as there are elements inside the specified range). Then copy the content
- * of the original ones to the new ones and save them into the 'added' or
- * 'removed' list of undo_items, according to the char type.
+ * \details Take a range of 'ent' elements and create ent copies to keep in undo structs lists
+ * such as the 'added' or 'removed' lists.
  *
- * Example usage:
- * @code
- *     <function name>();
- * @endcode
+ * char type: indicates UNDO_ADD ('a') for added list. or UNDO_DEL ('d') for the 'removed' list.
+ *
+ * handle_deps: if set to HANDLE_DEPS it will store the dependencies of the specified range as well.
+ * remember deps is a global variable.
+ *
+ * destination: struct ent * pointer to use in the copy. if none was given, just malloc one.
  * returns: none
  */
 
-void copy_to_undostruct (int row_desde, int col_desde, int row_hasta, int col_hasta, char type) {
-    int c, r;
+void copy_to_undostruct (int ri, int ci, int rf, int cf, char type, short handle_deps, struct ent ** destination) {
+    int i, c, r;
     struct ent * p;
+    extern struct ent_ptr * deps;
+
     //int repeated;
 
-    for (r = row_desde; r <= row_hasta; r++)
-        for (c = col_desde; c <= col_hasta; c++) {
+    // ask for memory to keep struct ent * for the whole range
+    // and only if no destination pointer was given
+    struct ent * y_cells = destination == NULL ? NULL : *destination;
+    if (y_cells == NULL && handle_deps == HANDLE_DEPS && deps != NULL)
+        y_cells = (struct ent *) calloc((rf-ri+1)*(cf-ci+1)+deps->vf, sizeof(struct ent));
+    else if (y_cells == NULL)
+        y_cells = (struct ent *) calloc((rf-ri+1)*(cf-ci+1), sizeof(struct ent));
+
+    // if no destination pointer was given
+    // we save the pointer for future free
+    if (destination == NULL) save_pointer_after_calloc(y_cells);
+
+    for (r = ri; r <= rf; r++)
+        for (c = ci; c <= cf; c++) {
             p = *ATBL(tbl, r, c);
             if (p == NULL) continue;
 
+            // initialize the 'ent'
+            cleanent(y_cells);
+
             /* here check that ent to add is not already in the list
-            // if so, avoid to add a duplicate ent
+             * if so, avoid to add a duplicate ent
+             * commented cause its resource consuming and harmless to duplicate
             struct ent * lista = type == 'a' ? undo_item.added : undo_item.removed;
             repeated = 0;
             while (lista != NULL) {
@@ -403,47 +432,97 @@ void copy_to_undostruct (int row_desde, int col_desde, int row_hasta, int col_ha
                 lista = lista->next;
             }
             if (repeated) continue;
-            // is the above really neccesary? i believe its harmless to duplicate it.
-            // and no resources consuming..
-            */
+             */
 
-            // not repeated - we malloc an ent and add it to list
-            // FIXME: improve this. ask memory for the whole range at once.
-            // do not malloc for every single cell in the range..
-            struct ent * e = (struct ent *) malloc( (unsigned) sizeof(struct ent) );
-            cleanent(e);
-            copyent(e, lookat(r, c), 0, 0, 0, 0, 0, 0, 'u');
+            // Copy cell at 'r, c' contents to 'y_cells' ent
+            copyent(y_cells, lookat(r, c), 0, 0, 0, 0, 0, 0, 'u');
 
             // Append 'ent' element at the beginning
-            if (type == 'a') {
-                e->next = undo_item.added;
-                undo_item.added = e;
+            if (type == UNDO_ADD) {
+                y_cells->next = undo_item.added;
+                undo_item.added = y_cells;
             } else {
-                e->next = undo_item.removed;
-                undo_item.removed = e;
+                y_cells->next = undo_item.removed;
+                undo_item.removed = y_cells;
             }
 
+            // increase pointer!
+            if (destination == NULL) y_cells++;
+            else *destination = ++y_cells;
+        }
+
+    // do the same for dependencies
+    if (handle_deps == HANDLE_DEPS)
+        for (i = 0; deps != NULL && i < deps->vf; i++) {
+            p = *ATBL(tbl, deps[i].vp->row, deps[i].vp->col);
+            if (p == NULL) continue;
+
+            // initialize the 'ent'
+            cleanent(y_cells);
+
+            // Copy cell at deps[i].vp->row, deps[i].vp->col contents to 'y_cells' ent
+            copyent(y_cells, lookat(deps[i].vp->row, deps[i].vp->col), 0, 0, 0, 0, 0, 0, 'u');
+
+            // Append 'ent' element at the beginning
+            if (type == UNDO_ADD) {
+                y_cells->next = undo_item.added;
+                undo_item.added = y_cells;
+            } else {
+                y_cells->next = undo_item.removed;
+                undo_item.removed = y_cells;
+            }
+            if (destination == NULL) y_cells++;
+            else *destination = ++y_cells;
         }
     return;
 }
 
 /**
- * \brief TODO Codument add_undo_aux_ent()
+ * \brief save_pointer_after_calloc()
  *
- * \details This function is used to keep aux ents in the undo struct.
- * This is used for undoing dr, dc, sk, and sh commands. It stores a copy
- * of the ent received as a parameter and returns the pointer to that copy.
+ * \details This function keeps in a pointer array every pointer that was returned by calloc
+ * so we can free them
  *
- * \return pointer to a copied ent
+ * \param[in] struct ent e
+ * \return void
  */
+void save_pointer_after_calloc(struct ent * e) {
+    undo_item.allocations = (struct ent_ptr *) realloc(undo_item.allocations, sizeof(struct ent_ptr) * (++(undo_item.alloc_size)));
+    undo_item.allocations[0].vf = undo_item.alloc_size; // we always keep size of list in the first position !
+    undo_item.allocations[undo_item.alloc_size-1].vp = e; // keep the pointer so later can be freed
+}
 
-struct ent * add_undo_aux_ent(struct ent * e) {
-    struct ent * e_new = (struct ent *) malloc( (unsigned) sizeof(struct ent) );
-    cleanent(e_new);
-    copyent(e_new, e, 0, 0, 0, 0, 0, 0, 'u'); // copy ent with special='u' (undo)
-    e_new->next = undo_item.aux_ents;         // add e_new to beginning of list
-    undo_item.aux_ents = e_new;
-    return e_new;
+/**
+ * \brief copy_cell_to_undostruct()
+ *
+ * \details This function adds an struct ent * (new) to undo struct lists.
+ * its contents are based on the struct ent * (ori).
+ * could be added list or deleted list depending on the type.
+ * \param[in] struct ent e
+ * \param[in] struct ent ori
+ * \param[in] char type: indicates UNDO_ADD ('a') for added list. or UNDO_DEL ('d') for the 'removed' list.
+ *
+ * the struct ent pointer is already alloc'ed
+ *
+ * \return void
+ */
+void copy_cell_to_undostruct (struct ent * e, struct ent * ori, char type) {
+    struct ent * new = e;
+    // initialize the 'ent'
+    cleanent(new);
+
+    // Copy 'ori' cell contents to 'new' ent
+    copyent(new, ori, 0, 0, 0, 0, 0, 0, 'u');
+
+    // Append 'ent' element at the beginning
+    if (type == UNDO_ADD) {
+        new->next = undo_item.added;
+        undo_item.added = new;
+    } else {
+        new->next = undo_item.removed;
+        undo_item.removed = new;
+    }
+    return;
 }
 
 /**
@@ -654,8 +733,6 @@ void do_undo() {
             }
         }
     }
-
-    //update(TRUE); //FIXME remove this line. its just to help debugging
 
     // Change cursor position
     //if (ul->removed != NULL) {

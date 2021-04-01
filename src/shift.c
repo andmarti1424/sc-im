@@ -79,10 +79,6 @@ void shift(int r, int c, int rf, int cf, wchar_t type) {
     }
 #ifdef UNDO
     create_undo_action();
-
-    // here we save in undostruct, all the ents that depends on the deleted one (before change)
-    extern struct ent_ptr * deps;
-    int i;
 #endif
     int ic = cmd_multiplier + 1;
 
@@ -100,18 +96,14 @@ void shift(int r, int c, int rf, int cf, wchar_t type) {
             fix_marks( -(rf - r + 1) * cmd_multiplier, 0, r, maxrow, c, cf);
             yank_area(r, c, rf + (rf-r+1) * (cmd_multiplier - 1), cf, 'a', cmd_multiplier); // keep ents in yanklist for sk
 #ifdef UNDO
-            copy_to_undostruct(r, c, rf + (rf-r+1) * (cmd_multiplier - 1), cf, UNDO_DEL);
-            save_undo_range_shift(-cmd_multiplier, 0, r, c, rf + (rf-r+1) * (cmd_multiplier - 1), cf);
             ents_that_depends_on_range(r, c, rf + (rf-r+1) * (cmd_multiplier - 1), cf);
-            for (i = 0; deps != NULL && i < deps->vf; i++)
-                copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, UNDO_DEL);
+            copy_to_undostruct(r, c, rf + (rf-r+1) * (cmd_multiplier - 1), cf, UNDO_DEL, HANDLE_DEPS, NULL);
+            save_undo_range_shift(-cmd_multiplier, 0, r, c, rf + (rf-r+1) * (cmd_multiplier - 1), cf);
 #endif
             while (ic--) shift_range(-ic, 0, r, c, rf, cf);
             if (get_conf_int("autocalc") && ! loading) EvalAll();
 #ifdef UNDO
-            // update(TRUE); this is used just to make debugging easier
-            for (i = 0; deps != NULL && i < deps->vf; i++) // TODO here save just ents that are off the shifted range
-                copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, UNDO_ADD);
+            copy_to_undostruct(0, 0, -1, -1, UNDO_ADD, HANDLE_DEPS, NULL);
 #endif
             break;
 
@@ -119,23 +111,17 @@ void shift(int r, int c, int rf, int cf, wchar_t type) {
             fix_marks(0, -(cf - c + 1) * cmd_multiplier, r, rf, c, maxcol);
             yank_area(r, c, rf, cf + (cf-c+1) * (cmd_multiplier - 1), 'a', cmd_multiplier); // keep ents in yanklist for sk
 #ifdef UNDO
-            copy_to_undostruct(r, c, rf, cf + (cf-c+1) * (cmd_multiplier - 1), UNDO_DEL);
-            save_undo_range_shift(0, -cmd_multiplier, r, c, rf, cf + (cf-c+1) * (cmd_multiplier - 1));
+            // here we save in undostruct, all the ents that depends on the deleted one (before change)
             ents_that_depends_on_range(r, c, rf, cf + (cf-c+1) * (cmd_multiplier - 1));
-            for (i = 0; deps != NULL && i < deps->vf; i++) {
-                copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, UNDO_DEL);
-            }
+            copy_to_undostruct(r, c, rf, cf + (cf-c+1) * (cmd_multiplier - 1), UNDO_DEL, HANDLE_DEPS, NULL);
+            save_undo_range_shift(0, -cmd_multiplier, r, c, rf, cf + (cf-c+1) * (cmd_multiplier - 1));
 #endif
             while (ic--) shift_range(0, -ic, r, c, rf, cf);
 
             if (get_conf_int("autocalc") && ! loading) EvalAll();
             //update(TRUE); // this is used just to make debugging easier
 #ifdef UNDO
-            for (i = 0; deps != NULL && i < deps->vf; i++) {
-                if (deps[i].vp->col > cf || deps[i].vp->col <= c) {
-                    copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, UNDO_ADD);
-                }
-            }
+            copy_to_undostruct(0, 0, -1, -1, UNDO_ADD, HANDLE_DEPS, NULL);
 #endif
             break;
 
@@ -149,6 +135,7 @@ void shift(int r, int c, int rf, int cf, wchar_t type) {
     }
 #ifdef UNDO
     end_undo_action();
+    extern struct ent_ptr * deps;
     if (deps != NULL) free(deps);
     deps = NULL;
 #endif

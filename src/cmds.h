@@ -109,6 +109,7 @@ void erase_area(int sr, int sc, int er, int ec, int ignorelock, int mark_ent_as_
 void auto_justify(int ci, int cf, int min);
 void valueize_area(int sr, int sc, int er, int ec);
 void sync_refs();
+void syncref(register struct enode * e);
 int fcopy(char * action);
 int fsum();
 int pad(int n, int r1, int c1, int r2, int c2);

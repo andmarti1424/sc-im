@@ -52,6 +52,7 @@
 #include "stdlib.h"
 #include "marks.h"
 #include "cmds.h"
+#include "conf.h"
 #include "yank.h"
 #include "dep_graph.h"
 #include "xmalloc.h" // for scxfree
@@ -69,6 +70,7 @@ int yank_arg;                 // number of rows and columns yanked. Used for com
 char type_of_yank;            // yank type. c=col, r=row, a=range, e=cell, '\0'=no yanking
 static struct ent * yanklist;
 struct ent * yanklist_tail;   // so we can always add ents at the end of the list easily
+unsigned int yanked_cells = 0;// keeping this helps performance
 
 /**
  * \brief TODO Document init_yanklist()
@@ -77,6 +79,7 @@ struct ent * yanklist_tail;   // so we can always add ents at the end of the lis
  */
 
 void init_yanklist() {
+    yanked_cells = 0;
     type_of_yank = YANK_NULL;
     yanklist = NULL;
     yanklist_tail = NULL;
@@ -125,6 +128,7 @@ void free_yanklist () {
 
     // free yanklist
     free(yanklist);
+    yanked_cells = 0;
     yanklist = NULL;
     yanklist_tail = NULL;
     return;
@@ -138,6 +142,7 @@ void free_yanklist () {
  */
 
 void add_ent_to_yanklist(struct ent * item) {
+    yanked_cells++;
 
    // If yanklist is empty, insert at the beginning
     if (yanklist == NULL) {
@@ -181,29 +186,19 @@ void yank_area(int tlrow, int tlcol, int brrow, int brcol, char type, int arg) {
     for (r = tlrow; r <= brrow; r++)
         for (c = tlcol; c <= brcol; c++) {
             e_ori = *ATBL(tbl, r, c);
-            if (e_ori != NULL) {
-                // Create and initialize the 'ent'
-                (y_cells)->label = (char *)0;
-                (y_cells)->row = 0;
-                (y_cells)->col = 0;
-                (y_cells)->flags = may_sync;
-                (y_cells)->expr = (struct enode *)0;
-                (y_cells)->v = (double) 0.0;
-                (y_cells)->format = (char *)0;
-                (y_cells)->cellerror = CELLOK;
-                (y_cells)->next = NULL;
-                (y_cells)->ucolor = NULL;
-                (y_cells)->pad = 0;
+            if (e_ori == NULL) continue;
 
-                // Copy 'e_ori' content to 'y_cells'
-                (void) copyent(y_cells, e_ori, 0, 0, 0, 0, 0, 0, 0);
+            // initialize the 'ent'
+            cleanent(y_cells);
 
-                // Important: each 'ent' element keeps the corresponding row and col
-                (y_cells)->row = e_ori->row;
-                (y_cells)->col = e_ori->col;
+            // Copy 'e_ori' contents to 'y_cells' ent
+            (void) copyent(y_cells, e_ori, 0, 0, 0, 0, 0, 0, 0);
 
-                add_ent_to_yanklist(y_cells++);
-            }
+            // Important: each 'ent' element keeps the corresponding row and col
+            (y_cells)->row = e_ori->row;
+            (y_cells)->col = e_ori->col;
+
+            add_ent_to_yanklist(y_cells++);
         }
     return;
 }
@@ -239,9 +234,8 @@ int paste_yanked_ents(int above, int type_paste) {
     struct ent * yll = yl;
     int diffr = 0, diffc = 0 , ignorelock = 0;
 
-#ifdef UNDO
     extern struct ent_ptr * deps;
-    int i;
+#ifdef UNDO
     create_undo_action();
 #endif
 
@@ -257,7 +251,7 @@ int paste_yanked_ents(int above, int type_paste) {
     } else if (type_of_yank == YANK_ROW) {                        // paste row
         int c = yank_arg;
 #ifdef UNDO
-        copy_to_undostruct(currow + ! above, 0, currow + ! above - 1 + yank_arg, maxcol, UNDO_DEL);
+        copy_to_undostruct(currow + ! above, 0, currow + ! above - 1 + yank_arg, maxcol, UNDO_DEL, IGNORE_DEPS, NULL);
 #endif
         while (c--) above ? insert_row(0) : insert_row(1);
         if (! above) currow = forw_row(1)->row;                   // paste below
@@ -271,7 +265,7 @@ int paste_yanked_ents(int above, int type_paste) {
     } else if (type_of_yank == YANK_COL) {                        // paste col
         int c = yank_arg;
 #ifdef UNDO
-        copy_to_undostruct(0, curcol + above, maxrow, curcol + above - 1 + yank_arg, UNDO_DEL);
+        copy_to_undostruct(0, curcol + above, maxrow, curcol + above - 1 + yank_arg, UNDO_DEL, IGNORE_DEPS, NULL);
 #endif
         while (c--) above ? insert_col(1) : insert_col(0);        // insert cols to the right if above or to the left
         diffr = yl->row;
@@ -299,31 +293,26 @@ int paste_yanked_ents(int above, int type_paste) {
         }
     }
 
-    // otherwise continue
-    // for each ent in yanklist
+    ents_that_depends_on_list(yl, diffr, diffc);
+
+#ifdef UNDO
+    // ask for memory to save the entire yanklist (and its dependencies) in the undo struct
+    struct ent * y_cells = (struct ent *) calloc(2*(yanked_cells + (deps != NULL ? deps->vf : 0)), sizeof(struct ent));
+    save_pointer_after_calloc(y_cells);
+#endif
+
     while (yl != NULL) {
 
 #ifdef UNDO
-        copy_to_undostruct(yl->row + diffr, yl->col + diffc, yl->row + diffr, yl->col + diffc, UNDO_DEL);
+        copy_cell_to_undostruct(y_cells++, lookat(yl->row + diffr, yl->col + diffc), UNDO_DEL);
 
-        // save graph dependencies as well
-        // added for #244 - 22/03/2018
-        ents_that_depends_on_range(yl->row + diffr, yl->col + diffc, yl->row + diffr, yl->col + diffc);
-        if (deps != NULL) {
-            for (i = 0; i < deps->vf; i++)
-                copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, UNDO_DEL);
-        }
+        // Here pass struct ent ** to copy_to_undostruct
+        copy_to_undostruct(0, 0, -1, -1, UNDO_DEL, HANDLE_DEPS, &y_cells);
 #endif
 
         // here we delete current content of "destino" ent.
         if (type_paste == YANK_RANGE || type_paste == YANK_SORT)
             erase_area(yl->row + diffr, yl->col + diffc, yl->row + diffr, yl->col + diffc, ignorelock, 0);
-
-        /*struct ent **pp = ATBL(tbl, yl->row + diffr, yl->col + diffc);
-        if (*pp && ( ! ((*pp)->flags & is_locked) )) {
-            mark_ent_as_deleted(*pp, TRUE);
-            *pp = NULL;
-        }*/
 
         struct ent * destino = lookat(yl->row + diffr, yl->col + diffc);
 
@@ -336,37 +325,39 @@ int paste_yanked_ents(int above, int type_paste) {
         } else if (type_paste == YANK_REF) {
             (void) copyent(destino, yl, diffr, diffc, 0, 0, maxrows, maxcols, 'c');
         }
-
         destino->row += diffr;
         destino->col += diffc;
 
-        // commented for issue 167 - 20170331
-        //if (type_paste == 'c' && destino->expr) {
-        if (destino->expr) {
+        /******************** this might be put outside the loop  */
+        // sync and then eval.
+        //sync_refs();
+
+        if (destino->expr && get_conf_int("autocalc")) {
+            syncref(destino->expr);
             EvalJustOneVertex(destino, destino->row, destino->col, 1);
         }
 
-#ifdef UNDO
-        copy_to_undostruct(yl->row + diffr, yl->col + diffc, yl->row + diffr, yl->col + diffc, UNDO_ADD);
-
-        // store dependencies after the change as well
-        // added for #244 - 22/03/2018
-        if (deps != NULL) {
-            for (i = 0; i < deps->vf; i++) {
-                EvalJustOneVertex(deps[i].vp, deps[i].vp->row, deps[i].vp->col, 0);
-                copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, UNDO_ADD);
-            }
+        int i;
+        for (i = 0; deps != NULL && i < deps->vf && get_conf_int("autocalc"); i++) {
+            syncref(deps[i].vp->expr);
+            EvalJustOneVertex(deps[i].vp, deps[i].vp->row, deps[i].vp->col, 0);
         }
+        /*******************/
+
+#ifdef UNDO
+        copy_cell_to_undostruct(y_cells++, lookat(yl->row + diffr, yl->col + diffc), UNDO_ADD);
+        // store dependencies after the change as well
+        copy_to_undostruct(0, 0, -1, -1, UNDO_ADD, HANDLE_DEPS, &y_cells);
 #endif
         yl = yl->next;
-
-        // TODO save graph dependencies as well
     }
-    //EvalAll();
-    sync_refs();
+    //rebuild_graph();
+    //if (get_conf_int("autocalc")) EvalAll();
 
-    #ifdef UNDO
+#ifdef UNDO
     end_undo_action();
-    #endif
+    if (deps != NULL) free(deps);
+    deps = NULL;
+#endif
     return 0;
 }

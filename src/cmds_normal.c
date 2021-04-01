@@ -569,9 +569,6 @@ void do_normalmode(struct block * buf) {
             struct mark * m = get_mark(buf->pnext->value);
             if ( m == NULL) return;
 
-            // added for #244 - 22/03/2018
-            int i;
-            extern struct ent_ptr * deps;
 
             // if m represents a range
             if ( m->row == -1 && m->col == -1) {
@@ -605,7 +602,9 @@ void do_normalmode(struct block * buf) {
                         n = lookat(currow, c1);
                     }
 #ifdef UNDO
-                    copy_to_undostruct(currow, c1, currow, c1, UNDO_DEL);
+                    // added for #244 - 22/03/2018
+                    ents_that_depends_on_range(n->row, n->col, n->row, n->col);
+                    copy_to_undostruct(currow, c1, currow, c1, UNDO_DEL, HANDLE_DEPS, NULL);
 #endif
                     copyent(n, p, currow - get_mark(buf->pnext->value)->row, c1 - get_mark(buf->pnext->value)->col, 0, 0, maxrow, maxcol, 0);
 
@@ -616,27 +615,13 @@ void do_normalmode(struct block * buf) {
                     if (n->expr) EvalJustOneVertex(n, n->row, n->col, 1);
 
 #ifdef UNDO
-                    copy_to_undostruct(currow, c1, currow, c1, UNDO_ADD);
+                    copy_to_undostruct(currow, c1, currow, c1, UNDO_ADD, HANDLE_DEPS, NULL);
 #endif
-
-                    // added for #244 - 22/03/2018
-                    ents_that_depends_on_range(n->row, n->col, n->row, n->col);
-
-#ifdef UNDO
-                    if (deps != NULL)
-                        for (i = 0; i < deps->vf; i++)
-                            copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, UNDO_DEL);
-#endif
-
-                    EvalJustOneVertex(deps[i].vp, deps[i].vp->row, deps[i].vp->col, 0);
-#ifdef UNDO
-                    if (deps != NULL)
-                        for (i = 0; i < deps->vf; i++)
-                            copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, UNDO_ADD);
-#endif
-
                 }
 #ifdef UNDO
+                extern struct ent_ptr * deps;
+                if (deps != NULL) free(deps);
+                deps = NULL;
                 end_undo_action();
 #endif
             }
@@ -1070,11 +1055,11 @@ void do_normalmode(struct block * buf) {
             else if (buf->value == L'|') swprintf(interp_line, BUFFERSIZE, L"center %s", v_name(r, c));
             if (p != -1) swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L":%s", v_name(rf, cf));
 #ifdef UNDO
-            copy_to_undostruct(r, c, rf, cf, UNDO_DEL);
+            copy_to_undostruct(r, c, rf, cf, UNDO_DEL, IGNORE_DEPS, NULL);
 #endif
             send_to_interp(interp_line);
 #ifdef UNDO
-            copy_to_undostruct(r, c, rf, cf, UNDO_ADD);
+            copy_to_undostruct(r, c, rf, cf, UNDO_ADD, IGNORE_DEPS, NULL);
             end_undo_action();
 #endif
             cmd_multiplier = 0;
@@ -1111,6 +1096,7 @@ void do_normalmode(struct block * buf) {
             struct ent * p;
 #ifdef UNDO
             create_undo_action();
+            copy_to_undostruct(tlrow, tlcol, brrow, brcol, UNDO_DEL, IGNORE_DEPS, NULL);
 #endif
             int arg = cmd_multiplier;
             int mf = modflg; // keep original modflg
@@ -1123,18 +1109,13 @@ void do_normalmode(struct block * buf) {
                         //sc_error("Can't increment / decrement a formula");
                         continue;
                     } else if (p->flags & is_valid) {
-#ifdef UNDO
-                        copy_to_undostruct(r, c, r, c, UNDO_DEL);
-#endif
                         p->v += buf->value == L'+' ? (double) arg : - 1 * (double) arg;
-#ifdef UNDO
-                        copy_to_undostruct(r, c, r, c, UNDO_ADD);
-#endif
                         if (mf == modflg) modflg++; // increase just one time
                     }
                 }
             }
 #ifdef UNDO
+            copy_to_undostruct(tlrow, tlcol, brrow, brcol, UNDO_ADD, IGNORE_DEPS, NULL);
             end_undo_action();
 #endif
             if (get_conf_int("autocalc")) EvalAll();
