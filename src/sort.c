@@ -169,7 +169,7 @@ void sortrange(struct ent * left, struct ent * right, char * criteria) {
                 return;
             }
         }
-        p->row = minr + c;
+        p_aux->row = minr + c;
     }
 
     currow = minr;

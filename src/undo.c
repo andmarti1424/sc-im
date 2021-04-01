@@ -384,7 +384,7 @@ int len_undo_list() {
 void copy_to_undostruct (int row_desde, int col_desde, int row_hasta, int col_hasta, char type) {
     int c, r;
     struct ent * p;
-    int repeated;
+    //int repeated;
 
     for (r = row_desde; r <= row_hasta; r++)
         for (c = col_desde; c <= col_hasta; c++) {
