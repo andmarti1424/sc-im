@@ -384,7 +384,7 @@ void destroy_vertex(struct ent * ent) {
        if (e->connectsTo->edges == NULL && e->connectsTo->back_edges == NULL && !e->connectsTo->ent->expr && !(e->connectsTo->ent->flags & is_valid) && ! e->connectsTo->ent->label)
            destroy_vertex(e->connectsTo->ent);
 //     WARNING: an orphan vertex now represents an ent that has an enode thats
-//     need to be evaluated, but do not depend in another cell.
+//     need to be evaluated, but do not depends on another cell.
        e = e->next;
    }
 
@@ -777,4 +777,40 @@ void ents_that_depends_on_range (int r1, int c1, int r2, int c2) {
             }
         }
         return;
+}
+
+/**
+ * \brief ents_that_depends_on_list()
+ *
+ * \details Checks dependency of list of ents.
+ *
+ * since this is used for pasting yanked ents, on which we may
+ * have a difference on rows and columns on which the cells are pasted
+ * we take care of it with deltar and deltac
+ *
+ * \param[in] struct ent * (e_ori)
+ * \param[in] deltar
+ * \param[in] deltac
+ *
+ * \return none
+ */
+
+void ents_that_depends_on_list(struct ent * e_ori, int deltar,  int deltac) {
+    struct ent * e = e_ori;
+    struct ent * p;
+    if (graph == NULL || e == NULL) return;
+
+    // at this point deps must be NULL
+    deps = NULL;
+    dep_size = 0;
+
+    while (e != NULL) {
+        p = *ATBL(tbl, e->row+deltar, e->col+deltac);
+        if (p != NULL) {
+            markAllVerticesNotVisited(0);
+            ents_that_depends_on(p);
+        }
+        e = e->next;
+    }
+    return;
 }

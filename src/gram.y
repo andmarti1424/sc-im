@@ -417,17 +417,13 @@ command:
                                   {
                                   // TODO get this code out of gram.y
                                   extern graphADT graph;
-                                  #ifdef UNDO
-                                  create_undo_action();
-                                  copy_to_undostruct($2.left.vp->row, $2.left.vp->col, $2.left.vp->row, $2.left.vp->col, UNDO_DEL);
+#ifdef UNDO
                                   // here we save in undostruct, all the ents that depends on the deleted one (before change)
-                                  extern struct ent_ptr * deps;
-                                  int i, n = 0;
                                   ents_that_depends_on_range($2.left.vp->row, $2.left.vp->col, $2.left.vp->row, $2.left.vp->col);
-                                  if (deps != NULL)
-                                      for (i = 0, n = deps->vf; i < n; i++)
-                                          copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, UNDO_DEL);
-                                  #endif
+                                  create_undo_action();
+                                  copy_to_undostruct($2.left.vp->row, $2.left.vp->col, $2.left.vp->row, $2.left.vp->col, UNDO_DEL, HANDLE_DEPS, NULL);
+#endif
+
                                   if (getVertex(graph, lookat($2.left.vp->row, $2.left.vp->col), 0) != NULL) destroy_vertex(lookat($2.left.vp->row, $2.left.vp->col));
 
                                   $2.left.vp->v = (double) 0.0;
@@ -444,17 +440,16 @@ command:
                                   if (( $2.left.vp->trigger  ) && (($2.left.vp->trigger->flag & TRG_WRITE) == TRG_WRITE))
                                       do_trigger($2.left.vp, TRG_WRITE);
 
-                                  #ifdef UNDO
-                                  copy_to_undostruct($2.left.vp->row, $2.left.vp->col, $2.left.vp->row, $2.left.vp->col, UNDO_ADD);
+#ifdef UNDO
                                   // here we save in undostruct, all the ents that depends on the deleted one (after change)
+                                  copy_to_undostruct($2.left.vp->row, $2.left.vp->col, $2.left.vp->row, $2.left.vp->col, UNDO_ADD, HANDLE_DEPS, NULL);
+                                  extern struct ent_ptr * deps;
                                   if (deps != NULL) {
-                                      for (i = 0, n = deps->vf; i < n; i++)
-                                          copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, UNDO_ADD);
                                       free(deps);
                                       deps = NULL;
                                   }
                                   end_undo_action();
-                                  #endif
+#endif
                                   }
 
     |    S_LABEL var_or_range '=' e       { slet($2.left.vp, $4, 0); }
