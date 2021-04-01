@@ -1,3 +1,27 @@
+v0.8.2
+
+Changes
+-------
+Improved yank and undo alloc'ing. Malloc as much we need from start in batches and avoid small mallocs.
+Disable mouse in mode other than NORMAL_MODE
+UNDO of :fsum is handled by let.
+
+
+Pending
+-------
+Add mouse support in insert and command mode
+Rethink LUA evaluation
+
+
+Thanks to all that helped and created PR.
+Thanks to all who support and use this program.
+
+Andrés Martinelli
+andmarti1424
+
+
+
+***********
 v0.8.1
 Released April 1st 2021
 
@@ -23,7 +47,6 @@ Changed default headings colors
 many improvements to the config facility and usage - PR 519
 improved sort for 65k rows
 
-
 Fixes
 -----
 Fix issues on CIRCULAR REFERENCES: #473 #201 #475 #321. these were as hard.
@@ -46,21 +69,7 @@ Fix possible memory leak in add freeze
 XLSX: Free memory leak when looking for specified sheet.
 XLSX: Avoid segfault when using shared formulas. issue #218.
 
-
-PENDING
--------
-Currently testing some big changes I have done on undo.c and yank.c cause it does not perform well on +65k rows.
-The idea is to malloc as much we need and avoid small mallocs.
-Will create a new dev branch on github soon.
-
-Thanks to all that helped and created PR.
-Thanks to all who support and use this program.
-
-Andrés Martinelli
-andmarti1424
-
-****************************************************************************************
-
+***********
 v0.8.0
 Released March 17th 2021
 
@@ -132,6 +141,7 @@ Also changed markAllVerticesNotVisited and All_vertexs_of_edges_visited function
 Some other issues fixed: #228, #234, #239, #240, #244, #246, #260, #295, #308
 .. and many other fixes and improvements!
 
+***********
 v0.7.0
 *Added 'copy to clipboard' feature: now content of a range can be copied to clipboard using the :ccopy command.
 *Added 'paste from clipboard' feature with :cpaste command.
@@ -165,6 +175,7 @@ but taking whose commands that beginning matches the current inputline content.
 *fix when :color is intended to be used without having set enough parameters. #219
 *fix when editing cells with string expressions. #197
 
+***********
 v0.6.0
 *Added new freeze feature (including new :freeze and :unfreeze commands).
 *Scripting support with LUA. Also with triggers and c dynamic linked modules.
@@ -205,6 +216,7 @@ so that if you set a content with let or slet over script, you can also undo it.
 *Fix in csv import: maxcol was not updated correctly during import.
 *Fix when saving csv files with :w. before it saved a csv file with sc format.
 
+***********
 v0.5.0
 *new @frow / @fcol functions.
 *Added :file special command.
@@ -243,7 +255,7 @@ v0.5.0
 *Some fixes in xml files import.
 *Various fixes to avoid warnings during build.
 
-
+***********
 v0.4.0
 * Fix memory leak in functions that use seval. ex.: dosval docat. this used to happen also in SC !
 * Chain cells with equations into a new graph structure
@@ -288,7 +300,7 @@ v0.4.0
 * doc improvement
 * Fix when opening files with slash
 
-
+***********
 v0.3.0
 * FIX when importing large CSV files
 * SC-IM now supports wide chars, enabling the use of different alphabets.
@@ -300,7 +312,7 @@ v0.3.0
   Change in format of a column as a result of auto_jus
   Change format of columns as a result of ic dc
 
-
+***********
 v0.2.2
 * Added plain text export.
 * Added padding between cells.
@@ -322,4 +334,3 @@ v0.2.2
 * Various fixes when using SC-IM without UI (--nocurses).
 * Help documentation now can be loaded without making install SC-IM.
 * MAXROWS now can be defined in Makefile.
-

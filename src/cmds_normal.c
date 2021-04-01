@@ -96,11 +96,9 @@ void do_normalmode(struct block * buf) {
     switch (buf->value) {
         // FOR TEST PURPOSES
         case L'A':
-            sc_info("runtime:%d", RUNTIME);
             //;
-            //wchar_t t = ui_query_opt(
-            //L"Backup file exists. Do you want to (E)dit file and remove backup, (R)ecover backup or (Q)uit: ", L"qer");
-            //sc_info("result: %lc.", t);
+            //wchar_t t = ui_query_opt(L"show a message. q / a / d to quit", L"qad");
+            //sc_info("char: %lc.", t);
             break;
 
         case L'W':
