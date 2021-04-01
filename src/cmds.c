@@ -219,12 +219,15 @@ void deletecol(int col, int mult) {
     }
 #ifdef UNDO
     create_undo_action();
-    // here we save in undostruct, all the ents that depends on the deleted one (before change)
-    ents_that_depends_on_range(0, col, maxrow, col - 1 + mult);
-    copy_to_undostruct(0, col, maxrow, col - 1 + mult, UNDO_DEL, HANDLE_DEPS, NULL);
+    copy_to_undostruct(0, col, maxrow, col - 1 + mult, UNDO_DEL);
     save_undo_range_shift(0, -mult, 0, col, maxrow, col - 1 + mult);
 
+    // here we save in undostruct, all the ents that depends on the deleted one (before change)
+    extern struct ent_ptr * deps;
     int i;
+    ents_that_depends_on_range(0, col, maxrow, col+mult);
+    for (i = 0; deps != NULL && i < deps->vf; i++)
+        copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, UNDO_DEL);
     for (i=col; i < col + mult; i++)
         add_undo_col_format(i, 'R', fwidth[i], precision[i], realfmt[i]);
 #endif
@@ -240,10 +243,10 @@ void deletecol(int col, int mult) {
     if (!loading) modflg++;
 
 #ifdef UNDO
-    // here we save in undostruct, just the ents that depends on the deleted one (after change)
-    copy_to_undostruct(0, 0, -1, -1, UNDO_ADD, HANDLE_DEPS, NULL);
+    // here we save in undostruct, all the ents that depends on the deleted one (after change)
+    for (i = 0; deps != NULL && i < deps->vf; i++) // TODO here save just ents that are off the shifted range
+        copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, UNDO_ADD);
 
-    extern struct ent_ptr * deps;
     if (deps != NULL) free(deps);
     deps = NULL;
 
@@ -375,7 +378,7 @@ void copyent(register struct ent * n, register struct ent * p, int dr, int dc, i
 
         if (p->label) {
             if (n->label) scxfree(n->label);
-            n->label = scxmalloc((unsigned) (strlen(p->label) + 1));
+                n->label = scxmalloc((unsigned) (strlen(p->label) + 1));
             (void) strcpy(n->label, p->label);
             n->flags &= ~is_leftflush;
             n->flags |= ((p->flags & is_label) | (p->flags & is_leftflush));
@@ -519,8 +522,8 @@ void erase_area(int sr, int sc, int er, int ec, int ignorelock, int mark_as_dele
             if (mark_as_deleted) {
                 mark_ent_as_deleted(*pp, TRUE);
             } else {
-                clearent(*pp); // free memory
-                cleanent(*pp); // fill ent with empty values
+                clearent(*pp);// free memory
+                cleanent(*pp);
                 mark_ent_as_deleted(*pp, FALSE);
             }
             *pp = NULL;
@@ -563,11 +566,21 @@ struct enode * copye(register struct enode *e, int Rdelta, int Cdelta, int r1, i
         newrow = e->e.r.left.vf & FIX_ROW || e->e.r.left.vp->row < r1 || e->e.r.left.vp->row > r2 || e->e.r.left.vp->col < c1 || e->e.r.left.vp->col > c2 ?  e->e.r.left.vp->row : special == 1 ? r1 + Rdelta + e->e.r.left.vp->col - c1 : e->e.r.left.vp->row + Rdelta;
         newcol = e->e.r.left.vf & FIX_COL || e->e.r.left.vp->row < r1 || e->e.r.left.vp->row > r2 || e->e.r.left.vp->col < c1 || e->e.r.left.vp->col > c2 ?  e->e.r.left.vp->col : special == 1 ? c1 + Cdelta + e->e.r.left.vp->row - r1 : e->e.r.left.vp->col + Cdelta;
         ret->e.r.left.vp =
+#ifdef UNDO
+        // Commented for issue #433
+        // track down in what cases this was needed and change it
+        //special == 2 ? add_undo_aux_ent(lookat(newrow, newcol)) :
+#endif
         lookat(newrow, newcol);
         ret->e.r.left.vf = e->e.r.left.vf;
         newrow = e->e.r.right.vf & FIX_ROW || e->e.r.right.vp->row < r1 || e->e.r.right.vp->row > r2 || e->e.r.right.vp->col < c1 || e->e.r.right.vp->col > c2 ?  e->e.r.right.vp->row : special == 1 ? r1 + Rdelta + e->e.r.right.vp->col - c1 : e->e.r.right.vp->row + Rdelta;
         newcol = e->e.r.right.vf & FIX_COL || e->e.r.right.vp->row < r1 || e->e.r.right.vp->row > r2 || e->e.r.right.vp->col < c1 || e->e.r.right.vp->col > c2 ?  e->e.r.right.vp->col : special == 1 ? c1 + Cdelta + e->e.r.right.vp->row - r1 : e->e.r.right.vp->col + Cdelta;
         ret->e.r.right.vp =
+#ifdef UNDO
+        // Commented for issue #433
+        // track down in what cases this was needed and change it
+        //special == 2 ? add_undo_aux_ent(lookat(newrow, newcol)) :
+#endif
         lookat(newrow, newcol);
         ret->e.r.right.vf = e->e.r.right.vf;
     } else {
@@ -600,7 +613,13 @@ struct enode * copye(register struct enode *e, int Rdelta, int Cdelta, int r1, i
                         newrow = e->e.v.vf & FIX_ROW || e->e.v.vp->row < r1 || e->e.v.vp->row > r2 || e->e.v.vp->col < c1 || e->e.v.vp->col > c2 ?  e->e.v.vp->row : special == 1 ? r1 + Rdelta + e->e.v.vp->col - c1 : e->e.v.vp->row + Rdelta;
                         newcol = e->e.v.vf & FIX_COL || e->e.v.vp->row < r1 || e->e.v.vp->row > r2 || e->e.v.vp->col < c1 || e->e.v.vp->col > c2 ?  e->e.v.vp->col : special == 1 ? c1 + Cdelta + e->e.v.vp->row - r1 : e->e.v.vp->col + Cdelta;
                     }
-                    ret->e.v.vp = lookat(newrow, newcol);
+                    ret->e.v.vp =
+#ifdef UNDO
+                        // Commented for issue #433
+                        // track down in what cases this was needed and change it
+                        //special == 2 ? add_undo_aux_ent(lookat(newrow, newcol)) :
+#endif
+                        lookat(newrow, newcol);
                     ret->e.v.vf = e->e.v.vf;
                     break;
                 }
@@ -876,11 +895,15 @@ void deleterow(int row, int mult) {
     }
 #ifdef UNDO
     create_undo_action();
-    // here we save in undostruct, all the ents that depends on the deleted one (before change)
-    ents_that_depends_on_range(row, 0, row + mult - 1, maxcol);
-    copy_to_undostruct(row, 0, row + mult - 1, maxcol, UNDO_DEL, HANDLE_DEPS, NULL);
+    copy_to_undostruct(row, 0, row + mult - 1, maxcol, UNDO_DEL);
     save_undo_range_shift(-mult, 0, row, 0, row - 1 + mult, maxcol);
 
+    // here we save in undostruct, all the ents that depends on the deleted one (before change)
+    extern struct ent_ptr * deps;
+    int i;
+    ents_that_depends_on_range(row, 0, row + mult - 1, maxcol);
+    for (i = 0; deps != NULL && i < deps->vf; i++)
+        copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, UNDO_DEL);
 #endif
 
     fix_marks(-mult, 0, row + mult - 1, maxrow, 0, maxcol);
@@ -894,10 +917,10 @@ void deleterow(int row, int mult) {
     if (!loading) modflg++;
 
 #ifdef UNDO
-    // here we save in undostruct, just the ents that depends on the deleted one (after the change)
-    copy_to_undostruct(0, 0, -1, -1, UNDO_ADD, HANDLE_DEPS, NULL);
+    // here we save in undostruct, all the ents that depends on the deleted one (after the change)
+    for (i = 0; deps != NULL && i < deps->vf; i++) // TODO here save just ents that are off the shifted range
+        copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, UNDO_ADD);
 
-    extern struct ent_ptr * deps;
     if (deps != NULL) free(deps);
     deps = NULL;
 
@@ -1146,12 +1169,20 @@ void del_selected_cells() {
     else
         yank_area(tlrow, tlcol, brrow, brcol, 'e', 1);
 
-#ifdef UNDO
+    #ifdef UNDO
     create_undo_action();
+    copy_to_undostruct(tlrow, tlcol, brrow, brcol, UNDO_DEL);
+
     // here we save in undostruct, all the ents that depends on the deleted one (before change)
+    extern struct ent_ptr * deps;
+    int i, n = 0;
     ents_that_depends_on_range(tlrow, tlcol, brrow, brcol);
-    copy_to_undostruct(tlrow, tlcol, brrow, brcol, UNDO_DEL, HANDLE_DEPS, NULL);
-#endif
+    if (deps != NULL) {
+        n = deps->vf;
+        for (i = 0; i < n; i++)
+            copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, UNDO_DEL);
+    }
+    #endif
 
     erase_area(tlrow, tlcol, brrow, brcol, 0, 0); //important: this erases the ents, but does NOT mark them as deleted
     modflg++;
@@ -1160,14 +1191,20 @@ void del_selected_cells() {
 
     EvalAll();
 
-#ifdef UNDO
+    #ifdef UNDO
     // here we save in undostruct, all the ents that depends on the deleted one (after the change)
-    copy_to_undostruct(tlrow, tlcol, brrow, brcol, UNDO_ADD, HANDLE_DEPS, NULL);
-    extern struct ent_ptr * deps;
+    for (i = 0; i < n; i++)
+        copy_to_undostruct(deps[i].vp->row, deps[i].vp->col, deps[i].vp->row, deps[i].vp->col, UNDO_ADD);
+
     if (deps != NULL) free(deps);
     deps = NULL;
+    #endif
+
+
+    #ifdef UNDO
+    copy_to_undostruct(tlrow, tlcol, brrow, brcol, UNDO_ADD);
     end_undo_action();
-#endif
+    #endif
 
     return;
 }
@@ -1209,6 +1246,7 @@ void send_to_interp(wchar_t * oper) {
         if ((pos = wstr_in_wstr(oper, L"\n")) != -1)
             oper[pos] = L'\0';
         sc_debug("Interp GOT: %ls", oper);
+        //wprintf(L"Interp GOT: %ls", oper);
     }
     wcstombs(line, oper, BUFFERSIZE);
 
@@ -1267,10 +1305,8 @@ struct ent * lookat(int row, int col) {
 void cleanent(struct ent * p) {
     if (!p) return;
     p->label = (char *) 0;
-    // do not uncomment. if so mod erase_area.
     //p->row = 0;
     //p->col = 0;
-
     p->flags = may_sync;
     p->expr = (struct enode *) 0;
     p->v = (double) 0.0;
@@ -1985,7 +2021,6 @@ void valueize_area(int sr, int sc, int er, int ec) {
 
     #ifdef UNDO
     create_undo_action();
-    copy_to_undostruct(sr, sc, er, ec, UNDO_DEL, IGNORE_DEPS, NULL);
     #endif
     for (r = sr; r <= er; r++) {
         for (c = sc; c <= ec; c++) {
@@ -1994,6 +2029,9 @@ void valueize_area(int sr, int sc, int er, int ec) {
                 sc_error(" Cell %s%d is locked", coltoa(c), r);
                 continue;
             }
+    #ifdef UNDO
+            copy_to_undostruct(r, c, r, c, UNDO_DEL);
+    #endif
             if (p && p->expr) {
                 efree(p->expr);
                 p->expr = (struct enode *)0;
@@ -2024,10 +2062,13 @@ void valueize_area(int sr, int sc, int er, int ec) {
                     if (v_cur->back_edges == NULL ) destroy_vertex(p);
                     }
             }
+
+    #ifdef UNDO
+            copy_to_undostruct(r, c, r, c, UNDO_ADD);
+    #endif
         }
     }
     #ifdef UNDO
-    copy_to_undostruct(sr, sc, er, ec, UNDO_ADD, IGNORE_DEPS, NULL);
     end_undo_action();
     #endif
     return;
@@ -2133,7 +2174,7 @@ int fsum() {
 
 #ifdef UNDO
     create_undo_action();
-    copy_to_undostruct(currow, curcol, currow, curcol, UNDO_DEL, IGNORE_DEPS, NULL);
+    copy_to_undostruct(currow, curcol, currow, curcol, UNDO_DEL);
 #endif
     if (r > 0 && (*ATBL(tbl, r-1, c) != NULL) && (*ATBL(tbl, r-1, c))->flags & is_valid) {
         for (r = currow-1; r >= 0; r--) {
@@ -2170,7 +2211,7 @@ int fsum() {
     if ((currow != r || curcol != c) && wcslen(interp_line)) {
         send_to_interp(interp_line);
 #ifdef UNDO
-        copy_to_undostruct(currow, curcol, currow, curcol, UNDO_ADD, IGNORE_DEPS, NULL);
+        copy_to_undostruct(currow, curcol, currow, curcol, UNDO_ADD);
         end_undo_action();
 #endif
     }
@@ -2238,6 +2279,7 @@ int fcopy(char * action) {
 
     all_formulas_found:
 
+
     if (any_locked_cells(ri, ci, rf, cf)) {
         swprintf(interp_line, BUFFERSIZE, L"");
         sc_error("Locked cells encountered. Nothing changed");
@@ -2245,7 +2287,7 @@ int fcopy(char * action) {
     }
 #ifdef UNDO
     create_undo_action();
-    copy_to_undostruct(ri, ci, rf, cf, UNDO_DEL, IGNORE_DEPS, NULL);
+    copy_to_undostruct(ri, ci, rf, cf, UNDO_DEL);
 #endif
 
     if (! strcmp(action, "")) {
@@ -2285,7 +2327,7 @@ int fcopy(char * action) {
     }
 
 #ifdef UNDO
-    copy_to_undostruct(ri, ci, rf, cf, UNDO_ADD, IGNORE_DEPS, NULL);
+    copy_to_undostruct(ri, ci, rf, cf, UNDO_ADD);
     end_undo_action();
 #endif
 
@@ -2313,7 +2355,6 @@ int pad(int n, int r1, int c1, int r2, int c2) {
 
 #ifdef UNDO
     create_undo_action();
-    copy_to_undostruct(r1, c1, r2, c2, UNDO_DEL, IGNORE_DEPS, NULL);
 #endif
 
     for (r = r1; r <= r2; r++) {
@@ -2322,13 +2363,21 @@ int pad(int n, int r1, int c1, int r2, int c2) {
                 pad_exceed_width = 1;
                 continue;
             }
-            if ((p = *ATBL(tbl, r, c)) != NULL) p->pad = n;
+            //p = lookat(r, c);
+            if ((p = *ATBL(tbl, r, c)) != NULL) {
+#ifdef UNDO
+                copy_to_undostruct(r, c, r, c, UNDO_DEL);
+#endif
+                p->pad = n;
+#ifdef UNDO
+                copy_to_undostruct(r, c, r, c, UNDO_ADD);
+#endif
+            }
             modflg++;
         }
     }
 
 #ifdef UNDO
-    copy_to_undostruct(r1, c1, r2, c2, UNDO_ADD, IGNORE_DEPS, NULL);
     end_undo_action();
 #endif
 

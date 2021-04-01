@@ -488,11 +488,11 @@ void do_visualmode(struct block * buf) {
         swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L":%s", v_name(r->brrow, r->brcol));
 #ifdef UNDO
         create_undo_action();
-        copy_to_undostruct(r->tlrow, r->tlcol, r->brrow, r->brcol, UNDO_DEL, IGNORE_DEPS, NULL);
+        copy_to_undostruct(r->tlrow, r->tlcol, r->brrow, r->brcol, UNDO_DEL);
 #endif
         send_to_interp(interp_line);
 #ifdef UNDO
-        copy_to_undostruct(r->tlrow, r->tlcol, r->brrow, r->brcol, UNDO_ADD, IGNORE_DEPS, NULL);
+        copy_to_undostruct(r->tlrow, r->tlcol, r->brrow, r->brcol, UNDO_ADD);
         end_undo_action();
 #endif
         cmd_multiplier = 0;

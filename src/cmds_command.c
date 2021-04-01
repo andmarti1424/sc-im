@@ -702,11 +702,11 @@ void do_commandmode(struct block * sb) {
                 del_range_wchars(interp_line, l, l + 5);
                 #ifdef UNDO
                 create_undo_action();
-                copy_to_undostruct(r, c, rf, cf, UNDO_DEL, IGNORE_DEPS, NULL);
+                copy_to_undostruct(r, c, rf, cf, UNDO_DEL);
                 #endif
                 send_to_interp(interp_line);
                 #ifdef UNDO
-                copy_to_undostruct(r, c, rf, cf, UNDO_ADD, IGNORE_DEPS, NULL);
+                copy_to_undostruct(r, c, rf, cf, UNDO_ADD);
                 end_undo_action();
                 #endif
             }
