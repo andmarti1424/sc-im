@@ -157,24 +157,24 @@ void sortrange(struct ent * left, struct ent * right, char * criteria) {
 
     yank_area(minr, minc, maxr, maxc, 's', 1); // save yanklist in the original range
 
+
     // Fix the 'ent' elements in the sorted range
-    int i, d, move;
     struct ent * p_aux, * yl = get_yanklist();
 
-    // Traverse 'rows' structure
-    for (d = 0; d < (maxr - minr + 1); d++) {
-        for (i = 0; i < (maxc - minc + 1); i++) {
-            p_aux = yl;
-            move = ( rows[d] - minr) * (maxc - minc + 1) + i;
-            while (move--) p_aux = p_aux->next;
-            p_aux->row = minr + d;
+    for (c = 0, p_aux = yl; p_aux; p_aux = p_aux->next) {
+        if (rows[c] != p_aux->row) {
+            for (c = 0; c <= maxr - minr && rows[c] != p_aux->row; c++) ;
+            if (c > maxr - minr) {
+                sc_error("sort error");
+                return;
+            }
         }
+        p->row = minr + c;
     }
 
     currow = minr;
     curcol = minc;
 
-    //paste_yanked_ents(0, 'a'); // paste ents over currow and curcol
     paste_yanked_ents(0, 's'); // paste ents over currow and curcol
 
     scxfree((char *) sort);
