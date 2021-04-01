@@ -2131,21 +2131,13 @@ int fsum() {
     int r = currow, c = curcol;
     struct ent * p;
 
-#ifdef UNDO
-    create_undo_action();
-    copy_to_undostruct(currow, curcol, currow, curcol, UNDO_DEL, IGNORE_DEPS, NULL);
-#endif
     if (r > 0 && (*ATBL(tbl, r-1, c) != NULL) && (*ATBL(tbl, r-1, c))->flags & is_valid) {
         for (r = currow-1; r >= 0; r--) {
             p = *ATBL(tbl, r, c);
             if (p == NULL) break;
             if (! (p->flags & is_valid)) break;
         }
-        if (currow == r) {
-#ifdef UNDO
-            dismiss_undo_item(NULL);
-#endif
-        } else {
+        if (currow != r) {
             swprintf(interp_line, BUFFERSIZE, L"let %s%d = @SUM(", coltoa(curcol), currow);
             swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%s%d:", coltoa(curcol), r+1);
             swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%s%d)", coltoa(curcol), currow-1);
@@ -2156,24 +2148,15 @@ int fsum() {
             if (p == NULL) break;
             if (! (p->flags & is_valid)) break;
         }
-        if (curcol == c) {
-#ifdef UNDO
-            dismiss_undo_item(NULL);
-#endif
-        } else {
+        if (curcol != c) {
             swprintf(interp_line, BUFFERSIZE, L"let %s%d = @SUM(", coltoa(curcol), currow);
             swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%s%d:", coltoa(c+1), r);
             swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%s%d)", coltoa(curcol-1), r);
         }
     }
 
-    if ((currow != r || curcol != c) && wcslen(interp_line)) {
+    if ((currow != r || curcol != c) && wcslen(interp_line))
         send_to_interp(interp_line);
-#ifdef UNDO
-        copy_to_undostruct(currow, curcol, currow, curcol, UNDO_ADD, IGNORE_DEPS, NULL);
-        end_undo_action();
-#endif
-    }
     return 0;
 }
 
