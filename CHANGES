@@ -1,3 +1,66 @@
+v0.8.1
+Released April 1st 2021
+
+New features
+------------
+Braille support
+Added latex export - issue #394
+Added mappings for command mode
+Work on issues #225 and #247: support mapping of ñ and other special chars
+Basic ODS file import
+Paste to a range of selected cells - (actually added on v0.8 - issue 438 - PR 445)
+Added txtdelim | for csv files import - issue 409
+Added macros to --version (show version)
+Support higher versions of lua.
+Handle <ESC> key in mappings. related to issue #492.
+Added freeze to visual mode - issue #459
+
+Changes
+--------
+Recognise <SPACE> in mappings rather than simple ' '
+Visual change: Moved cmd multiplier to the left of mode
+Changed default headings colors
+many improvements to the config facility and usage - PR 519
+improved sort for 65k rows
+
+
+Fixes
+-----
+Fix issues on CIRCULAR REFERENCES: #473 #201 #475 #321. these were as hard.
+Fix issue 417 and added a date type in xlsx import.
+Fix Engformat overlap text y número. Mostraba * (actually fixed on v0.8)
+Fix column header display - overflow with column width 2 and column with two letters - PR 517
+Fix isnumeric test to recognise floats: affects copy/paste - PR 450
+Fix issue setting conf variables like nonumeric
+Fix when showing empty text - 944844505d7cdb7d3d392a5c1d2b3ffde40a1fff
+Fix issue #227 - this was hard. used to segfault and keep wrong reference after deleting row that is last in range of expr. ex. @avg(B1:B4) and deleting row 4
+Fix issue #433: large memory use with multiple linked cells.
+Fix issue #287 - valueize didnt update depgraph
+Solved issue #399. 'g' command of NORMAL_MODE changed to 'gt'"
+Fixed vmaps in get_mappings function.
+Fixed bug on 'error' in gram.y - comment on issue #482
+Fix issue #457: cursor position could add empty rows or columns when exporting csv files
+Fix issue #288: ^ misbehaving when having fixed rows
+Fix in mouse clicks
+Fix possible memory leak in add freeze
+XLSX: Free memory leak when looking for specified sheet.
+XLSX: Avoid segfault when using shared formulas. issue #218.
+
+
+PENDING
+-------
+Currently testing some big changes I have done on undo.c and yank.c cause it does not perform well on +65k rows.
+The idea is to malloc as much we need and avoid small mallocs.
+Will create a new dev branch on github soon.
+
+Thanks to all that helped and created PR.
+Thanks to all who support and use this program.
+
+Andrés Martinelli
+andmarti1424
+
+****************************************************************************************
+
 v0.8.0
 Released March 17th 2021
 
@@ -68,20 +131,6 @@ Also changed markAllVerticesNotVisited and All_vertexs_of_edges_visited function
 
 Some other issues fixed: #228, #234, #239, #240, #244, #246, #260, #295, #308
 .. and many other fixes and improvements!
-
-PENDING
--------
-The most significative issue is regarding circular references.
-This have to be deeply analyzed and with the collaboration of the community
-it would be hopefully fixed by v0.9.
-
-Thanks to all that helped and created PR.
-Thanks to all who support and use this program.
-
-Andrés Martinelli
-andmarti1424
-
-****************************************************************************************
 
 v0.7.0
 *Added 'copy to clipboard' feature: now content of a range can be copied to clipboard using the :ccopy command.

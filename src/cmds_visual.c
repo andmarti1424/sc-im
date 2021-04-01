@@ -503,7 +503,7 @@ void do_visualmode(struct block * buf) {
 
     // freeze a range
     } else if (buf->value == L'f') {
-        add_frange(lookat(r->tlrow, r->tlcol), lookat(r->brrow, r->brcol), UNDO_ADD);
+        add_frange(lookat(r->tlrow, r->tlcol), lookat(r->brrow, r->brcol), 'a');
         center_hidden_rows = 0;
         center_hidden_cols = 0;
         cmd_multiplier = 0;
