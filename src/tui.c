@@ -137,8 +137,8 @@ void ui_start_screen() {
             // values defined in '.sc' files
             set_colors_param_dict();
         }
-        ////wbkgd(main_win, COLOR_PAIR((ucolors[DEFAULT].fg+1) * (COLORS+1) + ucolors[DEFAULT].bg + 2));
-        ////wbkgd(input_win, COLOR_PAIR((ucolors[DEFAULT].fg+1) * (COLORS+1) + ucolors[DEFAULT].bg + 2));
+        wbkgd(main_win, COLOR_PAIR((ucolors[DEFAULT].fg+1) * (COLORS) + ucolors[DEFAULT].bg + 2));
+        wbkgd(input_win, COLOR_PAIR((ucolors[DEFAULT].fg+1) * (COLORS) + ucolors[DEFAULT].bg + 2));
     }
     #endif
 
@@ -302,8 +302,8 @@ void ui_do_welcome() {
     int i;
 
     #ifdef USECOLORS
-////    wbkgd(main_win, COLOR_PAIR((ucolors[DEFAULT].fg+1) * (COLORS+1) + ucolors[DEFAULT].bg + 2));
-////    wbkgd(input_win, COLOR_PAIR((ucolors[DEFAULT].fg+1) * (COLORS+1) + ucolors[DEFAULT].bg + 2));
+    wbkgd(main_win, COLOR_PAIR((ucolors[DEFAULT].fg+1) * (COLORS) + ucolors[DEFAULT].bg + 2));
+    wbkgd(input_win, COLOR_PAIR((ucolors[DEFAULT].fg+1) * (COLORS) + ucolors[DEFAULT].bg + 2));
     #endif
 
     // show headings
@@ -381,9 +381,9 @@ void ui_update(int header) {
 
     if (header) {
     #ifdef USECOLORS
-////    wbkgd(main_win, COLOR_PAIR((ucolors[DEFAULT].fg+1) * (COLORS+1) + ucolors[DEFAULT].bg + 2));
+    wbkgd(main_win, COLOR_PAIR((ucolors[DEFAULT].fg+1) * (COLORS) + ucolors[DEFAULT].bg + 2));
         // comment this to prevent bold to be reset
-        //wbkgd(input_win, COLOR_PAIR((ucolors[DEFAULT].fg+1) * (COLORS+1) + ucolors[DEFAULT].bg + 2));
+    wbkgd(input_win, COLOR_PAIR((ucolors[DEFAULT].fg+1) * (COLORS) + ucolors[DEFAULT].bg + 2));
     #endif
 
         // Clean from top to bottom
