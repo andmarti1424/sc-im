@@ -7,11 +7,11 @@ Disable mouse in mode other than NORMAL_MODE
 UNDO of :fsum is handled by let.
 :fsum added to command mode commands. was missing.
 Added mapping_timeout configuration value with a default value of 1500ms (used to be a fixed value of 800ms).
+Added mouse support in insert and command mode. The selection of a cell gets copied to inputbar.
 
 
 Pending
 -------
-Add mouse support in insert and command mode
 Rethink LUA evaluation
 
 

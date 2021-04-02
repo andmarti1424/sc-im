@@ -1297,7 +1297,6 @@ Commands for handling cell content:
     passed that time no mapping was reached, that input would be passed to
     the buffer.
 
-
     'ignorecase' [default off]
     set this to ignore case in searches done with '/' command.
 

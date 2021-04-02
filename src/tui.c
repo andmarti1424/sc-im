@@ -87,6 +87,7 @@
 #include "sc.h"
 #include "cmds.h"
 #include "cmds_visual.h"
+#include "cmds_command.h"
 #include "conf.h"
 #include "version.h"
 #include "file.h"
@@ -1539,14 +1540,19 @@ void ui_mv_bottom_bar() {
  */
 #ifdef MOUSE
 void ui_handle_mouse(MEVENT event) {
-    if (curmode != NORMAL_MODE) return;
+
+    // if out of range return
     int i, r = 0, c = 0;
     if ( event.x < RESCOL || ( get_conf_int("input_bar_bottom") && (event.y == 0 || event.y >= LINES - RESROW)) ||
        ( !get_conf_int("input_bar_bottom") && (event.y <= RESROW))) return;
 
+    // if mode is not handled return
+    if (curmode != NORMAL_MODE && curmode != INSERT_MODE && curmode != COMMAND_MODE) return;
+
+    // scroll in normal mode
 #ifdef BUTTON5_PRESSED
-    if (event.bstate & BUTTON4_PRESSED || // scroll up
-        event.bstate & BUTTON5_PRESSED) { // scroll down
+    if (curmode == NORMAL_MODE && (event.bstate & BUTTON4_PRESSED || // scroll up
+        event.bstate & BUTTON5_PRESSED)) { // scroll down
             int n = LINES - RESROW - 1;
             if (get_conf_int("half_page_scroll")) n = n / 2;
             lastcol = curcol;
@@ -1593,9 +1599,23 @@ void ui_handle_mouse(MEVENT event) {
         if (col >= c + 1) break;
     }
     if (i > mxcol) i = mxcol;
-    currow = offscr_sc_rows + r;
-    curcol = offscr_sc_cols + i;
-    unselect_ranges();
+
+    // if in normal mode, change currow and curcol
+    if (curmode == NORMAL_MODE) {
+        currow = offscr_sc_rows + r;
+        curcol = offscr_sc_cols + i;
+        unselect_ranges();
+
+    // if in insert or command mode, we add the selected cell to inputbar
+    } else if (curmode == COMMAND_MODE || curmode == INSERT_MODE) {
+        wchar_t cline [BUFFERSIZE];
+        int count;
+        swprintf(cline, BUFFERSIZE, L"%s%d", coltoa(offscr_sc_cols+i), offscr_sc_rows + r);
+        for(count = 0; count < wcslen(cline); count++) ins_in_line(cline[count]);
+        ui_show_header();
+        return;
+    }
+
     ui_update(TRUE);
 }
 #endif
