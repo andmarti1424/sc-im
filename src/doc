@@ -1291,13 +1291,20 @@ Commands for handling cell content:
     'tm_gmtoff' [default -10800 seconds]
     set gmtoffset used for converting datetimes to localtime.
 
+    'mapping_timeout' [default 1500 milli seconds]
+    this is used when some user input collides with the start of a mapping.
+    sc-im will wait 'mapping_timeout' for user to complete a mapping. If
+    passed that time no mapping was reached, that input would be passed to
+    the buffer.
+
+
     'ignorecase' [default off]
     set this to ignore case in searches done with '/' command.
 
     'autobackup' [default 0 (no autobackup)]
     set this to a number in seconds 'n', to backup current file every 'n'
     seconds.
-    AUTOBACKUP must be set during Sc-im build for this feature to be
+    AUTOBACKUP must be set during sc-im build for this feature to be
     available.
     If you set this to 0 but AUTOBACKUP was set during build, it still will
     check for existance of backups before loading a file.
@@ -1973,5 +1980,7 @@ Commands for handling cell content:
     NEWLINE_ACTION = {NUMBER}
     TM_GMTOFF
     TM_GMTOFF = {num}
+    MAPPING_TIMEOUT
+    MAPPING_TIMEOUT = {num}
 
 vim:tw=78:sw=4:ts=4:et:ft=help:norl:

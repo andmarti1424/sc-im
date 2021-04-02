@@ -104,7 +104,7 @@ void handle_input(struct block * buffer) {
      */
     while (
               ( ! has_cmd(buffer, msec) && msec <= CMDTIMEOUT) ||
-              ( could_be_mapping(buffer) && msec_init < 800)
+              ( could_be_mapping(buffer) && msec_init < get_conf_int("mapping_timeout"))
           ) {
 
             // if command pending, refresh 'ef' only. Multiplier and cmd pending

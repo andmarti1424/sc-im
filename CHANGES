@@ -5,6 +5,8 @@ Changes
 Improved yank and undo alloc'ing. Malloc as much we need from start in batches and avoid small mallocs.
 Disable mouse in mode other than NORMAL_MODE
 UNDO of :fsum is handled by let.
+:fsum added to command mode commands. was missing.
+Added mapping_timeout configuration value with a default value of 1500ms (used to be a fixed value of 800ms).
 
 
 Pending
