@@ -38,8 +38,8 @@
 /**
  * \file input.c
  * \author Andrés Martinelli <andmarti@gmail.com>
- * \date 2017-07-18
- * \brief TODO Write a tbrief file description.
+ * \date 2021-04-02
+ * \brief functions to handle stdin
  */
 
 #include <sys/time.h>
@@ -100,7 +100,7 @@ void handle_input(struct block * buffer) {
      * important: buffer may contain a valid command (for instance,
      * just a letter in insert mode) but that buffer start may also
      * be a possible mapping! (for instace kj in insert mode to exit the mode).
-     * if so, wait a 800ms, before triggering has_cmd..
+     * if so, wait a mapping_timeout (1500ms), before triggering has_cmd..
      */
     while (
               ( ! has_cmd(buffer, msec) && msec <= CMDTIMEOUT) ||
@@ -174,11 +174,11 @@ void handle_input(struct block * buffer) {
                     cmd_digraph = 1;
                     continue;
                 }
-
                 addto_buf(buffer, wd);
 
                 // Replace maps in buffer
-                replace_maps(buffer);
+                // break if nore mapping
+                if (replace_maps(buffer) == 1) break;
             }
 
             /*

@@ -83,11 +83,14 @@ int could_be_mapping(struct block * b) {
 
 
 /**
- * \brief TODO Document replace_maps()
+ * \brief replace_maps() inside a struct block * list.
  * \param[in] b
  * \return r
+ * return 0 when no mapping replaced
+ * return -1 when recursive mapping was detected
+ * return 1 when no recursive mapping was applied
+ * return 2 when recursive mapping was applied
  */
-
 int replace_maps (struct block * b) {
     int r = 0;
 
@@ -116,7 +119,7 @@ int replace_maps (struct block * b) {
         m = m->psig;
     }
 
-    if (r && m->recursive) replace_maps(b);  // recursive mapping here!
+    if (r && m->recursive) { replace_maps(b); return 2; } // recursive mapping here!
     return r;
 }
 
