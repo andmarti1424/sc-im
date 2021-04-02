@@ -47,8 +47,7 @@
 #define MAXSC            15    // MAXSC is the max length of a special key expressed as a string. ex. <C-a>
 #define MAXMAPITEM       (MAXSC * 20) // max length of mapping part (in / out)
 #define TIMEOUT_CURSES   300   // ms  curses input timeout
-#define CMDTIMEOUT       3000  // ms  valid command timeout
-#define COMPLETECMDTIMEOUT     (CMDTIMEOUT/8)
+#define COMPLETECMDTIMEOUT     (get_conf_int("command_timeout")/8)     // used for goto cell
 #define ESC_DELAY        25    // Escape timeout
 #define RESCOL           4     // columns reserved for row numbers
 #define RESROW           2     // rows reserved for prompt, error, and column numbers

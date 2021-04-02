@@ -1291,11 +1291,14 @@ Commands for handling cell content:
     'tm_gmtoff' [default -10800 seconds]
     set gmtoffset used for converting datetimes to localtime.
 
+    'command_timeout' [default 3000 milli seconds]
+    the time sc-im waits for a valid command to be entered (the time it stays in '?')
+
     'mapping_timeout' [default 1500 milli seconds]
     this is used when some user input collides with the start of a mapping.
     sc-im will wait 'mapping_timeout' for user to complete a mapping. If
     passed that time no mapping was reached, that input would be passed to
-    the buffer.
+    the stdin buffer.
 
     'ignorecase' [default off]
     set this to ignore case in searches done with '/' command.

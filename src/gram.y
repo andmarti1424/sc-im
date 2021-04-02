@@ -264,6 +264,7 @@ token S_YANKCOL
 %token K_IGNORECASE
 %token K_NOIGNORECASE
 %token K_TM_GMTOFF
+%token K_COMMAND_TIMEOUT
 %token K_MAPPING_TIMEOUT
 %token K_NEWLINE_ACTION
 %token K_SHOW_CURSOR
@@ -1203,6 +1204,13 @@ setitem :
 
     |    K_NEWLINE_ACTION '=' NUMBER {
                                      if ($3 == 0) parse_str(user_conf_d, "newline_action=0", TRUE); }
+    |    K_COMMAND_TIMEOUT        {               parse_str(user_conf_d, "command_timeout=3000", TRUE); }
+    |    K_COMMAND_TIMEOUT '=' num   {
+                                     char * s = scxmalloc((unsigned) BUFFERSIZE);
+                                     sprintf(s, "command_timeout=%d", (int) $3);
+                                     parse_str(user_conf_d, s, TRUE);
+                                     scxfree(s);
+                                     }
     |    K_MAPPING_TIMEOUT        {               parse_str(user_conf_d, "mapping_timeout=1500", TRUE); }
     |    K_MAPPING_TIMEOUT '=' num   {
                                      char * s = scxmalloc((unsigned) BUFFERSIZE);

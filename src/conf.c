@@ -92,6 +92,7 @@ const char default_config[] =
 #else
     "default_paste_from_clipboard_cmd=\n"
 #endif
+    "command_timeout=3000\n"
     "mapping_timeout=1500\n"
 
     "tm_gmtoff=0\n";

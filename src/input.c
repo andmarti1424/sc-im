@@ -103,7 +103,7 @@ void handle_input(struct block * buffer) {
      * if so, wait a mapping_timeout (1500ms), before triggering has_cmd..
      */
     while (
-              ( ! has_cmd(buffer, msec) && msec <= CMDTIMEOUT) ||
+              ( ! has_cmd(buffer, msec) && msec <= get_conf_int("command_timeout")) ||
               ( could_be_mapping(buffer) && msec_init < get_conf_int("mapping_timeout"))
           ) {
 
@@ -203,7 +203,7 @@ void handle_input(struct block * buffer) {
             }
 
     }
-    if (msec >= CMDTIMEOUT) { // timeout. Command incomplete
+    if (msec >= get_conf_int("command_timeout")) { // timeout. Command incomplete
         cmd_pending = 0;      // No longer wait for a command, set flag.
         cmd_multiplier = 0;   // Reset multiplier
     } else {                  // Execute command or mapping
