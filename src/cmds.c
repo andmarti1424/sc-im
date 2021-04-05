@@ -656,12 +656,25 @@ struct enode * copye(register struct enode *e, int Rdelta, int Cdelta, int r1, i
  * \return none
  */
 void dorowformat(int r, unsigned char size) {
+#ifdef UNDO
+    if (! loading) {
+        create_undo_action();
+        add_undo_row_format(r, 'R', rowformat[r]);
+    }
+#endif
+
     if (size < 0 || size > UCHAR_MAX) sc_error("Invalid row format");
     if (r >= maxrows && !growtbl(GROWROW, 0, r)) r = maxrows-1 ;
     checkbounds(&r, &curcol);
 
     rowformat[r] = size;
-    ui_update(TRUE);
+
+#ifdef UNDO
+    if (!loading) {
+        add_undo_row_format(r, 'A', rowformat[r]);
+        end_undo_action();
+    }
+#endif
     if (! loading) modflg++;
     return;
 }
@@ -901,7 +914,9 @@ void deleterow(int row, int mult) {
     ents_that_depends_on_range(row, 0, row + mult - 1, maxcol);
     copy_to_undostruct(row, 0, row + mult - 1, maxcol, UNDO_DEL, HANDLE_DEPS, NULL);
     save_undo_range_shift(-mult, 0, row, 0, row - 1 + mult, maxcol);
-
+    int i;
+    for (i=row; i < row + mult; i++)
+        add_undo_row_format(i, 'R', rowformat[currow]);
 #endif
 
     fix_marks(-mult, 0, row + mult - 1, maxrow, 0, maxcol);

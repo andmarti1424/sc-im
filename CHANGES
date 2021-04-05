@@ -14,10 +14,11 @@ wrap cell content when nooverlap and notruncate are set.
 
 Pending
 -------
-colformat: undo of ir, dr, rowformat
 Rethink LUA evaluation
 handle content alignment over multiple lines in cmds.c:pad_and_align
 handle rowformat when exporting markdown and export plain!
+BUG: undo/redo of ir/dr ic/dc does not change hidden_rows/hidden_cols properly.
+
 
 
 Thanks to all that helped and created PR.

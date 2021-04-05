@@ -153,6 +153,7 @@ void create_undo_action() {
     undo_item.p_sig       = NULL;
     undo_item.range_shift = NULL;
     undo_item.cols_format = NULL;
+    undo_item.rows_format = NULL;
 
     undo_item.row_hidded  = NULL;
     undo_item.row_showed  = NULL;
@@ -177,7 +178,7 @@ void end_undo_action() {
     if ((undo_item.added      == NULL && undo_item.allocations == NULL &&
         undo_item.removed     == NULL && undo_item.range_shift == NULL &&
         undo_item.row_hidded  == NULL && undo_item.row_showed  == NULL &&
-        undo_item.cols_format == NULL &&
+        undo_item.cols_format == NULL && undo_item.rows_format == NULL &&
         undo_item.col_hidded  == NULL && undo_item.col_showed  == NULL) || loading) {
         if (undo_list->p_ant != NULL) undo_list = undo_list->p_ant;
         undo_list_pos--;
@@ -214,6 +215,7 @@ void add_to_undolist(struct undo u) {
     ul->alloc_size = u.alloc_size;
     ul->range_shift = u.range_shift;
     ul->cols_format = u.cols_format;
+    ul->rows_format = u.rows_format;
     ul->row_hidded = u.row_hidded;
     ul->col_hidded = u.col_hidded;
     ul->row_showed = u.row_showed;
@@ -290,6 +292,10 @@ void dismiss_undo_item(struct undo * ul) {
     if (ul->cols_format != NULL) {                      // Free cols_format memory
         free(ul->cols_format->cols);
         free(ul->cols_format);
+    }
+    if (ul->rows_format != NULL) {                      // Free rows_format memory
+        free(ul->rows_format->rows);
+        free(ul->rows_format);
     }
     if (ul->row_hidded  != NULL) free(ul->row_hidded); // Free hidden row memory
     if (ul->col_hidded  != NULL) free(ul->col_hidded); // Free hidden col memory
@@ -526,7 +532,7 @@ void copy_cell_to_undostruct (struct ent * e, struct ent * ori, char type) {
 }
 
 /**
- * \brief TODO Document add_undo_col_format()
+ * \brief add_undo_col_format()
  *
  * \param[in] col
  * \param[in] type
@@ -536,7 +542,6 @@ void copy_cell_to_undostruct (struct ent * e, struct ent * ori, char type) {
  *
  * \return none
  */
-
 void add_undo_col_format(int col, int type, int fwidth, int precision, int realfmt) {
     if (undo_item.cols_format == NULL) {
         undo_item.cols_format = (struct undo_cols_format *) malloc( sizeof(struct undo_cols_format));
@@ -551,6 +556,30 @@ void add_undo_col_format(int col, int type, int fwidth, int precision, int realf
     undo_item.cols_format->cols[ undo_item.cols_format->length - 1].fwidth = fwidth;
     undo_item.cols_format->cols[ undo_item.cols_format->length - 1].precision = precision;
     undo_item.cols_format->cols[ undo_item.cols_format->length - 1].realfmt = realfmt;
+    return;
+}
+
+/**
+ * \brief add_undo_row_format()
+ *
+ * \param[in] row
+ * \param[in] type
+ * \param[in] format
+ *
+ * \return none
+ */
+void add_undo_row_format(int row, int type, unsigned char format) {
+    if (undo_item.rows_format == NULL) {
+        undo_item.rows_format = (struct undo_rows_format *) malloc( sizeof(struct undo_rows_format));
+        undo_item.rows_format->length = 1;
+        undo_item.rows_format->rows = (struct undo_row_info *) malloc( sizeof(struct undo_row_info));
+    } else {
+        undo_item.rows_format->length++;
+        undo_item.rows_format->rows = (struct undo_row_info *) realloc(undo_item.rows_format->rows, undo_item.rows_format->length * sizeof(struct undo_row_info));
+    }
+    undo_item.rows_format->rows[ undo_item.rows_format->length - 1].type = type;
+    undo_item.rows_format->rows[ undo_item.rows_format->length - 1].row = row;
+    undo_item.rows_format->rows[ undo_item.rows_format->length - 1].format = format;
     return;
 }
 
@@ -715,8 +744,8 @@ void do_undo() {
 
         shift_range(- ul->range_shift->delta_rows, - ul->range_shift->delta_cols,
             ul->range_shift->tlrow, ul->range_shift->tlcol, ul->range_shift->brrow, ul->range_shift->brcol);
- 
-        // shift col_formats here
+
+        // shift col_formats here. FIXME handle col_hidden
         if (ul->range_shift->tlcol >= 0 && ul->range_shift->tlrow == 0 && ul->range_shift->brrow == maxrow) { // && ul->range_shift->delta_cols > 0) {
             int i;
             if (ul->range_shift->delta_cols > 0)
@@ -732,7 +761,16 @@ void do_undo() {
                  realfmt[i] = realfmt[i + ul->range_shift->delta_cols];
             }
         }
-        // TODO do the same for rows here
+        // do the same for rows here. FIXME handle row_hidden
+        if (ul->range_shift->tlrow >= 0 && ul->range_shift->tlcol == 0 && ul->range_shift->brcol == maxcol) { // && ul->range_shift->delta_rows > 0) {
+            int i;
+            if (ul->range_shift->delta_rows > 0)
+                for (i = ul->range_shift->brrow + ul->range_shift->delta_rows; i <= maxrow; i++)
+                    rowformat[i - ul->range_shift->delta_rows] = rowformat[i];
+            else
+                for (i = maxrow; i >= ul->range_shift->tlrow - ul->range_shift->delta_rows; i--)
+                     rowformat[i] = rowformat[i + ul->range_shift->delta_rows];
+        }
     }
 
     // Change cursor position
@@ -796,7 +834,19 @@ void do_undo() {
            }
         }
     }
-    // TODO: do the same for rows here. with row_hidden and rowformat
+
+    // Restore previous row format
+    if (ul->rows_format != NULL) {
+        struct undo_rows_format * uf = ul->rows_format;
+        int size = uf->length;
+        int i;
+
+        for (i=0; i < size; i++) {
+           if (uf->rows[i].type == 'R') {
+               rowformat[uf->rows[i].row] = uf->rows[i].format;
+           }
+        }
+    }
 
     // for every ent in added and removed, we reeval expression to update graph
     struct ent * ie = ul->added;
@@ -878,7 +928,7 @@ void do_redo() {
         shift_range(ul->range_shift->delta_rows, ul->range_shift->delta_cols,
             ul->range_shift->tlrow, ul->range_shift->tlcol, ul->range_shift->brrow, ul->range_shift->brcol);
 
-        // shift col_formats here
+        // shift col_formats here. FIXME handle col_hidden
         if (ul->range_shift->tlcol >= 0 && ul->range_shift->tlrow == 0 && ul->range_shift->brrow == maxrow) {
             int i;
             if (ul->range_shift->delta_cols > 0)
@@ -894,7 +944,16 @@ void do_redo() {
                 realfmt[i] = realfmt[i - ul->range_shift->delta_cols];
             }
         }
-        // TODO: do the same for rows here. with row_hidden and rowformat
+        // do the same for rows here. FIXME handle row_hidden
+        if (ul->range_shift->tlrow >= 0 && ul->range_shift->tlcol == 0 && ul->range_shift->brcol == maxcol) {
+            int i;
+            if (ul->range_shift->delta_rows > 0)
+                for (i = maxrow; i >= ul->range_shift->tlrow + ul->range_shift->delta_rows; i--)
+                    rowformat[i] = rowformat[i - ul->range_shift->delta_rows];
+            else
+                for (i = ul->range_shift->tlrow; i - ul->range_shift->delta_rows <= maxrow; i++)
+                    rowformat[i] = rowformat[i - ul->range_shift->delta_rows];
+        }
     }
 
     //update(TRUE);
@@ -960,7 +1019,19 @@ void do_redo() {
             }
         }
     }
-    // TODO: do the same for rows here. with row_hidden and rowformat
+
+    // Restore new row format
+    if (ul->rows_format != NULL) {
+        struct undo_rows_format * uf = ul->rows_format;
+        int size = uf->length;
+        int i;
+
+        for (i=0; i < size; i++) {
+           if (uf->rows[i].type == 'A') {
+               rowformat[uf->rows[i].row] = uf->rows[i].format;
+           }
+        }
+    }
 
     // for every ent in added and removed, we reeval expression to update graph
     struct ent * ie = ul->added;

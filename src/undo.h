@@ -53,6 +53,7 @@ struct undo {
     struct ent * removed;
     struct undo_range_shift * range_shift;
     struct undo_cols_format * cols_format;
+    struct undo_rows_format * rows_format;
     struct undo * p_sig;
     struct ent_ptr * allocations;
     int alloc_size;
@@ -85,12 +86,25 @@ struct undo_cols_format {
     struct undo_col_info * cols;
 };
 
+//These two structures are for undo / redo changes in row format
+struct undo_row_info {
+    char type;       // a row can be 'R' (removed) or 'A' (added) because of change
+    int row;
+    unsigned char format;      // 1 to n
+};
+
+struct undo_rows_format {
+    size_t length;   // keep the number of elements (rows)
+    struct undo_row_info * rows;
+};
+
 void create_undo_action();
 void end_undo_action();
 void copy_to_undostruct (int ri, int ci, int rf, int cf, char type, short handle_deps, struct ent ** destination);
 void save_undo_range_shift(int delta_rows, int delta_cols, int tlrow, int tlcol, int brrow, int brcol);
 void undo_hide_show(int row, int col, char type, int arg);
 void add_undo_col_format(int col, int type, int fwidth, int precision, int realfmt);
+void add_undo_row_format(int row, int type, unsigned char format);
 
 void add_to_undolist(struct undo u);
 void do_undo();

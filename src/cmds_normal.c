@@ -535,13 +535,13 @@ void do_normalmode(struct block * buf) {
 
             // decrease row height
             } else if (buf->pnext->value == 'k') {
-               if (rowformat[currow] > 1) rowformat[currow]--;
+               dorowformat(currow, rowformat[currow]-1);
                ui_update(TRUE);
                break;
 
             // increase row height
             } else if (buf->pnext->value == 'j') {
-               if (rowformat[currow] < UCHAR_MAX) rowformat[currow]++;
+               dorowformat(currow, rowformat[currow]+1);
                ui_update(TRUE);
                break;
 
@@ -747,14 +747,15 @@ void do_normalmode(struct block * buf) {
             create_undo_action();
 #endif
 
-
-
             if (buf->pnext->value == L'r') {
 #ifdef UNDO
                 save_undo_range_shift(1, 0, currow, 0, currow, maxcol);
 #endif
                 fix_marks(1, 0, currow, maxrow, 0, maxcol);
                 insert_row(0);
+#ifdef UNDO
+                add_undo_row_format(currow, 'A', rowformat[currow]);
+#endif
 
             } else if (buf->pnext->value == L'c') {
 #ifdef UNDO
@@ -786,6 +787,9 @@ void do_normalmode(struct block * buf) {
 #endif
                 fix_marks(1, 0, currow+1, maxrow, 0, maxcol);
                 insert_row(1);
+#ifdef UNDO
+                add_undo_row_format(currow, 'A', rowformat[currow]);
+#endif
 
             } else if (buf->pnext->value == L'c') {
 #ifdef UNDO
