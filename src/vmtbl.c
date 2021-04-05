@@ -201,8 +201,8 @@ int growtbl(int rowcol, int toprow, int topcol) {
 
         GROWALLOC(rowformat2, rowformat, newrows, unsigned char, nolonger);
         memset(rowformat + maxrows, 0, (newrows - maxrows) * sizeof(unsigned char));
-        for (i = maxcols; i < newcols; i++) {
-            rowformat[i] = 1;
+        for (i = maxrows; i < newrows; i++) {
+           rowformat[i] = 1;
         }
 
         /*

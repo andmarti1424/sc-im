@@ -416,7 +416,7 @@ void ui_update(int header) {
     int off_rows = calc_offscr_sc_rows();
     int mxcol = offscr_sc_cols + off_cols - 1;
     int mxrow = offscr_sc_rows + off_rows - 1;
-    //sc_debug("out: off:%d, center:%d, mxcol:%d %s, maxcols:%d", offscr_sc_cols, center_hidden_cols, mxcol, coltoa(mxcol), maxcols);
+    //sc_info("off_row:%d offscr:%d, center:%d, mxrow:%d, maxrows:%d", off_rows, offscr_sc_rows, center_hidden_rows, mxrow, maxrows);
 
     /* You can't hide the last row or col */
     while (row_hidden[currow])

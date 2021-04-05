@@ -800,6 +800,7 @@ void insert_row(int after) {
     tmprow = tbl[maxrow];
     for (r = maxrow; r > lim; r--) {
         row_hidden[r] = row_hidden[r-1];
+        rowformat[r] = rowformat[r-1];
         tbl[r] = tbl[r-1];
         for (c = 0, pp = ATBL(tbl, r, 0); c < maxcols; c++, pp++)
             if (*pp) (*pp)->row = r;
@@ -956,6 +957,8 @@ void int_deleterow(int row, int mult) {
 
         // and after that the erase_area of the deleted row
         erase_area(row, 0, row, maxcol, 0, 1); //important: this mark the ents as deleted
+
+        //FIXME update row_hidden and rowformat here
 
         // and we decrease ->row of all rows after the deleted one
         for (r = row; r < maxrows - 1; r++) {
