@@ -273,7 +273,7 @@ int save_plain(FILE * fout, int r0, int c0, int rn, int cn) {
                    fwprintf(fout, L"\t");
                 }
                 if (! get_conf_int("copy_to_clipboard_delimited_tab")) {
-                    pad_and_align(text, num, fwidth[col], align, 0, out);
+                    pad_and_align(text, num, fwidth[col], align, 0, out, rowformat[row]);
                     fwprintf(fout, L"%ls", out);
                 } else if ( (*pp)->flags & is_valid) {
                     fwprintf(fout, L"%s\t", num);

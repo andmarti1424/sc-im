@@ -535,13 +535,13 @@ int sc_isprint(int d) {
 }
 
 /**
- * \brief Return the number of wide chars of wchar_t * s string. Needed to 
+ * \brief Return the number of wide chars of wchar_t * s string. Needed to
  * fill p column positions.
  *
  * \param[in] s
  * \param[in] p
  *
- * \return TODO returns
+ * \return int
  */
 
 int count_width_widestring(const wchar_t * s, int p) {

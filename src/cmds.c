@@ -2531,7 +2531,7 @@ int calc_offscr_sc_rows() {
  * \return resulting string to be printed to the screen
  */
 
-void pad_and_align (char * str_value, char * numeric_value, int col_width, int align, int padding, wchar_t * str_out) {
+void pad_and_align (char * str_value, char * numeric_value, int col_width, int align, int padding, wchar_t * str_out, int rowfmt) {
     int str_len  = 0;
     int num_len  = strlen(numeric_value);
     str_out[0] = L'\0';
@@ -2560,7 +2560,7 @@ void pad_and_align (char * str_value, char * numeric_value, int col_width, int a
     }
 
     // If content exceedes column width, outputs n number of '*' needed to fill column width
-    if (str_len + num_len + padding > col_width && !get_conf_int("truncate") && ( (! get_conf_int("overlap"))) ) {
+    if (str_len + num_len + padding > col_width * rowfmt && !get_conf_int("truncate") && !get_conf_int("overlap") ) {
         if (padding) wmemset(str_out + wcslen(str_out), L'#', padding);
         wmemset(str_out + wcslen(str_out), L'*', col_width - padding);
         return;
@@ -2571,7 +2571,6 @@ void pad_and_align (char * str_value, char * numeric_value, int col_width, int a
 
     // left spaces
     int left_spaces = 0;
-    //if (align == 0) && str_len) {                             // center align
     if (align == 0) {                                           // center align
         left_spaces = (col_width - padding - str_len) / 2;
         if (num_len > left_spaces) left_spaces = col_width - padding - str_len - num_len;
@@ -2602,8 +2601,8 @@ void pad_and_align (char * str_value, char * numeric_value, int col_width, int a
     }
 
     // Similar condition to max width '*' condition above, but just trims instead
-    if (str_len + num_len + padding > col_width && get_conf_int("truncate")) {
-      str_out[col_width] = '\0';
+    if (str_len + num_len + padding > col_width * rowfmt && get_conf_int("truncate")) {
+        str_out[col_width] = '\0';
     }
 
     return;

@@ -1036,9 +1036,7 @@ void ui_show_content(WINDOW * win, int mxrow, int mxcol) {
                 //    else if get_conf_int("hide_number_from_combined"))
                 //        num[0]='\0';
                 // }
-                pad_and_align(text, num, fieldlen, align, (*p)->pad, out);
-                if (col == mxcol && wcswidth(out, wcslen(out)) > fieldlen)
-                    out[ count_width_widestring(out, fieldlen) ] = L'\0';
+                pad_and_align(text, num, fieldlen, align, (*p)->pad, out, rowformat[row]);
 
 #ifdef USECOLORS
                 if (has_colors() && get_conf_int("underline_grid")) {
@@ -1048,8 +1046,22 @@ void ui_show_content(WINDOW * win, int mxrow, int mxcol) {
                     wattr_set(win, attr | A_UNDERLINE, color, NULL);
                 }
 #endif
-                mvwprintw(win, count+1, c, "%ls", out);
-                wclrtoeol(win);
+                // 'out' may contain the output to fill multiple rows. not just one.
+                int count_row = 0;
+                wchar_t new[wcslen(out)+1];
+                for (count_row = 0; count_row < rowformat[row] && wcslen(out); count_row++) {
+                    int cw = count_width_widestring(out, fieldlen);
+                    wcscpy(new, out);
+                    if (get_conf_int("truncate") || !get_conf_int("overlap")) new[cw] = L'\0';
+
+                    int whites = fieldlen - wcslen(new);
+                    while (whites-- > 0) add_wchar(new, L' ', wcslen(new));
+                    if (wcslen(new)) mvwprintw(win, count+1+count_row, c, "%ls", new);
+                    wclrtoeol(win);
+                    if (cw) del_range_wchars(out, 0, cw-1);
+                    wcscpy(new, out);
+                    if (get_conf_int("overlap")) break;
+                }
             }
 
             if (currow == row && curcol == col) {

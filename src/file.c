@@ -1304,7 +1304,7 @@ void export_markdown(char * fname, int r0, int c0, int rn, int cn) {
                   strcat (dashline, "|");
                 }
 
-                pad_and_align (text, num, fwidth[col], align, 0, out);
+                pad_and_align (text, num, fwidth[col], align, 0, out, rowformat[row]);
                 (void) fprintf (f, "%ls", out);
 
             } else {
@@ -1407,7 +1407,9 @@ void export_plain(char * fname, int r0, int c0, int rn, int cn) {
                     }
                 }
 
-                pad_and_align (text, num, fwidth[col], align, 0, out);
+                pad_and_align (text, num, fwidth[col], align, 0, out, rowformat[row]);
+                //TODO if width is exceed and not overlap nor truncate (wrap).. follow to next column
+                //but do not increase row. loop by rowformat..
                 (void) fprintf (f, "%ls", out);
 
             } else {

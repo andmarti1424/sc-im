@@ -8,12 +8,16 @@ UNDO of :fsum is handled by let.
 Added mapping_timeout configuration variable with a default value of 1500ms (used to be a fixed value of 800ms).
 Added mouse support in insert and command mode. The selection of a cell gets copied to inputbar.
 Added command_timeout configuration variable.
-Rows now can have height higher than 1 LINE. Its UNDO still pending.
+Rows now can have height higher than 1 LINE.
+wrap cell content when nooverlap and notruncate are set.
 
 
 Pending
 -------
+colformat: undo of ir, dr, rowformat
 Rethink LUA evaluation
+handle content alignment over multiple lines in cmds.c:pad_and_align
+handle rowformat when exporting markdown and export plain!
 
 
 Thanks to all that helped and created PR.
@@ -21,7 +25,6 @@ Thanks to all who support and use this program.
 
 Andrés Martinelli
 andmarti1424
-
 
 
 ***********
