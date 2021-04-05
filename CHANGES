@@ -3,12 +3,12 @@ v0.8.2
 Changes
 -------
 Improved yank and undo alloc'ing. Malloc as much we need from start in batches and avoid small mallocs.
-Disable mouse in mode other than NORMAL_MODE
 UNDO of :fsum is handled by let.
 :fsum added to command mode commands. was missing.
 Added mapping_timeout configuration variable with a default value of 1500ms (used to be a fixed value of 800ms).
 Added mouse support in insert and command mode. The selection of a cell gets copied to inputbar.
 Added command_timeout configuration variable.
+Rows now can have height higher than 1 LINE. Its UNDO still pending.
 
 
 Pending
@@ -39,12 +39,12 @@ Paste to a range of selected cells - (actually added on v0.8 - issue 438 - PR 44
 Added txtdelim | for csv files import - issue 409
 Added macros to --version (show version)
 Support higher versions of lua.
-Handle <ESC> key in mappings. related to issue #492.
+Handle ESC key in mappings. related to issue #492.
 Added freeze to visual mode - issue #459
 
 Changes
 --------
-Recognise <SPACE> in mappings rather than simple ' '
+Recognise SPACE in mappings rather than simple ' '
 Visual change: Moved cmd multiplier to the left of mode
 Changed default headings colors
 many improvements to the config facility and usage - PR 519

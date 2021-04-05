@@ -104,6 +104,7 @@ int * precision;
 int * realfmt;
 char * col_hidden;
 char * row_hidden;
+unsigned short * rowformat;
 char line[FBUFLEN];
 int modflg; /**< Indicates a change was made since last save */
 struct ent *** tbl;

@@ -667,7 +667,8 @@ void ui_show_sc_row_headings(WINDOW * win, int mxrow) {
     #ifdef USECOLORS
     if (has_colors()) ui_set_ucolor(win, &ucolors[HEADINGS], DEFAULT_COLOR);
     #endif
-    int i;
+    int i, j;
+    int count=0;
     int freeze = freeze_ranges && (freeze_ranges->type == 'r' ||  freeze_ranges->type == 'a') ? 1 : 0;
 
     //for (i = 0; i < mxrow && i < maxrows; i++) {
@@ -694,7 +695,12 @@ void ui_show_sc_row_headings(WINDOW * win, int mxrow) {
             wattron(win, A_REVERSE);
             #endif
         }
-        mvwprintw (win, row+1, 0, "%*d ", rescol-1, i);
+        mvwprintw (win, count+1, 0, "%*d ", rescol-1, i);
+
+        for (j=1; j<rowformat[i]; j++) {
+            mvwprintw (win, count+1+j, 0, "%*c ", rescol-1, ' ');
+        }
+        count += rowformat[i];
 
         #ifdef USECOLORS
         if (has_colors()) ui_set_ucolor(win, &ucolors[HEADINGS], DEFAULT_COLOR);
@@ -800,7 +806,7 @@ void ui_show_sc_col_headings(WINDOW * win, int mxcol) {
 
 void ui_show_content(WINDOW * win, int mxrow, int mxcol) {
     register struct ent ** p;
-    int row, col;
+    int row, col, count = 0;
     int q_row_hidden = 0;
     int freezer = freeze_ranges && (freeze_ranges->type == 'r' ||  freeze_ranges->type == 'a') ? 1 : 0;
     int freezec = freeze_ranges && (freeze_ranges->type == 'c' ||  freeze_ranges->type == 'a') ? 1 : 0;
@@ -878,8 +884,7 @@ void ui_show_content(WINDOW * win, int mxrow, int mxcol) {
             //if ( (*p) == NULL) *p = lookat(row, col);
 
             // Clean format
-            #ifdef USECOLORS
-
+#ifdef USECOLORS
             if ((*p) && (*p)->cellerror) {                                  // cellerror
                 ui_set_ucolor(win, &ucolors[CELL_ERROR], ucolors[CELL_ERROR].bg != DEFAULT_COLOR ? DEFAULT_COLOR : col % 2 == 0 ? ucolors[GRID_PAIR].bg : ucolors[GRID_ODD].bg);
             } else if ((*p) && (*p)->v < 0) {                               // cell negative
@@ -895,32 +900,31 @@ void ui_show_content(WINDOW * win, int mxrow, int mxcol) {
             } else {
                 ui_set_ucolor(win, &ucolors[NORMAL], ucolors[NORMAL].bg != DEFAULT_COLOR ? DEFAULT_COLOR : col % 2 == 0 ? ucolors[GRID_PAIR].bg : ucolors[GRID_ODD].bg);
             }
-            #endif
+#endif
 
             // Cell color!
             if ((*p) && (*p)->ucolor != NULL) {
                 ui_set_ucolor(win, (*p)->ucolor, (*p)->ucolor->bg != DEFAULT_COLOR ? DEFAULT_COLOR : col % 2 == 0 ? ucolors[GRID_PAIR].bg : ucolors[GRID_ODD].bg);
             }
 
-
-            // Color selected cell
+            // setup color for selected cell
             if ((currow == row) && (curcol == col)) {
-                #ifdef USECOLORS
+#ifdef USECOLORS
                     if (has_colors()) ui_set_ucolor(win, &ucolors[CELL_SELECTION_SC], ucolors[CELL_SELECTION_SC].bg != DEFAULT_COLOR ? DEFAULT_COLOR : col % 2 == 0 ? ucolors[GRID_PAIR].bg : ucolors[GRID_ODD].bg);
-                #else
+#else
                     wattron(win, A_REVERSE);
-                #endif
+#endif
             }
 
-            // Color selected range
+            // setup color for selected range
             int in_range = 0; // this is for coloring empty cells within a range
             srange * s = get_selected_range();
             if (s != NULL && row >= s->tlrow && row <= s->brrow && col >= s->tlcol && col <= s->brcol ) {
-                #ifdef USECOLORS
+#ifdef USECOLORS
                     if (has_colors()) ui_set_ucolor(win, &ucolors[CELL_SELECTION_SC], ucolors[CELL_SELECTION_SC].bg != DEFAULT_COLOR ? DEFAULT_COLOR : col % 2 == 0 ? ucolors[GRID_PAIR].bg : ucolors[GRID_ODD].bg);
-                #else
+#else
                     wattron(win, A_REVERSE);
-                #endif
+#endif
                 in_range = 1; // local variable. this is for coloring empty cells within a range
             }
 
@@ -928,11 +932,11 @@ void ui_show_content(WINDOW * win, int mxrow, int mxcol) {
             if ( in_range && row >= ranges->tlrow && row <= ranges->brrow &&
                  col >= ranges->tlcol && col <= ranges->brcol
                ) {
-                #ifdef USECOLORS
+#ifdef USECOLORS
                     if (has_colors()) ui_set_ucolor(win, &ucolors[CELL_SELECTION_SC], ucolors[CELL_SELECTION_SC].bg != DEFAULT_COLOR ? DEFAULT_COLOR : col % 2 == 0 ? ucolors[GRID_PAIR].bg : ucolors[GRID_ODD].bg);
-                #else
+#else
                     wattron(win, A_REVERSE);
-                #endif
+#endif
             }
 
             char num [FBUFLEN] = "";
@@ -982,62 +986,69 @@ void ui_show_content(WINDOW * win, int mxrow, int mxcol) {
                num[0]='\0';
             }
 
+            // repaint a blank cell or range
+            if ( (currow == row && curcol == col) ||
+               ( in_range && row >= ranges->tlrow && row <= ranges->brrow &&
+                 col >= ranges->tlcol && col <= ranges->brcol ) ) {
+#ifdef USECOLORS
+                if (has_colors()) ui_set_ucolor(win, &ucolors[CELL_SELECTION_SC], ucolors[CELL_SELECTION_SC].bg != DEFAULT_COLOR ? DEFAULT_COLOR : col % 2 == 0 ? ucolors[GRID_PAIR].bg : ucolors[GRID_ODD].bg);
+#else
+                wattron(win, A_REVERSE);
+#endif
+            } else if ( !(*p) || (*p)->ucolor == NULL) {
+#ifdef USECOLORS
+                // When a long string does not fit in column.
+                ui_set_ucolor(win, &ucolors[STRG], ucolors[STRG].bg != DEFAULT_COLOR ? DEFAULT_COLOR : col % 2 == 0 ? ucolors[GRID_PAIR].bg : ucolors[GRID_ODD].bg);
+#endif
+            }
 
-            // repaint a blank cell, because of in range, or because we have a coloured empty cell!
-            if ( !(*p) || (( !((*p)->flags & is_valid) && !(*p)->label ) && !((*p)->cellerror == CELLERROR)) ) {
-                if ( (currow == row && curcol == col) ||
-                ( in_range && row >= ranges->tlrow && row <= ranges->brrow &&
-                col >= ranges->tlcol && col <= ranges->brcol ) ) {
-                    #ifdef USECOLORS
-                    if (has_colors()) ui_set_ucolor(win, &ucolors[CELL_SELECTION_SC], ucolors[CELL_SELECTION_SC].bg != DEFAULT_COLOR ? DEFAULT_COLOR : col % 2 == 0 ? ucolors[GRID_PAIR].bg : ucolors[GRID_ODD].bg);
-                    #else
-                    wattron(win, A_REVERSE);
-                    #endif
-                } else if ( !(*p) || (*p)->ucolor == NULL) {
-                    #ifdef USECOLORS
-                    // When a long string does not fit in column.
-                    ui_set_ucolor(win, &ucolors[STRG], ucolors[STRG].bg != DEFAULT_COLOR ? DEFAULT_COLOR : col % 2 == 0 ? ucolors[GRID_PAIR].bg : ucolors[GRID_ODD].bg);
-                    #endif
-                }
+#ifdef USECOLORS
+            if (has_colors() && get_conf_int("underline_grid")) {
+                attr_t attr;
+                short color;
+                wattr_get(win, &attr, &color, NULL);
+                wattr_set(win, attr | A_UNDERLINE, color, NULL);
+            }
+#endif
 
-                #ifdef USECOLORS
-                if (has_colors() && get_conf_int("underline_grid")) {
-                    attr_t attr;
-                    short color;
-                    wattr_get(win, &attr, &color, NULL);
-                    wattr_set(win, attr | A_UNDERLINE, color, NULL);
-                }
-                #endif
+            // new implementation for wide char support
+            cchar_t cht[fieldlen];
+            wchar_t w;
+            int i, j, k;
 
-                // new implementation for wide char support
-                cchar_t cht[fieldlen];
-                wchar_t w;
-                int i, j;
+            for (k=0; k < rowformat[row]; k++) {
                 for (i = 0; i < fieldlen; ) {
                     w = L' ';
-                    j = mvwin_wchnstr (win, r, c + i, cht, 1);
+                    j = mvwin_wchnstr (win, count+k+1, c + i, cht, 1);
                     if (j == OK && cht[0].chars[0] != L'\0')
                         w = cht[0].chars[0];
-                    mvwprintw(win, r, c+i, "%lc", w);
+                    mvwprintw(win, count+k+1, c+i, "%lc", w);
                     i += wcwidth(w);
                 }
+            }
 
             // we print text and number
-            } else {
+            if ( (*p) && ( ((*p)->flags & is_valid) || (*p)->label ) ) {
+                // hide text or number from num & text combined cells
+                // if ((strlen(text) && strlen(num)) {
+                //    if get_conf_int("hide_text_from_combined"))
+                //        text[0]='\0';
+                //    else if get_conf_int("hide_number_from_combined"))
+                //        num[0]='\0';
+                // }
                 pad_and_align(text, num, fieldlen, align, (*p)->pad, out);
                 if (col == mxcol && wcswidth(out, wcslen(out)) > fieldlen)
                     out[ count_width_widestring(out, fieldlen) ] = L'\0';
 
-            #ifdef USECOLORS
+#ifdef USECOLORS
                 if (has_colors() && get_conf_int("underline_grid")) {
                     attr_t attr;
                     short color;
                     wattr_get(win, &attr, &color, NULL);
                     wattr_set(win, attr | A_UNDERLINE, color, NULL);
                 }
-            #endif
-
-                mvwprintw(win, r, c, "%ls", out);
+#endif
+                mvwprintw(win, count+1, c, "%ls", out);
                 wclrtoeol(win);
             }
 
@@ -1056,10 +1067,11 @@ void ui_show_content(WINDOW * win, int mxrow, int mxcol) {
             }
 
             // clean format
-            #ifndef USECOLORS
+#ifndef USECOLORS
             wattroff(win, A_REVERSE);
-            #endif
+#endif
         }
+        count += rowformat[row];
     }
 }
 

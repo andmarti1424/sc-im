@@ -533,10 +533,21 @@ void do_normalmode(struct block * buf) {
                     add_frange(lookat(r, c), lookat(rf, cf), 'a');
                 }
 
+            // decrease row height
+            } else if (buf->pnext->value == 'k') {
+               if (rowformat[currow] > 1) rowformat[currow]--;
+               ui_update(TRUE);
+               break;
+
+            // increase row height
+            } else if (buf->pnext->value == 'j') {
+               if (rowformat[currow] < UCHAR_MAX) rowformat[currow]++;
+               ui_update(TRUE);
+               break;
+
             // change in format
             } else {
 #ifdef UNDO
-
             create_undo_action();
             add_undo_col_format(curcol, 'R', fwidth[curcol], precision[curcol], realfmt[curcol]);
 #endif

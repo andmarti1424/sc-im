@@ -734,7 +734,6 @@ void formatcol(int c) {
             modflg++;
             break;
         case '-':
-        case 'j':
         case OKEY_DOWN:
             for (i = curcol; i < curcol + arg; i++) {
                 precision[i]--;
@@ -744,7 +743,6 @@ void formatcol(int c) {
             modflg++;
             break;
         case '+':
-        case 'k':
         case OKEY_UP:
             for (i = curcol; i < curcol + arg; i++)
                 precision[i]++;
@@ -2386,7 +2384,7 @@ int calc_offscr_sc_cols() {
                 offscr_sc_cols = curcol;
                 center_hidden_cols = 0;
             }
-            for (i=curcol-1; i >= 0 && col-fwidth[i] - 1 > rescol; i--) {
+            for (i=curcol-1; i >= 0 && col - fwidth[i] - 1 > rescol; i--) {
                 if (freeze && curcol > brcol) center_hidden_cols--;
                 else offscr_sc_cols--;
                 if ( ! col_hidden[i]) col -= fwidth[i];
@@ -2422,14 +2420,14 @@ int calc_offscr_sc_rows() {
     // pick up row counts
     while (freeze && currow > brrow && currow <= brrow + center_hidden_rows) center_hidden_rows--;
     if (offscr_sc_rows - 1 <= currow) {
-        for (i = 0, q = 0, rows = 0, row=RESROW; i < maxrows && row < LINES; i++) {
+        for (i = 0, q = 0, rows = 0, row=RESROW; i < maxrows && row + rowformat[i] <= LINES; i++) {
             if (i < offscr_sc_rows && ! (freeze && i >= tlrow && i <= brrow)) continue;
             else if (freeze && i > brrow && i <= brrow + center_hidden_rows) continue;
             else if (freeze && i < tlrow && i >= tlrow - center_hidden_rows) continue;
             if (i < offscr_sc_rows && freeze && i >= tlrow && i <= brrow && ! row_hidden[i] ) q++;
             rows++;
             if (i == maxrows - 1) return rows + center_hidden_rows - q;
-            if (! row_hidden[i]) row++;
+            if (! row_hidden[i]) row += rowformat[i];
         }
     }
 
@@ -2467,21 +2465,22 @@ int calc_offscr_sc_rows() {
                 offscr_sc_rows = currow;
                 center_hidden_rows = 0;
             }
-            for (i=currow-1; i >= 0 && row - 1 > RESROW && i < maxrows; i--) {
+            for (i=currow-1; i >= 0 && row - rowformat[i] - 1 > RESROW && i < maxrows; i--) {
                 if (freeze && currow > brrow) center_hidden_rows--;
                 else offscr_sc_rows--;
-                if ( ! row_hidden[i]) row--;
+                if (! row_hidden[i]) row -= rowformat[i];
             }
         }
         // Now pick up the counts again
-        for (i = 0, rows = 0, row=RESROW,   q = 0; i < maxrows && row < LINES; i++) {
+        for (i = 0, rows = 0, row = RESROW, q = 0; i < maxrows && row + rowformat[i] <= LINES; i++) {
             if (i < offscr_sc_rows && ! (freeze && i >= tlrow && i <= brrow)) continue;
             else if (freeze && i > brrow && i <= brrow + center_hidden_rows) continue;
             else if (freeze && i < tlrow && i >= tlrow - center_hidden_rows) continue;
-            if (i < offscr_sc_rows && freeze && i >= tlrow && i <= brrow && ! row_hidden[i] ) q++;
+            if (i < offscr_sc_rows && freeze && i >= tlrow && i <= brrow && ! row_hidden[i]) q++;
             rows++;
             if (i == maxrows - 1) return rows + center_hidden_rows - q;
-            if (! row_hidden[i]) row++;
+
+            if (! row_hidden[i]) row += rowformat[i];
         }
     }
 

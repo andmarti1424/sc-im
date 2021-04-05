@@ -103,10 +103,12 @@ Commands for handling cell content:
      { } |       Align the content of a cell to the left, right or center.  If
                  a range is selected, every cell of the range gets aligned.
 
-     f+ , fk , f-UP:         Change cell format: Increment decimal precision.
-     f- , fj , f-DOWN:       Change cell format: Decrement decimal precision.
-     f< , fh , f-LEFT:       Change cell format: Decrement column width.
-     f> , fl , f-RIGHT:      Change cell format: Increment column width.
+     f< , fh , f-LEFT:  Change column format: Decrement column width.
+     f> , fl , f-RIGHT: Change column format: Increment column width.
+     f+ , f-UP:         Change column format: Increment decimal precision.
+     f- , f-DOWN:       Change column format: Decrement decimal precision.
+     fj                 Change row format: Increase height.
+     fk                 Change row format: Decrease height.
 
      fr          Freeze a row or the rows selected.
                  If none is selected it freezes the current row.

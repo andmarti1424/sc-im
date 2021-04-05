@@ -135,6 +135,7 @@ int growtbl(int rowcol, int toprow, int topcol) {
     int cnt;
     char * col_hidden2;
     char * row_hidden2;
+    unsigned short * rowformat2;
     int newrows;
     int i;
 
@@ -197,6 +198,12 @@ int growtbl(int rowcol, int toprow, int topcol) {
 
         GROWALLOC(row_hidden2, row_hidden, newrows, char, nolonger);
         memset(row_hidden + maxrows, 0, (newrows - maxrows) * sizeof(char));
+
+        GROWALLOC(rowformat2, rowformat, newrows, unsigned short, nolonger);
+        memset(rowformat + maxrows, 0, (newrows - maxrows) * sizeof(unsigned short));
+        for (i = maxcols; i < newcols; i++) {
+            rowformat[i] = 1;
+        }
 
         /*
          * alloc tbl row pointers, per net.lang.c, calloc does not
