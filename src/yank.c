@@ -137,6 +137,7 @@ void free_yanklist () {
 /**
  * \brief Add an already alloc'ed 'ent' element to the yanklist
  *
+ * yanklist_tail is pointer to the last ent in the list
  * \param[in] item 'ent' element to add to the yanklist
  * \return none
  */
@@ -200,6 +201,9 @@ void yank_area(int tlrow, int tlcol, int brrow, int brcol, char type, int arg) {
 
             add_ent_to_yanklist(y_cells++);
         }
+    // this takes care of a potential memory leak if no ent was added to yanklist
+    // for instance when deleting empty row
+    if (! yanked_cells) free(y_cells);
     return;
 }
 
