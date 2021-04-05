@@ -1566,7 +1566,7 @@ void ui_mv_bottom_bar() {
 void ui_handle_mouse(MEVENT event) {
 
     // if out of range return
-    int i, r = 0, c = 0;
+    int i, j, r = 0, c = 0;
     if ( event.x < RESCOL || ( get_conf_int("input_bar_bottom") && (event.y == 0 || event.y >= LINES - RESROW)) ||
        ( !get_conf_int("input_bar_bottom") && (event.y <= RESROW))) return;
 
@@ -1600,7 +1600,9 @@ void ui_handle_mouse(MEVENT event) {
     r = event.y - RESROW + (get_conf_int("input_bar_bottom") ? 1 : - 1);
 
     int mxcol = offscr_sc_cols + calc_offscr_sc_cols() - 1;
+    int mxrow = offscr_sc_rows + calc_offscr_sc_rows() - 1;
     int col = 0;
+    int row = 0;
     int freeze = freeze_ranges && (freeze_ranges->type == 'c' ||  freeze_ranges->type == 'a') ? 1 : 0;
 
     for (i = 0; i <= mxcol; i++) {
@@ -1617,24 +1619,44 @@ void ui_handle_mouse(MEVENT event) {
          i > freeze_ranges->br->col && i <= freeze_ranges->br->col + center_hidden_cols) || (
          i < freeze_ranges->tl->col && i >= freeze_ranges->tl->col - center_hidden_cols))) continue;
 
-
         //sc_debug("i:%d off%d mxcol:%d col:%d c:%d", i,  offscr_sc_cols, mxcol, col, c);
         col += fwidth[i];
         if (col >= c + 1) break;
     }
     if (i > mxcol) i = mxcol;
 
+    // same for rows
+    freeze = freeze_ranges && (freeze_ranges->type == 'r' ||  freeze_ranges->type == 'a') ? 1 : 0;
+
+    for (j = 0; j <= mxrow; j++) {
+        if (j >= maxrows) {
+            sc_error("j >= maxrows in ui_show_sc_row_headings. please check calc_offscr_sc_rows.");
+            break;
+        }
+
+        if (row_hidden[j]) continue;
+
+        // skip center_hidden_rows
+        if (freeze && ((
+         j > freeze_ranges->br->row && j <= freeze_ranges->br->row + center_hidden_rows) || (
+         j < freeze_ranges->tl->row && j >= freeze_ranges->tl->row - center_hidden_rows))) continue;
+
+        row += rowformat[j];
+        if (row >= r + 1) break;
+    }
+    if (j > mxrow) j = mxrow;
+
     // if in normal mode, change currow and curcol
     if (curmode == NORMAL_MODE) {
-        currow = offscr_sc_rows + r;
         curcol = offscr_sc_cols + i;
+        currow = offscr_sc_rows + j;
         unselect_ranges();
 
     // if in insert or command mode, we add the selected cell to inputbar
     } else if (curmode == COMMAND_MODE || curmode == INSERT_MODE) {
         wchar_t cline [BUFFERSIZE];
         int count;
-        swprintf(cline, BUFFERSIZE, L"%s%d", coltoa(offscr_sc_cols+i), offscr_sc_rows + r);
+        swprintf(cline, BUFFERSIZE, L"%s%d", coltoa(offscr_sc_cols+i), offscr_sc_rows + j);
         for(count = 0; count < wcslen(cline); count++) ins_in_line(cline[count]);
         ui_show_header();
         return;
