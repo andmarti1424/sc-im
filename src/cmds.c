@@ -646,6 +646,27 @@ struct enode * copye(register struct enode *e, int Rdelta, int Cdelta, int r1, i
 }
 
 /**
+ * \brief dorowformat()
+ *
+ * \details: apply a row format in lines(size) to a row (r)
+ *
+ * \param[in] r
+ * \param[in] size
+ *
+ * \return none
+ */
+void dorowformat(int r, unsigned char size) {
+    if (size < 0 || size > UCHAR_MAX) sc_error("Invalid row format");
+    if (r >= maxrows && !growtbl(GROWROW, 0, r)) r = maxrows-1 ;
+    checkbounds(&r, &curcol);
+
+    rowformat[r] = size;
+    ui_update(TRUE);
+    if (! loading) modflg++;
+    return;
+}
+
+/**
  * \brief TODO Write brief function description
  *
  * \details Note: Modified 9/17/90 THA to handle more formats.

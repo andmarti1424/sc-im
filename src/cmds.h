@@ -103,6 +103,7 @@ void ljustify(int sr, int sc, int er, int ec);
 void rjustify(int sr, int sc, int er, int ec);
 void center(int sr, int sc, int er, int ec);
 void doformat(int c1, int c2, int w, int p, int r);
+void dorowformat(int r, unsigned char size);
 struct enode;
 int etype(register struct enode *e);
 void erase_area(int sr, int sc, int er, int ec, int ignorelock, int mark_ent_as_deleted);

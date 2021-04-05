@@ -461,6 +461,7 @@ command:
     |    S_RIGHTJUSTIFY var_or_range { rjustify($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col); }
     |    S_CENTER var_or_range       { center($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col); }
     |    S_FORMAT COL NUMBER NUMBER NUMBER { doformat($2,$2,$3,$4,$5); }
+    |    S_FORMAT NUMBER NUMBER      { dorowformat($2, $3); }
     |    S_FMT var_or_range STRING   { format_cell($2.left.vp, $2.right.vp, $3);
                                        scxfree($3);
                                      }

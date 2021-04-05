@@ -101,6 +101,7 @@ void erasedb() {
     }
 
     for (r = 0; r <= maxrow; r++) {
+        rowformat[r] = 1;
         register struct ent ** pp = ATBL(tbl, r, 0);
         for (c = 0; c++ <= maxcol; pp++)
             if (*pp != NULL) {
@@ -228,10 +229,10 @@ char get_delim(char *type) {
 int savefile() {
     int force_rewrite = 0;
     char name[BUFFERSIZE];
-    #ifndef NO_WORDEXP
+#ifndef NO_WORDEXP
     size_t len;
     wordexp_t p;
-    #endif
+#endif
 
     if (! curfile[0] && wcslen(inputline) < 3) { // casos ":w" ":w!" ":x" ":x!"
         sc_error("There is no filename");
@@ -243,7 +244,7 @@ int savefile() {
     wcstombs(name, inputline, BUFFERSIZE);
     del_range_chars(name, 0, 1 + force_rewrite);
 
-    #ifndef NO_WORDEXP
+#ifndef NO_WORDEXP
     wordexp(name, &p, 0);
     if (p.we_wordc < 1) {
         sc_error("Failed expanding filepath");
@@ -256,14 +257,14 @@ int savefile() {
     }
     memcpy(name, p.we_wordv[0], len+1);
     wordfree(&p);
-    #endif
+#endif
 
     if (! force_rewrite && file_exists(name)) {
         sc_error("File already exists. Use \"!\" to force rewrite.");
         return -1;
     }
 
-    #ifdef AUTOBACKUP
+#ifdef AUTOBACKUP
     // check if backup of curfile exists.
     // if it exists, remove it.
     if (strlen(curfile) && backup_exists(curfile)) remove_backup(curfile);
@@ -277,7 +278,7 @@ int savefile() {
             return -1;
         } else remove_backup(name);
     }
-    #endif
+#endif
 
     // copy newfilename to curfile
     if (wcslen(inputline) > 2) {
@@ -288,12 +289,12 @@ int savefile() {
     if (wcslen(inputline) > 2 && str_in_str(curfile, ".") == -1) {
         sprintf(curfile + strlen(curfile), ".sc");
 
-
     // treat csv
     } else if (strlen(curfile) > 4 && (! strcasecmp( & curfile[strlen(curfile)-4], ".csv"))) {
         export_delim(curfile, get_delim("csv"), 0, 0, maxrow, maxcol, 1);
         modflg = 0;
         return 0;
+
     // treat tab
     } else if (strlen(curfile) > 4 && (! strcasecmp( & curfile[strlen(curfile)-4], ".tsv") ||
         ! strcasecmp( & curfile[strlen(curfile)-4], ".tab"))){
@@ -301,6 +302,7 @@ int savefile() {
         modflg = 0;
         return 0;
     }
+
     // save in sc format
     if (writefile(curfile, 0, 0, maxrow, maxcol, 1) < 0) {
         sc_error("File could not be saved");
@@ -377,6 +379,10 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
     for (c = c0; c <= cn; c++)
         if (fwidth[c] != DEFWIDTH || precision[c] != DEFPREC || realfmt[c] != DEFREFMT)
             (void) fprintf (f, "format %s %d %d %d\n", coltoa(c), fwidth[c], precision[c], realfmt[c]);
+
+    for (r = r0; r <= rn; r++)
+        if (rowformat[r] != 1)
+            (void) fprintf (f, "format %d %d\n", r, rowformat[r]);
 
     // new implementation of hidecol. group by ranges
     for (c = c0; c <= cn; c++) {

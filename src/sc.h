@@ -336,7 +336,7 @@ extern int * realfmt;
 extern char *colformat[10];
 extern char *col_hidden;
 extern char *row_hidden;
-extern unsigned short * rowformat;
+extern unsigned char * rowformat;
 extern char line[FBUFLEN];
 extern int linelim;
 extern int changed;
