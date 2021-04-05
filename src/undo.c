@@ -715,7 +715,7 @@ void do_undo() {
 
         shift_range(- ul->range_shift->delta_rows, - ul->range_shift->delta_cols,
             ul->range_shift->tlrow, ul->range_shift->tlcol, ul->range_shift->brrow, ul->range_shift->brcol);
-
+ 
         // shift col_formats here
         if (ul->range_shift->tlcol >= 0 && ul->range_shift->tlrow == 0 && ul->range_shift->brrow == maxrow) { // && ul->range_shift->delta_cols > 0) {
             int i;
@@ -732,6 +732,7 @@ void do_undo() {
                  realfmt[i] = realfmt[i + ul->range_shift->delta_cols];
             }
         }
+        // TODO do the same for rows here
     }
 
     // Change cursor position
@@ -795,6 +796,7 @@ void do_undo() {
            }
         }
     }
+    // TODO: do the same for rows here. with row_hidden and rowformat
 
     // for every ent in added and removed, we reeval expression to update graph
     struct ent * ie = ul->added;
@@ -892,6 +894,7 @@ void do_redo() {
                 realfmt[i] = realfmt[i - ul->range_shift->delta_cols];
             }
         }
+        // TODO: do the same for rows here. with row_hidden and rowformat
     }
 
     //update(TRUE);
@@ -957,6 +960,7 @@ void do_redo() {
             }
         }
     }
+    // TODO: do the same for rows here. with row_hidden and rowformat
 
     // for every ent in added and removed, we reeval expression to update graph
     struct ent * ie = ul->added;

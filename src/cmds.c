@@ -787,7 +787,7 @@ void formatcol(int c) {
  */
 
 void insert_row(int after) {
-    int    r, c;
+    int r, c;
     struct ent ** tmprow, ** pp, ** qq;
     struct ent * p;
     int lim = maxrow - currow + 1;
@@ -806,6 +806,7 @@ void insert_row(int after) {
             if (*pp) (*pp)->row = r;
     }
     tbl[r] = tmprow;        // the last row is never used
+    rowformat[r] = 1;
 
     // if padding exists in the old currow, we copy it to the new row!
     for (c = 0; c < maxcols; c++) {
@@ -958,8 +959,6 @@ void int_deleterow(int row, int mult) {
         // and after that the erase_area of the deleted row
         erase_area(row, 0, row, maxcol, 0, 1); //important: this mark the ents as deleted
 
-        //FIXME update row_hidden and rowformat here
-
         // and we decrease ->row of all rows after the deleted one
         for (r = row; r < maxrows - 1; r++) {
             for (c = 0; c < maxcols; c++) {
@@ -969,7 +968,11 @@ void int_deleterow(int row, int mult) {
                     if ( pp[0] ) pp[0]->row--;
                 }
             }
+            //update row_hidden and rowformat here
+            row_hidden[r] = row_hidden[r+1];
+            rowformat[r] = rowformat[r+1];
         }
+
         rebuild_graph(); //TODO CHECK HERE WHY REBUILD IS NEEDED. See NOTE1 in shift.c
         sync_refs();
         //if (get_conf_int("autocalc") && ! loading) EvalAll();
