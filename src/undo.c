@@ -38,7 +38,7 @@
 /**
  * \file undo.c
  * \author Andrés Martinelli <andmarti@gmail.com>
- * \date 2017-07-18
+ * \date 04/05/2021
  * \brief This file contains the main functions to support the undo/redo feature.
  */
 
@@ -47,19 +47,33 @@
  * Which contains:
  *       p_ant: pointer to 'undo' struct. If NULL, this node is the first change
  *              for the session.
+ *
  *       struct ent * added: 'ent' elements added by the change
+ *
  *       struct ent * removed: 'ent' elements removed by the change
+ *
  *       struct undo_range_shift * range_shift: range shifted by change
+ *
  *       row_hidded: integers list (int *) hidden rows on screen
+ *
  *       row_showed: integers list (int *) visible rows on screen
+ *
  *       col_hidded: integers list (int *) hidden columns on screen
+ *
  *       col_showed: integers list (int *) visible columns on screen
  *              NOTE: the first position of the lists contains (number of elements - 1) in the list
+ *
  *       struct ent_ptr * allocations: since we alloc over added and removed
  *              list in batches. we need to keep the first position in memory of each calloc.
+ *
  *       int alloc_size: the number of batch allocations.
+ *
  *       struct undo_cols_format * cols_format: list of 'undo_col_info' elements used for
  *              undoing / redoing changes in columns format (fwidth, precision y realfmt)
+ *
+ *       struct undo_rows_format * rows_format: list of 'undo_row_info' elements used for
+ *              undoing / redoing changes in rows format (height)
+ *
  *       p_sig: pointer to 'undo' struct, If NULL, this node is the last change in
  *              the session.
  *
@@ -104,11 +118,13 @@
  * 13. '-' and '+' commands in normal mode
  * 14. Lock and unlock of cells
  * 15. datefmt command
- * 16. Change in format of a column as a result of the 'f' command
- * 17. Change in format of a column as a result of auto_jus
- * 18. Change format of columns as a result of ic dc
- * 19. fill command
- * 20. unformat
+ * 16. the cellcolor command
+ * 17. Change in format of a column as a result of the 'f' command
+ * 18. Change in format of a column as a result of auto_jus
+ * 19. Change format of columns as a result of ic dc
+ * 20. fill command
+ * 21. unformat
+ * 22. change in the format of rows
  *
  * NOT implemented:
  * 1. undo of freeze / unfreeze command
@@ -140,7 +156,7 @@ static int undo_list_len = 0;
 static struct undo undo_item;
 
 /**
- * \brief Init 'unto_item'
+ * \brief Init 'undo_item'
  *
  * \return none
  */
@@ -163,10 +179,10 @@ void create_undo_action() {
 }
 
 /**
- * @brief TODO Document end_undo_action()
+ * @brief end_undo_action()
  *
  * \details Save undo_item copy with 'ent' elements modified, and the
- * unto range shift struct into the undolist.
+ * undo range shift struct into the undolist.
  *
  * \return none
  */
@@ -205,7 +221,7 @@ void add_to_undolist(struct undo u) {
     if ( undo_list != NULL && undo_list_pos != len_undo_list() )
         clear_from_current_pos();
 
-    struct undo * ul = (struct undo *) malloc (sizeof(struct undo));
+    struct undo * ul = (struct undo *) malloc (sizeof(struct undo)) ;
     ul->p_sig = NULL;
 
     // Add 'ent' elements
@@ -242,9 +258,10 @@ void add_to_undolist(struct undo u) {
 /**
  * \brief Dismiss current undo_item
  *
- * \details This function frees memory of a struct unto. It is internally used
- * by free_undo_node(). But as well, this function shall be called instead
- * of end_undo_action in case we want to cancel a previous create_undo_action.
+ * \details This function frees memory of a struct undo item.
+ * It is internally used by free_undo_node(). But as well, this function
+ * shall be called instead of end_undo_action in case we want to cancel
+ * a previous create_undo_action.
  * If called for this purpose, argument shall be NULL.
  *
  * \param[in] ul

@@ -38,7 +38,7 @@
 /**
  * \file cmds.c
  * \author Andrés Martinelli <andmarti@gmail.com>
- * \date 2017-07-18
+ * \date 05/04/2021
  * \brief TODO Write brief file description
  */
 
@@ -89,7 +89,6 @@ int center_hidden_rows = 0;
  *
  * \return none
  */
-
 void mark_ent_as_deleted(register struct ent * p, int delete) {
     if (p == NULL) return;
     if (delete) p->flags |= is_deleted;
@@ -110,7 +109,6 @@ void mark_ent_as_deleted(register struct ent * p, int delete) {
  *
  * \return none
  */
-
 void flush_saved() {
     register struct ent * p;
     register struct ent * q;
@@ -136,7 +134,6 @@ void flush_saved() {
  *
  * \return none
  */
-
 // TODO Improve this function such that it does not traverse the whole  table
 void sync_refs() {
     int i, j;
@@ -163,7 +160,6 @@ void sync_refs() {
  * @endcode
  * returns: none
  */
-
 void syncref(register struct enode * e) {
     if ( e == NULL ) {
         return;
@@ -211,7 +207,6 @@ void syncref(register struct enode * e) {
  *
  * \return none
  */
-
 void deletecol(int col, int mult) {
     if (any_locked_cells(0, col, maxrow, col + mult)) {
         sc_error("Locked cells encountered. Nothing changed");
@@ -263,7 +258,6 @@ void deletecol(int col, int mult) {
  *
  * \return none
  */
-
 void int_deletecol(int col, int mult) {
     register struct ent ** pp;
     int r, c, i;
@@ -342,10 +336,8 @@ void int_deletecol(int col, int mult) {
  * \param[in] r2
  * \param[in] c2
  * \param[in] special
- *
  * \return none
  */
-
 void copyent(register struct ent * n, register struct ent * p, int dr, int dc, int r1, int c1, int r2, int c2, int special) {
     if (!n || !p) {
         sc_error("copyent: internal error");
@@ -423,12 +415,8 @@ void copyent(register struct ent * n, register struct ent * p, int dr, int dc, i
 
 /**
  * \brief TODO Write brief description
- *
  * \return NUM; STR; etc.
  */
-
-// TODO Record the returns
-
 int etype(register struct enode *e) {
     if (e == (struct enode *)0)
         return NUM;
@@ -464,20 +452,16 @@ int etype(register struct enode *e) {
 
 /**
  * \brief TODO Write a brief function description
- *
  * \details ignorelock is used when sorting so that locked cells
  * can still be sorted
- *
  * \param[in] sr
  * \param[in] sc
  * \param[in] er
  * \param[in] ec
  * \param[in] ignorelock
  * \param[in] mark_as_deleted
- *
  * \return none
  */
-
 void erase_area(int sr, int sc, int er, int ec, int ignorelock, int mark_as_deleted) {
     int r, c;
     struct ent **pp;
@@ -496,8 +480,7 @@ void erase_area(int sr, int sc, int er, int ec, int ignorelock, int mark_as_dele
         sc = 0;
     checkbounds(&er, &ec);
 
-    /*
-     * mark the ent as deleted
+    /* mark the ent as deleted
      * Do a lookat() for the upper left and lower right cells of the range
      * being erased to make sure they are included in the delete buffer so
      * that pulling cells always works correctly even if the cells at one
@@ -506,37 +489,35 @@ void erase_area(int sr, int sc, int er, int ec, int ignorelock, int mark_as_dele
     (void) lookat(sr, sc);
     (void) lookat(er, ec);
     for (r = sr; r <= er; r++) {
-    for (c = sc; c <= ec; c++) {
-        pp = ATBL(tbl, r, c);
-        if (*pp && (!((*pp)->flags & is_locked) || ignorelock)) {
+        for (c = sc; c <= ec; c++) {
+            pp = ATBL(tbl, r, c);
+            if (*pp && (!((*pp)->flags & is_locked) || ignorelock)) {
 
-            /* delete vertex in graph
-               only if this vertex is not referenced by other */
-            vertexT * v = getVertex(graph, *pp, 0);
-            if (v != NULL && v->back_edges == NULL )
-                destroy_vertex(*pp);
+                /* delete vertex in graph
+                   only if this vertex is not referenced by other */
+                vertexT * v = getVertex(graph, *pp, 0);
+                if (v != NULL && v->back_edges == NULL )
+                    destroy_vertex(*pp);
 
-            if (mark_as_deleted) {
-                mark_ent_as_deleted(*pp, TRUE);
-            } else {
-                clearent(*pp); // free memory
-                cleanent(*pp); // fill ent with empty values
-                mark_ent_as_deleted(*pp, FALSE);
+                if (mark_as_deleted) {
+                    mark_ent_as_deleted(*pp, TRUE);
+                } else {
+                    clearent(*pp); // free memory
+                    cleanent(*pp); // fill ent with empty values
+                    mark_ent_as_deleted(*pp, FALSE);
+                }
+                *pp = NULL;
             }
-            *pp = NULL;
         }
-    }
     }
     return;
 }
 
 /**
  * \brief TODO Write a brief function description
- *
  * \details Function to copy an expression. It returns the copy.
  * special = 1 means transpose
  * special = 2 means copy from spreadsheet to undo struct
- *
  * \param[in] e
  * \param[in] Rdelta
  * \param[in] Cdelta
@@ -545,10 +526,8 @@ void erase_area(int sr, int sc, int er, int ec, int ignorelock, int mark_as_dele
  * \param[in] r2
  * \param[in] c2
  * \param[in] special
- *
  * \return none
  */
-
 struct enode * copye(register struct enode *e, int Rdelta, int Cdelta, int r1, int c1, int r2, int c2, int special) {
     register struct enode * ret;
     static struct enode * range = NULL;
@@ -647,12 +626,9 @@ struct enode * copye(register struct enode *e, int Rdelta, int Cdelta, int r1, i
 
 /**
  * \brief dorowformat()
- *
  * \details: apply a row format in lines(size) to a row (r)
- *
  * \param[in] r
  * \param[in] size
- *
  * \return none
  */
 void dorowformat(int r, unsigned char size) {
@@ -681,18 +657,14 @@ void dorowformat(int r, unsigned char size) {
 
 /**
  * \brief TODO Write brief function description
- *
  * \details Note: Modified 9/17/90 THA to handle more formats.
- *
  * \param[in] c1
  * \param[in] c2
  * \param[in] w
  * \param[in] p
  * \param[in] r
- *
  * \return none
  */
-
 void doformat(int c1, int c2, int w, int p, int r) {
     register int i;
     int crows = 0;
@@ -732,12 +704,9 @@ void doformat(int c1, int c2, int w, int p, int r) {
 
 /**
  * \brief TODO Document formatcol)
- *
  * \param[in] c
- *
  * \return none
  */
-
 void formatcol(int c) {
     int arg = 1;
     int i;
@@ -790,15 +759,11 @@ void formatcol(int c) {
 
 /**
  * \brief TODO Document insert_row()
- *
  * \details Insert a single rox. It will be inserted before currow.
  * if after is 0; after if it is 1.
- *
  * \param[in] after
- *
  * \returnsnone
  */
-
 void insert_row(int after) {
     int r, c;
     struct ent ** tmprow, ** pp, ** qq;
@@ -835,16 +800,12 @@ void insert_row(int after) {
 
 /**
  * \brief Insert new column
- *
  * \details Insert a cingle column. The column will be inserted
  * BEFORE CURCOL if after is 0;
  * AFTER CURCOL if it is 1.
- *
  * \param[in] after
- *
  * \return none
  */
-
 void insert_col(int after) {
     int r, c;
     register struct ent ** pp, ** qq;
@@ -896,13 +857,10 @@ void insert_col(int after) {
 
 /**
  * \brief Delete a row
- *
  * \param[in] row
  * \param[in] mult
- *
  * \return none
  */
-
 void deleterow(int row, int mult) {
     if (any_locked_cells(row, 0, row + mult - 1, maxcol)) {
         sc_error("Locked cells encountered. Nothing changed");
@@ -944,15 +902,11 @@ void deleterow(int row, int mult) {
 
 /**
  * \brief Delete a row
- *
  * \details Delete a row - internal function
- *
  * \param[in] row row to delete
  * \param[in] multi commands multiplier (usually 1)
- *
  * \return none
  */
-
 void int_deleterow(int row, int mult) {
     register struct ent ** pp;
     register struct ent * q;
@@ -999,15 +953,12 @@ void int_deleterow(int row, int mult) {
 
 /**
  * \brief Document ljustify()
- *
  * \param[in] sr
  * \param[in] sc
  * \param[in] er
  * \param[in] ec
- *
  * \return none
  */
-
 void ljustify(int sr, int sc, int er, int ec) {
     struct ent *p;
     int i, j;
@@ -1037,15 +988,12 @@ void ljustify(int sr, int sc, int er, int ec) {
 
 /**
  * \brief TODO Document rjustify()
- *
  * \param[in] sr
  * \param[in] sc
  * \param[in] er
  * \param[in] ec
- *
  * \return none
  */
-
 void rjustify(int sr, int sc, int er, int ec) {
     struct ent *p;
     int i, j;
@@ -1075,15 +1023,12 @@ void rjustify(int sr, int sc, int er, int ec) {
 
 /**
  * \brief TODO Cocument center()
- *
  * \param[in] sr
  * \param[in] sc
  * \param[in] er
  * \param[in] ec
- *
  * \return none
  */
-
 void center(int sr, int sc, int er, int ec) {
     struct ent *p;
     int i, j;
@@ -1113,12 +1058,9 @@ void center(int sr, int sc, int er, int ec) {
 
 /**
  * @brief TODO Document chg_mode
- *
  * \param[in] strcmd
- *
  * \return none
  */
-
 void chg_mode(char strcmd){
     lastmode = curmode;
     switch (strcmd) {
@@ -1155,12 +1097,9 @@ void chg_mode(char strcmd){
 
 /**
  * \brief Delete selected cells
- *
  * \details Delete selected cell or range of cells.
- *
  * \return none
  */
-
 void del_selected_cells() {
     int tlrow = currow;
     int tlcol = curcol;
@@ -1214,18 +1153,14 @@ void del_selected_cells() {
 
 /**
  * \brief Enter cell content on a cell
- *
  * \details Enter cell content on a cell.
  * Covers commands LET, LABEL, LEFTSTRING, and RIGHTSTRING
- *
  * \param[in] r
  * \param[in] c
  * \param[in] submode
  * \param[in] content
- *
  * \return none
  */
-
 void enter_cell_content(int r, int c, char * submode,  wchar_t * content) {
     // TODO - ADD PADDING INTELLIGENCE HERE ??
     (void) swprintf(interp_line, BUFFERSIZE, L"%s %s = %ls", submode, v_name(r, c), content);
@@ -1234,15 +1169,11 @@ void enter_cell_content(int r, int c, char * submode,  wchar_t * content) {
 
 /**
  * @brief Send command to interpreter
- *
  * \details Send command to interpreter
  * wide_char version
- *
  * \param[in] oper
- *
  * \return none
  */
-
 void send_to_interp(wchar_t * oper) {
     if (get_conf_int("nocurses")) {
         int pos = -1;
@@ -1262,15 +1193,11 @@ void send_to_interp(wchar_t * oper) {
 
 /**
  * \brief Return a pointer to a cell's [struct ent *]
- *
  * Return a pointer to a cell's [struct ent *], creating if needed
- *
  * \param[in] row
  * \param[in] col
- *
  * \return none
  */
-
 struct ent * lookat(int row, int col) {
     register struct ent **pp;
 
@@ -1298,12 +1225,9 @@ struct ent * lookat(int row, int col) {
 
 /**
  * \brief Blank an ent
- *
  * \param[in] p
- *
  * \return none
  */
-
 void cleanent(struct ent * p) {
     if (!p) return;
     p->label = (char *) 0;
@@ -1324,12 +1248,9 @@ void cleanent(struct ent * p) {
 
 /**
  * \brief Free memory of an ent and its contents
- *
  * \param[in] v
- *
  * \return none
  */
-
 void clearent(struct ent * v) {
     if (!v) return;
 
@@ -1354,12 +1275,9 @@ void clearent(struct ent * v) {
 
 /**
  * \brief Moves curcol back one displayed column
- *
  * \param[in] arg
- *
  * \return lookat
  */
-
 struct ent * back_col(int arg) {
     extern int center_hidden_cols;
     int freeze = freeze_ranges && (freeze_ranges->type == 'c' ||  freeze_ranges->type == 'a') ? 1 : 0;
@@ -1389,12 +1307,9 @@ struct ent * back_col(int arg) {
 
 /**
  * \brief Moves curcol forward one displayed column
- *
  * \param[in] arg
- *
  * \return lookat
  */
-
 struct ent * forw_col(int arg) {
     int c = curcol;
     extern int center_hidden_cols;
@@ -1418,12 +1333,9 @@ struct ent * forw_col(int arg) {
 
 /**
  * \brief Move currow forward one displayed row
- *
  * \param[in] arg
- *
  * \return lookat
  */
-
 struct ent * forw_row(int arg) {
     int r = currow;
     extern int center_hidden_rows;
@@ -1447,10 +1359,8 @@ struct ent * forw_row(int arg) {
 
 /**
  * \brief Moves currow backward on displayed row
- *
  * \return lookat
  */
-
 struct ent * back_row(int arg) {
     int bkprow = currow;
     int r = currow;
@@ -1483,12 +1393,9 @@ struct ent * back_row(int arg) {
 
 /**
  * \brief Document scroll_down()
- *
  * \param[in] n
- *
  * \return none
  */
-
 void scroll_down(int n) {
     extern int center_hidden_rows;
     int freezer = freeze_ranges && (freeze_ranges->type == 'r' ||  freeze_ranges->type == 'a') ? 1 : 0;
@@ -1513,12 +1420,9 @@ void scroll_down(int n) {
 
 /**
  * @brief Document scroll_up()
- *
  * \param[in] n
- *
  * \return none
  */
-
 void scroll_up(int n) {
     extern int center_hidden_rows;
     int freezer = freeze_ranges && (freeze_ranges->type == 'r' ||  freeze_ranges->type == 'a') ? 1 : 0;
@@ -1559,20 +1463,16 @@ void scroll_up(int n) {
 
 /**
  * \brief TODO Document go_home()
- *
  * \return lookat
  */
-
 struct ent * go_home() {
     return lookat(0, 0);
 }
 
 /**
- * \brief TODO Document vert_top()
- *
+ * \brief vert_top() - for command H in normal mode
  * \return lookat
  */
-
 struct ent * vert_top() {
     extern int center_hidden_rows;
     int freezer = freeze_ranges && (freeze_ranges->type == 'r' ||  freeze_ranges->type == 'a') ? 1 : 0;
@@ -1585,11 +1485,9 @@ struct ent * vert_top() {
 }
 
 /**
- * \brief TODO Document vert_bottom()
- *
+ * \brief vert_bottom() - for command L in normal mode
  * \return lookat
  */
-
 struct ent * vert_bottom() {
     extern int center_hidden_rows;
     int freezer = freeze_ranges && (freeze_ranges->type == 'r' ||  freeze_ranges->type == 'a') ? 1 : 0;
@@ -1603,18 +1501,16 @@ struct ent * vert_bottom() {
         else if (r < offscr_sc_rows && ! (freezer && r >= tlrow && r <= brrow)) continue;
         else if (freezer && r > brrow && r <= brrow + center_hidden_rows) continue;
         else if (freezer && r < tlrow && r >= tlrow - center_hidden_rows) continue;
-        i++;
+        i+= rowformat[r];
     }
     if (r > maxrows) r = maxrows;
     return lookat(r, curcol);
 }
 
 /**
- * \brief TODO Document vert_middle()
- *
+ * \brief vert_middle() - for command M in normal mode
  * \return lookat
  */
-
 struct ent * vert_middle() {
     extern int center_hidden_rows;
     int freezer = freeze_ranges && (freeze_ranges->type == 'r' ||  freeze_ranges->type == 'a') ? 1 : 0;
@@ -1632,10 +1528,8 @@ struct ent * vert_middle() {
 
 /**
  * \brief TODO Document go_end()
- *
  * \return lookat; NULL otherwise
  */
-
 struct ent * go_end() {
     int r = 0, c = 0;
     int raux = r, caux = c;
@@ -1658,13 +1552,10 @@ struct ent * go_end() {
 
 /**
  * \brief TODO Document tick()
- *
  * \details if ticks a cell, returns struct ent *
  * if ticks a range, return struct ent * to top left cell
- *
  * \return lookat; NULL otherwise
  */
-
 struct ent * tick(char ch) {
     int r, c;
     struct mark * m = get_mark(ch);
@@ -1689,12 +1580,9 @@ struct ent * tick(char ch) {
 
 /**
  * \brief TODO  Document scroll_right()
- *
  * \param[in] n
- *
  * \return none
  */
-
 void scroll_right(int n) {
     extern int center_hidden_cols;
     int freezec = freeze_ranges && (freeze_ranges->type == 'c' ||  freeze_ranges->type == 'a') ? 1 : 0;
@@ -1719,12 +1607,9 @@ void scroll_right(int n) {
 
 /**
  * @brief TODO Document scroll_left()
- *
  * \param[in] n
- *
  * \return none
  */
-
 void scroll_left(int n) {
     extern int center_hidden_cols;
     int freezec = freeze_ranges && (freeze_ranges->type == 'c' ||  freeze_ranges->type == 'a') ? 1 : 0;
@@ -1761,7 +1646,6 @@ void scroll_left(int n) {
  *
  * \return lookat
  */
-
 struct ent * left_limit() {
     int c = 0;
     while ( col_hidden[c] && c < curcol ) c++;
@@ -1773,7 +1657,6 @@ struct ent * left_limit() {
  *
  * \return lookat
  */
-
 struct ent * right_limit() {
     register struct ent *p;
     int c = maxcols - 1;
@@ -1799,7 +1682,6 @@ struct ent * goto_top() {
  *
  * \return lookat
  */
-
 // FIXME to handle freeze rows/cols
 struct ent * goto_bottom() {
     register struct ent *p;
@@ -1834,7 +1716,6 @@ struct ent * goto_last_col() {
  *
  * \return lookat
  */
-
 struct ent * go_forward() {
     int r = currow, c = curcol;
     int r_ori = r, c_ori = c;
@@ -1860,27 +1741,22 @@ struct ent * go_forward() {
  *
  * \return lookat
  */
-
 struct ent * go_bol() {
     return lookat(currow, offscr_sc_cols);
 }
 
 /**
  * \brief TODO Document go_eol()
- *
  * \return none
  */
-
 struct ent * go_eol() {
     return lookat(currow, offscr_sc_cols + calc_offscr_sc_cols() - 1);
 }
 
 /**
  * \brief TODO Document horiz_middle()
- *
  * \return lookat; NULL otherwise
  */
-
 struct ent * horiz_middle() {
     int i;
     int ancho = rescol;
@@ -1909,7 +1785,6 @@ struct ent * horiz_middle() {
  *
  * \return lookat
  */
-
 struct ent * go_backward() {
     int r = currow, c = curcol;
     int r_ori = r, c_ori = c;
@@ -1939,7 +1814,6 @@ struct ent * go_backward() {
  *
  * \return none
  */
-
 void auto_justify(int ci, int cf, int min) {
     // column width is not set below the min value
     int r, c, sum = 0;
@@ -2004,7 +1878,6 @@ void auto_justify(int ci, int cf, int min) {
  *
  * \return none
  */
-
 void valueize_area(int sr, int sc, int er, int ec) {
     int r, c;
     struct ent *p;
@@ -2075,15 +1948,12 @@ void valueize_area(int sr, int sc, int er, int ec) {
 
 /**
  * \brief TODO Document select_inner_range()
- *
  * \param[in] vir_tlrow
  * \param[in] vir_tlcol
  * \param[in] vir_brrow
  * \param[in] vir_brcol
- *
  * \return none
  */
-
 void select_inner_range(int * vir_tlrow, int * vir_tlcol, int * vir_brrow, int * vir_brcol) {
     struct ent * p;
     int rr, cc, r, c, mf = 1;
@@ -2127,7 +1997,6 @@ void select_inner_range(int * vir_tlrow, int * vir_tlcol, int * vir_brrow, int *
  *
  * \return 1 if cell if locked; 0 otherwise
  */
-
 int locked_cell(int r, int c) {
     struct ent *p = *ATBL(tbl, r, c);
     if (p && (p->flags & is_locked)) {
@@ -2147,7 +2016,6 @@ int locked_cell(int r, int c) {
  *
  * \return 1 if area contains a locked cell; 0 otherwise
  */
-
 int any_locked_cells(int r1, int c1, int r2, int c2) {
     int r, c;
     struct ent * p ;
@@ -2163,10 +2031,8 @@ int any_locked_cells(int r1, int c1, int r2, int c2) {
 
 /**
  * \brief sum special command
- *
  * \return none
  */
-
 int fsum() {
     int r = currow, c = curcol;
     struct ent * p;
@@ -2202,12 +2068,9 @@ int fsum() {
 
 /**
  * \brief fcopy special command
- *
  * \param[in] action
- *
  * \return -1 on error; 0 otherwise
  */
-
 int fcopy(char * action) {
     int r, ri, rf, c, ci, cf;
     struct ent * pdest;
@@ -2323,7 +2186,6 @@ int fcopy(char * action) {
  * \return -1 if locked cell is encountered; 1 if padding exceeded
  * column width; 0 otherwise
  */
-
 int pad(int n, int r1, int c1, int r2, int c2) {
     int r, c;
     struct ent * p ;
@@ -2371,7 +2233,6 @@ int pad(int n, int r1, int c1, int r2, int c2) {
  *
  * \return number of hidden columns to the left
  */
-
 int calc_offscr_sc_cols() {
     int q = 0, i, cols = 0, col = 0;
     int freeze = freeze_ranges && (freeze_ranges->type == 'c' ||  freeze_ranges->type == 'a') ? 1 : 0;
@@ -2449,10 +2310,8 @@ int calc_offscr_sc_cols() {
 
 /**
  * \brief Calculate the number of hidden rows above
- *
  * \return the number of hidden rows above
  */
-
 int calc_offscr_sc_rows() {
     int q, i, rows = 0, row = 0;
     int freeze = freeze_ranges && (freeze_ranges->type == 'r' ||  freeze_ranges->type == 'a') ? 1 : 0;
@@ -2545,7 +2404,6 @@ int calc_offscr_sc_rows() {
  *
  * \return resulting string to be printed to the screen
  */
-
 void pad_and_align (char * str_value, char * numeric_value, int col_width, int align, int padding, wchar_t * str_out, int rowfmt) {
     int str_len  = 0;
     int num_len  = strlen(numeric_value);
@@ -2634,7 +2492,6 @@ void pad_and_align (char * str_value, char * numeric_value, int col_width, int a
  *
  * \return result
  */
-
 int is_single_command (struct block * buf, long timeout) {
     if (buf->value == L'\0') return NO_CMD;
     int result = NO_CMD;

@@ -179,6 +179,12 @@ Commands for handling cell content:
                  14. locking and unlocking of cells
                  15. the datefmt command
                  16. the cellcolor command
+                 17. Change in format of a column as a result of the 'f' command
+                 18. Change in format of a column as a result of auto_jus
+                 19. Change format of columns as a result of ic dc
+                 20. fill command
+                 21. unformat
+                 22. change in the format of rows
 
      c-d         Convert the text content of a selected cell or range to a
                  date, using default LOCALE's D_FMT format.
