@@ -69,6 +69,7 @@ extern char valores;
 extern int cmd_multiplier;
 extern void start_visualmode(int tlrow, int tlcol, int brrow, int brcol);
 extern void ins_in_line(wint_t d);
+extern void openfile_under_cursor(int r, int c);
 
 extern wchar_t interp_line[BUFFERSIZE];
 
@@ -365,6 +366,15 @@ void do_normalmode(struct block * buf) {
                 lastcol = curcol;
                 lastrow = currow;
                 curcol = go_eol()->col;
+
+            } else if (buf->pnext->value == L'f') {                        // gf
+                unselect_ranges();
+                ui_update(TRUE);
+                ui_stop_screen();
+                openfile_under_cursor(currow, curcol);
+                ui_start_screen();
+                start_default_ucolors();
+                set_colors_param_dict();
 
             } else if (buf->pnext->value == L'g') {                        // gg
                 e = go_home();

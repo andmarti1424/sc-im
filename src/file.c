@@ -1814,3 +1814,32 @@ int backup_exists(char * file) {
     }
     return 0;
 }
+
+/**
+ * \brief open file nested
+ * \param[in] file name string
+ * \return none
+ */
+void openfile_nested(char * file) {
+    char * cmd = get_conf_value("default_open_file_under_cursor_cmd");
+    if (cmd == NULL || ! strlen(cmd)) return;
+    char syscmd[PATHLEN + strlen(cmd)];
+    sprintf(syscmd, "%s", cmd);
+    sprintf(syscmd + strlen(syscmd), " %s", file);
+    system(syscmd);
+}
+
+/**
+ * \brief open file under cursor
+ * \param[in] current row and column
+ * \return none
+ */
+void openfile_under_cursor(int r, int c) {
+    register struct ent ** pp;
+    pp = ATBL(tbl, r, c);
+    if (*pp && (*pp)->label) {
+        char text[FBUFLEN] = "";
+        strcpy(text, (*pp)->label);
+        openfile_nested(text);
+    }
+}

@@ -1,0 +1,16 @@
+#!/bin/bash -a
+
+exec_bg () {
+    exec $1 "$2" &
+    exit 0
+    }
+
+File="$1"
+[[ $File =~ (file|http|https|ftp|sftp)"://"* ]] && exec w3m "$File"
+
+Ext=${File##*.}
+[[ $Ext == htm* ]] && exec w3m "$File"
+[[ $Ext =~ (sc|tab|csv) ]] && exec sc-im "$File"
+[[ $Ext == pdf ]] && exec_bg evince "$File"
+
+exec_bg gvim "$File"

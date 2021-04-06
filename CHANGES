@@ -10,6 +10,7 @@ Added mouse support in insert and command mode. The selection of a cell gets cop
 Added command_timeout configuration variable.
 Rows now can have height higher than 1 LINE.
 wrap cell content when nooverlap and notruncate are set.
+Open URL or file specified on cell (PR 401)!
 
 
 Pending

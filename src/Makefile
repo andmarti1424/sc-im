@@ -70,6 +70,9 @@ CFLAGS += -DDEFAULT_PASTE_FROM_CLIPBOARD_CMD=\""tmux show-buffer"\"
 #CFLAGS += -DDEFAULT_PASTE_FROM_CLIPBOARD_CMD=\""xclip -o -selection clipboard"\"
 #CFLAGS += -DDEFAULT_PASTE_FROM_CLIPBOARD_CMD=\""pbpaste"\"
 
+# Command to open file or link under cursor
+CFLAGS += -DDEFAULT_OPEN_FILE_UNDER_CURSOR_CMD=\""scopen"\"
+
 # NOTE: libxlsreader (libxls) is required for xls file reading support
 ifneq (,$(wildcard /usr/include/xls.h)$(wildcard /usr/local/include/xls.h))
   CFLAGS += -DXLS
@@ -178,6 +181,7 @@ all : $(name)
 install :
 	install -d $(DESTDIR)$(prefix)/bin
 	install $(name) $(DESTDIR)$(prefix)/bin/$(name)
+	install scopen $(DESTDIR)$(prefix)/bin/scopen
 	install -d $(DESTDIR)$(HELPDIR)
 	install -m 644 doc $(DESTDIR)$(HELPDIR)/$(name)_help
 	install -m 644 $(wildcard plot_*) $(DESTDIR)$(HELPDIR)/

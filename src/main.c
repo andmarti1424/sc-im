@@ -766,6 +766,9 @@ void show_version_and_quit() {
 #ifdef DEFAULT_PASTE_FROM_CLIPBOARD_CMD
     sc_info("-DDEFAULT_PASTE_FROM_CLIPBOARD_CMD=\"%s\"", DEFAULT_PASTE_FROM_CLIPBOARD_CMD);
 #endif
+#ifdef DEFAULT_OPEN_FILE_UNDER_CURSOR_CMD
+    sc_info("-DDEFAULT_OPEN_FILE_UNDER_CURSOR_CMD=\"%s\"", DEFAULT_OPEN_FILE_UNDER_CURSOR_CMD);
+#endif
 #ifdef USELOCALE
     sc_info("-DUSELOCALE");
 #endif
@@ -843,6 +846,7 @@ void show_usage_and_quit(){
 \n  --debug                     Set variable 'debug'\
 \n  --default_copy_to_clipboard_cmd=COMMAND  set variable 'default_copy_from_clipboard_cmd'\
 \n  --default_paste_from_clipboard_cmd=COMMAND  set variable 'default_paste_from_clipboard_cmd'\
+\n  --default_open_file_under_cursor_cmd=COMMAND  set variable 'default_open_file_under_cursor_cmd'\
 \n  --export_csv                Export to csv without interaction\
 \n  --export_tab                Export to tab without interaction\
 \n  --export_txt                Export to txt without interaction\

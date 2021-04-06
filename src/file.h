@@ -81,3 +81,5 @@ void * do_autobackup();
 void handle_backup();
 void remove_backup(char * file);
 int backup_exists(char * file);
+void openfile_nested(char * file);
+void openfile_under_cursor(int r, int c);

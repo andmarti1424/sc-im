@@ -75,6 +75,7 @@ const char default_config[] =
     "help=0\n"
     "input_bar_bottom=0\n"
     "underline_grid=0\n"
+
 #ifdef AUTOBACKUP
     "autobackup=0\n"  // 0:noautobackup, n>0: backup every n in seconds
 #endif
@@ -92,8 +93,15 @@ const char default_config[] =
 #else
     "default_paste_from_clipboard_cmd=\n"
 #endif
+
     "command_timeout=3000\n"
     "mapping_timeout=1500\n"
+
+#ifdef DEFAULT_OPEN_FILE_UNDER_CURSOR_CMD
+    "default_open_file_under_cursor_cmd=" DEFAULT_OPEN_FILE_UNDER_CURSOR_CMD "\n"
+#else
+    "default_open_file_under_cursor_cmd=\n"
+#endif
 
     "tm_gmtoff=0\n";
 
