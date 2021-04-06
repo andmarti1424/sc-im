@@ -822,12 +822,12 @@ void do_normalmode(struct block * buf) {
             // yank row
             if ( bs == 2 && buf->pnext->value == L'r') {
                 yank_area(currow, 0, currow + cmd_multiplier - 1, maxcol, 'r', cmd_multiplier);
-                if (cmd_multiplier > 0) cmd_multiplier = 0;
+                if (cmd_multiplier > 1) cmd_multiplier = 0;
 
             // yank col
             } else if ( bs == 2 && buf->pnext->value == L'c') {
                 yank_area(0, curcol, maxrow, curcol + cmd_multiplier - 1, 'c', cmd_multiplier);
-                if (cmd_multiplier > 0) cmd_multiplier = 0;
+                if (cmd_multiplier > 1) cmd_multiplier = 0;
 
             // yank cell
             } else if ( bs == 2 && buf->pnext->value == L'y' && is_range_selected() == -1) {
