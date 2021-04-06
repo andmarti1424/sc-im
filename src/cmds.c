@@ -46,6 +46,7 @@
 #include <ctype.h>   // for isdigit
 #include <wchar.h>
 #include <wctype.h>
+#include <limits.h>
 #include "main.h"
 #include "maps.h"
 #include "yank.h"
