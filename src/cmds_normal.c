@@ -733,12 +733,12 @@ void do_normalmode(struct block * buf) {
             // deleterow
             if (buf->pnext->value == L'r') {
                 deleterow(currow, ic);
-                if (cmd_multiplier > 0) cmd_multiplier = 0;
+                if (cmd_multiplier > 1) cmd_multiplier = 0;
 
             // deletecol
             } else if (buf->pnext->value == L'c') {
                 deletecol(curcol, ic);
-                if (cmd_multiplier > 0) cmd_multiplier = 0;
+                if (cmd_multiplier > 1) cmd_multiplier = 0;
 
             } else if (buf->pnext->value == L'd') {
                 del_selected_cells();
