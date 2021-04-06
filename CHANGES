@@ -21,7 +21,7 @@ BUG: undo/redo of ir/dr ic/dc does not change hidden_rows/hidden_cols properly.
 
 handle mouse clicks in edition mode.
 Restore comments from old SC?
-handle rowformat when exporting markdown and export plain !
+handle rowformat when exporting markdown
 handle content alignment over multiple lines in cmds.c:pad_and_align
 C-y misbehave sometimes?
 

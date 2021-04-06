@@ -1364,8 +1364,12 @@ void export_plain(char * fname, int r0, int c0, int rn, int cn) {
     char formated_s[FBUFLEN] = "";
     int res = -1;
     int align = 1;
+    int rowfmt;
+
 
     for (row = r0; row <= rn; row++) {
+        for (rowfmt=0; rowfmt<rowformat[row]; rowfmt++) {
+
         // ignore hidden rows
         //if (row_hidden[row]) continue;
 
@@ -1408,15 +1412,33 @@ void export_plain(char * fname, int r0, int c0, int rn, int cn) {
                 }
 
                 pad_and_align (text, num, fwidth[col], align, 0, out, rowformat[row]);
-                //TODO if width is exceed and not overlap nor truncate (wrap).. follow to next column
-                //but do not increase row. loop by rowformat..
-                (void) fprintf (f, "%ls", out);
 
+                wchar_t new[wcslen(out)+1];
+                wcscpy(new, out);
+                int cw = count_width_widestring(new, fwidth[col]);
+
+                if (wcslen(new) > cw && rowfmt) {
+                    int count_row = 0;
+                    for (count_row = 0; count_row < rowfmt; count_row++) {
+                        cw = count_width_widestring(new, fwidth[col]);
+                        if (cw) del_range_wchars(new, 0, cw-1);
+                        int whites = fwidth[col] - wcslen(new);
+                        while (whites-- > 0) add_wchar(new, L' ', wcslen(new));
+                    }
+                    new[cw] = L'\0';
+                    fprintf (f, "%ls", new);
+                } else if (! rowfmt) {
+                    if (get_conf_int("truncate") || !get_conf_int("overlap")) new[cw] = L'\0';
+                    fprintf (f, "%ls", new);
+                } else {
+                    fprintf (f, "%*s", fwidth[col], " ");
+                }
             } else {
                 (void) fprintf (f, "%*s", fwidth[col], " ");
             }
         }
         (void) fprintf(f,"\n");
+        }
     }
     if (fname != NULL) {
         closefile(f, pid, 0);
