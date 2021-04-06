@@ -1240,55 +1240,22 @@ void export_markdown(char * fname, int r0, int c0, int rn, int cn) {
     for (row = r0; row <= rn; row++) {
         for (rowfmt=0; rowfmt<rowformat[row]; rowfmt++) {
 
-        // ignore hidden rows
-        //if (row_hidden[row]) continue;
+            // ignore hidden rows
+            //if (row_hidden[row]) continue;
 
-        for (pp = ATBL(tbl, row, col = c0); col <= cn; col++, pp++) {
-            // ignore hidden cols
-            //if (col_hidden[col]) continue;
+            for (pp = ATBL(tbl, row, col = c0); col <= cn; col++, pp++) {
+                // ignore hidden cols
+                //if (col_hidden[col]) continue;
 
-            if (col == 0) {
-                (void) fprintf (f, "| ");
-            } else if (col <= cn) {
-                (void) fprintf (f, " | ");
-            }
-
-            if (*pp) {
-                num [0] = '\0';
-                text[0] = '\0';
-                out [0] = L'\0';
-                formated_s[0] = '\0';
-                res = -1;
-                align = 1;
-
-                // If a numeric value exists
-                if ( (*pp)->flags & is_valid) {
-                    res = ui_get_formated_value(pp, col, formated_s);
-                    // res = 0, indicates that in num we store a date
-                    // res = 1, indicates a format is applied in num
-                    if (res == 0 || res == 1) {
-                        strcpy(num, formated_s);
-                    } else if (res == -1) {
-                        sprintf(num, "%.*f", precision[col], (*pp)->v);
-                    }
-                }
-
-                // If a string exists
-                if ((*pp)->label) {
-                    strcpy(text, (*pp)->label);
-                    align = 1;                                // right alignment
-                    if ((*pp)->flags & is_label) {            // center alignment
-                        align = 0;
-                    } else if ((*pp)->flags & is_leftflush) { // left alignment
-                        align = -1;
-                    } else if (res == 0) {                    // res must ¿NOT? be zero for label to be printed
-                        text[0] = '\0';
-                    }
+                if (col == c0) {
+                    (void) fprintf (f, "| ");
+                } else if (col <= cn) {
+                    (void) fprintf (f, " | ");
                 }
 
                 //make header border of dashes with alignment characters
                 if (row == 0) {
-                    if (col == 0) strcat (dashline, "|");
+                    if (col == c0) strcat (dashline, "|");
                     if (align == 0) {
                         strcat (dashline, ":");
                     } else {
@@ -1305,33 +1272,67 @@ void export_markdown(char * fname, int r0, int c0, int rn, int cn) {
                     strcat (dashline, "|");
                 }
 
-                pad_and_align (text, num, fwidth[col], align, 0, out, rowformat[row]);
+                if (*pp) {
+                    num [0] = '\0';
+                    text[0] = '\0';
+                    out [0] = L'\0';
+                    formated_s[0] = '\0';
+                    res = -1;
+                    align = 1;
 
-                wchar_t new[wcslen(out)+1];
-                wcscpy(new, out);
-                int cw = count_width_widestring(new, fwidth[col]);
-
-                if (wcslen(new) > cw && rowfmt) {
-                    int count_row = 0;
-                    for (count_row = 0; count_row < rowfmt; count_row++) {
-                        cw = count_width_widestring(new, fwidth[col]);
-                        if (cw) del_range_wchars(new, 0, cw-1);
-                        int whites = fwidth[col] - wcslen(new);
-                        while (whites-- > 0) add_wchar(new, L' ', wcslen(new));
+                    // If a numeric value exists
+                    if ( (*pp)->flags & is_valid) {
+                        res = ui_get_formated_value(pp, col, formated_s);
+                        // res = 0, indicates that in num we store a date
+                        // res = 1, indicates a format is applied in num
+                        if (res == 0 || res == 1) {
+                            strcpy(num, formated_s);
+                        } else if (res == -1) {
+                            sprintf(num, "%.*f", precision[col], (*pp)->v);
+                        }
                     }
-                    new[cw] = L'\0';
-                    fprintf (f, "%ls", new);
-                } else if (! rowfmt) {
-                    if (get_conf_int("truncate") || !get_conf_int("overlap")) new[cw] = L'\0';
-                    fprintf (f, "%ls", new);
+
+                    // If a string exists
+                    if ((*pp)->label) {
+                        strcpy(text, (*pp)->label);
+                        align = 1;                                // right alignment
+                        if ((*pp)->flags & is_label) {            // center alignment
+                            align = 0;
+                        } else if ((*pp)->flags & is_leftflush) { // left alignment
+                            align = -1;
+                        } else if (res == 0) {                    // res must ¿NOT? be zero for label to be printed
+                            text[0] = '\0';
+                        }
+                    }
+
+
+                    pad_and_align (text, num, fwidth[col], align, 0, out, rowformat[row]);
+
+                    wchar_t new[wcslen(out)+1];
+                    wcscpy(new, out);
+                    int cw = count_width_widestring(new, fwidth[col]);
+
+                    if (wcslen(new) > cw && rowfmt) {
+                        int count_row = 0;
+                        for (count_row = 0; count_row < rowfmt; count_row++) {
+                            cw = count_width_widestring(new, fwidth[col]);
+                            if (cw) del_range_wchars(new, 0, cw-1);
+                            int whites = fwidth[col] - wcslen(new);
+                            while (whites-- > 0) add_wchar(new, L' ', wcslen(new));
+                        }
+                        new[cw] = L'\0';
+                        fprintf (f, "%ls", new);
+                    } else if (! rowfmt && wcslen(new)) {
+                        if (get_conf_int("truncate") || !get_conf_int("overlap")) new[cw] = L'\0';
+                        fprintf (f, "%ls", new);
+                    } else {
+                        fprintf (f, "%*s", fwidth[col], " ");
+                    }
                 } else {
-                    fprintf (f, "%*s", fwidth[col], "*");
+                    fprintf (f, "%*s", fwidth[col], " ");
                 }
-            } else {
-                fprintf (f, "%*s", fwidth[col], " ");
             }
-        }
-        (void) fprintf(f," |\n");
+            fprintf(f," |\n");
         }
 
         if (row == 0) (void) fprintf(f,"%s\n",dashline);
@@ -1386,78 +1387,77 @@ void export_plain(char * fname, int r0, int c0, int rn, int cn) {
     int align = 1;
     int rowfmt;
 
-
     for (row = r0; row <= rn; row++) {
         for (rowfmt=0; rowfmt<rowformat[row]; rowfmt++) {
 
-        // ignore hidden rows
-        //if (row_hidden[row]) continue;
+            // ignore hidden rows
+            //if (row_hidden[row]) continue;
 
-        for (pp = ATBL(tbl, row, col = c0); col <= cn; col++, pp++) {
-            // ignore hidden cols
-            //if (col_hidden[col]) continue;
+            for (pp = ATBL(tbl, row, col = c0); col <= cn; col++, pp++) {
+                // ignore hidden cols
+                //if (col_hidden[col]) continue;
 
-            if (*pp) {
+                if (*pp) {
 
-                num [0] = '\0';
-                text[0] = '\0';
-                out [0] = L'\0';
-                formated_s[0] = '\0';
-                res = -1;
-                align = 1;
+                    num [0] = '\0';
+                    text[0] = '\0';
+                    out [0] = L'\0';
+                    formated_s[0] = '\0';
+                    res = -1;
+                    align = 1;
 
-                // If a numeric value exists
-                if ( (*pp)->flags & is_valid) {
-                    res = ui_get_formated_value(pp, col, formated_s);
-                    // res = 0, indicates that in num we store a date
-                    // res = 1, indicates a format is applied in num
-                    if (res == 0 || res == 1) {
-                        strcpy(num, formated_s);
-                    } else if (res == -1) {
-                        sprintf(num, "%.*f", precision[col], (*pp)->v);
+                    // If a numeric value exists
+                    if ( (*pp)->flags & is_valid) {
+                        res = ui_get_formated_value(pp, col, formated_s);
+                        // res = 0, indicates that in num we store a date
+                        // res = 1, indicates a format is applied in num
+                        if (res == 0 || res == 1) {
+                            strcpy(num, formated_s);
+                        } else if (res == -1) {
+                            sprintf(num, "%.*f", precision[col], (*pp)->v);
+                        }
                     }
-                }
 
-                // If a string exists
-                if ((*pp)->label) {
-                    strcpy(text, (*pp)->label);
-                    align = 1;                                // right alignment
-                    if ((*pp)->flags & is_label) {            // center alignment
-                        align = 0;
-                    } else if ((*pp)->flags & is_leftflush) { // left alignment
-                        align = -1;
-                    } else if (res == 0) {                    // res must ¿NOT? be zero for label to be printed
-                        text[0] = '\0';
+                    // If a string exists
+                    if ((*pp)->label) {
+                        strcpy(text, (*pp)->label);
+                        align = 1;                                // right alignment
+                        if ((*pp)->flags & is_label) {            // center alignment
+                            align = 0;
+                        } else if ((*pp)->flags & is_leftflush) { // left alignment
+                            align = -1;
+                        } else if (res == 0) {                    // res must ¿NOT? be zero for label to be printed
+                            text[0] = '\0';
+                        }
                     }
-                }
 
-                pad_and_align (text, num, fwidth[col], align, 0, out, rowformat[row]);
+                    pad_and_align (text, num, fwidth[col], align, 0, out, rowformat[row]);
 
-                wchar_t new[wcslen(out)+1];
-                wcscpy(new, out);
-                int cw = count_width_widestring(new, fwidth[col]);
+                    wchar_t new[wcslen(out)+1];
+                    wcscpy(new, out);
+                    int cw = count_width_widestring(new, fwidth[col]);
 
-                if (wcslen(new) > cw && rowfmt) {
-                    int count_row = 0;
-                    for (count_row = 0; count_row < rowfmt; count_row++) {
-                        cw = count_width_widestring(new, fwidth[col]);
-                        if (cw) del_range_wchars(new, 0, cw-1);
-                        int whites = fwidth[col] - wcslen(new);
-                        while (whites-- > 0) add_wchar(new, L' ', wcslen(new));
+                    if (wcslen(new) > cw && rowfmt) {
+                        int count_row = 0;
+                        for (count_row = 0; count_row < rowfmt; count_row++) {
+                            cw = count_width_widestring(new, fwidth[col]);
+                            if (cw) del_range_wchars(new, 0, cw-1);
+                            int whites = fwidth[col] - wcslen(new);
+                            while (whites-- > 0) add_wchar(new, L' ', wcslen(new));
+                        }
+                        new[cw] = L'\0';
+                        fprintf (f, "%ls", new);
+                    } else if (! rowfmt && wcslen(new)) {
+                        if (get_conf_int("truncate") || !get_conf_int("overlap")) new[cw] = L'\0';
+                        fprintf (f, "%ls", new);
+                    } else {
+                        fprintf (f, "%*s", fwidth[col], " ");
                     }
-                    new[cw] = L'\0';
-                    fprintf (f, "%ls", new);
-                } else if (! rowfmt) {
-                    if (get_conf_int("truncate") || !get_conf_int("overlap")) new[cw] = L'\0';
-                    fprintf (f, "%ls", new);
                 } else {
                     fprintf (f, "%*s", fwidth[col], " ");
                 }
-            } else {
-                (void) fprintf (f, "%*s", fwidth[col], " ");
             }
-        }
-        (void) fprintf(f,"\n");
+            fprintf(f,"\n");
         }
     }
     if (fname != NULL) {
