@@ -1235,28 +1235,31 @@ void export_markdown(char * fname, int r0, int c0, int rn, int cn) {
     int res = -1;
     int align = 1;
     int dash_num;
+    int rowfmt;
 
     for (row = r0; row <= rn; row++) {
+        for (rowfmt=0; rowfmt<rowformat[row]; rowfmt++) {
+
         // ignore hidden rows
         //if (row_hidden[row]) continue;
 
         for (pp = ATBL(tbl, row, col = c0); col <= cn; col++, pp++) {
             // ignore hidden cols
             //if (col_hidden[col]) continue;
-            if (*pp) {
 
+            if (col == 0) {
+                (void) fprintf (f, "| ");
+            } else if (col <= cn) {
+                (void) fprintf (f, " | ");
+            }
+
+            if (*pp) {
                 num [0] = '\0';
                 text[0] = '\0';
                 out [0] = L'\0';
                 formated_s[0] = '\0';
                 res = -1;
                 align = 1;
-
-                if (col == 0) {
-                  (void) fprintf (f, "| ");
-                } else if (col <= cn) {
-                  (void) fprintf (f, " | ");
-                }
 
                 // If a numeric value exists
                 if ( (*pp)->flags & is_valid) {
@@ -1285,43 +1288,60 @@ void export_markdown(char * fname, int r0, int c0, int rn, int cn) {
 
                 //make header border of dashes with alignment characters
                 if (row == 0) {
-                  if (col == 0) strcat (dashline, "|");
-                  if(align == 0){
-                    strcat (dashline, ":");
-                  }
-                  else {
-                    strcat (dashline, "-");
-                  }
-                  for (dash_num = 0; dash_num < fwidth[col]; dash_num++) {
-                    strcat (dashline, "-");
-                  }
-                  if(align >= 0){
-                    strcat (dashline, ":");
-                  }
-                  else {
-                    strcat (dashline, "-");
-                  }
-                  strcat (dashline, "|");
+                    if (col == 0) strcat (dashline, "|");
+                    if (align == 0) {
+                        strcat (dashline, ":");
+                    } else {
+                        strcat (dashline, "-");
+                    }
+                    for (dash_num = 0; dash_num < fwidth[col]; dash_num++) {
+                        strcat (dashline, "-");
+                    }
+                    if(align >= 0) {
+                        strcat (dashline, ":");
+                    } else {
+                        strcat (dashline, "-");
+                    }
+                    strcat (dashline, "|");
                 }
 
                 pad_and_align (text, num, fwidth[col], align, 0, out, rowformat[row]);
-                (void) fprintf (f, "%ls", out);
 
+                wchar_t new[wcslen(out)+1];
+                wcscpy(new, out);
+                int cw = count_width_widestring(new, fwidth[col]);
+
+                if (wcslen(new) > cw && rowfmt) {
+                    int count_row = 0;
+                    for (count_row = 0; count_row < rowfmt; count_row++) {
+                        cw = count_width_widestring(new, fwidth[col]);
+                        if (cw) del_range_wchars(new, 0, cw-1);
+                        int whites = fwidth[col] - wcslen(new);
+                        while (whites-- > 0) add_wchar(new, L' ', wcslen(new));
+                    }
+                    new[cw] = L'\0';
+                    fprintf (f, "%ls", new);
+                } else if (! rowfmt) {
+                    if (get_conf_int("truncate") || !get_conf_int("overlap")) new[cw] = L'\0';
+                    fprintf (f, "%ls", new);
+                } else {
+                    fprintf (f, "%*s", fwidth[col], "*");
+                }
             } else {
-              (void) fprintf (f, "%*s", fwidth[col], " ");
+                fprintf (f, "%*s", fwidth[col], " ");
             }
         }
-
         (void) fprintf(f," |\n");
+        }
 
         if (row == 0) (void) fprintf(f,"%s\n",dashline);
     }
 
     if (fname != NULL) {
-      closefile(f, pid, 0);
-      if (! pid) {
-        sc_info("File \"%s\" written", fname);
-      }
+        closefile(f, pid, 0);
+        if (! pid) {
+            sc_info("File \"%s\" written", fname);
+        }
     }
 }
 
