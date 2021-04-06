@@ -534,13 +534,13 @@ void do_normalmode(struct block * buf) {
                 }
 
             // decrease row height
-            } else if (buf->pnext->value == 'k') {
+            } else if (buf->pnext->value == 'k' || buf->pnext->value == OKEY_UP) {
                dorowformat(currow, rowformat[currow]-1);
                ui_update(TRUE);
                break;
 
             // increase row height
-            } else if (buf->pnext->value == 'j') {
+            } else if (buf->pnext->value == 'j' || buf->pnext->value == OKEY_DOWN) {
                dorowformat(currow, rowformat[currow]+1);
                ui_update(TRUE);
                break;

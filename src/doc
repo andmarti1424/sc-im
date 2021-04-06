@@ -105,10 +105,10 @@ Commands for handling cell content:
 
      f< , fh , f-LEFT:  Change column format: Decrement column width.
      f> , fl , f-RIGHT: Change column format: Increment column width.
-     f+ , f-UP:         Change column format: Increment decimal precision.
-     f- , f-DOWN:       Change column format: Decrement decimal precision.
-     fj                 Change row format: Increase height.
-     fk                 Change row format: Decrease height.
+     f+                 Change column format: Increment decimal precision.
+     f-                 Change column format: Decrement decimal precision.
+     fj , f-DOWN:       Change row format: Increase height.
+     fk , f-UP:         Change row format: Decrease height.
 
      fr          Freeze a row or the rows selected.
                  If none is selected it freezes the current row.

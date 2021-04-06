@@ -736,7 +736,6 @@ void formatcol(int c) {
             modflg++;
             break;
         case '-':
-        case OKEY_DOWN:
             for (i = curcol; i < curcol + arg; i++) {
                 precision[i]--;
                 if (precision[i] < 0)
@@ -745,7 +744,6 @@ void formatcol(int c) {
             modflg++;
             break;
         case '+':
-        case OKEY_UP:
             for (i = curcol; i < curcol + arg; i++)
                 precision[i]++;
             modflg++;
