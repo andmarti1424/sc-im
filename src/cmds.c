@@ -1368,28 +1368,15 @@ struct ent * forw_row(int arg) {
 struct ent * back_row(int arg) {
     int bkprow = currow;
     int r = currow;
-    extern int center_hidden_rows;
-    //int freeze = freeze_ranges && (freeze_ranges->type == 'r' ||  freeze_ranges->type == 'a') ? 1 : 0;
 
     while (arg--) {
         if (r) {
-            // need to update currow here so center_hidden_rows
-            // get update correctly after calc_offscr_sc_rows
-            //currow = --r;
-            //calc_offscr_sc_rows();
             r--;
         } else {
             sc_info("At row zero");
             break;
         }
-        //while ((row_hidden[r] || (freeze && r > freeze_ranges->br->row && r < freeze_ranges->br->row + center_hidden_rows)) && r)
-        while ((row_hidden[r] && r)) {
-            // need to update currow here so center_hidden_rows
-            // get update correctly after calc_offscr_sc_rows
-            //currow = --r;
-            //calc_offscr_sc_rows();
-            r--;
-        }
+        while ((row_hidden[r] && r)) r--;
     }
     currow = bkprow;
     return lookat(r, curcol);
@@ -1443,7 +1430,7 @@ void scroll_up(int n) {
             else if (r < offscr_sc_rows && ! (freezer && r >= tlrow && r <= brrow)) continue;
             else if (freezer && r > brrow && r <= brrow + center_hidden_rows) continue;
             else if (freezer && r < tlrow && r >= tlrow - center_hidden_rows) continue;
-            i++;
+            i += rowformat[r];
         }
 
         if (freezer && center_hidden_rows && r != brrow) {
@@ -1458,7 +1445,7 @@ void scroll_up(int n) {
             break;
         }
         if (currow == r) {
-            currow = back_row(1)->row;
+            currow = back_row(rowformat[offscr_sc_rows])->row;
             unselect_ranges();
         }
     }

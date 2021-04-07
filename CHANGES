@@ -15,6 +15,7 @@ issue #372
 fix markdown export when empty col was added left to data
 fix in :showrows command.
 added showcols command that was missing.
+handle hidden rows/cols in undo/redo of ir/ic/dr/dc
 
 
 Pending
@@ -22,7 +23,7 @@ Pending
 handle mouse clicks in edition mode.
 Restore comments from old SC?
 handle content alignment over multiple lines in cmds.c:pad_and_align
-C-y misbehave sometimes?
+
 
 Rethink LUA evaluation
 
