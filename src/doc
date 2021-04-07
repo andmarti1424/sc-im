@@ -203,7 +203,7 @@ Commands for handling cell content:
      Zc          Zap (hide) the current column.
      Sr          If a range is selected, show the rows hidden in the range.
      Sc          If a range is selected, show the columns hidden in the range.
-     '/'         Alias for ':int goto '.
+     /           Alias for ':int goto '.
 
                  If a number is given, SC-IM will search for a cell containing
                  that number.  Searches for either strings or numbers proceed
@@ -229,6 +229,8 @@ Commands for handling cell content:
                  although they are somewhat slower than searching through
                  ordinary strings, since all numbers must be formatted or
                  expressions decompiled on the fly during the search.
+
+     ?           Same as / but searchs backwards.
      n           Move to next search match.
      N           Move to previous search match.
 
