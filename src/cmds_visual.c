@@ -276,7 +276,7 @@ void do_visualmode(struct block * buf) {
 
     // $
     } else if (buf->value == L'$') {
-        int s = right_limit()->col;
+        int s = right_limit(currow)->col;
         r->tlcol = r->brcol;
         r->brcol = r->brcol > s ? r->brcol : s;
         curcol = r->brcol;

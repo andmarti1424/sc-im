@@ -1600,6 +1600,8 @@ void export_delim(char * fname, char coldelim, int r0, int c0, int rn, int cn, i
 
     for (row = r0; row <= rn; row++) {
         for (pp = ATBL(tbl, row, col = c0); col <= cn; col++, pp++) {
+            int last_valid_col = right_limit(row)->col; // for issue #374
+            if (col > last_valid_col) continue;
             if (*pp) {
                 char * s;
                 if ((*pp)->flags & is_valid) {
@@ -1627,7 +1629,7 @@ void export_delim(char * fname, char coldelim, int r0, int c0, int rn, int cn, i
                     unspecial(f, s, coldelim);
                 }
             }
-            if (col < cn)
+            if (col < cn && col < last_valid_col)
                 (void) fprintf(f,"%c", coldelim);
         }
         (void) fprintf(f,"\n");

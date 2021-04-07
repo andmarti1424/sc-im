@@ -79,7 +79,7 @@ void scroll_right (int n);
 void scroll_down(int n);
 void scroll_up(int n);
 struct ent * left_limit();
-struct ent * right_limit();
+struct ent * right_limit(int row);
 struct ent * goto_top();
 struct ent * goto_bottom();
 struct ent * tick(char c);             // 'tick' ( ' ) command

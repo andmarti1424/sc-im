@@ -166,7 +166,7 @@ void do_normalmode(struct block * buf) {
         case OKEY_END:
             lastrow = currow;
             lastcol = curcol;
-            curcol = right_limit()->col;
+            curcol = right_limit(currow)->col;
             unselect_ranges();
             ui_update(TRUE);
             break;

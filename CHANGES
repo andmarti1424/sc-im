@@ -16,6 +16,7 @@ fix markdown export when empty col was added left to data
 fix in :showrows command.
 added showcols command that was missing.
 handle hidden rows/cols in undo/redo of ir/ic/dr/dc
+handled issue #374
 
 
 Pending

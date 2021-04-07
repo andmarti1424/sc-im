@@ -1644,15 +1644,16 @@ struct ent * left_limit() {
 }
 
 /**
- * \brief TODO Document right_limit()
- *
+ * \brief right_limit()
+ * \details get the last valid cell to the right
+ * \param[in] row where to check
  * \return lookat
  */
-struct ent * right_limit() {
+struct ent * right_limit(int row) {
     register struct ent *p;
     int c = maxcols - 1;
-    while ( (! VALID_CELL(p, currow, c) && c > 0) || col_hidden[c]) c--;
-    return lookat(currow, c);
+    while ( (! VALID_CELL(p, row, c) && c > 0) || col_hidden[c]) c--;
+    return lookat(row, c);
 }
 
 /**
