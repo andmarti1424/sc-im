@@ -362,7 +362,7 @@ int isnumeric(char * string) {
             continue;
         }
 
-        if ( (string[i] == 'e' || string[i] == 'E') && ! has_exponent ) {
+        if ( (string[i] == 'e' || string[i] == 'E') && ! has_exponent && len > 1) {
             has_exponent = true;
             has_sign = false; // allow sign for exponent
             continue;
