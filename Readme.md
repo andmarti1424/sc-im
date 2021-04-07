@@ -5,24 +5,24 @@ SC original authors are James Gosling and Mark Weiser, and mods were later added
 
 ## Some of the features of SC-IM
 
+- Vim movements commands for editing cell content.
 - UNDO / REDO.
 - 65.536 rows and 702 columns supported. (The number of rows can be expanded to 1.048.576 if wished).
-- CSV / TAB delimited / XLSX file import and export.
-- Scripting support with LUA. Also with triggers and c dynamic linked modules.
-- Clipboard support.
-- GNUPlot interaction.
+- CSV / TAB delimited / XLSX file import and export. ODS import. Markdown export.
 - Key-mappings.
+- Autobackup.
+- 256 color support - screen colors can be customized by user, even at runtime.
+- Colorize cells or give them format such as bold, italic or underline.
+- Wide character support. The following alphabets are supported: English, Spanish, French, Italian, German, Portuguese, Russian, Ukrainian, Greek, Turkish, Czech, Japanese, Chinese.
 - Sort of rows.
 - Filter of rows.
 - Subtotals.
 - Cell shifting.
-- 256 color support - screen colors can be customized by user, even at runtime.
-- Colorize cells or give them format such as bold or underline.
-- Wide character support. The following alphabets are supported: English, Spanish, French, Italian, German, Portuguese, Russian, Ukrainian, Greek, Turkish, Czech, Japanese, Chinese.
-- Autobackup.
+- Clipboard support.
+- GNUPlot interaction.
+- Scripting support with LUA. Also with triggers and c dynamic linked modules.
 - Implement external functions in the language you prefer and use them in SC-IM.
 - Use SC-IM as a non-interactive calculator, reading its input from a external script.
-- More movements commands implemented !
 - Input and Output was completely rewritten.
 
 About the name, the idea is that the program can be identified as another vim-like app.
@@ -120,12 +120,14 @@ Want to help?  You can help us with one or more of the following:
 
 ### Donations
 
-You can help SC-IM development by making a DONATION with PayPal.
+If you like SC-IM please support its development by making a DONATION with PayPal.
+It would really help a lot. 2 kids, 2 cats, 1 wife and only one salary..
 
 <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=U537V8SNQQ45J" target="_blank">
 <img src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" />
 </a>
 
 If you wish to make a donation, please click the above button or just send money to scim.spreadsheet@gmail.com via PayPal, choosing "Goods and Services".
+Paypal is preferred over Patreon.
 
 Thanks!
