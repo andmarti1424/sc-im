@@ -108,6 +108,7 @@ token S_YANKCOL
 %token S_SORT
 %token S_FILTERON
 %token S_GOTO
+%token S_GOTOB
 %token S_CCOPY
 %token S_CPASTE
 %token S_PLOT
@@ -587,7 +588,16 @@ command:
                                    //scxfree($3); shall not free here
     |    S_GOTO '%' STRING       { str_search($3, 0, 0, maxrow, maxcol, 2, 1); }
                                    //scxfree($3); shall not free here
- //   |    S_GOTO WORD             { /* don't repeat last goto on "unintelligible word" */ ; }
+
+    |    S_GOTOB num              { num_search($2, 0, 0, maxrow, maxcol, 0, 0); }
+
+    |    S_GOTOB STRING           { str_search($2, 0, 0, maxrow, maxcol, 0, 0); }
+
+    |    S_GOTOB '#' STRING       { str_search($3, 0, 0, maxrow, maxcol, 1, 0); }
+
+    |    S_GOTOB '%' STRING       { str_search($3, 0, 0, maxrow, maxcol, 2, 0); }
+
+ // |    S_GOTO WORD             { /* don't repeat last goto on "unintelligible word" */ ; }
 
     |    S_CCOPY range           { copy_to_clipboard($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col); }
 |    S_STRTONUM range           {  convert_string_to_number($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col); } 

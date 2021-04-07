@@ -443,6 +443,18 @@ void do_normalmode(struct block * buf) {
             break;
             }
 
+        case L'?':
+            {
+            char cadena[] = ":int gotob ";
+            int i;
+            for (i=0; i<strlen(cadena); i++) {
+                flush_buf(buf);
+                addto_buf(buf, cadena[i]);
+                exec_single_cmd(buf);
+            }
+            break;
+            }
+
         // repeat last command
         case L'.':
             if (get_conf_int("numeric_decimal") == 1 && get_conf_int("numeric") == 1) goto numeric;

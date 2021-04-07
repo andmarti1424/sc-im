@@ -2602,6 +2602,7 @@ int is_single_command (struct block * buf, long timeout) {
         else if (buf->value == L'w')        result = MOVEMENT_CMD;
         else if (buf->value == L'b')        result = MOVEMENT_CMD;
         else if (buf->value == L'/')        result = MOVEMENT_CMD; // search
+        else if (buf->value == L'?')        result = MOVEMENT_CMD; // search backwards
         else if (buf->value == L'n')        result = MOVEMENT_CMD; // repeat last goto cmd
         else if (buf->value == L'N')        result = MOVEMENT_CMD; // repeat last goto cmd - backwards
 
