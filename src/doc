@@ -769,9 +769,15 @@ Commands for handling cell content:
     :showcol {column:column}
                 Show columns that were previously hidden.
 
+    :showcols
+                Having a selected range, it will show cols that were previously hidden in that range.
+
     :showrow {rows}
     :showrow {row:row}
                 Show rows that were previously hidden.
+
+    :showrows
+                Having a selected range, it will show rows that were previously hidden in that range.
 
     :hiddenrows
                 Show details of hidden rows.

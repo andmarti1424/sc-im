@@ -13,18 +13,18 @@ wrap cell content when nooverlap and notruncate are set.
 Open URL or file specified on cell (PR 401)!
 issue #372
 fix markdown export when empty col was added left to data
+fix in :showrows command.
+added showcols command that was missing.
 
 
 Pending
 -------
-Rethink LUA evaluation
-BUG: undo/redo of ir/dr ic/dc does not change hidden_rows/hidden_cols properly.
-
 handle mouse clicks in edition mode.
 Restore comments from old SC?
 handle content alignment over multiple lines in cmds.c:pad_and_align
 C-y misbehave sometimes?
 
+Rethink LUA evaluation
 
 --
 Thanks to all that helped and created PR.

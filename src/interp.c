@@ -2415,6 +2415,7 @@ void lock_cells(struct ent * v1, struct ent * v2) {
     copy_to_undostruct(minr, minc, maxr, maxc, UNDO_ADD, IGNORE_DEPS, NULL);
     end_undo_action();
 #endif
+    sc_info("Cells were locked");
 }
 
 /**
@@ -2455,6 +2456,7 @@ void unlock_cells(struct ent * v1, struct ent * v2) {
     copy_to_undostruct(minr, minc, maxr, maxc, UNDO_ADD, IGNORE_DEPS, NULL);
     end_undo_action();
 #endif
+    sc_info("Cells were unlocked");
 }
 
 /* set the numeric part of a cell */

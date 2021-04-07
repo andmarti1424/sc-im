@@ -218,8 +218,7 @@ void end_undo_action() {
 
 void add_to_undolist(struct undo u) {
     // If not at the end of the list, remove from the end
-    if ( undo_list != NULL && undo_list_pos != len_undo_list() )
-        clear_from_current_pos();
+    if (undo_list != NULL && undo_list_pos != len_undo_list()) clear_from_current_pos();
 
     struct undo * ul = (struct undo *) malloc (sizeof(struct undo)) ;
     ul->p_sig = NULL;
@@ -727,10 +726,9 @@ void undo_hide_show(int row, int col, char type, int arg) {
 
 void do_undo() {
     if (undo_list == NULL || undo_list_pos == 0) {
-        sc_error("No UNDO's left");
+        sc_error("No UNDO's left.");
         return;
     }
-    //sc_info("%d %d", undo_list_pos, len_undo_list());
 
     int ori_currow = currow;
     int ori_curcol = curcol;
@@ -749,20 +747,29 @@ void do_undo() {
 
     // Make undo shift, if any
     if (ul->range_shift != NULL) {
-        // fix marks
+        // fix marks for rows
         if (ul->range_shift->delta_rows > 0)      // sj
             fix_marks(-(ul->range_shift->brrow - ul->range_shift->tlrow + 1), 0, ul->range_shift->tlrow, maxrow, ul->range_shift->tlcol, ul->range_shift->brcol);
         else if (ul->range_shift->delta_rows < 0) // sk
             fix_marks( (ul->range_shift->brrow - ul->range_shift->tlrow + 1), 0, ul->range_shift->tlrow, maxrow, ul->range_shift->tlcol, ul->range_shift->brcol);
+
+        // handle row_hidden
+        fix_row_hidden(ul->range_shift->delta_rows, ul->range_shift->tlrow, maxrow);
+
+        // fix marks for cols
         if (ul->range_shift->delta_cols > 0)      // sl
             fix_marks(0, -(ul->range_shift->brcol - ul->range_shift->tlcol + 1), ul->range_shift->tlrow, ul->range_shift->brrow, ul->range_shift->tlcol, maxcol);
         else if (ul->range_shift->delta_cols < 0) // sh
             fix_marks(0,  (ul->range_shift->brcol - ul->range_shift->tlcol + 1), ul->range_shift->tlrow, ul->range_shift->brrow, ul->range_shift->tlcol, maxcol);
 
+        // handle col_hidden
+        fix_col_hidden(ul->range_shift->delta_cols, ul->range_shift->tlcol, maxcol);
+
+        // shift range now
         shift_range(- ul->range_shift->delta_rows, - ul->range_shift->delta_cols,
             ul->range_shift->tlrow, ul->range_shift->tlcol, ul->range_shift->brrow, ul->range_shift->brcol);
 
-        // shift col_formats here. FIXME handle col_hidden
+        // shift col_formats here.
         if (ul->range_shift->tlcol >= 0 && ul->range_shift->tlrow == 0 && ul->range_shift->brrow == maxrow) { // && ul->range_shift->delta_cols > 0) {
             int i;
             if (ul->range_shift->delta_cols > 0)
@@ -778,7 +785,7 @@ void do_undo() {
                  realfmt[i] = realfmt[i + ul->range_shift->delta_cols];
             }
         }
-        // do the same for rows here. FIXME handle row_hidden
+        // do the same for rows here.
         if (ul->range_shift->tlrow >= 0 && ul->range_shift->tlcol == 0 && ul->range_shift->brcol == maxcol) { // && ul->range_shift->delta_rows > 0) {
             int i;
             if (ul->range_shift->delta_rows > 0)
@@ -886,11 +893,10 @@ void do_undo() {
     curcol = ori_curcol;
 
     // decrease modflg
-    modflg= mf - 1;
+    modflg = mf - 1;
 
     if (undo_list->p_ant != NULL) undo_list = undo_list->p_ant;
-    undo_list_pos--;
-    sc_info("Change: %d of %d", undo_list_pos, len_undo_list());
+    sc_info("Change: %d of %d", --undo_list_pos, len_undo_list());
     return;
 }
 
@@ -904,20 +910,21 @@ void do_undo() {
  */
 
 void do_redo() {
-    //if ( undo_list == NULL || undo_list_pos == len_undo_list()  ) {
     //FIXME check why undo_list_pos can sometimes be > len_undo_list(). it shouldnt!!
-    if ( undo_list == NULL || undo_list_pos >= len_undo_list()  ) {
-        sc_error("No REDO's left");
+    //if ( undo_list == NULL || undo_list_pos >= len_undo_list()  ) {
+    if ( undo_list == NULL || undo_list_pos == len_undo_list()  ) {
+        sc_error("No REDO's left.");
         return;
     }
-    //sc_info("%d %d", undo_list_pos, len_undo_list());
 
     int ori_currow = currow;
     int ori_curcol = curcol;
     int mf = modflg; // save modflag status
 
-    if (undo_list->p_ant == NULL && undo_list_pos == 0);
-    else if (undo_list->p_sig != NULL) undo_list = undo_list->p_sig;
+    //if (undo_list->p_ant == NULL && undo_list_pos == 0);
+    //else if (undo_list->p_sig != NULL) undo_list = undo_list->p_sig;
+    if ((undo_list->p_ant != NULL || undo_list_pos != 0)
+    && (undo_list->p_sig != NULL)) undo_list = undo_list->p_sig;
 
     struct undo * ul = undo_list;
 
@@ -932,20 +939,29 @@ void do_redo() {
 
     // Make undo shift, if any
     if (ul->range_shift != NULL) {
-        // fix marks
+        // fix marks for rows
         if (ul->range_shift->delta_rows > 0)      // sj
             fix_marks( (ul->range_shift->brrow - ul->range_shift->tlrow + 1), 0, ul->range_shift->tlrow, maxrow, ul->range_shift->tlcol, ul->range_shift->brcol);
         else if (ul->range_shift->delta_rows < 0) // sk
             fix_marks(-(ul->range_shift->brrow - ul->range_shift->tlrow + 1), 0, ul->range_shift->tlrow, maxrow, ul->range_shift->tlcol, ul->range_shift->brcol);
+
+        // handle row_hidden
+        fix_row_hidden(-ul->range_shift->delta_rows, ul->range_shift->tlrow, maxrow);
+
+        // fix marks for cols
         if (ul->range_shift->delta_cols > 0)      // sl
             fix_marks(0,  (ul->range_shift->brcol - ul->range_shift->tlcol + 1), ul->range_shift->tlrow, ul->range_shift->brrow, ul->range_shift->tlcol, maxcol);
         else if (ul->range_shift->delta_cols < 0) // sh
             fix_marks(0, -(ul->range_shift->brcol - ul->range_shift->tlcol + 1), ul->range_shift->tlrow, ul->range_shift->brrow, ul->range_shift->tlcol, maxcol);
 
+        // handle col_hidden
+        fix_col_hidden(-ul->range_shift->delta_cols, ul->range_shift->tlcol, maxcol);
+
+        // shift range now
         shift_range(ul->range_shift->delta_rows, ul->range_shift->delta_cols,
             ul->range_shift->tlrow, ul->range_shift->tlcol, ul->range_shift->brrow, ul->range_shift->brcol);
 
-        // shift col_formats here. FIXME handle col_hidden
+        // shift col_formats here
         if (ul->range_shift->tlcol >= 0 && ul->range_shift->tlrow == 0 && ul->range_shift->brrow == maxrow) {
             int i;
             if (ul->range_shift->delta_cols > 0)
@@ -961,7 +977,7 @@ void do_redo() {
                 realfmt[i] = realfmt[i - ul->range_shift->delta_cols];
             }
         }
-        // do the same for rows here. FIXME handle row_hidden
+        // do the same for rows here
         if (ul->range_shift->tlrow >= 0 && ul->range_shift->tlcol == 0 && ul->range_shift->brcol == maxcol) {
             int i;
             if (ul->range_shift->delta_rows > 0)
@@ -972,8 +988,6 @@ void do_redo() {
                     rowformat[i] = rowformat[i - ul->range_shift->delta_rows];
         }
     }
-
-    //update(TRUE);
 
     // Change cursor position
     //if (ul->p_sig != NULL && ul->p_sig->removed != NULL) {
@@ -1073,8 +1087,7 @@ void do_redo() {
     // increase modflg
     modflg = mf + 1;
 
-    sc_info("Change: %d of %d", undo_list_pos + 1, len_undo_list());
-    undo_list_pos++;
+    sc_info("Change: %d of %d", ++undo_list_pos, len_undo_list());
 
     return;
 }

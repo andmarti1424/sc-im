@@ -114,6 +114,9 @@ void syncref(register struct enode * e);
 int fcopy(char * action);
 int fsum();
 int pad(int n, int r1, int c1, int r2, int c2);
+void fix_row_hidden(int deltar, int ri, int rf);
+void fix_col_hidden(int deltac, int ci, int cf);
+
 void mark_ent_as_deleted(register struct ent * p, int delete);
 int calc_offscr_sc_rows();
 int calc_offscr_sc_cols();

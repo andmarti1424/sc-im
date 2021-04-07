@@ -221,8 +221,11 @@ void deletecol(int col, int mult) {
     save_undo_range_shift(0, -mult, 0, col, maxrow, col - 1 + mult);
 
     int i;
-    for (i=col; i < col + mult; i++)
+    for (i=col; i < col + mult; i++) {
         add_undo_col_format(i, 'R', fwidth[i], precision[i], realfmt[i]);
+        if (col_hidden[i]) undo_hide_show(-1, i, 's', 1);
+        else undo_hide_show(-1, i, 'h', 1);
+    }
 #endif
 
     fix_marks(0, -mult, 0, maxrow,  col + mult -1, maxcol);
@@ -871,8 +874,11 @@ void deleterow(int row, int mult) {
     copy_to_undostruct(row, 0, row + mult - 1, maxcol, UNDO_DEL, HANDLE_DEPS, NULL);
     save_undo_range_shift(-mult, 0, row, 0, row - 1 + mult, maxcol);
     int i;
-    for (i=row; i < row + mult; i++)
+    for (i=row; i < row + mult; i++) {
         add_undo_row_format(i, 'R', rowformat[currow]);
+        if (row_hidden[i]) undo_hide_show(i, -1, 's', 1);
+        else undo_hide_show(i, -1, 'h', 1);
+    }
 #endif
 
     fix_marks(-mult, 0, row + mult - 1, maxrow, 0, maxcol);
@@ -1941,6 +1947,7 @@ void valueize_area(int sr, int sc, int er, int ec) {
     copy_to_undostruct(sr, sc, er, ec, UNDO_ADD, IGNORE_DEPS, NULL);
     end_undo_action();
     #endif
+    sc_info("Removed formulas from range");
     return;
 }
 
@@ -2220,6 +2227,52 @@ int pad(int n, int r1, int c1, int r2, int c2) {
         return 1;
     }
     return 0;
+}
+
+/**
+ * \brief fix_row_hidden
+ * \details fix hidden rows after undoing ir dr etc..
+ * \return none
+ */
+void fix_row_hidden(int deltar, int ri, int rf) {
+    int r;
+    int d = deltar;
+
+    // decrease / for dr
+    if (deltar > 0)
+    while (d-- > 0)
+    for (r = ri; r < rf; r++)
+        row_hidden[r] = row_hidden[r+1];
+
+    // increase / for ir
+    if (deltar < 0)
+    while (d++ < 0)
+    for (r = rf; r > ri; r--)
+        row_hidden[r] = row_hidden[r-1];
+    return;
+}
+
+/**
+ * \brief fix_col_hidden
+ * \details fix hidden cols after undoing ic dc etc..
+ * \return none
+ */
+void fix_col_hidden(int deltac, int ci, int cf) {
+    int c;
+    int d = deltac;
+
+    // decrease / for dc
+    if (deltac > 0)
+    while (d-- > 0)
+    for (c = ci; c < cf; c++)
+        col_hidden[c] = col_hidden[c+1];
+
+    // increase / for ic
+    if (deltac < 0)
+    while (d++ < 0)
+    for (c = cf; c > ci; c--)
+        col_hidden[c] = col_hidden[c-1];
+    return;
 }
 
 /**

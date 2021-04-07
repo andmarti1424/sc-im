@@ -146,3 +146,4 @@ void fix_marks(int deltar, int deltac, int row_desde, int row_hasta, int col_des
     }
     return;
 }
+

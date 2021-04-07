@@ -484,8 +484,19 @@ void do_commandmode(struct block * sb) {
                 int r, arg;
                 sr = get_range_by_pos(p);
                 r = sr->tlrow;
-                arg = sr->brcol - sr->tlcol + 1;
+                arg = sr->brrow - sr->tlrow + 1;
+                sc_debug("r:%d, arg:%d", r, arg);
                 show_row(r, arg);
+            }
+
+        } else if ( ! wcsncmp(inputline, L"showcols", 8) ) {
+            if (p != -1) { // only continue if there is a selected range
+                int r, arg;
+                sr = get_range_by_pos(p);
+                r = sr->tlcol;
+                arg = sr->brcol - sr->tlcol + 1;
+                sc_debug("r:%d, arg:%d", r, arg);
+                show_col(r, arg);
             }
 
         // range lock / unlock
