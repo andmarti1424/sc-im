@@ -261,6 +261,7 @@ Commands for handling cell content:
                  If the character is a mark of a cell or range, the range
                  represented is inserted into the field.
      c-v         Enter Visual mode. See C-o and C-k commands in VISUAL MODE.
+     \\{char}    Fills the cell with n occurrences of {char} to complete its width.
 
 ==============================================================================
 &EDIT MODE&

@@ -2455,15 +2455,21 @@ void pad_and_align (char * str_value, char * numeric_value, int col_width, int a
     mbsptr = str_value;
 
     // Here we handle \" and replace them with "
-    int pos;
-    while ((pos = str_in_str(str_value, "\\\"")) != -1)
-        del_char(str_value, pos);
+    strcpy(str_value, str_replace(str_value, "\\\"", "\""));
 
     // create wcs string based on multibyte string..
     memset( &state, '\0', sizeof state );
     result = mbsrtowcs(wcs_value, &mbsptr, BUFFERSIZE, &state);
     if ( result != (size_t)-1 )
         str_len = wcswidth(wcs_value, wcslen(wcs_value));
+
+    if (str_len == 2 && str_value[0] == '\\') {
+        wmemset(str_out + wcslen(str_out), str_value[1], col_width);
+        return;
+    } else if (str_len == 3 && str_value[0] == '\\' && str_value[1] == '\\') {
+        wmemset(str_out + wcslen(str_out), str_value[2], col_width);
+        return;
+    }
 
     // If padding exceedes column width, returns n number of '-' needed to fill column width
     if (padding >= col_width ) {
