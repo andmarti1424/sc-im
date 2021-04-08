@@ -1050,20 +1050,20 @@ void do_normalmode(struct block * buf) {
             #ifdef UNDO
             do_undo();
             ui_update(TRUE);
-            break;
             #else
             sc_error("Build was done without UNDO support");
             #endif
+            break;
 
         // redo
         case ctl('r'):
             #ifdef UNDO
             do_redo();
             ui_update(TRUE);
-            break;
             #else
             sc_error("Build was done without UNDO support");
             #endif
+            break;
 
         case L'{': // left align
         case L'}': // right align
