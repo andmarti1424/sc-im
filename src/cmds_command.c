@@ -545,7 +545,9 @@ void do_commandmode(struct block * sb) {
                     swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%s%d %ls", coltoa(sr->brcol), sr->brrow, cline);
                 }
             }
+            sc_info("Sorting..");
             send_to_interp(interp_line);
+            sc_info("Done.");
 
         } else if ( ! wcsncmp(inputline, L"subtotal ", 9) ) {
             int r = currow, c = curcol, rf = currow, cf = curcol, pos, cancel = 0;
