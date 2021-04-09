@@ -1080,9 +1080,7 @@ int import_csv(char * fname, char d) {
                 del_char(token, strlen(token)-1);
             }
 
-            char * st = str_replace (token, "\"", "''"); // replace double quotes inside string
-
-            st = str_replace (st, repls, replb); // handle "," case
+            char * st = str_replace (token, repls, replb); // handle "," case
 
             // number import
             if (strlen(st) && isnumeric(st) && ! get_conf_int("import_delimited_as_text")
