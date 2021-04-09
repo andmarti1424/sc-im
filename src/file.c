@@ -1035,6 +1035,12 @@ int import_csv(char * fname, char d) {
 
     int i=0;
 
+    // handle ","
+    char lookf[4], repls[2], replb[2];
+    sprintf(lookf, "\"%c\"", d);
+    sprintf(repls, "%c", 6);
+    sprintf(replb, "%c", d);
+
     // CSV file traversing
     while ( ! feof(f) && (fgets(line_in, sizeof(line_in), f) != NULL) ) {
         // show file loading progress
@@ -1048,6 +1054,8 @@ int import_csv(char * fname, char d) {
                 line_in[l] = '\0';
                 break;
             }
+
+        sprintf(line_in, str_replace (line_in, lookf, repls)); // handle "," case
 
         // Split string using the delimiter
         token = xstrtok(line_in, delim);
@@ -1071,7 +1079,10 @@ int import_csv(char * fname, char d) {
                 del_char(token, 0);
                 del_char(token, strlen(token)-1);
             }
-            char * st = str_replace (token, "\"", "''"); //replace double quotes inside string
+
+            char * st = str_replace (token, "\"", "''"); // replace double quotes inside string
+
+            st = str_replace (st, repls, replb); // handle "," case
 
             // number import
             if (strlen(st) && isnumeric(st) && ! get_conf_int("import_delimited_as_text")
