@@ -53,7 +53,7 @@ SC-IM stands for Spreadsheet Calculator Improvised. :-)
   - `gnuplot` (for plots)
   - `libxlsxreader` (for xls support)
   - `xlsxwriter` (for xlsx export support)
-  - `libxml-2.0` and `libzip` (for xlsx import support)
+  - `libxml-2.0` and `libzip` (for xlsx/ods import support)
   - `lua` (for Lua scripting)
   - threads support (in case you want to test this in Minix, just disable autobackup and HAVE_PTHREAD)
 
