@@ -101,7 +101,7 @@ void erasedb() {
     }
 
     for (r = 0; r <= maxrow; r++) {
-        rowformat[r] = 1;
+        row_format[r] = 1;
         register struct ent ** pp = ATBL(tbl, r, 0);
         for (c = 0; c++ <= maxcol; pp++)
             if (*pp != NULL) {
@@ -381,8 +381,8 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
             (void) fprintf (f, "format %s %d %d %d\n", coltoa(c), fwidth[c], precision[c], realfmt[c]);
 
     for (r = r0; r <= rn; r++)
-        if (rowformat[r] != 1)
-            (void) fprintf (f, "format %d %d\n", r, rowformat[r]);
+        if (row_format[r] != 1)
+            (void) fprintf (f, "format %d %d\n", r, row_format[r]);
 
     // new implementation of hidecol. group by ranges
     for (c = c0; c <= cn; c++) {
@@ -1247,7 +1247,7 @@ void export_markdown(char * fname, int r0, int c0, int rn, int cn) {
     int rowfmt;
 
     for (row = r0; row <= rn; row++) {
-        for (rowfmt=0; rowfmt<rowformat[row]; rowfmt++) {
+        for (rowfmt=0; rowfmt<row_format[row]; rowfmt++) {
 
             // ignore hidden rows
             //if (row_hidden[row]) continue;
@@ -1315,7 +1315,7 @@ void export_markdown(char * fname, int r0, int c0, int rn, int cn) {
                     }
 
 
-                    pad_and_align (text, num, fwidth[col], align, 0, out, rowformat[row]);
+                    pad_and_align (text, num, fwidth[col], align, 0, out, row_format[row]);
 
                     wchar_t new[wcslen(out)+1];
                     wcscpy(new, out);
@@ -1397,7 +1397,7 @@ void export_plain(char * fname, int r0, int c0, int rn, int cn) {
     int rowfmt;
 
     for (row = r0; row <= rn; row++) {
-        for (rowfmt=0; rowfmt<rowformat[row]; rowfmt++) {
+        for (rowfmt=0; rowfmt<row_format[row]; rowfmt++) {
 
             // ignore hidden rows
             //if (row_hidden[row]) continue;
@@ -1440,7 +1440,7 @@ void export_plain(char * fname, int r0, int c0, int rn, int cn) {
                         }
                     }
 
-                    pad_and_align (text, num, fwidth[col], align, 0, out, rowformat[row]);
+                    pad_and_align (text, num, fwidth[col], align, 0, out, row_format[row]);
 
                     wchar_t new[wcslen(out)+1];
                     wcscpy(new, out);

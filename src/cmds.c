@@ -73,9 +73,12 @@ wchar_t interp_line[BUFFERSIZE];
 extern graphADT graph;
 extern int yyparse(void);
 
-int offscr_sc_rows = 0, offscr_sc_cols = 0; /**< off screen spreadsheet rows and columns */
-int center_hidden_cols = 0;
-int center_hidden_rows = 0;
+int offscr_sc_rows = 0, offscr_sc_cols = 0; // off screen spreadsheet rows and columns
+int num_frozen_after_rows = 0; // number of frozen rows after the calculated rows of calc_offscr_sc_rows()
+int num_frozen_after_cols = 0; // number of frozen cols after the calculated cols of calc_offscr_sc_cols()
+
+int center_hidden_cols = 0; // to be removed
+int center_hidden_rows = 0; // to be removed
 
 /**
  * \brief Maintain ent strucs until they are release for deletion by sync_refs.
@@ -107,6 +110,7 @@ void mark_ent_as_deleted(register struct ent * p, int delete) {
  * clearent for freeing ents contents memory and free ent pointer. This
  * function should always be called at exit. This is mandatory, just in
  * case we want to UNDO any changes.
+ * TODO: any malloc of ents should check here before asking for memory
  *
  * \return none
  */
@@ -135,7 +139,7 @@ void flush_saved() {
  *
  * \return none
  */
-// TODO Improve this function such that it does not traverse the whole  table
+// TODO Improve this function such that it does not traverse the whole table
 void sync_refs() {
     int i, j;
     register struct ent * p;
@@ -225,6 +229,7 @@ void deletecol(int col, int mult) {
         add_undo_col_format(i, 'R', fwidth[i], precision[i], realfmt[i]);
         if (col_hidden[i]) undo_hide_show(-1, i, 's', 1);
         else undo_hide_show(-1, i, 'h', 1);
+        // TODO undo col_frozen
     }
 #endif
 
@@ -301,6 +306,7 @@ void int_deletecol(int col, int mult) {
             precision[i] = precision[i+1];
             realfmt[i] = realfmt[i+1];
             col_hidden[i] = col_hidden[i+1];
+            col_frozen[i] = col_frozen[i+1];
         }
 
         for (; i < maxcols - 1; i++) {
@@ -308,6 +314,7 @@ void int_deletecol(int col, int mult) {
             precision[i] = DEFPREC;
             realfmt[i] = DEFREFMT;
             col_hidden[i] = FALSE;
+            col_frozen[i] = FALSE;
         }
 
         maxcol--;
@@ -641,16 +648,16 @@ void dorowformat(int r, unsigned char size) {
 #ifdef UNDO
     if (! loading) {
         create_undo_action();
-        add_undo_row_format(r, 'R', rowformat[r]);
+        add_undo_row_format(r, 'R', row_format[r]);
     }
 #endif
     if (r >= maxrows && !growtbl(GROWROW, 0, r)) r = maxrows-1 ;
     checkbounds(&r, &curcol);
-    rowformat[r] = size;
+    row_format[r] = size;
 
 #ifdef UNDO
     if (!loading) {
-        add_undo_row_format(r, 'A', rowformat[r]);
+        add_undo_row_format(r, 'A', row_format[r]);
         end_undo_action();
     }
 #endif
@@ -779,13 +786,14 @@ void insert_row(int after) {
     tmprow = tbl[maxrow];
     for (r = maxrow; r > lim; r--) {
         row_hidden[r] = row_hidden[r-1];
-        rowformat[r] = rowformat[r-1];
+        row_frozen[r] = row_frozen[r-1];
+        row_format[r] = row_format[r-1];
         tbl[r] = tbl[r-1];
         for (c = 0, pp = ATBL(tbl, r, 0); c < maxcols; c++, pp++)
             if (*pp) (*pp)->row = r;
     }
     tbl[r] = tmprow;        // the last row is never used
-    rowformat[r] = 1;
+    row_format[r] = 1;
 
     // if padding exists in the old currow, we copy it to the new row!
     for (c = 0; c < maxcols; c++) {
@@ -825,12 +833,14 @@ void insert_col(int after) {
         precision[c] = precision[c-1];
         realfmt[c] = realfmt[c-1];
         col_hidden[c] = col_hidden[c-1];
+        col_frozen[c] = col_frozen[c-1];
     }
     for (c = curcol + after; c - curcol - after < 1; c++) {
         fwidth[c] = DEFWIDTH;
         precision[c] =  DEFPREC;
         realfmt[c] = DEFREFMT;
         col_hidden[c] = FALSE;
+        col_frozen[c] = FALSE;
     }
 
     for (r=0; r <= maxrow; r++) {
@@ -875,9 +885,10 @@ void deleterow(int row, int mult) {
     save_undo_range_shift(-mult, 0, row, 0, row - 1 + mult, maxcol);
     int i;
     for (i=row; i < row + mult; i++) {
-        add_undo_row_format(i, 'R', rowformat[currow]);
+        add_undo_row_format(i, 'R', row_format[currow]);
         if (row_hidden[i]) undo_hide_show(i, -1, 's', 1);
         else undo_hide_show(i, -1, 'h', 1);
+        // TODO undo row_frozen
     }
 #endif
 
@@ -941,9 +952,10 @@ void int_deleterow(int row, int mult) {
                     if ( pp[0] ) pp[0]->row--;
                 }
             }
-            //update row_hidden and rowformat here
+            //update row_hidden and row_format here
             row_hidden[r] = row_hidden[r+1];
-            rowformat[r] = rowformat[r+1];
+            row_frozen[r] = row_frozen[r+1];
+            row_format[r] = row_format[r+1];
         }
 
         rebuild_graph(); //TODO CHECK HERE WHY REBUILD IS NEEDED. See NOTE1 in shift.c
@@ -1283,8 +1295,6 @@ void clearent(struct ent * v) {
  * \return lookat
  */
 struct ent * back_col(int arg) {
-    extern int center_hidden_cols;
-    int freeze = freeze_ranges && (freeze_ranges->type == 'c' ||  freeze_ranges->type == 'a') ? 1 : 0;
     int c = curcol;
 
     while (--arg >= 0) {
@@ -1297,8 +1307,7 @@ struct ent * back_col(int arg) {
             sc_info ("At column A");
             break;
         }
-        while ((col_hidden[c] || (freeze && c > freeze_ranges->br->col
-        && c < freeze_ranges->br->col + center_hidden_cols)) && c) {
+        while (col_hidden[c] && c) {
             // need to update curcol here so center_hidden_cols
             // get update correctly after calc_offscr_sc_cols
             curcol = --c;
@@ -1316,20 +1325,20 @@ struct ent * back_col(int arg) {
  */
 struct ent * forw_col(int arg) {
     int c = curcol;
-    extern int center_hidden_cols;
-    int freeze = freeze_ranges && (freeze_ranges->type == 'c' ||  freeze_ranges->type == 'a') ? 1 : 0;
 
     while (--arg >= 0) {
-        if (c < maxcols - 1)
+        if (c < maxcols - 1) {
             c++;
-        else
+        } else
             if (! growtbl(GROWCOL, 0, arg)) {    /* get as much as needed */
                 sc_error("cannot grow");
                 return lookat(currow, curcol);
-            } else
+            } else {
                 c++;
-        while ((col_hidden[c] || (freeze && c > freeze_ranges->br->col && c <= freeze_ranges->br->col + center_hidden_cols)) && (c < maxcols - 1))
+            }
+        while (col_hidden[c] && c < maxcols - 1) {
             c++;
+        }
 
     }
     return lookat(currow, c);
@@ -1342,8 +1351,6 @@ struct ent * forw_col(int arg) {
  */
 struct ent * forw_row(int arg) {
     int r = currow;
-    extern int center_hidden_rows;
-    int freeze = freeze_ranges && (freeze_ranges->type == 'r' ||  freeze_ranges->type == 'a') ? 1 : 0;
 
     while (arg--) {
         if (r < maxrows - 1)
@@ -1355,8 +1362,7 @@ struct ent * forw_row(int arg) {
             } else
                 r++;
         }
-        while ((row_hidden[r] || (freeze && r > freeze_ranges->br->row && r <= freeze_ranges->br->row + center_hidden_rows)) && (r < maxrows - 1))
-            r++;
+        while (row_hidden[r] && r < maxrows - 1) r++;
     }
     return lookat(r, curcol);
 }
@@ -1387,24 +1393,25 @@ struct ent * back_row(int arg) {
  * \param[in] n
  * \return none
  */
+//FIXME: to handle multiple frozen rows/cols
 void scroll_down(int n) {
-    extern int center_hidden_rows;
-    int freezer = freeze_ranges && (freeze_ranges->type == 'r' ||  freeze_ranges->type == 'a') ? 1 : 0;
-    int tlrow = freezer ? freeze_ranges->tl->row : 0;
-    int brrow = freezer ? freeze_ranges->br->row : 0;
+    //extern int center_hidden_rows;
+    //int freezer = freeze_ranges && (freeze_ranges->type == 'r' ||  freeze_ranges->type == 'a') ? 1 : 0;
+    //int tlrow = freezer ? freeze_ranges->tl->row : 0;
+    //int brrow = freezer ? freeze_ranges->br->row : 0;
     while (currow < maxrows && n--) {
-    //while (n--) {
-        if ( (!freezer && currow == offscr_sc_rows) ||
-             ( freezer && currow == offscr_sc_rows + center_hidden_rows + brrow - tlrow + 1) // && currow != tlrow)
-        ) {
+        if (currow == offscr_sc_rows + calc_offscr_sc_rows() - 2) {
+        //if ( (!freezer && currow == offscr_sc_rows) ||
+        //     ( freezer && currow == offscr_sc_rows + center_hidden_rows + brrow - tlrow + 1)
+        //) {
             currow = forw_row(1)->row;
             unselect_ranges();
         }
-        if (freezer && offscr_sc_rows == tlrow) {
-            center_hidden_rows++;
-        } else {
-            offscr_sc_rows++;
-        }
+        //if (freezer && offscr_sc_rows == tlrow) {
+        //    center_hidden_rows++;
+        //} else {
+        offscr_sc_rows++;
+        //}
     }
     return;
 }
@@ -1414,23 +1421,23 @@ void scroll_down(int n) {
  * \param[in] n
  * \return none
  */
+// FIXME: to handle multiple frozen rows/cols
 void scroll_up(int n) {
-    extern int center_hidden_rows;
-    int freezer = freeze_ranges && (freeze_ranges->type == 'r' ||  freeze_ranges->type == 'a') ? 1 : 0;
-    int r, i;
-    int brrow = freezer ? freeze_ranges->br->row : 0;
-    int tlrow = freezer ? freeze_ranges->tl->row : 0;
+    //extern int center_hidden_rows;
+    //int freezer = freeze_ranges && (freeze_ranges->type == 'r' ||  freeze_ranges->type == 'a') ? 1 : 0;
+    //int r, i;
+    //int brrow = freezer ? freeze_ranges->br->row : 0;
+    //int tlrow = freezer ? freeze_ranges->tl->row : 0;
 
     while (n--) {
-        // check what is the last row visible (r)
+        /* check what is the last row visible (r)
         i = 0, r = offscr_sc_rows-1;
         while (i < LINES - RESROW - 1 && r < maxrows - 1) {
             r++;
             if (row_hidden[r]) continue;
-            else if (r < offscr_sc_rows && ! (freezer && r >= tlrow && r <= brrow)) continue;
-            else if (freezer && r > brrow && r <= brrow + center_hidden_rows) continue;
-            else if (freezer && r < tlrow && r >= tlrow - center_hidden_rows) continue;
-            i += rowformat[r];
+            else if (r < offscr_sc_rows && ! row_frozen[r]) continue;
+            else if (row_frozen[r]) continue;
+            i += row_format[r];
         }
 
         if (freezer && center_hidden_rows && r != brrow) {
@@ -1440,12 +1447,16 @@ void scroll_up(int n) {
         } else if (offscr_sc_rows && freezer && r == brrow) {
             offscr_sc_rows--;
             center_hidden_rows++;
+            */
+        if (offscr_sc_rows) {
+            offscr_sc_rows--;
         } else {
             sc_info("cannot scroll no longer");
             break;
         }
-        if (currow == r) {
-            currow = back_row(rowformat[offscr_sc_rows])->row;
+        //if (currow == r) {
+        if (currow == offscr_sc_rows-1) {
+            currow = back_row(row_format[offscr_sc_rows])->row;
             unselect_ranges();
         }
     }
@@ -1464,14 +1475,15 @@ struct ent * go_home() {
  * \brief vert_top() - for command H in normal mode
  * \return lookat
  */
+//FIXME: to handle multiple frozen rows/cols
 struct ent * vert_top() {
-    extern int center_hidden_rows;
-    int freezer = freeze_ranges && (freeze_ranges->type == 'r' ||  freeze_ranges->type == 'a') ? 1 : 0;
-    int brrow = freezer ? freeze_ranges->br->row : 0;
+    //extern int center_hidden_rows;
+    //int freezer = freeze_ranges && (freeze_ranges->type == 'r' ||  freeze_ranges->type == 'a') ? 1 : 0;
+    //int brrow = freezer ? freeze_ranges->br->row : 0;
 
     int r = offscr_sc_rows;
     while ( row_hidden[r] && r < currow ) r++;
-    if (freezer && currow > brrow + center_hidden_rows + 1) while (row_hidden[r] || r <= brrow + center_hidden_rows) r++;
+    //if (freezer && currow > brrow + center_hidden_rows + 1) while (row_hidden[r] || r <= brrow + center_hidden_rows) r++;
     return lookat(r, curcol);
 }
 
@@ -1479,20 +1491,14 @@ struct ent * vert_top() {
  * \brief vert_bottom() - for command L in normal mode
  * \return lookat
  */
+//FIXME: should count frozen rows as well
 struct ent * vert_bottom() {
-    extern int center_hidden_rows;
-    int freezer = freeze_ranges && (freeze_ranges->type == 'r' ||  freeze_ranges->type == 'a') ? 1 : 0;
-    int brrow = freezer ? freeze_ranges->br->row : 0;
-    int tlrow = freezer ? freeze_ranges->tl->row : 0;
-
     int i = 0, r = offscr_sc_rows-1;
     while (i < LINES - RESROW - 1) {
         r++;
         if (row_hidden[r]) continue;
-        else if (r < offscr_sc_rows && ! (freezer && r >= tlrow && r <= brrow)) continue;
-        else if (freezer && r > brrow && r <= brrow + center_hidden_rows) continue;
-        else if (freezer && r < tlrow && r >= tlrow - center_hidden_rows) continue;
-        i+= rowformat[r];
+        else if (r < offscr_sc_rows && ! row_frozen[r]) continue;
+        i+= row_format[r];
     }
     if (r > maxrows) r = maxrows;
     return lookat(r, curcol);
@@ -1502,23 +1508,17 @@ struct ent * vert_bottom() {
  * \brief vert_middle() - for command M in normal mode
  * \return lookat
  */
+//FIXME: to handle multiple frozen rows/cols
 struct ent * vert_middle() {
-    extern int center_hidden_rows;
-    int freezer = freeze_ranges && (freeze_ranges->type == 'r' ||  freeze_ranges->type == 'a') ? 1 : 0;
-    int brrow = freezer ? freeze_ranges->br->row : 0;
-    int tlrow = freezer ? freeze_ranges->tl->row : 0;
-
     int top = offscr_sc_rows;
-    while ( (row_hidden[top] && top < currow) || (freezer && top >= tlrow && top <= brrow) ||
-        (freezer && top > brrow && top <= brrow + center_hidden_rows) ||
-        (freezer && top < tlrow && top >= tlrow - center_hidden_rows)) top++;
+    while (row_hidden[top] && top < currow) top++;
     int mid = (vert_bottom()->row + top) / 2;
-    while ( row_hidden[mid] && mid < currow ) mid++; // just in case mid is hidden
+    while (row_hidden[mid] && mid < currow) mid++; // just in case mid is hidden
     return lookat(mid, curcol);
 }
 
 /**
- * \brief TODO Document go_end()
+ * \brief go_end(): go to last valid cell of grid
  * \return lookat; NULL otherwise
  */
 struct ent * go_end() {
@@ -1574,6 +1574,7 @@ struct ent * tick(char ch) {
  * \param[in] n
  * \return none
  */
+//FIXME: to handle multiple frozen rows/cols
 void scroll_right(int n) {
     extern int center_hidden_cols;
     int freezec = freeze_ranges && (freeze_ranges->type == 'c' ||  freeze_ranges->type == 'a') ? 1 : 0;
@@ -1601,6 +1602,7 @@ void scroll_right(int n) {
  * \param[in] n
  * \return none
  */
+//FIXME: to handle multiple frozen rows/cols
 void scroll_left(int n) {
     extern int center_hidden_cols;
     int freezec = freeze_ranges && (freeze_ranges->type == 'c' ||  freeze_ranges->type == 'a') ? 1 : 0;
@@ -1749,6 +1751,7 @@ struct ent * go_eol() {
  * \brief TODO Document horiz_middle()
  * \return lookat; NULL otherwise
  */
+//FIXME: to handle multiple frozen rows/cols
 struct ent * horiz_middle() {
     int i;
     int ancho = rescol;
@@ -2265,171 +2268,140 @@ void fix_col_hidden(int deltac, int ci, int cf) {
 
 /**
  * \brief Calculate number of hidden columns to the left
- *
  * \details Calculate number of hidden columns to the left.
- * q are the number of columns that are before offscr_sc_cols that are shown
- * because they are frozen.
- *
  * \return number of hidden columns to the left
  */
 int calc_offscr_sc_cols() {
-    int q = 0, i, cols = 0, col = 0;
-    int freeze = freeze_ranges && (freeze_ranges->type == 'c' ||  freeze_ranges->type == 'a') ? 1 : 0;
-    int tlcol = freeze ? freeze_ranges->tl->col : 0;
-    int brcol = freeze ? freeze_ranges->br->col : 0;
+    int i, k, cols, col, colf;
+    int fmt_frozen_after_cols = 0;    // number of NCURSES screen lines needed to display the frozen after cols.
+    int num_frozen_before_offscr = 0; // number of frozen cols before offscr cols
 
     // pick up col counts
-    while (freeze && curcol > brcol && curcol <= brcol + center_hidden_cols) center_hidden_cols--;
-    if (offscr_sc_cols - 1 <= curcol) {
-        for (i = 0, q = 0, cols = 0, col = rescol; i < maxcols && col + fwidth[i] <= COLS; i++) {
-            if (i < offscr_sc_cols && ! (freeze && i >= tlcol && i <= brcol)) continue;
-            else if (freeze && i > brcol && i <= brcol + center_hidden_cols) continue;
-            else if (freeze && i < tlcol && i >= tlcol - center_hidden_cols) continue;
-            if (i < offscr_sc_cols && freeze && i >= tlcol && i <= brcol && ! col_hidden[i] ) q++;
+    // col : number of NCURSES screen columns counted (for entire grid). must be <= COLS
+    // cols : number de sc cols shown on grid
+    // colf : number of NCURSES screen lines (because of frozen cols) before offscr_sc_cols
+    countc:
+    for (i = 0, cols = 0, colf = 0, col = rescol, num_frozen_before_offscr = 0; i < maxcols && col + fwidth[i] <= COLS; i++) {
+        if (offscr_sc_cols + cols - 2 > maxcols) return cols;
+        if (col_hidden[i]) continue;
+        if (col_frozen[i] || i >= offscr_sc_cols) {
+            col += fwidth[i];
+            if (col_frozen[i] && i < offscr_sc_cols) { colf += fwidth[i]; num_frozen_before_offscr++; }
             cols++;
-
-            if (! col_hidden[i]) col += fwidth[i];
         }
     }
 
-    // get  off screen cols
-    while ( offscr_sc_cols + center_hidden_cols + cols - 1      < curcol || curcol < offscr_sc_cols
-            || (freeze && curcol < tlcol && curcol >= tlcol - center_hidden_cols)) {
-
-        // izq
-        if (offscr_sc_cols - 1 == curcol) {
-            if (freeze && offscr_sc_cols + cols + center_hidden_cols >= brcol && brcol - cols - offscr_sc_cols + 2 > 0)
-                center_hidden_cols = brcol - cols - offscr_sc_cols + 2;
-            offscr_sc_cols--;
-
-        // derecha
-        } else if (offscr_sc_cols + center_hidden_cols + cols == curcol &&
-            (! freeze || (curcol > brcol && offscr_sc_cols < tlcol) || (curcol >= cols && offscr_sc_cols < tlcol))) {
-            offscr_sc_cols++;
-
-        // derecha con freeze cols a la izq.
-        } else if (offscr_sc_cols + center_hidden_cols + cols == curcol) {
-            center_hidden_cols++;
-
-        // derecha con freeze a la derecha
-        } else if (freeze && curcol < tlcol && curcol >= tlcol - center_hidden_cols ) {
-            center_hidden_cols--;
-            offscr_sc_cols++;
-
-        } else {
-            // Try to put the cursor in the center of the screen
-            col = (COLS - rescol - fwidth[curcol]) / 2 + rescol;
-            if (freeze && curcol > brcol) {
-                offscr_sc_cols = tlcol;
-                center_hidden_cols = curcol - brcol; //FIXME shall we count frozen cols to center??
-            } else {
-                offscr_sc_cols = curcol;
-                center_hidden_cols = 0;
-            }
-            for (i=curcol-1; i >= 0 && col - fwidth[i] - 1 > rescol; i--) {
-                if (freeze && curcol > brcol) center_hidden_cols--;
-                else offscr_sc_cols--;
-                if ( ! col_hidden[i]) col -= fwidth[i];
-            }
+    // decrease cols until fitting frozen cols after "cols"..
+    // we count the number of frozen cols after "cols", from "cols" until maxcols.
+    for (k = offscr_sc_cols + cols - 1 , num_frozen_after_cols = 0, fmt_frozen_after_cols = 0; k < maxcols; k++)
+        if (col_frozen[k]) {
+            num_frozen_after_cols++;
+            fmt_frozen_after_cols += fwidth[k]; // count the screen lines needed to display them as well
         }
-        // Now pick up the counts again
-        for (i = 0, cols = 0, col = rescol, q = 0; i < maxcols && col + fwidth[i] <= COLS; i++) {
-            if (i < offscr_sc_cols && ! (freeze && i >= tlcol && i <= brcol)) continue;
-            else if (freeze && i > brcol && i <= brcol + center_hidden_cols) continue;
-            else if (freeze && i < tlcol && i >= tlcol - center_hidden_cols) continue;
-            if (i < offscr_sc_cols && freeze && i >= tlcol && i <= brcol && ! col_hidden[i]) q++;
-            cols++;
+    // TODO: abort in a better way
+    if (fmt_frozen_after_cols > col) { sc_debug("calc offscr sc cols: frozen cols overflow"); return 0; }
 
-            if (! col_hidden[i]) col += fwidth[i];
-        }
+    //FIXME this
+    int dec = fmt_frozen_after_cols;
+    while (dec > 0) {
+        if (col_hidden[i]) { i--; continue; }
+        dec -= fwidth[i];
+        cols--;
+        i--;
     }
-    while (freeze && curcol > brcol && curcol <= brcol + center_hidden_cols) center_hidden_cols--;
-    return cols + center_hidden_cols - q;
+
+    while ( offscr_sc_cols + cols - 1 - num_frozen_before_offscr - num_frozen_after_cols < curcol || curcol < offscr_sc_cols) {
+        if (offscr_sc_cols + cols - 1 >= maxcols) {
+            //sc_debug("off:%d cols:%d numb:%d numa:%d col:%d COLS:%d", offscr_sc_cols, cols, num_frozen_before_offscr, num_frozen_after_cols, col, COLS);
+            //sc_debug("fmta:%d fmtb:%d", colf, fmt_frozen_after_cols);
+            //if (col == COLS)
+            offscr_sc_cols++;
+            break;
+        }
+        else if (offscr_sc_cols - colf - 1 == curcol) { offscr_sc_cols--; }
+        else if (offscr_sc_cols + cols - 1 - num_frozen_before_offscr - num_frozen_after_cols < curcol) offscr_sc_cols++;
+        else if (offscr_sc_cols + cols - 1 - num_frozen_after_cols > curcol) offscr_sc_cols--;
+        else break;
+        goto countc;
+    }
+    //sc_info("cols:%d num:%d", cols, num_frozen_before_offscr);
+    return cols - num_frozen_after_cols - num_frozen_before_offscr;
 }
 
+
 /**
- * \brief Calculate the number of hidden rows above
- * \return the number of hidden rows above
+ * \brief This functions calculates the number of hidden rows above grid.
+ * Those rows are not actually hidden as when you hide a row,
+ * but rather not shown because of current cell position.
+ *
+ * \details
+ * this is the core of displaying rows / columns and cell content on the grid.
+ * this function do a couple of things:
+ * 1. calculates the number of hidden rows above grid, setting offscr_sc_rows (which is a global variable).
+ * You can see that variable as a value of scroll.
+ *
+ * 2. sets num_frozen_after_rows (another global variable), which is the number of frozen rows after the
+ * calculated "rows" (the return value of this function).
+ *
+ * \return rows: the number of sc rows that should be shown counting from top (offscr_sc_rows + 1),
+ * and ignoring any frozen rows at bottom.
  */
 int calc_offscr_sc_rows() {
-    int q, i, rows = 0, row = 0;
-    int freeze = freeze_ranges && (freeze_ranges->type == 'r' ||  freeze_ranges->type == 'a') ? 1 : 0;
-    int tlrow = freeze ? freeze_ranges->tl->row : 0;
-    int brrow = freeze ? freeze_ranges->br->row : 0;
+    int i, k, rows, row, rowf;
+    int fmt_frozen_after_rows = 0;    // number of NCURSES screen lines needed to display the frozen after rows.
+    int num_frozen_before_offscr = 0; // number of frozen rows before offscr rows
 
     // pick up row counts
-    while (freeze && currow > brrow && currow <= brrow + center_hidden_rows) center_hidden_rows--;
-    if (offscr_sc_rows - 1 <= currow) {
-        for (i = 0, q = 0, rows = 0, row=RESROW; i < maxrows && row + rowformat[i] <= LINES; i++) {
-            if (i < offscr_sc_rows && ! (freeze && i >= tlrow && i <= brrow)) continue;
-            else if (freeze && i > brrow && i <= brrow + center_hidden_rows) continue;
-            else if (freeze && i < tlrow && i >= tlrow - center_hidden_rows) continue;
-            if (i < offscr_sc_rows && freeze && i >= tlrow && i <= brrow && ! row_hidden[i] ) q++;
+    // row  : number of NCURSES screen lines counted (for entire grid). must be <= LINES
+    // rows : number de sc rows shown on grid
+    // rowf : number of NCURSES screen lines (because of frozen rows) before offscr_sc_rows
+    count:
+    for (i = 0, rows = 0, rowf = 0, row = RESROW, num_frozen_before_offscr = 0; i < maxrows && row + row_format[i] <= LINES; i++) {
+        if (offscr_sc_rows + rows - 2 > maxrows) return rows;
+        if (row_hidden[i]) continue;
+        if (row_frozen[i] || i >= offscr_sc_rows) {
+            row += row_format[i];
+            if (row_frozen[i] && i < offscr_sc_rows) { rowf += row_format[i]; num_frozen_before_offscr++; }
             rows++;
-            if (i == maxrows - 1) return rows + center_hidden_rows - q;
-            if (! row_hidden[i]) row += rowformat[i];
         }
     }
 
-    // get off screen rows
-    while ( offscr_sc_rows + center_hidden_rows + rows - RESROW < currow || currow < offscr_sc_rows
-            || (freeze && currow < tlrow && currow >= tlrow - center_hidden_rows)) {
-
-        // move up
-        if (offscr_sc_rows - 1 == currow) {
-            if (freeze && offscr_sc_rows + rows + center_hidden_rows >= brrow && brrow - rows - offscr_sc_rows + 3 > 0)
-                center_hidden_rows = brrow - rows - offscr_sc_rows + 3;
-            offscr_sc_rows--;
-
-        // move down
-        } else if (offscr_sc_rows + center_hidden_rows + rows - 1 == currow &&
-            (! freeze || (currow > brrow && offscr_sc_rows < tlrow) || (currow >= rows - 1 && offscr_sc_rows < tlrow))) {
-            offscr_sc_rows++;
-
-        // move down with freezen rows in top
-        } else if (offscr_sc_rows + center_hidden_rows + rows - 1 == currow) {
-            center_hidden_rows++;
-
-        // move down with freezen rows in bottom
-        } else if (freeze && currow < tlrow && currow >= tlrow - center_hidden_rows ) {
-            center_hidden_rows--;
-            offscr_sc_rows++;
-
-        } else {
-            // Try to put the cursor in the center of the screen
-            row = (LINES - RESROW) / 2 + RESROW;
-            if (freeze && currow > brrow) {
-                offscr_sc_rows = tlrow;
-                center_hidden_rows = currow - 2; //FIXME
-            } else {
-                offscr_sc_rows = currow;
-                center_hidden_rows = 0;
-            }
-            for (i=currow-1; i >= 0 && row - rowformat[i] - 1 > RESROW && i < maxrows; i--) {
-                if (freeze && currow > brrow) center_hidden_rows--;
-                else offscr_sc_rows--;
-                if (! row_hidden[i]) row -= rowformat[i];
-            }
+    // decrease rows until fitting frozen rows after "rows"..
+    // we count the number of frozen rows after "rows", from "rows" until maxrows.
+    for (k = offscr_sc_rows + rows - 1 , num_frozen_after_rows = 0, fmt_frozen_after_rows = 0; k < maxrows; k++)
+        if (row_frozen[k]) {
+            num_frozen_after_rows++;
+            fmt_frozen_after_rows += row_format[k]; // count the screen lines needed to display them as well
         }
-        // Now pick up the counts again
-        for (i = 0, rows = 0, row = RESROW, q = 0; i < maxrows && row + rowformat[i] <= LINES; i++) {
-            if (i < offscr_sc_rows && ! (freeze && i >= tlrow && i <= brrow)) continue;
-            else if (freeze && i > brrow && i <= brrow + center_hidden_rows) continue;
-            else if (freeze && i < tlrow && i >= tlrow - center_hidden_rows) continue;
-            if (i < offscr_sc_rows && freeze && i >= tlrow && i <= brrow && ! row_hidden[i]) q++;
-            rows++;
-            if (i == maxrows - 1) return rows + center_hidden_rows - q;
+    // TODO: abort in a better way
+    if (fmt_frozen_after_rows > row) { sc_debug("calc offscr sc rows: frozen rows overflow"); return 0; }
 
-            if (! row_hidden[i]) row += rowformat[i];
-        }
+    int dec = fmt_frozen_after_rows;
+    while (dec > 0) {
+        if (row_hidden[i]) { i--; continue; }
+        dec -= row_format[i];
+        rows--;
+        i--;
     }
 
-    while (freeze && currow > brrow && currow <= brrow + center_hidden_rows) center_hidden_rows--;
-    return rows + center_hidden_rows - q;
+    while ( offscr_sc_rows + rows - RESROW - num_frozen_before_offscr - num_frozen_after_rows < currow || currow < offscr_sc_rows) {
+        if (offscr_sc_rows + rows >= maxrows) {
+            //sc_debug("1.off:%d rows%d RESROW:%d rowf:%d currow:%d maxrows:%d row%d LINES:%d", offscr_sc_rows, rows, -RESROW, -rowf, currow, maxrows, row, LINES);
+            if (row == LINES) offscr_sc_rows++;
+            break;
+        }
+        else if (offscr_sc_rows - rowf - 1 == currow) { offscr_sc_rows--; }
+        else if (offscr_sc_rows + rows - RESROW - num_frozen_before_offscr - num_frozen_after_rows < currow) offscr_sc_rows++;
+        else if (offscr_sc_rows + rows - RESROW - num_frozen_after_rows > currow) offscr_sc_rows--;
+        else break;
+        goto count;
+    }
+    //sc_info("OU off:%d rows%d RESROW:%d fmtbef:%d fmtaft:%d currow:%d maxrows:%d num_frozen_before_offscr:%d", offscr_sc_rows, rows, -RESROW, -rowf, fmt_frozen_after_rows, currow, maxrows, num_frozen_before_offscr);
+    return rows - num_frozen_after_rows;
 }
 
 /**
- * \brief TODO Write a longer funciton description.
+ * \brief pad_and_align
  *
  * \details This function aligns text of a cell (align = 0 center,
  * align = 1 right, align = -1 left). Also adds padding between cells.

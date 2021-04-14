@@ -544,12 +544,14 @@ command:
 
     |    S_FILL num num { sc_error("Not enough parameters for fill command"); }
 
-    |    S_UNFREEZE                  { remove_frange(); }
-    |    S_FREEZE range              { add_frange($2.left.vp, $2.right.vp, 'a'); }
-    |    S_FREEZE NUMBER ':' NUMBER  { add_frange(lookat($2, 0), lookat($4, 0), 'r'); }
-    |    S_FREEZE NUMBER             { add_frange(lookat($2, 0), lookat($2, 0), 'r'); }
-    |    S_FREEZE COL ':' COL        { add_frange(lookat(0, $2), lookat(0, $4), 'c'); }
-    |    S_FREEZE COL                { add_frange(lookat(0, $2), lookat(0, $2), 'c'); }
+    |    S_FREEZE NUMBER ':' NUMBER  { handle_freeze(lookat($2, 0), lookat($4, 0), 1, 'r'); }
+    |    S_FREEZE NUMBER             { handle_freeze(lookat($2, 0), lookat($2, 0), 1, 'r'); }
+    |    S_FREEZE COL ':' COL        { handle_freeze(lookat(0, $2), lookat(0, $4), 1, 'c'); }
+    |    S_FREEZE COL                { handle_freeze(lookat(0, $2), lookat(0, $2), 1, 'c'); }
+    |    S_UNFREEZE NUMBER ':' NUMBER{ handle_freeze(lookat($2, 0), lookat($4, 0), 0, 'r'); }
+    |    S_UNFREEZE NUMBER           { handle_freeze(lookat($2, 0), lookat($2, 0), 0, 'r'); }
+    |    S_UNFREEZE COL ':' COL      { handle_freeze(lookat(0, $2), lookat(0, $4), 0, 'c'); }
+    |    S_UNFREEZE COL              { handle_freeze(lookat(0, $2), lookat(0, $2), 0, 'c'); }
 
     |    S_SORT range STRING         { sortrange($2.left.vp, $2.right.vp, $3);
                                        //scxfree($3);

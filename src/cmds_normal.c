@@ -99,13 +99,18 @@ void do_normalmode(struct block * buf) {
         case L'A':
             //;
             //wchar_t t = ui_query_opt(L"show a message. q / a / d to quit", L"qad");
-            //sc_info("char: %lc.", t);
+            offscr_sc_rows++;
+            ui_update(TRUE);
+            sc_info("offscr_sc_rows: %d", offscr_sc_rows);
             break;
 
         case L'W':
             break;
 
         case L'Q':
+            if (offscr_sc_rows) offscr_sc_rows--;
+            ui_update(TRUE);
+            sc_info("offscr_sc_rows: %d", offscr_sc_rows);
             break;
 
         // MOVEMENT COMMANDS
@@ -548,22 +553,28 @@ void do_normalmode(struct block * buf) {
                 }
 
                 if (buf->pnext->value == 'r') {
-                    add_frange(lookat(r, c), lookat(rf, cf), 'r');
+                    handle_freeze(lookat(r, c), lookat(rf, cf), 1, 'r');
+                    sc_info("Row%s frozen", r != rf ? "s" : "");
                 } else if (buf->pnext->value == 'c') {
-                    add_frange(lookat(r, c), lookat(rf, cf), 'c');
+                    handle_freeze(lookat(r, c), lookat(rf, cf), 1, 'c');
+                    sc_info("Column%s frozen", c != cf ? "s" : "");
                 } else if (buf->pnext->value == 'a') {
-                    add_frange(lookat(r, c), lookat(rf, cf), 'a');
+                    handle_freeze(lookat(r, c), lookat(rf, cf), 1, 'r');
+                    handle_freeze(lookat(r, c), lookat(rf, cf), 1, 'c');
+                    sc_info("Area frozen");
                 }
+               ui_update(FALSE);
+               break;
 
             // decrease row height
             } else if (buf->pnext->value == 'k' || buf->pnext->value == OKEY_UP) {
-               dorowformat(currow, rowformat[currow]-1);
+               dorowformat(currow, row_format[currow]-1);
                ui_update(TRUE);
                break;
 
             // increase row height
             } else if (buf->pnext->value == 'j' || buf->pnext->value == OKEY_DOWN) {
-               dorowformat(currow, rowformat[currow]+1);
+               dorowformat(currow, row_format[currow]+1);
                ui_update(TRUE);
                break;
 
@@ -776,7 +787,7 @@ void do_normalmode(struct block * buf) {
                 fix_marks(1, 0, currow, maxrow, 0, maxcol);
                 insert_row(0);
 #ifdef UNDO
-                add_undo_row_format(currow, 'A', rowformat[currow]);
+                add_undo_row_format(currow, 'A', row_format[currow]);
 #endif
 
             } else if (buf->pnext->value == L'c') {
@@ -810,7 +821,7 @@ void do_normalmode(struct block * buf) {
                 fix_marks(1, 0, currow+1, maxrow, 0, maxcol);
                 insert_row(1);
 #ifdef UNDO
-                add_undo_row_format(currow, 'A', rowformat[currow]);
+                add_undo_row_format(currow, 'A', row_format[currow]);
 #endif
 
             } else if (buf->pnext->value == L'c') {

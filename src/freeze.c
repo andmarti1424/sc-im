@@ -52,15 +52,12 @@ struct frange * freeze_ranges = NULL;
 
 /**
  * \brief TODO Document add_frange()
- *
  * \details type = 'r' -> freeze a row
  * \details type = 'c' -> freeze a col
  * \details type = 'a' -> freeze an area
- *
  * \param[in] tl_ent
  * \param[in] br_ent
  * \param[in] type
- *
  * \return none
  */
 
@@ -78,11 +75,26 @@ void add_frange(struct ent * tl_ent, struct ent * br_ent, char type) {
 }
 
 /**
- * \brief TODO Document remove_frange()
- *
+ * \brief handle_freeze. freeze/unfreeze a row/column
+ * \param[in] tl_ent: top ent that defines area
+ * \param[in] br_ent: bottom ent that defines area
+ * \param[in] value: 0 (unfreeze) or 1 (freeze)
+ * \param[in] type: 'r' or 'c'
  * \return none
  */
+void handle_freeze(struct ent * tl_ent, struct ent * br_ent, char value, char type) {
+    int i;
+    if (type == 'r')
+        for (i=tl_ent->row; i<=br_ent->row; i++) row_frozen[i]=value;
+    else if (type == 'c')
+        for (i=tl_ent->col; i<=br_ent->col; i++) col_frozen[i]=value;
+    return;
+}
 
+/**
+ * \brief TODO Document remove_frange()
+ * \return none
+ */
 void remove_frange() {
     extern int center_hidden_rows;
     extern int center_hidden_cols;

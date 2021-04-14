@@ -790,10 +790,10 @@ void do_undo() {
             int i;
             if (ul->range_shift->delta_rows > 0)
                 for (i = ul->range_shift->brrow + ul->range_shift->delta_rows; i <= maxrow; i++)
-                    rowformat[i - ul->range_shift->delta_rows] = rowformat[i];
+                    row_format[i - ul->range_shift->delta_rows] = row_format[i];
             else
                 for (i = maxrow; i >= ul->range_shift->tlrow - ul->range_shift->delta_rows; i--)
-                     rowformat[i] = rowformat[i + ul->range_shift->delta_rows];
+                     row_format[i] = row_format[i + ul->range_shift->delta_rows];
         }
     }
 
@@ -867,7 +867,7 @@ void do_undo() {
 
         for (i=0; i < size; i++) {
            if (uf->rows[i].type == 'R') {
-               rowformat[uf->rows[i].row] = uf->rows[i].format;
+               row_format[uf->rows[i].row] = uf->rows[i].format;
            }
         }
     }
@@ -982,10 +982,10 @@ void do_redo() {
             int i;
             if (ul->range_shift->delta_rows > 0)
                 for (i = maxrow; i >= ul->range_shift->tlrow + ul->range_shift->delta_rows; i--)
-                    rowformat[i] = rowformat[i - ul->range_shift->delta_rows];
+                    row_format[i] = row_format[i - ul->range_shift->delta_rows];
             else
                 for (i = ul->range_shift->tlrow; i - ul->range_shift->delta_rows <= maxrow; i++)
-                    rowformat[i] = rowformat[i - ul->range_shift->delta_rows];
+                    row_format[i] = row_format[i - ul->range_shift->delta_rows];
         }
     }
 
@@ -1059,7 +1059,7 @@ void do_redo() {
 
         for (i=0; i < size; i++) {
            if (uf->rows[i].type == 'A') {
-               rowformat[uf->rows[i].row] = uf->rows[i].format;
+               row_format[uf->rows[i].row] = uf->rows[i].format;
            }
         }
     }

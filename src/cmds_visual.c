@@ -503,7 +503,8 @@ void do_visualmode(struct block * buf) {
 
     // freeze a range
     } else if (buf->value == L'f') {
-        add_frange(lookat(r->tlrow, r->tlcol), lookat(r->brrow, r->brcol), 'a');
+        handle_freeze(lookat(r->tlrow, r->tlcol), lookat(r->brrow, r->brcol), 1, 'r');
+        handle_freeze(lookat(r->tlrow, r->tlcol), lookat(r->brrow, r->brcol), 1, 'c');
         center_hidden_rows = 0;
         center_hidden_cols = 0;
         cmd_multiplier = 0;
@@ -511,6 +512,7 @@ void do_visualmode(struct block * buf) {
         exit_visualmode();
         chg_mode('.');
         ui_show_header();
+        sc_info("Area frozen");
 
     // range lock / unlock // valueize
     } else if ( buf->value == L'r' && (buf->pnext->value == L'l' || buf->pnext->value == L'u' ||

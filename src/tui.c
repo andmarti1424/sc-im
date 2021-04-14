@@ -61,6 +61,7 @@
  * ui_set_ucolor          // function called internally for setting a color
  * ui_show_content
  * ui_show_sc_col_headings
+ * ui_show_sc_row_headings
  * ui_add_cell_detail     // Add details of an ent to a char * received as a parameter. used for input_win
  *
  * ANYONE WHO WANTS TO PORT THIS TO ANOTHER UI, WOULD JUST NEED TO REIMPLEMENT THIS FILE
@@ -68,7 +69,7 @@
  *
  *
  * if not working with ncurses, you should also have to define LINES and COLS macros in Xui.h as well.
- * see ui example inside /files folder
+ * see ui example inside /examples/gui_example folder
  */
 
 #include <string.h>
@@ -308,7 +309,7 @@ void ui_do_welcome() {
 
     // show headings
     int mxcol = offscr_sc_cols + calc_offscr_sc_cols() - 1;
-    int mxrow = offscr_sc_rows + calc_offscr_sc_rows() - 1;
+    int mxrow = offscr_sc_rows + calc_offscr_sc_rows() - 2;
     ui_show_sc_col_headings(main_win, mxcol);
     ui_show_sc_row_headings(main_win, mxrow);
 
@@ -396,12 +397,18 @@ void ui_update(int header) {
         ui_print_mode();
     }
 
+    /* You can't hide the last row or col */
+    while (row_hidden[currow])
+        currow++;
+    while (col_hidden[curcol])
+        curcol++;
+
     /*
      * Calculate offscreen rows and columns
      *
-     * mxcol is the last visible column in screen grid.
+     * mxcol-1 is the last visible column in screen grid.
      * for instance, if mxcol is 8, last visible column would be I
-     * mxrow is the last visible row in screen grid
+     * mxrow-1 is the last visible row in screen grid
      *
      * offscr_sc_cols are the number of columns left at the left of start of grid.
      * for instance, if offscr_sc_cols is 4. the first visible column in grid would be column E.
@@ -412,28 +419,21 @@ void ui_update(int header) {
      * example: if columns A and B are frozen, and center_hidden_cols is 4,
      * your grid would start with columns A, B, G, H..
      */
-    int off_cols = calc_offscr_sc_cols();
-    int off_rows = calc_offscr_sc_rows();
-    int mxcol = offscr_sc_cols + off_cols - 1;
-    int mxrow = offscr_sc_rows + off_rows - 1;
-    //sc_info("off_row:%d offscr:%d, center:%d, mxrow:%d, maxrows:%d", off_rows, offscr_sc_rows, center_hidden_rows, mxrow, maxrows);
-
-    /* You can't hide the last row or col */
-    while (row_hidden[currow])
-        currow++;
-    while (col_hidden[curcol])
-        curcol++;
-
-
-    // Show the content of the cells
-    // Numeric values, strings.
-    ui_show_content(main_win, mxrow, mxcol);
+    int cols = calc_offscr_sc_cols();
+    int rows = calc_offscr_sc_rows();
+    int mxcol = offscr_sc_cols + cols - 1;
+    int mxrow = offscr_sc_rows + rows - 2;
+    //sc_debug("rows:%d off:%d, mxrow:%d, maxrows:%d", rows, offscr_sc_rows, mxrow, maxrows);
 
     // Show sc_col headings: A, B, C, D..
     ui_show_sc_col_headings(main_win, mxcol);
 
     // Show sc_row headings: 0, 1, 2, 3..
     ui_show_sc_row_headings(main_win, mxrow);
+
+    // Show the content of the cells
+    // Numeric values, strings.
+    ui_show_content(main_win, mxrow, mxcol);
 
     if (status_line_empty && get_conf_int("show_cursor")) {
         // Leave cursor on selected cell when no status message
@@ -663,29 +663,22 @@ void ui_print_mode() {
  */
 
 void ui_show_sc_row_headings(WINDOW * win, int mxrow) {
-    int row = 0;
     #ifdef USECOLORS
     if (has_colors()) ui_set_ucolor(win, &ucolors[HEADINGS], DEFAULT_COLOR);
     #endif
     int i, j;
-    int count=0;
-    int freeze = freeze_ranges && (freeze_ranges->type == 'r' ||  freeze_ranges->type == 'a') ? 1 : 0;
+    int count = 0;
+    int frozen_after_rows_shown = 0;
 
-    //for (i = 0; i < mxrow && i < maxrows; i++) {
-    for (i = 0; i <= mxrow; i++) {
-        if (i >= maxrows) {
-            sc_error("i >= maxrows in ui_show_sc_row_headings. please check calc_offscr_sc_rows.");
+    for (i = 0; i <= mxrow || frozen_after_rows_shown != num_frozen_after_rows; i++) {
+        if (i > maxrows) {
+            sc_debug("i:%d >= maxrows:%d in ui_show_sc_row_headings. please check calc_offscr_sc_rows.", i, maxrows);
             break;
         }
-        // print rows in case freezen rows are before offscr_sc_rows
-        if (i < offscr_sc_rows && !(freeze && i >= freeze_ranges->tl->row && i <= freeze_ranges->br->row)) continue;
+        // print rows in case frozen rows are before offscr_sc_rows
+        if ( (i < offscr_sc_rows && ! row_frozen[i]) || row_hidden[i] ) continue;
 
-        if (row_hidden[i]) continue;
-
-        // skip center_hidden_rows
-        if (freeze && ((
-         i > freeze_ranges->br->row && i <= freeze_ranges->br->row + center_hidden_rows) || (
-         i < freeze_ranges->tl->row && i >= freeze_ranges->tl->row - center_hidden_rows))) continue;
+        if (i > mxrow) { while (! row_frozen[i]) i++; frozen_after_rows_shown++; }
 
         srange * s = get_selected_range();
         if ( (s != NULL && i >= s->tlrow && i <= s->brrow) || i == currow ) {
@@ -696,18 +689,18 @@ void ui_show_sc_row_headings(WINDOW * win, int mxrow) {
             #endif
         }
         mvwprintw (win, count+1, 0, "%*d ", rescol-1, i);
+        if (row_frozen[i]) mvwprintw (win, count+1, rescol-1, "!");
 
-        for (j=1; j<rowformat[i]; j++) {
+        for (j = 1; j < row_format[i]; j++)
             mvwprintw (win, count+1+j, 0, "%*c ", rescol-1, ' ');
-        }
-        count += rowformat[i];
+
+        count += row_format[i];
 
         #ifdef USECOLORS
         if (has_colors()) ui_set_ucolor(win, &ucolors[HEADINGS], DEFAULT_COLOR);
         #else
         wattroff(win, A_REVERSE);
         #endif
-        row++;
     }
 }
 
@@ -722,35 +715,27 @@ void ui_show_sc_row_headings(WINDOW * win, int mxrow) {
 
 void ui_show_sc_col_headings(WINDOW * win, int mxcol) {
     int i, col = rescol;
-    int freeze = freeze_ranges && (freeze_ranges->type == 'c' ||  freeze_ranges->type == 'a') ? 1 : 0;
-    //int l;
-
+    int frozen_after_cols_shown = 0;
 
     wmove(win, 0, 0);
     wclrtoeol(win);
 
-    //for (i = 0; i <= mxcol && i < maxcols; i++) {
-    for (i = 0; i <= mxcol; i++) {
+    for (i = 0; i <= mxcol || frozen_after_cols_shown != num_frozen_after_cols; i++) {
+        if (i > maxcols) {
+            sc_debug("i:%d >= maxcols:%d in ui_show_sc_col_headings. please check calc_offscr_sc_cols.", i, maxcols);
+            break;
+        }
+        // print cols in case freezen columns are before offscr_sc_cols
+        if ( (i < offscr_sc_cols && ! col_frozen[i]) || col_hidden[i] ) continue;
+
+        if (i > mxcol) { while (! col_frozen[i]) i++; frozen_after_cols_shown++; }
+
         #ifdef USECOLORS
         if (has_colors() && i % 2 == 0)
             ui_set_ucolor(win, &ucolors[HEADINGS], DEFAULT_COLOR);
         else if (i % 2 == 1)
             ui_set_ucolor(win, &ucolors[HEADINGS_ODD], DEFAULT_COLOR);
         #endif
-
-        if (i >= maxcols) {
-            sc_error("i >= maxcols in ui_show_sc_col_headings. please check calc_offscr_sc_cols.");
-            break;
-        }
-        // print cols in case freezen columns are before offscr_sc_cols
-        if (i < offscr_sc_cols && !(freeze && i >= freeze_ranges->tl->col && i <= freeze_ranges->br->col)) continue;
-
-        if (col_hidden[i]) continue;
-
-        // skip center_hidden_cols
-        if (freeze && ((
-         i > freeze_ranges->br->col && i <= freeze_ranges->br->col + center_hidden_cols) || (
-         i < freeze_ranges->tl->col && i >= freeze_ranges->tl->col - center_hidden_cols))) continue;
 
         srange * s = get_selected_range();
         if ( (s != NULL && i >= s->tlcol && i <= s->brcol) || i == curcol ) {
@@ -762,24 +747,13 @@ void ui_show_sc_col_headings(WINDOW * win, int mxcol) {
         }
 
         int k = (fwidth[i] - 1) / 2;
-        mvwprintw(win, 0, col, "%*s%-*s", k, "", fwidth[i] - k, coltoa(i));
-
-        /* We also colorize the columns with alternate color
-        #ifdef USECOLORS
-        if (has_colors() && i % 2 == 0)
-            ui_set_ucolor(win, &ucolors[GRID_PAIR], DEFAULT_COLOR);
-        else if (i % 2 == 1)
-            ui_set_ucolor(win, &ucolors[GRID_ODD], DEFAULT_COLOR);
-
-        for (l=1; l<LINES-RESROW; l++) {
-            mvwprintw(win, l, col, "%*s%", fwidth[i], " ");
-        }
-        #endif
-        */
+        // if we want ! before column name:
+        //mvwprintw(win, 0, col, "%*s%-*s", k, "", fwidth[i] - k - 1, coltoa(i), col_frozen[i] ? "!" : "");
+        // if we want ! after column name:
+        mvwprintw(win, 0, col, "%*s%s%s%*s", k, "", coltoa(i), col_frozen[i] ? "!" : "", fwidth[i]-k-1, "");
 
         col += fwidth[i];
-        if (i == mxcol && COLS - col > 0)
-            wclrtoeol(win);
+        if (i == mxcol && COLS - col > 0) wclrtoeol(win);
 
         #ifdef USECOLORS
         if (has_colors() && i % 2 == 0)
@@ -807,81 +781,38 @@ void ui_show_sc_col_headings(WINDOW * win, int mxcol) {
 void ui_show_content(WINDOW * win, int mxrow, int mxcol) {
     register struct ent ** p;
     int row, col, count = 0;
-    int q_row_hidden = 0;
-    int freezer = freeze_ranges && (freeze_ranges->type == 'r' ||  freeze_ranges->type == 'a') ? 1 : 0;
-    int freezec = freeze_ranges && (freeze_ranges->type == 'c' ||  freeze_ranges->type == 'a') ? 1 : 0;
+    int frozen_after_rows_shown = 0;
 
-    for (row = 0; row <= mxrow; row++) {
-        if (row >= maxrows) {
-            sc_error("i >= maxrows in show_content. please check calc_offscr_sc_rows.");
-            break;
-        }
+    for (row = 0; row <= mxrow || frozen_after_rows_shown != num_frozen_after_rows; row++) {
+         if (row > maxrows) {
+             sc_debug("row:%d >= maxrows:%d in show_content. please check calc_offscr_sc_rows.", row, maxrows);
+             break;
+         }
 
-        if (row < offscr_sc_rows
-            && (freezer
-            && row >= freeze_ranges->tl->row
-            && row <= freeze_ranges->br->row)) {
-            q_row_hidden--;
-            continue;
-        } else if (row < offscr_sc_rows
-            && !(freezer
-            && row >= freeze_ranges->tl->row
-            && row <= freeze_ranges->br->row)) {
-            //q_row_hidden++;
-            continue;
-        }
-        if (row_hidden[row]) {
-            q_row_hidden++;
-            continue;
-        }
+        // print rows in case frozen rows are before offscr_sc_rows
+        if (row < offscr_sc_rows && ! row_frozen[row]) continue;
 
-        // skip center_hidden_cols
-        if (freezer && (
-        (row >= freeze_ranges->br->row && row > freeze_ranges->br->row && row <= freeze_ranges->br->row + center_hidden_rows) ||
-        (row <= freeze_ranges->tl->row && row < freeze_ranges->tl->row && row >= freeze_ranges->tl->row - center_hidden_rows))) {
-            q_row_hidden++;
-            continue;
-        }
+        if (row_hidden[row]) continue;
 
-        int r = row + 1 - offscr_sc_rows - q_row_hidden;
+        if (row > mxrow) { while (! row_frozen[row]) row++; frozen_after_rows_shown++; }
+
         int c = rescol;
         int nextcol;
         int fieldlen;
         col = 0;
 
         for (p = ATBL(tbl, row, col); col <= mxcol; p += nextcol - col, col = nextcol, c += fieldlen) {
-            if (col >= maxcols) {
-                sc_error("i >= maxcols in show_content. please check calc_offscr_sc_cols.");
+            if (col > maxcols) {
+                sc_debug("col:%d >= maxcols:%d in show_content. please check calc_offscr_sc_cols.", col, maxcols);
                 break;
             }
-
 
             nextcol = col + 1;
             fieldlen = fwidth[col];
 
-            // print cols in case frozen columns are before offscr_sc_cols
-            if (col < offscr_sc_cols
-                && !(freezec
-                && col >= freeze_ranges->tl->col
-                && col <= freeze_ranges->br->col)) {
-                c -= fieldlen;
-                continue;
-            }
-
-            if (col_hidden[col]) {
-                c -= fieldlen;
-                continue;
-            }
-
-            // skip center_hidden_cols
-            if (freezec &&
-            ((col >= freeze_ranges->br->col && col > freeze_ranges->br->col && col <= freeze_ranges->br->col + center_hidden_cols) ||
-             (col <= freeze_ranges->tl->col && col < freeze_ranges->tl->col && col >= freeze_ranges->tl->col - center_hidden_cols))) {
-                c -= fieldlen;
-                continue;
-            }
-
-            //if ( (*p) == NULL) *p = lookat(row, col);
+            // show cols in case frozen cols are before offscr_sc_cols
+            // and ignore col_hidden
+            if ( (col < offscr_sc_cols && ! col_frozen[col]) || col_hidden[col] ) { c -= fieldlen; continue; }
 
             // Clean format
 #ifdef USECOLORS
@@ -948,8 +879,6 @@ void ui_show_content(WINDOW * win, int mxrow, int mxcol) {
 
             // If a numeric value exists
             if ( (*p) && (*p)->flags & is_valid) {
-                //show_numeric_content_of_cell(win, p, col, r, c);
-
                 res = ui_get_formated_value(p, col, formated_s);
                 // res = 0, indicates that in num we store a date
                 // res = 1, indicates a format is applied in num
@@ -1016,7 +945,7 @@ void ui_show_content(WINDOW * win, int mxrow, int mxcol) {
             wchar_t w;
             int i, j, k;
 
-            for (k=0; k < rowformat[row]; k++) {
+            for (k=0; k < row_format[row]; k++) {
                 for (i = 0; i < fieldlen; ) {
                     w = L' ';
                     j = mvwin_wchnstr (win, count+k+1, c + i, cht, 1);
@@ -1036,7 +965,7 @@ void ui_show_content(WINDOW * win, int mxrow, int mxcol) {
                 //    else if get_conf_int("hide_number_from_combined"))
                 //        num[0]='\0';
                 // }
-                pad_and_align(text, num, fieldlen, align, (*p)->pad, out, rowformat[row]);
+                pad_and_align(text, num, fieldlen, align, (*p)->pad, out, row_format[row]);
 
 #ifdef USECOLORS
                 if (has_colors() && get_conf_int("underline_grid")) {
@@ -1049,7 +978,7 @@ void ui_show_content(WINDOW * win, int mxrow, int mxcol) {
                 // 'out' may contain the output to fill multiple rows. not just one.
                 int count_row = 0;
                 wchar_t new[wcslen(out)+1];
-                for (count_row = 0; count_row < rowformat[row] && wcslen(out); count_row++) {
+                for (count_row = 0; count_row < row_format[row] && wcslen(out); count_row++) {
                     int cw = count_width_widestring(out, fieldlen);
                     wcscpy(new, out);
                     if (get_conf_int("truncate") || !get_conf_int("overlap")) new[cw] = L'\0';
@@ -1064,6 +993,7 @@ void ui_show_content(WINDOW * win, int mxrow, int mxcol) {
                 }
             }
 
+            /* FIXME
             if (currow == row && curcol == col) {
                 curwinrow = r;
                 curwincol = c;
@@ -1077,13 +1007,14 @@ void ui_show_content(WINDOW * win, int mxrow, int mxcol) {
                     curwincol += i;
                 }
             }
+            */
 
             // clean format
 #ifndef USECOLORS
             wattroff(win, A_REVERSE);
 #endif
         }
-        count += rowformat[row];
+        count += row_format[row];
     }
 }
 
@@ -1562,6 +1493,7 @@ void ui_mv_bottom_bar() {
  * function thats handles mouse movements
  * \return none
  */
+//TODO handle frozen rows and columns after "rows" "cols"
 #ifdef MOUSE
 void ui_handle_mouse(MEVENT event) {
 
@@ -1600,63 +1532,44 @@ void ui_handle_mouse(MEVENT event) {
     r = event.y - RESROW + (get_conf_int("input_bar_bottom") ? 1 : - 1);
 
     int mxcol = offscr_sc_cols + calc_offscr_sc_cols() - 1;
-    int mxrow = offscr_sc_rows + calc_offscr_sc_rows() - 1;
+    int mxrow = offscr_sc_rows + calc_offscr_sc_rows() - 2;
     int col = 0;
     int row = 0;
-    int freeze = freeze_ranges && (freeze_ranges->type == 'c' ||  freeze_ranges->type == 'a') ? 1 : 0;
 
     for (i = 0; i <= mxcol; i++) {
-        if (i >= maxcols) {
-            sc_error("i >= maxcols in ui_show_sc_col_headings. please check calc_offscr_sc_cols.");
+        if (i > maxcols) {
+            sc_debug("ui_handle_mouse - i:%d >= maxcols:%d in show_content. please check calc_offscr_sc_cols.", i, maxcols);
             break;
         }
-        //if (i < offscr_sc_cols && !(freeze && i >= freeze_ranges->tl->col && i <= freeze_ranges->br->col)) continue;
-
         if (col_hidden[i]) continue;
-
-        // skip center_hidden_cols
-        if (freeze && ((
-         i > freeze_ranges->br->col && i <= freeze_ranges->br->col + center_hidden_cols) || (
-         i < freeze_ranges->tl->col && i >= freeze_ranges->tl->col - center_hidden_cols))) continue;
-
-        //sc_debug("i:%d off%d mxcol:%d col:%d c:%d", i,  offscr_sc_cols, mxcol, col, c);
-        col += fwidth[i];
+        if (col_frozen[i] || i >= offscr_sc_cols) col += fwidth[i];
         if (col >= c + 1) break;
     }
     if (i > mxcol) i = mxcol;
 
     // same for rows
-    freeze = freeze_ranges && (freeze_ranges->type == 'r' ||  freeze_ranges->type == 'a') ? 1 : 0;
-
     for (j = 0; j <= mxrow; j++) {
-        if (j >= maxrows) {
-            sc_error("j >= maxrows in ui_show_sc_row_headings. please check calc_offscr_sc_rows.");
+        if (j > maxrows) {
+            sc_debug("ui_handle_mouse - j:%d >= maxrows:%d in ui_show_sc_row_headings. please check calc_offscr_sc_rows.", j, maxrows);
             break;
         }
-
         if (row_hidden[j]) continue;
-
-        // skip center_hidden_rows
-        if (freeze && ((
-         j > freeze_ranges->br->row && j <= freeze_ranges->br->row + center_hidden_rows) || (
-         j < freeze_ranges->tl->row && j >= freeze_ranges->tl->row - center_hidden_rows))) continue;
-
-        row += rowformat[j];
+        if (row_frozen[j] || j >= offscr_sc_rows) row += row_format[j];
         if (row >= r + 1) break;
     }
     if (j > mxrow) j = mxrow;
 
     // if in normal mode, change currow and curcol
     if (curmode == NORMAL_MODE) {
-        curcol = offscr_sc_cols + i;
-        currow = offscr_sc_rows + j;
+        curcol = i;
+        currow = j;
         unselect_ranges();
 
     // if in insert or command mode, we add the selected cell to inputbar
     } else if (curmode == COMMAND_MODE || curmode == INSERT_MODE) {
         wchar_t cline [BUFFERSIZE];
         int count;
-        swprintf(cline, BUFFERSIZE, L"%s%d", coltoa(offscr_sc_cols+i), offscr_sc_rows + j);
+        swprintf(cline, BUFFERSIZE, L"%s%d", coltoa(i), j);
         for(count = 0; count < wcslen(cline); count++) ins_in_line(cline[count]);
         ui_show_header();
         return;

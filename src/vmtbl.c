@@ -133,9 +133,11 @@ int growtbl(int rowcol, int toprow, int topcol) {
     struct ent *** tbl2;
     struct ent ** nullit;
     int cnt;
-    char * col_hidden2;
-    char * row_hidden2;
-    unsigned char * rowformat2;
+    unsigned char * col_hidden2;
+    unsigned char * row_hidden2;
+    unsigned char * col_frozen2;
+    unsigned char * row_frozen2;
+    unsigned char * row_format2;
     int newrows;
     int i;
 
@@ -196,14 +198,14 @@ int growtbl(int rowcol, int toprow, int topcol) {
         struct ent *** lnullit;
         int lcnt;
 
-        GROWALLOC(row_hidden2, row_hidden, newrows, char, nolonger);
-        memset(row_hidden + maxrows, 0, (newrows - maxrows) * sizeof(char));
+        GROWALLOC(row_hidden2, row_hidden, newrows, unsigned char, nolonger);
+        memset(row_hidden + maxrows, 0, (newrows - maxrows) * sizeof(unsigned char));
 
-        GROWALLOC(rowformat2, rowformat, newrows, unsigned char, nolonger);
-        memset(rowformat + maxrows, 0, (newrows - maxrows) * sizeof(unsigned char));
-        for (i = maxrows; i < newrows; i++) {
-           rowformat[i] = 1;
-        }
+        GROWALLOC(row_format2, row_format, newrows, unsigned char, nolonger);
+        memset(row_format + maxrows, 1, (newrows - maxrows) * sizeof(unsigned char));
+
+        GROWALLOC(row_frozen2, row_frozen, newrows, unsigned char, nolonger);
+        memset(row_frozen + maxrows, 0, (newrows - maxrows) * sizeof(unsigned char));
 
         /*
          * alloc tbl row pointers, per net.lang.c, calloc does not
@@ -226,13 +228,16 @@ int growtbl(int rowcol, int toprow, int topcol) {
         memset(realfmt + maxcols, 0, (newcols - maxcols) * sizeof(int));
     }
 #else
-        GROWALLOC(col_hidden2, col_hidden, newcols, char, nowider);
-        memset(col_hidden + maxcols, 0, (newcols - maxcols) * sizeof(char));
+        GROWALLOC(col_hidden2, col_hidden, newcols, unsigned char, nowider);
+        memset(col_hidden + maxcols, 0, (newcols - maxcols) * sizeof(unsigned char));
         for (i = maxcols; i < newcols; i++) {
             fwidth[i] = DEFWIDTH;
             precision[i] = DEFPREC;
             realfmt[i] = DEFREFMT;
         }
+
+        GROWALLOC(col_frozen2, col_frozen, newcols, unsigned char, nolonger);
+        memset(col_frozen + maxcols, 0, (newcols - maxcols) * sizeof(unsigned char));
 
         /* [re]alloc the space for each row */
         for (i = 0; i < maxrows; i++) {
@@ -272,7 +277,7 @@ int growtbl(int rowcol, int toprow, int topcol) {
 }
 
 /**
- * \brief TODO Document ATBL()
+ * \brief ATBL(): function to get ent from grid
  *
  * \param[in] tlb
  * \param[in] row

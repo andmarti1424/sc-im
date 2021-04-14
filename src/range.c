@@ -58,8 +58,8 @@ srange * ranges = NULL;
 
 extern int currow;
 extern int curcol;
-extern char * col_hidden;
-extern char * row_hidden;
+extern unsigned char * col_hidden;
+extern unsigned char * row_hidden;
 
 /**
 * \brief Create a range from either to marks or two cells. 

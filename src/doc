@@ -114,9 +114,10 @@ Commands for handling cell content:
 
      fr          Freeze a row or the rows selected.
                  If none is selected it freezes the current row.
-                 NOTE: there can be only just one frozen range defined.
+
      fc          Freeze a col or the cols selected.
                  If none is selected it freezes the current col.
+
      fa          Freeze the area selected.
 
      ir          Insert a row.
@@ -788,26 +789,25 @@ Commands for handling cell content:
     :hiddencols
                 Show details of hidden columns.
 
-    :freeze {column}
-    :freeze {column:column}
+    :freezecol {column}
+    :freezecol {column:column}
                 Freeze the column or column range given. (Case insensitive).
                 (the rest of the screen scrolls but the column/s stays fixed
                 on the screen).
-                NOTE: there can be only just one frozen range defined.
 
-    :freeze {row}
-    :freeze {row:row}
+    :freezerow {row}
+    :freezerow {row:row}
                 Freeze the row or row range given.
                 (the rest of the screen scrolls but the row/s stays fixed on
                 the screen).
 
-    :freeze {range}
-                Freeze a range given.  (Case insensitive).
-                (the rest of the screen scrolls but the range stays fixed on
-                the screen).
+    :unfreeze {column}
+    :unfreeze {column:column}
+                Unfreeze a previous frozen col or range of cols.
 
-    :unfreeze
-                Remove a previous frozen row / col or range.
+    :unfreeze {row}
+    :unfreeze {row:row}
+                Unfreeze a previous frozen row or range of rows.
 
     :pad {spaces}
                 Apply a left padding {spaces} characters in width to a column.

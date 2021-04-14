@@ -333,10 +333,12 @@ extern int colsinrange;       // Number of cols in target range of a goto
 extern int * fwidth;
 extern int * precision;
 extern int * realfmt;
-extern char *colformat[10];
-extern char *col_hidden;
-extern char *row_hidden;
-extern unsigned char * rowformat;
+extern char * colformat[10];
+extern unsigned char * col_hidden;
+extern unsigned char * row_hidden;
+extern unsigned char * row_format;
+extern unsigned char * row_frozen;
+extern unsigned char * col_frozen;
 extern char line[FBUFLEN];
 extern int linelim;
 extern int changed;

@@ -99,12 +99,14 @@ int lastrow = 0;
 int lastcol = 0;
 int maxrows;
 int maxcols;
+unsigned char * col_hidden;
+unsigned char * col_frozen;
 int * fwidth;
 int * precision;
 int * realfmt;
-char * col_hidden;
-char * row_hidden;
-unsigned char * rowformat;
+unsigned char * row_hidden;
+unsigned char * row_frozen;
+unsigned char * row_format;
 char line[FBUFLEN];
 int modflg; /**< Indicates a change was made since last save */
 struct ent *** tbl;
