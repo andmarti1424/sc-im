@@ -254,6 +254,8 @@ token S_YANKCOL
 %token K_UNDERLINE_GRID
 %token K_TRUNCATE
 %token K_NOTRUNCATE
+%token K_AUTOWRAP
+%token K_NOAUTOWRAP
 %token K_QUIT_AFTERLOAD
 %token K_NOQUIT_AFTERLOAD
 %token K_XLSX_READFORMULAS
@@ -1127,6 +1129,12 @@ setitem :
                                      else         parse_str(user_conf_d, "truncate=1", TRUE); }
     |    K_TRUNCATE               {               parse_str(user_conf_d, "truncate=1", TRUE); }
     |    K_NOTRUNCATE             {               parse_str(user_conf_d, "truncate=0", TRUE); }
+
+    |    K_AUTOWRAP '=' NUMBER    {  if ($3 == 0) parse_str(user_conf_d, "autowrap=0", TRUE);
+                                     else         parse_str(user_conf_d, "autowrap=1", TRUE); }
+    |    K_AUTOWRAP               {               parse_str(user_conf_d, "autowrap=1", TRUE); }
+    |    K_NOAUTOWRAP             {               parse_str(user_conf_d, "autowrap=0", TRUE); }
+
     |    K_AUTOBACKUP '=' NUMBER  {
                                                   char cmd[MAXCMD];
                                                   sprintf(cmd, "autobackup=%d", $3);

@@ -68,6 +68,7 @@ const char default_config[] =
     "filename_with_mode=0\n"
     "overlap=0\n"
     "truncate=0\n"
+    "autowrap=0\n"
     "debug=0\n"
     "ignorecase=0\n"
     "trigger=1\n"

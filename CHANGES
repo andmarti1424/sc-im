@@ -20,6 +20,8 @@ handled issue #374
 added backwards search with '?'
 restore \\* from old SC. \\{char} fills the cell with n occurrences of {char} to complete its width
 issue #429
+multiple frozen rows/columns (fr / fc in normal mode)
+new autowrap config value. works only when nooverlap and notruncate are set.
 
 
 Pending

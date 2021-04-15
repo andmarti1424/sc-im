@@ -2614,6 +2614,11 @@ void slet(struct ent * v, struct enode * se, int flushdir) {
         efree(se);
     } else if (constant(se)) {
         label(v, p, flushdir);
+
+        // auto wrap
+        if (! get_conf_int("truncate") && ! get_conf_int("overlap") && get_conf_int("autowrap"))
+            row_format[v->row] = ceil(strlen(p) * 1.0 / fwidth[v->col]);
+
         if (p) scxfree(p);
         efree(se);
         if (v->flags & is_strexpr) {

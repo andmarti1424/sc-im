@@ -1297,6 +1297,10 @@ Commands for handling cell content:
     If cell content exceedes column width it gets replaced by asterisks '*'.
     If truncate is set, the content is cut off at the end of the cell.
 
+    'autowrap' [default off]
+    Auto wrap cell content and auto adjust row height to cover it.
+    Works only when overlap and truncate are set to off.
+
     'debug' [default off]
     set this to see debug messages in screen
 
