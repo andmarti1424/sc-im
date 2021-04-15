@@ -2104,8 +2104,6 @@ void num_search(double n, int firstrow, int firstcol, int lastrow_, int lastcol_
     gs.g_n = n;
     gs.g_row = firstrow;
 
-
-
     gs.g_col = firstcol;
     gs.g_lastrow = lastrow_;
     gs.g_lastcol = lastcol_;

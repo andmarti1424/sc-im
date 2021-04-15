@@ -51,6 +51,7 @@
 #define ESC_DELAY        25    // Escape timeout
 #define RESCOL           4     // columns reserved for row numbers
 #define RESROW           2     // rows reserved for prompt, error, and column numbers
+#define RESCOLHEADER     1     // number of row to show column header. always 1. just to make code cleaner
 #define NORMAL_MODE      0x01
 #define INSERT_MODE      0x02
 #define EDIT_MODE        0x04

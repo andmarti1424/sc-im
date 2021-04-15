@@ -309,7 +309,7 @@ void ui_do_welcome() {
 
     // show headings
     int mxcol = offscr_sc_cols + calc_offscr_sc_cols() - 1;
-    int mxrow = offscr_sc_rows + calc_offscr_sc_rows() - 2;
+    int mxrow = offscr_sc_rows + calc_offscr_sc_rows() - 1;
     ui_show_sc_col_headings(main_win, mxcol);
     ui_show_sc_row_headings(main_win, mxrow);
 
@@ -422,7 +422,7 @@ void ui_update(int header) {
     int cols = calc_offscr_sc_cols();
     int rows = calc_offscr_sc_rows();
     int mxcol = offscr_sc_cols + cols - 1;
-    int mxrow = offscr_sc_rows + rows - 2;
+    int mxrow = offscr_sc_rows + rows - 1;
     //sc_debug("rows:%d off:%d, mxrow:%d, maxrows:%d", rows, offscr_sc_rows, mxrow, maxrows);
 
     // Show sc_col headings: A, B, C, D..
@@ -671,7 +671,7 @@ void ui_show_sc_row_headings(WINDOW * win, int mxrow) {
     int frozen_after_rows_shown = 0;
 
     for (i = 0; i <= mxrow || frozen_after_rows_shown != num_frozen_after_rows; i++) {
-        if (i > maxrows) {
+        if (i >= maxrows) {
             sc_debug("i:%d >= maxrows:%d in ui_show_sc_row_headings. please check calc_offscr_sc_rows.", i, maxrows);
             break;
         }
@@ -721,7 +721,8 @@ void ui_show_sc_col_headings(WINDOW * win, int mxcol) {
     wclrtoeol(win);
 
     for (i = 0; i <= mxcol || frozen_after_cols_shown != num_frozen_after_cols; i++) {
-        if (i > maxcols) {
+        //sc_info("mxcol:%d %s num_frozen_after_cols: %d", mxcol, coltoa(mxcol), num_frozen_after_cols);
+        if (i >= maxcols) {
             sc_debug("i:%d >= maxcols:%d in ui_show_sc_col_headings. please check calc_offscr_sc_cols.", i, maxcols);
             break;
         }
@@ -747,10 +748,12 @@ void ui_show_sc_col_headings(WINDOW * win, int mxcol) {
         }
 
         int k = (fwidth[i] - 1) / 2;
+
         // if we want ! before column name:
         //mvwprintw(win, 0, col, "%*s%-*s", k, "", fwidth[i] - k - 1, coltoa(i), col_frozen[i] ? "!" : "");
+
         // if we want ! after column name:
-        mvwprintw(win, 0, col, "%*s%s%s%*s", k, "", coltoa(i), col_frozen[i] ? "!" : "", fwidth[i]-k-1, "");
+        mvwprintw(win, 0, col, "%*s%s%s%*s", k, "", coltoa(i), col_frozen[i] ? "!" : "", fwidth[i] - k - (col_frozen[i] ? 2 : 1), "");
 
         col += fwidth[i];
         if (i == mxcol && COLS - col > 0) wclrtoeol(win);
@@ -784,7 +787,7 @@ void ui_show_content(WINDOW * win, int mxrow, int mxcol) {
     int frozen_after_rows_shown = 0;
 
     for (row = 0; row <= mxrow || frozen_after_rows_shown != num_frozen_after_rows; row++) {
-         if (row > maxrows) {
+         if (row >= maxrows) {
              sc_debug("row:%d >= maxrows:%d in show_content. please check calc_offscr_sc_rows.", row, maxrows);
              break;
          }
@@ -796,13 +799,14 @@ void ui_show_content(WINDOW * win, int mxrow, int mxcol) {
 
         if (row > mxrow) { while (! row_frozen[row]) row++; frozen_after_rows_shown++; }
 
+        int r = row + offscr_sc_rows;
         int c = rescol;
         int nextcol;
         int fieldlen;
         col = 0;
 
         for (p = ATBL(tbl, row, col); col <= mxcol; p += nextcol - col, col = nextcol, c += fieldlen) {
-            if (col > maxcols) {
+            if (col >= maxcols) {
                 sc_debug("col:%d >= maxcols:%d in show_content. please check calc_offscr_sc_cols.", col, maxcols);
                 break;
             }
@@ -993,7 +997,6 @@ void ui_show_content(WINDOW * win, int mxrow, int mxcol) {
                 }
             }
 
-            /* FIXME
             if (currow == row && curcol == col) {
                 curwinrow = r;
                 curwincol = c;
@@ -1007,7 +1010,6 @@ void ui_show_content(WINDOW * win, int mxrow, int mxcol) {
                     curwincol += i;
                 }
             }
-            */
 
             // clean format
 #ifndef USECOLORS
@@ -1531,13 +1533,13 @@ void ui_handle_mouse(MEVENT event) {
     c = event.x - RESCOL;
     r = event.y - RESROW + (get_conf_int("input_bar_bottom") ? 1 : - 1);
 
-    int mxcol = offscr_sc_cols + calc_offscr_sc_cols() - 1;
-    int mxrow = offscr_sc_rows + calc_offscr_sc_rows() - 2;
+    int mxcol = calc_offscr_sc_cols() + offscr_sc_cols - 1;
+    int mxrow = calc_offscr_sc_rows() + offscr_sc_rows - 1;
     int col = 0;
     int row = 0;
 
     for (i = 0; i <= mxcol; i++) {
-        if (i > maxcols) {
+        if (i >= maxcols) {
             sc_debug("ui_handle_mouse - i:%d >= maxcols:%d in show_content. please check calc_offscr_sc_cols.", i, maxcols);
             break;
         }
@@ -1549,7 +1551,7 @@ void ui_handle_mouse(MEVENT event) {
 
     // same for rows
     for (j = 0; j <= mxrow; j++) {
-        if (j > maxrows) {
+        if (j >= maxrows) {
             sc_debug("ui_handle_mouse - j:%d >= maxrows:%d in ui_show_sc_row_headings. please check calc_offscr_sc_rows.", j, maxrows);
             break;
         }

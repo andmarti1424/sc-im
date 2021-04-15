@@ -2293,15 +2293,17 @@ int calc_offscr_sc_cols() {
 
     // decrease cols until fitting frozen cols after "cols"..
     // we count the number of frozen cols after "cols", from "cols" until maxcols.
-    for (k = offscr_sc_cols + cols - 1 , num_frozen_after_cols = 0, fmt_frozen_after_cols = 0; k < maxcols; k++)
+    for (k = offscr_sc_cols + cols, num_frozen_after_cols = 0, fmt_frozen_after_cols = 0; k < maxcols; k++) {
+        //if (k == offscr_sc_cols + cols) sc_info("k:%d, coltoa:%s cols:%d", k, coltoa(k), cols);
         if (col_frozen[k]) {
             num_frozen_after_cols++;
             fmt_frozen_after_cols += fwidth[k]; // count the screen lines needed to display them as well
         }
+    }
+
     // TODO: abort in a better way
     if (fmt_frozen_after_cols > col) { sc_debug("calc offscr sc cols: frozen cols overflow"); return 0; }
 
-    //FIXME this
     int dec = fmt_frozen_after_cols;
     while (dec > 0) {
         if (col_hidden[i]) { i--; continue; }
@@ -2319,13 +2321,13 @@ int calc_offscr_sc_cols() {
             break;
         }
         else if (offscr_sc_cols - colf - 1 == curcol) { offscr_sc_cols--; }
-        else if (offscr_sc_cols + cols - 1 - num_frozen_before_offscr - num_frozen_after_cols < curcol) offscr_sc_cols++;
-        else if (offscr_sc_cols + cols - 1 - num_frozen_after_cols > curcol) offscr_sc_cols--;
+        else if (offscr_sc_cols + cols - 2 - num_frozen_before_offscr - num_frozen_after_cols < curcol) offscr_sc_cols++;
+        else if (offscr_sc_cols + cols - 2 - num_frozen_after_cols > curcol) offscr_sc_cols--;
         else break;
         goto countc;
     }
-    //sc_info("cols:%d num:%d", cols, num_frozen_before_offscr);
-    return cols - num_frozen_after_cols - num_frozen_before_offscr;
+    if (num_frozen_after_cols) sc_info("cols:%d num:%d", cols, num_frozen_after_cols);
+    return cols;
 }
 
 
@@ -2356,19 +2358,19 @@ int calc_offscr_sc_rows() {
     // rows : number de sc rows shown on grid
     // rowf : number of NCURSES screen lines (because of frozen rows) before offscr_sc_rows
     count:
-    for (i = 0, rows = 0, rowf = 0, row = RESROW, num_frozen_before_offscr = 0; i < maxrows && row + row_format[i] <= LINES; i++) {
-        if (offscr_sc_rows + rows - 2 > maxrows) return rows;
+    for (i = 0, rows = 0, rowf = 0, row = RESROW + RESCOLHEADER, num_frozen_before_offscr = 0; i < maxrows && row + row_format[i] <= LINES; i++) {
+        if (offscr_sc_rows + rows > maxrows) return rows;
         if (row_hidden[i]) continue;
         if (row_frozen[i] || i >= offscr_sc_rows) {
+            rows++;
             row += row_format[i];
             if (row_frozen[i] && i < offscr_sc_rows) { rowf += row_format[i]; num_frozen_before_offscr++; }
-            rows++;
         }
     }
+    //sc_info("1.off:%d rows%d RESROW:%d rowf:%d currow:%d maxrows:%d row%d LINES:%d", offscr_sc_rows, rows, -RESROW, -rowf, currow, maxrows, row, LINES);
 
-    // decrease rows until fitting frozen rows after "rows"..
     // we count the number of frozen rows after "rows", from "rows" until maxrows.
-    for (k = offscr_sc_rows + rows - 1 , num_frozen_after_rows = 0, fmt_frozen_after_rows = 0; k < maxrows; k++)
+    for (k = offscr_sc_rows + rows - 1, num_frozen_after_rows = 0, fmt_frozen_after_rows = 0; k < maxrows; k++)
         if (row_frozen[k]) {
             num_frozen_after_rows++;
             fmt_frozen_after_rows += row_format[k]; // count the screen lines needed to display them as well
@@ -2376,28 +2378,28 @@ int calc_offscr_sc_rows() {
     // TODO: abort in a better way
     if (fmt_frozen_after_rows > row) { sc_debug("calc offscr sc rows: frozen rows overflow"); return 0; }
 
+    // decrease rows until fitting frozen rows after "rows"..
     int dec = fmt_frozen_after_rows;
     while (dec > 0) {
-        if (row_hidden[i]) { i--; continue; }
+        if (row_hidden[i] || row_frozen[i]) { i--; continue; }
         dec -= row_format[i];
         rows--;
         i--;
     }
 
     while ( offscr_sc_rows + rows - RESROW - num_frozen_before_offscr - num_frozen_after_rows < currow || currow < offscr_sc_rows) {
-        if (offscr_sc_rows + rows >= maxrows) {
-            //sc_debug("1.off:%d rows%d RESROW:%d rowf:%d currow:%d maxrows:%d row%d LINES:%d", offscr_sc_rows, rows, -RESROW, -rowf, currow, maxrows, row, LINES);
+        if (offscr_sc_rows + rows > maxrows) {
             if (row == LINES) offscr_sc_rows++;
             break;
         }
         else if (offscr_sc_rows - rowf - 1 == currow) { offscr_sc_rows--; }
-        else if (offscr_sc_rows + rows - RESROW - num_frozen_before_offscr - num_frozen_after_rows < currow) offscr_sc_rows++;
-        else if (offscr_sc_rows + rows - RESROW - num_frozen_after_rows > currow) offscr_sc_rows--;
+        else if (offscr_sc_rows + rows - RESROW + RESCOLHEADER - num_frozen_before_offscr - num_frozen_after_rows < currow) offscr_sc_rows++;
+        else if (offscr_sc_rows + rows - RESROW + RESCOLHEADER - num_frozen_after_rows > currow) offscr_sc_rows--;
         else break;
         goto count;
     }
     //sc_info("OU off:%d rows%d RESROW:%d fmtbef:%d fmtaft:%d currow:%d maxrows:%d num_frozen_before_offscr:%d", offscr_sc_rows, rows, -RESROW, -rowf, fmt_frozen_after_rows, currow, maxrows, num_frozen_before_offscr);
-    return rows - num_frozen_after_rows;
+    return rows;
 }
 
 /**
@@ -2701,7 +2703,7 @@ int is_single_command (struct block * buf, long timeout) {
                  buf->pnext->value == L'v' )) result = EDITION_CMD;
 
         else if (buf->value == L'R' && bs == 3 &&    // Create range with two marks
-            //  FIXME add validation
+            //  FIXME add better validation
                ((buf->pnext->value - (L'a' - 1)) < 1 ||
                  buf->pnext->value > 26) &&
                ((buf->pnext->pnext->value - (L'a' - 1)) < 1 ||
