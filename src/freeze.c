@@ -88,6 +88,7 @@ void handle_freeze(struct ent * tl_ent, struct ent * br_ent, char value, char ty
         for (i=tl_ent->row; i<=br_ent->row; i++) row_frozen[i]=value;
     else if (type == 'c')
         for (i=tl_ent->col; i<=br_ent->col; i++) col_frozen[i]=value;
+
     return;
 }
 

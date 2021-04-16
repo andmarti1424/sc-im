@@ -600,10 +600,8 @@ void do_commandmode(struct block * sb) {
         } else if ( ! wcsncmp(inputline, L"freezecol", 9) ) {
             wcscpy(interp_line, inputline);
             if (p != -1) {
-                wchar_t cline [BUFFERSIZE];
-                wcscpy(cline, interp_line);
-                del_range_wchars(cline, 0, 8);
-                swprintf(interp_line, BUFFERSIZE, L"freeze %s:%s", coltoa(sr->tlcol), coltoa(sr->brcol));
+                swprintf(interp_line, BUFFERSIZE, L"freeze %s:", coltoa(sr->tlcol));
+                swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%s", coltoa(sr->brcol));
             } else {
                 swprintf(interp_line, BUFFERSIZE, L"freeze %s:%s", coltoa(curcol), coltoa(curcol));
             }
@@ -614,9 +612,6 @@ void do_commandmode(struct block * sb) {
         } else if ( ! wcsncmp(inputline, L"freezerow", 9) ) {
             wcscpy(interp_line, inputline);
             if (p != -1) {
-                wchar_t cline [BUFFERSIZE];
-                wcscpy(cline, interp_line);
-                del_range_wchars(cline, 0, 8);
                 swprintf(interp_line, BUFFERSIZE, L"freeze %d:%d", sr->tlrow, sr->brrow);
             } else {
                 swprintf(interp_line, BUFFERSIZE, L"freeze %d:%d", currow, currow);
@@ -628,13 +623,10 @@ void do_commandmode(struct block * sb) {
         } else if ( ! wcsncmp(inputline, L"unfreezecol", 11) ) {
             wcscpy(interp_line, inputline);
             if (p != -1) {
-                wchar_t cline [BUFFERSIZE];
-                wcscpy(cline, interp_line);
-                del_range_wchars(cline, 0, 10);
-                swprintf(interp_line, BUFFERSIZE, L"unfreeze %s:%s", coltoa(sr->tlcol), coltoa(sr->brcol));
-            } else {
+                swprintf(interp_line, BUFFERSIZE, L"unfreeze %s:", coltoa(sr->tlcol));
+                swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%s", coltoa(sr->brcol));
+            } else
                 swprintf(interp_line, BUFFERSIZE, L"unfreeze %s:%s", coltoa(curcol), coltoa(curcol));
-            }
             send_to_interp(interp_line);
             center_hidden_rows = 0;
             center_hidden_cols = 0;
@@ -642,13 +634,9 @@ void do_commandmode(struct block * sb) {
         } else if ( ! wcsncmp(inputline, L"unfreezerow", 11) ) {
             wcscpy(interp_line, inputline);
             if (p != -1) {
-                wchar_t cline [BUFFERSIZE];
-                wcscpy(cline, interp_line);
-                del_range_wchars(cline, 0, 10);
                 swprintf(interp_line, BUFFERSIZE, L"unfreeze %d:%d", sr->tlrow, sr->brrow);
-            } else {
+            } else
                 swprintf(interp_line, BUFFERSIZE, L"unfreeze %d:%d", currow, currow);
-            }
             send_to_interp(interp_line);
             center_hidden_rows = 0;
             center_hidden_cols = 0;

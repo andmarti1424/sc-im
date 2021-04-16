@@ -2282,31 +2282,29 @@ int calc_offscr_sc_cols() {
     // colf : number of NCURSES screen lines (because of frozen cols) before offscr_sc_cols
     countc:
     for (i = 0, cols = 0, colf = 0, col = rescol, num_frozen_before_offscr = 0; i < maxcols && col + fwidth[i] <= COLS; i++) {
-        if (offscr_sc_cols + cols - 2 > maxcols) return cols;
+        if (offscr_sc_cols + cols - 2 > maxcols) return cols; // FIXME -2
         if (col_hidden[i]) continue;
         if (col_frozen[i] || i >= offscr_sc_cols) {
+            cols++;
             col += fwidth[i];
             if (col_frozen[i] && i < offscr_sc_cols) { colf += fwidth[i]; num_frozen_before_offscr++; }
-            cols++;
         }
     }
 
-    // decrease cols until fitting frozen cols after "cols"..
     // we count the number of frozen cols after "cols", from "cols" until maxcols.
-    for (k = offscr_sc_cols + cols, num_frozen_after_cols = 0, fmt_frozen_after_cols = 0; k < maxcols; k++) {
-        //if (k == offscr_sc_cols + cols) sc_info("k:%d, coltoa:%s cols:%d", k, coltoa(k), cols);
+    for (k = offscr_sc_cols + cols - 1, num_frozen_after_cols = 0, fmt_frozen_after_cols = 0; k < maxcols; k++)
         if (col_frozen[k]) {
             num_frozen_after_cols++;
             fmt_frozen_after_cols += fwidth[k]; // count the screen lines needed to display them as well
         }
-    }
 
     // TODO: abort in a better way
     if (fmt_frozen_after_cols > col) { sc_debug("calc offscr sc cols: frozen cols overflow"); return 0; }
 
+    // decrease cols until fitting frozen cols after "cols"..
     int dec = fmt_frozen_after_cols;
     while (dec > 0) {
-        if (col_hidden[i]) { i--; continue; }
+        if (col_hidden[i] || col_frozen[i]) { i--; continue; }
         dec -= fwidth[i];
         cols--;
         i--;
@@ -2314,10 +2312,8 @@ int calc_offscr_sc_cols() {
 
     while ( offscr_sc_cols + cols - 1 - num_frozen_before_offscr - num_frozen_after_cols < curcol || curcol < offscr_sc_cols) {
         if (offscr_sc_cols + cols - 1 >= maxcols) {
-            //sc_debug("off:%d cols:%d numb:%d numa:%d col:%d COLS:%d", offscr_sc_cols, cols, num_frozen_before_offscr, num_frozen_after_cols, col, COLS);
-            //sc_debug("fmta:%d fmtb:%d", colf, fmt_frozen_after_cols);
-            //if (col == COLS)
-            offscr_sc_cols++;
+            sc_debug("maxcol. off:%d cols:%d numb:%d numa:%d col:%d COLS:%d", offscr_sc_cols, cols, num_frozen_before_offscr, num_frozen_after_cols, col, COLS);
+            if (col == COLS) offscr_sc_cols++;
             break;
         }
         else if (offscr_sc_cols - colf - 1 == curcol) { offscr_sc_cols--; }
@@ -2326,7 +2322,7 @@ int calc_offscr_sc_cols() {
         else break;
         goto countc;
     }
-    if (num_frozen_after_cols) sc_info("cols:%d num:%d", cols, num_frozen_after_cols);
+    //if (num_frozen_after_cols) sc_info("cols:%d num:%d", cols, num_frozen_after_cols);
     return cols;
 }
 
@@ -2393,8 +2389,8 @@ int calc_offscr_sc_rows() {
             break;
         }
         else if (offscr_sc_rows - rowf - 1 == currow) { offscr_sc_rows--; }
-        else if (offscr_sc_rows + rows - RESROW + RESCOLHEADER - num_frozen_before_offscr - num_frozen_after_rows < currow) offscr_sc_rows++;
-        else if (offscr_sc_rows + rows - RESROW + RESCOLHEADER - num_frozen_after_rows > currow) offscr_sc_rows--;
+        else if (offscr_sc_rows + rows - RESROW - RESCOLHEADER - num_frozen_before_offscr - num_frozen_after_rows < currow) offscr_sc_rows++;
+        else if (offscr_sc_rows + rows - RESROW - RESCOLHEADER - num_frozen_after_rows > currow) offscr_sc_rows--;
         else break;
         goto count;
     }
