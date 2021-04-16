@@ -423,7 +423,8 @@ void ui_update(int header) {
     int rows = calc_offscr_sc_rows();
     int mxcol = offscr_sc_cols + cols - 1;
     int mxrow = offscr_sc_rows + rows - 1;
-    //sc_debug("rows:%d off:%d, mxrow:%d, maxrows:%d", rows, offscr_sc_rows, mxrow, maxrows);
+    //sc_info("rows:%d off:%d, mxrow:%d, maxrows:%d aft:%d", rows, offscr_sc_rows, mxrow, maxrows, num_frozen_after_rows);
+    //sc_info("cols:%d off:%d, mxcol:%d, maxcols:%d", cols, offscr_sc_cols, mxcol, maxcols);
 
     // Show sc_col headings: A, B, C, D..
     ui_show_sc_col_headings(main_win, mxcol);
