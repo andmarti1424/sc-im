@@ -22,14 +22,25 @@ restore \\* from old SC. \\{char} fills the cell with n occurrences of {char} to
 issue #429
 multiple frozen rows/columns (fr / fc in normal mode)
 new autowrap config value. works only when nooverlap and notruncate are set.
+store frozen rows and cols when saving file
 
 
 Pending
 -------
-handle mouse clicks in edition mode.
-Restore comments from old SC?
-handle content alignment over multiple lines in cmds.c:pad_and_align
+test calc_offscr_rows and calc_offscr_cols
+handle \n in cell input
+change input bar from window to pad
+check all cmds movement functions after new frozen mods
+save offscr_sc_rows, offscr_sc_cols, COLS and LINES values when saving file
 
+show_cmd
+notimeout
+edit!
+
+format MODE?
+restore comments
+handle content alignment over multiple lines in cmds.c:pad_and_align
+handle mouse clicks in edition mode.
 
 Rethink LUA evaluation
 

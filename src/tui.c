@@ -748,13 +748,11 @@ void ui_show_sc_col_headings(WINDOW * win, int mxcol) {
             #endif
         }
 
-        int k = (fwidth[i] - 1) / 2;
-
-        // if we want ! before column name:
-        //mvwprintw(win, 0, col, "%*s%-*s", k, "", fwidth[i] - k - 1, coltoa(i), col_frozen[i] ? "!" : "");
 
         // if we want ! after column name:
-        mvwprintw(win, 0, col, "%*s%s%s%*s", k, "", coltoa(i), col_frozen[i] ? "!" : "", fwidth[i] - k - (col_frozen[i] ? 2 : 1), "");
+        int k = (fwidth[i] - 1) / 2;
+        mvwprintw(win, 0, col, "%*s%s%s%*s", k, "", coltoa(i),
+        col_frozen[i] ? "!" : "", fwidth[i] - k - (col_frozen[i] ? strlen(coltoa(i))+1 : strlen(coltoa(i))), "");
 
         col += fwidth[i];
         if (i == mxcol && COLS - col > 0) wclrtoeol(win);

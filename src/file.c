@@ -414,6 +414,34 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
         }
     }
 
+    // frozen cols. group by ranges
+    for (c = c0; c <= cn; c++) {
+        int c_aux = c;
+        if (col_frozen[c] && c <= maxcol && (c == 0 || ! col_frozen[c-1])) {
+            while (c_aux <= maxcol && col_frozen[c_aux]) c_aux++;
+            fprintf(f, "freeze %s", coltoa(c));
+            if (c_aux-1 != c) {
+                fprintf(f, ":%s\n", coltoa(c_aux-1));
+                c = c_aux-1;
+            } else
+                fprintf(f, "\n");
+        }
+    }
+
+    // frozen rows. group by ranges
+    for (r = r0; r <= rn; r++) {
+        int r_aux = r;
+        if (row_frozen[r] && r <= maxrow && (r == 0 || ! row_frozen[r-1])) {
+            while (r_aux <= maxrow && row_frozen[r_aux]) r_aux++;
+            fprintf(f, "freeze %d", r);
+            if (r_aux-1 != r) {
+                fprintf(f, ":%d\n", r_aux-1);
+                r = r_aux-1;
+            } else
+                fprintf(f, "\n");
+        }
+    }
+
     write_marks(f);
     write_franges(f);
 
