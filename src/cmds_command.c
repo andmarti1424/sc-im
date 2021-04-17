@@ -118,6 +118,7 @@ L"fill",
 L"filteron",
 L"filteroff",
 L"format",
+L"formatcol",
 L"fsum",
 L"freezecol",
 L"freezerow",
@@ -718,6 +719,30 @@ void do_commandmode(struct block * sb) {
                     swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%ls", inputline);
                 send_to_interp(interp_line);
             }
+
+        } else if ( ! wcsncmp(inputline, L"formatcol ", 10) ) {
+            int c = curcol, cf = curcol, i;
+            if (p != -1) {
+                c = sr->tlcol;
+                cf = sr->brcol;
+            }
+#ifdef UNDO
+            create_undo_action();
+#endif
+            for (i=c; i<=cf;i++) {
+#ifdef UNDO
+                add_undo_col_format(i, 'R', fwidth[i], precision[i], realfmt[i]);
+#endif
+                swprintf(interp_line, BUFFERSIZE, L"format %s", coltoa(i));
+                swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L" %ls", &inputline[10]);
+                send_to_interp(interp_line);
+#ifdef UNDO
+                add_undo_col_format(i, 'A', fwidth[i], precision[i], realfmt[i]);
+#endif
+            }
+#ifdef UNDO
+            end_undo_action();
+#endif
 
         } else if ( ! wcsncmp(inputline, L"format ", 7) ) {
             int r = currow, c = curcol, rf = currow, cf = curcol;

@@ -659,6 +659,9 @@ Commands for handling cell content:
                          :format "d%d/%m/%Y"
                          :format "####.####E+3"
 
+    :formatcol {width} {precision} {fixed-point}
+                Format the selected column or range of columns with the
+                specified format of width, precision and fixed-point.
 
     :datefmt "{date_format_string}"   See the DATE INPUT section below.
 
