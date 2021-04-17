@@ -24,11 +24,11 @@ multiple frozen rows/columns (fr / fc in normal mode)
 new autowrap config value. works only when nooverlap and notruncate are set.
 store frozen rows and cols when saving file
 added :formatcol command (handling its undo as well)
+added :formatrow command (handling its undo as well)
 
 
 Pending
 -------
-undo de fj fk.
 undo de freeze row and col
 remove old references to freezer / freezec
 test calc_offscr_rows and calc_offscr_cols

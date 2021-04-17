@@ -119,6 +119,7 @@ L"filteron",
 L"filteroff",
 L"format",
 L"formatcol",
+L"formatrow",
 L"fsum",
 L"freezecol",
 L"freezerow",
@@ -720,6 +721,33 @@ void do_commandmode(struct block * sb) {
                 send_to_interp(interp_line);
             }
 
+        } else if ( ! wcsncmp(inputline, L"formatrow ", 10) ) {
+            int r = currow, rf = currow, i;
+            if (p != -1) {
+                r = sr->tlrow;
+                rf = sr->brrow;
+            }
+#ifdef UNDO
+            int changed = 0, fmt_ori;
+            create_undo_action();
+#endif
+            for (i=r; i<=rf;i++) {
+#ifdef UNDO
+                fmt_ori = row_format[i];
+                add_undo_row_format(i, 'R', row_format[i]);
+#endif
+                swprintf(interp_line, BUFFERSIZE, L"format %d %ls", i, &inputline[10]);
+                send_to_interp(interp_line);
+#ifdef UNDO
+                if (fmt_ori != row_format[i]) changed = 1;
+                add_undo_row_format(i, 'A', row_format[i]);
+#endif
+            }
+#ifdef UNDO
+            if (! changed) dismiss_undo_item(NULL);
+            else end_undo_action();
+#endif
+
         } else if ( ! wcsncmp(inputline, L"formatcol ", 10) ) {
             int c = curcol, cf = curcol, i;
             if (p != -1) {
@@ -727,21 +755,30 @@ void do_commandmode(struct block * sb) {
                 cf = sr->brcol;
             }
 #ifdef UNDO
+            int changed = 0;
+            int fwidth_ori;
+            int precision_ori;
+            int realfmt_ori;
             create_undo_action();
 #endif
             for (i=c; i<=cf;i++) {
 #ifdef UNDO
+                fwidth_ori = fwidth[i];
+                precision_ori = precision[i];
+                realfmt_ori = realfmt[i];
                 add_undo_col_format(i, 'R', fwidth[i], precision[i], realfmt[i]);
 #endif
                 swprintf(interp_line, BUFFERSIZE, L"format %s", coltoa(i));
                 swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L" %ls", &inputline[10]);
                 send_to_interp(interp_line);
 #ifdef UNDO
+                if (fwidth[i] != fwidth_ori || precision[i] != precision_ori || realfmt[i] != realfmt_ori) changed = 1;
                 add_undo_col_format(i, 'A', fwidth[i], precision[i], realfmt[i]);
 #endif
             }
 #ifdef UNDO
-            end_undo_action();
+            if (! changed) dismiss_undo_item(NULL);
+            else end_undo_action();
 #endif
 
         } else if ( ! wcsncmp(inputline, L"format ", 7) ) {

@@ -645,22 +645,9 @@ struct enode * copye(register struct enode *e, int Rdelta, int Cdelta, int r1, i
 void dorowformat(int r, unsigned char size) {
     if (size < 1 || size > UCHAR_MAX || size > LINES - RESROW - 1) { sc_error("Invalid row format"); return; }
 
-#ifdef UNDO
-    if (! loading) {
-        create_undo_action();
-        add_undo_row_format(r, 'R', row_format[r]);
-    }
-#endif
     if (r >= maxrows && !growtbl(GROWROW, 0, r)) r = maxrows-1 ;
     checkbounds(&r, &curcol);
     row_format[r] = size;
-
-#ifdef UNDO
-    if (!loading) {
-        add_undo_row_format(r, 'A', row_format[r]);
-        end_undo_action();
-    }
-#endif
     if (! loading) modflg++;
     return;
 }

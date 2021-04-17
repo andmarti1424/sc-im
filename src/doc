@@ -663,6 +663,10 @@ Commands for handling cell content:
                 Format the selected column or range of columns with the
                 specified format of width, precision and fixed-point.
 
+    :formatrow {height}
+                Format the selected row or range of rows with the specified
+                height.
+
     :datefmt "{date_format_string}"   See the DATE INPUT section below.
 
 

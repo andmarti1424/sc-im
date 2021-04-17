@@ -563,26 +563,52 @@ void do_normalmode(struct block * buf) {
                     handle_freeze(lookat(r, c), lookat(rf, cf), 1, 'c');
                     sc_info("Area frozen");
                 }
-               ui_update(FALSE);
-               break;
+                ui_update(FALSE);
+                break;
 
             // decrease row height
             } else if (buf->pnext->value == 'k' || buf->pnext->value == OKEY_UP) {
-               dorowformat(currow, row_format[currow]-1);
-               ui_update(TRUE);
-               break;
+
+#ifdef UNDO
+                create_undo_action();
+                int fmt_ori = row_format[currow];
+                add_undo_row_format(currow, 'R', row_format[currow]);
+#endif
+                swprintf(interp_line, BUFFERSIZE, L"format %d %d", currow, row_format[currow]-1);
+                send_to_interp(interp_line);
+#ifdef UNDO
+                if (row_format[currow] != fmt_ori) {
+                    add_undo_row_format(currow, 'A', row_format[currow]);
+                    end_undo_action();
+                } else dismiss_undo_item(NULL);
+#endif
+                ui_update(TRUE);
+                break;
 
             // increase row height
             } else if (buf->pnext->value == 'j' || buf->pnext->value == OKEY_DOWN) {
-               dorowformat(currow, row_format[currow]+1);
-               ui_update(TRUE);
-               break;
+
+#ifdef UNDO
+                create_undo_action();
+                int fmt_ori = row_format[currow];
+                add_undo_row_format(currow, 'R', row_format[currow]);
+#endif
+                swprintf(interp_line, BUFFERSIZE, L"format %d %d", currow, row_format[currow]+1);
+                send_to_interp(interp_line);
+#ifdef UNDO
+                if (row_format[currow] != fmt_ori) {
+                    add_undo_row_format(currow, 'A', row_format[currow]);
+                    end_undo_action();
+                } else dismiss_undo_item(NULL);
+#endif
+                ui_update(TRUE);
+                break;
 
             // change in format
             } else {
 #ifdef UNDO
-            create_undo_action();
-            add_undo_col_format(curcol, 'R', fwidth[curcol], precision[curcol], realfmt[curcol]);
+                create_undo_action();
+                add_undo_col_format(curcol, 'R', fwidth[curcol], precision[curcol], realfmt[curcol]);
 #endif
             formatcol(buf->pnext->value);
 #ifdef UNDO
