@@ -801,19 +801,23 @@ Commands for handling cell content:
                 Freeze the column or column range given. (Case insensitive).
                 (the rest of the screen scrolls but the column/s stays fixed
                 on the screen).
+    :freezecol {range}
+                Freeze the columns determinated by the selected range.
 
     :freezerow {row}
     :freezerow {row:row}
                 Freeze the row or row range given.
                 (the rest of the screen scrolls but the row/s stays fixed on
                 the screen).
+    :freezerow {range}
+                Freeze the rows determinated by the selected range.
 
-    :unfreeze {column}
-    :unfreeze {column:column}
+    :unfreezecol {column}
+    :unfreezecol {column:column}
                 Unfreeze a previous frozen col or range of cols.
 
-    :unfreeze {row}
-    :unfreeze {row:row}
+    :unfreezerow {row}
+    :unfreezerow {row:row}
                 Unfreeze a previous frozen row or range of rows.
 
     :pad {spaces}
