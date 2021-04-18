@@ -342,7 +342,7 @@ double dolookup(struct enode * val, int minr, int minc, int maxr, int maxc, int 
         s = seval(NULL, val);
         for (r = minr, c = minc; r <= maxr && c <= maxc; r+=incr, c+=incc) {
             if ((p = *ATBL(tbl, r, c)) && p->label) {
-                if (strcmp(p->label,s) == 0) {
+                if (s && strcmp(p->label,s) == 0) {
                     fndr = incc ? (minr + offset) : r;
                     fndc = incr ? (minc + offset) : c;
                     if (ISVALID(fndr,fndc)) {
@@ -359,7 +359,7 @@ double dolookup(struct enode * val, int minr, int minc, int maxr, int maxc, int 
         }
         if (p && p->flags & is_valid)
             ret = p->v;
-        scxfree(s);
+        if (s != NULL) scxfree(s);
     }
     return ret;
 }
