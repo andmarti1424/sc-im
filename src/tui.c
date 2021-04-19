@@ -973,8 +973,11 @@ void ui_show_content(WINDOW * win, int mxrow, int mxcol) {
                 pad_and_align(text, num, fieldlen, align, (*p)->pad, out, row_format[row]);
 
                 // auto wrap
-                if (! get_conf_int("truncate") && ! get_conf_int("overlap") && get_conf_int("autowrap"))
-                    row_format[row] = ceil(wcslen(out) * 1.0 / fwidth[col]);
+                if (! get_conf_int("truncate") && ! get_conf_int("overlap") && get_conf_int("autowrap")) {
+                    int newheight = ceil(wcslen(out) * 1.0 / fwidth[col]);
+                    if (row_format[row] < newheight)
+                    row_format[row] = newheight;
+                }
 
 #ifdef USECOLORS
                 if (has_colors() && get_conf_int("underline_grid")) {
