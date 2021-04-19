@@ -334,8 +334,9 @@ void dismiss_undo_item(struct undo * ul) {
     if (ul->col_hidded  != NULL) free(ul->col_hidded); // Free hidden col memory
     if (ul->row_showed  != NULL) free(ul->row_showed); // Free showed row memory
     if (ul->row_frozed  != NULL) free(ul->row_frozed); // Free frozed row memory
-    if (ul->row_unfrozed  != NULL) free(ul->row_unfrozed); // Free unfrozed row memory
     if (ul->col_showed  != NULL) free(ul->col_showed); // Free showed col memory
+    if (ul->col_frozed  != NULL) free(ul->col_frozed); // Free frozed col memory
+    if (ul->row_unfrozed  != NULL) free(ul->row_unfrozed); // Free unfrozed row memory
     if (ul->col_unfrozed  != NULL) free(ul->col_unfrozed); // Free unfrozed col memory
 
     return;
