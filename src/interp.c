@@ -2585,6 +2585,7 @@ void slet(struct ent * v, struct enode * se, int flushdir) {
         ents_that_depends_on_range(v->row, v->col, v->row, v->col);
         create_undo_action();
         copy_to_undostruct(v->row, v->col, v->row, v->col, UNDO_DEL, HANDLE_DEPS, NULL);
+        add_undo_row_format(v->row, 'R', row_format[v->row]);
     }
     #endif
     // No debe borrarse el vertex. Ver comentario en LET

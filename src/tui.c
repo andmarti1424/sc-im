@@ -975,8 +975,7 @@ void ui_show_content(WINDOW * win, int mxrow, int mxcol) {
                 // auto wrap
                 if (! get_conf_int("truncate") && ! get_conf_int("overlap") && get_conf_int("autowrap")) {
                     int newheight = ceil(wcslen(out) * 1.0 / fwidth[col]);
-                    if (row_format[row] < newheight)
-                    row_format[row] = newheight;
+                    if (row_format[row] < newheight) row_format[row] = newheight;
                 }
 
 #ifdef USECOLORS

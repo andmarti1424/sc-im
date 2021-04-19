@@ -27,16 +27,17 @@ added :formatcol command (handling its undo as well)
 added :formatrow command (handling its undo as well)
 undo of freeze row and col
 handle \n in cell input, and with autowrap
+handle undoing changes in row height produced by string input
 
 
 Pending
 -------
+handle \n inside csv files to increase rows height
 remove old references to freezer / freezec
 test calc_offscr_rows and calc_offscr_cols
 change input bar from window to pad
 check all cmds movement functions after new frozen mods
 save offscr_sc_rows, offscr_sc_cols, COLS and LINES values when saving file
-handle \n inside csv files to increase rows height
 show_shorthelp
 show_cmd
 notimeout
