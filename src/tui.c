@@ -56,6 +56,8 @@
  * ui_start_colors        // exclusive ui startup routine for colors
  * ui_pause
  * ui_resume
+ * ui_mv_bottom_bar
+ * ui_refresh_pad
  *
  * these are local functions that might not be needed to reimplement if writing another ui:
  * ui_set_ucolor          // function called internally for setting a color
@@ -104,6 +106,7 @@ extern char insert_edit_submode;
 
 WINDOW * main_win;
 WINDOW * input_win;
+WINDOW * input_pad;
 SCREEN * sstderr;
 SCREEN * sstdout;
 
@@ -124,7 +127,9 @@ void ui_start_screen() {
     set_term(sstdout);
 
     main_win = newwin(LINES - RESROW, COLS, get_conf_int("input_bar_bottom") ? 0 : RESROW, 0);
-    input_win = newwin(RESROW, COLS, get_conf_int("input_bar_bottom") ? LINES-RESROW : 0, 0);
+    input_win = newwin(RESROW-1, COLS, get_conf_int("input_bar_bottom") ? LINES-RESROW : 0, 0);
+    input_pad = newpad(RESROW-1, MAX_IB_LEN);
+
     status_line_empty = 1;
 
     #ifdef USECOLORS
@@ -139,12 +144,13 @@ void ui_start_screen() {
             // values defined in '.sc' files
             set_colors_param_dict();
         }
-        wbkgd(main_win, COLOR_PAIR((ucolors[DEFAULT].fg+1) * (COLORS) + ucolors[DEFAULT].bg + 2));
-        wbkgd(input_win, COLOR_PAIR((ucolors[DEFAULT].fg+1) * (COLORS) + ucolors[DEFAULT].bg + 2));
+        //wbkgd(main_win, COLOR_PAIR((ucolors[DEFAULT].fg+1) * (COLORS) + ucolors[DEFAULT].bg + 2));
+        //wbkgd(input_win, COLOR_PAIR((ucolors[DEFAULT].fg+1) * (COLORS) + ucolors[DEFAULT].bg + 2));
+        //wbkgd(input_pad, COLOR_PAIR((ucolors[DEFAULT].fg+1) * (COLORS) + ucolors[DEFAULT].bg + 2));
     }
     #endif
 
-    wtimeout(input_win, TIMEOUT_CURSES);
+    wtimeout(input_pad, TIMEOUT_CURSES);
     noecho();
     curs_set(0);
 
@@ -158,7 +164,7 @@ void ui_start_screen() {
     if ((char *) getenv ("ESCDELAY") == NULL) set_escdelay(ESC_DELAY);
     #endif
     cbreak();
-    keypad(input_win, 1);
+    keypad(input_pad, 1);
 }
 
 /**
@@ -197,7 +203,7 @@ void ui_stop_screen() {
  */
 
 int ui_getch(wint_t * wd) {
-    return wget_wch(input_win, wd);
+    return wget_wch(input_pad, wd);
 }
 
 /**
@@ -215,19 +221,19 @@ int ui_getch(wint_t * wd) {
 
 int ui_getch_b(wint_t * wd) {
     wint_t digraph = 0;
-    wtimeout(input_win, -1);
+    wtimeout(input_pad, -1);
     move(0, inputline_pos + 1);
-    wget_wch(input_win, wd);
+    wget_wch(input_pad, wd);
     if (*wd == ctl('k')) {
-        wget_wch(input_win, wd);
+        wget_wch(input_pad, wd);
         if (*wd != OKEY_ESC) {
             digraph = *wd;
-            wget_wch(input_win, wd);
+            wget_wch(input_pad, wd);
             if (*wd != OKEY_ESC)
                 *wd = get_digraph(digraph, *wd);
         }
     }
-    wtimeout(input_win, TIMEOUT_CURSES);
+    wtimeout(input_pad, TIMEOUT_CURSES);
     if ( *wd != OKEY_ESC ) return 0;
     return -1;
 }
@@ -249,38 +255,34 @@ void ui_sc_msg(char * s, int type, ...) {
     if ( ! get_conf_int("nocurses")) {
 #ifdef USECOLORS
         if (type == ERROR_MSG)
-            ui_set_ucolor(input_win, &ucolors[ERROR_MSG], DEFAULT_COLOR);
+            ui_set_ucolor(input_pad, &ucolors[ERROR_MSG], DEFAULT_COLOR);
         else
-            ui_set_ucolor(input_win, &ucolors[INFO_MSG], DEFAULT_COLOR);
+            ui_set_ucolor(input_pad, &ucolors[INFO_MSG], DEFAULT_COLOR);
 #endif
-        mvwprintw(input_win, 1, 0, "%s", t);
-        wclrtoeol(input_win);
-        wmove(input_win, 1, 0);
+        mvwprintw(input_pad, 0, 0, "%s", t);
+        wclrtoeol(input_pad);
+        wmove(input_pad, 0, 0);
         status_line_empty = 0;
 
         if (type == DEBUG_MSG || (loading && type == ERROR_MSG)) {
-            wtimeout(input_win, -1);
-            wgetch(input_win);
-            wtimeout(input_win, TIMEOUT_CURSES);
+            wtimeout(input_pad, -1);
+            wgetch(input_pad);
+            wtimeout(input_pad, TIMEOUT_CURSES);
         }
-        wrefresh(input_win);
+        ui_refresh_pad(0);
 
     } else if (type == VALUE_MSG && get_conf_value("output") != NULL && fdoutput != NULL) {
         fwprintf(fdoutput, L"%s\n", t);
     } else if (type == VALUE_MSG) {
         if (fwide(stdout, 0) >0)
-            //wprintf(L"wide %s\n", t);
             wprintf(L"%s\n", t);
         else
-            //printf("nowide %s\n", t);
             printf("%s\n", t);
         fflush(stdout);
     } else {
         if (fwide(stderr, 0) >0)
-            //wprintf(L"wide %s\n", t);
             fwprintf(stderr, L"%s\n", t);
         else
-            //printf("nowide %s\n", t);
             fprintf(stderr, "%s\n", t);
         fflush(stderr);
     }
@@ -306,6 +308,7 @@ void ui_do_welcome() {
     #ifdef USECOLORS
     wbkgd(main_win, COLOR_PAIR((ucolors[DEFAULT].fg+1) * (COLORS) + ucolors[DEFAULT].bg + 2));
     wbkgd(input_win, COLOR_PAIR((ucolors[DEFAULT].fg+1) * (COLORS) + ucolors[DEFAULT].bg + 2));
+    wbkgd(input_pad, COLOR_PAIR((ucolors[DEFAULT].fg+1) * (COLORS) + ucolors[DEFAULT].bg + 2));
     #endif
 
     // show headings
@@ -357,11 +360,13 @@ void ui_do_welcome() {
 
     if (get_conf_int("show_cursor")) {
         /* land cursor next to the help line */
-        curwinrow = LINES/2;
-        curwincol = COLS/2-strlen(msg_help)/2-1;
+        curwinrow = LINES / 2;
+        curwincol = COLS / 2 - strlen(msg_help) / 2 - 1;
         status_line_empty = 1;
     }
 
+    // refresh pad
+    ui_refresh_pad(0);
     return;
 }
 
@@ -385,8 +390,9 @@ void ui_update(int header) {
     if (header) {
     #ifdef USECOLORS
     wbkgd(main_win, COLOR_PAIR((ucolors[DEFAULT].fg+1) * (COLORS) + ucolors[DEFAULT].bg + 2));
-        // comment this to prevent bold to be reset
+    // comment this to prevent bold to be reset
     wbkgd(input_win, COLOR_PAIR((ucolors[DEFAULT].fg+1) * (COLORS) + ucolors[DEFAULT].bg + 2));
+    wbkgd(input_pad, COLOR_PAIR((ucolors[DEFAULT].fg+1) * (COLORS) + ucolors[DEFAULT].bg + 2));
     #endif
 
         // Clean from top to bottom
@@ -397,6 +403,8 @@ void ui_update(int header) {
         //wclrtobot(input_win);
         ui_show_celldetails(); // always before ui_print_mode
         ui_print_mode();
+        wrefresh(input_win);
+        ui_refresh_pad(0);
     }
 
     /* You can't hide the last row or col */
@@ -506,7 +514,7 @@ void ui_print_mult_pend() {
     if (curmode != NORMAL_MODE && curmode != VISUAL_MODE && curmode != EDIT_MODE) return;
 
     int row_orig, col_orig;
-    getyx(input_win, row_orig, col_orig);
+    getyx(input_pad, row_orig, col_orig);
 
     #ifdef USECOLORS
     ui_set_ucolor(input_win, &ucolors[MODE], DEFAULT_COLOR);
@@ -528,8 +536,8 @@ void ui_print_mult_pend() {
     mvwprintw(input_win, 0, COLS - rescol - 14, "%s", strm);
 
     // Return cursor to previous position
-    wmove(input_win, row_orig, col_orig);
-    wrefresh(input_win);
+    wmove(input_pad, row_orig, col_orig);
+    wrefresh(input_pad);
 
     if (status_line_empty && curmode != EDIT_MODE && get_conf_int("show_cursor")) {
         // Leave cursor on selected cell when no status message
@@ -545,55 +553,61 @@ void ui_print_mult_pend() {
  */
 
 void ui_show_header() {
-    ui_clr_header(0);
+    //ui_clr_header(0);
     ui_clr_header(1);
 
+    // print multiplier
     ui_print_mult_pend();
 
     // Show current mode
     ui_print_mode();
 
-    // Print input text
+    // Print input text over the input pad
     switch (curmode) {
         case COMMAND_MODE:
-            mvwprintw(input_win, 0, 0, ":%ls", inputline);
-            wmove(input_win, 0, inputline_pos + 1);
+            mvwprintw(input_pad, 0, 0, ":%ls", inputline);
+            wmove(input_pad, 0, inputline_pos + 1);
             break;
         case INSERT_MODE:
-            mvwprintw(input_win, 0, 1, "%ls", inputline);
-            wmove(input_win, 0, inputline_pos + 1);
+            mvwprintw(input_pad, 0, 1, "%ls", inputline);
+            wmove(input_pad, 0, inputline_pos + 1);
             break;
         case EDIT_MODE:
-            mvwprintw(input_win, 0, 0, " %ls", inputline);
-            wmove(input_win, 0, inputline_pos + 1);
+            mvwprintw(input_pad, 0, 0, " %ls", inputline);
+            wmove(input_pad, 0, inputline_pos + 1);
     }
+    int scroll = 0;
+    if (inputline_pos > COLS - 14) scroll += inputline_pos - COLS + 14;
     wrefresh(input_win);
+    ui_refresh_pad(scroll);
     return;
 }
 
 /**
- * \brief Clean a whole row
- *
- * \param[in] i Line to clean
+ * \brief ui_clr_header
+ * \details clr a line
+ * \param[in] i (row)
  *
  * \return none
  */
-
 void ui_clr_header(int i) {
     int row_orig, col_orig;
-    getyx(input_win, row_orig, col_orig);
+    getyx(input_pad, row_orig, col_orig);
     if (col_orig > COLS) col_orig = COLS - 1;
 
-    wmove(input_win, i, 0);
-    wclrtoeol(input_win);
-
+    if (i == 0) {
+        wmove(input_win, 0, 0);
+        wclrtoeol(input_win);
+    } else {
+        wmove(input_pad, 0, 0);
+        wclrtoeol(input_pad);
+        status_line_empty = 1;
+    }
     // Return cursor to previous position
-    wmove(input_win, row_orig, col_orig);
-
-    if (i == 1) status_line_empty = 1;
-
-    return;
+    if (get_conf_int("show_cursor")) wmove(input_pad, row_orig, col_orig);
+    ui_refresh_pad(0);
 }
+
 
 /**
  * \brief Print current mode in the first row
@@ -629,7 +643,7 @@ void ui_print_mode() {
         ui_set_ucolor(input_win, &ucolors[INPUT], DEFAULT_COLOR);
         #endif
         // Show submode (INSERT)
-        mvwprintw(input_win, 0, 0, "%c", insert_edit_submode);
+        mvwprintw(input_pad, 0, 0, "%c", insert_edit_submode);
 
     } else if (curmode == EDIT_MODE) {
         strcat(strm, "   -- EDIT --");
@@ -648,9 +662,9 @@ void ui_print_mode() {
         #ifdef USECOLORS
         ui_set_ucolor(input_win, &ucolors[INPUT], DEFAULT_COLOR);
         #endif
-        // muestro ':'
-        mvwprintw(input_win, 0, 0, ":");
-        wmove(input_win, 0, 1);
+        // show ':'
+        mvwprintw(input_pad, 0, 0, ":");
+        wmove(input_pad, 0, 1);
     }
 
     return;
@@ -1032,13 +1046,12 @@ void ui_show_content(WINDOW * win, int mxrow, int mxcol) {
  *
  * \details Add details of an ent to a char * received as a parameter.
  * Used for 'input_win'
-  *
+ *
  * \param[in] d
  * \param[in] p1
  *
  * \return none
  */
-
 void ui_add_cell_detail(char * d, struct ent * p1) {
     if ( ! p1 ) return;
 
@@ -1079,10 +1092,8 @@ void ui_add_cell_detail(char * d, struct ent * p1) {
 
 /**
  * \brief Draw cell content detail in header
- *
  * \return none
  */
-
 void ui_show_celldetails() {
     char head[FBUFLEN];
     int inputline_pos = 0;
@@ -1142,7 +1153,7 @@ void ui_show_celldetails() {
 
     mvwprintw(input_win, 0, inputline_pos, "%s", head);
     wclrtoeol(input_win);
-    //wrefresh(input_win);
+    wrefresh(input_win);
 }
 
 /**
@@ -1154,8 +1165,8 @@ void ui_show_celldetails() {
  */
 
 void yyerror(char * err) {
-    mvwprintw(input_win, 1, 0, "%s: %.*s<=%s", err, linelim, line, line + linelim);
-    wrefresh(input_win);
+    mvwprintw(input_pad, 0, 0, "%s: %.*s<=%s", err, linelim, line, line + linelim);
+    ui_refresh_pad(0);
     return;
 }
 
@@ -1258,7 +1269,6 @@ void sig_winchg() {
  *
  * \return none
  */
-
 void ui_bail(lua_State *L, char * msg) {
     extern char stderr_buffer[1024];
     fprintf(stderr,"FATAL ERROR: %s: %s\n", msg, lua_tostring(L, -1));
@@ -1300,25 +1310,22 @@ wchar_t ui_query_opt(wchar_t * initial_msg, wchar_t * valid) {
     int res;
 
     curs_set(1);
-    wtimeout(input_win, -1);
+    wtimeout(input_pad, -1);
     move(0, wcslen(initial_msg) + 1);
     while ((res = wstr_in_wstr(valid, wdc)) == -1) {
-        wget_wch(input_win, &wd);
+        wget_wch(input_pad, &wd);
         swprintf(wdc, FBUFLEN, L"%lc", wd);
     }
-    wtimeout(input_win, TIMEOUT_CURSES);
+    wtimeout(input_pad, TIMEOUT_CURSES);
     curs_set(0);
     return wdc[0];
 }
 
 /**
  * \brief Read text from stdin
- *
  * \param[in] initial_msg
- *
  * \return user input
  */
-
 char * ui_query(char * initial_msg) {
     char * hline = (char *) malloc(sizeof(char) * BUFFERSIZE);
     hline[0]='\0';
@@ -1348,12 +1355,13 @@ char * ui_query(char * initial_msg) {
     if (strlen(initial_msg)) sc_info(initial_msg);
 
     // ask for input
-    wtimeout(input_win, -1);
-    notimeout(input_win, TRUE);
-    wmove(input_win, 0, 0);
-    wclrtoeol(input_win);
-    wrefresh(input_win);
-    int d = wgetch(input_win);
+    wtimeout(input_pad, -1);
+    notimeout(input_pad, TRUE);
+    wmove(input_pad, 0, 0);
+    wclrtoeol(input_pad);
+    ui_refresh_pad(0);
+
+    int d = wgetch(input_pad);
 
     while (d != OKEY_ENTER && d != OKEY_ESC) {
         if (d == OKEY_BS || d == OKEY_BS2) {
@@ -1362,23 +1370,23 @@ char * ui_query(char * initial_msg) {
             sprintf(hline + strlen(hline), "%c", d);
         }
 
-        mvwprintw(input_win, 0, 0, "%s", hline);
-        wclrtoeol(input_win);
-        wrefresh(input_win);
-        d = wgetch(input_win);
+        mvwprintw(input_pad, 0, 0, "%s", hline);
+        wclrtoeol(input_pad);
+        ui_refresh_pad(0);
+        d = wgetch(input_pad);
     }
     if (d == OKEY_ESC) hline[0]='\0';
 
     // go back to spreadsheet
     noecho();
     curs_set(0);
-    wtimeout(input_win, TIMEOUT_CURSES);
+    wtimeout(input_pad, TIMEOUT_CURSES);
     wmove(input_win, 0,0);
     wclrtoeol(input_win);
-    wmove(input_win, 1,0);
-    wclrtoeol(input_win);
+    wmove(input_pad, 0,0);
+    wclrtoeol(input_pad);
     status_line_empty = 1;
-    wrefresh(input_win);
+    ui_refresh_pad(0);
     return hline;
 }
 
@@ -1495,6 +1503,16 @@ void ui_mv_bottom_bar() {
     mvwin(main_win, get_conf_int("input_bar_bottom") ? 0 : RESROW, 0);
     mvwin(input_win, get_conf_int("input_bar_bottom") ? LINES-RESROW : 0, 0);
     return;
+}
+
+/**
+ * \brief
+ * UI function thats refresh input_pad
+ * \return none
+ */
+void ui_refresh_pad(int scroll) {
+    prefresh(input_pad, 0, scroll, get_conf_int("input_bar_bottom") ? LINES-RESROW+1: RESROW-1, 0,
+             get_conf_int("input_bar_bottom") ? LINES-RESROW+1: RESROW-1, COLS-1);
 }
 
 /**

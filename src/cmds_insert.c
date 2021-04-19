@@ -226,7 +226,7 @@ void do_insertmode(struct block * sb) {
         inputline_pos = 0;
         real_inputline_pos = 0;
         chg_mode('.');
-        ui_clr_header(0);
+        ui_clr_header(1);
 
         char * opt = get_conf_value("newline_action");
         switch (opt[0]) {
@@ -254,7 +254,8 @@ void do_insertmode(struct block * sb) {
         return;
 
     // Write new char !!
-    } else if ( wcslen(inputline) < (COLS - 16) && sc_isprint(sb->value)) {
+    //} else if ( wcslen(inputline) < (COLS - 16) && sc_isprint(sb->value)) {
+    } else if ( sc_isprint(sb->value)) {
         //DEBUG sc_info("2: %d %lc", sb->value, sb->value);
         ins_in_line(sb->value);
         ui_show_header();

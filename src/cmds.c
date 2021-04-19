@@ -2553,7 +2553,7 @@ void pad_and_align (char * str_value, char * numeric_value, int col_width, int a
     int posnl, leftnl = 0;
     while ((posnl = wstr_in_wstr(str_out, L"\\n")) != -1) {
         del_range_wchars(str_out, posnl, posnl+1);
-        if (posnl < col_width) leftnl = col_width - posnl;
+        if (posnl <= col_width) leftnl = col_width - posnl;
         else leftnl = col_width - posnl % col_width;
         while (leftnl-- > 0) add_wchar(str_out, L' ', posnl);
     }

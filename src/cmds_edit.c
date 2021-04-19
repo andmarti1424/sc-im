@@ -197,7 +197,7 @@ void do_editmode(struct block * sb) {
         inputline_pos = 0;
         real_inputline_pos = 0;
         chg_mode('.');
-        ui_clr_header(0);
+        ui_clr_header(1);
 
         char * opt = get_conf_value("newline_action");
         switch (opt[0]) {
@@ -689,6 +689,6 @@ int start_edit_mode(struct block * buf, char type) {
     }
     inputline_pos = wcswidth(inputline, wcslen(inputline)) - 1;
     real_inputline_pos = wcslen(inputline) - 1;
-    ui_show_header();
+    //ui_show_header();
     return 1;
 }

@@ -73,6 +73,7 @@ void ui_stop_screen();
 int ui_getch(wint_t * wd);
 int ui_getch_b(wint_t * wd);
 void ui_clr_header(int row);
+void ui_refresh_pad(int scroll);
 void ui_print_mult_pend();
 void ui_show_header();
 void ui_show_celldetails();

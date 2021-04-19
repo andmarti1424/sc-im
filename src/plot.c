@@ -67,7 +67,7 @@ int plotedit(wchar_t * s) {
 
     if (! wcscmp(s, L"line") || ! wcscmp(s, L"scatter") ||
         ! wcscmp(s, L"pie")  || ! wcscmp(s, L"bar")) {
-        char buffer[PATHLEN];
+        char buffer[PATHLEN + 5];
         char path_out[PATHLEN];
         char type[BUFFERSIZE];
         wcstombs(type, s, BUFFERSIZE);

@@ -61,8 +61,10 @@ extern struct ent ** ATBL(struct ent ***,int ,int );
 
 #define MINCOLS       30
 #define ABSMAXCOLS   702     /* MAX cols. (ZZ in base 26) */
+
 #define CRROWS         1
 #define CRCOLS         2
+
 /* formats for engformat() */
 #define REFMTFIX       0
 #define REFMTFLT       1
@@ -73,9 +75,11 @@ extern struct ent ** ATBL(struct ent ***,int ,int );
 #define DEFPREC        2
 #define DEFREFMT      REFMTFIX /* Make default format fixed point  THA 10/14/90 */
 #define FKEYS         24     /* Number of function keys available */
+
 #define COLFORMATS    10     /* Number of custom column formats */
 #define FBUFLEN     1024     /* buffer size for a single field */
 #define PATHLEN     1024     /* maximum path length */
+
 #define MAXCMD       160     /* for ! command and commands that use the pager */
 #define STDERRBUF   8192     /* stderr buffer size */
 

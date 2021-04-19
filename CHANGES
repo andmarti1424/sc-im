@@ -2,53 +2,57 @@ v0.8.2
 
 Changes
 -------
-Improved yank and undo alloc'ing. Malloc as much we need from start in batches and avoid small mallocs.
+>> Improved yank and undo alloc'ing. Malloc as much we need from start in batches and avoid small mallocs.
 UNDO of :fsum is handled by let.
 :fsum added to command mode commands. was missing.
 Added mapping_timeout configuration variable with a default value of 1500ms (used to be a fixed value of 800ms).
 Added mouse support in insert and command mode. The selection of a cell gets copied to inputbar.
 Added command_timeout configuration variable.
 Rows now can have height higher than 1 LINE.
-wrap cell content when nooverlap and notruncate are set.
-Open URL or file specified on cell (PR 401)!
+>> wrap cell content when nooverlap and notruncate are set.
+>> Open URL or file specified on cell (PR 401)!
 issue #372
 fix markdown export when empty col was added left to data
 fix in :showrows command.
 added showcols command that was missing.
 handle hidden rows/cols in undo/redo of ir/ic/dr/dc
 handled issue #374
-added backwards search with '?'
-restore \\* from old SC. \\{char} fills the cell with n occurrences of {char} to complete its width
+>> added backwards search with '?'
+>> restore \\* from old SC. \\{char} fills the cell with n occurrences of {char} to complete its width
 issue #429
-multiple frozen rows/columns (fr / fc in normal mode)
+>> multiple frozen rows/columns (fr / fc in normal mode)
 new autowrap config value. works only when nooverlap and notruncate are set.
 store frozen rows and cols when saving file
-added :formatcol command (handling its undo as well)
-added :formatrow command (handling its undo as well)
+>> added :formatcol command (handling its undo as well)
+>> added :formatrow command (handling its undo as well)
 undo of freeze row and col
-handle \n in cell input, and with autowrap
+>> handle \n in cell input, and with autowrap
 handle undoing changes in row height produced by string input
+fix old sc bug - issue #371
+changed input bar from window to pad: permits entering string longer than COLS
+
 
 
 Pending
 -------
-handle \n inside csv files to increase rows height
-remove old references to freezer / freezec
+in csv import: handle \n inside csv values to increase rows height
+handle content alignment over multiple lines in cmds.c:pad_and_align
+
 test calc_offscr_rows and calc_offscr_cols
-change input bar from window to pad
 check all cmds movement functions after new frozen mods
+remove old references to freezer / freezec
+
 save offscr_sc_rows, offscr_sc_cols, COLS and LINES values when saving file
 show_shorthelp
 show_cmd
 notimeout
 edit!
 
-format MODE?
 restore comments
-handle content alignment over multiple lines in cmds.c:pad_and_align
 handle mouse clicks in edition mode.
 
 Rethink LUA evaluation!
+format MODE?
 
 --
 Thanks to all that helped and created PR.
