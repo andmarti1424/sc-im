@@ -58,10 +58,18 @@
  *
  *       row_showed: integers list (int *) visible rows on screen
  *
+ *       row_frozed: integers list (int *) frozen rows on screen
+ *
+ *       row_unfrozed: integers list (int *) unfrozen rows on screen
+ *
  *       col_hidded: integers list (int *) hidden columns on screen
  *
  *       col_showed: integers list (int *) visible columns on screen
  *              NOTE: the first position of the lists contains (number of elements - 1) in the list
+ *
+ *       col_frozed: integers list (int *) frozen cols on screen
+ *
+ *       col_unfrozed: integers list (int *) unfrozen cols on screen
  *
  *       struct ent_ptr * allocations: since we alloc over added and removed
  *              list in batches. we need to keep the first position in memory of each calloc.
@@ -125,9 +133,8 @@
  * 20. fill command
  * 21. unformat
  * 22. change in the format of rows
+ * 23. undo of freeze / unfreeze commands
  *
- * NOT implemented:
- * 1. undo of freeze / unfreeze command
  */
 
 #ifdef UNDO
@@ -173,8 +180,12 @@ void create_undo_action() {
 
     undo_item.row_hidded  = NULL;
     undo_item.row_showed  = NULL;
+    undo_item.row_frozed  = NULL;
+    undo_item.row_unfrozed  = NULL;
     undo_item.col_hidded  = NULL;
     undo_item.col_showed  = NULL;
+    undo_item.col_frozed  = NULL;
+    undo_item.col_unfrozed  = NULL;
     return;
 }
 
@@ -194,6 +205,8 @@ void end_undo_action() {
     if ((undo_item.added      == NULL && undo_item.allocations == NULL &&
         undo_item.removed     == NULL && undo_item.range_shift == NULL &&
         undo_item.row_hidded  == NULL && undo_item.row_showed  == NULL &&
+        undo_item.row_frozed  == NULL && undo_item.col_frozed  == NULL &&
+        undo_item.row_unfrozed  == NULL && undo_item.col_unfrozed  == NULL &&
         undo_item.cols_format == NULL && undo_item.rows_format == NULL &&
         undo_item.col_hidded  == NULL && undo_item.col_showed  == NULL) || loading) {
         if (undo_list->p_ant != NULL) undo_list = undo_list->p_ant;
@@ -235,6 +248,10 @@ void add_to_undolist(struct undo u) {
     ul->col_hidded = u.col_hidded;
     ul->row_showed = u.row_showed;
     ul->col_showed = u.col_showed;
+    ul->row_frozed = u.row_frozed;
+    ul->col_frozed = u.col_frozed;
+    ul->row_unfrozed = u.row_unfrozed;
+    ul->col_unfrozed = u.col_unfrozed;
 
     if (undo_list == NULL) {
         ul->p_ant = NULL;
@@ -316,7 +333,10 @@ void dismiss_undo_item(struct undo * ul) {
     if (ul->row_hidded  != NULL) free(ul->row_hidded); // Free hidden row memory
     if (ul->col_hidded  != NULL) free(ul->col_hidded); // Free hidden col memory
     if (ul->row_showed  != NULL) free(ul->row_showed); // Free showed row memory
+    if (ul->row_frozed  != NULL) free(ul->row_frozed); // Free frozed row memory
+    if (ul->row_unfrozed  != NULL) free(ul->row_unfrozed); // Free unfrozed row memory
     if (ul->col_showed  != NULL) free(ul->col_showed); // Free showed col memory
+    if (ul->col_unfrozed  != NULL) free(ul->col_unfrozed); // Free unfrozed col memory
 
     return;
 }
@@ -638,14 +658,14 @@ void save_undo_range_shift(int delta_rows, int delta_cols, int tlrow, int tlcol,
  * we always store the number of elements that the list has.
  */
 /**
- * \brief TODO Document undo_hide_show()
+ * \brief todo document undo_hide_show()
  *
- * \details This function is used for undoint and redoing changes
+ * \details this function is used for undoint and redoing changes
  * caused by commands that hide/show rows/columns of screen such
- * as Zr, Zc, Sc, and Sr commands.
+ * as zr, zc, sc, and sr commands.
  *
- * It stores in four different lists (int * list) the row or column numbers
- * that are shown or hidden because of a change. As these lists are
+ * it stores in four different lists (int * list) the row or column numbers
+ * that are shown or hidden because of a change. as these lists are
  * dynamically built, in the first position of every list, we always store
  * the number of elements that the list has.
  *
@@ -656,7 +676,6 @@ void save_undo_range_shift(int delta_rows, int delta_cols, int tlrow, int tlcol,
  *
  * \return none
  */
-
 void undo_hide_show(int row, int col, char type, int arg) {
     int i;
     if (type == 'h') {
@@ -715,6 +734,79 @@ void undo_hide_show(int row, int col, char type, int arg) {
     return;
 }
 
+
+/**
+ * \brief undo_freeze_unfreeze()
+ *
+ * \details this function is used for undoint and redoing changes
+ * caused by freeze row/col and unfreeze row/col commands
+ *
+ * \param[in] row
+ * \param[in] col
+ * \param[in] type 'f' or 'u'
+ * \param[in] arg
+ *
+ * \return none
+ */
+
+void undo_freeze_unfreeze(int row, int col, char type, int arg) {
+    int i;
+    if (type == 'f') {
+        if (row > -1) {        // hide row
+            if (undo_item.row_frozed == NULL) {
+                undo_item.row_frozed = (int *) malloc(sizeof(int) * (arg + 1));
+                undo_item.row_frozed[0] = 0;
+            } else
+                undo_item.row_frozed = (int *) realloc(undo_item.row_frozed, sizeof(int) * (undo_item.row_frozed[0] + arg + 1));
+
+            for (i=0; i < arg; i++)
+                undo_item.row_frozed[undo_item.row_frozed[0] + i + 1] = row + i;
+
+            undo_item.row_frozed[0] += arg; // keep in first position the number of elements (rows)
+
+        } else if (col > -1) { // hide col
+            if (undo_item.col_frozed == NULL) {
+                undo_item.col_frozed = (int *) malloc(sizeof(int) * (arg + 1));
+                undo_item.col_frozed[0] = 0;
+            } else
+                undo_item.col_frozed = (int *) realloc(undo_item.col_frozed, sizeof(int) * (undo_item.col_frozed[0] + arg + 1));
+
+            for (i=0; i < arg; i++)
+                undo_item.col_frozed[undo_item.col_frozed[0] + i + 1] = col + i;
+
+            undo_item.col_frozed[0] += arg; // keep in first position the number of elements (cols)
+        }
+    } else if (type == 'u') {
+        if (row > -1) {        // unfreeze row
+            if (undo_item.row_unfrozed == NULL) {
+                undo_item.row_unfrozed = (int *) malloc(sizeof(int) * (arg + 1));
+                undo_item.row_unfrozed[0] = 0;
+            } else
+                undo_item.row_unfrozed = (int *) realloc(undo_item.row_unfrozed, sizeof(int) * (undo_item.row_unfrozed[0] + arg + 1));
+
+            for (i=0; i < arg; i++)
+                undo_item.row_unfrozed[undo_item.row_unfrozed[0] + i + 1] = row + i;
+
+            undo_item.row_unfrozed[0] += arg; // keep in first position the number of elements (rows)
+
+        } else if (col > -1) { // unfreeze col
+            if (undo_item.col_unfrozed == NULL) {
+                undo_item.col_unfrozed = (int *) malloc(sizeof(int) * (arg + 1));
+                undo_item.col_unfrozed[0] = 0;
+            } else
+                undo_item.col_unfrozed = (int *) realloc(undo_item.col_unfrozed, sizeof(int) * (undo_item.col_unfrozed[0] + arg + 1));
+
+            for (i=0; i < arg; i++)
+                undo_item.col_unfrozed[undo_item.col_unfrozed[0] + i + 1] = col + i;
+
+            undo_item.col_unfrozed[0] += arg; // keep in first position the number of elements (cols)
+
+        }
+    }
+    return;
+}
+
+
 /**
  * \brief Do UNDO operation
  *
@@ -765,6 +857,12 @@ void do_undo() {
         // handle col_hidden
         fix_col_hidden(ul->range_shift->delta_cols, ul->range_shift->tlcol, maxcol);
 
+        // handle row_frozen
+        fix_row_frozen(ul->range_shift->delta_rows, ul->range_shift->tlrow, maxrow);
+
+        // handle col_frozen
+        fix_col_frozen(ul->range_shift->delta_cols, ul->range_shift->tlcol, maxcol);
+
         // shift range now
         shift_range(- ul->range_shift->delta_rows, - ul->range_shift->delta_cols,
             ul->range_shift->tlrow, ul->range_shift->tlcol, ul->range_shift->brrow, ul->range_shift->brcol);
@@ -793,7 +891,7 @@ void do_undo() {
                     row_format[i - ul->range_shift->delta_rows] = row_format[i];
             else
                 for (i = maxrow; i >= ul->range_shift->tlrow - ul->range_shift->delta_rows; i--)
-                     row_format[i] = row_format[i + ul->range_shift->delta_rows];
+                    row_format[i] = row_format[i + ul->range_shift->delta_rows];
         }
     }
 
@@ -841,6 +939,37 @@ void do_undo() {
         int left = *(pd++);
         while (left--) {
             row_hidden[*(pd++)] = TRUE;
+        }
+    }
+
+    // freeze frozen cols and rows
+    // unfreeze unfrozen cols and rows
+    if (ul->col_unfrozed != NULL) {
+        int * pd = ul->col_unfrozed;
+        int left = *(pd++);
+        while (left--) {
+            col_frozen[*(pd++)] = TRUE;
+        }
+    }
+    if (ul->col_frozed  != NULL) {
+        int * pd = ul->col_frozed;
+        int left = *(pd++);
+        while (left--) {
+            col_frozen[*(pd++)] = FALSE;
+        }
+    }
+    if (ul->row_unfrozed  != NULL) {
+        int * pd = ul->row_unfrozed;
+        int left = *(pd++);
+        while (left--) {
+            row_frozen[*(pd++)] = TRUE;
+        }
+    }
+    if (ul->row_frozed  != NULL) {
+        int * pd = ul->row_frozed;
+        int left = *(pd++);
+        while (left--) {
+            row_frozen[*(pd++)] = FALSE;
         }
     }
 
@@ -1033,6 +1162,37 @@ void do_redo() {
         int left = *(pd++);
         while (left--) {
             row_hidden[*(pd++)] = FALSE;
+        }
+    }
+
+    // freeze frozen cols and rows
+    // unfreeze unfrozen cols and rows
+    if (ul->col_unfrozed != NULL) {
+        int * pd = ul->col_unfrozed;
+        int left = *(pd++);
+        while (left--) {
+            col_frozen[*(pd++)] = FALSE;
+        }
+    }
+    if (ul->col_frozed  != NULL) {
+        int * pd = ul->col_frozed;
+        int left = *(pd++);
+        while (left--) {
+            col_frozen[*(pd++)] = TRUE;
+        }
+    }
+    if (ul->row_unfrozed  != NULL) {
+        int * pd = ul->row_unfrozed;
+        int left = *(pd++);
+        while (left--) {
+            row_frozen[*(pd++)] = FALSE;
+        }
+    }
+    if (ul->row_frozed  != NULL) {
+        int * pd = ul->row_frozed;
+        int left = *(pd++);
+        while (left--) {
+            row_frozen[*(pd++)] = TRUE;
         }
     }
 

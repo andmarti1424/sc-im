@@ -2254,6 +2254,52 @@ void fix_col_hidden(int deltac, int ci, int cf) {
 }
 
 /**
+ * \brief fix_row_frozen
+ * \details fix frozen rows after undoing ir dr etc..
+ * \return none
+ */
+void fix_row_frozen(int deltar, int ri, int rf) {
+    int r;
+    int d = deltar;
+
+    // decrease / for dr
+    if (deltar > 0)
+    while (d-- > 0)
+    for (r = ri; r < rf; r++)
+        row_frozen[r] = row_frozen[r+1];
+
+    // increase / for ir
+    if (deltar < 0)
+    while (d++ < 0)
+    for (r = rf; r > ri; r--)
+        row_frozen[r] = row_frozen[r-1];
+    return;
+}
+
+/**
+ * \brief fix_col_frozen
+ * \details fix frozen cols after undoing ic dc etc..
+ * \return none
+ */
+void fix_col_frozen(int deltac, int ci, int cf) {
+    int c;
+    int d = deltac;
+
+    // decrease / for dc
+    if (deltac > 0)
+    while (d-- > 0)
+    for (c = ci; c < cf; c++)
+        col_frozen[c] = col_frozen[c+1];
+
+    // increase / for ic
+    if (deltac < 0)
+    while (d++ < 0)
+    for (c = cf; c > ci; c--)
+        col_frozen[c] = col_frozen[c-1];
+    return;
+}
+
+/**
  * \brief This functions calculates the number of hidden rows above grid (offscr_sc_rows).
  * Those rows are not actually hidden as when you hide a row,
  * but rather not shown because of current cell position.

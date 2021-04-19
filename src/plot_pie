@@ -1,5 +1,5 @@
-#set terminal dumb enhanced
-set terminal caca driver ncurses color enhanced size 80,43 inverted charset ascii
+set terminal dumb enhanced
+#set terminal caca driver ncurses color enhanced size 80,43 inverted charset ascii
 set datafile separator ','
 stats filename u 2 noout      # get STATS_sum (sum of column 2)
 

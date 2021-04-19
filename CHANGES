@@ -25,11 +25,11 @@ new autowrap config value. works only when nooverlap and notruncate are set.
 store frozen rows and cols when saving file
 added :formatcol command (handling its undo as well)
 added :formatrow command (handling its undo as well)
+undo of freeze row and col
 
 
 Pending
 -------
-undo de freeze row and col
 remove old references to freezer / freezec
 test calc_offscr_rows and calc_offscr_cols
 handle \n in cell input
@@ -37,6 +37,7 @@ change input bar from window to pad
 check all cmds movement functions after new frozen mods
 save offscr_sc_rows, offscr_sc_cols, COLS and LINES values when saving file
 
+show_shorthelp
 show_cmd
 notimeout
 edit!

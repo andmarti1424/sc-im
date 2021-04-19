@@ -47,6 +47,7 @@
 #include "freeze.h"
 #include "macros.h"
 #include "tui.h"
+#include "undo.h"
 
 struct frange * freeze_ranges = NULL;
 
@@ -84,11 +85,27 @@ void add_frange(struct ent * tl_ent, struct ent * br_ent, char type) {
  */
 void handle_freeze(struct ent * tl_ent, struct ent * br_ent, char value, char type) {
     int i;
-    if (type == 'r')
-        for (i=tl_ent->row; i<=br_ent->row; i++) row_frozen[i]=value;
-    else if (type == 'c')
-        for (i=tl_ent->col; i<=br_ent->col; i++) col_frozen[i]=value;
 
+#ifdef UNDO
+    create_undo_action();
+#endif
+    if (type == 'r')
+        for (i=tl_ent->row; i<=br_ent->row; i++) {
+            row_frozen[i]=value;
+#ifdef UNDO
+            undo_freeze_unfreeze(i, -1, value == 1 ? 'f' : 'u', 1);
+#endif
+        }
+    else if (type == 'c')
+        for (i=tl_ent->col; i<=br_ent->col; i++) {
+            col_frozen[i]=value;
+#ifdef UNDO
+            undo_freeze_unfreeze(-1, i, value == 1 ? 'f' : 'u', 1);
+#endif
+        }
+#ifdef UNDO
+    end_undo_action();
+#endif
     return;
 }
 

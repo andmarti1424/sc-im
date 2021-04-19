@@ -61,6 +61,10 @@ struct undo {
     int * row_showed;
     int * col_hidded;
     int * col_showed;
+    int * row_frozed;
+    int * row_unfrozed;
+    int * col_frozed;
+    int * col_unfrozed;
 };
 
 struct undo_range_shift {
@@ -103,6 +107,8 @@ void end_undo_action();
 void copy_to_undostruct (int ri, int ci, int rf, int cf, char type, short handle_deps, struct ent ** destination);
 void save_undo_range_shift(int delta_rows, int delta_cols, int tlrow, int tlcol, int brrow, int brcol);
 void undo_hide_show(int row, int col, char type, int arg);
+void undo_freeze_unfreeze(int row, int col, char type, int arg);
+
 void add_undo_col_format(int col, int type, int fwidth, int precision, int realfmt);
 void add_undo_row_format(int row, int type, unsigned char format);
 
