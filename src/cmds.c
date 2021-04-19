@@ -2464,6 +2464,7 @@ int calc_offscr_sc_cols() {
  * \param[in] align
  * \param[in] padding
  * \param[in] str_out
+ * \param[in] rowfmt: rowheight
  *
  * \return resulting string to be printed to the screen
  */
@@ -2502,7 +2503,8 @@ void pad_and_align (char * str_value, char * numeric_value, int col_width, int a
     }
 
     // If content exceedes column width, outputs n number of '*' needed to fill column width
-    if (str_len + num_len + padding > col_width * rowfmt && !get_conf_int("truncate") && !get_conf_int("overlap") ) {
+    if (str_len + num_len + padding > col_width * rowfmt && ! get_conf_int("truncate") &&
+        ! get_conf_int("overlap") && ! get_conf_int("autowrap")) {
         if (padding) wmemset(str_out + wcslen(str_out), L'#', padding);
         wmemset(str_out + wcslen(str_out), L'*', col_width - padding);
         return;
@@ -2545,6 +2547,15 @@ void pad_and_align (char * str_value, char * numeric_value, int col_width, int a
     // Similar condition to max width '*' condition above, but just trims instead
     if (str_len + num_len + padding > col_width * rowfmt && get_conf_int("truncate")) {
         str_out[col_width] = '\0';
+    }
+
+    // on each \n chars, replace with n number of L' ' to complete column width
+    int posnl, leftnl = 0;
+    while ((posnl = wstr_in_wstr(str_out, L"\\n")) != -1) {
+        del_range_wchars(str_out, posnl, posnl+1);
+        if (posnl < col_width) leftnl = col_width - posnl;
+        else leftnl = col_width - posnl % col_width;
+        while (leftnl-- > 0) add_wchar(str_out, L' ', posnl);
     }
 
     return;

@@ -26,17 +26,17 @@ store frozen rows and cols when saving file
 added :formatcol command (handling its undo as well)
 added :formatrow command (handling its undo as well)
 undo of freeze row and col
+handle \n in cell input, and with autowrap
 
 
 Pending
 -------
 remove old references to freezer / freezec
 test calc_offscr_rows and calc_offscr_cols
-handle \n in cell input
 change input bar from window to pad
 check all cmds movement functions after new frozen mods
 save offscr_sc_rows, offscr_sc_cols, COLS and LINES values when saving file
-
+handle \n inside csv files to increase rows height
 show_shorthelp
 show_cmd
 notimeout
@@ -47,7 +47,7 @@ restore comments
 handle content alignment over multiple lines in cmds.c:pad_and_align
 handle mouse clicks in edition mode.
 
-Rethink LUA evaluation
+Rethink LUA evaluation!
 
 --
 Thanks to all that helped and created PR.

@@ -81,6 +81,7 @@
 #include <stdarg.h>
 
 #include "main.h"
+#include "macros.h"
 #include "conf.h"
 #include "input.h"
 #include "tui.h"
@@ -311,8 +312,8 @@ void ui_do_welcome() {
     int mxcol = offscr_sc_cols + calc_offscr_sc_cols() - 1;
     int mxrow = offscr_sc_rows + calc_offscr_sc_rows() - 1;
     ui_show_sc_col_headings(main_win, mxcol);
-    ui_show_sc_row_headings(main_win, mxrow);
     ui_show_content(main_win, mxrow, mxcol);
+    ui_show_sc_row_headings(main_win, mxrow); // schow_sc_row_headings must be after show_content
 
     #ifdef USECOLORS
     ui_set_ucolor(main_win, &ucolors[WELCOME], DEFAULT_COLOR);
@@ -430,12 +431,12 @@ void ui_update(int header) {
     // Show sc_col headings: A, B, C, D..
     ui_show_sc_col_headings(main_win, mxcol);
 
-    // Show sc_row headings: 0, 1, 2, 3..
-    ui_show_sc_row_headings(main_win, mxrow);
-
     // Show the content of the cells
     // Numeric values, strings.
     ui_show_content(main_win, mxrow, mxcol);
+
+    // Show sc_row headings: 0, 1, 2, 3..
+    ui_show_sc_row_headings(main_win, mxrow); // schow_sc_row_headings must be after show_content
 
     if (status_line_empty && get_conf_int("show_cursor")) {
         // Leave cursor on selected cell when no status message
@@ -970,6 +971,10 @@ void ui_show_content(WINDOW * win, int mxrow, int mxcol) {
                 //        num[0]='\0';
                 // }
                 pad_and_align(text, num, fieldlen, align, (*p)->pad, out, row_format[row]);
+
+                // auto wrap
+                if (! get_conf_int("truncate") && ! get_conf_int("overlap") && get_conf_int("autowrap"))
+                    row_format[row] = ceil(wcslen(out) * 1.0 / fwidth[col]);
 
 #ifdef USECOLORS
                 if (has_colors() && get_conf_int("underline_grid")) {

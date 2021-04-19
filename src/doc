@@ -249,6 +249,15 @@ Commands for handling cell content:
      <           Enter a left justified string or string expression.
      \           Enter a centered label.
      >           Enter a right justified string or string expression.
+     >
+                 NOTE: if entering strings that exceed column width, you
+                 can make them show truncated, overlapping to adjacent column, or to
+                 wrap it increasing the rows height.
+                 Please see :set overlap, :set truncate, :set autowrap
+                 options.
+                 You can also type \n when entering strings and sc-im will increase
+                 row height accordangly.
+
      <TAB>       Return to Edit mode from Insert mode.
      <LEFT>, <RIGHT>
                  Move the cursor with the arrow keys.

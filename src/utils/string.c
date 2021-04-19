@@ -171,7 +171,7 @@ int add_char(char * str, char c, int posicion) {
 }
 
 /**
- * \brief Add a C character to a cell in POSICION. Wade char version.
+ * \brief Add a C character to a cell in POSICION. Wide char version.
  *
  * \details STR should be previously allocated with enough memory.
  *
