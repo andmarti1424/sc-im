@@ -534,10 +534,11 @@ void ui_print_mult_pend() {
     strcat(strm, field);
 
     mvwprintw(input_win, 0, COLS - rescol - 14, "%s", strm);
+    wrefresh(input_win);
 
     // Return cursor to previous position
     wmove(input_pad, row_orig, col_orig);
-    wrefresh(input_pad);
+    ui_refresh_pad(0);
 
     if (status_line_empty && curmode != EDIT_MODE && get_conf_int("show_cursor")) {
         // Leave cursor on selected cell when no status message
