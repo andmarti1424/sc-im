@@ -264,12 +264,12 @@ void ui_sc_msg(char * s, int type, ...) {
         wmove(input_pad, 0, 0);
         status_line_empty = 0;
 
+        ui_refresh_pad(0);
         if (type == DEBUG_MSG || (loading && type == ERROR_MSG)) {
             wtimeout(input_pad, -1);
             wgetch(input_pad);
             wtimeout(input_pad, TIMEOUT_CURSES);
         }
-        ui_refresh_pad(0);
 
     } else if (type == VALUE_MSG && get_conf_value("output") != NULL && fdoutput != NULL) {
         fwprintf(fdoutput, L"%s\n", t);
