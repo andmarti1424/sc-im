@@ -30,7 +30,7 @@ undo of freeze row and col
 handle undoing changes in row height produced by string input
 fix old sc bug - issue #371
 changed input bar from window to pad: permits entering string longer than COLS
-
+fix when saving sc files of cells that has some string expressions - issue #541
 
 
 Pending
