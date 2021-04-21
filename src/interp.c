@@ -1092,14 +1092,15 @@ double eval(register struct ent * ent, register struct enode * e) {
 
 
             if (!vp || vp->flags & is_deleted) {
-                if (vp != NULL && getVertex(graph, vp, 0) != NULL) destroy_vertex(vp);
+                //if (vp != NULL && getVertex(graph, vp, 0) != NULL) destroy_vertex(vp);
 
-                e->op = REF_;
-                e->e.o.left = NULL;
-                e->e.o.right = NULL;
+                // commented for #538 21/04/21
+                //e->op = REF_;
+                //e->e.o.left = NULL;
+                //e->e.o.right = NULL;
 
                 //CELLREF propagates
-                cellerror = CELLREF;
+                //cellerror = CELLREF;
 
                 return (double) 0;
             }
@@ -1165,29 +1166,29 @@ double eval(register struct ent * ent, register struct enode * e) {
 
         switch (e->op) {
             case LOOKUP:
-            return dolookup(e->e.o.right, minr, minc, maxr, maxc, 1, minc==maxc);
+                return dolookup(e->e.o.right, minr, minc, maxr, maxc, 1, minc==maxc);
             case HLOOKUP:
-            return dolookup(e->e.o.right->e.o.left, minr,minc,maxr,maxc,
-                (int) eval(ent, e->e.o.right->e.o.right), 0);
+                return dolookup(e->e.o.right->e.o.left, minr,minc,maxr,maxc,
+                        (int) eval(ent, e->e.o.right->e.o.right), 0);
             case VLOOKUP:
-            return dolookup(e->e.o.right->e.o.left, minr,minc,maxr,maxc,
-                (int) eval(ent, e->e.o.right->e.o.right), 1);
+                return dolookup(e->e.o.right->e.o.left, minr,minc,maxr,maxc,
+                        (int) eval(ent, e->e.o.right->e.o.right), 1);
             case INDEX:
-            return doindex(minr, minc, maxr, maxc, e->e.o.right);
-                case SUM:
-            return dosum(minr, minc, maxr, maxc, e->e.o.right);
-                case PROD:
-            return doprod(minr, minc, maxr, maxc, e->e.o.right);
-                case AVG:
-            return doavg(minr, minc, maxr, maxc, e->e.o.right);
-                case COUNT:
-            return docount(minr, minc, maxr, maxc, e->e.o.right);
-                case STDDEV:
-            return dostddev(minr, minc, maxr, maxc, e->e.o.right);
-                case MAX:
-            return domax(minr, minc, maxr, maxc, e->e.o.right);
-                case MIN:
-            return domin(minr, minc, maxr, maxc, e->e.o.right);
+                return doindex(minr, minc, maxr, maxc, e->e.o.right);
+            case SUM:
+                return dosum(minr, minc, maxr, maxc, e->e.o.right);
+            case PROD:
+                return doprod(minr, minc, maxr, maxc, e->e.o.right);
+            case AVG:
+                return doavg(minr, minc, maxr, maxc, e->e.o.right);
+            case COUNT:
+                return docount(minr, minc, maxr, maxc, e->e.o.right);
+            case STDDEV:
+                return dostddev(minr, minc, maxr, maxc, e->e.o.right);
+            case MAX:
+                return domax(minr, minc, maxr, maxc, e->e.o.right);
+            case MIN:
+                return domin(minr, minc, maxr, maxc, e->e.o.right);
         }
     }
     case REDUCE | 'R':
