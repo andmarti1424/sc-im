@@ -668,7 +668,8 @@ void write_cells(register FILE *f, int r0, int c0, int rn, int cn, int dr, int d
                     edits(r, c, 1);
                     (void) fprintf(f, "%s\n", line);
                 }
-                if ((*pp)->flags & is_valid || (*pp)->expr) {
+                if ((*pp)->flags & is_valid) {
+                //if ((*pp)->flags & is_valid || (*pp)->expr) { // for #541
                     editv(r, c);
                     dpointptr = strchr(line, dpoint);
                     if (dpointptr != NULL)
