@@ -1250,6 +1250,7 @@ void ui_show_text(char * val) {
  * \return none
  */
 void sig_winchg() {
+    if (isendwin()) return;
     endwin();
     refresh();
     clear();
