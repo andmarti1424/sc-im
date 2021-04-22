@@ -574,7 +574,7 @@ void ui_show_header() {
             wmove(input_pad, 0, inputline_pos + 1);
             break;
         case EDIT_MODE:
-            mvwprintw(input_pad, 0, 0, " %ls", inputline);
+            mvwprintw(input_pad, 0, 1, "%ls", inputline);
             wmove(input_pad, 0, inputline_pos + 1);
     }
     int scroll = 0;
@@ -593,20 +593,21 @@ void ui_show_header() {
  */
 void ui_clr_header(int i) {
     int row_orig, col_orig;
-    getyx(input_pad, row_orig, col_orig);
+    getyx(i == 0 ? input_win : input_pad, row_orig, col_orig);
     if (col_orig > COLS) col_orig = COLS - 1;
 
     if (i == 0) {
         wmove(input_win, 0, 0);
         wclrtoeol(input_win);
     } else {
+        getyx(input_pad, row_orig, col_orig);
         wmove(input_pad, 0, 0);
         wclrtoeol(input_pad);
         status_line_empty = 1;
     }
     // Return cursor to previous position
-    if (get_conf_int("show_cursor")) wmove(input_pad, row_orig, col_orig);
-    ui_refresh_pad(0);
+    wmove(i == 0 ? input_win : input_pad, row_orig, col_orig);
+    if (! i) ui_refresh_pad(0);
 }
 
 
@@ -649,6 +650,8 @@ void ui_print_mode() {
     } else if (curmode == EDIT_MODE) {
         strcat(strm, "   -- EDIT --");
         ui_write_j(input_win, strm, row, RIGHT);
+        // Show ^ in 0,0 position of pad
+        mvwprintw(input_pad, 0, 0, "^");
 
     } else if (curmode == VISUAL_MODE) {
         strcat(strm, " -- VISUAL --");
@@ -1097,7 +1100,7 @@ void ui_add_cell_detail(char * d, struct ent * p1) {
  */
 void ui_show_celldetails() {
     char head[FBUFLEN];
-    int inputline_pos = 0;
+    int il_pos = 0;
 
     // show cell in header
     #ifdef USECOLORS
@@ -1105,7 +1108,7 @@ void ui_show_celldetails() {
     #endif
     sprintf(head, "%s%d ", coltoa(curcol), currow);
     mvwprintw(input_win, 0, 0, "%s", head);
-    inputline_pos += strlen(head);
+    il_pos += strlen(head);
 
     // show the current cell's format
     #ifdef USECOLORS
@@ -1125,8 +1128,8 @@ void ui_show_celldetails() {
         sprintf(head + strlen(head), "(%s) ", p1->format);
     else
         sprintf(head + strlen(head), "(%d %d %d) ", fwidth[curcol], precision[curcol], realfmt[curcol]);
-    mvwprintw(input_win, 0, inputline_pos, "%s", head);
-    inputline_pos += strlen(head);
+    mvwprintw(input_win, 0, il_pos, "%s", head);
+    il_pos += strlen(head);
 
     // show expr
     #ifdef USECOLORS
@@ -1137,22 +1140,22 @@ void ui_show_celldetails() {
         editexp(currow, curcol);  /* set line to expr */
         linelim = -1;
         sprintf(head, "[%.*s] ", FBUFLEN-4, line);
-        mvwprintw(input_win, 0, inputline_pos, "%s", head);
-        inputline_pos += strlen(head);
+        mvwprintw(input_win, 0, il_pos, "%s", head);
+        il_pos += strlen(head);
     }
     // add cell content to head string
     head[0] = '\0';
     ui_add_cell_detail(head, p1);
 
     // cut string if its too large!
-    if (strlen(head) > COLS - inputline_pos - 1) {
-        head[COLS - inputline_pos - 1 - 15]='>';
-        head[COLS - inputline_pos - 1 - 14]='>';
-        head[COLS - inputline_pos - 1 - 13]='>';
-        head[COLS - inputline_pos - 1 - 12]='\0';
+    if (strlen(head) > COLS - il_pos - 1) {
+        head[COLS - il_pos - 1 - 15]='>';
+        head[COLS - il_pos - 1 - 14]='>';
+        head[COLS - il_pos - 1 - 13]='>';
+        head[COLS - il_pos - 1 - 12]='\0';
     }
 
-    mvwprintw(input_win, 0, inputline_pos, "%s", head);
+    mvwprintw(input_win, 0, il_pos, "%s", head);
     wclrtoeol(input_win);
     wrefresh(input_win);
 }

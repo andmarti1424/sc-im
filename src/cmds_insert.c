@@ -83,16 +83,18 @@ void do_insertmode(struct block * sb) {
             real_inputline_pos--;
             int l = wcwidth(inputline[real_inputline_pos]);
             inputline_pos -= l;
-            ui_show_header();
         }
+        ui_show_header();
+        return;
 
     } else if (sb->value == OKEY_RIGHT) {  // RIGHT
         int max = wcswidth(inputline, wcslen(inputline));
         if (inputline_pos < max) {
             int l = wcwidth(inputline[real_inputline_pos++]);
             inputline_pos += l;
-            ui_show_header();
         }
+        ui_show_header();
+        return;
 
 #ifdef INS_HISTORY_FILE
     } else if (sb->value == OKEY_UP || sb->value == ctl('p') ||         // UP

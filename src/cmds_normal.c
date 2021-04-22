@@ -509,7 +509,6 @@ void do_normalmode(struct block * buf) {
         // edit cell (v)
         case L'e':
             if (locked_cell(currow, curcol)) return;
-            //ui_clr_header(0);
             inputline_pos = 0;
             real_inputline_pos = 0;
             if (start_edit_mode(buf, 'v')) ui_show_header();
@@ -518,7 +517,6 @@ void do_normalmode(struct block * buf) {
         // edit cell (s)
         case L'E':
             if (locked_cell(currow, curcol)) return;
-            //ui_clr_header(0);
             inputline_pos = 0;
             real_inputline_pos = 0;
             if (start_edit_mode(buf, 's')) ui_show_header();

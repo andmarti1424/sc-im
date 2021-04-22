@@ -210,8 +210,8 @@ void do_commandmode(struct block * sb) {
             real_inputline_pos--;
             int l = wcwidth(inputline[real_inputline_pos]);
             inputline_pos -= l;
-            ui_show_header();
         }
+        ui_show_header();
         return;
 
     } else if (sb->value == OKEY_RIGHT) {  // RIGHT
@@ -219,8 +219,8 @@ void do_commandmode(struct block * sb) {
         if (inputline_pos < max) {
             int l = wcwidth(inputline[real_inputline_pos++]);
             inputline_pos += l;
-            ui_show_header();
         }
+        ui_show_header();
         return;
 
     } else if (sb->value == OKEY_DEL) {    // DEL

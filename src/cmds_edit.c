@@ -81,16 +81,16 @@ void do_editmode(struct block * sb) {
         if (real_inputline_pos) {
             real_inputline_pos--;
             inputline_pos = wcswidth(inputline, real_inputline_pos);
-            ui_show_header();
         }
+        ui_show_header();
         return;
 
     } else if (sb->value == L'l' || sb->value == OKEY_RIGHT) { // RIGHT
         if (real_inputline_pos < wcslen(inputline)-1) {
             real_inputline_pos++;
             inputline_pos = wcswidth(inputline, real_inputline_pos);
-            ui_show_header();
         }
+        ui_show_header();
         return;
 
     } else if (sb->value == L' ' && ( wcslen(inputline) < (COLS - 14) ) ) {         // SPACE
