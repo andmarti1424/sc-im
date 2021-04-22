@@ -2476,11 +2476,13 @@ void pad_and_align (char * str_value, char * numeric_value, int col_width, int a
     wchar_t wcs_value[BUFFERSIZE] = { L'\0' };
     mbstate_t state;
     size_t result;
-    const char * mbsptr;
-    mbsptr = str_value;
+    char * str_in;
 
     // Here we handle \" and replace them with "
-    strcpy(str_value, str_replace(str_value, "\\\"", "\""));
+    str_in = str_replace(str_value, "\\\"", "\"");
+
+    const char * mbsptr;
+    mbsptr = str_in;
 
     // create wcs string based on multibyte string..
     memset( &state, '\0', sizeof state );
@@ -2488,17 +2490,20 @@ void pad_and_align (char * str_value, char * numeric_value, int col_width, int a
     if ( result != (size_t)-1 )
         str_len = wcswidth(wcs_value, wcslen(wcs_value));
 
-    if (str_len == 2 && str_value[0] == '\\') {
-        wmemset(str_out + wcslen(str_out), str_value[1], col_width);
+    if (str_len == 2 && str_in[0] == '\\') {
+        wmemset(str_out + wcslen(str_out), str_in[1], col_width);
+        free(str_in);
         return;
-    } else if (str_len == 3 && str_value[0] == '\\' && str_value[1] == '\\') {
-        wmemset(str_out + wcslen(str_out), str_value[2], col_width);
+    } else if (str_len == 3 && str_in[0] == '\\' && str_in[1] == '\\') {
+        wmemset(str_out + wcslen(str_out), str_in[2], col_width);
+        free(str_in);
         return;
     }
 
     // If padding exceedes column width, returns n number of '-' needed to fill column width
     if (padding >= col_width ) {
         wmemset(str_out + wcslen(str_out), L'#', col_width);
+        free(str_in);
         return;
     }
 
@@ -2507,6 +2512,7 @@ void pad_and_align (char * str_value, char * numeric_value, int col_width, int a
         ! get_conf_int("overlap") && ! get_conf_int("autowrap")) {
         if (padding) wmemset(str_out + wcslen(str_out), L'#', padding);
         wmemset(str_out + wcslen(str_out), L'*', col_width - padding);
+        free(str_in);
         return;
     }
 
@@ -2525,7 +2531,7 @@ void pad_and_align (char * str_value, char * numeric_value, int col_width, int a
 
     // add text
     if (align != 1 || ! num_len)
-        swprintf(str_out + wcslen(str_out), BUFFERSIZE, L"%s", str_value);
+        swprintf(str_out + wcslen(str_out), BUFFERSIZE, L"%s", str_in);
 
     // spaces after string value
     int spaces = col_width - padding - str_len - num_len;
@@ -2558,6 +2564,7 @@ void pad_and_align (char * str_value, char * numeric_value, int col_width, int a
         while (leftnl-- > 0) add_wchar(str_out, L' ', posnl);
     }
 
+    free(str_in);
     return;
 }
 
