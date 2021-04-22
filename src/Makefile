@@ -73,12 +73,6 @@ CFLAGS += -DDEFAULT_PASTE_FROM_CLIPBOARD_CMD=\""tmux show-buffer"\"
 # Command to open file or link under cursor
 CFLAGS += -DDEFAULT_OPEN_FILE_UNDER_CURSOR_CMD=\""scopen"\"
 
-# NOTE: libxlsreader (libxls) is required for xls file reading support
-ifneq (,$(wildcard /usr/include/xls.h)$(wildcard /usr/local/include/xls.h))
-  CFLAGS += -DXLS
-  LDLIBS += -lxlsreader
-endif
-
 # Autobackup. If you unset this, no backup check nor autobackup feature will be available.
 CFLAGS += -DAUTOBACKUP
 # Have threads? Set these two, if you want the autobackup feature to work with threads.
@@ -86,16 +80,6 @@ CFLAGS += -DHAVE_PTHREAD
 
 ifneq ($(shell uname -s),Darwin)
   LDLIBS += -pthread
-endif
-
-# NOTE: libxlsxwriter is required for xlsx file export support
-ifneq (,$(wildcard /usr/include/xlsxwriter.h))
-  CFLAGS += -DXLSX_EXPORT
-  LDLIBS += -lxlsxwriter
-endif
-ifneq (,$(wildcard /usr/local/include/xlsxwriter.h))
-  CFLAGS += -DXLSX_EXPORT
-  LDLIBS += -lxlsxwriter
 endif
 
 # Check for gnuplot existance
@@ -131,10 +115,22 @@ ifneq (, $(shell which pkg-config))
     LDLIBS += -lncursesw
   endif
 
+  # NOTE: libxlsreader (libxls) is required for xls file reading support
+  ifneq ($(shell pkg-config --exists libxls || echo 'no'),no)
+    CFLAGS += -DXLS $(shell pkg-config --cflags libxls)
+    LDLIBS += $(shell pkg-config --libs libxls)
+  endif
+
   # NOTE: libxml and libzip are required for xlsx file import support
   ifneq ($(shell pkg-config --exists libzip libxml-2.0 || echo 'no'),no)
     CFLAGS += -DODS -DXLSX $(shell pkg-config --cflags libxml-2.0 libzip)
     LDLIBS += $(shell pkg-config --libs libxml-2.0 libzip)
+  endif
+
+  # NOTE: libxlsxwriter is required for xlsx file export support
+  ifneq ($(shell pkg-config --exists xlsxwriter || echo 'no'),no)
+    CFLAGS += -DXLSX_EXPORT $(shell pkg-config --cflags xlsxwriter)
+    LDLIBS += $(shell pkg-config --libs xlsxwriter)
   endif
 
   # NOTE: lua support
