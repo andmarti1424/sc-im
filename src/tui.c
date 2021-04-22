@@ -1492,10 +1492,9 @@ void ui_pause() {
 void ui_resume() {
     set_term(sstdout);
     reset_prog_mode();
-    refresh();
     clearok(stdscr, TRUE);
-    ui_show_header();
-    ui_update(TRUE);
+    sig_winchg();
+
     return;
 }
 
@@ -1528,6 +1527,7 @@ void ui_refresh_pad(int scroll) {
 //TODO handle frozen rows and columns after "rows" "cols"
 #ifdef MOUSE
 void ui_handle_mouse(MEVENT event) {
+    if (isendwin()) return;
 
     // if out of range return
     int i, j, r = 0, c = 0;
