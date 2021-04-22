@@ -126,9 +126,7 @@ void handle_input(struct block * buffer) {
 
             if ( d == OKEY_ESC || d == ctl('g')) {
                 break_waitcmd_loop(buffer);
-                ui_print_mult_pend();
-                ui_clr_header(1);
-                ui_refresh_pad(0);
+                ui_show_header();
                 return;
             }
 
