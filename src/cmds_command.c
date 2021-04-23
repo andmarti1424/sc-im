@@ -647,6 +647,8 @@ void do_commandmode(struct block * sb) {
                 del_range_wchars(cline, 0, found);
                 wcstombs(line, cline, BUFFERSIZE);
                 add_filter(line);
+                line[strlen(line)-1]='\0'; // remove last "
+                sc_info("Added filter: %s", line);
             }
 
         } else if ( ! wcsncmp(inputline, L"delfilter ", 10) ) {
@@ -656,10 +658,10 @@ void do_commandmode(struct block * sb) {
             del_range_wchars(cline, 0, 9);
             wcstombs(line, cline, BUFFERSIZE);
             int id = atoi(line);
-            del_filter(id);
+            if (del_filter(id) == 0) sc_info("Removed filter: %d", id);
 
         } else if ( ! wcsncmp(inputline, L"delfilters", 10) ) {
-            free_filters();
+            if (free_filters() == 0) sc_info("Removed filters");
 
         } else if ( ! wcsncmp(inputline, L"filteron", 8) ) {
             wcscpy(interp_line, inputline);

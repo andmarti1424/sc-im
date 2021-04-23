@@ -153,6 +153,7 @@ void enable_filters(struct ent * left, struct ent * right) {
     for (r = results[0]; r <= results[1]; r++) {
         row_hidden[r] = results[r-results[0]+2];
     }
+    sc_error("Filters enabled");
     return;
 }
 
@@ -173,6 +174,7 @@ void disable_filters() {
         row_hidden[r] = 0;
     }
     active = 0;
+    sc_error("Filters disabled");
     return;
 }
 
@@ -211,17 +213,17 @@ void show_filters() {
 /**
  * \brief Free memory of entire filters structure
  *
- * \return none
+ * \return int: -1 not removed - 0 removed
  */
 
-void free_filters() {
-    if (filters == NULL) return;
+int free_filters() {
+    if (filters == NULL) return -1;
     int i;
     for (i=0; i < howmany; i++)
         if (filters[i].eval != NULL) scxfree((char *) filters[i].eval);
     scxfree((char *) filters);
     filters = NULL;
-    return;
+    return 0;
 }
 
 /**
@@ -229,19 +231,19 @@ void free_filters() {
  *
  * \param[in] id
  *
- * \return none
+ * \return int: -1 not removed - 0 removed
  */
 
-void del_filter(int id) {
+int del_filter(int id) {
     if (filters == NULL || id < 0 || id > howmany) {
         sc_error("Cannot delete the filter");
-        return;
+        return -1;
     }
     if (filters[id].eval != NULL) {
         scxfree((char *) filters[id].eval);
         filters[id].eval = NULL;
     }
-    return;
+    return 0;
 }
 
 /**
