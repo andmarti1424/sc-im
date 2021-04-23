@@ -153,7 +153,7 @@ void enable_filters(struct ent * left, struct ent * right) {
     for (r = results[0]; r <= results[1]; r++) {
         row_hidden[r] = results[r-results[0]+2];
     }
-    sc_error("Filters enabled");
+    sc_info("Filters enabled");
     return;
 }
 
@@ -174,7 +174,7 @@ void disable_filters() {
         row_hidden[r] = 0;
     }
     active = 0;
-    sc_error("Filters disabled");
+    sc_info("Filters disabled");
     return;
 }
 

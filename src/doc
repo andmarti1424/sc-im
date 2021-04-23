@@ -1376,6 +1376,7 @@ Commands for handling cell content:
             @sum(D1:D20,D1>25)
             @sum(D1:D20,E1>25)
             @sum(D1:D20,@eqs(C1,"s"))
+            @sum(D1:D20,@eqs(@fixed(C1),"s"))
 
     @prod({range})
     @prod({range},{expr})
@@ -1388,6 +1389,8 @@ Commands for handling cell content:
     @count({range})
     @count({range},{expr})
         Count the values.
+        examples with optional {expr} argument:
+            @count(D1:D20,@eqs(D1,"enero"))
 
     @max({range})
     @max({range},{expr})
