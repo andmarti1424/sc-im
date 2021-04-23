@@ -974,6 +974,7 @@ void ui_show_content(WINDOW * win, int mxrow, int mxcol) {
                     j = mvwin_wchnstr (win, count+k+1, c + i, cht, 1);
                     if (j == OK && cht[0].chars[0] != L'\0')
                         w = cht[0].chars[0];
+                    //mvwprintw(win, count+k+1, c+i, "%lc", L'*');//w
                     mvwprintw(win, count+k+1, c+i, "%lc", w);
                     i += wcwidth(w);
                 }
@@ -1007,17 +1008,16 @@ void ui_show_content(WINDOW * win, int mxrow, int mxcol) {
                 // 'out' may contain the output to fill multiple rows. not just one.
                 int count_row = 0;
                 wchar_t new[wcslen(out)+1];
-                for (count_row = 0; count_row < row_format[row] && wcslen(out); count_row++) {
+                for (count_row = 0; count_row < row_format[row]; count_row++) {
                     int cw = count_width_widestring(out, fieldlen);
                     wcscpy(new, out);
                     if (get_conf_int("truncate") || !get_conf_int("overlap")) new[cw] = L'\0';
 
-                    int whites = fieldlen - wcslen(new);
+                    int whites = fieldlen - cw;
                     while (whites-- > 0) add_wchar(new, L' ', wcslen(new));
                     if (wcslen(new)) mvwprintw(win, count+1+count_row, c, "%ls", new);
-                    wclrtoeol(win);
+                    //wclrtoeol(win);
                     if (cw) del_range_wchars(out, 0, cw-1);
-                    wcscpy(new, out);
                     if (get_conf_int("overlap")) break;
                 }
             }
