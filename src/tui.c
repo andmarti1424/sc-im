@@ -316,7 +316,7 @@ void ui_do_welcome() {
     int mxrow = offscr_sc_rows + calc_offscr_sc_rows() - 1;
     ui_show_sc_col_headings(main_win, mxcol);
     ui_show_content(main_win, mxrow, mxcol);
-    ui_show_sc_row_headings(main_win, mxrow); // schow_sc_row_headings must be after show_content
+    ui_show_sc_row_headings(main_win, mxrow); // show_sc_row_headings must be after show_content
 
     #ifdef USECOLORS
     ui_set_ucolor(main_win, &ucolors[WELCOME], DEFAULT_COLOR);

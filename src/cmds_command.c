@@ -489,7 +489,6 @@ void do_commandmode(struct block * sb) {
                 sr = get_range_by_pos(p);
                 r = sr->tlrow;
                 arg = sr->brrow - sr->tlrow + 1;
-                sc_debug("r:%d, arg:%d", r, arg);
                 show_row(r, arg);
             }
 
@@ -499,7 +498,6 @@ void do_commandmode(struct block * sb) {
                 sr = get_range_by_pos(p);
                 r = sr->tlcol;
                 arg = sr->brcol - sr->tlcol + 1;
-                sc_debug("r:%d, arg:%d", r, arg);
                 show_col(r, arg);
             }
 
