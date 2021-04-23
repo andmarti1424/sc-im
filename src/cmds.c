@@ -2513,7 +2513,7 @@ void pad_and_align (char * str_value, char * numeric_value, int col_width, int a
 
     // If padding exceedes column width, returns n number of '-' needed to fill column width
     if (padding >= col_width ) {
-        wmemset(str_out + wcslen(str_out), L'#', col_width);
+        wmemset(str_out + wcslen(str_out), L' ', col_width);
         free(str_in);
         return;
     }
@@ -2521,7 +2521,7 @@ void pad_and_align (char * str_value, char * numeric_value, int col_width, int a
     // If content exceedes column width, outputs n number of '*' needed to fill column width
     if (str_len + num_len + padding > col_width * rowfmt && ! get_conf_int("truncate") &&
         ! get_conf_int("overlap") && ! get_conf_int("autowrap")) {
-        if (padding) wmemset(str_out + wcslen(str_out), L'#', padding);
+        if (padding) wmemset(str_out + wcslen(str_out), L' ', padding);
         wmemset(str_out + wcslen(str_out), L'*', col_width - padding);
         free(str_in);
         return;
