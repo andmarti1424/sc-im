@@ -390,7 +390,8 @@ double docount(int minr, int minc, int maxr, int maxc, struct enode * e) {
             coloffset = c - minc;
         }
         if (!e || eval(NULL, e))
-            if ((p = *ATBL(tbl, r, c)) && p->flags & is_valid) {
+            // the following changed for #430. docount should also count cells with strings. not just numbers
+            if ((p = *ATBL(tbl, r, c)) && (p->flags & is_valid || p->label) ) {
                 if (p->cellerror) cellerr = CELLINVALID;
                 v++;
             }
