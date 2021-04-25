@@ -144,10 +144,10 @@ void sync_refs() {
     int i, j;
     register struct ent * p;
     for (i=0; i <= maxrow; i++)
-    for (j=0; j <= maxcol; j++)
-        if ( (p = *ATBL(tbl, i, j)) && p->expr ) {
-            syncref(p->expr);
-        }
+        for (j=0; j <= maxcol; j++)
+            if ( (p = *ATBL(tbl, i, j)) && p->expr ) {
+                syncref(p->expr);
+            }
     return;
 }
 
@@ -2004,11 +2004,11 @@ int any_locked_cells(int r1, int c1, int r2, int c2) {
     struct ent * p ;
 
     for (r = r1; r <= r2; r++)
-    for (c = c1; c <= c2; c++) {
-        p = *ATBL(tbl, r, c);
-        if (p && (p->flags & is_locked))
-            return 1;
-    }
+        for (c = c1; c <= c2; c++) {
+            p = *ATBL(tbl, r, c);
+            if (p && (p->flags & is_locked))
+                return 1;
+        }
     return 0;
 }
 
@@ -2218,15 +2218,15 @@ void fix_row_hidden(int deltar, int ri, int rf) {
 
     // decrease / for dr
     if (deltar > 0)
-    while (d-- > 0)
-    for (r = ri; r < rf; r++)
-        row_hidden[r] = row_hidden[r+1];
+        while (d-- > 0)
+            for (r = ri; r < rf; r++)
+                row_hidden[r] = row_hidden[r+1];
 
     // increase / for ir
     if (deltar < 0)
-    while (d++ < 0)
-    for (r = rf; r > ri; r--)
-        row_hidden[r] = row_hidden[r-1];
+        while (d++ < 0)
+            for (r = rf; r > ri; r--)
+                row_hidden[r] = row_hidden[r-1];
     return;
 }
 
@@ -2241,15 +2241,15 @@ void fix_col_hidden(int deltac, int ci, int cf) {
 
     // decrease / for dc
     if (deltac > 0)
-    while (d-- > 0)
-    for (c = ci; c < cf; c++)
-        col_hidden[c] = col_hidden[c+1];
+        while (d-- > 0)
+            for (c = ci; c < cf; c++)
+                col_hidden[c] = col_hidden[c+1];
 
     // increase / for ic
     if (deltac < 0)
-    while (d++ < 0)
-    for (c = cf; c > ci; c--)
-        col_hidden[c] = col_hidden[c-1];
+        while (d++ < 0)
+            for (c = cf; c > ci; c--)
+                col_hidden[c] = col_hidden[c-1];
     return;
 }
 
@@ -2264,15 +2264,15 @@ void fix_row_frozen(int deltar, int ri, int rf) {
 
     // decrease / for dr
     if (deltar > 0)
-    while (d-- > 0)
-    for (r = ri; r < rf; r++)
-        row_frozen[r] = row_frozen[r+1];
+        while (d-- > 0)
+            for (r = ri; r < rf; r++)
+                row_frozen[r] = row_frozen[r+1];
 
     // increase / for ir
     if (deltar < 0)
-    while (d++ < 0)
-    for (r = rf; r > ri; r--)
-        row_frozen[r] = row_frozen[r-1];
+        while (d++ < 0)
+            for (r = rf; r > ri; r--)
+                row_frozen[r] = row_frozen[r-1];
     return;
 }
 
@@ -2287,15 +2287,15 @@ void fix_col_frozen(int deltac, int ci, int cf) {
 
     // decrease / for dc
     if (deltac > 0)
-    while (d-- > 0)
-    for (c = ci; c < cf; c++)
-        col_frozen[c] = col_frozen[c+1];
+        while (d-- > 0)
+            for (c = ci; c < cf; c++)
+                col_frozen[c] = col_frozen[c+1];
 
     // increase / for ic
     if (deltac < 0)
-    while (d++ < 0)
-    for (c = cf; c > ci; c--)
-        col_frozen[c] = col_frozen[c-1];
+        while (d++ < 0)
+            for (c = cf; c > ci; c--)
+                col_frozen[c] = col_frozen[c-1];
     return;
 }
 
@@ -2840,7 +2840,7 @@ int is_single_command (struct block * buf, long timeout) {
                  buf->value == L':'
              )
                  result = MOVEMENT_CMD;
-        else if (buf->value == L'{' ||
+             else if (buf->value == L'{' ||
                  buf->value == L'}' ||
                  buf->value == L'f' ||
                  buf->value == L'|')

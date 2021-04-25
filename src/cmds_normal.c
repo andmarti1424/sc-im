@@ -99,18 +99,12 @@ void do_normalmode(struct block * buf) {
         case L'A':
             //;
             //wchar_t t = ui_query_opt(L"show a message. q / a / d to quit", L"qad");
-            offscr_sc_rows++;
-            ui_update(TRUE);
-            sc_info("offscr_sc_rows: %d", offscr_sc_rows);
             break;
 
         case L'W':
             break;
 
         case L'Q':
-            if (offscr_sc_rows) offscr_sc_rows--;
-            ui_update(TRUE);
-            sc_info("offscr_sc_rows: %d", offscr_sc_rows);
             break;
 
         // MOVEMENT COMMANDS
