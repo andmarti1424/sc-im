@@ -200,10 +200,10 @@ void shift_cells_down(int deltarows, int deltacols) {
     }
     // blank new ents
     for (c = curcol; c < curcol + deltacols; c++)
-    for (r = currow; r < currow + deltarows; r++) {
-        pp = ATBL(tbl, r, c);
-        *pp = (struct ent *) 0;
-    }
+        for (r = currow; r < currow + deltarows; r++) {
+            pp = ATBL(tbl, r, c);
+            *pp = (struct ent *) 0;
+        }
     return;
 }
 

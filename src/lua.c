@@ -259,7 +259,7 @@ static int l_colrow(lua_State *L) {
     len=strlen(buf);
     c = (toupper((int)buf[0])) - 'A';
     if (len == 2)               /* has second char */
-    c = ((c + 1) * 26) + ((toupper((int)buf[1])) - 'A');
+        c = ((c + 1) * 26) + ((toupper((int)buf[1])) - 'A');
     lua_pushnumber(L,c);
     lua_pushnumber(L,r);
     return 2;

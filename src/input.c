@@ -103,105 +103,105 @@ void handle_input(struct block * buffer) {
      * if so, wait a mapping_timeout (1500ms), before triggering has_cmd..
      */
     while (
-              ( ! has_cmd(buffer, msec) && msec <= get_conf_int("command_timeout")) ||
-              ( could_be_mapping(buffer) && msec_init < get_conf_int("mapping_timeout"))
+            ( ! has_cmd(buffer, msec) && msec <= get_conf_int("command_timeout")) ||
+            ( could_be_mapping(buffer) && msec_init < get_conf_int("mapping_timeout"))
           ) {
 
-            // if command pending, refresh 'ef' only. Multiplier and cmd pending
-            if (cmd_pending) ui_print_mult_pend();
+        // if command pending, refresh 'ef' only. Multiplier and cmd pending
+        if (cmd_pending) ui_print_mult_pend();
 
-            // Modify cursor state according to the current mode
-            ui_handle_cursor();
+        // Modify cursor state according to the current mode
+        ui_handle_cursor();
 
-            // Read new character from stdin
-            return_value = ui_getch(&wd);
-            d = wd;
+        // Read new character from stdin
+        return_value = ui_getch(&wd);
+        d = wd;
 #ifdef MOUSE
-            if (d == KEY_MOUSE) {
-                getmouse (&event);
-                ui_handle_mouse(event);
-                return;
-            } else
+        if (d == KEY_MOUSE) {
+            getmouse (&event);
+            ui_handle_mouse(event);
+            return;
+        }
 #endif
 
-            if ( d == OKEY_ESC || d == ctl('g')) {
-                break_waitcmd_loop(buffer);
-                ui_show_header();
-                return;
-            }
+        if ( d == OKEY_ESC || d == ctl('g')) {
+            break_waitcmd_loop(buffer);
+            ui_show_header();
+            return;
+        }
 
-            // Handle multiplier of commands in NORMAL VISUAL and EDIT modes
-            if ( return_value != -1 && isdigit(d)
-               && ( buffer->value == L'\0' || iswdigit((wchar_t) buffer->value))
-               && ( curmode == NORMAL_MODE || curmode == VISUAL_MODE || curmode == EDIT_MODE )
-               && ( cmd_multiplier || d != L'0' )
-               && ( ! get_conf_int("numeric"))
-               ) {
-                    cmd_multiplier *= 10;
-                    cmd_multiplier += (int) (d - '0');
-                    if (cmd_multiplier > MAX_MULTIPLIER) cmd_multiplier = 0;
+        // Handle multiplier of commands in NORMAL VISUAL and EDIT modes
+        if ( return_value != -1 && isdigit(d)
+                && ( buffer->value == L'\0' || iswdigit((wchar_t) buffer->value))
+                && ( curmode == NORMAL_MODE || curmode == VISUAL_MODE || curmode == EDIT_MODE )
+                && ( cmd_multiplier || d != L'0' )
+                && ( ! get_conf_int("numeric"))
+           ) {
+            cmd_multiplier *= 10;
+            cmd_multiplier += (int) (d - '0');
+            if (cmd_multiplier > MAX_MULTIPLIER) cmd_multiplier = 0;
 
-                    gettimeofday(&start_tv, NULL);
-                    msec = (m_tv.tv_sec - start_tv.tv_sec) * 1000L +
-                           (m_tv.tv_usec - start_tv.tv_usec) / 1000L;
-
-                    ui_print_mult_pend();
-                    continue;
-            }
-
-
-            /*
-             * Handle special characters input: BS TAB ENTER HOME END DEL PGUP
-             * PGDOWN and alphanumeric characters
-             */
-            if (is_idchar(d) || return_value != -1) {
-                // If in NORMAL, VISUAL or EDITION mode, added '?' cmd_pending at the left of MODE
-                if ( (curmode == NORMAL_MODE && d >= ' ') || //FIXME
-                     (curmode == EDIT_MODE   && d >= ' ') ||
-                     (curmode == VISUAL_MODE && d >= ' ') ) {
-                    cmd_pending = 1;
-                }
-                if (cmd_digraph) {
-                    if (digraph == 0) {
-                        digraph = wd;
-                        continue;
-                    }
-                    wd = get_digraph(digraph, wd);
-                    cmd_digraph = 0;
-                    digraph = 0;
-
-                } else if (! cmd_digraph && wd == ctl('k')) {
-                    cmd_digraph = 1;
-                    continue;
-                }
-                addto_buf(buffer, wd);
-
-                // Replace maps in buffer
-                // break if nore mapping
-                if (replace_maps(buffer) == 1) break;
-            }
-
-            /*
-             * Update time stamp to reset timeout after each loop
-             * (start_tv changes only if current mode is COMMAND, INSERT or
-             * EDIT) and for each user input as well.
-             */
-            gettimeofday(&m_tv, NULL);
+            gettimeofday(&start_tv, NULL);
             msec = (m_tv.tv_sec - start_tv.tv_sec) * 1000L +
-                   (m_tv.tv_usec - start_tv.tv_usec) / 1000L;
+                (m_tv.tv_usec - start_tv.tv_usec) / 1000L;
 
-            msec_init = (m_tv.tv_sec - init_tv.tv_sec) * 1000L +
-                (m_tv.tv_usec - init_tv.tv_usec) / 1000L;
-            if (msec_init > 4000) gettimeofday(&init_tv, NULL); // just to avoid overload
-            fix_timeout(&start_tv);
+            ui_print_mult_pend();
+            continue;
+        }
 
-            // to handle map of ESC
-            if ( buffer->value == OKEY_ESC || buffer->value == ctl('g')) {
-                break_waitcmd_loop(buffer);
-                ui_print_mult_pend();
-                ui_refresh_pad(0);
-                return;
+
+        /*
+         * Handle special characters input: BS TAB ENTER HOME END DEL PGUP
+         * PGDOWN and alphanumeric characters
+         */
+        if (is_idchar(d) || return_value != -1) {
+            // If in NORMAL, VISUAL or EDITION mode, added '?' cmd_pending at the left of MODE
+            if ( (curmode == NORMAL_MODE && d >= ' ') || //FIXME
+                    (curmode == EDIT_MODE   && d >= ' ') ||
+                    (curmode == VISUAL_MODE && d >= ' ') ) {
+                cmd_pending = 1;
             }
+            if (cmd_digraph) {
+                if (digraph == 0) {
+                    digraph = wd;
+                    continue;
+                }
+                wd = get_digraph(digraph, wd);
+                cmd_digraph = 0;
+                digraph = 0;
+
+            } else if (! cmd_digraph && wd == ctl('k')) {
+                cmd_digraph = 1;
+                continue;
+            }
+            addto_buf(buffer, wd);
+
+            // Replace maps in buffer
+            // break if nore mapping
+            if (replace_maps(buffer) == 1) break;
+        }
+
+        /*
+         * Update time stamp to reset timeout after each loop
+         * (start_tv changes only if current mode is COMMAND, INSERT or
+         * EDIT) and for each user input as well.
+         */
+        gettimeofday(&m_tv, NULL);
+        msec = (m_tv.tv_sec - start_tv.tv_sec) * 1000L +
+            (m_tv.tv_usec - start_tv.tv_usec) / 1000L;
+
+        msec_init = (m_tv.tv_sec - init_tv.tv_sec) * 1000L +
+            (m_tv.tv_usec - init_tv.tv_usec) / 1000L;
+        if (msec_init > 4000) gettimeofday(&init_tv, NULL); // just to avoid overload
+        fix_timeout(&start_tv);
+
+        // to handle map of ESC
+        if ( buffer->value == OKEY_ESC || buffer->value == ctl('g')) {
+            break_waitcmd_loop(buffer);
+            ui_print_mult_pend();
+            ui_refresh_pad(0);
+            return;
+        }
 
     }
     if (msec >= get_conf_int("command_timeout")) { // timeout. Command incomplete
@@ -222,7 +222,6 @@ void handle_input(struct block * buffer) {
  *
  * \return none
  */
-
 void break_waitcmd_loop(struct block * buffer) {
     if (curmode == COMMAND_MODE) {
 #ifdef HISTORY_FILE

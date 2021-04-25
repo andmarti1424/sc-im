@@ -243,8 +243,7 @@ char * dostindex(int minr, int minc, int maxr, int maxc, struct enode * val) {
 double doascii(char * s) {
     double v = 0.;
     int i ;
-    if ( !s )
-    return ((double) 0);
+    if ( !s ) return ((double) 0);
 
     for (i = 0; s[i] != '\0' ; v = v*256 + (unsigned char)(s[i++]) ) ;
     scxfree(s);
@@ -384,18 +383,18 @@ double docount(int minr, int minc, int maxr, int maxc, struct enode * e) {
 
     v = 0;
     for (r = minr; r <= maxr; r++)
-    for (c = minc; c <= maxc; c++) {
-        if (e) {
-            rowoffset = r - minr;
-            coloffset = c - minc;
-        }
-        if (!e || eval(NULL, e))
-            // the following changed for #430. docount should also count cells with strings. not just numbers
-            if ((p = *ATBL(tbl, r, c)) && (p->flags & is_valid || p->label) ) {
-                if (p->cellerror) cellerr = CELLINVALID;
-                v++;
+        for (c = minc; c <= maxc; c++) {
+            if (e) {
+                rowoffset = r - minr;
+                coloffset = c - minc;
             }
-    }
+            if (!e || eval(NULL, e))
+                // the following changed for #430. docount should also count cells with strings. not just numbers
+                if ((p = *ATBL(tbl, r, c)) && (p->flags & is_valid || p->label) ) {
+                    if (p->cellerror) cellerr = CELLINVALID;
+                    v++;
+                }
+        }
     cellerror = cellerr;
     rowoffset = coloffset = 0;
     return v;
@@ -830,8 +829,7 @@ int doslen(char * s) {
 double doeqs(char * s1, char * s2) {
     double v;
 
-    if ( !s1 && !s2 )
-    return ((double)1.0);
+    if ( !s1 && !s2 ) return ((double)1.0);
 
     if ( !s1 || !s2 )
         v = 0.0;

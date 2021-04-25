@@ -376,24 +376,23 @@ void destroy_vertex(struct ent * ent) {
    // for each edge in edges, we look for the reference to the vertex we are deleting, and we erase it!
    edgeT * e = v_cur->edges;
    if (v_cur->back_edges == NULL)
-   while (e != NULL && v_cur->back_edges == NULL) {
-    // sc_debug("edge: we follow %d %d", e->connectsTo->ent->row, e->connectsTo->ent->col);
-       delete_reference(v_cur, e->connectsTo, 1);
+       while (e != NULL && v_cur->back_edges == NULL) {
+           // sc_debug("edge: we follow %d %d", e->connectsTo->ent->row, e->connectsTo->ent->col);
+           delete_reference(v_cur, e->connectsTo, 1);
 
-       // delete vertex only if it end up having no edges, no expression, no value, no label....
-       if (e->connectsTo->edges == NULL && e->connectsTo->back_edges == NULL && !e->connectsTo->ent->expr && !(e->connectsTo->ent->flags & is_valid) && ! e->connectsTo->ent->label)
-           destroy_vertex(e->connectsTo->ent);
-//     WARNING: an orphan vertex now represents an ent that has an enode thats
-//     need to be evaluated, but do not depends on another cell.
-       e = e->next;
-   }
+           // delete vertex only if it end up having no edges, no expression, no value, no label....
+           if (e->connectsTo->edges == NULL && e->connectsTo->back_edges == NULL && !e->connectsTo->ent->expr && !(e->connectsTo->ent->flags & is_valid) && ! e->connectsTo->ent->label)
+               destroy_vertex(e->connectsTo->ent);
+           //     WARNING: an orphan vertex now represents an ent that has an enode thats
+           //     need to be evaluated, but do not depends on another cell.
+           e = e->next;
+       }
 
    destroy_list_edges(v_cur->edges);
    v_cur->edges = NULL;
 
    destroy_list_edges(v_cur->back_edges);
    v_cur->back_edges = NULL;
-
 
    // if vertex to free was the first one..
    if (graph->vertices && graph->vertices->ent->row == ent->row && graph->vertices->ent->col == ent->col)

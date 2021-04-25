@@ -1006,14 +1006,14 @@ void closefile(FILE *f, int pid, int rfd) {
  */
 void print_options(FILE *f) {
     if (
-        ! optimize &&
-        ! rndtoeven &&
-        calc_order == BYROWS &&
-        prescale == 1.0 &&
-        ! get_conf_int("external_functions") &&
-        tbl_style == 0
+            ! optimize &&
+            ! rndtoeven &&
+            calc_order == BYROWS &&
+            prescale == 1.0 &&
+            ! get_conf_int("external_functions") &&
+            tbl_style == 0
        )
-    return; // No reason to do this
+        return; // No reason to do this
 
     (void) fprintf(f, "set");
     if (optimize)              (void) fprintf(f," optimize");
@@ -1084,7 +1084,7 @@ int import_csv(char * fname, char d) {
                 break;
             }
 
-        sprintf(line_in, str_replace (line_in, lookf, repls)); // handle "," case
+        strcpy(line_in, str_replace(line_in, lookf, repls)); // handle "," case
 
         // Split string using the delimiter
         token = xstrtok(line_in, delim);

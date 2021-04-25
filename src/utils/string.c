@@ -112,9 +112,9 @@ int del_range_chars(char * str, int d, int h) {
     if ( h >= slen || h < d ) return -1;
 
     for (j = 0; j <= (h-d); j++)
-    for (i = d; i < slen - 1; i++) {
-        str[i] = str[i+1];
-    }
+        for (i = d; i < slen - 1; i++) {
+            str[i] = str[i+1];
+        }
     str[slen - (h - d) - 1] = '\0';
     return 0;
 }
@@ -136,9 +136,9 @@ int del_range_wchars(wchar_t * str, int d, int h) {
     if ( h >= slen || h < d ) return -1;
 
     for (j = 0; j <= (h-d); j++)
-    for (i = d; i < slen - 1; i++) {
-        str[i] = str[i+1];
-    }
+        for (i = d; i < slen - 1; i++) {
+            str[i] = str[i+1];
+        }
     str[slen - (h - d) - 1] = L'\0';
     return 0;
 }

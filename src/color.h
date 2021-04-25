@@ -45,7 +45,7 @@
 #include "macros.h"
 
 #include <math.h>
-#define RGB(r, g, b)    floor(r*999/255), floor(g*999/255), floor(b*999/255)
+#define RGB(r, g, b)    r*999/255, g*999/255, b*999/255
 
 #define N_INIT_PAIRS      24
 
