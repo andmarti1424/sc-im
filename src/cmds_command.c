@@ -602,8 +602,7 @@ void do_commandmode(struct block * sb) {
                 swprintf(interp_line, BUFFERSIZE, L"freeze %s:", coltoa(sr->tlcol));
                 swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%s", coltoa(sr->brcol));
             } else if (! wcscmp(inputline, L"freezecol")) {
-                swprintf(interp_line, BUFFERSIZE, L"freeze %s:", coltoa(curcol));
-                swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%s", coltoa(curcol));
+                swprintf(interp_line, BUFFERSIZE, L"freeze %s", coltoa(curcol));
             } else
                 swprintf(interp_line, BUFFERSIZE, L"freeze %ls", &inputline[9]);
             send_to_interp(interp_line);
@@ -614,7 +613,7 @@ void do_commandmode(struct block * sb) {
             if (p != -1) {
                 swprintf(interp_line, BUFFERSIZE, L"freeze %d:%d", sr->tlrow, sr->brrow);
             } else if (! wcscmp(inputline, L"freezerow")) {
-                swprintf(interp_line, BUFFERSIZE, L"freeze %d:%d", currow, currow);
+                swprintf(interp_line, BUFFERSIZE, L"freeze %d", currow);
             } else
                 swprintf(interp_line, BUFFERSIZE, L"freeze %ls", &inputline[9]);
             send_to_interp(interp_line);
@@ -626,8 +625,7 @@ void do_commandmode(struct block * sb) {
                 swprintf(interp_line, BUFFERSIZE, L"unfreeze %s:", coltoa(sr->tlcol));
                 swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%s", coltoa(sr->brcol));
             } else if (! wcscmp(inputline, L"unfreezecol")) {
-                swprintf(interp_line, BUFFERSIZE, L"unfreeze %s:", coltoa(curcol));
-                swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%s", coltoa(curcol));
+                swprintf(interp_line, BUFFERSIZE, L"unfreeze %s", coltoa(curcol));
             } else
                 swprintf(interp_line, BUFFERSIZE, L"unfreeze %ls", &inputline[11]);
             send_to_interp(interp_line);
@@ -638,7 +636,7 @@ void do_commandmode(struct block * sb) {
             if (p != -1) {
                 swprintf(interp_line, BUFFERSIZE, L"unfreeze %d:%d", sr->tlrow, sr->brrow);
             } else if (! wcscmp(inputline, L"unfreezerow")) {
-                swprintf(interp_line, BUFFERSIZE, L"unfreeze %d:%d", currow, currow);
+                swprintf(interp_line, BUFFERSIZE, L"unfreeze %d", currow);
             } else
                 swprintf(interp_line, BUFFERSIZE, L"unfreeze %ls", &inputline[11]);
             send_to_interp(interp_line);
