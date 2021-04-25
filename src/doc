@@ -192,7 +192,7 @@ Commands for handling cell content:
      c-d         Convert the text content of a selected cell or range to a
                  date, using default LOCALE's D_FMT format.
                  This converts text to a numeric value that can be shown as a
-                 date. See DATE INPUT below for more info.
+                 date. See DATES INPUT below for more info.
                  Note: USELOCALE has to be enabled during build.
 
      aa    c-j   Auto-resize the selected column(s) to accommodate the widest
@@ -645,7 +645,7 @@ Commands for handling cell content:
                 from the right end of the integer.
 
            d    Specifies a date format that is applied to the numeric value
-                of a cell. (See also the DATE INPUT section below.) Date
+                of a cell. (See also the DATES INPUT section below.) Date
                 format strings are identified by the presence of a 'd' in the
                 first position.  If this is present, the remainder of the
                 string is passed to the strftime() function, and therefore
@@ -676,7 +676,7 @@ Commands for handling cell content:
                 Format the selected row or range of rows with the specified
                 height.
 
-    :datefmt "{date_format_string}"   See the DATE INPUT section below.
+    :datefmt "{date_format_string}"   See the DATES INPUT section below.
 
 
     :sort {range} "{sort_string}"
@@ -1150,7 +1150,7 @@ Commands for handling cell content:
     c-d         Convert the text content of a selected cell or range to a
                 date, using default LOCALE's D_FMT format.
                 This converts text to a numeric value that can be shown as a
-                date. See DATE INPUT below for more info.
+                date. See DATES INPUT below for more info.
                 Note: USELOCALE has to be enabled during build.
     c-j         Auto-resize the selected column(s) to accommodate the widest
                 cells.
