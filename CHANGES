@@ -33,6 +33,7 @@ changed input bar from window to pad: permits entering string longer than COLS
 fix when saving sc files of cells that has some string expressions - issue #541
 @count counts cells with strings as well, and not just with numbers
 ignore SIGWINCH outside ncurses
+handle entering a label after :datefmt for datetime value edition
 
 
 Pending

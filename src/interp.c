@@ -1111,7 +1111,7 @@ double eval(register struct ent * ent, register struct enode * e) {
                 vertexT * v_ent = getVertex(graph, lookat(ent->row, ent->col), 0);
                 vertexT * v_vp = getVertex(graph, lookat(vp->row, vp->col), 0);
                 if (v_ent != NULL && v_vp != NULL && GraphIsReachable(v_ent, v_vp, 1)) {
-                    sc_debug("Circular reference in eval (cell %s%d)", coltoa(vp->col), vp->row);
+                    sc_error("Circular reference in eval (cell %s%d)", coltoa(vp->col), vp->row);
                     e->op = ERR_;
                     e->e.o.left = NULL;
                     e->e.o.right = NULL;
@@ -2624,6 +2624,15 @@ void slet(struct ent * v, struct enode * se, int flushdir) {
             efree(v->expr);
             v->expr = (struct enode *) 0;
             v->flags &= ~is_strexpr;
+        }
+        // entering new label for changing a datetime value
+        if (v->format && v->format[0] == 'd') {
+            struct tm tm;
+            memset(&tm, 0, sizeof(struct tm));
+            strptime(v->label, &v->format[1], &tm);
+            v->v = (double) mktime(&tm);
+            v->flags |= ( is_changed | is_valid );
+            label(v, "", -1); // free label
         }
     } else if ( ! already_eval ) {
         if (p) free(p);                   // ADDED for 2267 leak!
