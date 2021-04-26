@@ -38,12 +38,12 @@
 /**
  * \file lua.h
  * \author Andrés Martinelli <andmarti@gmail.com>
- * \date 2017-07-18
+ * \date 2021-04-26
  * \brief Header file for lua.c
  */
 
 #ifdef XLUA
-char * doLUA( struct enode * se);
+char * doLUA(struct enode * se, int type);
 void doLuainit();
-void doLuaTrigger_cell(struct ent *p,int rw);
+void doLuaTrigger_cell(struct ent * p, int rw);
 #endif

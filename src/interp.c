@@ -1283,7 +1283,7 @@ double eval(register struct ent * ent, register struct enode * e) {
                     (int)eval(ent, e->e.o.right->e.o.left),
                     (int)eval(ent, e->e.o.right->e.o.right)));
     case STON:
-                 //if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
+                 if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
                  return (doston(seval(ent, e->e.o.left)));
     case ASCII:  return (doascii(seval(ent, e->e.o.left)));
     case SLEN:   return (doslen(seval(ent, e->e.o.left)));
@@ -1539,7 +1539,7 @@ char * doext(struct enode *se) {
             (void) sprintf(buff, "%s %g", command, value); /* build cmd line */
             scxfree(command);
 
-            sc_error("Running external function...");
+            sc_info("Running external function...");
             //(void) refresh();
 
             if ((pp = popen(buff, "r")) == (FILE *) NULL) {    /* run it */
@@ -1803,9 +1803,20 @@ char * seval(register struct ent * ent, register struct enode * se) {
         return dostindex(minr, minc, maxr, maxc, se->e.o.right);
     }
     case EXT:    return (doext(se));
+
 #ifdef XLUA
-    case LUA:    return (doLUA(se));
+    case LUA:
+         // add to depgraph ONLY if second parameter to @lua is 1
+         ;
+         int dg_store = eval(NULL, se->e.o.right);
+         if (dg_store == 1 && ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
+         if (ent) {
+             ent->label = scxmalloc(sizeof(char)*4);
+             strcpy(ent->label, "LUA");
+         }
+         return (doLUA(se, dg_store));
 #endif
+
     case SVAL:   return (dosval(seval(ent, se->e.o.left), eval(NULL, se->e.o.right)));
     case REPLACE: return (doreplace(seval(ent, se->e.o.left),
                           seval(NULL, se->e.o.right->e.o.left),
@@ -2603,7 +2614,8 @@ void slet(struct ent * v, struct enode * se, int flushdir) {
         p = "";
     } else {
         cellerror = CELLOK;
-        p = seval(NULL, se);
+        //p = seval(NULL, se);
+        p = seval(v, se);
     }
     if (v->cellerror != cellerror) {
         v->flags |= is_changed;
@@ -2613,10 +2625,12 @@ void slet(struct ent * v, struct enode * se, int flushdir) {
     (void) signal(SIGFPE, exit_app);
     if (exprerr) {
         efree(se);
+        sc_error("error in slet - exprerr");
     } else if (constant(se)) {
         label(v, p, flushdir);
 
         if (p) scxfree(p);
+        p = NULL;
         efree(se);
         if (v->flags & is_strexpr) {
             efree(v->expr);
@@ -2633,13 +2647,13 @@ void slet(struct ent * v, struct enode * se, int flushdir) {
             label(v, "", -1); // free label
         }
     } else if ( ! already_eval ) {
-        if (p) free(p);                   // ADDED for 2267 leak!
+        //if (p) free(p);                   // ADDED for 2267 leak!
 
         efree(v->expr);
         v->expr = se;
 
-        p = seval(v, se);                 // ADDED - here we store the cell dependences in a graph
-        if (p) scxfree(p);                // ADDED
+        //p = seval(v, se);                 // ADDED - here we store the cell dependences in a graph
+        //if (p) scxfree(p);                // ADDED
 
         v->flags |= (is_changed | is_strexpr);
         if (flushdir < 0) v->flags |= is_leftflush;
@@ -2788,8 +2802,9 @@ void label(register struct ent * v, register char * s, int flushdir) {
             v = tv, flushdir = -1;
             else flushdir = -1;
         }*/
-        if (v->label)
+        if (v->label) {
             scxfree((char *)(v->label));
+        }
         if (s && s[0]) {
             v->label = scxmalloc((unsigned)(strlen(s)+1));
             (void) strcpy (v->label, s);

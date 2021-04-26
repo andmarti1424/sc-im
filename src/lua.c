@@ -371,14 +371,14 @@ void doLuaclose() {
  * \return none
  */
 
-char * doLUA( struct enode * se) {
+char * doLUA( struct enode * se, int type) {
     char * cmd;
     char buffer[PATHLEN];
     char buffer1[PATHLEN];
     cmd = seval(NULL, se->e.o.left);
 
-    sprintf(buffer,"lua/%s",cmd);
-    if(plugin_exists(buffer,strlen(buffer),buffer1)) {
+    sprintf(buffer, "lua/%s", cmd);
+    if (plugin_exists(buffer, strlen(buffer), buffer1)) {
         if (luaL_loadfile(L, buffer1))              /* Load but don't run the Lua script */
             ui_bail(L, "luaL_loadfile() failed");   /* Error out if file can't be read */
 

@@ -1362,8 +1362,9 @@ char * ui_query(char * initial_msg) {
     // ask for input
     wtimeout(input_pad, -1);
     notimeout(input_pad, TRUE);
-    wmove(input_pad, 0, 0);
-    wclrtoeol(input_pad);
+    //wmove(input_pad, 0, 0);
+    wmove(input_pad, 0, strlen(initial_msg));
+    //wclrtoeol(input_pad);
     ui_refresh_pad(0);
 
     int d = wgetch(input_pad);

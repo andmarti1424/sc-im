@@ -35,27 +35,19 @@ fix when saving sc files of cells that has some string expressions - issue #541
 ignore SIGWINCH outside ncurses
 handle entering a label after :datefmt for datetime value edition
 
+Changed the way lua scripts are referenced in formulas. Now they are input as any other string formula,
+like this: \"@lua("script_name.lua", 1)
+being 1 if the reference should be added to the depgraph or not, making it evaluated just once or
+every time the depgraph is evaluated.
+NOTE that if set to 0 and the cell is referenced by another cell, it will be executed nonetheless.
 
-Pending
--------
-in csv import: handle \n inside csv values to increase rows height
-handle content alignment over multiple lines in cmds.c:pad_and_align
 
+Pending for v0.8.2 release
+-------------------
 test calc_offscr_rows and calc_offscr_cols
 check all cmds movement functions after new frozen mods
 remove old references to freezer / freezec
 
-save offscr_sc_rows, offscr_sc_cols, COLS and LINES values when saving file
-show_shorthelp
-show_cmd
-notimeout
-edit!
-
-restore comments
-handle mouse clicks in edition mode.
-
-Rethink LUA evaluation!
-format MODE?
 
 --
 Thanks to all that helped and created PR.

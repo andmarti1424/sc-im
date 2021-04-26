@@ -869,7 +869,7 @@ Commands for handling cell content:
                 Example:  :color "type=HEADINGS bold=0 fg=BLACK bg=YELLOW"
 
                 Colors can be set at runtime or specified in:
-                     a. the .scimrc file stored in $HOME
+                     a. the scimrc file stored in $HOME
                      b. the current .sc file.
 
                 color "type=HEADINGS fg=WHITE bg=CYAN"
@@ -993,7 +993,7 @@ Commands for handling cell content:
     :trigger    Trigger action on cell or range. Trigger can be Read or Write
                 or Both. On Read, trigger is executed before evaluating cells
                 value, on Write, after the evaluation. Type of Trigger can be
-                Lua or C. In Lua there are scim specific function available
+                Lua or C. In Lua there are sc-im specific function available
                 accessing cells, more in "examples/lua* directory.
 
                 Example:
@@ -1014,9 +1014,9 @@ Commands for handling cell content:
                 available for dynamic linking with modules.
 
                 The search path for LUA trigger files is
-                $PWD/lua/ or $HOME/.scim/lua/ or /usr/local/share/scim/lua
+                $PWD/lua/ or $HOME/.config/sc-im/lua/ or /usr/local/share/sc-im/lua
                 (in that order) and for C Trigger
-                $HOME/.scim/module or /usr/local/share/scim/module
+                $HOME/.sc-im/module or /usr/local/share/sc-im/module
 
 
     :untrigger  Delete Trigger action on cell. Use with care.
@@ -1053,8 +1053,8 @@ Commands for handling cell content:
 
                 Ex. of use:     :plot line
                 This command calls gnuplot using the file called 'plotline'
-                that is first looked in $HOME/.scim/, and if not found in
-                /usr/local/share/scim/ (or HELPDIR path of Makefile).
+                that is first looked in $HOME/.config/sc-im/, and if not found in
+                /usr/local/share/sc-im/ (or HELPDIR path of Makefile).
                 This 'plotline' can be customized by user. (See :plotedit
                 command below). You can set terminal and other gnuplot
                 parameters. Default terminal is 'dumb', although 'caca'
@@ -1617,14 +1617,23 @@ Commands for handling cell content:
         string (base-256 number without digit 0).
         See also @ascii.
 
-    @lua("luascript",0)
-        Executes a "luascript". Using Lua script scim can be extend with lot
+    @lua("{luascript}", {i})
+        Executes a "luascript". Using Lua script, sc-im can be extend with lot
         new functionality, such as complex programming, accessing databases
         etc.
+        The second parameter {i} is 0 or 1 indicating if the reference to this
+        cell should be added to the formula evaluation graph.
+        Setting it to 0 may be a good idea if you call sc.lquery to often in
+        your scripts.
+        However, in the cases were its not added to the dependency graph, it
+        will nevertheless be executed when the cell that calls the script
+        executions is referenced by another cell.
+
         The search patch for LUA scripts files is $PWD/lua/
-        $HOME/.scim/lua/ or /usr/local/share/scim/lua (in that order)
-        Always use it only with @ston see example:
-        @ston(@lua("luascript",0))
+        $HOME/.sc-im/lua/ or /usr/local/share/sc-im/lua (in that order)
+
+        To call a lua script use \" as with any other string function.
+        @ston(@lua("luascript", 1))
 
     @fmt("{se}", {e})
         Convert a number to a string. The argument se must be a valid
@@ -1705,7 +1714,7 @@ Commands for handling cell content:
         sc.currow()             - return current row
 
         The search patch for LUA scripts files is $PWD/lua or
-        $HOME/.scim/lua/ or /usr/local/share/scim/lua (in that order)
+        $HOME/.config/sc-im/lua/ or /usr/local/share/sc-im/lua (in that order)
         Example can be found in sc-im/examples/lua in source code tree.
 
 
