@@ -869,7 +869,7 @@ Commands for handling cell content:
                 Example:  :color "type=HEADINGS bold=0 fg=BLACK bg=YELLOW"
 
                 Colors can be set at runtime or specified in:
-                     a. the scimrc file stored in $HOME
+                     a. the scimrc file stored in $HOME/.config/sc-im/
                      b. the current .sc file.
 
                 color "type=HEADINGS fg=WHITE bg=CYAN"

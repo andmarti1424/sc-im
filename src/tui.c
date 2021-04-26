@@ -1240,6 +1240,9 @@ void ui_show_text(char * val) {
     reset_prog_mode();
     refresh();
     ui_update(TRUE);
+    wmove(input_pad, 0, 0);
+    wclrtoeol(input_pad);
+    ui_refresh_pad(0);
 }
 
 

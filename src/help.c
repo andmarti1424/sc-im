@@ -65,6 +65,7 @@ static char word_looked[50] = "";
 
 extern WINDOW * main_win;
 extern WINDOW * input_win;
+extern WINDOW * input_pad;
 
 /**
  * \brief Load the contents of help_doc into memory
@@ -155,6 +156,9 @@ void help() {
     wmove(input_win, 0,0);
     wclrtobot(input_win);
     wrefresh(input_win);
+    wmove(input_pad, 0, 0);
+    wclrtoeol(input_pad);
+    ui_refresh_pad(0);
 
     ui_set_ucolor(main_win, &ucolors[NORMAL], DEFAULT_COLOR);
     wtimeout(input_win, -1);
