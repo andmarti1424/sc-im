@@ -2651,7 +2651,8 @@ void slet(struct ent * v, struct enode * se, int flushdir) {
             label(v, "", -1); // free label
         }
     } else {
-        if (p) free(p);                   // ADDED for 2267 leak!
+        if (p) free(p);                   // This prevents leaks in string formulas - missing in old sc
+        p = NULL;
 
         efree(v->expr);
         v->expr = se;

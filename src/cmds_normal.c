@@ -1002,18 +1002,12 @@ void do_normalmode(struct block * buf) {
                 case L'z':
                 case L'.':
                     {
-                    int freezer = freeze_ranges && (freeze_ranges->type == 'r' ||  freeze_ranges->type == 'a') ? 1 : 0;
-                    int tlrow = freezer ? freeze_ranges->tl->row : 0;
-                    int brrow = freezer ? freeze_ranges->br->row : 0;
                     int i = 0, r = offscr_sc_rows-1;
-
 
                     if (buf->pnext->value == L't') {
                         while (i < LINES - RESROW - 1 && r < currow) {
                             r++;
-                            if (freezer && r >= tlrow && r <= brrow) continue;
-                            else if (freezer && r > brrow && r <= brrow + center_hidden_rows) continue;
-                            else if (freezer && r < tlrow && r >= tlrow - center_hidden_rows) continue;
+                            if (row_frozen[r]) continue;
                             i++;
                         }
                         scroll_down(--i);
@@ -1023,10 +1017,8 @@ void do_normalmode(struct block * buf) {
                         while (i < LINES - RESROW - 1) {
                             r++;
                             if (row_hidden[r]) { hidden++; continue; }
-                            else if (r < offscr_sc_rows && ! (freezer && r >= tlrow && r <= brrow)) continue;
-                            else if (freezer && r >= tlrow && r <= brrow) continue;
-                            else if (freezer && r > brrow && r <= brrow + center_hidden_rows) continue;
-                            else if (freezer && r < tlrow && r >= tlrow - center_hidden_rows) continue;
+                            else if (r < offscr_sc_rows && ! (row_frozen[r])) continue;
+                            else if (row_frozen[r]) continue;
                             i++;
                         }
                         scroll_up(r-currow-hidden);
@@ -1034,19 +1026,14 @@ void do_normalmode(struct block * buf) {
                     } else if (buf->pnext->value == L'z' || buf->pnext->value == L'.') {
                         while (i < LINES - RESROW - 1 && r <= currow) {
                             r++;
-                            //if (freezer && r >= tlrow && r <= brrow) continue;
-                            //else
-                            if (freezer && r > brrow && r <= brrow + center_hidden_rows) continue;
-                            else if (freezer && r < tlrow && r >= tlrow - center_hidden_rows) continue;
+                            if (row_frozen[r]) continue;
                             i++;
                         }
                         int top = --i;
                         i = 0, r = offscr_sc_rows-1;
                         while (i < LINES - RESROW - 1) {
                             r++;
-                            if (r < offscr_sc_rows && ! (freezer && r >= tlrow && r <= brrow)) continue;
-                            else if (freezer && r > brrow && r <= brrow + center_hidden_rows) continue;
-                            else if (freezer && r < tlrow && r >= tlrow - center_hidden_rows) continue;
+                            if (r < offscr_sc_rows && ! (row_frozen[r])) continue;
                             i++;
                         }
                         int bottom = r-currow;
