@@ -36,10 +36,10 @@ ignore SIGWINCH outside ncurses
 handle entering a label after :datefmt for datetime value edition
 
 Changed the way lua scripts are referenced in formulas. Now they are input as any other string formula,
-like this: \"@lua("script_name.lua", 1)
-being 1 if the reference should be added to the depgraph or not, making it evaluated just once or
-every time the depgraph is evaluated.
-NOTE that if set to 0 and the cell is referenced by another cell, it will be executed nonetheless.
+    like this: \"@lua("script_name.lua", 1)
+    being 1 if the reference should be added to the depgraph or not, making it evaluated just once or
+    every time the depgraph is evaluated.
+    NOTE that if set to 0 and the cell is referenced by another cell, it will be executed nonetheless.
 
 
 Pending for v0.8.2 release
@@ -47,7 +47,6 @@ Pending for v0.8.2 release
 test calc_offscr_rows and calc_offscr_cols
 check all cmds movement functions after new frozen mods
 remove old references to freezer / freezec
-
 
 --
 Thanks to all that helped and created PR.

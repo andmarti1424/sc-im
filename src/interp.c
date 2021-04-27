@@ -2605,7 +2605,6 @@ void slet(struct ent * v, struct enode * se, int flushdir) {
     char * p;
     if (v->row == currow && v->col == curcol) cellassign = 1;
     exprerr = 0;
-    short already_eval = FALSE;
 
     (void) signal(SIGFPE, eval_fpe);
     if (setjmp(fpe_save)) {
@@ -2646,8 +2645,8 @@ void slet(struct ent * v, struct enode * se, int flushdir) {
             v->flags |= ( is_changed | is_valid );
             label(v, "", -1); // free label
         }
-    } else if ( ! already_eval ) {
-        //if (p) free(p);                   // ADDED for 2267 leak!
+    } else {
+        if (p) free(p);                   // ADDED for 2267 leak!
 
         efree(v->expr);
         v->expr = se;
