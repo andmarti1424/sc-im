@@ -124,7 +124,7 @@ static int l_setnum (lua_State *L) {
     c = lua_tointeger(L, 1);  /* get argument */
     r = lua_tointeger(L, 2);
     val=lua_tonumber(L,3);
-    sc_debug("getnum !!");
+    //sc_debug("getnum !!");
 
     p=lookat(r,c);
     p->v=val;

@@ -1637,7 +1637,7 @@ Commands for handling cell content:
         $HOME/.sc-im/lua/ or /usr/local/share/sc-im/lua (in that order)
 
         To call a lua script use \" as with any other string function.
-        @ston(@lua("luascript", 1))
+        @lua("luascript", 1)
 
     @fmt("{se}", {e})
         Convert a number to a string. The argument se must be a valid

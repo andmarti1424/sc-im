@@ -46,9 +46,9 @@ Added new exec_lua configuration variable.
 
 Pending for v0.8.2 release
 -------------------
+remove old references to freezer / freezec / center_hidden_rows: cmds.c cmds_command freeze.c tui.c tui.h
 test calc_offscr_rows and calc_offscr_cols
 check all cmds movement functions after new frozen mods
-remove old references to freezer / freezec
 
 --
 Thanks to all that helped and created PR.
