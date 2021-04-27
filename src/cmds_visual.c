@@ -505,8 +505,6 @@ void do_visualmode(struct block * buf) {
     } else if (buf->value == L'f') {
         handle_freeze(lookat(r->tlrow, r->tlcol), lookat(r->brrow, r->brcol), 1, 'r');
         handle_freeze(lookat(r->tlrow, r->tlcol), lookat(r->brrow, r->brcol), 1, 'c');
-        center_hidden_rows = 0;
-        center_hidden_cols = 0;
         cmd_multiplier = 0;
 
         exit_visualmode();

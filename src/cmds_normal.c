@@ -147,16 +147,9 @@ void do_normalmode(struct block * buf) {
         case L'0':
             if (get_conf_int("numeric_zero") == 1 && get_conf_int("numeric") == 1) goto numeric;
         case OKEY_HOME:
-            ;
-            int freeze = freeze_ranges && (freeze_ranges->type == 'c' ||  freeze_ranges->type == 'a') ? 1 : 0;
-            int tlcol = freeze ? freeze_ranges->tl->col : 0;
-            int brcol = freeze ? freeze_ranges->br->col : 0;
-            extern int center_hidden_cols;
             lastrow = currow;
             lastcol = curcol;
-            if (freeze && curcol > brcol && tlcol >= offscr_sc_cols && curcol != brcol + center_hidden_cols + 1) curcol = brcol + center_hidden_cols + 1;
-            else curcol = left_limit()->col;
-
+            curcol = left_limit()->col;
             unselect_ranges();
             ui_update(TRUE);
             break;
@@ -308,7 +301,6 @@ void do_normalmode(struct block * buf) {
         case L'H':
             lastrow = currow;
             int currow_h = vert_top()->row;
-            if (currow_h < center_hidden_rows) break;
             currow = currow_h;
             unselect_ranges();
             ui_update(TRUE);
@@ -346,10 +338,6 @@ void do_normalmode(struct block * buf) {
             curcol = e->col;
             currow = e->row;
             unselect_ranges();
-            extern int center_hidden_rows;
-            extern int center_hidden_cols;
-            center_hidden_rows=0;
-            center_hidden_cols=0;
             offscr_sc_rows = 0;
             offscr_sc_cols = 0;
             ui_update(TRUE);
@@ -381,10 +369,6 @@ void do_normalmode(struct block * buf) {
                 lastrow = currow;
                 curcol = e->col;
                 currow = e->row;
-                extern int center_hidden_rows;
-                extern int center_hidden_cols;
-                center_hidden_rows=0;
-                center_hidden_cols=0;
                 offscr_sc_rows = 0;
                 offscr_sc_cols = 0;
 
@@ -969,13 +953,13 @@ void do_normalmode(struct block * buf) {
                     break;
 
                 case L'H':
-                    scroll = calc_offscr_sc_cols() - center_hidden_cols;
+                    scroll = calc_offscr_sc_cols();
                     if (get_conf_int("half_page_scroll")) scroll /= 2;
                     scroll_left(scroll);
                     break;
 
                 case L'L':
-                    scroll = calc_offscr_sc_cols() - center_hidden_cols;
+                    scroll = calc_offscr_sc_cols();
                     if (get_conf_int("half_page_scroll")) scroll /= 2;
                     scroll_right(scroll);
                     break;
