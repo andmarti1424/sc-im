@@ -228,7 +228,7 @@ void do_insertmode(struct block * sb) {
         inputline_pos = 0;
         real_inputline_pos = 0;
         chg_mode('.');
-        ui_clr_header(1);
+        //ui_clr_header(1);
 
         char * opt = get_conf_value("newline_action");
         switch (opt[0]) {

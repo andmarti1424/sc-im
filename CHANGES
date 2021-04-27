@@ -41,6 +41,8 @@ Changed the way lua scripts are referenced in formulas. Now they are input as an
     every time the depgraph is evaluated.
     NOTE that if set to 0 and the cell is referenced by another cell, it will be executed nonetheless.
 
+Added new exec_lua configuration variable.
+
 
 Pending for v0.8.2 release
 -------------------

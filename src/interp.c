@@ -1806,13 +1806,18 @@ char * seval(register struct ent * ent, register struct enode * se) {
 
 #ifdef XLUA
     case LUA:
-         // add to depgraph ONLY if second parameter to @lua is 1
          ;
          int dg_store = eval(NULL, se->e.o.right);
+         // add to depgraph ONLY if second parameter to @lua is 1
          if (dg_store == 1 && ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
+
          if (ent) {
              ent->label = scxmalloc(sizeof(char)*4);
              strcpy(ent->label, "LUA");
+         }
+         if (! get_conf_int("exec_lua")) {
+             sc_info("Execution of LUA scripts disabled");
+             return NULL;
          }
          return (doLUA(se, dg_store));
 #endif
@@ -2676,7 +2681,6 @@ void slet(struct ent * v, struct enode * se, int flushdir) {
         end_undo_action();
     }
 #endif
-
     return;
 }
 

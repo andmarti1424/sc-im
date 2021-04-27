@@ -1298,6 +1298,10 @@ Commands for handling cell content:
     Disabled by default, set this variable to enable external functions.  See
     @ext function below.
 
+    'exec_lua' [default on]
+    Enabled by default, set this variable to enable the execution of @lua
+    scripts. See @lua function below.
+
     'filename_with_mode' [default 0]
     Set it to '1' to display current filename along with the current mode at
     the right end of the status line.

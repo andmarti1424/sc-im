@@ -236,6 +236,8 @@ token S_YANKCOL
 %token K_NOTRG
 %token K_EXTERNAL_FUNCTIONS
 %token K_NOEXTERNAL_FUNCTIONS
+%token K_EXEC_LUA
+%token K_NOEXEC_LUA
 %token K_HALF_PAGE_SCROLL
 %token K_NOHALF_PAGE_SCROLL
 %token K_NOCURSES
@@ -482,7 +484,6 @@ command:
 /* more scripting commands */
     |    S_DELETECOL COL             { deletecol($2, 1); }
     |    S_DELETEROW NUMBER          { deleterow($2, 1); }
-
 
 /* agregados para scim */
     |    S_HIDECOL COL               {
@@ -1157,6 +1158,11 @@ setitem :
                                      if ($3 == 0) parse_str(user_conf_d, "external_functions=0", TRUE);
                                      else         parse_str(user_conf_d, "external_functions=1", TRUE); }
     |    K_NOEXTERNAL_FUNCTIONS   {               parse_str(user_conf_d, "external_functions=0", TRUE); }
+    |    K_EXEC_LUA               {               parse_str(user_conf_d, "exec_lua=1", TRUE); }
+    |    K_EXEC_LUA '=' NUMBER    {
+                                     if ($3 == 0) parse_str(user_conf_d, "exec_lua=0", TRUE);
+                                     else         parse_str(user_conf_d, "exec_lua=1", TRUE); }
+    |    K_NOEXEC_LUA             {               parse_str(user_conf_d, "exec_lua=0", TRUE); }
     |    K_HALF_PAGE_SCROLL       {               parse_str(user_conf_d, "half_page_scroll=1", TRUE); }
     |    K_HALF_PAGE_SCROLL '=' NUMBER
                                   {  if ($3 == 0) parse_str(user_conf_d, "half_page_scroll=0", TRUE);

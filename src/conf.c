@@ -60,6 +60,7 @@ const char default_config[] =
     "nocurses=0\n"
     "newline_action=0\n"
     "external_functions=0\n"
+    "exec_lua=1\n"
     "xlsx_readformulas=0\n"
     "import_delimited_as_text=0\n"
     "quit_afterload=0\n"
