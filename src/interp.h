@@ -125,4 +125,4 @@ int dateformat(struct ent * v1, struct ent * v2, char * fmt);
 double rint(double d);
 
 void EvalAllVertexs();
-void EvalJustOneVertex(register struct ent * p, int i, int j, int rebuild_graph);
+void EvalJustOneVertex(register struct ent * p, int rebuild_graph);

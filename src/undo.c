@@ -1007,14 +1007,14 @@ void do_undo() {
     while (ie != NULL) {
         struct ent * p;
         if ((p = *ATBL(tbl, ie->row, ie->col)) && p->expr)
-            EvalJustOneVertex(p, ie->row, ie->col, 1);
+            EvalJustOneVertex(p, 1);
         ie = ie->next;
     }
     ie = ul->removed;
     while (ie != NULL) {
         struct ent * p;
         if ((p = *ATBL(tbl, ie->row, ie->col)) && p->expr)
-            EvalJustOneVertex(p, ie->row, ie->col, 1);
+            EvalJustOneVertex(p, 1);
         ie = ie->next;
     }
 
@@ -1230,14 +1230,14 @@ void do_redo() {
     while (ie != NULL) {
         struct ent * p;
         if ((p = *ATBL(tbl, ie->row, ie->col)) && p->expr)
-            EvalJustOneVertex(p, ie->row, ie->col, 1);
+            EvalJustOneVertex(p, 1);
         ie = ie->next;
     }
     ie = ul->removed;
     while (ie != NULL) {
         struct ent * p;
         if ((p = *ATBL(tbl, ie->row, ie->col)) && p->expr)
-            EvalJustOneVertex(p, ie->row, ie->col, 1);
+            EvalJustOneVertex(p, 1);
         ie = ie->next;
     }
 

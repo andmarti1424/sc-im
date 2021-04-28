@@ -333,18 +333,20 @@ int paste_yanked_ents(int above, int type_paste) {
         destino->col += diffc;
 
         /******************** this might be put outside the loop  */
+        // if so, use EvalRange
         // sync and then eval.
-        //sync_refs();
+        // sync_refs();
 
-        if (destino->expr && get_conf_int("autocalc")) {
+        if (destino->expr) {
             syncref(destino->expr);
-            EvalJustOneVertex(destino, destino->row, destino->col, 1);
+            if (get_conf_int("autocalc")) EvalJustOneVertex(destino, 1);
+            //EvalRange(destino->row, destino->col, destino->row, destino->col);
         }
 
         int i;
-        for (i = 0; deps != NULL && i < deps->vf && get_conf_int("autocalc"); i++) {
+        for (i = 0; deps != NULL && i < deps->vf; i++) {
             syncref(deps[i].vp->expr);
-            EvalJustOneVertex(deps[i].vp, deps[i].vp->row, deps[i].vp->col, 0);
+            if (get_conf_int("autocalc")) EvalJustOneVertex(deps[i].vp, 0);
         }
         /*******************/
 

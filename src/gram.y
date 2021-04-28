@@ -399,30 +399,11 @@ token K_COLORERR
 
 %%
 command:
-         S_LET var_or_range '=' e { let($2.left.vp, $4);
-                                  }
-    |    S_DETAIL var             {
-                                  char det[BUFFERSIZE] = "";
-                                  struct ent * e = $2.vp;
+         S_LET var_or_range '=' e { let($2.left.vp, $4); }
 
-                                  sprintf(det + strlen(det), "row: %d\n", e->row);
-                                  sprintf(det + strlen(det), "col: %d\n", e->col);
-                                  sprintf(det + strlen(det), "cellerror: %d\n"   , e->cellerror);
-                                  sprintf(det + strlen(det), "flags:\n");
-                                  sprintf(det + strlen(det), "is_valid: %d\n"    , e->flags & is_valid );
-                                  sprintf(det + strlen(det), "is_deleted: %d\n"  , e->flags & is_deleted);
-                                  sprintf(det + strlen(det), "is_changed: %d\n"  , e->flags & is_changed);
-                                  sprintf(det + strlen(det), "is_strexpr: %d\n"  , e->flags & is_strexpr);
-                                  sprintf(det + strlen(det), "is_leftflush: %d\n", e->flags & is_leftflush);
-                                  sprintf(det + strlen(det), "is_locked: %d\n"   , e->flags & is_locked);
-                                  sprintf(det + strlen(det), "is_label: %d\n"    , e->flags & is_label);
-                                  sprintf(det + strlen(det), "iscleared: %d\n"   , e->flags & iscleared);
-                                  sprintf(det + strlen(det), "may_sync: %d\n"    , e->flags & may_sync);
-                                  ui_show_text((char *) &det);
-                                  }
     |    S_LET var_or_range '='
                                   {
-                                  // TODO get this code out of gram.y
+                                  // TODO get this code out of gram.y - reeval cells that depends on $2
                                   extern graphADT graph;
 #ifdef UNDO
                                   // here we save in undostruct, all the ents that depends on the deleted one (before change)
@@ -464,6 +445,7 @@ command:
     |    S_RIGHTSTRING var_or_range '=' e { slet($2.left.vp, $4, 1); }
     |    S_LEFTJUSTIFY var_or_range  { ljustify($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col); }
     |    S_RIGHTJUSTIFY var_or_range { rjustify($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col); }
+
     |    S_CENTER var_or_range       { center($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col); }
     |    S_FORMAT COL NUMBER NUMBER NUMBER { doformat($2,$2,$3,$4,$5); }
     |    S_FORMAT NUMBER NUMBER      { dorowformat($2, $3); }
@@ -523,7 +505,7 @@ command:
                                        currow = r < currow ? r : r < currow + arg ? currow : r - arg;
                                      }
 
-    |    S_VALUEIZEALL              { valueize_area(0, 0, maxrow, maxcol); }
+    |    S_VALUEIZEALL               { valueize_area(0, 0, maxrow, maxcol); }
     |    S_SHIFT var_or_range STRING {
                                        if (strlen($3) != 1 || ($3[0] != 'h' && $3[0] != 'j' && $3[0] != 'k' && $3[0] != 'l')) {
                                            sc_error("wrong parameter for shift command");
@@ -541,11 +523,11 @@ command:
                                           srange * sr = create_range('\0', '\0', $3.left.vp, $4.left.vp);
                                           unselect_ranges();
                                           set_range_mark($2 + 97, sr);
-                                          }
+                                     }
 
     |    S_FILL var_or_range num num { fill($2.left.vp, $2.right.vp, $3, $4); }
 
-    |    S_FILL num num { sc_error("Not enough parameters for fill command"); }
+    |    S_FILL num num              { sc_error("Not enough parameters for fill command"); }
 
     |    S_FREEZE NUMBER ':' NUMBER  { handle_freeze(lookat($2, 0), lookat($4, 0), 1, 'r'); }
     |    S_FREEZE NUMBER             { handle_freeze(lookat($2, 0), lookat($2, 0), 1, 'r'); }
@@ -605,7 +587,7 @@ command:
  // |    S_GOTO WORD             { /* don't repeat last goto on "unintelligible word" */ ; }
 
     |    S_CCOPY range           { copy_to_clipboard($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col); }
-|    S_STRTONUM range           {  convert_string_to_number($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col); } 
+    |    S_STRTONUM range        { convert_string_to_number($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col); }
     |    S_CPASTE                { paste_from_clipboard(); }
     |    S_LOCK var_or_range     { lock_cells($2.left.vp, $2.right.vp); }
     |    S_UNLOCK var_or_range   { unlock_cells($2.left.vp, $2.right.vp); }
@@ -677,6 +659,26 @@ command:
                                    scxfree($2);
                                    }
 
+    |    S_DETAIL var              {
+                                   char det[BUFFERSIZE] = "";
+                                   struct ent * e = $2.vp;
+
+                                   sprintf(det + strlen(det), "row: %d\n", e->row);
+                                   sprintf(det + strlen(det), "col: %d\n", e->col);
+                                   sprintf(det + strlen(det), "cellerror: %d\n"   , e->cellerror);
+                                   sprintf(det + strlen(det), "flags:\n");
+                                   sprintf(det + strlen(det), "is_valid: %d\n"    , e->flags & is_valid );
+                                   sprintf(det + strlen(det), "is_deleted: %d\n"  , e->flags & is_deleted);
+                                   sprintf(det + strlen(det), "is_changed: %d\n"  , e->flags & is_changed);
+                                   sprintf(det + strlen(det), "is_strexpr: %d\n"  , e->flags & is_strexpr);
+                                   sprintf(det + strlen(det), "is_leftflush: %d\n", e->flags & is_leftflush);
+                                   sprintf(det + strlen(det), "is_locked: %d\n"   , e->flags & is_locked);
+                                   sprintf(det + strlen(det), "is_label: %d\n"    , e->flags & is_label);
+                                   sprintf(det + strlen(det), "iscleared: %d\n"   , e->flags & iscleared);
+                                   sprintf(det + strlen(det), "may_sync: %d\n"    , e->flags & may_sync);
+                                   ui_show_text((char *) &det);
+                                   }
+
     |    S_CELLCOLOR var_or_range STRING
                                    {
 #ifdef USECOLORS
@@ -718,9 +720,11 @@ command:
     |    S_REDEFINE_COLOR STRING NUMBER NUMBER NUMBER {
                                          redefine_color($2, $3, $4, $5);
                                          scxfree($2); }
+
     |    S_DEFINE_COLOR STRING NUMBER NUMBER NUMBER {
                                          define_color($2, $3, $4, $5);
                                          scxfree($2); }
+
     |    S_FCOPY                   { fcopy(""); }
     |    S_FCOPY strarg            { fcopy($2); }
     |    S_FSUM                    { fsum();  }
@@ -752,7 +756,7 @@ command:
 */
     |    S_DEFINE strarg range     { add_range($2, $3.left, $3.right, 1); }
     |    S_DEFINE strarg var       { add_range($2, $3, $3, 0); }
-/*    |    S_DEFINE strarg NUMBER  { info("%s %d", $2, $3); get_key(); } */
+/*  |    S_DEFINE strarg NUMBER    { info("%s %d", $2, $3); get_key(); } */
     |    S_UNDEFINE var_or_range   { del_range($2.left.vp, $2.right.vp); }
 
     |    S_EVAL e                  {
@@ -794,6 +798,7 @@ command:
 
     |    S_PRINT_GRAPH             { print_vertexs(); }
     |    S_SYNCREFS                { sync_refs(); }
+
     |    S_UNDO                    {
 #ifdef UNDO
                                      do_undo();
@@ -802,6 +807,7 @@ command:
                                      ui_update(TRUE);
 #endif
                                    }
+
     |    S_REDO                    {
 #ifdef UNDO
                                      do_redo();
@@ -812,7 +818,6 @@ command:
                                    }
 
 // For scripting and piping
-
     |    S_RECALC                  {
                                      EvalAll();
                                      //ui_update(1);

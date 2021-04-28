@@ -38,7 +38,7 @@
 /**
  * \file intrep.c
  * \author Andrés Martinelli <andmarti@gmail.com>
- * \date 2017-07-18
+ * \date 2021-04-28
  * \brief TODO Write a tbrief file description.
  *
  * \details Expression interpreter and assorted support routines
@@ -141,6 +141,9 @@ extern int find_range(char * name, int len, struct ent * lmatch, struct ent * rm
 extern graphADT graph;
 
 extern WINDOW * input_win;
+
+
+
 /**
  * \brief TODO Document finfunc()
  *
@@ -151,7 +154,6 @@ extern WINDOW * input_win;
  *
  * \return none
  */
-
 double finfunc(int fun, double v1, double v2, double v3) {
     double answer,p;
 
@@ -202,7 +204,6 @@ double finfunc(int fun, double v1, double v2, double v3) {
  *
  * \return none
  */
-
 char * dostindex(int minr, int minc, int maxr, int maxc, struct enode * val) {
     int r, c;
     register struct ent * p;
@@ -239,7 +240,6 @@ char * dostindex(int minr, int minc, int maxr, int maxc, struct enode * val) {
  *
  * \return none
  */
-
 double doascii(char * s) {
     double v = 0.;
     int i ;
@@ -261,7 +261,6 @@ double doascii(char * s) {
  *
  * \return none
  */
-
 double doindex(int minr, int minc, int maxr, int maxc, struct enode * val) {
     int r, c;
     register struct ent * p;
@@ -302,7 +301,6 @@ double doindex(int minr, int minc, int maxr, int maxc, struct enode * val) {
  *
  * \return none
  */
-
 double dolookup(struct enode * val, int minr, int minc, int maxr, int maxc, int offset, int vflag) {
     double v, ret = (double) 0;
     int r, c;
@@ -374,7 +372,6 @@ double dolookup(struct enode * val, int minr, int minc, int maxr, int maxc, int 
  *
  * \return none
  */
-
 double docount(int minr, int minc, int maxr, int maxc, struct enode * e) {
     int v;
     int r, c;
@@ -411,7 +408,6 @@ double docount(int minr, int minc, int maxr, int maxc, struct enode * e) {
  *
  * \return none
  */
-
 double dosum(int minr, int minc, int maxr, int maxc, struct enode * e) {
     double v;
     int r, c;
@@ -448,7 +444,6 @@ double dosum(int minr, int minc, int maxr, int maxc, struct enode * e) {
  *
  * \return none
  */
-
 double doprod(int minr, int minc, int maxr, int maxc, struct enode * e) {
     double v;
     int r, c;
@@ -485,7 +480,6 @@ double doprod(int minr, int minc, int maxr, int maxc, struct enode * e) {
  *
  * \return none
  */
-
 double doavg(int minr, int minc, int maxr, int maxc, struct enode * e) {
     double v;
     int r, c;
@@ -527,7 +521,6 @@ double doavg(int minr, int minc, int maxr, int maxc, struct enode * e) {
  *
  * \return none
  */
-
 double dostddev(int minr, int minc, int maxr, int maxc, struct enode * e) {
     double lp, rp, v, nd;
     int r, c;
@@ -572,7 +565,6 @@ double dostddev(int minr, int minc, int maxr, int maxc, struct enode * e) {
  *
  * \return none
  */
-
 double domax(int minr, int minc, int maxr, int maxc, struct enode * e) {
     double v = (double) 0;
     int r, c;
@@ -617,7 +609,6 @@ double domax(int minr, int minc, int maxr, int maxc, struct enode * e) {
  *
  * \return none
  */
-
 double domin(int minr, int minc, int maxr, int maxc, struct enode * e) {
     double v = (double)0;
     int r, c;
@@ -661,7 +652,6 @@ int mdays[12]={ 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
  *
  * \return none
  */
-
 double dodts(int e1, int e2, int e3) {
     int yr, mo, day;
     time_t secs;
@@ -702,7 +692,6 @@ double dodts(int e1, int e2, int e3) {
  *
  * \return none
  */
-
 double dotts(int hr, int min, int sec) {
     if (hr < 0 || hr > 23 || min < 0 || min > 59 || sec < 0 || sec > 59) {
         sc_error ("@tts: Invalid argument");
@@ -719,7 +708,6 @@ double dotts(int hr, int min, int sec) {
  *
  * \return none
  */
-
 double dorow(struct enode * ep) {
     return (double) ep->e.v.vp->row;
 }
@@ -731,7 +719,6 @@ double dorow(struct enode * ep) {
  *
  * \return none
  */
-
 double docol(struct enode * ep) {
     return (double) ep->e.v.vp->col;
 }
@@ -744,7 +731,6 @@ double docol(struct enode * ep) {
  *
  * \return none
  */
-
 double dotime(int which, double when) {
     static time_t t_cache;
     static struct tm tm_cache;
@@ -784,7 +770,6 @@ double dotime(int which, double when) {
  *
  * \return none
  */
-
 double doston(char * s) {
     double v;
 
@@ -802,7 +787,6 @@ double doston(char * s) {
  *
  * \return none
  */
-
 int doslen(char * s) {
     if (!s) return 0;
 
@@ -825,7 +809,6 @@ int doslen(char * s) {
  *
  * \return none
  */
-
 double doeqs(char * s1, char * s2) {
     double v;
 
@@ -858,7 +841,6 @@ double doeqs(char * s1, char * s2) {
  *
  * \return none
  */
-
 struct ent * getent(char *colstr, double rowdoub) {
     int collen;                         /**< length of string */
     int row, col;                       /**< integer values   */
@@ -893,7 +875,6 @@ struct ent * getent(char *colstr, double rowdoub) {
  *
  * \return none
  */
-
 double donval(char * colstr, double rowdoub) {
     struct ent * ep;
 
@@ -913,7 +894,6 @@ double donval(char * colstr, double rowdoub) {
  *
  * \return none
  */
-
 double dolmax(struct ent * e, struct enode * ep) {
     register int count = 0;
     register double maxval = 0; /* Assignment to shut up lint */
@@ -940,7 +920,6 @@ double dolmax(struct ent * e, struct enode * ep) {
  *
  * \return none
  */
-
 double dolmin(struct ent * e, struct enode * ep) {
     register int count = 0;
     register double minval = 0; /* Assignment to shut up lint */
@@ -967,7 +946,6 @@ double dolmin(struct ent * e, struct enode * ep) {
  *
  * \return none
  */
-
 double eval(register struct ent * ent, register struct enode * e) {
 //    //if (cellerror == CELLERROR || (ent && ent->cellerror == CELLERROR)) {
 //    if (cellerror == CELLERROR) {
@@ -1344,7 +1322,6 @@ double eval(register struct ent * ent, register struct enode * e) {
  *
  * \return none
  */
-
 void eval_fpe() { /* Trap for FPE errors in eval */
 #if defined(i386)
     sc_debug("eval_fpe i386");
@@ -1368,7 +1345,6 @@ void eval_fpe() { /* Trap for FPE errors in eval */
  *
  * \return none
  */
-
 double fn1_eval(double (*fn)(), double arg) {
     double res;
     errno = 0;
@@ -1377,6 +1353,7 @@ double fn1_eval(double (*fn)(), double arg) {
 
     return res;
 }
+
 
 /**
  * \brief TODO Document fn2_eval()
@@ -1387,7 +1364,6 @@ double fn1_eval(double (*fn)(), double arg) {
  *
  * \return none
  */
-
 double fn2_eval(double (*fn)(), double arg1, double arg2) {
     double res;
     errno = 0;
@@ -1396,6 +1372,7 @@ double fn2_eval(double (*fn)(), double arg1, double arg2) {
 
     return res;
 }
+
 
 /**
  * \brief TODO Document docat()
@@ -1409,7 +1386,6 @@ double fn2_eval(double (*fn)(), double arg1, double arg2) {
  *
  * \return none
  */
-
 char * docat(register char * s1, register char * s2) {
     register char * p;
     char * arg1, * arg2;
@@ -1428,6 +1404,7 @@ char * docat(register char * s1, register char * s2) {
     return (p);
 }
 
+
 /**
  * \brief TODO Document dodate()
  *
@@ -1436,7 +1413,6 @@ char * docat(register char * s1, register char * s2) {
  *
  * \return none
  */
-
 char * dodate(time_t tloc, char * fmtstr) {
     char buff[FBUFLEN];
     char * p;
@@ -1449,6 +1425,7 @@ char * dodate(time_t tloc, char * fmtstr) {
     return (p);
 }
 
+
 /**
  * \brief Conversion reverse from doascii
  *
@@ -1456,7 +1433,6 @@ char * dodate(time_t tloc, char * fmtstr) {
  *
  * \return none
  */
-
 char * dochr(double ascii) {
     char * p = scxmalloc((size_t) 10);
     char * q = p;
@@ -1478,6 +1454,7 @@ char * dochr(double ascii) {
     return p;
 }
 
+
 /**
  * \brief TODO Document dofmt()
  *
@@ -1486,7 +1463,6 @@ char * dochr(double ascii) {
  *
  * \return none
  */
-
 char * dofmt(char * fmtstr, double v) {
     char buff[FBUFLEN];
     char * p;
@@ -1499,6 +1475,7 @@ char * dofmt(char * fmtstr, double v) {
     scxfree(fmtstr);
     return (p);
 }
+
 
 /**
  * \brief TODO Document doext()
@@ -1515,7 +1492,6 @@ char * dofmt(char * fmtstr, double v) {
  *
  * \return none
  */
-
 char * doext(struct enode *se) {
     char buff[FBUFLEN];        /* command line/return, not permanently alloc */
     char * command;
@@ -1572,6 +1548,7 @@ char * doext(struct enode *se) {
         return (strcpy(scxmalloc((size_t)1), ""));
 }
 
+
 /**
  * \brief TODO Document dosval()
  *
@@ -1585,7 +1562,6 @@ char * doext(struct enode *se) {
  *
  * \return none
  */
-
 char * dosval(char * colstr, double rowdoub) {
     struct ent * ep;
     char * llabel;
@@ -1598,6 +1574,7 @@ char * dosval(char * colstr, double rowdoub) {
     return (strcpy(scxmalloc( (size_t) (strlen(llabel) + 1)), llabel));
 }
 
+
 /**
  * \brief TODO Document doreplace()
  *
@@ -1607,10 +1584,10 @@ char * dosval(char * colstr, double rowdoub) {
  *
  * \return none
  */
-
 char * doreplace(char * source, char * old, char * new) {
     return str_replace(source, old, new);
 }
+
 
 /**
  * \brief TODO Document dosubstring()
@@ -1621,7 +1598,6 @@ char * doreplace(char * source, char * old, char * new) {
  *
  * \return none
  */
-
 char * dosubstr(char * s, register int v1, register int v2) {
     register char * s1, * s2;
     char * p;
@@ -1655,7 +1631,6 @@ char * dosubstr(char * s, register int v1, register int v2) {
  *
  * \return none
  */
-
 char * docase(int acase, char * s) {
     char * p = s;
 
@@ -1696,7 +1671,6 @@ char * docase(int acase, char * s) {
  *
  * \return none
  */
-
 char * docapital(char * s) {
     char * p;
     int skip = 1;
@@ -1726,7 +1700,6 @@ char * docapital(char * s) {
  *
  * \return none
  */
-
 char * seval(register struct ent * ent, register struct enode * se) {
     register char * p;
 
@@ -1861,7 +1834,6 @@ char * seval(register struct ent * ent, register struct enode * se) {
  *
  * \return none
  */
-
 struct enode * new(int op, struct enode * a1, struct enode * a2) {
     register struct enode * p;
     //if (freeenodes) {
@@ -1885,7 +1857,6 @@ struct enode * new(int op, struct enode * a1, struct enode * a2) {
  *
  * \return none
  */
-
 struct enode * new_var(int op, struct ent_ptr a1) {
     register struct enode * p;
     //if (freeenodes) {
@@ -1898,6 +1869,7 @@ struct enode * new_var(int op, struct ent_ptr a1) {
     return p;
 }
 
+
 /**
  * \brief TODO Document new_range()
  *
@@ -1906,7 +1878,6 @@ struct enode * new_var(int op, struct ent_ptr a1) {
  *
  * \return none
  */
-
 struct enode * new_range(int op, struct range_s a1) {
     register struct enode * p;
     //if (freeenodes)
@@ -1920,6 +1891,7 @@ struct enode * new_range(int op, struct range_s a1) {
     return p;
 }
 
+
 /**
  * \brief TODO Document new_const()
  *
@@ -1928,7 +1900,6 @@ struct enode * new_range(int op, struct range_s a1) {
  *
  * \return none
  */
-
 struct enode * new_const(int op, double a1) {
     register struct enode * p;
     //if (freeenodes) {    /* reuse an already free'd enode */
@@ -1941,6 +1912,7 @@ struct enode * new_const(int op, double a1) {
     return p;
 }
 
+
 /**
  * \brief TODO Document new_str()
  *
@@ -1948,7 +1920,6 @@ struct enode * new_const(int op, double a1) {
  *
  * \return none
  */
-
 struct enode * new_str(char * s) {
     register struct enode * p;
     //if (freeenodes) {    /* reuse an already free'd enode */
@@ -1961,12 +1932,12 @@ struct enode * new_str(char * s) {
     return (p);
 }
 
+
 /**
  * \brief Goto subroutines
  *
  * \return none
  */
-
 void g_free() {
     switch (gs.g_type) {
         case G_STR:
@@ -1980,12 +1951,12 @@ void g_free() {
     gs.errsearch = 0;
 }
 
+
 /**
  * \brief TODO Document go_previous()
  *
  * \return none
  */
-
 void go_previous() {
     int num = 0;
 
@@ -2005,12 +1976,12 @@ void go_previous() {
     }
 }
 
+
 /**
  * \brief TODO Document go_last()
  *
  * \return none
  */
-
 void go_last() {
     int num = 0;
 
@@ -2037,6 +2008,7 @@ void go_last() {
     }
 }
 
+
 /**
  * \brief Place the cursor on a given cell.
  *
@@ -2053,7 +2025,6 @@ void go_last() {
  *
  * \return none
  */
-
 void moveto(int row, int col, int lastrow_, int lastcol_, int cornerrow, int cornercol) {
     register int i;
 
@@ -2090,6 +2061,7 @@ void moveto(int row, int col, int lastrow_, int lastcol_, int cornerrow, int cor
     //if (loading) changed = 0;
 }
 
+
 /**
  * \brief TODO Document num_search()
  *
@@ -2108,7 +2080,6 @@ void moveto(int row, int col, int lastrow_, int lastcol_, int cornerrow, int cor
  *
  * \return none
  */
-
 void num_search(double n, int firstrow, int firstcol, int lastrow_, int lastcol_, int errsearch, int flow) {
     register struct ent * p;
     register int r, c;
@@ -2186,13 +2157,14 @@ void num_search(double n, int firstrow, int firstcol, int lastrow_, int lastcol_
     //} //else remember(1);
 }
 
+
 /**
  * \brief 'goto' a cell containing a matching string
  *
  * \details 'goto' a cell containing a matching string.
  * \details flow = 1, look forward
  * \details flow = 0, look backwards
- * 
+ *
  * \param[in] s
  * \param[in] firstrow
  * \param[in] firstcol
@@ -2203,7 +2175,6 @@ void num_search(double n, int firstrow, int firstcol, int lastrow_, int lastcol_
  *
  * \return none
  */
-
 void str_search(char *s, int firstrow, int firstcol, int lastrow_, int lastcol_, int num, int flow) {
     struct ent * p;
     int r, c;
@@ -2327,6 +2298,7 @@ void str_search(char *s, int firstrow, int firstcol, int lastrow_, int lastcol_,
     //}
 }
 
+
 /**
  * \brief Fill a range with constants
  *
@@ -2337,7 +2309,6 @@ void str_search(char *s, int firstrow, int firstcol, int lastrow_, int lastcol_,
  *
  * \return none
  */
-
 void fill(struct ent *v1, struct ent *v2, double start, double inc) {
     int r, c;
     register struct ent *n;
@@ -2385,11 +2356,13 @@ void fill(struct ent *v1, struct ent *v2, double start, double inc) {
     else {
         sc_error(" Internal error calc_order");
     }
+    EvalRange(minr, minc, maxr, maxc);
 #ifdef UNDO
     copy_to_undostruct(minr, minc, maxr, maxc, UNDO_ADD, IGNORE_DEPS, NULL);
     end_undo_action();
 #endif
 }
+
 
 /**
  * \brief Lock a range of cells
@@ -2399,7 +2372,6 @@ void fill(struct ent *v1, struct ent *v2, double start, double inc) {
  *
  * \return none
  */
-
 void lock_cells(struct ent * v1, struct ent * v2) {
     int r, c;
     register struct ent * n;
@@ -2432,6 +2404,7 @@ void lock_cells(struct ent * v1, struct ent * v2) {
     sc_info("Cells were locked");
 }
 
+
 /**
  * \brief Unlock a range of cells
  *
@@ -2440,7 +2413,6 @@ void lock_cells(struct ent * v1, struct ent * v2) {
  *
  * \return none
  */
-
 void unlock_cells(struct ent * v1, struct ent * v2) {
     int r, c;
     register struct ent * n;
@@ -2473,6 +2445,7 @@ void unlock_cells(struct ent * v1, struct ent * v2) {
     sc_info("Cells were unlocked");
 }
 
+
 /* set the numeric part of a cell */
 /**
  * \brief Set the numeric part of a cell
@@ -2482,7 +2455,6 @@ void unlock_cells(struct ent * v1, struct ent * v2) {
  *
  * \return none
  */
-
 void let(struct ent * v, struct enode * e) {
 
     if (locked_cell(v->row, v->col)) return;
@@ -2496,13 +2468,6 @@ void let(struct ent * v, struct enode * e) {
         copy_to_undostruct(v->row, v->col, v->row, v->col, UNDO_DEL, HANDLE_DEPS, NULL);
     }
     #endif
-    //if (getVertex(graph, lookat(v->row, v->col), 0) != NULL) {
-        // FIXME aca no debe borrarse el vertex
-        //destroy_vertex(lookat(v->row, v->col));
-        // porque por ejemplo pudo haberse creado el vertex de F5 para
-        // let C1 = F5 + A0
-        // y en esta llamada a let estamos haciendo let F5 = F1 + F3
-    //}
 
     double val;
     unsigned isconstant = constant(e);
@@ -2581,6 +2546,7 @@ void let(struct ent * v, struct enode * e) {
     return;
 }
 
+
 /**
  * \brief TODO Document slet()
  *
@@ -2590,7 +2556,6 @@ void let(struct ent * v, struct enode * e) {
  *
  * \return none
  */
-
 void slet(struct ent * v, struct enode * se, int flushdir) {
     if (locked_cell(v->row, v->col)) return;
 
@@ -2616,10 +2581,12 @@ void slet(struct ent * v, struct enode * se, int flushdir) {
         sc_error ("Floating point exception in cell %s", v_name(v->row, v->col));
         cellerror = CELLERROR;
         p = "";
+    } else if (v->flags & is_strexpr || v->expr) {
+        cellerror = CELLOK;
+        p = seval(v, se);
     } else {
         cellerror = CELLOK;
-        //p = seval(NULL, se);
-        p = seval(v, se);
+        p = seval(NULL, se);
     }
     if (v->cellerror != cellerror) {
         v->flags |= is_changed;
@@ -2651,7 +2618,7 @@ void slet(struct ent * v, struct enode * se, int flushdir) {
             label(v, "", -1); // free label
         }
     } else {
-        if (p) free(p);                   // This prevents leaks in string formulas - missing in old sc
+        if (p) free(p);                     // This prevents leaks in string formulas - missing in old sc
         p = NULL;
 
         efree(v->expr);
@@ -2685,6 +2652,7 @@ void slet(struct ent * v, struct enode * se, int flushdir) {
     return;
 }
 
+
 /**
  * \brief TODO Document format_cell()
  *
@@ -2694,7 +2662,6 @@ void slet(struct ent * v, struct enode * se, int flushdir) {
  *
  * \return none
  */
-
 void format_cell(struct ent *v1, struct ent *v2, char *s) {
     int r, c;
     register struct ent *n;
@@ -2727,6 +2694,7 @@ void format_cell(struct ent *v1, struct ent *v2, char *s) {
         }
 }
 
+
 /**
  * \brief Say if an expression is a constant or not
  *
@@ -2735,7 +2703,6 @@ void format_cell(struct ent *v1, struct ent *v2, char *s) {
  * \return 1 function is an expression
  * \return 0 function is not an expression
  */
-
 int constant(register struct enode *e) {
     return e == NULL
      || e->op == O_CONST
@@ -2761,6 +2728,7 @@ int constant(register struct enode *e) {
          && optimize );
 }
 
+
 /**
  * \brief TODO Document efree()
  *
@@ -2768,7 +2736,6 @@ int constant(register struct enode *e) {
  *
  * \return none
  */
-
 void efree(struct enode * e) {
     if (e) {
         if (e->op != O_VAR && e->op != O_CONST && e->op != O_SCONST
@@ -2786,6 +2753,7 @@ void efree(struct enode * e) {
     }
 }
 
+
 /**
  * \brief TODO Document label()
  *
@@ -2795,7 +2763,6 @@ void efree(struct enode * e) {
  *
  * \return none
  */
-
 void label(register struct ent * v, register char * s, int flushdir) {
     if (v) {
         /*if (flushdir == 0 && v->flags & is_valid) {
@@ -2822,6 +2789,7 @@ void label(register struct ent * v, register char * s, int flushdir) {
     }
 }
 
+
 /**
  * \brief TODO Document decodev()
  *
@@ -2829,7 +2797,6 @@ void label(register struct ent * v, register char * s, int flushdir) {
  *
  * \return none
  */
-
 void decodev(struct ent_ptr v) {
     struct range * r;
     //if ( ! v.vp || v.vp->flags & is_deleted)
@@ -2845,6 +2812,15 @@ void decodev(struct ent_ptr v) {
     return;
 }
 
+
+/**
+ * \brief coltoa()
+ * \details converts a number representing a column to its name.
+ * Example 3 to "D"
+ * \param[in] col
+ *
+ * \return none
+ */
 char * coltoa(int col) {
     static char rname[3];
     register char *p = rname;
@@ -2858,6 +2834,7 @@ char * coltoa(int col) {
     return (rname);
 }
 
+
 /**
  * \brief TODO Document decompile_list()
  *
@@ -2869,13 +2846,13 @@ char * coltoa(int col) {
  *
  * \return none
  */
-
 static void decompile_list(struct enode *p) {
     if (!p) return;
     decompile_list(p->e.o.left);    /* depth first */
     decompile(p->e.o.right, 0);
     line[linelim++] = ',';
 }
+
 
 /**
  * \brief TODO Document decompile()
@@ -2885,7 +2862,6 @@ static void decompile_list(struct enode *p) {
  *
  * \return none
  */
-
 void decompile(register struct enode *e, int priority) {
     register char *s;
     if (e) {
@@ -3100,6 +3076,7 @@ void decompile(register struct enode *e, int priority) {
     } else line[linelim++] = '?';
 }
 
+
 /**
  * \brief TODO Document index_arg()
  *
@@ -3108,7 +3085,6 @@ void decompile(register struct enode *e, int priority) {
  *
  * \return none
  */
-
 void index_arg(char *s, struct enode *e) {
     if (e->e.o.right && e->e.o.right->op == ',') {
         two_arg_index(s, e);
@@ -3125,6 +3101,7 @@ void index_arg(char *s, struct enode *e) {
     line[linelim++] = ')';
 }
 
+
 /**
  * \brief TODO Document two_arg_index()
  *
@@ -3133,7 +3110,6 @@ void index_arg(char *s, struct enode *e) {
  *
  * \return none
  */
-
 void two_arg_index(char *s, struct enode *e) {
     for (; (line[linelim++] = *s++); );
     linelim--;
@@ -3146,6 +3122,7 @@ void two_arg_index(char *s, struct enode *e) {
     line[linelim++] = ')';
 }
 
+
 /**
  * \brief TODO Document list_arg()
  *
@@ -3154,7 +3131,6 @@ void two_arg_index(char *s, struct enode *e) {
  *
  * \return none
  */
-
 void list_arg(char *s, struct enode *e) {
     for (; (line[linelim++] = *s++); );
     linelim--;
@@ -3165,6 +3141,7 @@ void list_arg(char *s, struct enode *e) {
     line[linelim - 1] = ')';
 }
 
+
 /**
  * \brief TODO Document one_arg()
  *
@@ -3173,13 +3150,13 @@ void list_arg(char *s, struct enode *e) {
  *
  * \return none
  */
-
 void one_arg(char *s, struct enode *e) {
     for (; (line[linelim++] = *s++); );
     linelim--;
     decompile(e->e.o.left, 0);
     line[linelim++] = ')';
 }
+
 
 /**
  * \brief TODO Document two_arg()
@@ -3189,7 +3166,6 @@ void one_arg(char *s, struct enode *e) {
  *
  * \return none
  */
-
 void two_arg(char *s, struct enode *e) {
     for (; (line[linelim++] = *s++); );
     linelim--;
@@ -3199,6 +3175,7 @@ void two_arg(char *s, struct enode *e) {
     line[linelim++] = ')';
 }
 
+
 /**
  * \brief TODO Document three_arg()
  *
@@ -3207,7 +3184,6 @@ void two_arg(char *s, struct enode *e) {
  *
  * \return none
  */
-
 void three_arg(char *s, struct enode *e) {
     for (; (line[linelim++] = *s++); );
     linelim--;
@@ -3219,6 +3195,7 @@ void three_arg(char *s, struct enode *e) {
     line[linelim++] = ')';
 }
 
+
 /**
  * \brief TODO Document range_arg()
  *
@@ -3227,7 +3204,6 @@ void three_arg(char *s, struct enode *e) {
  *
  * \return none
  */
-
 void range_arg(char *s, struct enode *e) {
     struct range *r;
 
@@ -3244,6 +3220,7 @@ void range_arg(char *s, struct enode *e) {
     line[linelim++] = ')';
 }
 
+
 /**
  * \brief TODO Document editfmt()
  *
@@ -3252,7 +3229,6 @@ void range_arg(char *s, struct enode *e) {
  *
  * \return none
  */
-
 void editfmt(int row, int col) {
     register struct ent *p;
 
@@ -3263,6 +3239,7 @@ void editfmt(int row, int col) {
     }
 }
 
+
 /**
  * \brief TODO Document editv()
  *
@@ -3271,7 +3248,6 @@ void editfmt(int row, int col) {
  *
  * \return none
  */
-
 void editv(int row, int col) {
     register struct ent *p;
 
@@ -3287,6 +3263,7 @@ void editv(int row, int col) {
     }
 }
 
+
 /**
  * \brief TODO Document editexp()
  *
@@ -3295,7 +3272,6 @@ void editv(int row, int col) {
  *
  * \return none
  */
-
 void editexp(int row, int col) {
     register struct ent *p;
 
@@ -3304,6 +3280,7 @@ void editexp(int row, int col) {
     decompile(p->expr, 0);
     line[linelim] = '\0';
 }
+
 
 /**
  * \brief TODO Document edits()
@@ -3314,7 +3291,6 @@ void editexp(int row, int col) {
  *
  * \return none
  */
-
 void edits(int row, int col, int saveinfile) {
     register struct ent *p;
 
@@ -3343,6 +3319,7 @@ void edits(int row, int col, int saveinfile) {
     }
  }
 
+
 /**
  * \brief TODO Document dateformat()
  *
@@ -3352,7 +3329,6 @@ void edits(int row, int col, int saveinfile) {
  *
  * \return none
  */
-
 int dateformat(struct ent *v1, struct ent *v2, char * fmt) {
     if ( ! fmt || *fmt == '\0') return -1;
 
@@ -3409,12 +3385,12 @@ int dateformat(struct ent *v1, struct ent *v2, char * fmt) {
     return 0;
 }
 
-#ifdef RINT
 
+#ifdef RINT
 /**
  * \brief TODO Round-to-even
  *
- * \details Round-to-even, also known as "banker's rounding". With 
+ * \details Round-to-even, also known as "banker's rounding". With
  * round-to-even, a number exactly halfway between two values is
  * rounded to whichever is even; e.g. rnd(0.5)=0, rnd(1.5)=2,
  * rnd(3.5)=4. This is the default rounding mode for IEEE floating
@@ -3428,7 +3404,6 @@ int dateformat(struct ent *v1, struct ent *v2, char * fmt) {
  *
  * \return none
  */
-
 double rint(double d) {
     /* as sent */
     double fl = floor(d), fr = d-fl;

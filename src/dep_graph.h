@@ -85,5 +85,7 @@ int GraphIsReachable(vertexT * src, vertexT * dest, int back_dep);
 void rebuild_graph();
 
 void EvalAll();
+void EvalBottomUp();
 void EvalAllVertexs();
-void EvalJustOneVertex(register struct ent * p, int i, int j, int rebuild_graph);
+void EvalRange(int tlrow, int tlcol, int brrow, int brcol);
+void EvalJustOneVertex(struct ent * p, int rebuild_graph);

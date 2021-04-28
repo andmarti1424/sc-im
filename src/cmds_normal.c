@@ -656,7 +656,7 @@ void do_normalmode(struct block * buf) {
                     n->col += c1 - get_mark(buf->pnext->value)->col;
 
                     n->flags |= is_changed;
-                    if (n->expr) EvalJustOneVertex(n, n->row, n->col, 1);
+                    if (n->expr) EvalJustOneVertex(n, 1);
 
 #ifdef UNDO
                     copy_to_undostruct(currow, c1, currow, c1, UNDO_ADD, HANDLE_DEPS, NULL);
@@ -670,7 +670,6 @@ void do_normalmode(struct block * buf) {
 #endif
             }
 
-            //if (get_conf_int("autocalc")) EvalAll();
             ui_update(TRUE);
             break;
             }
@@ -767,7 +766,6 @@ void do_normalmode(struct block * buf) {
 
             } else if (buf->pnext->value == L'd') {
                 del_selected_cells();
-                if (get_conf_int("autocalc") && ! loading) EvalAll();
             }
 
             ui_update(TRUE);
@@ -1153,7 +1151,7 @@ void do_normalmode(struct block * buf) {
             copy_to_undostruct(tlrow, tlcol, brrow, brcol, UNDO_ADD, IGNORE_DEPS, NULL);
             end_undo_action();
 #endif
-            if (get_conf_int("autocalc")) EvalAll();
+            if (get_conf_int("autocalc")) EvalRange(tlrow, tlcol, brrow, brcol);
             cmd_multiplier = 0;
             ui_update(TRUE);
             }

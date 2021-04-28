@@ -89,17 +89,26 @@ extern int cellerror;    /**< is there an error in this cell */
 
 graphADT graph; /**< Creates an empty graph, with no vertices. Allocate memory from the heap */
 
+// used for saving dependencies of cells:
+struct ent_ptr * deps = NULL;
+int dep_size = 0;
+
+
+/************************************************************
+ * These are the functions used for creating the depgraph
+ * **********************************************************/
+
+
 /**
- * \brief TODO Document GraphCreate()
- *
+ * \brief GraphCreate()
  * \return An empty graph
  */
-
 graphADT GraphCreate() {
    graphADT emptyGraph = (graphCDT *) malloc(sizeof(graphCDT));
    emptyGraph->vertices = NULL;
    return emptyGraph;
 }
+
 
 /**
  * \brief Undefined function
@@ -113,7 +122,6 @@ graphADT GraphCreate() {
  *
  * \return a pointer to the new vertex
  */
-
 vertexT * GraphAddVertex(graphADT graph , struct ent * ent) {
     //if (ent == NULL) {
     //    sc_debug("add vertex-  null ent");
@@ -170,7 +178,6 @@ vertexT * GraphAddVertex(graphADT graph , struct ent * ent) {
  *
  * \return vertex if found; NULL if not found
  */
-
 vertexT * getVertex(graphADT graph, struct ent * ent, int create) {
    if (graph == NULL || ent == NULL || (graph->vertices == NULL && !create)) return NULL;
    vertexT * temp = graph->vertices;
@@ -210,7 +217,6 @@ vertexT * getVertex(graphADT graph, struct ent * ent, int create) {
  *
  * \return none
  */
-
 void GraphAddEdge(vertexT * from, vertexT * to) {
    if (from == NULL || to == NULL) {
       sc_info("Error while adding edge: either of the vertices do not exist") ;
@@ -240,6 +246,7 @@ void GraphAddEdge(vertexT * from, vertexT * to) {
   return;
 }
 
+
 /**
  * \brief Iterate through all verticies and set visited to false
  *
@@ -248,7 +255,6 @@ void GraphAddEdge(vertexT * from, vertexT * to) {
  *
  * \return none
  */
-
 void markAllVerticesNotVisited (int eval_visited) {
    vertexT * temp = graph->vertices;
    while (temp != NULL) {
@@ -265,7 +271,6 @@ void markAllVerticesNotVisited (int eval_visited) {
  *
  * \return none
  */
-
 void print_vertexs() {
    char det[BUFFERSIZE] = "";
    if (graph == NULL) {
@@ -340,7 +345,6 @@ void print_vertexs() {
  *
  * \return none
  */
-
 void destroy_vertex(struct ent * ent) {
    if (graph == NULL || ent == NULL) return;
    //sc_debug("destroying vertex %d %d", ent->row, ent->col);
@@ -420,7 +424,6 @@ void destroy_vertex(struct ent * ent) {
  *
  * \return none
  */
-
 void delete_reference(vertexT * v_cur, vertexT * vc, int back_reference) {
     if (v_cur == NULL || vc == NULL) return;
 //  sc_debug("we follow %d %d", vc->ent->row, vc->ent->col);
@@ -460,7 +463,6 @@ void delete_reference(vertexT * v_cur, vertexT * vc, int back_reference) {
  *
  * \return none
  */
-
 void destroy_list_edges(edgeT * e) {
     if (e == NULL) return;
     edgeT * e_next, * e_cur = e;
@@ -482,7 +484,6 @@ void destroy_list_edges(edgeT * e) {
  *
  * \return none
  */
-
 void destroy_graph(graphADT graph) {
     if (graph == NULL) return;
 
@@ -500,33 +501,7 @@ void destroy_graph(graphADT graph) {
 
 
 /**
- * \brief Document rebuild_graph()
- * \details Rebuild entire graph and eval from top left to bottom right.
- * \return none
- */
-
-void rebuild_graph() {
-    destroy_graph(graph);
-    graph = GraphCreate();
-    int i, j;
-    struct ent * p;
-
-    for (i = 0; i <= maxrow; i++)
-        for (j = 0; j <= maxcol; j++)
-
-        if ((p = *ATBL(tbl, i, j)) && p->expr) {
-            EvalJustOneVertex(p, i, j, 1);
-            //sc_debug("Expr %d %d", i, j);
-        } else if ((p = *ATBL(tbl, i, j)) && p->flags & is_valid && getVertex(graph, p, 0) == NULL) {
-            GraphAddVertex(graph, p);
-            //sc_debug("Val %d %d", i, j);
-        }
-    return;
-}
-
-
-/**
- * \brief Document All_vertexs_of_edges_visited
+ * \brief All_vertexs_of_edges_visited
  * \details Used in EvalBottomUp and GraphIsReachable
  * \return int
  */
@@ -543,9 +518,181 @@ int All_vertexs_of_edges_visited(struct edgeTag * e, int eval_visited) {
 
 
 /**
- * \brief EvalBottomUp
- * New Eval implementation. It operates bottom up.
- * Replaces EvalAllVertexs()
+ * \brief ents_that_depends_on()
+ * \details get the list of ents that depends on an specific ent
+ * \param[in] ent
+ * \return none
+ */
+void ents_that_depends_on (struct ent * ent) {
+   if (graph == NULL) return;
+   vertexT * v = getVertex(graph, ent, 0);
+   if (v == NULL || v->visited) return;
+
+   struct edgeTag * edges = v->back_edges;
+   while (edges != NULL) {
+       // TODO only add ent if it does not exists in deps ??
+       deps = (struct ent_ptr *) realloc(deps, sizeof(struct ent_ptr) * (++dep_size));
+       deps[0].vf = dep_size; // we always keep size of list in the first position !
+       deps[dep_size-1].vp = lookat(edges->connectsTo->ent->row, edges->connectsTo->ent->col);
+       ents_that_depends_on(edges->connectsTo->ent);
+       edges->connectsTo->visited = 1;
+       edges = edges->next;
+   }
+   return;
+}
+
+/**
+ * \brief GraphIsReachable
+ *
+ * \details This method returns if a vertex called dest is reachable
+ * from the vertex called src (if back_dep is set to false). If back_dep
+ * is set to true, the relationship is evaluated in the opposite way.
+ *
+ * \param[in] src
+ * \param[out] dest
+ * \param[in] back_dep
+ *
+ * \return 1 true or 0 false
+ */
+int GraphIsReachable(vertexT * src, vertexT * dest, int back_dep) {
+   if (src == dest) {
+       return 1;
+   } else if (src->visited) {
+       return 0;
+   } else {
+       // visit all edges of vertexT * src
+       src->visited = 1;
+
+       edgeT * tempe;
+       if ( !back_dep )
+           tempe = src->edges;
+       else
+           tempe = src->back_edges;
+
+       while (tempe != NULL) {
+          if ( ! GraphIsReachable(tempe->connectsTo, dest, back_dep)) {
+             tempe = tempe->next;
+          } else {
+             return 1;
+          }
+       }
+   }
+   return 0;
+}
+
+/**
+ * \brief ents_that_depends_on_range()
+ *
+ * \details Checks dependency of a range of ents.
+ * Keep the ents references in "deps" lists.
+ *
+ * \param[in] r1
+ * \param[in] c1
+ * \param[in] r2
+ * \param[in] c2
+ *
+ * \return none
+ */
+void ents_that_depends_on_range (int r1, int c1, int r2, int c2) {
+        if (graph == NULL) return;
+
+        int r, c;
+        struct ent * p;
+
+        // at this point deps must be NULL
+        deps = NULL;
+        dep_size = 0;
+
+        for (r = r1; r <= r2; r++) {
+            for (c = c1; c <= c2; c++) {
+                markAllVerticesNotVisited(0);
+                p = *ATBL(tbl, r, c);
+                if (p == NULL) continue;
+                ents_that_depends_on(p);
+            }
+        }
+        return;
+}
+
+
+/**
+ * \brief ents_that_depends_on_list()
+ *
+ * \details Checks dependency of list of ents.
+ *
+ * since this is used for pasting yanked ents, on which we may
+ * have a difference on rows and columns on which the cells are pasted
+ * we take care of it with deltar and deltac
+ *
+ * \param[in] struct ent * (e_ori)
+ * \param[in] deltar
+ * \param[in] deltac
+ *
+ * \return none
+ */
+void ents_that_depends_on_list(struct ent * e_ori, int deltar,  int deltac) {
+    struct ent * e = e_ori;
+    struct ent * p;
+    if (graph == NULL || e == NULL) return;
+
+    // at this point deps must be NULL
+    deps = NULL;
+    dep_size = 0;
+
+    while (e != NULL) {
+        p = *ATBL(tbl, e->row+deltar, e->col+deltac);
+        if (p != NULL) {
+            markAllVerticesNotVisited(0);
+            ents_that_depends_on(p);
+        }
+        e = e->next;
+    }
+    return;
+}
+
+/**
+ * \brief rebuild_graph()
+ * \details Rebuild entire graph and eval from top left to bottom right.
+ * \return none
+ */
+void rebuild_graph() {
+    destroy_graph(graph);
+    graph = GraphCreate();
+    int i, j;
+    struct ent * p;
+
+    for (i = 0; i <= maxrow; i++)
+        for (j = 0; j <= maxcol; j++)
+            if ((p = *ATBL(tbl, i, j)) && p->expr) {
+                EvalJustOneVertex(p, 1);
+                //sc_debug("Expr %d %d", i, j);
+
+            // just numeric values (no formulas) shouldnt be added to graph
+            // unless other cell references it
+            //} else if ((p = *ATBL(tbl, i, j)) && p->flags & is_valid && getVertex(graph, p, 0) == NULL) {
+            //    GraphAddVertex(graph, p);
+            //    sc_debug("Val %d %d", i, j);
+            }
+    return;
+}
+
+/************************************************************
+ * Here we have the depgraph evaluation functions
+ * **********************************************************/
+
+/**
+ * \brief Eval the entire depgraph
+ * \return none
+ */
+void EvalAll() {
+    EvalBottomUp();
+    return;
+}
+
+
+/**
+ * \brief EvalBottomUp the entire dep graph
+ * It operates bottom up.
  * \return none
  */
 void EvalBottomUp() {
@@ -562,7 +709,7 @@ void EvalBottomUp() {
             //sc_debug("visito %d %d", temp->ent->row, temp->ent->col);
 
             if ((p = *ATBL(tbl, temp->ent->row, temp->ent->col)) && p->expr) {
-                EvalJustOneVertex(temp->ent, temp->ent->row, temp->ent->col, 0);
+                EvalJustOneVertex(temp->ent, 0);
             }
             temp->eval_visited = 1;
             evalDone = 1;
@@ -580,22 +727,51 @@ void EvalBottomUp() {
 
 
 /**
- * \brief Eval vertexs of graph
+ * \brief EvalRange
+ * \details Given a range of cells look up for their vertexs in the depgraph and Eval them.
+ * It also handles the cells that depends on the range and reeval those as well.
  * \return none
  */
-void EvalAll() {
-    //EvalAllVertexs();
-    EvalBottomUp();
+void EvalRange(int tlrow, int tlcol, int brrow, int brcol) {
+    if (loading) return;
+    extern struct ent_ptr * deps;
+    extern int dep_size;
+    int i, r, c;
+    struct ent * e, * f;
+
+    for (r = tlrow; r <= brrow; r++) {
+        for (c = tlcol; c <= brcol; c++) {
+            // eval the cell
+            e = *ATBL(tbl, r, c);
+            if (!e) continue;
+            if (e->expr) EvalJustOneVertex(e, 0);
+
+            // eval the dependencies
+            markAllVerticesNotVisited(0);
+            deps = NULL;
+            dep_size = 0;
+            ents_that_depends_on(e);
+
+            for (i = 0; deps != NULL && i < deps->vf; i++) {
+                f = *ATBL(tbl, deps[i].vp->row, deps[i].vp->col);
+                if (f == NULL || ! f->expr) continue;
+                EvalJustOneVertex(f, 0);
+            }
+            if (deps != NULL) free(deps);
+            deps = NULL;
+        }
+    }
+
     return;
 }
 
 
 /**
- * \brief TODO Document EvalAllVertexs
+ * \brief EvalAllVertexs
  * \details Eval all vertexs of graph in the order that they were added
+ * >>>>>   NO LONGER IN USE
  * \return none
  */
-
 void EvalAllVertexs() {
     struct ent * p;
 
@@ -605,11 +781,12 @@ void EvalAllVertexs() {
     while (temp != NULL) {
         //sc_debug("Evaluating cell %d %d: %d", temp->ent->row, temp->ent->col, ++i);
         if ((p = *ATBL(tbl, temp->ent->row, temp->ent->col)) && p->expr)
-            EvalJustOneVertex(p, temp->ent->row, temp->ent->col, 0);
+            EvalJustOneVertex(p, 0);
         temp = temp->next;
     }
     //(void) signal(SIGFPE, exit_app);
 }
+
 
 /**
  * \brief Evaluate just one vertex
@@ -621,7 +798,9 @@ void EvalAllVertexs() {
  *
  * \return none
  */
-void EvalJustOneVertex(register struct ent * p, int i, int j, int rebuild_graph) {
+void EvalJustOneVertex(struct ent * p, int rebuild_graph) {
+    int i = p->row;
+    int j = p->col;
 
     gmyrow=i; gmycol=j;
 
@@ -665,151 +844,4 @@ void EvalJustOneVertex(register struct ent * p, int i, int j, int rebuild_graph)
                 do_trigger(p, TRG_WRITE);
         }
     }
-}
-
-
-/* TODO Incorporate this comment into the functions and variables below.
- * the folowing functions and variables are used for ent_that_depends_on function.
- * the last is used to get the list of ents that depends on an specific ent
- * the result is saved in a list of ents.
- */
-struct ent_ptr * deps = NULL;
-int dep_size = 0;
-
-/**
- * \brief TODO Document ents_that_depends_on()
- *
- * \param[in] ent
- *
- * \return none
- */
-
-void ents_that_depends_on (struct ent * ent) {
-   if (graph == NULL) return;
-   vertexT * v = getVertex(graph, ent, 0);
-   if (v == NULL || v->visited) return;
-
-   struct edgeTag * edges = v->back_edges;
-   while (edges != NULL) {
-       // TODO only add ent if it does not exists in deps ??
-       deps = (struct ent_ptr *) realloc(deps, sizeof(struct ent_ptr) * (++dep_size));
-       deps[0].vf = dep_size; // we always keep size of list in the first position !
-       deps[dep_size-1].vp = lookat(edges->connectsTo->ent->row, edges->connectsTo->ent->col);
-       ents_that_depends_on(edges->connectsTo->ent);
-       edges->connectsTo->visited = 1;
-       edges = edges->next;
-   }
-   return;
-}
-
-/**
- * \brief TODO Write brief function description
- *
- * \details This method returns if a vertex called dest is reachable
- * from the vertex called src (if back_dep is set to false). If back_dep
- * is set to true, the relationship is evaluated in the opposite way.
- *
- * \param[in] src
- * \param[out] dest
- * \param[in] back_dep
- *
- * \return
- */
-// TODO List the returns of this function
-
-int GraphIsReachable(vertexT * src, vertexT * dest, int back_dep) {
-   if (src == dest) {
-       return 1;
-   } else if (src->visited) {
-       return 0;
-   } else {
-       // visit all edges of vertexT * src
-       src->visited = 1;
-
-       edgeT * tempe;
-       if ( !back_dep )
-           tempe = src->edges;
-       else
-           tempe = src->back_edges;
-
-       while (tempe != NULL) {
-          if ( ! GraphIsReachable(tempe->connectsTo, dest, back_dep)) {
-             tempe = tempe->next;
-          } else {
-             return 1;
-          }
-       }
-   }
-   return 0;
-}
-
-/**
- * \brief TODO Document ents_that_depends_on_range()
- *
- * \details Checks dependency of a range of ents. Keep the ends
- * in "deps" lists.
- *
- * \param[in] r1
- * \param[in] c1
- * \param[in] r2
- * \param[in] c2
- *
- * \return none
- */
-
-void ents_that_depends_on_range (int r1, int c1, int r2, int c2) {
-        if (graph == NULL) return;
-
-        int r, c;
-        struct ent * p;
-
-        // at this point deps must be NULL
-        deps = NULL;
-        dep_size = 0;
-
-        for (r = r1; r <= r2; r++) {
-            for (c = c1; c <= c2; c++) {
-                markAllVerticesNotVisited(0);
-                p = *ATBL(tbl, r, c);
-                if (p == NULL) continue;
-                ents_that_depends_on(p);
-            }
-        }
-        return;
-}
-
-/**
- * \brief ents_that_depends_on_list()
- *
- * \details Checks dependency of list of ents.
- *
- * since this is used for pasting yanked ents, on which we may
- * have a difference on rows and columns on which the cells are pasted
- * we take care of it with deltar and deltac
- *
- * \param[in] struct ent * (e_ori)
- * \param[in] deltar
- * \param[in] deltac
- *
- * \return none
- */
-
-void ents_that_depends_on_list(struct ent * e_ori, int deltar,  int deltac) {
-    struct ent * e = e_ori;
-    struct ent * p;
-    if (graph == NULL || e == NULL) return;
-
-    // at this point deps must be NULL
-    deps = NULL;
-    dep_size = 0;
-
-    while (e != NULL) {
-        p = *ATBL(tbl, e->row+deltar, e->col+deltac);
-        if (p != NULL) {
-            markAllVerticesNotVisited(0);
-            ents_that_depends_on(p);
-        }
-        e = e->next;
-    }
-    return;
 }

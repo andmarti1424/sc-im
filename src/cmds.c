@@ -239,7 +239,7 @@ void deletecol(int col, int mult) {
     // do the job
     int_deletecol(col, mult);
 
-    //EvalAll();
+    // if (get_conf_int("autocalc")) EvalAll();
 
     if (!loading) modflg++;
 
@@ -283,7 +283,8 @@ void int_deletecol(int col, int mult) {
             }
         }
 
-        rebuild_graph(); // Rebuild of graph is needed
+        rebuild_graph(); // Rebuild of graph is needed.
+        //But shouldnt! TODO
 
         // Copy references from right column cells to left column (which gets removed)
         for (r = 0; r <= maxrow; r++) {
@@ -416,7 +417,7 @@ void copyent(register struct ent * n, register struct ent * p, int dr, int dc, i
     n->cellerror = p->cellerror;
 
     if (special == 'c' && n->expr)
-        EvalJustOneVertex(n, n->row, n->col, 0);
+        EvalJustOneVertex(n, 0);
 
     n->flags |= is_changed;
     n->row = p->row;
@@ -947,7 +948,6 @@ void int_deleterow(int row, int mult) {
 
         rebuild_graph(); //TODO CHECK HERE WHY REBUILD IS NEEDED. See NOTE1 in shift.c
         sync_refs();
-        //if (get_conf_int("autocalc") && ! loading) EvalAll();
         EvalAll();
         maxrow--;
     }
@@ -1140,7 +1140,7 @@ void del_selected_cells() {
     sync_refs();
     //flush_saved(); DO NOT UNCOMMENT! flush_saved shall not be called other than at exit.
 
-    EvalAll();
+    EvalRange(tlrow, tlcol, brrow, brcol);
 
 #ifdef UNDO
     // here we save in undostruct, all the ents that depends on the deleted one (after the change)
@@ -1165,9 +1165,9 @@ void del_selected_cells() {
  * \return none
  */
 void enter_cell_content(int r, int c, char * submode,  wchar_t * content) {
-    // TODO - ADD PADDING INTELLIGENCE HERE ??
     (void) swprintf(interp_line, BUFFERSIZE, L"%s %s = %ls", submode, v_name(r, c), content);
     send_to_interp(interp_line);
+    if (get_conf_int("autocalc") && ! loading) EvalRange(r, c, r, c);
 }
 
 /**
@@ -1190,7 +1190,9 @@ void send_to_interp(wchar_t * oper) {
     yyparse();
     linelim = -1;
     line[0]='\0';
-    if (get_conf_int("autocalc") && ! loading) EvalAll();
+    // commented on 28/04/2021. EvalAll should be used only on certain ocasions.
+    // Use EvalRange instead when possible, and certainly not here everytime sending to interp.
+    //if (get_conf_int("autocalc") && ! loading) EvalAll();
     return;
 }
 
@@ -2046,6 +2048,7 @@ int fsum() {
 
     if ((currow != r || curcol != c) && wcslen(interp_line))
         send_to_interp(interp_line);
+    EvalRange(currow, curcol, currow, curcol);
     return 0;
 }
 
@@ -2152,6 +2155,7 @@ int fcopy(char * action) {
             }
         }
     }
+    EvalRange(ri, ci, rf, cf);
 
 #ifdef UNDO
     copy_to_undostruct(ri, ci, rf, cf, UNDO_ADD, IGNORE_DEPS, NULL);

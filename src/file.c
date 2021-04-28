@@ -829,9 +829,7 @@ sc_readfile_result readfile(char * fname, int eraseflg) {
 
     loading = 0;
     linelim = -1;
-    //EvalAll(); // FIXME: see why this double EvalAll is neccesary to remedy #193
     if (eraseflg) {
-        //(void) strcpy(curfile, save);
         cellassign = 0;
     }
     strcpy(curfile, save);
