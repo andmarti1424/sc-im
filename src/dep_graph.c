@@ -38,7 +38,7 @@
 /**
  * \file dep_graph.c
  * \author Andrés Martinelli <andmarti@gmail.com>
- * \date 2017-07-18
+ * \date 2021-04-29
  * \brief All the functions used to track cell dependencies
  *
  * \details This file contains all functions used for maintaining a
@@ -64,7 +64,7 @@
 
 #include "dep_graph.h"
 #include "interp.h"
-#include "tui.h"    // for show_text
+#include "tui.h"       // for show_text
 #include "sc.h"
 #include "xmalloc.h"   // for scxfree
 #include "macros.h"
@@ -205,16 +205,10 @@ vertexT * getVertex(graphADT graph, struct ent * ent, int create) {
 }
 
 
-/*
- * This function adds a edge in our graph from the vertex "from" to the vertex "to"
- * should add edges ordered in list ?
- */
 /**
  * \brief Add an edge to a graph
- *
  * \details This function adds an edge in out graph from the vertex "from"
- * to the vertex "to". Should add edges ordered in list?
- *
+ * to the vertex "to".
  * \return none
  */
 void GraphAddEdge(vertexT * from, vertexT * to) {
@@ -234,7 +228,7 @@ void GraphAddEdge(vertexT * from, vertexT * to) {
    newEdge->next = NULL;
    edgeT * tempEdge = NULL;
    APPEND_TO_LINKLIST(from->edges, newEdge, tempEdge);
-//sc_info("Added the edge from %d %d to %d %d", from->row, from->col, to->row, to->col) ;
+   //sc_info("Added the edge from %d %d to %d %d", from->row, from->col, to->row, to->col) ;
 
    // BACK APPEND
    newEdge = CREATE_NEW(edgeT) ;
@@ -242,8 +236,8 @@ void GraphAddEdge(vertexT * from, vertexT * to) {
    newEdge->next = NULL;
    tempEdge = NULL;
    APPEND_TO_LINKLIST(to->back_edges, newEdge, tempEdge);
-//sc_info("Added BACK reference from %d %d to %d %d", to->row, to->col, from->row, from->col) ;
-  return;
+   //sc_info("Added BACK reference from %d %d to %d %d", to->row, to->col, from->row, from->col) ;
+   return;
 }
 
 
@@ -268,7 +262,6 @@ void markAllVerticesNotVisited (int eval_visited) {
 
 /**
  * \brief Prints vertexes
- *
  * \return none
  */
 void print_vertexs() {
@@ -426,7 +419,7 @@ void destroy_vertex(struct ent * ent) {
  */
 void delete_reference(vertexT * v_cur, vertexT * vc, int back_reference) {
     if (v_cur == NULL || vc == NULL) return;
-//  sc_debug("we follow %d %d", vc->ent->row, vc->ent->col);
+    //sc_debug("we follow %d %d", vc->ent->row, vc->ent->col);
 
     // If v_cur is in the first position of back_edge list of vc
     if (back_reference && vc->back_edges->connectsTo == v_cur) {
@@ -460,7 +453,6 @@ void delete_reference(vertexT * v_cur, vertexT * vc, int back_reference) {
 
 /**
  * \brief Free memory of an edge and its linked edges
- *
  * \return none
  */
 void destroy_list_edges(edgeT * e) {
@@ -479,9 +471,7 @@ void destroy_list_edges(edgeT * e) {
 
 /**
  * \brief Free the memory of a graph
- *
  * \param[in] graph
- *
  * \return none
  */
 void destroy_graph(graphADT graph) {
@@ -543,7 +533,6 @@ void ents_that_depends_on (struct ent * ent) {
 
 /**
  * \brief GraphIsReachable
- *
  * \details This method returns if a vertex called dest is reachable
  * from the vertex called src (if back_dep is set to false). If back_dep
  * is set to true, the relationship is evaluated in the opposite way.
@@ -658,21 +647,26 @@ void ents_that_depends_on_list(struct ent * e_ori, int deltar,  int deltac) {
 void rebuild_graph() {
     destroy_graph(graph);
     graph = GraphCreate();
-    int i, j;
+    int first, second, fb, gb;
     struct ent * p;
 
-    for (i = 0; i <= maxrow; i++)
-        for (j = 0; j <= maxcol; j++)
-            if ((p = *ATBL(tbl, i, j)) && p->expr) {
+    fb = calc_order == BYROWS ? maxrow : maxcol;
+    gb = calc_order == BYROWS ? maxcol : maxrow;
+
+    for (first = 0; first <= fb; first++)
+        for (second = 0; second <= gb; second++) {
+            p = *ATBL(tbl, calc_order == BYROWS ? first : second, calc_order == BYROWS ? second : first);
+            if (p && p->expr) {
                 EvalJustOneVertex(p, 1);
-                //sc_debug("Expr %d %d", i, j);
+                //sc_debug("Expr %d %d", p->row, p->col);
 
             // just numeric values (no formulas) shouldnt be added to graph
             // unless other cell references it
-            //} else if ((p = *ATBL(tbl, i, j)) && p->flags & is_valid && getVertex(graph, p, 0) == NULL) {
+            //} else if (p && p->flags & is_valid && getVertex(graph, p, 0) == NULL) {
             //    GraphAddVertex(graph, p);
-            //    sc_debug("Val %d %d", i, j);
+            //    sc_debug("Val %d %d", p->row, p->col);
             }
+        }
     return;
 }
 
@@ -736,13 +730,19 @@ void EvalRange(int tlrow, int tlcol, int brrow, int brcol) {
     if (loading) return;
     extern struct ent_ptr * deps;
     extern int dep_size;
-    int i, r, c;
+    int i, fa, fb, ga, gb, first, second;
     struct ent * e, * f;
 
-    for (r = tlrow; r <= brrow; r++) {
-        for (c = tlcol; c <= brcol; c++) {
+    if (calc_order == BYROWS)
+        fa = tlrow, fb = brrow, ga = tlcol, gb = brcol;
+    else
+        fa = tlcol, fb = brcol, ga = tlrow, gb = brrow;
+
+    for (first = fa; first <= fb; first++) {
+        for (second = ga; second <= gb; second++) {
             // eval the cell
-            e = *ATBL(tbl, r, c);
+            e = *ATBL(tbl, calc_order == BYROWS ? first : second, calc_order == BYROWS ? second : first);
+
             if (!e) continue;
             if (e->expr) EvalJustOneVertex(e, 0);
 

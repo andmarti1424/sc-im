@@ -43,9 +43,15 @@ Changed the way lua scripts are referenced in formulas. Now they are input as an
 
 Added new exec_lua configuration variable.
 
+Added EvalRange() so that the graph is not evaluated entirely all the time.
+Replaced 'EvalAll' with 'EvalRange'.
+Removed unneeded parameters on EvalJustVertex"
+Added eval_order in EvalRange and rebuild_graph
+
+
 
 Pending for v0.8.2 release
--------------------
+----------------------------
 remove old references to freezer / freezec / center_hidden_rows: cmds.c cmds_command freeze.c tui.c tui.h
 test calc_offscr_rows and calc_offscr_cols
 check all cmds movement functions after new frozen mods
