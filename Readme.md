@@ -1,4 +1,4 @@
-## SC-IM
+# SC-IM
 
 SC-IM is a spreadsheet program that is based on SC (http://ibiblio.org/pub/Linux/apps/financial/spreadsheet/sc-7.16.tar.gz)
 SC original authors are James Gosling and Mark Weiser, and mods were later added by Chuck Martin.
@@ -11,7 +11,7 @@ SC original authors are James Gosling and Mark Weiser, and mods were later added
 - CSV / TAB delimited / XLSX file import and export. ODS import. Markdown export.
 - Key-mappings.
 - Autobackup.
-- 256 color support - screen colors can be customized by user, even at runtime.
+- Direct color support - specifing the RGB values, screen colors can be customized by user, even at runtime.
 - Colorize cells or give them format such as bold, italic or underline.
 - Wide character support. The following alphabets are supported: English, Spanish, French, Italian, German, Portuguese, Russian, Ukrainian, Greek, Turkish, Czech, Japanese, Chinese.
 - Sort of rows.
@@ -22,8 +22,7 @@ SC original authors are James Gosling and Mark Weiser, and mods were later added
 - GNUPlot interaction.
 - Scripting support with LUA. Also with triggers and c dynamic linked modules.
 - Implement external functions in the language you prefer and use them in SC-IM.
-- Use SC-IM as a non-interactive calculator, reading its input from a external script.
-- Input and Output was completely rewritten.
+- Use SC-IM as a non-interactive calculator, reading its input from an external script.
 
 About the name, the idea is that the program can be identified as another vim-like app.
 SC-IM stands for Spreadsheet Calculator Improvised. :-)
