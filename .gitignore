@@ -10,3 +10,4 @@ doc/grammar_yacc_tools/commands.txt
 doc/grammar_yacc_tools/setitems.txt
 doc/grammar_yacc_tools/term_list.txt
 doc/grammar_yacc_tools/yacc-format-stage1
+src/html

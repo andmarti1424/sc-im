@@ -15,8 +15,8 @@
 #include "conf.h"
 #include "pipe.h"
 #include "main.h"
+#include "file.h"
 #include "tui.h"
-#include "freeze.h"
 #include "undo.h"
 #include "dep_graph.h"
 #include "utils/dictionary.h"
@@ -198,6 +198,7 @@ token S_YANKCOL
 %token S_RECALC
 %token S_EXECUTE
 %token S_QUIT
+%token S_EXPORT
 %token S_REBUILD_GRAPH
 %token S_PRINT_GRAPH
 %token S_SYNCREFS
@@ -258,6 +259,8 @@ token S_YANKCOL
 %token K_NOTRUNCATE
 %token K_AUTOWRAP
 %token K_NOAUTOWRAP
+%token K_QUIET
+%token K_NOQUIET
 %token K_QUIT_AFTERLOAD
 %token K_NOQUIT_AFTERLOAD
 %token K_XLSX_READFORMULAS
@@ -787,6 +790,12 @@ command:
                                      inputline[0]=L'\0';
                                      scxfree($2);
                                    }
+    |    S_EXPORT STRING STRING    {
+                                         swprintf(inputline, BUFFERSIZE, L"e! %s %s", $2, $3);
+                                         do_export(0, 0, maxrow, maxcol);
+                                         scxfree($2);
+                                         scxfree($3);
+                                   }
     |    S_QUIT                    {
                                      printf("quitting. unsaved changes will be lost.\n");
                                      shall_quit = 2; // unsaved changes are lost!
@@ -1173,6 +1182,11 @@ setitem :
                                   {  if ($3 == 0) parse_str(user_conf_d, "half_page_scroll=0", TRUE);
                                      else         parse_str(user_conf_d, "half_page_scroll=1", TRUE); }
     |    K_NOHALF_PAGE_SCROLL     {               parse_str(user_conf_d, "half_page_scroll=0", TRUE); }
+    |    K_QUIET '=' NUMBER       {
+                                     if ($3 == 0) parse_str(user_conf_d, "quiet=0", TRUE);
+                                     else         parse_str(user_conf_d, "quiet=1", TRUE); }
+    |    K_QUIET                  {               parse_str(user_conf_d, "quiet=1", TRUE); }
+    |    K_NOQUIET                {               parse_str(user_conf_d, "quiet=0", TRUE); }
     |    K_QUIT_AFTERLOAD         {               parse_str(user_conf_d, "quit_afterload=1", TRUE); }
     |    K_QUIT_AFTERLOAD '=' NUMBER
                                   {  if ($3 == 0) parse_str(user_conf_d, "quit_afterload=0", TRUE);

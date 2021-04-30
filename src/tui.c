@@ -247,6 +247,7 @@ int ui_getch_b(wint_t * wd) {
  */
 
 void ui_sc_msg(char * s, int type, ...) {
+    if (get_conf_int("quiet")) return;
     if (type == DEBUG_MSG && ! get_conf_int("debug")) return;
     char t[BUFFERSIZE];
     va_list args;

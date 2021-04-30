@@ -64,6 +64,7 @@ const char default_config[] =
     "xlsx_readformulas=0\n"
     "import_delimited_as_text=0\n"
     "quit_afterload=0\n"
+    "quiet=0\n"
     "numeric_zero=1\n"
     "numeric_decimal=1\n"
     "filename_with_mode=0\n"

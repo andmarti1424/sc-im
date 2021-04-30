@@ -1773,6 +1773,9 @@ Commands for handling cell content:
 
     You can set the --output parameter to save the results to a file.
 
+    You can set the --quiet parameter to avoid printing messages of all kinds
+    (info, error or debug).
+
     Export to csv, tab, markdown or plain text formats without interaction:
         ./sc-im --quit_afterload --nocurses --export_csv
         ./sc-im --quit_afterload --nocurses --export_tab
@@ -1805,6 +1808,9 @@ Commands for handling cell content:
     Receive data from both a pipe and a script, and output to file:
         cat script | ./sc-im a.sc --quit_afterload --output=return_file
 
+    Export data and create pdf
+        echo 'export "mkd" "/dev/stdout"' | ./sc-im --nocurses --quiet --quit_afterload foo.csv | text2pdf -L > fighters.pdf
+
     Start interactive mode but with no ncurses interface:
         ./sc-im --nocurses
 
@@ -1829,6 +1835,11 @@ Commands for handling cell content:
     EXECUTE "{STRING}"
         Call an internal COMMAND MODE command. Examples:
         EXECUTE "load /tmp/test.csv"
+
+    EXPORT "{STRING}" "{STRING}"
+        Export spreadsheet. First parameter is type, second is path to file.
+        example of use:
+        echo 'export "mkd" "/dev/stdout"' | ./sc-im --nocurses --quiet --quit_afterload foo.csv | text2pdf -L > fighters.pdf
 
     RECALC
         Recalculates a formulas in all cells
@@ -2007,6 +2018,9 @@ Commands for handling cell content:
     EXTERNAL_FUNCTIONS
     EXTERNAL_FUNCTIONS = {NUMBER}
     NOEXTERNAL_FUNCTIONS
+    EXEC_LUA
+    EXEC_LUA = {NUMBER}
+    NOEXEC_LUA
     HALF_PAGE_SCROLL
     HALF_PAGE_SCROLL = {NUMBER}
     NOHALF_PAGE_SCROLL
