@@ -266,6 +266,9 @@ void ui_sc_msg(char * s, int type, ...) {
         status_line_empty = 0;
 
         ui_refresh_pad(0);
+#ifdef USECOLORS
+        ui_set_ucolor(input_win, &ucolors[INPUT], DEFAULT_COLOR);
+#endif
         if (type == DEBUG_MSG || (loading && type == ERROR_MSG)) {
             wtimeout(input_pad, -1);
             wgetch(input_pad);
