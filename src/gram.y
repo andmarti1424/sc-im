@@ -337,6 +337,8 @@ token S_YANKCOL
 %token K_SLEN
 %token K_EQS
 %token K_EXT
+%token K_EVALUATE
+%token K_SEVALUATE
 %token K_LUA
 %token K_NVAL
 %token K_SVAL
@@ -844,7 +846,7 @@ command:
 
     |    S_GETFMT var_or_range     { getfmt($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col, fdoutput); }
 
-    |    S_SEVAL e                 { seval_result = seval(NULL, $2); // TODO make sure this seval_result is always freed afterwards
+    |    S_SEVAL e                 { seval_result = seval(NULL, $2); // always make sure this seval_result is always freed afterwards
                                      efree($2);
                                    }
     |    S_ERROR STRING            { sc_error($2);
@@ -1012,6 +1014,9 @@ term:     var                     { $$ = new_var(O_VAR, $1); }
                                   { $$ = new(SVAL, $4, $6); }
         | '@' K_REPLACE '(' e ',' e ',' e ')'
                                   { $$ = new(REPLACE, $4, new(',', $6, $8)); }
+
+        | '@' K_EVALUATE '(' e ')'  { $$ = new(EVALUATE, $4, ENULL); }
+        | '@' K_SEVALUATE '(' e ')' { $$ = new(SEVALUATE, $4, ENULL); }
         | '@' K_SUBSTR '(' e ',' e ',' e ')'
                                   { $$ = new(SUBSTR, $4, new(',', $6, $8)); }
         |       '(' e ')'         { $$ = $2; }

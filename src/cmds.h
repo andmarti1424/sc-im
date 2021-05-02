@@ -38,7 +38,7 @@
 /**
  * \file cmds.h
  * \author Andrés Martinelli <andmarti@gmail.com>
- * \date 2017-07-18
+ * \date 2021-05-02
  * \brief Header file for cmds.c
  */
 
@@ -105,12 +105,12 @@ void center(int sr, int sc, int er, int ec);
 void doformat(int c1, int c2, int w, int p, int r);
 void dorowformat(int r, unsigned char size);
 struct enode;
-int etype(register struct enode *e);
+int etype(struct enode *e);
 void erase_area(int sr, int sc, int er, int ec, int ignorelock, int mark_ent_as_deleted);
 void auto_justify(int ci, int cf, int min);
 void valueize_area(int sr, int sc, int er, int ec);
 void sync_refs();
-void syncref(register struct enode * e);
+void syncref(struct enode * e);
 int fcopy(char * action);
 int fsum();
 int pad(int n, int r1, int c1, int r2, int c2);
@@ -119,7 +119,7 @@ void fix_col_hidden(int deltac, int ci, int cf);
 void fix_row_frozen(int deltar, int ri, int rf);
 void fix_col_frozen(int deltac, int ci, int cf);
 
-void mark_ent_as_deleted(register struct ent * p, int delete);
+void mark_ent_as_deleted(struct ent * p, int del);
 int calc_offscr_sc_rows();
 int calc_offscr_sc_cols();
 void pad_and_align (char * str_value, char * numeric_value, int col_width, int align, int padding, wchar_t * str_out, int rowfmt);

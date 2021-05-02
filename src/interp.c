@@ -145,14 +145,14 @@ extern WINDOW * input_win;
 
 
 /**
- * \brief TODO Document finfunc()
+ * \brief finfunc()
  *
  * \param[in] fun
  * \param[in] v1
  * \param[in] v2
  * \param[in] v3
  *
- * \return none
+ * \return double
  */
 double finfunc(int fun, double v1, double v2, double v3) {
     double answer,p;
@@ -194,7 +194,7 @@ double finfunc(int fun, double v1, double v2, double v3) {
 }
 
 /**
- * \brief TODO Document dostindex()
+ * \brief dostindex()
  *
  * \param[in] minr
  * \param[in] minc
@@ -202,7 +202,7 @@ double finfunc(int fun, double v1, double v2, double v3) {
  * \param[in] maxc
  * \param[in] val
  *
- * \return none
+ * \return char *
  */
 char * dostindex(int minr, int minc, int maxr, int maxc, struct enode * val) {
     int r, c;
@@ -233,12 +233,11 @@ char * dostindex(int minr, int minc, int maxr, int maxc, struct enode * val) {
         return ((char *) 0);
 }
 
+
 /**
- * \brief TODO Document doascii()
- *
+ * \brief doascii()
  * \param[in] s
- *
- * \return none
+ * \return double
  */
 double doascii(char * s) {
     double v = 0.;
@@ -250,8 +249,9 @@ double doascii(char * s) {
     return(v);
 }
 
+
 /**
- * \brief TODO Documetn doindex()
+ * \brief doindex()
  *
  * \param[in] minr
  * \param[in] minc
@@ -259,7 +259,7 @@ double doascii(char * s) {
  * \param[in] maxc
  * \param[in] val
  *
- * \return none
+ * \return double
  */
 double doindex(int minr, int minc, int maxr, int maxc, struct enode * val) {
     int r, c;
@@ -289,7 +289,7 @@ double doindex(int minr, int minc, int maxr, int maxc, struct enode * val) {
 }
 
 /**
- * \brief TODO Document dolookup()
+ * \brief dolookup()
  *
  * \param[in] val
  * \param[in] minr
@@ -299,7 +299,7 @@ double doindex(int minr, int minc, int maxr, int maxc, struct enode * val) {
  * \param[in] offset
  * \param[in] vflag
  *
- * \return none
+ * \return double
  */
 double dolookup(struct enode * val, int minr, int minc, int maxr, int maxc, int offset, int vflag) {
     double v, ret = (double) 0;
@@ -361,8 +361,9 @@ double dolookup(struct enode * val, int minr, int minc, int maxr, int maxc, int 
     return ret;
 }
 
+
 /**
- * \brief TODO Document docount()
+ * \brief docount()
  *
  * \param[in] minr
  * \param[in] minc
@@ -370,7 +371,7 @@ double dolookup(struct enode * val, int minr, int minc, int maxr, int maxc, int 
  * \param[in] maxc
  * \param[in] e
  *
- * \return none
+ * \return double
  */
 double docount(int minr, int minc, int maxr, int maxc, struct enode * e) {
     int v;
@@ -387,6 +388,7 @@ double docount(int minr, int minc, int maxr, int maxc, struct enode * e) {
             }
             if (!e || eval(NULL, e))
                 // the following changed for #430. docount should also count cells with strings. not just numbers
+                // TODO: create @counta to count both, and leave @count for just numbers
                 if ((p = *ATBL(tbl, r, c)) && (p->flags & is_valid || p->label) ) {
                     if (p->cellerror) cellerr = CELLINVALID;
                     v++;
@@ -397,16 +399,15 @@ double docount(int minr, int minc, int maxr, int maxc, struct enode * e) {
     return v;
 }
 
+
 /**
- * \brief TODO Document dosum()
- *
+ * \brief dosum()
  * \param[in] minr
  * \param[in] minc
  * \param[in] maxr
  * \param[in] maxc
  * \param[in] e
- *
- * \return none
+ * \return double
  */
 double dosum(int minr, int minc, int maxr, int maxc, struct enode * e) {
     double v;
@@ -434,7 +435,7 @@ double dosum(int minr, int minc, int maxr, int maxc, struct enode * e) {
 }
 
 /**
- * \brief TODO Document doprod()
+ * \brief doprod()
  *
  * \param[in] minr
  * \param[in] minc
@@ -442,7 +443,7 @@ double dosum(int minr, int minc, int maxr, int maxc, struct enode * e) {
  * \param[in] maxc
  * \param[in] e
  *
- * \return none
+ * \return double
  */
 double doprod(int minr, int minc, int maxr, int maxc, struct enode * e) {
     double v;
@@ -470,7 +471,7 @@ double doprod(int minr, int minc, int maxr, int maxc, struct enode * e) {
 
 
 /**
- * \brief TODO Document doavg()
+ * \brief doavg()
  *
  * \param[in] minr
  * \param[in] minc
@@ -478,7 +479,7 @@ double doprod(int minr, int minc, int maxr, int maxc, struct enode * e) {
  * \param[in] maxc
  * \param[in] e
  *
- * \return none
+ * \return double
  */
 double doavg(int minr, int minc, int maxr, int maxc, struct enode * e) {
     double v;
@@ -511,7 +512,7 @@ double doavg(int minr, int minc, int maxr, int maxc, struct enode * e) {
 }
 
 /**
- * \brief TODO Document dostddev()
+ * \brief dostddev()
  *
  * \param[in] minr
  * \param[in] minc
@@ -519,7 +520,7 @@ double doavg(int minr, int minc, int maxr, int maxc, struct enode * e) {
  * \param[in] maxc
  * \param[in] e
  *
- * \return none
+ * \return double
  */
 double dostddev(int minr, int minc, int maxr, int maxc, struct enode * e) {
     double lp, rp, v, nd;
@@ -555,7 +556,7 @@ double dostddev(int minr, int minc, int maxr, int maxc, struct enode * e) {
 }
 
 /**
- * \brief TODO Document domax()
+ * \brief domax()
  *
  * \param[in] minr
  * \param[in] minc
@@ -563,7 +564,7 @@ double dostddev(int minr, int minc, int maxr, int maxc, struct enode * e) {
  * \param[in] maxc
  * \param[in] e
  *
- * \return none
+ * \return double
  */
 double domax(int minr, int minc, int maxr, int maxc, struct enode * e) {
     double v = (double) 0;
@@ -598,8 +599,9 @@ double domax(int minr, int minc, int maxr, int maxc, struct enode * e) {
     return (v);
 }
 
+
 /**
- * \brief TODO Document domin()
+ * \brief domin()
  *
  * \param[in] minr
  * \param[in] minc
@@ -607,7 +609,7 @@ double domax(int minr, int minc, int maxr, int maxc, struct enode * e) {
  * \param[in] maxc
  * \param[in] e
  *
- * \return none
+ * \return double
  */
 double domin(int minr, int minc, int maxr, int maxc, struct enode * e) {
     double v = (double)0;
@@ -641,16 +643,16 @@ double domin(int minr, int minc, int maxr, int maxc, struct enode * e) {
     return (v);
 }
 
+
 int mdays[12]={ 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
+
 /**
- * \brief TODO Document dodts()
- *
+ * \brief dodts()
  * \param[in] e1
  * \param[in] e2
  * \param[in] e3
- *
- * \return none
+ * \return double
  */
 double dodts(int e1, int e2, int e3) {
     int yr, mo, day;
@@ -683,14 +685,13 @@ double dodts(int e1, int e2, int e3) {
     return ((double) secs);
 }
 
+
 /**
- * \brief TODO Document dotts()
- *
+ * \brief dotts()
  * \param[in] hr
  * \param[in] min
  * \param[in] sec
- *
- * \return none
+ * \return double
  */
 double dotts(int hr, int min, int sec) {
     if (hr < 0 || hr > 23 || min < 0 || min > 59 || sec < 0 || sec > 59) {
@@ -701,35 +702,36 @@ double dotts(int hr, int min, int sec) {
     return ((double) (sec + min * 60 + hr * 3600));
 }
 
+
 /**
- * \brief TODO Document dorow()
- *
+ * \brief dorow()
  * \param[in] ep
- *
- * \return none
+ * \return double
  */
 double dorow(struct enode * ep) {
     return (double) ep->e.v.vp->row;
 }
 
+
 /**
- * \brief TODO Document docol()
+ * \brief docol()
  *
  * \param[in] ep
  *
- * \return none
+ * \return double
  */
 double docol(struct enode * ep) {
     return (double) ep->e.v.vp->col;
 }
 
+
 /**
- * \brief TODO Document dotime()
+ * \brief dotime()
  *
  * \param[in] which
  * \param[in] when
  *
- * \return none
+ * \return double
  */
 double dotime(int which, double when) {
     static time_t t_cache;
@@ -763,12 +765,11 @@ double dotime(int which, double when) {
     return ((double)0);
 }
 
+
 /**
- * \brief TODO Document doston()
- *
+ * \brief doston()
  * \param[in] s
- *
- * \return none
+ * \return double
  */
 double doston(char * s) {
     double v;
@@ -780,12 +781,27 @@ double doston(char * s) {
     return(v);
 }
 
+
 /**
- * \brief TODO Document doslen()
- *
+ * \brief doevaluate(): take a char * with a formula and eval it
  * \param[in] s
- *
- * \return none
+ * \return double
+ */
+double doevaluate(char * s) {
+    if ( !s) return ((double)0);
+    wchar_t cline [BUFFERSIZE];
+    swprintf(cline, BUFFERSIZE, L"eval %s", s);
+    send_to_interp(cline);
+    double d = eval_result;
+    scxfree(s);
+    return (double) d;
+}
+
+
+/**
+ * \brief doslen()
+ * \param[in] s
+ * \return int
  */
 int doslen(char * s) {
     if (!s) return 0;
@@ -801,13 +817,14 @@ int doslen(char * s) {
     return i;
 }
 
+
 /**
- * \brief TODO Document doeqs()
+ * \brief doeqs()
  *
  * \param[in] s1
  * \param[in] s2
  *
- * \return none
+ * \return double
  */
 double doeqs(char * s1, char * s2) {
     double v;
@@ -828,8 +845,9 @@ double doeqs(char * s1, char * s2) {
     return(v);
 }
 
+
 /**
- * \brief TODO Document getent()
+ * \brief getent()
  *
  * \details Given a string representing a column name and a value which
  * is a row number, return a pointer to the selected cell's entry, if any,
@@ -839,7 +857,8 @@ double doeqs(char * s1, char * s2) {
  * \param[in] colstr
  * \param[in] rwodoub
  *
- * \return none
+ * \return struct ent *
+ * TODO
  */
 struct ent * getent(char *colstr, double rowdoub) {
     int collen;                         /**< length of string */
@@ -865,7 +884,7 @@ struct ent * getent(char *colstr, double rowdoub) {
 
 
 /**
- * \brief TODO Document donval()
+ * \brief donval()
  *
  * \details Given a string representing a column name and a value which is a
  * column number, return the selected cell's numeric value, if any.
@@ -873,7 +892,7 @@ struct ent * getent(char *colstr, double rowdoub) {
  * \param[in] colstr
  * \param[in] rowdoub
  *
- * \return none
+ * \return double
  */
 double donval(char * colstr, double rowdoub) {
     struct ent * ep;
@@ -882,8 +901,9 @@ double donval(char * colstr, double rowdoub) {
         (ep->v) : (double)0);
 }
 
+
 /**
- * \brief TODO Document dolmax()
+ * \brief dolmax()
  *
  * \details The list routines (e.g. dolmax) are called with an LMAX
  * enode. The left pointer is a chain of ELIST nodes, the right
@@ -892,7 +912,7 @@ double donval(char * colstr, double rowdoub) {
  * \param[in] e
  * \param[in] ep
  *
- * \return none
+ * \return double
  */
 double dolmax(struct ent * e, struct enode * ep) {
     register int count = 0;
@@ -913,12 +933,10 @@ double dolmax(struct ent * e, struct enode * ep) {
 }
 
 /**
- * \brief TODO Document dolmin()
- *
+ * \brief dolmin()
  * \param[in] e
  * \param[in] ep
- *
- * \return none
+ * \return double
  */
 double dolmin(struct ent * e, struct enode * ep) {
     register int count = 0;
@@ -939,12 +957,10 @@ double dolmin(struct ent * e, struct enode * ep) {
 }
 
 /**
- * \brief TODO Document eval()
- *
+ * \brief eval()
  * \param[in] ent
  * \param[in] e
- *
- * \return none
+ * \return double
  */
 double eval(register struct ent * ent, register struct enode * e) {
 //    //if (cellerror == CELLERROR || (ent && ent->cellerror == CELLERROR)) {
@@ -1260,6 +1276,10 @@ double eval(register struct ent * ent, register struct enode * e) {
     case TTS:    return (dotts((int) eval(ent, e->e.o.left),
                     (int)eval(ent, e->e.o.right->e.o.left),
                     (int)eval(ent, e->e.o.right->e.o.right)));
+
+    case EVALUATE:
+                 if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
+                 return doevaluate(seval(ent, e->e.o.left));
     case STON:
                  if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
                  return (doston(seval(ent, e->e.o.left)));
@@ -1319,7 +1339,6 @@ double eval(register struct ent * ent, register struct enode * e) {
 
 /*
  * \brief TODO Document eval_fpe()
- *
  * \return none
  */
 void eval_fpe() { /* Trap for FPE errors in eval */
@@ -1338,12 +1357,10 @@ void eval_fpe() { /* Trap for FPE errors in eval */
 }
 
 /**
- * \brief TODO Document fn1_eval()
- *
+ * \brief fn1_eval()
  * \param[in] fn
  * \param[in] arg
- *
- * \return none
+ * \return double
  */
 double fn1_eval(double (*fn)(), double arg) {
     double res;
@@ -1356,13 +1373,11 @@ double fn1_eval(double (*fn)(), double arg) {
 
 
 /**
- * \brief TODO Document fn2_eval()
- *
+ * \brief fn2_eval()
  * \param[in] fn
  * \param[in] arg1
  * \param[in] arg2
- *
- * \return none
+ * \return double
  */
 double fn2_eval(double (*fn)(), double arg1, double arg2) {
     double res;
@@ -1375,7 +1390,7 @@ double fn2_eval(double (*fn)(), double arg1, double arg2) {
 
 
 /**
- * \brief TODO Document docat()
+ * \brief docat()
  *
  * \details Tules for string functions:
  * Take string arguments which they scxfree. All returned strings
@@ -1384,7 +1399,7 @@ double fn2_eval(double (*fn)(), double arg1, double arg2) {
  * \param[in] s1
  * \param[in] s2
  *
- * \return none
+ * \return char *
  */
 char * docat(register char * s1, register char * s2) {
     register char * p;
@@ -1406,12 +1421,10 @@ char * docat(register char * s1, register char * s2) {
 
 
 /**
- * \brief TODO Document dodate()
- *
+ * \brief dodate()
  * \param[in] tloc
  * \param[in] fmstr
- *
- * \return none
+ * \return char *
  */
 char * dodate(time_t tloc, char * fmtstr) {
     char buff[FBUFLEN];
@@ -1428,10 +1441,8 @@ char * dodate(time_t tloc, char * fmtstr) {
 
 /**
  * \brief Conversion reverse from doascii
- *
  * \param[in] ascii
- *
- * \return none
+ * \return char *
  */
 char * dochr(double ascii) {
     char * p = scxmalloc((size_t) 10);
@@ -1456,12 +1467,12 @@ char * dochr(double ascii) {
 
 
 /**
- * \brief TODO Document dofmt()
+ * \brief dofmt()
  *
  * \param[in] fmtstr
  * \param[in] v
  *
- * \return none
+ * \return char *
  */
 char * dofmt(char * fmtstr, double v) {
     char buff[FBUFLEN];
@@ -1477,8 +1488,9 @@ char * dofmt(char * fmtstr, double v) {
 }
 
 
+
 /**
- * \brief TODO Document doext()
+ * \brief doext()
  *
  * \details Given a command name and a value, run the command with the given
  * value and read and return its first output line (only) as an allocated
@@ -1490,7 +1502,7 @@ char * dofmt(char * fmtstr, double v) {
  *
  * \param[in] se
  *
- * \return none
+ * \return char *
  */
 char * doext(struct enode *se) {
     char buff[FBUFLEN];        /* command line/return, not permanently alloc */
@@ -1550,7 +1562,7 @@ char * doext(struct enode *se) {
 
 
 /**
- * \brief TODO Document dosval()
+ * \brief dosval()
  *
  * \details Given a string representing a column name and a value which
  * is a column number, return the selected cell's string value, if any.
@@ -1560,7 +1572,7 @@ char * doext(struct enode *se) {
  * \param[in] colstr
  * \param[in] rowdoub
  *
- * \return none
+ * \return char *
  */
 char * dosval(char * colstr, double rowdoub) {
     struct ent * ep;
@@ -1576,13 +1588,13 @@ char * dosval(char * colstr, double rowdoub) {
 
 
 /**
- * \brief TODO Document doreplace()
+ * \brief doreplace()
  *
  * \param[in] source
  * \param[in] old
  * \param[in] new
  *
- * \return none
+ * \return char *
  */
 char * doreplace(char * source, char * old, char * new) {
     return str_replace(source, old, new);
@@ -1590,20 +1602,19 @@ char * doreplace(char * source, char * old, char * new) {
 
 
 /**
- * \brief TODO Document dosubstring()
+ * \brief dosubstring()
  *
  * \param[in] s
  * \param[in] v1
  * \param[in] v2
  *
- * \return none
+ * \return char *
  */
 char * dosubstr(char * s, register int v1, register int v2) {
     register char * s1, * s2;
     char * p;
 
-    if ( !s )
-        return ((char *) 0);
+    if ( !s ) return ((char *) 0);
 
     if (v2 >= strlen(s))        /* past end */
         v2 =  strlen(s) - 1;    /* to end   */
@@ -1623,13 +1634,36 @@ char * dosubstr(char * s, register int v1, register int v2) {
     return (p);
 }
 
+
+/**
+ * \brief dosevaluate(): take a char * with a formula and seval it
+ * \param[in] s
+ * \return char *
+ */
+char * dosevaluate(char * s) {
+    if ( !s ) return ((char *) 0);
+    char * p;
+
+    wchar_t cline [BUFFERSIZE];
+    swprintf(cline, BUFFERSIZE, L"seval %s", s);
+    send_to_interp(cline);
+
+    p = scxmalloc(sizeof(char) * strlen(seval_result)+1);
+    strcpy(p, seval_result);
+    free(seval_result);
+
+    scxfree(s);
+    return p;
+}
+
+
 /**
  * \brief Character casing: make upper case, make lower case, set 8th bit
  *
  * \param[in] acase
  * \param[in] s
  *
- * \return none
+ * \return char *
  */
 char * docase(int acase, char * s) {
     char * p = s;
@@ -1660,7 +1694,7 @@ char * docase(int acase, char * s) {
 }
 
 /**
- * \brief TODO Document docapital
+ * \brief docapital
  *
  * \details Make proper capitals of every word in a string. If the string
  * has mixed case, we say the string is lower and we will upcase only
@@ -1669,7 +1703,7 @@ char * docase(int acase, char * s) {
  *
  * \param[in] s
  *
- * \return none
+ * \return char *
  */
 char * docapital(char * s) {
     char * p;
@@ -1693,24 +1727,26 @@ char * docapital(char * s) {
 }
 
 /**
- * \brief TODO Document seval()
+ * \brief seval()
  *
  * \param[in] ent
  * \param[in] se
  *
- * \return none
+ * \return char *
  */
-char * seval(register struct ent * ent, register struct enode * se) {
-    register char * p;
-
+char * seval(struct ent * ent, struct enode * se) {
     if (se == (struct enode *) 0) return (char *) 0;
+
+    char * p;
+
     switch (se->op) {
     case O_SCONST:
             p = scxmalloc( (size_t) (strlen(se->e.s) + 1));
             (void) strcpy(p, se->e.s);
 
-            if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent); //FIXME
+            if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
             return (p);
+
     case O_VAR:
             {
             struct ent * vp = se->e.v.vp;
@@ -1739,8 +1775,10 @@ char * seval(register struct ent * ent, register struct enode * se) {
             }
             return (p);
     }
+
     case '#':
             return (docat(seval(ent, se->e.o.left), seval(ent, se->e.o.right)));
+
     case 'f':
              {
              int rtmp = rowoffset;
@@ -1752,17 +1790,25 @@ char * seval(register struct ent * ent, register struct enode * se) {
              coloffset = ctmp;
              return (ret);
              }
+
     case 'F':    return (seval(ent, se->e.o.left));
+
     case IF:
-    case '?':    return (eval(NULL, se->e.o.left) ? seval(ent, se->e.o.right->e.o.left)
-                         : seval(ent, se->e.o.right->e.o.right));
-    case DATE:   return (dodate( (time_t) (eval(NULL, se->e.o.left)),
-                 seval(ent, se->e.o.right)));
+
+    case '?':    return (eval(NULL, se->e.o.left) ? seval(ent, se->e.o.right->e.o.left) : seval(ent, se->e.o.right->e.o.right));
+
+    case DATE:   return (dodate( (time_t) (eval(NULL, se->e.o.left)), seval(ent, se->e.o.right)));
+
     case FMT:    return (dofmt(seval(ent, se->e.o.left), eval(NULL, se->e.o.right)));
+
     case UPPER:  return (docase(UPPER, seval(ent, se->e.o.left)));
+
     case LOWER:  return (docase(LOWER, seval(ent, se->e.o.left)));
+
     case SET8BIT:  return (docase(SET8BIT, seval(ent, se->e.o.left)));
+
     case CAPITAL:return (docapital(seval(ent, se->e.o.left)));
+
     case STINDEX: {
         int r, c;
         int maxr, maxc;
@@ -1796,19 +1842,26 @@ char * seval(register struct ent * ent, register struct enode * se) {
 #endif
 
     case SVAL:   return (dosval(seval(ent, se->e.o.left), eval(NULL, se->e.o.right)));
+
     case REPLACE: return (doreplace(seval(ent, se->e.o.left),
                           seval(NULL, se->e.o.right->e.o.left),
                           seval(NULL, se->e.o.right->e.o.right)));
+
     case SUBSTR: return (dosubstr(seval(ent, se->e.o.left),
                 (int) eval(NULL, se->e.o.right->e.o.left) - 1,
                 (int) eval(NULL, se->e.o.right->e.o.right) - 1));
     case COLTOA:
                  if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
-                 return (strcpy(scxmalloc( (size_t) 10),
-                             coltoa((int) eval(NULL, se->e.o.left))));
+                 return (strcpy(scxmalloc( (size_t) 10), coltoa((int) eval(NULL, se->e.o.left))));
+
     case CHR:
              if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
              return (strcpy(scxmalloc( (size_t) 10), dochr(eval(NULL, se->e.o.left))));
+
+    case SEVALUATE:
+             if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
+             return dosevaluate(seval(ent, se->e.o.left));
+
     case FILENAME: {
              int n = eval(NULL, se->e.o.left);
              char *s = strrchr(curfile, '/');
@@ -1825,14 +1878,14 @@ char * seval(register struct ent * ent, register struct enode * se) {
     }
 }
 
+
 /**
- * \brief TODO Document new()
+ * \brief new()
  *
  * \param[in] op
  * \param[in] a1
  * \param[in] a2
- *
- * \return none
+ * \return struct enode *
  */
 struct enode * new(int op, struct enode * a1, struct enode * a2) {
     register struct enode * p;
@@ -1849,13 +1902,12 @@ struct enode * new(int op, struct enode * a1, struct enode * a2) {
     return p;
 }
 
+
 /**
- * \brief TODO Document new_var()
- *
+ * \brief new_var()
  * \param[in] op
  * \param[in] a1
- *
- * \return none
+ * \return struct enotde *
  */
 struct enode * new_var(int op, struct ent_ptr a1) {
     register struct enode * p;
@@ -1893,12 +1945,10 @@ struct enode * new_range(int op, struct range_s a1) {
 
 
 /**
- * \brief TODO Document new_const()
- *
+ * \brief new_const()
  * \param[in] op
  * \param[in] a1
- *
- * \return none
+ * \return struct enotde *
  */
 struct enode * new_const(int op, double a1) {
     register struct enode * p;
@@ -1914,11 +1964,9 @@ struct enode * new_const(int op, double a1) {
 
 
 /**
- * \brief TODO Document new_str()
- *
+ * \brief new_str()
  * \param[in] s
- *
- * \return none
+ * \return struct enode *
  */
 struct enode * new_str(char * s) {
     register struct enode * p;
@@ -1935,7 +1983,6 @@ struct enode * new_str(char * s) {
 
 /**
  * \brief Goto subroutines
- *
  * \return none
  */
 void g_free() {
@@ -1953,8 +2000,7 @@ void g_free() {
 
 
 /**
- * \brief TODO Document go_previous()
- *
+ * \brief go_previous()
  * \return none
  */
 void go_previous() {
@@ -1978,8 +2024,7 @@ void go_previous() {
 
 
 /**
- * \brief TODO Document go_last()
- *
+ * \brief go_last()
  * \return none
  */
 void go_last() {
@@ -2063,7 +2108,7 @@ void moveto(int row, int col, int lastrow_, int lastcol_, int cornerrow, int cor
 
 
 /**
- * \brief TODO Document num_search()
+ * \brief num_search()
  *
  * \details 'goto' either a given number, 'error', or 'invalid' starting
  * at (currow, curcol).
@@ -2151,10 +2196,6 @@ void num_search(double n, int firstrow, int firstcol, int lastrow_, int lastcol_
     curcol = c;
     rowsinrange = 1;
     colsinrange = fwidth[curcol];
-    //if (loading) {
-        //update(1);
-    //    changed = 0;
-    //} //else remember(1);
 }
 
 
@@ -2293,9 +2334,6 @@ void str_search(char *s, int firstrow, int firstcol, int lastrow_, int lastcol_,
     rowsinrange = 1;
     colsinrange = fwidth[curcol];
     regfree(&preg);
-    //if (loading) {
-    //    changed = 0;
-    //}
 }
 
 
@@ -2446,7 +2484,6 @@ void unlock_cells(struct ent * v1, struct ent * v2) {
 }
 
 
-/* set the numeric part of a cell */
 /**
  * \brief Set the numeric part of a cell
  *
@@ -2548,7 +2585,7 @@ void let(struct ent * v, struct enode * e) {
 
 
 /**
- * \brief TODO Document slet()
+ * \brief slet()
  *
  * \param[in] v
  * \param[in] se
@@ -2654,7 +2691,7 @@ void slet(struct ent * v, struct enode * se, int flushdir) {
 
 
 /**
- * \brief TODO Document format_cell()
+ * \brief format_cell()
  *
  * \param[in] v1
  * \param[in] v2
@@ -2730,10 +2767,8 @@ int constant(register struct enode *e) {
 
 
 /**
- * \brief TODO Document efree()
- *
+ * \brief efree()
  * \param[in] e
- *
  * \return none
  */
 void efree(struct enode * e) {
@@ -2755,7 +2790,7 @@ void efree(struct enode * e) {
 
 
 /**
- * \brief TODO Document label()
+ * \brief label()
  *
  * \param[in] v
  * \param[in] s
@@ -2791,10 +2826,8 @@ void label(register struct ent * v, register char * s, int flushdir) {
 
 
 /**
- * \brief TODO Document decodev()
- *
+ * \brief decodev()
  * \param[in] v
- *
  * \return none
  */
 void decodev(struct ent_ptr v) {
@@ -2818,7 +2851,6 @@ void decodev(struct ent_ptr v) {
  * \details converts a number representing a column to its name.
  * Example 3 to "D"
  * \param[in] col
- *
  * \return none
  */
 char * coltoa(int col) {
@@ -2836,7 +2868,7 @@ char * coltoa(int col) {
 
 
 /**
- * \brief TODO Document decompile_list()
+ * \brief decompile_list()
  *
  * \details To make list elements come out in the same order
  * they were entered, we must do a depth-first eval of the
@@ -2855,7 +2887,7 @@ static void decompile_list(struct enode *p) {
 
 
 /**
- * \brief TODO Document decompile()
+ * \brief decompile()
  *
  * \param[in] e
  * \param[in] priority
@@ -2983,6 +3015,8 @@ void decompile(register struct enode *e, int priority) {
     case NVAL:  two_arg("@nval(", e); break;
     case SVAL:  two_arg("@sval(", e); break;
     case EXT:   two_arg("@ext(", e); break;
+    case EVALUATE: one_arg("@evaluate(", e); break;
+    case SEVALUATE: one_arg("@sevaluate(", e); break;
 #ifdef XLUA
     case LUA:   two_arg("@lua(", e); break;
 #endif
@@ -3078,7 +3112,7 @@ void decompile(register struct enode *e, int priority) {
 
 
 /**
- * \brief TODO Document index_arg()
+ * \brief index_arg()
  *
  * \param[in] s
  * \param[in] e
@@ -3103,7 +3137,7 @@ void index_arg(char *s, struct enode *e) {
 
 
 /**
- * \brief TODO Document two_arg_index()
+ * \brief two_arg_index()
  *
  * \param[in] s
  * \param[in] e
@@ -3124,7 +3158,7 @@ void two_arg_index(char *s, struct enode *e) {
 
 
 /**
- * \brief TODO Document list_arg()
+ * \brief list_arg()
  *
  * \param[in] s
  * \param[in] e
@@ -3143,7 +3177,7 @@ void list_arg(char *s, struct enode *e) {
 
 
 /**
- * \brief TODO Document one_arg()
+ * \brief one_arg()
  *
  * \param[in] s
  * \param[in] e
@@ -3159,7 +3193,7 @@ void one_arg(char *s, struct enode *e) {
 
 
 /**
- * \brief TODO Document two_arg()
+ * \brief two_arg()
  *
  * \param[in] s
  * \param[in] e
@@ -3177,7 +3211,7 @@ void two_arg(char *s, struct enode *e) {
 
 
 /**
- * \brief TODO Document three_arg()
+ * \brief three_arg()
  *
  * \param[in] s
  * \param[in] e
@@ -3197,7 +3231,7 @@ void three_arg(char *s, struct enode *e) {
 
 
 /**
- * \brief TODO Document range_arg()
+ * \brief range_arg()
  *
  * \param[in] s
  * \param[in] e
@@ -3222,7 +3256,7 @@ void range_arg(char *s, struct enode *e) {
 
 
 /**
- * \brief TODO Document editfmt()
+ * \brief editfmt()
  *
  * \param[in] row
  * \param[in] col
@@ -3241,7 +3275,7 @@ void editfmt(int row, int col) {
 
 
 /**
- * \brief TODO Document editv()
+ * \brief editv()
  *
  * \param[in] row
  * \param[in] col
@@ -3265,7 +3299,7 @@ void editv(int row, int col) {
 
 
 /**
- * \brief TODO Document editexp()
+ * \brief editexp()
  *
  * \param[in] row
  * \param[in] col
@@ -3283,7 +3317,7 @@ void editexp(int row, int col) {
 
 
 /**
- * \brief TODO Document edits()
+ * \brief edits()
  *
  * \param[in] row
  * \param[in] col
@@ -3321,7 +3355,7 @@ void edits(int row, int col, int saveinfile) {
 
 
 /**
- * \brief TODO Document dateformat()
+ * \brief dateformat()
  *
  * \param[in] v1
  * \param[in] v2
@@ -3388,7 +3422,7 @@ int dateformat(struct ent *v1, struct ent *v2, char * fmt) {
 
 #ifdef RINT
 /**
- * \brief TODO Round-to-even
+ * \brief Round-to-even
  *
  * \details Round-to-even, also known as "banker's rounding". With
  * round-to-even, a number exactly halfway between two values is

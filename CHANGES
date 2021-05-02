@@ -48,10 +48,16 @@ Replaced 'EvalAll' with 'EvalRange'.
 Removed unneeded parameters on EvalJustVertex"
 Added eval_order in EvalRange and rebuild_graph
 
+Added @evaluate / @sevaluate functions
 
 
 Pending for v0.8.2 release
 ----------------------------
+
+Added @evaluate / @sevaluate to doc
+idem with @dts / @now
+create @counta, and modify @count to not count strings
+
 remove old references to freezer / freezec / center_hidden_rows: cmds.c cmds_command freeze.c tui.c tui.h
 test calc_offscr_rows and calc_offscr_cols
 check all cmds movement functions after new frozen mods

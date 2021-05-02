@@ -289,6 +289,8 @@ struct go_save {
 #define LUA         (OP_BASE + 84)
 #define FACT        (OP_BASE + 85)
 #define GETENT      (OP_BASE + 86)
+#define EVALUATE    (OP_BASE + 87)
+#define SEVALUATE   (OP_BASE + 88)
 
 /* flag values */
 #define is_valid      0001

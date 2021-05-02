@@ -126,3 +126,5 @@ double rint(double d);
 
 void EvalAllVertexs();
 void EvalJustOneVertex(register struct ent * p, int rebuild_graph);
+double doevaluate(char * s);
+char * dosevaluate(char * s);
