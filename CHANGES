@@ -54,8 +54,7 @@ Added @evaluate / @sevaluate functions
 Pending for v0.8.2 release
 ----------------------------
 
-Added @evaluate / @sevaluate to doc
-idem with @dts / @now
+Added @dts / @now to doc
 create @counta, and modify @count to not count strings
 
 remove old references to freezer / freezec / center_hidden_rows: cmds.c cmds_command freeze.c tui.c tui.h

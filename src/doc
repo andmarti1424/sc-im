@@ -1515,7 +1515,13 @@ Commands for handling cell content:
     @slen("{se}")
         Returns the length of string expression {se}.
 
-
+    @evaluate("{se}")
+        Evaluate a string expression as a numeric formula. Example of use:
+        If you have in cell D0 a formula as text, "@sum(A0:A11)", instead of a proper
+        numeric formula inserted with '=', you could make it get evaluated in another
+        cell (for this example E0) with =@evaluate(D0). Please note that this will not
+        added the dependency to the evaluation graph. That means that if you later
+        update the value of cell A0, it will not get updated in cell D0.
 
 ==============================================================================
 &String Expressions&
@@ -1646,6 +1652,15 @@ Commands for handling cell content:
         @fmt("**%6.3f**", 10.5)
         yields the string ``**10.500**''. e is a double, so applicable
         formats are e, E, f, g, and G.  Try ``%g'' as a starting point.
+
+    @sevaluate("{se}")
+        Evaluate a string expression as a string formula. Example of use:
+        If you have in cell D0 a string formula as text, "@substr(A0, 4, 6)",
+        instead of a proper string formula inserted with '\"', you could make it
+        get evaluated in another cell (for this example E0) with =@sevaluate(D0).
+        Please note that this will not added the dependency to the evaluation
+        graph. That means that if you later update the value of cell A0, it will
+        not get updated in cell D0.
 
 ==============================================================================
 &Built-in Date and Time Functions&
