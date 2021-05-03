@@ -452,8 +452,6 @@ command:
     |    S_RIGHTJUSTIFY var_or_range { rjustify($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col); }
 
     |    S_CENTER var_or_range       { center($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col); }
-    |    S_FORMAT COL NUMBER NUMBER NUMBER { doformat($2,$2,$3,$4,$5); }
-    |    S_FORMAT NUMBER NUMBER      { dorowformat($2, $3); }
     |    S_FMT var_or_range STRING   { format_cell($2.left.vp, $2.right.vp, $3);
                                        scxfree($3);
                                      }
@@ -557,8 +555,6 @@ command:
                                                  $2.right.vp->col, $3, $4, $5, 1);
                                        scxfree($4);
                                      }
-    |    S_FILTERON range            { enable_filters($2.left.vp, $2.right.vp);
-                                     }
 /*
     |    S_GET strarg {
 /* This tmp hack is because readfile recurses back through yyparse.
@@ -571,6 +567,15 @@ command:
     |    S_AUTOJUS COL ':' COL       { auto_justify($2, $4, DEFWIDTH); }  // auto justificado de columnas
     |    S_AUTOJUS COL               { auto_justify($2, $2, DEFWIDTH); }  // auto justificado de columna
 
+    |    S_PAD NUMBER COL ':' COL  { pad($2, 0, $3, maxrow, $5); }
+    |    S_PAD NUMBER COL          { pad($2, 0, $3, maxrow, $3); }
+    |    S_PAD NUMBER var_or_range { pad($2, $3.left.vp->row, $3.left.vp->col, $3.right.vp->row, $3.right.vp->col); }
+    |    S_GETFORMAT COL           { getformat($2, fdoutput); }
+    |    S_FORMAT COL NUMBER NUMBER NUMBER { doformat($2,$2,$3,$4,$5); }
+    |    S_FORMAT NUMBER NUMBER      { dorowformat($2, $3); }
+
+    |    S_FILTERON range            { enable_filters($2.left.vp, $2.right.vp);
+                                     }
     |    S_GOTO var_or_range var_or_range { moveto($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col, $3.left.vp->row, $3.left.vp->col); }
     |    S_GOTO var_or_range     { moveto($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col, -1, -1); }
     |    S_GOTO num              { num_search($2, 0, 0, maxrow, maxcol, 0, 1); }
@@ -733,9 +738,6 @@ command:
     |    S_FCOPY                   { fcopy(""); }
     |    S_FCOPY strarg            { fcopy($2); }
     |    S_FSUM                    { fsum();  }
-    |    S_PAD NUMBER COL ':' COL  { pad($2, 0, $3, maxrow, $5); }
-    |    S_PAD NUMBER COL          { pad($2, 0, $3, maxrow, $3); }
-    |    S_PAD NUMBER var_or_range { pad($2, $3.left.vp->row, $3.left.vp->col, $3.right.vp->row, $3.right.vp->col); }
 
     |    S_PLOT STRING var_or_range       {
                                      plot($2, $3.left.vp->row, $3.left.vp->col, $3.right.vp->row, $3.right.vp->col);
@@ -842,7 +844,6 @@ command:
 
     |    S_GETEXP var_or_range     { getexp($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col, fdoutput); }
 
-    |    S_GETFORMAT COL           { getformat($2, fdoutput); }
 
     |    S_GETFMT var_or_range     { getfmt($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col, fdoutput); }
 
@@ -1008,6 +1009,10 @@ term:     var                     { $$ = new_var(O_VAR, $1); }
                                   $$ = new(LUA, $4, $6);
                                   #endif
                                   }
+        | '@' K_MYROW             { $$ = new(MYROW, ENULL, ENULL);}
+        | '@' K_MYCOL             { $$ = new(MYCOL, ENULL, ENULL);}
+        | '@' K_LASTROW           { $$ = new(LASTROW, ENULL, ENULL);}
+        | '@' K_LASTCOL           { $$ = new(LASTCOL, ENULL, ENULL);}
         | '@' K_NVAL '(' e ',' e ')'
                                   { $$ = new(NVAL, $4, $6); }
         | '@' K_SVAL '(' e ',' e ')'
@@ -1030,10 +1035,6 @@ term:     var                     { $$ = new_var(O_VAR, $1); }
         |       '!' term          { $$ = new('!', $2, ENULL); }
         | '@' K_FILENAME '(' e ')'
                                   { $$ = new(FILENAME, $4, ENULL); }
-        | '@' K_MYROW             { $$ = new(MYROW, ENULL, ENULL);}
-        | '@' K_MYCOL             { $$ = new(MYCOL, ENULL, ENULL);}
-        | '@' K_LASTROW           { $$ = new(LASTROW, ENULL, ENULL);}
-        | '@' K_LASTCOL           { $$ = new(LASTCOL, ENULL, ENULL);}
         | '@' K_COLTOA '(' e ')'  { $$ = new(COLTOA, $4, ENULL);}
         | '@' K_ASCII '(' e ')'   { $$ = new(ASCII, $4, ENULL); }
         | '@' K_SET8BIT '(' e ')' { $$ = new(SET8BIT, $4, ENULL); }
