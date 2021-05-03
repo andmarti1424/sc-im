@@ -60,7 +60,7 @@ double dotime(int which, double when);
 double doston(char * s);
 int    doslen(char * s);
 double doeqs(char * s1, char * s2);
-struct ent * getent(char * colstr, double rowdoub);
+struct ent * getent(char * colstr, double rowdoub, int alloc);
 struct ent * dogetent(int r, int c);
 double donval(char * colstr, double rowdoub);
 double dolmax(struct ent * e, struct enode * ep);

@@ -1507,6 +1507,7 @@ Commands for handling cell content:
         If {se} or {expr} is out of bounds, or the cell has no numeric
         value, the result is 0.
         You can use this for simple table lookups. See also @sval below.
+        =@nval("B", 0);     would output the same as   =B0
 
     @eqs("{se1}","{se2}")
         Return 1 if string expressions {se1} and {se2} have the same value, 0
@@ -1652,6 +1653,8 @@ Commands for handling cell content:
         @fmt("**%6.3f**", 10.5)
         yields the string ``**10.500**''. e is a double, so applicable
         formats are e, E, f, g, and G.  Try ``%g'' as a starting point.
+        More details on:
+        https://www.gnu.org/software/libc/manual/html_node/Floating_002dPoint-Conversions.html
 
     @sevaluate("{se}")
         Evaluate a string expression as a string formula. Example of use:

@@ -104,7 +104,7 @@ struct go_save gs = { .g_type = G_NONE } ;
 int exprerr;              /* Set by eval() and seval() if expression errors */
 double prescale = 1.0;    /* Prescale for constants in let() */
 int loading = 0;          /* Set when readfile() is active */
-int gmyrow, gmycol;       /* globals used to implement @myrow, @mycol cmds */
+int gmyrow = -1, gmycol = -1;       /* globals used to implement @myrow, @mycol cmds */
 int rowoffset = 0, coloffset = 0;    /* row & col offsets for range functions */
 jmp_buf fpe_save;
 
@@ -850,8 +850,9 @@ double doeqs(char * s1, char * s2) {
  * \brief getent()
  *
  * \details Given a string representing a column name and a value which
- * is a row number, return a pointer to the selected cell's entry, if any,
- * else NULL. Use only the integer part of the column number. Always
+ * is a row number, return a pointer to the selected cell's entry.
+ * if alloc == 0 and no cell is alloc, return NULL.
+ * Use only the integer part of the column number. Always
  * free the string
  *
  * \param[in] colstr
@@ -860,22 +861,26 @@ double doeqs(char * s1, char * s2) {
  * \return struct ent *
  * TODO
  */
-struct ent * getent(char *colstr, double rowdoub) {
-    int collen;                         /**< length of string */
-    int row, col;                       /**< integer values   */
-    struct ent *p = (struct ent *) 0;   /**< selected entry   */
+struct ent * getent(char *colstr, double rowdoub, int alloc) {
+    int collen;                         /* length of string */
+    int row, col;                       /* integer values   */
+    struct ent *p = (struct ent *) 0;   /* selected entry   */
 
     if (!colstr) {
         cellerror = CELLERROR;
         return ((struct ent *) 0);
     }
+    collen = strlen(colstr);
+    col = atocol(colstr, collen);
+    row = (int) floor(rowdoub);
 
-    if (((row = (int) floor(rowdoub)) >= 0)
+    if (row >= 0
         && (row < maxrows)                      /* in range */
-        && ((collen = strlen (colstr)) <= 2)    /* not too long */
-        && ((col = atocol (colstr, collen)) >= 0)
+        && (collen <= 2)                        /* not too long */
+        && (col >= 0)
         && (col < maxcols)) {                   /* in range */
-            p = *ATBL(tbl, row, col);
+            if (alloc) p = lookat(row, col);
+            else p = *ATBL(tbl, row, col);
             if ((p != NULL) && p->cellerror) cellerror = CELLINVALID;
     }
     scxfree(colstr);
@@ -897,8 +902,7 @@ struct ent * getent(char *colstr, double rowdoub) {
 double donval(char * colstr, double rowdoub) {
     struct ent * ep;
 
-    return (((ep = getent(colstr, rowdoub)) && ((ep->flags) & is_valid)) ?
-        (ep->v) : (double)0);
+    return (((ep = getent(colstr, rowdoub, 0)) && ((ep->flags) & is_valid)) ? (ep->v) : (double)0);
 }
 
 
@@ -1258,18 +1262,18 @@ double eval(register struct ent * ent, register struct enode * e) {
         }
     case FV:
     case PV:
-    case PMT:    return (finfunc(e->op, eval(ent, e->e.o.left),
-                    eval(ent, e->e.o.right->e.o.left),
-                    eval(ent, e->e.o.right->e.o.right)));
+    case PMT:    return (finfunc(e->op, eval(ent, e->e.o.left), eval(ent, e->e.o.right->e.o.left), eval(ent, e->e.o.right->e.o.right)));
     case HOUR:   return (dotime(HOUR, eval(ent, e->e.o.left)));
     case MINUTE: return (dotime(MINUTE, eval(ent, e->e.o.left)));
     case SECOND: return (dotime(SECOND, eval(ent, e->e.o.left)));
     case MONTH:  return (dotime(MONTH, eval(ent, e->e.o.left)));
     case DAY:    return (dotime(DAY, eval(ent, e->e.o.left)));
     case YEAR:   return (dotime(YEAR, eval(ent, e->e.o.left)));
+
     case NOW:
                  if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
                  return (dotime(NOW, (double) 0.0));
+
     case DTS:    return (dodts((int) eval(ent, e->e.o.left),
                     (int)eval(ent, e->e.o.right->e.o.left),
                     (int)eval(ent, e->e.o.right->e.o.right)));
@@ -1280,38 +1284,67 @@ double eval(register struct ent * ent, register struct enode * e) {
     case EVALUATE:
                  if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
                  return doevaluate(seval(ent, e->e.o.left));
+
     case STON:
                  if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
                  return (doston(seval(ent, e->e.o.left)));
+
     case ASCII:  return (doascii(seval(ent, e->e.o.left)));
+
     case SLEN:   return (doslen(seval(ent, e->e.o.left)));
+
     case EQS:    return (doeqs(seval(ent, e->e.o.right), seval(ent, e->e.o.left)));
+
     case LMAX:   return dolmax(ent, e);
+
     case LMIN:   return dolmin(ent, e);
-    case NVAL:   return (donval(seval(ent, e->e.o.left), eval(ent, e->e.o.right)));
+
+    case NVAL:
+                 if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
+                 char * s = seval(ent, e->e.o.left);
+                 char * sf = malloc(sizeof(char)*(strlen(s)+1));
+                 strcpy(sf, s);
+                 double n = eval(ent, e->e.o.right);
+                 struct ent * ep = getent(sf, n, 1);
+                 if (! ep) return (double) (0);
+                 if (ent && ep) GraphAddEdge(getVertex(graph, lookat(ent->row, ent->col), 1), getVertex(graph, ep, 1));
+                 return donval(s, n);
+
     case MYROW:
+                 // Add default value for gmyrow, in case eval() is called before EvallJustOneVertex
+                 // this might happen during startup when loading file
+                 if (gmyrow == -1 && ent) gmyrow = ent->row;
                  if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
                  return ((double) (gmyrow + rowoffset));
     case MYCOL:
+                 // Add default value for gmycol, in case eval() is called before EvallJustOneVertex
+                 // this might happen during startup when loading file
+                 if (gmycol == -1 && ent) gmycol = ent->col;
                  if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
                  return ((double) (gmycol + coloffset));
+
     case LASTROW:
                  if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
                  return ((double) maxrow);
+
     case LASTCOL:
                  if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
                  return ((double) maxcol);
+
     case ERR_:
                  cellerror = CELLERROR;
                  if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
                  return ((double) 0);
+
     case REF_:
                  cellerror = CELLREF;
                  if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
                  return ((double) 0);
+
     case PI_:
                  if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
                  return ((double) M_PI);
+
     case BLACK:  return ((double) COLOR_BLACK);
     case RED:    return ((double) COLOR_RED);
     case GREEN:  return ((double) COLOR_GREEN);
@@ -1578,10 +1611,10 @@ char * dosval(char * colstr, double rowdoub) {
     struct ent * ep;
     char * llabel;
 
-    //llabel = (ep = getent(colstr, rowdoub)) ? (ep -> label) : "";
+    //llabel = (ep = getent(colstr, rowdoub, 0)) ? (ep -> label) : "";
 
     // getent don't return NULL for a cell with no string.
-    llabel = ( ep = getent(colstr, rowdoub) ) && ep -> label ? (ep -> label) : "";
+    llabel = ( ep = getent(colstr, rowdoub, 0) ) && ep -> label ? (ep -> label) : "";
 
     return (strcpy(scxmalloc( (size_t) (strlen(llabel) + 1)), llabel));
 }
@@ -1850,9 +1883,10 @@ char * seval(struct ent * ent, struct enode * se) {
     case SUBSTR: return (dosubstr(seval(ent, se->e.o.left),
                 (int) eval(NULL, se->e.o.right->e.o.left) - 1,
                 (int) eval(NULL, se->e.o.right->e.o.right) - 1));
+
     case COLTOA:
                  if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
-                 return (strcpy(scxmalloc( (size_t) 10), coltoa((int) eval(NULL, se->e.o.left))));
+                 return (strcpy(scxmalloc( (size_t) 10), coltoa((int) eval(ent, se->e.o.left))));
 
     case CHR:
              if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
