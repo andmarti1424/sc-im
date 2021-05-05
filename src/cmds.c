@@ -875,8 +875,7 @@ void deleterow(int row, int mult) {
     for (i=row; i < row + mult; i++) {
         add_undo_row_format(i, 'R', row_format[currow]);
         if (row_hidden[i]) undo_hide_show(i, -1, 's', 1);
-        else undo_hide_show(i, -1, 'h', 1);
-        // TODO undo row_frozen
+        //else undo_hide_show(i, -1, 'h', 1);
     }
 #endif
 
