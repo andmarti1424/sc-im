@@ -441,8 +441,8 @@ void read_stdin() {
  *
  * \return none
  */
-
 void delete_structures() {
+
     // Free marks array
     free_marks_array();
 
@@ -461,6 +461,11 @@ void delete_structures() {
     // Free undo list - from start of list
 #ifdef UNDO
     clear_undo_list();
+#endif
+
+    // Free lua stuff
+#ifdef XLUA
+    doLuaclose();
 #endif
 
     // free deleted ents

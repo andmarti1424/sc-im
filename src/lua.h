@@ -46,4 +46,5 @@
 char * doLUA(struct enode * se, int type);
 void doLuainit();
 void doLuaTrigger_cell(struct ent * p, int rw);
+void doLuaclose();
 #endif
