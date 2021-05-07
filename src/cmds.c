@@ -551,8 +551,8 @@ struct enode * copye(register struct enode *e, int Rdelta, int Cdelta, int r1, i
         int newrow, newcol;
         ret = (struct enode *) scxmalloc((unsigned) sizeof (struct enode));
         ret->op = e->op;
-        ret->e.r.left.expr = e->e.r.left.expr ? e->e.r.left.expr : NULL; // important to initialize
-        ret->e.r.right.expr = e->e.r.right.expr ? e->e.r.right.expr : NULL; // important to initialize
+        ret->e.r.left.expr = e->e.r.left.expr ? copye(e->e.r.left.expr, Rdelta, Cdelta, r1, c1, r2, c2, special) : NULL; // important to initialize
+        ret->e.r.right.expr = e->e.r.right.expr ? copye(e->e.r.right.expr, Rdelta, Cdelta, r1, c1, r2, c2, special) : NULL; // important to initialize
         newrow = e->e.r.left.vf & FIX_ROW || e->e.r.left.vp->row < r1 || e->e.r.left.vp->row > r2 || e->e.r.left.vp->col < c1 || e->e.r.left.vp->col > c2 ?  e->e.r.left.vp->row : special == 1 ? r1 + Rdelta + e->e.r.left.vp->col - c1 : e->e.r.left.vp->row + Rdelta;
         newcol = e->e.r.left.vf & FIX_COL || e->e.r.left.vp->row < r1 || e->e.r.left.vp->row > r2 || e->e.r.left.vp->col < c1 || e->e.r.left.vp->col > c2 ?  e->e.r.left.vp->col : special == 1 ? c1 + Cdelta + e->e.r.left.vp->row - r1 : e->e.r.left.vp->col + Cdelta;
         ret->e.r.left.vp = lookat(newrow, newcol);
@@ -564,8 +564,8 @@ struct enode * copye(register struct enode *e, int Rdelta, int Cdelta, int r1, i
     } else {
         struct enode *temprange=0;
         ret = (struct enode *) scxmalloc((unsigned) sizeof (struct enode));
-        ret->e.r.left.expr = e->e.r.left.expr ? e->e.r.left.expr : NULL; // important to initialize
-        ret->e.r.right.expr = e->e.r.right.expr ? e->e.r.right.expr : NULL; // important to initialize
+        ret->e.r.left.expr = e->e.r.left.expr ? copye(e->e.r.left.expr, Rdelta, Cdelta, r1, c1, r2, c2, special) : NULL; // important to initialize
+        ret->e.r.right.expr = e->e.r.right.expr ? copye(e->e.r.right.expr, Rdelta, Cdelta, r1, c1, r2, c2, special) : NULL; // important to initialize
         ret->e.r.left.vp = e->e.r.left.vp;
         ret->e.r.right.vp = e->e.r.right.vp;
         ret->op = e->op;
