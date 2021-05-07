@@ -46,4 +46,4 @@
  * CODE REVISION NUMBER:
  */
 
-char * rev = "version 0.8.2-lua";
+char * rev = "version 0.8.2-freeze";
