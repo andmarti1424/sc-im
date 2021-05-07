@@ -55,10 +55,14 @@ free lua memory at exit
 
 Added @getent (FR issue #451)
 
+import mkd files
+
 
 
 Pending for v0.8.2 release
 ----------------------------
+
++ modify :w to check current file name and save the file with the correct format.
 
 + Add to (or check the text in) doc file:
     @getent

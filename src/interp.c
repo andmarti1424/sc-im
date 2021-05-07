@@ -2923,9 +2923,9 @@ void decodev(struct ent_ptr v) {
     } else if (v.vf == GETENT) {
         sprintf(line + linelim, "@getent(");
         linelim += strlen(line + linelim);
-        decompile(v.expr->e.o.left, 0);
+        if (v.expr && v.expr->e.o.left) decompile(v.expr->e.o.left, 0);
         line[linelim++] = ',';
-        decompile(v.expr->e.o.right, 0);
+        if (v.expr && v.expr->e.o.right) decompile(v.expr->e.o.right, 0);
         line[linelim++] = ')';
     } else {
         (void) sprintf( line + linelim, "%s%s%s%d", v.vf & FIX_COL ? "$" : "", coltoa(v.vp->col), v.vf & FIX_ROW ? "$" : "", v.vp->row);
