@@ -865,20 +865,17 @@ command:
                      yyerrok;
                  };
 
-term:     var                     { $$ = new_var(O_VAR, $1); }
+term:   var                       {
+                                    if ($1.vf & GETENT)
+                                        $$ = $1.expr;
+                                    else $$ = new_var(O_VAR, $1);
+                                  }
+
         | '@' K_FIXED term        { $$ = new('f', $3, ENULL); }
+
         | '(' '@' K_FIXED ')' term
                                   { $$ = new('F', $5, ENULL); }
-        | '@' K_GETENT '(' NUMBER ',' NUMBER ')' {
-                                      struct ent_ptr ep;
-                                      ep.vp = lookat($4, $6);
-                                      ep.vf = 0;
-                                      $$ = new(GETENT, new_var(O_VAR, ep), ENULL);
 
-                                      // Work on issue #451.
-                                      // @sum(A0:@getent(@lastrow, 2))
-                                      // @sum(A0:@getent("A",@lastrow))
-                                  }
         | '@' K_SUM '(' var_or_range ')'
                                   { $$ = new(SUM, new_range(REDUCE | SUM, $4), ENULL); }
         | '@' K_SUM  '(' range ',' e ')'
@@ -1026,7 +1023,7 @@ term:     var                     { $$ = new_var(O_VAR, $1); }
                                   { $$ = new(SUBSTR, $4, new(',', $6, $8)); }
         |       '(' e ')'         { $$ = $2; }
         |       '+' term          { $$ = $2; }
-    //    |       '-' term        { $$ = new('m', $2, ENULL); }
+    //    |       '-' term          { $$ = new('m', $2, ENULL); }
         |       NUMBER            { $$ = new_const(O_CONST, (double) $1); }
         |       FNUMBER           { $$ = new_const(O_CONST, $1); }
         | '@'   K_PI              { $$ = new(PI_, ENULL, ENULL); }
@@ -1043,7 +1040,7 @@ term:     var                     { $$ = new_var(O_VAR, $1); }
         |     K_ERR               { $$ = new(ERR_, ENULL, ENULL); }
         | '@' K_REF               { $$ = new(REF_, ENULL, ENULL); }
         |     K_REF               { $$ = new(REF_, ENULL, ENULL); }
-        | '@' K_FACT '(' e ')'     { $$ = new(FACT, $4, ENULL); }
+        | '@' K_FACT '(' e ')'    { $$ = new(FACT, $4, ENULL); }
         ;
 
 /* expressions */
@@ -1073,7 +1070,10 @@ expr_list:     e                  { $$ = new(ELIST, ENULL, $1); }
     |    expr_list ',' e          { $$ = new(ELIST, $1, $3); }
     ;
 
-range:   var ':' var              { $$.left = $1; $$.right = $3; }
+range:   var ':' var              {
+                                    $$.left = $1;
+                                    $$.right = $3;
+                                  }
     |    RANGE                    { $$ = $1; }
     ;
 
@@ -1090,6 +1090,14 @@ var:     COL NUMBER               { $$.vp = lookat($2, $1);
                                     $$.vp = lookat($4, $2);
                                     $$.vf = FIX_ROW | FIX_COL;
                                   }
+
+    | '@' K_GETENT '(' e ',' e ')' {
+                                    $$.vp = lookat(eval(NULL, $4), eval(NULL, $6));
+                                    $$.vf = GETENT;
+                                    if ($$.expr != NULL) efree($$.expr);
+                                    $$.expr = new(GETENT, $4, $6);
+                                  }
+
     |    VAR                      {
                                     $$ = $1.left;
                                   }

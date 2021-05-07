@@ -49,17 +49,41 @@ Removed unneeded parameters on EvalJustVertex"
 Added eval_order in EvalRange and rebuild_graph
 
 Added @evaluate / @sevaluate functions
+handle @nval dependencies. handle @mycol/@myrow calls during startup when no EvalJustOneVertex is yet called
+
+free lua memory at exit
+
+Added @getent (FR issue #451)
+
 
 
 Pending for v0.8.2 release
 ----------------------------
 
-Added @dts / @now to doc
++ Add to (or check the text in) doc file:
+    @getent
+    @sum(A0:@getent(@lastrow,0)) examples
+    Add @dts / @now to doc
+    @coltoa
+    @coltoa(@mycol)
+        @myrow
+
+    =@nval(@coltoa(@mycol-1),@myrow)
+    \"@fmt("%.f",@myrow)
+
+Add GETENT in seval
+
+Reeval of @lastrow @lastcol: check cells that uses @lastrow / @lastcol gets updated everytime it change
+
 create @counta, and modify @count to not count strings
 
 remove old references to freezer / freezec / center_hidden_rows: cmds.c cmds_command freeze.c tui.c tui.h
+
 test calc_offscr_rows and calc_offscr_cols
+
 check all cmds movement functions after new frozen mods
+
+
 
 --
 Thanks to all that helped and created PR.

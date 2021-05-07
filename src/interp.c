@@ -859,7 +859,6 @@ double doeqs(char * s1, char * s2) {
  * \param[in] rwodoub
  *
  * \return struct ent *
- * TODO
  */
 struct ent * getent(char *colstr, double rowdoub, int alloc) {
     int collen;                         /* length of string */
@@ -1040,6 +1039,7 @@ double eval(register struct ent * ent, register struct enode * e) {
     case '!':    return (eval(ent, e->e.o.left) == 0.0);
     case ';':    return (((int) eval(ent, e->e.o.left) & 7) +
                 (((int) eval(ent, e->e.o.right) & 7) << 3));
+
     case O_CONST:
             if (! isfinite(e->e.k)) {
                 e->op = ERR_;
@@ -1051,8 +1051,23 @@ double eval(register struct ent * ent, register struct enode * e) {
             return (e->e.k);
 
     case GETENT:
+            ;
+            int r = eval(ent, e->e.o.left);
+            int c = eval(ent, e->e.o.right);
+            struct ent * vp = *ATBL(tbl, r, c);
+            if (ent && vp && ent->row == vp->row && ent->col == vp->col) {
+                    sc_error("Circular reference in eval (cell %s%d)", coltoa(vp->col), vp->row);
+                    e->op = ERR_;
+                    e->e.o.left = NULL;
+                    e->e.o.right = NULL;
+                    cellerror = CELLERROR;
+                    return (double) 0;
+            }
             if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
-            return (eval(ent, e->e.o.left));
+            if (ent && vp) GraphAddEdge(getVertex(graph, lookat(ent->row, ent->col), 1), getVertex(graph, lookat(vp->row, vp->col), 1));
+            if (vp && vp->flags & is_valid) return (vp->v);
+            return (double) 0;
+
     case O_VAR:    {
             struct ent * vp = e->e.v.vp;
             //sc_debug("var %d %d", vp->row, vp->col);
@@ -1316,6 +1331,7 @@ double eval(register struct ent * ent, register struct enode * e) {
                  if (gmyrow == -1 && ent) gmyrow = ent->row;
                  if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
                  return ((double) (gmyrow + rowoffset));
+
     case MYCOL:
                  // Add default value for gmycol, in case eval() is called before EvallJustOneVertex
                  // this might happen during startup when loading file
@@ -1928,11 +1944,14 @@ struct enode * new(int op, struct enode * a1, struct enode * a2) {
     //    freeenodes = p->e.o.left;
     //} else
     p = (struct enode *) scxmalloc( (size_t) sizeof(struct enode));
+    p->e.r.left.vp = NULL;    // important to initialize
+    p->e.r.left.expr = NULL;  // important to initialize
+    p->e.r.right.vp = NULL;   // important to initialize
+    p->e.r.right.expr = NULL; // important to initialize
     p->op = op;
     p->e.o.left = a1;
     p->e.o.right = a2;
     p->e.o.s = NULL;
-
     return p;
 }
 
@@ -1950,6 +1969,10 @@ struct enode * new_var(int op, struct ent_ptr a1) {
     //    freeenodes = p->e.o.left;
     //} else
     p = (struct enode *) scxmalloc( (size_t) sizeof(struct enode));
+    p->e.r.left.vp = NULL;    // important to initialize
+    p->e.r.left.expr = NULL;  // important to initialize
+    p->e.r.right.vp = NULL;   // important to initialize
+    p->e.r.right.expr = NULL; // important to initialize
     p->op = op;
     p->e.v = a1; // ref to cell needed for this expr
     return p;
@@ -1972,6 +1995,10 @@ struct enode * new_range(int op, struct range_s a1) {
     //}
     //else
     p = (struct enode *) scxmalloc( (size_t) sizeof(struct enode));
+    p->e.r.left.vp = NULL;    // important to initialize
+    p->e.r.left.expr = NULL;  // important to initialize
+    p->e.r.right.vp = NULL;   // important to initialize
+    p->e.r.right.expr = NULL; // important to initialize
     p->op = op;
     p->e.r = a1;
     return p;
@@ -1991,6 +2018,10 @@ struct enode * new_const(int op, double a1) {
     //    freeenodes = p->e.o.left;
     //} else
     p = (struct enode *) scxmalloc( (size_t) sizeof(struct enode));
+    p->e.r.left.vp = NULL;    // important to initialize
+    p->e.r.left.expr = NULL;  // important to initialize
+    p->e.r.right.vp = NULL;   // important to initialize
+    p->e.r.right.expr = NULL; // important to initialize
     p->op = op;
     p->e.k = a1;
     return p;
@@ -2009,6 +2040,10 @@ struct enode * new_str(char * s) {
     //    freeenodes = p->e.o.left;
     //} else
     p = (struct enode *) scxmalloc( (size_t) sizeof(struct enode));
+    p->e.r.left.vp = NULL;    // important to initialize
+    p->e.r.left.expr = NULL;  // important to initialize
+    p->e.r.right.vp = NULL;   // important to initialize
+    p->e.r.right.expr = NULL; // important to initialize
     p->op = O_SCONST;
     p->e.s = s;
     return (p);
@@ -2807,18 +2842,31 @@ int constant(register struct enode *e) {
  */
 void efree(struct enode * e) {
     if (e) {
-        if (e->op != O_VAR && e->op != O_CONST && e->op != O_SCONST
-        && !(e->op & REDUCE) && e->op != ERR_) {
-            efree(e->e.o.left);
-            efree(e->e.o.right);
+        /* for get ent ---> */
+        if (e->e.r.left.vp && e->e.r.left.vf & GETENT) {
+            efree(e->e.r.left.expr);
+            e->e.r.left.expr = NULL;
+        }
+        if (e->e.r.right.vp && e->e.r.right.vf & GETENT) {
+            efree(e->e.r.right.expr);
+            e->e.r.right.expr = NULL;
+        } /* <-- for get ent */
+
+        if (e->op != O_VAR && e->op != O_CONST && e->op != O_SCONST && !(e->op & REDUCE) && e->op != ERR_) {
+            if (e->e.o.left) efree(e->e.o.left);
+            e->e.o.left = NULL;
+            if (e->e.o.right) efree(e->e.o.right);
             e->e.o.right = NULL;
         }
-        if (e->op == O_SCONST && e->e.s)
+        if (e->op == O_SCONST && e->e.s) {
             scxfree(e->e.s);
-        else if (e->op == EXT && e->e.o.s)
+            e->e.s = NULL;
+        } else if (e->op == EXT && e->e.o.s) {
             scxfree(e->e.o.s);
-        e->e.o.left = NULL;
+            e->e.o.s = NULL;
+        }
         scxfree((char *) e);
+        e = (struct enode *) 0;
     }
 }
 
@@ -2869,13 +2917,20 @@ void decodev(struct ent_ptr v) {
     //if ( ! v.vp || v.vp->flags & is_deleted)
     //    (void) sprintf(line + linelim, "@ERR");
     //else
-    if ( !find_range( (char *) 0, 0, v.vp, v.vp, &r) && !r->r_is_range)
+    if ( !find_range( (char *) 0, 0, v.vp, v.vp, &r) && !r->r_is_range) {
         (void) sprintf(line+linelim, "%s", r->r_name);
-    else {
+        linelim += strlen(line + linelim);
+    } else if (v.vf == GETENT) {
+        sprintf(line + linelim, "@getent(");
+        linelim += strlen(line + linelim);
+        decompile(v.expr->e.o.left, 0);
+        line[linelim++] = ',';
+        decompile(v.expr->e.o.right, 0);
+        line[linelim++] = ')';
+    } else {
         (void) sprintf( line + linelim, "%s%s%s%d", v.vf & FIX_COL ? "$" : "", coltoa(v.vp->col), v.vf & FIX_ROW ? "$" : "", v.vp->row);
+        linelim += strlen(line + linelim);
     }
-    linelim += strlen(line + linelim);
-
     return;
 }
 
@@ -2912,7 +2967,7 @@ char * coltoa(int col) {
  *
  * \return none
  */
-static void decompile_list(struct enode *p) {
+void decompile_list(struct enode *p) {
     if (!p) return;
     decompile_list(p->e.o.left);    /* depth first */
     decompile(p->e.o.right, 0);
@@ -2969,20 +3024,17 @@ void decompile(register struct enode *e, int priority) {
     case O_VAR:
             decodev(e->e.v);
             break;
+
     case O_CONST:
             (void) sprintf(line+linelim, "%.15g", e->e.k);
             linelim += strlen(line+linelim);
             break;
+
     case O_SCONST:
             (void) sprintf(line+linelim, "\"%s\"", e->e.s);
             linelim += strlen(line+linelim);
             break;
-    case GETENT:
-            ;
-            struct enode * a = e->e.o.left;
-            (void) sprintf(line+linelim, "%s(%d,%d)", "@getent", a->e.v.vp->row, a->e.v.vp->col);
-            linelim += strlen(line+linelim);
-            break;
+
     case SUM    : index_arg("@sum", e); break;
     case PROD   : index_arg("@prod", e); break;
     case AVG    : index_arg("@avg", e); break;
@@ -2992,6 +3044,7 @@ void decompile(register struct enode *e, int priority) {
     case MIN    : index_arg("@min", e); break;
     case REDUCE | 'R': range_arg("@rows(", e); break;
     case REDUCE | 'C': range_arg("@cols(", e); break;
+    case GETENT: two_arg("@getent(", e); break;
     case FROW:   one_arg("@frow(", e); break;
     case FCOL:   one_arg("@fcol(", e); break;
     case ABS:    one_arg("@abs(", e); break;

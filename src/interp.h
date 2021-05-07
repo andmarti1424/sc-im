@@ -108,7 +108,7 @@ void efree(struct enode * e);
 void label(register struct ent * v, register char * s, int flushdir);
 void decodev(struct ent_ptr v);
 char * coltoa(int col);
-//static void decompile_list(struct enode * p);
+void decompile_list(struct enode * p);
 void decompile(register struct enode * e, int priority);
 void index_arg(char * s, struct enode * e);
 void two_arg_index(char * s, struct enode * e);

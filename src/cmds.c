@@ -551,19 +551,23 @@ struct enode * copye(register struct enode *e, int Rdelta, int Cdelta, int r1, i
         int newrow, newcol;
         ret = (struct enode *) scxmalloc((unsigned) sizeof (struct enode));
         ret->op = e->op;
+        ret->e.r.left.expr = NULL; // important to initialize
+        ret->e.r.right.expr = NULL; // important to initialize
         newrow = e->e.r.left.vf & FIX_ROW || e->e.r.left.vp->row < r1 || e->e.r.left.vp->row > r2 || e->e.r.left.vp->col < c1 || e->e.r.left.vp->col > c2 ?  e->e.r.left.vp->row : special == 1 ? r1 + Rdelta + e->e.r.left.vp->col - c1 : e->e.r.left.vp->row + Rdelta;
         newcol = e->e.r.left.vf & FIX_COL || e->e.r.left.vp->row < r1 || e->e.r.left.vp->row > r2 || e->e.r.left.vp->col < c1 || e->e.r.left.vp->col > c2 ?  e->e.r.left.vp->col : special == 1 ? c1 + Cdelta + e->e.r.left.vp->row - r1 : e->e.r.left.vp->col + Cdelta;
-        ret->e.r.left.vp =
-        lookat(newrow, newcol);
+        ret->e.r.left.vp = lookat(newrow, newcol);
         ret->e.r.left.vf = e->e.r.left.vf;
         newrow = e->e.r.right.vf & FIX_ROW || e->e.r.right.vp->row < r1 || e->e.r.right.vp->row > r2 || e->e.r.right.vp->col < c1 || e->e.r.right.vp->col > c2 ?  e->e.r.right.vp->row : special == 1 ? r1 + Rdelta + e->e.r.right.vp->col - c1 : e->e.r.right.vp->row + Rdelta;
         newcol = e->e.r.right.vf & FIX_COL || e->e.r.right.vp->row < r1 || e->e.r.right.vp->row > r2 || e->e.r.right.vp->col < c1 || e->e.r.right.vp->col > c2 ?  e->e.r.right.vp->col : special == 1 ? c1 + Cdelta + e->e.r.right.vp->row - r1 : e->e.r.right.vp->col + Cdelta;
-        ret->e.r.right.vp =
-        lookat(newrow, newcol);
+        ret->e.r.right.vp = lookat(newrow, newcol);
         ret->e.r.right.vf = e->e.r.right.vf;
     } else {
         struct enode *temprange=0;
         ret = (struct enode *) scxmalloc((unsigned) sizeof (struct enode));
+        ret->e.r.left.expr = NULL; // important to initialize
+        ret->e.r.right.expr = NULL; // important to initialize
+        ret->e.r.left.vp = e->e.r.left.vp;
+        ret->e.r.right.vp = e->e.r.right.vp;
         ret->op = e->op;
         switch (ret->op) {
             case SUM:

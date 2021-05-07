@@ -49,7 +49,7 @@
 #include <memory.h>
 
 //#define ATBL(tbl, row, col)    (*(tbl + row) + (col))
-extern struct ent ** ATBL(struct ent ***,int ,int );
+extern struct ent ** ATBL(struct ent ***, int, int );
 
 #define MINROWS      100     /* minimum size at startup */
 
@@ -115,7 +115,7 @@ extern struct ent ** ATBL(struct ent ***,int ,int );
 #define VALID_CELL(p, r, c) ((p = *ATBL(tbl, r, c)) && ((p->flags & is_valid) || p->label))
 
 // TODO Properly document these structs using doxygen tags. Possibly
-// not the same as functions. What is the standar way?
+// not the same as functions. What is the standard way?
 
 /* info for each cell, only alloc'd when something is stored in a cell */
 struct ent {
@@ -146,6 +146,7 @@ struct ent {
 struct ent_ptr {
     int vf;
     struct ent * vp;
+    struct enode * expr;  /* for getent */
 };
 
 // stores a range (left, right)
@@ -366,13 +367,6 @@ extern int repct;
 extern int calc_order;
 extern double prescale;
 extern int propagation;
-//extern int autocalc;
-//extern int autolabel;
-//extern int autoinsert;
-//extern int autowrap;
-//extern int showcell;
-//extern int showtop;
-//extern int craction;
 extern int optimize;
 extern int color;
 extern int numeric;
@@ -380,40 +374,35 @@ extern int colorneg;
 extern int colorerr;
 extern int rndtoeven;
 extern int tbl_style;
-//extern int pagesize;    // If nonzero, use instead of 1/2 screen height
-//extern int rowlimit;
-//extern int collimit;
 extern int loading;
 
-extern struct enode *copye(register struct enode *e, int Rdelta, int Cdelta, int r1, int c1, int r2, int c2, int transpose);
-extern char dpoint;    // country-dependent decimal point from locale
+extern struct enode * copye(struct enode *e, int Rdelta, int Cdelta, int r1, int c1, int r2, int c2, int transpose);
+extern char dpoint;   // country-dependent decimal point from locale
 extern char thsep;    // country-dependent thousands separator from locale
 extern char * coltoa(int col);
-extern char * findplugin(char *ext, char type);
-extern char * findhome(char *path);
+extern char * findplugin(char * ext, char type);
+extern char * findhome(char * path);
 extern char * r_name(int r1, int c1, int r2, int c2);
 extern char * scxmalloc(unsigned n);
-extern char * scxrealloc(char *ptr, unsigned n);
-//extern char * seval(register struct enode * se);
-extern char * seval(register struct ent * ent, register struct enode * se);
+extern char * scxrealloc(char * ptr, unsigned n);
+extern char * seval(struct ent * ent, struct enode * se);
 extern char * v_name(int row, int col);
-//extern double eval(register struct enode *e);
-extern double eval(register struct ent * ent, register struct enode * e);
-extern struct enode *new(int op, struct enode *a1, struct enode *a2);
-extern struct enode *new_const(int op, double a1);
-extern struct enode *new_range(int op, struct range_s a1);
-extern struct enode *new_str(char *s);
-extern struct enode *new_var(int op, struct ent_ptr a1);
-extern struct ent *lookat(int row, int col);
+extern double eval(struct ent * ent, struct enode * e);
+extern struct enode * new(int op, struct enode * a1, struct enode * a2);
+extern struct enode * new_const(int op, double a1);
+extern struct enode * new_range(int op, struct range_s a1);
+extern struct enode * new_str(char * s);
+extern struct enode * new_var(int op, struct ent_ptr a1);
+extern struct ent * lookat(int row, int col);
 extern void EvalAll();
-extern void checkbounds(int *rowp, int *colp);
-extern void clearent(struct ent *v);
-extern void closefile(FILE *f, int pid, int rfd);
+extern void checkbounds(int * rowp, int * colp);
+extern void clearent(struct ent * v);
+extern void closefile(FILE * f, int pid, int rfd);
 extern void colshow_op();
 extern struct colorpair *cpairs[8];
 extern void editexp(int row, int col);
-extern void efree(struct enode *e);
-extern void label(register struct ent *v, register char *s, int flushdir);
+extern void efree(struct enode * e);
+extern void label(struct ent * v, char * s, int flushdir);
 
 extern double eval_result;
 extern char * seval_result;
