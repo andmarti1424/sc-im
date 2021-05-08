@@ -2562,7 +2562,6 @@ void unlock_cells(struct ent * v1, struct ent * v2) {
  * \return none
  */
 void let(struct ent * v, struct enode * e) {
-    sc_info("IN let");
 
     if (locked_cell(v->row, v->col)) return;
 
