@@ -1,9 +1,9 @@
-# SC-IM
+# sc-im
+Spreadsheet Calculator Improvised, aka sc-im, is an ncurses based, vim-like spreadsheet calculator.
+sc-im is based on [sc](https://en.wikipedia.org/wiki/Sc_(spreadsheet_calculator))
+sc original authors are James Gosling and Mark Weiser, and mods were later added by Chuck Martin.
 
-SC-IM is a spreadsheet program that is based on SC (http://ibiblio.org/pub/Linux/apps/financial/spreadsheet/sc-7.16.tar.gz)
-SC original authors are James Gosling and Mark Weiser, and mods were later added by Chuck Martin.
-
-## Some of the features of SC-IM
+## Some of the features of sc-im
 
 - Vim movements commands for editing cell content.
 - UNDO / REDO.
@@ -24,8 +24,6 @@ SC original authors are James Gosling and Mark Weiser, and mods were later added
 - Implement external functions in the language you prefer and use them in SC-IM.
 - Use SC-IM as a non-interactive calculator, reading its input from an external script.
 
-About the name, the idea is that the program can be identified as another vim-like app.
-SC-IM stands for Spreadsheet Calculator Improvised. :-)
 
 ## Quick start
 
@@ -125,7 +123,7 @@ See [this wiki page](https://github.com/andmarti1424/sc-im/wiki/Ubuntu-with-XLSX
 
 ### Configuration
 
-The `scimrc` file can be used to configure `SC-IM`. The file should be placed in the `~/.config/sc-im` directory.
+The `scimrc` file can be used to configure `sc-im`. The file should be placed in the `~/.config/sc-im` directory.
 
 Here is an example `~/.config/sc-im/scimrc` :
 
@@ -141,13 +139,14 @@ Other configuration variables are listed in the [help file](https://raw.githubus
 
 Want to help?  You can help us with one or more of the following:
 
-* giving SC-IM a star in GitHub
-* taking screenshots / creating screencasts showing SC-IM
+* giving sc-im a star on GitHub
+* taking screenshots / creating screencasts showing sc-im
 * making a donation (see below).
+* telling if you use it / like it. I really don't have a clue if this app is used by someone.
 
 ### Donations
 
-If you like SC-IM please support its development by making a DONATION with PayPal.
+If you like sc-im please support its development by making a DONATION with PayPal.
 It would really help a lot. 2 kids, 2 cats, 1 wife and only one salary..
 
 <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=U537V8SNQQ45J" target="_blank">
