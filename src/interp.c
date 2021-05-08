@@ -2562,8 +2562,10 @@ void unlock_cells(struct ent * v1, struct ent * v2) {
  * \return none
  */
 void let(struct ent * v, struct enode * e) {
+    sc_info("IN let");
 
     if (locked_cell(v->row, v->col)) return;
+
 
     #ifdef UNDO
     extern struct ent_ptr * deps;
@@ -2577,8 +2579,13 @@ void let(struct ent * v, struct enode * e) {
 
     double val;
     unsigned isconstant = constant(e);
-    if (v->row == currow && v->col == curcol)
-        cellassign = 1;
+
+    // since we are calling let and not Eval. we need to update gmyrow and gmycol global variables
+    gmyrow = currow;
+    gmycol = curcol;
+
+    if (v->row == currow && v->col == curcol) cellassign = 1;
+
     if (loading && ! isconstant)
         val = (double) 0.0;
     else {
@@ -2677,6 +2684,10 @@ void slet(struct ent * v, struct enode * se, int flushdir) {
     #endif
     // No debe borrarse el vertex. Ver comentario en LET
     //if (getVertex(graph, lookat(v->row, v->col), 0) != NULL) destroy_vertex(lookat(v->row, v->col));
+
+    // since we are calling let and not Eval. we need to update gmyrow and gmycol global variables
+    gmyrow = currow;
+    gmycol = curcol;
 
     char * p;
     if (v->row == currow && v->col == curcol) cellassign = 1;
