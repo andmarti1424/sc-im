@@ -951,11 +951,6 @@ void ui_show_content(WINDOW * win, int mxrow, int mxcol) {
 #else
                 wattron(win, A_REVERSE);
 #endif
-            } else if ( !(*p) || (*p)->ucolor == NULL) {
-#ifdef USECOLORS
-                // When a long string does not fit in column.
-                ui_set_ucolor(win, &ucolors[STRG], ucolors[STRG].bg != DEFAULT_COLOR ? DEFAULT_COLOR : col % 2 == 0 ? ucolors[GRID_PAIR].bg : ucolors[GRID_ODD].bg);
-#endif
             }
 
 #ifdef USECOLORS
