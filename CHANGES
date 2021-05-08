@@ -67,6 +67,7 @@ EXPR and NUMBER colors were overloaded by STRING color #546
 + modified savefile() of file.c to check current file format before saving a file.
 Keep consistent with other format such as csv and save the file with the same format as current file.
 
+renamed GRID_PAIR to GRID_EVEN in color.c
 
 
 

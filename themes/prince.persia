@@ -2,7 +2,7 @@
 color "type=DEFAULT fg=WHITE bg=DEFAULT_COLOR"
 color "type=HEADINGS fg=BLACK bg=YELLOW bold=0"
 color "type=HEADINGS_ODD fg=BLACK bg=YELLOW bold=0"
-color "type=GRID_PAIR fg=WHITE bg=DEFAULT_COLOR"
+color "type=GRID_EVEN fg=WHITE bg=DEFAULT_COLOR"
 color "type=GRID_ODD fg=WHITE bg=DEFAULT_COLOR"
 color "type=WELCOME fg=YELLOW bg=DEFAULT_COLOR bold=0"
 color "type=CELL_SELECTION bg=BLACK fg=YELLOW bold=0"
