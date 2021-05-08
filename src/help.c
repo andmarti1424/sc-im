@@ -160,6 +160,7 @@ void help() {
     wclrtoeol(input_pad);
     ui_refresh_pad(0);
 
+    wbkgd(main_win, COLOR_PAIR((ucolors[DEFAULT].fg+1) * (COLORS) + ucolors[DEFAULT].bg + 2));
     ui_set_ucolor(main_win, &ucolors[NORMAL], DEFAULT_COLOR);
     wtimeout(input_win, -1);
     noecho();
@@ -341,6 +342,7 @@ void find_word(char * word, char order) {
     if (look_result == -1) {
         sc_info("Pattern not found.");
     }
+    wbkgd(input_win, COLOR_PAIR((ucolors[DEFAULT].fg+1) * (COLORS) + ucolors[DEFAULT].bg + 2));
     ui_set_ucolor(input_win, &ucolors[NORMAL], DEFAULT_COLOR);
     return;
 }
