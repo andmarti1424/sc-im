@@ -845,7 +845,7 @@ Commands for handling cell content:
 
                 The value of type shall be one of the following:
                      HEADINGS, HEADINGD_ODD, MODE, NUMB, STRG, DATEF,
-                     EXPRESSION, GRID_PAIR, GRID_ODD,
+                     EXPRESSION, GRID_EVEN, GRID_ODD,
                      CELL_ERROR, CELL_NEGATIVE, CELL_SELECTION,
                      CELL_SELECTION_SC, INFO_MSG, ERROR_MSG, CELL_ID,
                      CELL_FORMAT, CELL_CONTENT, WELCOME, NORMAL, INPUT.
@@ -893,7 +893,7 @@ Commands for handling cell content:
                           used on the HEADINGS to indicate the coordinates of the
                           selected row.
                         - CELL_SELECTION_SC The currently (focussed) cell.
-                        - GRID_PAIR: Color shown for even columns itself.
+                        - GRID_EVEN: Color shown for even columns itself.
                         - GRID_ODD: Color shown for odd columns itself.
                         - EXPRESSION The cell styling used for cells that are
                           the result of an expression.

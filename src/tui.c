@@ -844,31 +844,31 @@ void ui_show_content(WINDOW * win, int mxrow, int mxcol) {
             // Clean format
 #ifdef USECOLORS
             if ((*p) && (*p)->cellerror) {                                  // cellerror
-                ui_set_ucolor(win, &ucolors[CELL_ERROR], ucolors[CELL_ERROR].bg != DEFAULT_COLOR ? DEFAULT_COLOR : col % 2 == 0 ? ucolors[GRID_PAIR].bg : ucolors[GRID_ODD].bg);
+                ui_set_ucolor(win, &ucolors[CELL_ERROR], ucolors[CELL_ERROR].bg != DEFAULT_COLOR ? DEFAULT_COLOR : col % 2 == 0 ? ucolors[GRID_EVEN].bg : ucolors[GRID_ODD].bg);
             } else if ((*p) && (*p)->v < 0) {                               // cell negative
-                ui_set_ucolor(win, &ucolors[CELL_NEGATIVE], ucolors[CELL_NEGATIVE].bg != DEFAULT_COLOR ? DEFAULT_COLOR : col % 2 == 0 ? ucolors[GRID_PAIR].bg : ucolors[GRID_ODD].bg);
+                ui_set_ucolor(win, &ucolors[CELL_NEGATIVE], ucolors[CELL_NEGATIVE].bg != DEFAULT_COLOR ? DEFAULT_COLOR : col % 2 == 0 ? ucolors[GRID_EVEN].bg : ucolors[GRID_ODD].bg);
             } else if ((*p) && (*p)->expr) {
-                ui_set_ucolor(win, &ucolors[EXPRESSION], ucolors[EXPRESSION].bg != DEFAULT_COLOR ? DEFAULT_COLOR : col % 2 == 0 ? ucolors[GRID_PAIR].bg : ucolors[GRID_ODD].bg);
+                ui_set_ucolor(win, &ucolors[EXPRESSION], ucolors[EXPRESSION].bg != DEFAULT_COLOR ? DEFAULT_COLOR : col % 2 == 0 ? ucolors[GRID_EVEN].bg : ucolors[GRID_ODD].bg);
             } else if ((*p) && (*p)->label) {                               // string
-                ui_set_ucolor(win, &ucolors[STRG], ucolors[STRG].bg != DEFAULT_COLOR ? DEFAULT_COLOR : col % 2 == 0 ? ucolors[GRID_PAIR].bg : ucolors[GRID_ODD].bg);
+                ui_set_ucolor(win, &ucolors[STRG], ucolors[STRG].bg != DEFAULT_COLOR ? DEFAULT_COLOR : col % 2 == 0 ? ucolors[GRID_EVEN].bg : ucolors[GRID_ODD].bg);
             } else if ((*p) && (*p)->flags & is_valid && ! (*p)->format) {  // numeric value
-                ui_set_ucolor(win, &ucolors[NUMB], ucolors[NUMB].bg != DEFAULT_COLOR ? DEFAULT_COLOR : col % 2 == 0 ? ucolors[GRID_PAIR].bg : ucolors[GRID_ODD].bg);
+                ui_set_ucolor(win, &ucolors[NUMB], ucolors[NUMB].bg != DEFAULT_COLOR ? DEFAULT_COLOR : col % 2 == 0 ? ucolors[GRID_EVEN].bg : ucolors[GRID_ODD].bg);
             } else if ((*p) && (*p)->format && (*p)->format[0] == 'd') {    // date format
-                ui_set_ucolor(win, &ucolors[DATEF], ucolors[DATEF].bg != DEFAULT_COLOR ? DEFAULT_COLOR : col % 2 == 0 ? ucolors[GRID_PAIR].bg : ucolors[GRID_ODD].bg);
+                ui_set_ucolor(win, &ucolors[DATEF], ucolors[DATEF].bg != DEFAULT_COLOR ? DEFAULT_COLOR : col % 2 == 0 ? ucolors[GRID_EVEN].bg : ucolors[GRID_ODD].bg);
             } else {
-                ui_set_ucolor(win, &ucolors[NORMAL], ucolors[NORMAL].bg != DEFAULT_COLOR ? DEFAULT_COLOR : col % 2 == 0 ? ucolors[GRID_PAIR].bg : ucolors[GRID_ODD].bg);
+                ui_set_ucolor(win, &ucolors[NORMAL], ucolors[NORMAL].bg != DEFAULT_COLOR ? DEFAULT_COLOR : col % 2 == 0 ? ucolors[GRID_EVEN].bg : ucolors[GRID_ODD].bg);
             }
 #endif
 
             // Cell color!
             if ((*p) && (*p)->ucolor != NULL) {
-                ui_set_ucolor(win, (*p)->ucolor, (*p)->ucolor->bg != DEFAULT_COLOR ? DEFAULT_COLOR : col % 2 == 0 ? ucolors[GRID_PAIR].bg : ucolors[GRID_ODD].bg);
+                ui_set_ucolor(win, (*p)->ucolor, (*p)->ucolor->bg != DEFAULT_COLOR ? DEFAULT_COLOR : col % 2 == 0 ? ucolors[GRID_EVEN].bg : ucolors[GRID_ODD].bg);
             }
 
             // setup color for selected cell
             if ((currow == row) && (curcol == col)) {
 #ifdef USECOLORS
-                    if (has_colors()) ui_set_ucolor(win, &ucolors[CELL_SELECTION_SC], ucolors[CELL_SELECTION_SC].bg != DEFAULT_COLOR ? DEFAULT_COLOR : col % 2 == 0 ? ucolors[GRID_PAIR].bg : ucolors[GRID_ODD].bg);
+                    if (has_colors()) ui_set_ucolor(win, &ucolors[CELL_SELECTION_SC], ucolors[CELL_SELECTION_SC].bg != DEFAULT_COLOR ? DEFAULT_COLOR : col % 2 == 0 ? ucolors[GRID_EVEN].bg : ucolors[GRID_ODD].bg);
 #else
                     wattron(win, A_REVERSE);
 #endif
@@ -879,7 +879,7 @@ void ui_show_content(WINDOW * win, int mxrow, int mxcol) {
             srange * s = get_selected_range();
             if (s != NULL && row >= s->tlrow && row <= s->brrow && col >= s->tlcol && col <= s->brcol ) {
 #ifdef USECOLORS
-                    if (has_colors()) ui_set_ucolor(win, &ucolors[CELL_SELECTION_SC], ucolors[CELL_SELECTION_SC].bg != DEFAULT_COLOR ? DEFAULT_COLOR : col % 2 == 0 ? ucolors[GRID_PAIR].bg : ucolors[GRID_ODD].bg);
+                    if (has_colors()) ui_set_ucolor(win, &ucolors[CELL_SELECTION_SC], ucolors[CELL_SELECTION_SC].bg != DEFAULT_COLOR ? DEFAULT_COLOR : col % 2 == 0 ? ucolors[GRID_EVEN].bg : ucolors[GRID_ODD].bg);
 #else
                     wattron(win, A_REVERSE);
 #endif
@@ -891,7 +891,7 @@ void ui_show_content(WINDOW * win, int mxrow, int mxcol) {
                  col >= ranges->tlcol && col <= ranges->brcol
                ) {
 #ifdef USECOLORS
-                    if (has_colors()) ui_set_ucolor(win, &ucolors[CELL_SELECTION_SC], ucolors[CELL_SELECTION_SC].bg != DEFAULT_COLOR ? DEFAULT_COLOR : col % 2 == 0 ? ucolors[GRID_PAIR].bg : ucolors[GRID_ODD].bg);
+                    if (has_colors()) ui_set_ucolor(win, &ucolors[CELL_SELECTION_SC], ucolors[CELL_SELECTION_SC].bg != DEFAULT_COLOR ? DEFAULT_COLOR : col % 2 == 0 ? ucolors[GRID_EVEN].bg : ucolors[GRID_ODD].bg);
 #else
                     wattron(win, A_REVERSE);
 #endif
@@ -947,7 +947,7 @@ void ui_show_content(WINDOW * win, int mxrow, int mxcol) {
                ( in_range && row >= ranges->tlrow && row <= ranges->brrow &&
                  col >= ranges->tlcol && col <= ranges->brcol ) ) {
 #ifdef USECOLORS
-                if (has_colors()) ui_set_ucolor(win, &ucolors[CELL_SELECTION_SC], ucolors[CELL_SELECTION_SC].bg != DEFAULT_COLOR ? DEFAULT_COLOR : col % 2 == 0 ? ucolors[GRID_PAIR].bg : ucolors[GRID_ODD].bg);
+                if (has_colors()) ui_set_ucolor(win, &ucolors[CELL_SELECTION_SC], ucolors[CELL_SELECTION_SC].bg != DEFAULT_COLOR ? DEFAULT_COLOR : col % 2 == 0 ? ucolors[GRID_EVEN].bg : ucolors[GRID_ODD].bg);
 #else
                 wattron(win, A_REVERSE);
 #endif

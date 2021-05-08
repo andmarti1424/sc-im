@@ -49,7 +49,8 @@ Removed unneeded parameters on EvalJustVertex"
 Added eval_order in EvalRange and rebuild_graph
 
 Added @evaluate / @sevaluate functions
-handle @nval dependencies. handle @mycol/@myrow calls during startup when no EvalJustOneVertex is yet called
+
+Handle @nval dependencies. handle @mycol/@myrow calls during startup when no EvalJustOneVertex is yet called
 
 free lua memory at exit
 
@@ -61,15 +62,16 @@ import mkd files
 
 The save format for :w command would be according to current file format. #493
 
+EXPR and NUMBER colors were overloaded by STRING color #546
+
++ modified savefile() of file.c to check current file format before saving a file.
+Keep consistent with other format such as csv and save the file with the same format as current file.
+
+
 
 
 Pending for v0.8.2 release
 ----------------------------
-
-#pkg-config with libxlsxwriter doesnt seem to work well
-
-+ modify savefile() from file.c to check current file format (applies to xlsx, ods, xlx formats)
-and save the file with the same format, rather than sc format.
 
 + Add to (or check the text in) doc file:
     @getent

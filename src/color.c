@@ -101,8 +101,8 @@ void start_default_ucolors() {
     ucolors[ HEADINGS        ].fg = BLACK;
     ucolors[ HEADINGS_ODD    ].bg = YELLOW;
     ucolors[ HEADINGS_ODD    ].fg = BLACK;
-    ucolors[ GRID_PAIR       ].fg = WHITE;
-    ucolors[ GRID_PAIR       ].bg = DEFAULT_COLOR;
+    ucolors[ GRID_EVEN       ].fg = WHITE;
+    ucolors[ GRID_EVEN       ].bg = DEFAULT_COLOR;
     ucolors[ GRID_ODD        ].fg = WHITE;
     ucolors[ GRID_ODD        ].bg = DEFAULT_COLOR;
     ucolors[ WELCOME         ].fg = YELLOW;
@@ -193,8 +193,8 @@ void set_colors_param_dict() {
     put(d_colors_param, "HEADINGS", str);
     sprintf(str, "%d", HEADINGS_ODD);
     put(d_colors_param, "HEADINGS_ODD", str);
-    sprintf(str, "%d", GRID_PAIR);
-    put(d_colors_param, "GRID_PAIR", str);
+    sprintf(str, "%d", GRID_EVEN);
+    put(d_colors_param, "GRID_EVEN", str);
     sprintf(str, "%d", GRID_ODD);
     put(d_colors_param, "GRID_ODD", str);
     sprintf(str, "%d", WELCOME);
