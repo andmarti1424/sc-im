@@ -75,9 +75,10 @@ int convert_string_to_number( int r0, int c0, int rn, int cn) {
                 // If a string exists
                 if ((*pp)->label) {
                     char * num = str_replace((*pp)->label," ","");
-                    (*pp)->label ='\0';
+                    (*pp)->label[0] = '\0';
                     swprintf(out, BUFFERSIZE, L"let %s%d=%s", coltoa(col), row, num);
                     send_to_interp(out);
+                    free(num);
                 }
             }
         }
