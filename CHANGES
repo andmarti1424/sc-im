@@ -55,14 +55,21 @@ free lua memory at exit
 
 Added @getent (FR issue #451)
 
+Fix when saving marks in file after importing xlsx file and saving it in sc format.
+
 import mkd files
+
+The save format for :w command would be according to current file format. #493
 
 
 
 Pending for v0.8.2 release
 ----------------------------
 
-+ modify :w to check current file name and save the file with the correct format.
+#pkg-config with libxlsxwriter doesnt seem to work well
+
++ modify savefile() from file.c to check current file format (applies to xlsx, ods, xlx formats)
+and save the file with the same format, rather than sc format.
 
 + Add to (or check the text in) doc file:
     @getent

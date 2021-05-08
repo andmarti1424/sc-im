@@ -308,6 +308,21 @@ int savefile() {
       export_markdown(curfile, 0, 0, maxrow, maxcol);
       modflg = 0;
       return 0;
+
+    // treat xlsx format
+    } else if (strlen(curfile) > 5 && ( ! strcasecmp( & curfile[strlen(curfile)-5], ".xlsx") ||
+            ! strcasecmp( & curfile[strlen(curfile)-5], ".xlsx"))){
+#ifndef XLSX_EXPORT
+        sc_error("XLSX export support not compiled in. Please save file in other extension.");
+        return -1;
+#else
+        if (export_xlsx(curfile, 0, 0, maxrow, maxcol) == 0) {
+            sc_info("File \"%s\" written", curfile);
+            modflg = 0;
+        } else
+            sc_error("File could not be saved");
+        return 0;
+#endif
     }
 
     // save in sc format
@@ -315,6 +330,7 @@ int savefile() {
         sc_error("File could not be saved");
         return -1;
     }
+    modflg = 0;
     return 0;
 }
 

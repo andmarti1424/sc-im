@@ -392,6 +392,7 @@ Commands for handling cell content:
      :w {file}   Save the current spreadsheet as {file}.
      :w! {file}  Save the current spreadsheet as {file}, forcing an overwrite
                  if {file} already exists.
+                 The format in which it will be save will be according to the current file extension, if any.
 
      :h          Show this help.
      :help       Show this help.
