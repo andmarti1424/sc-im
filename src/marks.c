@@ -142,6 +142,8 @@ void fix_marks(int deltar, int deltac, int row_desde, int row_hasta, int col_des
             m->col >= col_desde && m->col <= col_hasta ) {
                 m->row += deltar;
                 m->col += deltac;
+                if (m->row < 0) m->row = 0;
+                if (m->col < 0) m->col = 0;
         }
     }
     return;
