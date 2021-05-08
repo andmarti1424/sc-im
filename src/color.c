@@ -292,19 +292,19 @@ void chg_color(char * str) {
     // bg, fg should have valid values BLACK(0) to WHITE(7) for ncurses stock colors
     // or a custom color name, or -1, indicating default TERMINAL color
     if (get(d_colors_param, get(d, "type")) == NULL) {
-        sc_error("Error setting color. Invalid type value.");
+        sc_error("Error setting color. Invalid type value: %s", get(d, "type"));
         destroy_dictionary(d);
         return;
     }
 
     if (get(d_colors_param, get(d, "fg")) == NULL && get_custom_color(get(d, "fg")) == NULL) {
-        sc_error("Error setting color. Invalid fg value. It is not and ncurses color nor user defined color.");
+        sc_error("Error setting color. Invalid fg value: %s. It is not and ncurses color nor user defined color.", get(d, "fg"));
         destroy_dictionary(d);
         return;
     }
 
     if (get(d_colors_param, get(d, "bg")) == NULL && get_custom_color(get(d, "bg")) == NULL) {
-        sc_error("Error setting color. Invalid bg value. It is not and ncurses color nor user defined color.");
+        sc_error("Error setting color. Invalid bg value: %s. It is not and ncurses color nor user defined color.", get(d, "bg"));
         destroy_dictionary(d);
         return;
     }
@@ -376,11 +376,12 @@ void color_cell(int r, int c, int rf, int cf, char * str) {
     char * cl;
 
     // Validations
-    if (
-       ((cl = get(d, "fg")) != NULL && cl[0] != '\0' && get(d_colors_param, get(d, "fg")) == NULL && get_custom_color(cl) == NULL) ||
-       ((cl = get(d, "bg")) != NULL && cl[0] != '\0' && get(d_colors_param, get(d, "bg")) == NULL && get_custom_color(cl) == NULL)
-       ) {
-            sc_error("One of the values specified is wrong. Please check the values of type, fg and bg.");
+    if (((cl = get(d, "fg")) != NULL && cl[0] != '\0' && get(d_colors_param, get(d, "fg")) == NULL && get_custom_color(cl) == NULL)) {
+            sc_error("One of the values specified is wrong: %s. Please check the values of type, fg and bg.", cl);
+            destroy_dictionary(d);
+            return;
+    } else if ((cl = get(d, "bg")) != NULL && cl[0] != '\0' && get(d_colors_param, get(d, "bg")) == NULL && get_custom_color(cl) == NULL) {
+            sc_error("One of the values specified is wrong: %s. Please check the values of type, fg and bg.", cl);
             destroy_dictionary(d);
             return;
     }
