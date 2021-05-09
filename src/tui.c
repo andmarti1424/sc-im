@@ -601,9 +601,11 @@ void ui_clr_header(int i) {
     if (col_orig > COLS) col_orig = COLS - 1;
 
     if (i == 0) {
+        wbkgd(input_win, COLOR_PAIR((ucolors[DEFAULT].fg+1) * (COLORS) + ucolors[DEFAULT].bg + 2));
         wmove(input_win, 0, 0);
         wclrtoeol(input_win);
     } else {
+        wbkgd(input_pad, COLOR_PAIR((ucolors[DEFAULT].fg+1) * (COLORS) + ucolors[DEFAULT].bg + 2));
         getyx(input_pad, row_orig, col_orig);
         wmove(input_pad, 0, 0);
         wclrtoeol(input_pad);
