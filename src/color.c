@@ -95,6 +95,7 @@ void start_default_ucolors() {
     }
 
     // Set some colors attributes
+    // NOTE: always increase N_INIT_PAIRS on each color definition you add.
     ucolors[ DEFAULT         ].fg = WHITE;
     ucolors[ DEFAULT         ].bg = DEFAULT_COLOR;
     ucolors[ HEADINGS        ].bg = YELLOW;
@@ -148,6 +149,8 @@ void start_default_ucolors() {
     ucolors[ CELL_ERROR      ].bold = 1;
     ucolors[ CELL_NEGATIVE   ].fg = GREEN;
     ucolors[ CELL_NEGATIVE   ].bg = DEFAULT_COLOR;
+    ucolors[ HELP_HIGHLIGHT  ].fg = BLACK;               // cell selection in spreadsheet
+    ucolors[ HELP_HIGHLIGHT  ].bg = YELLOW;
 
     ui_start_colors(); // call specific ui startup routine
 }
@@ -203,6 +206,8 @@ void set_colors_param_dict() {
     put(d_colors_param, "CELL_SELECTION", str);
     sprintf(str, "%d", CELL_SELECTION_SC);
     put(d_colors_param, "CELL_SELECTION_SC", str);
+    sprintf(str, "%d", HELP_HIGHLIGHT);
+    put(d_colors_param, "HELP_HIGHLIGHT", str);
     sprintf(str, "%d", NUMB);
     put(d_colors_param, "NUMB", str);
     sprintf(str, "%d", STRG);

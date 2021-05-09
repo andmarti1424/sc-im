@@ -848,7 +848,8 @@ Commands for handling cell content:
                      EXPRESSION, GRID_EVEN, GRID_ODD,
                      CELL_ERROR, CELL_NEGATIVE, CELL_SELECTION,
                      CELL_SELECTION_SC, INFO_MSG, ERROR_MSG, CELL_ID,
-                     CELL_FORMAT, CELL_CONTENT, WELCOME, NORMAL, INPUT.
+                     CELL_FORMAT, CELL_CONTENT, WELCOME, NORMAL, INPUT,
+                     HELP_HIGHLIGHT.
 
                 The value of fg and bg shall be one of the following:
                      WHITE, BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN,
@@ -920,6 +921,8 @@ Commands for handling cell content:
                         - NORMAL Text that shows on top of the terminal (like in :help)
                         - INPUT The text that shows up while you type text in the
                           input bar at the top left of the screen.
+                        - HELP_HIGHLIGHT Color used for highlighting search results
+                          and titles of help page.
 
     :cellcolor "{key}={arg} .."
                 Change the color of the current cell or range.

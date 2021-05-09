@@ -378,7 +378,7 @@ int show_lines() {
 
             #ifdef USECOLORS
             bold && ! key?
-            ui_set_ucolor(main_win, &ucolors[CELL_SELECTION_SC], DEFAULT_COLOR) :
+            ui_set_ucolor(main_win, &ucolors[HELP_HIGHLIGHT], DEFAULT_COLOR) :
             ui_set_ucolor(main_win, &ucolors[NORMAL], DEFAULT_COLOR);
             #endif
 
@@ -401,7 +401,7 @@ int show_lines() {
             } else if (look_result != -1 && i >= look_result &&
                 i < look_result + strlen(word_looked) ) {
                 #ifdef USECOLORS
-                ui_set_ucolor(main_win, &ucolors[CELL_SELECTION_SC], DEFAULT_COLOR);
+                ui_set_ucolor(main_win, &ucolors[HELP_HIGHLIGHT], DEFAULT_COLOR);
                 #endif
             } else if (key) {
                 #ifdef USECOLORS

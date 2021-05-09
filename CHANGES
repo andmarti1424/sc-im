@@ -69,6 +69,8 @@ Keep consistent with other format such as csv and save the file with the same fo
 
 renamed GRID_PAIR to GRID_EVEN in color.c
 
+Added HELP_HIGHLIGHT definition color for help page
+
 
 
 Pending for v0.8.2 release
