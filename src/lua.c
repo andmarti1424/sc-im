@@ -81,7 +81,7 @@ extern FILE * fdoutput;
         return 1;                           \
     }
 
-lua_State *L;
+lua_State * L = NULL;
 
 /**
  * \brief TODO Document l_getnum()
@@ -359,7 +359,8 @@ void doLuainit() {
  */
 
 void doLuaclose() {
-    lua_close(L);
+    if (L != NULL) lua_close(L);
+    L = NULL;
     return;
 }
 

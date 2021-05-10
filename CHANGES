@@ -51,6 +51,7 @@ Added eval_order in EvalRange and rebuild_graph
 Added @evaluate / @sevaluate functions
 
 Handle @nval dependencies. handle @mycol/@myrow calls during startup when no EvalJustOneVertex is yet called
+Fix leak in nval
 
 free lua memory at exit
 
@@ -71,6 +72,8 @@ renamed GRID_PAIR to GRID_EVEN in color.c
 
 Added HELP_HIGHLIGHT definition color for help page
 
+New dracula / papercolor themes
+
 
 
 Pending for v0.8.2 release
@@ -89,6 +92,9 @@ Pending for v0.8.2 release
 
 Add GETENT in seval
 
+
+
+
 Reeval of @lastrow @lastcol: check cells that uses @lastrow / @lastcol gets updated everytime it change
 
 create @counta, and modify @count to not count strings
@@ -98,6 +104,9 @@ remove old references to freezer / freezec / center_hidden_rows: cmds.c cmds_com
 test calc_offscr_rows and calc_offscr_cols
 
 check all cmds movement functions after new frozen mods
+
+
+
 
 
 
