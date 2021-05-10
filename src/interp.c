@@ -1325,18 +1325,18 @@ double eval(register struct ent * ent, register struct enode * e) {
                  return donval(s, n);
 
     case MYROW:
-                 // Add default value for gmyrow, in case eval() is called before EvallJustOneVertex
-                 // this might happen during startup when loading file
-                 if (gmyrow == -1 && ent) gmyrow = ent->row;
+                 // if @myrow is called before EvallJustOneVertex
+                 // (this might happen during startup when loading file)
+                 // gmyrow does not happen to have valid value. handle that.
                  if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
-                 return ((double) (gmyrow + rowoffset));
+                 return (gmyrow == -1 ? (ent ? ent->row + rowoffset : (double) currow + rowoffset) : (double) (gmyrow + rowoffset));
 
     case MYCOL:
-                 // Add default value for gmycol, in case eval() is called before EvallJustOneVertex
-                 // this might happen during startup when loading file
-                 if (gmycol == -1 && ent) gmycol = ent->col;
+                 // if @mycol is called before EvallJustOneVertex
+                 // (this might happen during startup when loading file)
+                 // gmycol does not happen to have valid value. handle that.
                  if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
-                 return ((double) (gmycol + coloffset));
+                 return (gmycol == -1 ? (ent ? ent->col + coloffset : (double) curcol + coloffset) : (double) (gmycol + coloffset));
 
     case LASTROW:
                  if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
@@ -2561,7 +2561,6 @@ void unlock_cells(struct ent * v1, struct ent * v2) {
  * \return none
  */
 void let(struct ent * v, struct enode * e) {
-
     if (locked_cell(v->row, v->col)) return;
 
 
@@ -2577,10 +2576,6 @@ void let(struct ent * v, struct enode * e) {
 
     double val;
     unsigned isconstant = constant(e);
-
-    // since we are calling let and not Eval. we need to update gmyrow and gmycol global variables
-    gmyrow = currow;
-    gmycol = curcol;
 
     if (v->row == currow && v->col == curcol) cellassign = 1;
 
@@ -2682,10 +2677,6 @@ void slet(struct ent * v, struct enode * se, int flushdir) {
     #endif
     // No debe borrarse el vertex. Ver comentario en LET
     //if (getVertex(graph, lookat(v->row, v->col), 0) != NULL) destroy_vertex(lookat(v->row, v->col));
-
-    // since we are calling let and not Eval. we need to update gmyrow and gmycol global variables
-    gmyrow = currow;
-    gmycol = curcol;
 
     char * p;
     if (v->row == currow && v->col == curcol) cellassign = 1;
