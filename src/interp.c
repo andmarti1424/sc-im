@@ -900,7 +900,6 @@ struct ent * getent(char *colstr, double rowdoub, int alloc) {
  */
 double donval(char * colstr, double rowdoub) {
     struct ent * ep;
-
     return (((ep = getent(colstr, rowdoub, 0)) && ((ep->flags) & is_valid)) ? (ep->v) : (double)0);
 }
 
@@ -1317,11 +1316,11 @@ double eval(register struct ent * ent, register struct enode * e) {
     case NVAL:
                  if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
                  char * s = seval(ent, e->e.o.left);
-                 char * sf = malloc(sizeof(char)*(strlen(s)+1));
+                 char * sf = calloc(strlen(s)+1, sizeof(char));
                  strcpy(sf, s);
                  double n = eval(ent, e->e.o.right);
                  struct ent * ep = getent(sf, n, 1);
-                 if (! ep) return (double) (0);
+                 if (! ep) { free(s); return (double) (0); }
                  if (ent && ep) GraphAddEdge(getVertex(graph, lookat(ent->row, ent->col), 1), getVertex(graph, ep, 1));
                  return donval(s, n);
 
