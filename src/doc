@@ -1,4 +1,4 @@
-                         This is the SC-IM help file.
+                         This is the sc-im help file.
 
 Use the arrow keys to move around, or 'j' to go down and 'k' to go up.
 You can also use the <ENTER> key to go one line down and <DEL> to go up.
@@ -18,9 +18,9 @@ Important !!:
     ~/.scimrc, nor .config/scimrc
 
 ==============================================================================
-SC-IM has the following modes:
+sc-im has the following modes:
 
-SC-IM has the following modes:
+sc-im has the following modes:
    NORMAL MODE:  In Normal mode, you can navigate cells and input normal
                  commands.
    INSERT MODE:  Use the '=', '<', '>', or '\' to go to Insert mode, where you
@@ -84,7 +84,7 @@ Navigation commands:
      zb          Scroll vertically to position the selected cell at the bottom
                  of the screen.
      Vir         Select the smallest range that covers all valid cells.
-     ESC or c-g  Clean stdin buffer, so SC-IM no longer waits for completing a
+     ESC or c-g  Clean stdin buffer, so sc-im no longer waits for completing a
                  correct command.
 
 
@@ -206,7 +206,7 @@ Commands for handling cell content:
      Sc          If a range is selected, show the columns hidden in the range.
      /           Alias for ':int goto '.
 
-                 If a number is given, SC-IM will search for a cell containing
+                 If a number is given, sc-im will search for a cell containing
                  that number.  Searches for either strings or numbers proceed
                  forward from the current cell, wrapping back to a0 at the end
                  of the table, and terminate at the current cell if the string
@@ -215,7 +215,7 @@ Commands for handling cell content:
                  Example: Type '/4' to look for cells containing the value 4.
                  Or type '/"value"' to look for cells that has "value" as
                  label content.
-                 You can quote a regular expression, and SC-IM will search for
+                 You can quote a regular expression, and sc-im will search for
                  a cell containing a string matching that regular expression.
                  Example: Type / followed by "[_mente]" (with the double
                   quotes). That will look up for cells that has one character
@@ -397,11 +397,11 @@ Commands for handling cell content:
      :h          Show this help.
      :help       Show this help.
 
-     :q[uit]     Quit SC-IM.
-     :q[uit]!    Quit SC-IM, ignoring unsaved changes.
+     :q[uit]     Quit sc-im.
+     :q[uit]!    Quit sc-im, ignoring unsaved changes.
 
      :load {file}
-                 Load {file} into the SC-IM database.
+                 Load {file} into the sc-im database.
 
                  {file} can be an sc format file (.sc), a comma-separated file
                  (.csv), a tab-separated file (.tab, .tsv),a markdown table
@@ -419,10 +419,10 @@ Commands for handling cell content:
                  Same as previous, but ignore changes done to the current
                  loaded spreadsheet.
 
-     :x          Save the current spreadsheet and quit SC-IM.
+     :x          Save the current spreadsheet and quit sc-im.
      :wq
 
-     :x {file}   Save the current spreadsheet to {file} and quit SC-IM.
+     :x {file}   Save the current spreadsheet to {file} and quit sc-im.
 
      :x! {file}  Like ":x", but overwrite {file} if it exists.
 
@@ -482,7 +482,7 @@ Commands for handling cell content:
 
      :e xlsx {file}
                  Export the current spreadsheet to xlsx file {file}.
-                 If 'xlsx_readformulas' is set, SC-IM tries to export
+                 If 'xlsx_readformulas' is set, sc-im tries to export
                  formulas, rather than the final values of a cell.
 
      :e! xlsx {file}
@@ -517,7 +517,7 @@ Commands for handling cell content:
                  This process will treat '\t' chars as column delimiter, and
                  '\n' chars as rows delimiters.
 
-     :version    Show SC-IM version number.
+     :version    Show sc-im version number.
 
                  If you start Sc-im with ./sc-im --version
                  version number of Sc-im will be printed on screen, including
@@ -883,7 +883,7 @@ Commands for handling cell content:
                           that lists row numbers.                          
                         - HEADINGS_ODD The same that above but shown for odd columns.
                         - MODE The text in the top right that indicates which
-                          mode SC-IM is currently in.
+                          mode sc-im is currently in.
                         - NUMB The cell styling used for cells formatted as
                           numbers (That are positive)
                         - STRG The cell styling used for cells formatted as
@@ -917,7 +917,7 @@ Commands for handling cell content:
                           and CELL_FORMAT that shows the content of the currently
                           selected cell. This will show the expression used to get
                           the current cell.
-                        - WELCOME The text that shows up when you first open SC-IM
+                        - WELCOME The text that shows up when you first open sc-im
                         - NORMAL Text that shows on top of the terminal (like in :help)
                         - INPUT The text that shows up while you type text in the
                           input bar at the top left of the screen.
@@ -944,11 +944,11 @@ Commands for handling cell content:
                 Note: This requires that ncurses is built with --enable-ext-colors,
                 and the terminal must support 256 colors. For example, TERM=xterm-256color.
                 You can check how many colors your terminal supports with: 'tput colors' command.
-                SC-IM must also be linked to ncursesw library and not the common ncurses library.
+                sc-im must also be linked to ncursesw library and not the common ncurses library.
 
                 Example of use:   :define_color "skyblue" 75 50 200
 
-                To make this take effect every time SC-IM is started, you can
+                To make this take effect every time sc-im is started, you can
                 add it to $HOME/.config/sc-im/scimrc:
                             DEFINE_COLOR "skyblue" 75 50 200
 
@@ -964,17 +964,17 @@ Commands for handling cell content:
 
                 Note: This requires that ncurses is built with
                 --enable-ext-colors, and the terminal must support 256 colors.
-                For example, TERM=xterm-256color.  SC-IM must link to
+                For example, TERM=xterm-256color.  sc-im must link to
                 ncursesw library and not the common ncurses library.
 
                 Example:   :redefine_color "RED" 250 0 0
 
-                To make this take effect every time SC-IM is started, you can
+                To make this take effect every time sc-im is started, you can
                 add it to $HOME/.config/sc-im/scimrc:
                             REDEFINE_COLOR "RED" 250 0 0
 
                 Redefining the BLACK color itself is another way to change the
-                default background color of SC-IM.
+                default background color of sc-im.
 
     :lock       Lock the current cell or range.  Locked cells are immune to
                 any type of editing and can't be changed in any way until
@@ -1162,7 +1162,7 @@ Commands for handling cell content:
 ==============================================================================
 &MAPPING&
 
-    Mapping can be done in any SC-IM file or in CONFIG_DIR/scimrc file.
+    Mapping can be done in any sc-im file or in CONFIG_DIR/scimrc file.
 
     Maps can be added with the :nmap, :imap, :cmap and :vmap commands and removed
     with the :nunmap, :iunmap, :cunmap and :vunmap commands.
@@ -1204,22 +1204,38 @@ Commands for handling cell content:
 ==============================================================================
 &DATES INPUT&
 
-    Dates are internally stored in SC-IM as numeric values, and they are
+    Dates are internally stored in sc-im as numeric values, and they are
     displayed as dates if a date format is applied to the cells that store
-    them.  Dates can be entered as a label and then converted to a numeric
-    value with the :datefmt command. Another option is to enter the numeric
-    value and apply a format with the :format special command.
+    them. You have 3 options for entering them:
+
+    1. Dates can be entered as text and then converted to a numeric
+    value with the :datefmt command.
 
     The :datefmt command takes the cell's text content that represents a date,
     and uses a given format to set the numeric value of the cell.
     Its format is ':datefmt "{strftime_format}"', taking a strftime-compatible
-    format string.  The format is applied to the cell (as could be done with
+    format string. The format is applied to the cell (as could be done with
     the :format function) so that the value is displayed as a date.
 
-    Example:      :datefmt "%d/%m/%Y"
+    Example:            \12/03/2020
+                        :datefmt "%d/%m/%Y"
 
-    The c-d command, used in Normal and Visual modes, acts as the :datefmt
-    described above, but uses the locale's D_FMT format.
+    NOTE: The <C-d> command, used in NORMAL and VISUAL modes, acts as the
+    `:datefmt` described above, but uses the locale's D_FMT format.
+
+    2. You can also enter dates using the @date and @dts functions.
+    Example:            \"@date(@dts(2015, 23, 2), "%d/%m/%Y")
+    will show  '23/02/2015'.
+
+    3. Another option is to enter the numeric value that represents the
+    datetime (that would be the number of seconds since the beginning of the
+    epoch - December 31, 1969, midnight, GMT) and apply a format with the
+    :format special command.
+    Example:            =1424660400
+                        :format "d%d/%m/%Y"
+
+
+    Please see &Built-in Date and Time Functions& below for more details.
 
 ==============================================================================
 &NUMBER FORMATS&
@@ -1336,7 +1352,7 @@ Commands for handling cell content:
     set this to scroll by half a page instead of full page.
 
     'xlsx_readformulas' [default off]
-    If 'xlsx_readformulas' is set, SC-IM tries to import formulas, rather than
+    If 'xlsx_readformulas' is set, sc-im tries to import formulas, rather than
     the final values of a cell.
 
     'tm_gmtoff' [default -10800 seconds]
@@ -1654,7 +1670,7 @@ Commands for handling cell content:
         Convert a number to a string. The argument se must be a valid
         printf(3) format string. e is converted according to the standard
         rules.  For example, the expression
-        @fmt("**%6.3f**", 10.5)
+        \"@fmt("**%6.3f**", 10.5)
         yields the string ``**10.500**''. e is a double, so applicable
         formats are e, E, f, g, and G.  Try ``%g'' as a starting point.
         More details on:
@@ -1697,6 +1713,47 @@ Commands for handling cell content:
         Return the number of seconds since the last full minute, encoded as 0
         to 59.
 
+    @now()
+        Return the current time encoded as the number of seconds since the
+        beginning of the epoch (December 31, 1969, midnight, GMT).
+
+    @date({date_expr}, {sexpr})
+           Convert the time {expr} in seconds to a date string, applying a format {sexpr}.
+           This functions is entered as a string formula with \". Example:
+           \"@date(@now, "%d/%m/%Y")
+           Note that you can extract parts of this fixed-format string with @substr().
+           A format string compatible with the strftime() function may optionally be
+           given as a second argument to override the default format.
+           See the strftime(3) man page for details.
+
+     @dts({expr1}, {expr2}, {expr3})
+           Convert a date to the number of seconds from the epoch to the first
+           second of the specified date, local time. Dates may be  specified
+           in either (m,d,y) or (y,m,d) format, although the latter is preferred,
+           since it's more universally recognized (m,d,y is only used in  America).
+           If e2 > 12 or e3 > 31, then (m,d,y) is assumed. Otherwise, (y,m,d)
+           is assumed.
+           Example of use:
+               @date(@dts(1976, 12, 14)) yields 'Tue Dec 14 00:00:00 1976'
+               @date(@dts(2015, 23, 2), "%d/%m/%Y") yields '23/02/2015'
+
+           The month should range from 1 to 12; the day should range from 1 to the
+           number of days in the specified month; and the year should
+           include the century (e.g. 1999 instead of 99). Any date capable of being
+           handled by the system is valid, typically 14 Dec 1901 to '18 Jan 2038'
+           on a system that uses a 32 bit time_t. Invalid dates or dates outside of
+           this range will return ERROR. For rapid entry of dates using only the
+           numeric keypad, sc provides the alternate syntax y.m.d or m.d.y, which is
+           automatically converted to the @dts(...) format above.
+           The year, month, and day must be entered numerically in the alternate
+           syntax; formulas are not allowed.
+
+       @tts({expr1}, {expr2}, {expr3})
+           @tts(8,20,45) converts the time 8:40:45 to the number of seconds since
+           midnight, the night before. The hour should range from 0 to 23;
+           the minutes and seconds should range from 0 to 59.
+
+
 ==============================================================================
 &Other functions&
     @if({expr}, {expr}, {expr})
@@ -1706,12 +1763,18 @@ Commands for handling cell content:
         example of use with string expression: @if(A1>100,"over","not enough")
         Remember string expressions should be entered by typing \"
 
+    @getent({e}, {e})
+        Reference to a cell evaluating expressions. First expression in
+        formula corresponds to row number, the second expression to column
+        number.
+        Example of use: =@sum(A0:@getent(@lastrow-1,0))
+
 
 ==============================================================================
 &LUA Scripts and Triggers&
 
-        SC-IM was extended with LUA capabilities and also provided with helper
-        functions to manipulate SC-IM data with Lua at runtime. Since it is a
+        sc-im was extended with LUA capabilities and also provided with helper
+        functions to manipulate sc-im data with Lua at runtime. Since it is a
         fully functional Lua, you can also use all Lua packages for sc-im lua
         scripts. Use luarocks to install additional packages.
 
@@ -1747,8 +1810,8 @@ Commands for handling cell content:
 ==============================================================================
 &Supported file formats / File import&
 
-    SC-IM can open the following file formats:
-        .sc     SC-IM's native text format
+    sc-im can open the following file formats:
+        .sc     sc-im's native text format
         .xls    Microsoft Excel Spreadsheet
         .xlsx   Microsoft Office Open XML Workbook
         .csv    Comma-separated values
@@ -1758,14 +1821,14 @@ Commands for handling cell content:
         .mkd    Markdown file with only table contents
         .md     Markdown file with only table contents
 
-    You can pass files of any of the above formats to SC-IM binary.
-    If you pass a .txt or .csv file to SC-IM, it is imported using a comma as
+    You can pass files of any of the above formats to sc-im binary.
+    If you pass a .txt or .csv file to sc-im, it is imported using a comma as
     the delimiter.
-    If you pass a .tsv or .tab file to SC-IM, it is imported using the tab
+    If you pass a .tsv or .tab file to sc-im, it is imported using the tab
     character as the delimiter.
 
     Note: You can always override the delimiter used passing the --txtdelim
-    parameter to SC-IM.
+    parameter to sc-im.
 
     Example: ./sc-im --txtdelim="\t" file.txt
 
@@ -1775,7 +1838,7 @@ Commands for handling cell content:
         --txtdelim=";"
         --txtdelim="|"
 
-    If you pass a .xlsx file to SC-IM, you can specify which sheet to load
+    If you pass a .xlsx file to sc-im, you can specify which sheet to load
     with the --sheet parameter, which can be the name or number of a sheet.
     Default value is 1.
 
@@ -1784,13 +1847,21 @@ Commands for handling cell content:
     Some possible values are:
         --sheet=3
         --sheet=dogs
+==============================================================================
+&THEMES&
+
+    There are a couple of themes you can use with sc-im.
+    They are "dracula", "old.sc", "papercolor-dark" and "prince.persia", and
+    they are located in the "/themes" folder.
+    You can add the corresponding lines of those in your .scimrc or you can
+    load them at runtime with `:load path_to_theme_file`
 
 ==============================================================================
 &External scripts&
 
-    SC-IM can read data from a external script, either through a pipeline or
+    sc-im can read data from a external script, either through a pipeline or
     redirection.
-    This enables SC-IM to be used as a non-interactive calculator.
+    This enables sc-im to be used as a non-interactive calculator.
 
     It can also be run interactively without the ncurses interface if you pass
     the --nocurses flag.
@@ -1806,7 +1877,7 @@ Commands for handling cell content:
         ./sc-im --quit_afterload --nocurses --export_mkd
         ./sc-im --quit_afterload --nocurses --export_txt # (or just --export)
 
-    If you set the --quit_afterload flag, SC-IM will quit after loading all
+    If you set the --quit_afterload flag, sc-im will quit after loading all
     files, but before becoming interactive.
 
     Suppose you have a file called "script" with the following content:
@@ -1815,7 +1886,7 @@ Commands for handling cell content:
         recalc
         getnum A3
 
-    The following invocations demonstrate SC-IM's input and output options.
+    The following invocations demonstrate sc-im's input and output options.
 
     Output to stdout, then quit:
         cat script | ./sc-im --nocurses --quit_afterload
@@ -1840,14 +1911,14 @@ Commands for handling cell content:
 
     Note: Setting the --output parameter implies setting the --nocurses flag.
 
-    SC-IM script function names are case insensitive.
+    sc-im script function names are case insensitive.
        'LET A0=1' is the same as 'let A0=1'
 
-    Almost every interactive SC-IM command is available for non-interactive
+    Almost every interactive sc-im command is available for non-interactive
     scripting. Search the equivelent interactive commands for usage
     information.
 
-    SC-IM has these commands for available for external scripts.
+    sc-im has these commands for available for external scripts.
 
     LET {[COL][ROW]}={expr}
         Sets the contents of a cell with a value or an expression. E.g.
@@ -1884,7 +1955,7 @@ Commands for handling cell content:
         Get format from cell and print to STDOUT
 
     QUIT
-        Quits SC-IM.
+        Quits sc-im.
 
     Other available commands for scripting are:
 

@@ -2,113 +2,108 @@ v0.8.2
 
 Changes
 -------
->> Improved yank and undo alloc'ing. Malloc as much we need from start in batches and avoid small mallocs.
-UNDO of :fsum is handled by let.
-:fsum added to command mode commands. was missing.
-Added mapping_timeout configuration variable with a default value of 1500ms (used to be a fixed value of 800ms).
-Added mouse support in insert and command mode. The selection of a cell gets copied to inputbar.
-Added command_timeout configuration variable.
-Rows now can have height higher than 1 LINE.
->> wrap cell content when nooverlap and notruncate are set.
->> Open URL or file specified on cell (PR 401)!
-issue #372
-fix markdown export when empty col was added left to data
-fix in :showrows command.
-added showcols command that was missing.
-handle hidden rows/cols in undo/redo of ir/ic/dr/dc
-handled issue #374
->> added backwards search with '?'
->> restore \\* from old SC. \\{char} fills the cell with n occurrences of {char} to complete its width
-issue #429
->> multiple frozen rows/columns (fr / fc in normal mode)
-new autowrap config value. works only when nooverlap and notruncate are set.
-store frozen rows and cols when saving file
->> added :formatcol command (handling its undo as well)
->> added :formatrow command (handling its undo as well)
-undo of freeze row and col
->> handle \n in cell input, and with autowrap
-handle undoing changes in row height produced by string input
-fix old sc bug - issue #371
-changed input bar from window to pad: permits entering string longer than COLS
-fix when saving sc files of cells that has some string expressions - issue #541
-@count counts cells with strings as well, and not just with numbers
-ignore SIGWINCH outside ncurses
-handle entering a label after :datefmt for datetime value edition
 
-Changed the way lua scripts are referenced in formulas. Now they are input as any other string formula,
++ Improved yank and undo alloc'ing. Malloc as much we need from start in batches and avoid small mallocs.
+
++ Changed the way lua scripts are referenced in formulas. Now they are input as any other string formula,
     like this: \"@lua("script_name.lua", 1)
     being 1 if the reference should be added to the depgraph or not, making it evaluated just once or
     every time the depgraph is evaluated.
     NOTE that if set to 0 and the cell is referenced by another cell, it will be executed nonetheless.
 
-Added new exec_lua configuration variable.
++ Added new exec_lua configuration variable.
 
-Added EvalRange() so that the graph is not evaluated entirely all the time.
-Replaced 'EvalAll' with 'EvalRange'.
-Removed unneeded parameters on EvalJustVertex"
-Added eval_order in EvalRange and rebuild_graph
++ Rows now can have height higher than one LINE. See fj and fk in normal mode or :formatrow in command mode.
+
++ Wrap cell content. new autowrap config value. works when nooverlap and notruncate are set.
+
++ Open URL or file specified on cell (PR 401)
+
++ Import mkd files
+
++ Multiple frozen rows/columns (fr / fc in normal mode)
+
+Added mapping_timeout configuration variable with a default value of 1500ms (used to be a fixed value of 800ms).
+Added mouse support in insert and command mode. The selection of a cell gets copied to inputbar.
+Added command_timeout configuration variable.
+handle hidden rows/cols in undo/redo of ir/ic/dr/dc
+Added backwards search with '?'
+Restore \\* from old SC. \\{char} fills the cell with n occurrences of {char} to complete its width
+Store frozen rows and cols when saving file
+Added :formatcol command (handling its undo as well)
+Added :formatrow command (handling its undo as well)
+Added undo of freeze row and col
+Handle \n in cell input, and with autowrap
+Handle undoing changes in row height produced by string input
+
+Changed input bar from window to pad: permits entering string longer than COLS.
+
+@count counts cells with strings as well, and not just with numbers.
+
+Handle entering a label after :datefmt for datetime value edition.
+
+New dracula / papercolor themes.
+
++ Added EvalRange() so that the graph is not evaluated entirely all the time.
+    Replaced 'EvalAll' with 'EvalRange'.
+    Removed unneeded parameters on EvalJustVertex"
+    Added eval_order in EvalRange and rebuild_graph.
 
 Added @evaluate / @sevaluate functions
 
-Handle @nval dependencies. handle @mycol/@myrow calls during startup when no EvalJustOneVertex is yet called
-Fix leak in nval
-
-free lua memory at exit
+Handle @nval dependencies.
+Handle @mycol/@myrow calls during startup when no EvalJustOneVertex is yet called
 
 Added @getent (FR issue #451)
 
-Fix when saving marks in file after importing xlsx file and saving it in sc format.
-
-import mkd files
-
-The save format for :w command would be according to current file format. #493
-
-EXPR and NUMBER colors were overloaded by STRING color #546
-
-+ modified savefile() of file.c to check current file format before saving a file.
++ The saving format for :w command would be according to current file format. #493
+modified savefile() of file.c to check current file format before saving a file.
 Keep consistent with other format such as csv and save the file with the same format as current file.
 
-renamed GRID_PAIR to GRID_EVEN in color.c
+Added HELP_HIGHLIGHT definition color for help page.
 
-Added HELP_HIGHLIGHT definition color for help page
+Renamed GRID_PAIR to GRID_EVEN in color.c.
 
-New dracula / papercolor themes
+UNDO of :fsum is handled by let.
+
+
+
+
+
+Fixes
+-----
+Fix old sc bug - issue #371
+Fix when saving sc files of cells that has some string expressions - issue #541
+Fix leak in nval.
+Fix Issue #372.
+Free lua memory at exit.
+Fix when saving marks in file after importing xlsx file and saving it in sc format.
+EXPR and NUMBER colors were overloaded by STRING color #546
+Fix markdown export when empty col was added left to data
+Fix in :showrows command.
+:fsum added to command mode commands. It was missing.
+Added :showcols command that was missing.
+Handled issue #429
+handled issue #374
+Ignore SIGWINCH outside ncurses.
+
+
 
 
 
 Pending for v0.8.2 release
 ----------------------------
 
-+ Add to (or check the text in) doc file:
-    @getent
-    @sum(A0:@getent(@lastrow,0)) examples
-    Add @dts / @now to doc
-    @coltoa
-    @coltoa(@mycol)
-        @myrow
-
-    =@nval(@coltoa(@mycol-1),@myrow)
-    \"@fmt("%.f",@myrow)
-
-Add GETENT in seval
++ Add GETENT in seval
++ remove old references to freezer / freezec / center_hidden_rows: cmds.c cmds_command freeze.c tui.c tui.h
 
 
 
-
-Reeval of @lastrow @lastcol: check cells that uses @lastrow / @lastcol gets updated everytime it change
-
+For v0.8.3 release
+-------------------
 create @counta, and modify @count to not count strings
-
-remove old references to freezer / freezec / center_hidden_rows: cmds.c cmds_command freeze.c tui.c tui.h
-
-test calc_offscr_rows and calc_offscr_cols
-
+Reeval of @lastrow @lastcol: check cells that uses @lastrow / @lastcol gets updated everytime it change
 check all cmds movement functions after new frozen mods
-
-
-
-
-
 
 --
 Thanks to all that helped and created PR.
