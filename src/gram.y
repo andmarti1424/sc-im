@@ -1092,8 +1092,6 @@ var:     COL NUMBER               { $$.vp = lookat($2, $1);
                                   }
 
     | '@' K_GETENT '(' e ',' e ')' {
-                                    gmyrow = currow;
-                                    gmycol = curcol;
                                     $$.vp = lookat(eval(NULL, $4), eval(NULL, $6));
                                     $$.vf = GETENT;
                                     if ($$.expr != NULL) efree($$.expr);

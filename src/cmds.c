@@ -75,7 +75,9 @@ extern int yyparse(void);
 
 int offscr_sc_rows = 0, offscr_sc_cols = 0; // off screen spreadsheet rows and columns
 int num_frozen_after_rows = 0; // number of frozen rows after the calculated rows of calc_offscr_sc_rows()
+int first_frozen_after_rows =0; // starting point for such rows
 int num_frozen_after_cols = 0; // number of frozen cols after the calculated cols of calc_offscr_sc_cols()
+int first_frozen_after_cols = 0; // starting point for such columns
 
 int center_hidden_cols = 0; // to be removed
 int center_hidden_rows = 0; // to be removed
@@ -926,7 +928,7 @@ void int_deleterow(int row, int mult) {
         for (c = 0; c < maxcols; c++) {
             if (row <= maxrow) {
                 pp = ATBL(tbl, row, c);
-                if ((q = *ATBL(tbl, row, c)) != NULL) q->row--;
+                if ((q = *ATBL(tbl, row, c)) != NULL && q->row > 0) q->row--;
             }
         }
         sync_refs();
@@ -2356,6 +2358,7 @@ int calc_offscr_sc_rows() {
     // we count the number of frozen rows after "rows", from "rows" until maxrows.
     for (k = i, num_frozen_after_rows = 0, fmtaft = 0; k < maxrows; k++)
         if (row_frozen[k]) {
+            if (num_frozen_after_rows == 0) first_frozen_after_rows = k;
             num_frozen_after_rows++;
             fmtaft += row_format[k]; // count the screen lines needed to display them as well
         }
@@ -2430,6 +2433,7 @@ int calc_offscr_sc_cols() {
     // we count the number of frozen cols after "cols", from "cols" until maxcols.
     for (k = i, num_frozen_after_cols = 0, fmtaft = 0; k < maxcols; k++)
         if (col_frozen[k]) {
+            if (num_frozen_after_cols == 0) first_frozen_after_cols = k;
             num_frozen_after_cols++;
             fmtaft += fwidth[k]; // count the screen lines needed to display them as well
         }
