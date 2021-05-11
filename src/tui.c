@@ -1010,7 +1010,7 @@ void ui_show_content(WINDOW * win, int row_boundary, int col_boundary) {
 
                 // auto wrap
                 if (!conf_truncate && !conf_overlap && conf_autowrap) {
-                    int newheight = ceil(wcslen(out) * 1.0 / fwidth[col]);
+                    int newheight = (wcslen(out) + fwidth[col] - 1) / fwidth[col];
                     if (row_format[row] < newheight) row_format[row] = newheight;
                 }
 
