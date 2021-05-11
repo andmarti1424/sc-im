@@ -1316,6 +1316,7 @@ double eval(register struct ent * ent, register struct enode * e) {
     case NVAL:
                  if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
                  char * s = seval(ent, e->e.o.left);
+                 if (! s) { return (double) (0); }
                  char * sf = calloc(strlen(s)+1, sizeof(char));
                  strcpy(sf, s);
                  double n = eval(ent, e->e.o.right);
