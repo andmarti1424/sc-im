@@ -141,16 +141,16 @@ void set_trigger(int r, int c, int rf, int cf, char * str) {
                 tmp |= TRG_C;
                 sprintf(buffer, "module/%s", n->trigger->file);
 
-                if(plugin_exists(buffer,strlen(buffer),buffer1))
-                    n->trigger->handle=dlopen(buffer1,RTLD_LAZY);
-                if(!n->trigger->handle) {
-                    fputs (dlerror(), stderr);
-                    exit(1);
+                if (plugin_exists(buffer, strlen(buffer), buffer1))
+                    n->trigger->handle = dlopen(buffer1, RTLD_LAZY);
+                if (! n->trigger->handle) {
+                    sc_error("Trigger could not be set: %s", dlerror());
+                    return;
                 }
                 n->trigger->c_function = dlsym(n->trigger->handle, n->trigger->function);
                 if ((error = dlerror()) != NULL)  {
-                    fputs(error, stderr);
-                    exit(1);
+                    sc_error("Trigger could not be set: %s.", error);
+                    return;
                 }
             }
             n->trigger->flag = tmp;
