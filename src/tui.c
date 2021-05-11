@@ -700,7 +700,7 @@ void ui_show_sc_row_headings(WINDOW * win, int row_boundary) {
     for (i = 0; i < outrow; i++) {
         // skip this row if before offscr_sc_rows and not frozen
         if (i < offscr_sc_rows && ! row_frozen[i]) continue;
-       
+
         // skip this row if hidden
         if (row_hidden[i]) continue;
 
