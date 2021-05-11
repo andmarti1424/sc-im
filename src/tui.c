@@ -695,6 +695,7 @@ void ui_show_sc_row_headings(WINDOW * win, int row_boundary) {
     int winrow = 1;
     int outrow = (num_frozen_after_rows != 0) ?
             (first_frozen_after_rows + num_frozen_after_rows) : row_boundary;
+    srange * s = get_selected_range();
 
     for (i = 0; i < outrow; i++) {
         // skip this row if before offscr_sc_rows and not frozen
@@ -711,7 +712,6 @@ void ui_show_sc_row_headings(WINDOW * win, int row_boundary) {
             break;
         }
 
-        srange * s = get_selected_range();
         if ( (s != NULL && i >= s->tlrow && i <= s->brrow) || i == currow ) {
             #ifdef USECOLORS
             if (has_colors()) ui_set_ucolor(win, &ucolors[CELL_SELECTION], DEFAULT_COLOR);
@@ -748,6 +748,7 @@ void ui_show_sc_col_headings(WINDOW * win, int col_boundary) {
     int i, wincol = rescol;
     int outcol = (num_frozen_after_cols != 0) ?
             (first_frozen_after_cols + num_frozen_after_cols) : col_boundary;
+    srange * s = get_selected_range();
 
     wmove(win, 0, 0);
     wclrtoeol(win);
@@ -774,7 +775,6 @@ void ui_show_sc_col_headings(WINDOW * win, int col_boundary) {
             ui_set_ucolor(win, &ucolors[HEADINGS_ODD], DEFAULT_COLOR);
         #endif
 
-        srange * s = get_selected_range();
         if ( (s != NULL && i >= s->tlcol && i <= s->brcol) || i == curcol ) {
             #ifdef USECOLORS
             if (has_colors()) ui_set_ucolor(win, &ucolors[CELL_SELECTION], DEFAULT_COLOR);
@@ -819,6 +819,11 @@ void ui_show_content(WINDOW * win, int row_boundary, int col_boundary) {
             (first_frozen_after_rows + num_frozen_after_rows) : row_boundary;
     int outcol = (num_frozen_after_cols != 0) ?
             (first_frozen_after_cols + num_frozen_after_cols) : col_boundary;
+    srange * s = get_selected_range();
+    int conf_underline_grid = get_conf_int("underline_grid");
+    int conf_truncate = get_conf_int("truncate");
+    int conf_overlap = get_conf_int("overlap");
+    int conf_autowrap = get_conf_int("autowrap");
 
     for (row = 0; row < outrow; row++) {
         // skip this row if before offscr_sc_rows and not frozen
@@ -890,7 +895,6 @@ void ui_show_content(WINDOW * win, int row_boundary, int col_boundary) {
 
             // setup color for selected range
             int in_range = 0; // this is for coloring empty cells within a range
-            srange * s = get_selected_range();
             if (s != NULL && row >= s->tlrow && row <= s->brrow && col >= s->tlcol && col <= s->brcol ) {
 #ifdef USECOLORS
                     if (has_colors()) ui_set_ucolor(win, &ucolors[CELL_SELECTION_SC], ucolors[CELL_SELECTION_SC].bg != DEFAULT_COLOR ? DEFAULT_COLOR : col % 2 == 0 ? ucolors[GRID_EVEN].bg : ucolors[GRID_ODD].bg);
@@ -968,7 +972,7 @@ void ui_show_content(WINDOW * win, int row_boundary, int col_boundary) {
             }
 
 #ifdef USECOLORS
-            if (has_colors() && get_conf_int("underline_grid")) {
+            if (has_colors() && conf_underline_grid) {
                 attr_t attr;
                 short color;
                 wattr_get(win, &attr, &color, NULL);
@@ -1005,13 +1009,13 @@ void ui_show_content(WINDOW * win, int row_boundary, int col_boundary) {
                 pad_and_align(text, num, fieldlen, align, (*p)->pad, out, row_format[row]);
 
                 // auto wrap
-                if (! get_conf_int("truncate") && ! get_conf_int("overlap") && get_conf_int("autowrap")) {
+                if (!conf_truncate && !conf_overlap && conf_autowrap) {
                     int newheight = ceil(wcslen(out) * 1.0 / fwidth[col]);
                     if (row_format[row] < newheight) row_format[row] = newheight;
                 }
 
 #ifdef USECOLORS
-                if (has_colors() && get_conf_int("underline_grid")) {
+                if (has_colors() && conf_underline_grid) {
                     attr_t attr;
                     short color;
                     wattr_get(win, &attr, &color, NULL);
@@ -1024,14 +1028,14 @@ void ui_show_content(WINDOW * win, int row_boundary, int col_boundary) {
                 for (count_row = 0; count_row < row_format[row]; count_row++) {
                     int cw = count_width_widestring(out, fieldlen);
                     wcscpy(new, out);
-                    if (get_conf_int("truncate") || !get_conf_int("overlap")) new[cw] = L'\0';
+                    if (conf_truncate || !conf_overlap) new[cw] = L'\0';
 
                     int whites = fieldlen - cw;
                     while (whites-- > 0) add_wchar(new, L' ', wcslen(new));
                     if (wcslen(new)) mvwprintw(win, winrow+count_row, wincol, "%ls", new);
                     //wclrtoeol(win);
                     if (cw) del_range_wchars(out, 0, cw-1);
-                    if (get_conf_int("overlap")) break;
+                    if (conf_overlap) break;
                 }
             }
 
