@@ -928,7 +928,7 @@ void int_deleterow(int row, int mult) {
         for (c = 0; c < maxcols; c++) {
             if (row <= maxrow) {
                 pp = ATBL(tbl, row, c);
-                if ((q = *ATBL(tbl, row, c)) != NULL) q->row--;
+                if ((q = *ATBL(tbl, row, c)) != NULL && q->row > 0) q->row--;
             }
         }
         sync_refs();
