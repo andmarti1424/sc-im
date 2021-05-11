@@ -1053,6 +1053,10 @@ double eval(register struct ent * ent, register struct enode * e) {
             ;
             int r = eval(ent, e->e.o.left);
             int c = eval(ent, e->e.o.right);
+            if (r < 0 || c < 0) {
+                sc_debug("@getent shouldnt be called with negative parameters %d %d", r, c);
+                return (double) 0;
+            }
             struct ent * vp = *ATBL(tbl, r, c);
             if (ent && vp && ent->row == vp->row && ent->col == vp->col) {
                     sc_error("Circular reference in eval (cell %s%d)", coltoa(vp->col), vp->row);
