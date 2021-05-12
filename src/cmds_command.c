@@ -611,8 +611,6 @@ void do_commandmode(struct block * sb) {
             } else
                 swprintf(interp_line, BUFFERSIZE, L"freeze %ls", &inputline[9]);
             send_to_interp(interp_line);
-            center_hidden_rows = 0;
-            center_hidden_cols = 0;
 
         } else if ( ! wcsncmp(inputline, L"freezerow", 9) ) {
             if (p != -1) {
@@ -622,8 +620,6 @@ void do_commandmode(struct block * sb) {
             } else
                 swprintf(interp_line, BUFFERSIZE, L"freeze %ls", &inputline[9]);
             send_to_interp(interp_line);
-            center_hidden_rows = 0;
-            center_hidden_cols = 0;
 
         } else if ( ! wcsncmp(inputline, L"unfreezecol", 11) ) {
             if (p != -1) {
@@ -634,8 +630,6 @@ void do_commandmode(struct block * sb) {
             } else
                 swprintf(interp_line, BUFFERSIZE, L"unfreeze %ls", &inputline[11]);
             send_to_interp(interp_line);
-            center_hidden_rows = 0;
-            center_hidden_cols = 0;
 
         } else if ( ! wcsncmp(inputline, L"unfreezerow", 11) ) {
             if (p != -1) {
@@ -645,8 +639,6 @@ void do_commandmode(struct block * sb) {
             } else
                 swprintf(interp_line, BUFFERSIZE, L"unfreeze %ls", &inputline[11]);
             send_to_interp(interp_line);
-            center_hidden_rows = 0;
-            center_hidden_cols = 0;
 
         } else if ( ! wcsncmp(inputline, L"addfilter", 9) ) {
             wchar_t cline [BUFFERSIZE];

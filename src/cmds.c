@@ -74,13 +74,9 @@ extern graphADT graph;
 extern int yyparse(void);
 
 int offscr_sc_rows = 0, offscr_sc_cols = 0; // off screen spreadsheet rows and columns
-int num_frozen_after_rows = 0;   // number of frozen rows after the calculated rows of calc_offscr_sc_rows()
-int first_frozen_after_rows =0;  // starting point for such rows
-int num_frozen_after_cols = 0;   // number of frozen cols after the calculated cols of calc_offscr_sc_cols()
-int first_frozen_after_cols = 0; // starting point for such columns
-
-int center_hidden_cols = 0; // to be removed
-int center_hidden_rows = 0; // to be removed
+int nb_frozen_rows = 0, nb_frozen_cols = 0; // total number of frozen rows/cols
+int nb_frozen_screenrows = 0; // screen rows occupied by those frozen rows
+int nb_frozen_screencols = 0; // screen cols occupied by those frozen columns
 
 /**
  * \brief Maintain ent strucs until they are release for deletion by sync_refs.
@@ -1293,21 +1289,17 @@ struct ent * back_col(int arg) {
 
     while (--arg >= 0) {
         if (c) {
-            // need to update curcol here so center_hidden_cols
-            // get update correctly after calc_offscr_sc_cols
             curcol = --c;
-            calc_offscr_sc_cols();
         } else {
             sc_info ("At column A");
             break;
         }
         while (col_hidden[c] && c) {
-            // need to update curcol here so center_hidden_cols
-            // get update correctly after calc_offscr_sc_cols
             curcol = --c;
-            calc_offscr_sc_cols();
         }
     }
+    if (curcol < offscr_sc_cols)
+        offscr_sc_cols = curcol;
 
     return lookat(currow, c);
 }
@@ -1323,13 +1315,14 @@ struct ent * forw_col(int arg) {
     while (--arg >= 0) {
         if (c < maxcols - 1) {
             c++;
-        } else
+        } else {
             if (! growtbl(GROWCOL, 0, arg)) {    /* get as much as needed */
                 sc_error("cannot grow");
                 return lookat(currow, curcol);
             } else {
                 c++;
             }
+        }
         while (col_hidden[c] && c < maxcols - 1) {
             c++;
         }
@@ -1366,19 +1359,17 @@ struct ent * forw_row(int arg) {
  * \return lookat
  */
 struct ent * back_row(int arg) {
-    int bkprow = currow;
     int r = currow;
 
-    while (arg--) {
+    while (--arg >= 0) {
         if (r) {
-            r--;
+            --r;
         } else {
-            sc_info("At row zero");
+            sc_info ("At row 0");
             break;
         }
-        while ((row_hidden[r] && r)) r--;
+        while (row_hidden[r] && r) --r;
     }
-    currow = bkprow;
     return lookat(r, curcol);
 }
 
@@ -1387,27 +1378,27 @@ struct ent * back_row(int arg) {
  * \param[in] n
  * \return none
  */
-//FIXME: to handle multiple frozen rows/cols
-void scroll_down(int n) {
-    //extern int center_hidden_rows;
-    //int freezer = freeze_ranges && (freeze_ranges->type == 'r' ||  freeze_ranges->type == 'a') ? 1 : 0;
-    //int tlrow = freezer ? freeze_ranges->tl->row : 0;
-    //int brrow = freezer ? freeze_ranges->br->row : 0;
-    while (currow < maxrows && n--) {
-        if (currow == offscr_sc_rows + calc_offscr_sc_rows() - 2) {
-        //if ( (!freezer && currow == offscr_sc_rows) ||
-        //     ( freezer && currow == offscr_sc_rows + center_hidden_rows + brrow - tlrow + 1)
-        //) {
-            currow = forw_row(1)->row;
-            unselect_ranges();
-        }
-        //if (freezer && offscr_sc_rows == tlrow) {
-        //    center_hidden_rows++;
-        //} else {
-        offscr_sc_rows++;
-        //}
-    }
-    return;
+void scroll_down(int n)
+{
+	while (n--) {
+		int last, currow_orig = currow;
+		/* find last mobile row */
+		calc_mobile_rows(&last);
+		/* move to next non-hidden non-frozen row */
+		do {
+			lookat(++last, curcol);
+			if (last >= maxrows)
+				return;
+		} while (row_hidden[last] || row_frozen[last]);
+		/* this will adjust offscr_sc_rows */
+		currow = last;
+		calc_mobile_rows(NULL);
+		/* restore currow */
+		currow = currow_orig;
+		if (currow < offscr_sc_rows)
+			currow = offscr_sc_rows;
+		unselect_ranges();
+	}
 }
 
 /**
@@ -1415,46 +1406,26 @@ void scroll_down(int n) {
  * \param[in] n
  * \return none
  */
-// FIXME: to handle multiple frozen rows/cols
-void scroll_up(int n) {
-    //extern int center_hidden_rows;
-    //int freezer = freeze_ranges && (freeze_ranges->type == 'r' ||  freeze_ranges->type == 'a') ? 1 : 0;
-    //int r, i;
-    //int brrow = freezer ? freeze_ranges->br->row : 0;
-    //int tlrow = freezer ? freeze_ranges->tl->row : 0;
-
-    while (n--) {
-        /* check what is the last row visible (r)
-        i = 0, r = offscr_sc_rows-1;
-        while (i < LINES - RESROW - 1 && r < maxrows - 1) {
-            r++;
-            if (row_hidden[r]) continue;
-            else if (r < offscr_sc_rows && ! row_frozen[r]) continue;
-            else if (row_frozen[r]) continue;
-            i += row_format[r];
-        }
-
-        if (freezer && center_hidden_rows && r != brrow) {
-            center_hidden_rows--;
-        } else if (offscr_sc_rows && (!freezer || r > brrow) ) {
-            offscr_sc_rows--;
-        } else if (offscr_sc_rows && freezer && r == brrow) {
-            offscr_sc_rows--;
-            center_hidden_rows++;
-            */
-        if (offscr_sc_rows) {
-            offscr_sc_rows--;
-        } else {
-            sc_info("Cannot scroll no longer");
-            break;
-        }
-        //if (currow == r) {
-        if (currow == offscr_sc_rows-1) {
-            currow = back_row(row_format[offscr_sc_rows])->row;
-            unselect_ranges();
-        }
-    }
-    return;
+void scroll_up(int n)
+{
+	while (n--) {
+		int first, last, currow_orig = currow;
+		/* move to previous non-hidden non-frozen row */
+		first = offscr_sc_rows;
+		do {
+			if (--first < 0)
+				return;
+		} while (row_hidden[first] || row_frozen[first]);
+		offscr_sc_rows = first;
+		/* find corresponding last mobile row */
+		currow = first;
+		calc_mobile_rows(&last);
+		/* restore/adjust currow */
+		currow = currow_orig;
+		if (currow > last)
+			currow = last;
+		unselect_ranges();
+	}
 }
 
 /**
@@ -1469,46 +1440,52 @@ struct ent * go_home() {
  * \brief vert_top() - for command H in normal mode
  * \return lookat
  */
-//FIXME: to handle multiple frozen rows/cols
-struct ent * vert_top() {
-    //extern int center_hidden_rows;
-    //int freezer = freeze_ranges && (freeze_ranges->type == 'r' ||  freeze_ranges->type == 'a') ? 1 : 0;
-    //int brrow = freezer ? freeze_ranges->br->row : 0;
-
-    int r = offscr_sc_rows;
-    while ( row_hidden[r] && r < currow ) r++;
-    //if (freezer && currow > brrow + center_hidden_rows + 1) while (row_hidden[r] || r <= brrow + center_hidden_rows) r++;
-    return lookat(r, curcol);
+struct ent * vert_top()
+{
+	int r = offscr_sc_rows;
+	while (row_hidden[r] || row_frozen[r]) r++;
+	return lookat(r, curcol);
 }
 
 /**
  * \brief vert_bottom() - for command L in normal mode
  * \return lookat
  */
-//FIXME: should count frozen rows as well
-struct ent * vert_bottom() {
-    int i = 0, r = offscr_sc_rows-1;
-    while (i < LINES - RESROW - 1) {
-        r++;
-        if (row_hidden[r]) continue;
-        else if (r < offscr_sc_rows && ! row_frozen[r]) continue;
-        i+= row_format[r];
-    }
-    if (r > maxrows) r = maxrows;
-    return lookat(r, curcol);
+struct ent * vert_bottom()
+{
+	int last;
+	calc_mobile_rows(&last);
+	return lookat(last, curcol);
 }
 
 /**
  * \brief vert_middle() - for command M in normal mode
  * \return lookat
  */
-//FIXME: to handle multiple frozen rows/cols
-struct ent * vert_middle() {
-    int top = offscr_sc_rows;
-    while (row_hidden[top] && top < currow) top++;
-    int mid = (vert_bottom()->row + top) / 2;
-    while (row_hidden[mid] && mid < currow) mid++; // just in case mid is hidden
-    return lookat(mid, curcol);
+struct ent * vert_middle()
+{
+	int i;
+	int midscreen_pos = (LINES - RESROW - RESCOLHEADER - 1)/2;
+	int curr_pos = 0;
+	int mobile_rows = calc_mobile_rows(NULL);
+
+	for (i = 0; i < maxrows; i++) {
+		if (row_hidden[i])
+			continue;
+		if (! row_frozen[i]) {
+			if (i < offscr_sc_rows)
+				continue;
+			if (--mobile_rows < 0)
+				continue;
+		}
+
+		/* compare middle of current row against middle of screen */
+		if (curr_pos + (row_format[i] - 1)/2 >= midscreen_pos)
+			return lookat(i, curcol);
+
+		curr_pos += row_format[i];
+	}
+	return NULL;
 }
 
 /**
@@ -1568,27 +1545,27 @@ struct ent * tick(char ch) {
  * \param[in] n
  * \return none
  */
-//FIXME: to handle multiple frozen rows/cols
-void scroll_right(int n) {
-    extern int center_hidden_cols;
-    int freezec = freeze_ranges && (freeze_ranges->type == 'c' ||  freeze_ranges->type == 'a') ? 1 : 0;
-    int brcol = freezec ? freeze_ranges->br->col : 0;
-    int tlcol = freezec ? freeze_ranges->tl->col : 0;
-
-    while (curcol < maxcols && n--) {
-        if ((freezec && curcol == offscr_sc_cols + center_hidden_cols + brcol - tlcol + 1) ||
-           (!freezec && curcol == offscr_sc_cols)) {
-            curcol = forw_col(1)->col;
-            unselect_ranges();
-        }
-        if (freezec && offscr_sc_cols == freeze_ranges->tl->col) {
-            center_hidden_cols++;
-        } else {
-            offscr_sc_cols++;
-        }
-        while (curcol < offscr_sc_cols) curcol++;
-    }
-    return;
+void scroll_right(int n)
+{
+	while (n--) {
+		int last, curcol_orig = curcol;
+		/* find last mobile column */
+		calc_mobile_cols(&last);
+		/* move to next non-hidden non-frozen column */
+		do {
+			lookat(currow, ++last);
+			if (last >= maxcols)
+				return;
+		} while (col_hidden[last] || col_frozen[last]);
+		/* this will adjust offscr_sc_cols */
+		curcol = last;
+		calc_mobile_cols(NULL);
+		/* restore curcol */
+		curcol = curcol_orig;
+		if (curcol < offscr_sc_cols)
+			curcol = offscr_sc_cols;
+		unselect_ranges();
+	}
 }
 
 /**
@@ -1596,36 +1573,26 @@ void scroll_right(int n) {
  * \param[in] n
  * \return none
  */
-//FIXME: to handle multiple frozen rows/cols
-void scroll_left(int n) {
-    extern int center_hidden_cols;
-    int freezec = freeze_ranges && (freeze_ranges->type == 'c' ||  freeze_ranges->type == 'a') ? 1 : 0;
-
-    while (n--) {
-        int a = 1;
-        int b = 0, c = 0, d = 0;
-        if (freezec && center_hidden_cols) {
-            center_hidden_cols--;
-        } else if (offscr_sc_cols) {
-            offscr_sc_cols--;
-        } else {
-            sc_info("Cannot scroll no longer");
-            break;
-        }
-        while (a != b && curcol) {
-            a = offscr_sc_cols;
-            c = center_hidden_cols;
-            calc_offscr_sc_cols();
-            b = offscr_sc_cols;
-            d = center_hidden_cols;
-            if (a != b || c != d) {
-                curcol = back_col(1)->col;
-                offscr_sc_cols = a;
-                center_hidden_cols = c;
-            }
-        }
-    }
-    return;
+void scroll_left(int n)
+{
+	while (n--) {
+		int first, last, curcol_orig = curcol;
+		/* move to previous non-hidden non-frozen column */
+		first = offscr_sc_cols;
+		do {
+			if (--first < 0)
+				return;
+		} while (col_hidden[first] || col_frozen[first]);
+		offscr_sc_cols = first;
+		/* find corresponding last mobile column */
+		curcol = first;
+		calc_mobile_cols(&last);
+		/* restore/adjust curcol */
+		curcol = curcol_orig;
+		if (curcol > last)
+			curcol = last;
+		unselect_ranges();
+	}
 }
 
 /**
@@ -1659,8 +1626,6 @@ struct ent * right_limit(int row) {
  */
 struct ent * goto_top() {
     int r = 0;
-    center_hidden_rows=0;
-    center_hidden_cols=0;
     while ( row_hidden[r] && r < currow ) r++;
     return lookat(r, curcol);
 }
@@ -1738,35 +1703,39 @@ struct ent * go_bol() {
  * \return none
  */
 struct ent * go_eol() {
-    return lookat(currow, offscr_sc_cols + calc_offscr_sc_cols() - 1);
+    int last_col;
+    calc_mobile_cols(&last_col);
+    return lookat(currow, last_col);
 }
 
 /**
  * \brief TODO Document horiz_middle()
  * \return lookat; NULL otherwise
  */
-//FIXME: to handle multiple frozen rows/cols
-struct ent * horiz_middle() {
-    int i;
-    int ancho = rescol;
-    int visibles = calc_offscr_sc_cols();
-    int freeze = freeze_ranges && (freeze_ranges->type == 'c' ||  freeze_ranges->type == 'a') ? 1 : 0;
-    int tlcol = freeze ? freeze_ranges->tl->col : 0;
-    int brcol = freeze ? freeze_ranges->br->col : 0;
-    extern int center_hidden_cols;
+struct ent * horiz_middle()
+{
+	int i;
+	int midscreen_pos = (COLS - rescol - 1)/2;
+	int curr_pos = 0;
+	int mobile_cols = calc_mobile_cols(NULL);
 
-    for (i = offscr_sc_cols; i < offscr_sc_cols + visibles; i++) {
-        //if not shown, continue
-        if (col_hidden[i]) continue;
-        else if (freeze && i > brcol && i <= brcol + center_hidden_cols) continue;
-        else if (freeze && i < tlcol && i >= tlcol - center_hidden_cols) continue;
+	for (i = 0; i < maxcols; i++) {
+		if (col_hidden[i])
+			continue;
+		if (! col_frozen[i]) {
+			if (i < offscr_sc_cols)
+				continue;
+			if (--mobile_cols < 0)
+				continue;
+		}
 
-        ancho += fwidth[i];
-        if (ancho >= (COLS-rescol)/2) {
-            return lookat(currow, i);
-        }
-    }
-    return NULL;
+		/* compare middle of current col against middle of screen */
+		if (curr_pos + (fwidth[i] - 1)/2 >= midscreen_pos)
+			return lookat(currow, i);
+
+		curr_pos += fwidth[i];
+	}
+	return NULL;
 }
 
 /**
@@ -2309,170 +2278,181 @@ void fix_col_frozen(int deltac, int ci, int cf) {
 }
 
 /**
- * \brief This functions calculates the number of hidden rows above grid (offscr_sc_rows).
- * Those rows are not actually hidden as when you hide a row,
- * but rather not shown because of current cell position.
- * unless you have some frozen rows at top..
+ * \brief Compute number of mobile (unfrozen) rows to fit on screen
  *
- * \details
- * this is the core of displaying rows / columns and cell content on the grid.
- * this function do a couple of things:
- * 1. calculates the number of hidden rows above grid, setting offscr_sc_rows (which is a global variable).
- * You can see that variable as a value of scroll.
+ * \details This function finds the number of mobile rows that can fit on
+ * the screen. This number excludes frozen rows as they never leave the
+ * screen hence their total height is subtracted from the available screen
+ * area. This number also excludes hidden rows. Displayed mobile rows are
+ * considered starting from offscr_sc_rows, however currow must be within
+ * the displayed rows. If currow is found to be outside the displayed set
+ * of rows then offscr_sc_rows is adjusted accordingly.
  *
- * 2. sets num_frozen_after_rows (another global variable), which is the number of frozen rows after the
- * calculated "rows" (the return value of this function).
+ * \param[in] last_p If not NULL then the last mobile row to fit is stored there
  *
- * \return rows: the number of sc rows that should be shown counting from top (offscr_sc_rows + 1),
- * and ignoring any frozen rows at bottom, but counting frozen rows at top.
- * NOTE: if you have frozen rows at top, those are counted by offscr_sc_rows as well.
- * that means for instance that if you have the first two rows frozen, and offscr_sc_rows equals 5,
- * the first two rows would be rows 0 and 1, and the third row would be row 5, and so on.
+ * \return Number of mobile rows displayable on the screen
  */
-int calc_offscr_sc_rows() {
-    int i, k, rows, row, fmtbef;
-    int fmtaft = 0; // number of NCURSES screen lines needed to display the frozen after rows.
-    int numbef = 0; // number of frozen rows before offscr rows
+int calc_mobile_rows(int *last_p)
+{
+	int i, row_space, mobile_rows, last;
 
-    // pick up row counts
-    // row  : number of NCURSES screen lines counted (for entire grid). must be <= LINES
-    // rows : number de sc rows shown on grid. if you have hidden rows, those get counted.
-    // fmtbef : number of NCURSES screen lines (because of frozen rows) before offscr_sc_rows
-    count:
-    for (i = 0, rows = 0, fmtbef = 0, row = RESROW + RESCOLHEADER, numbef = 0; i < maxrows && row + row_format[i] <= LINES; i++) {
-        if (offscr_sc_rows - fmtbef + rows > maxrows) {
-            return rows - num_frozen_after_rows - numbef;
-            break;
-        }
-        if (row_hidden[i]) {
-            if (i >= offscr_sc_rows) rows++;
-            continue;
-        }
-        if (row_frozen[i] || i >= offscr_sc_rows) {
-            rows++;
-            row += row_format[i];
-            if (row_frozen[i] && i < offscr_sc_rows) { fmtbef += row_format[i]; numbef++; }
-        }
-    }
+	/*
+	 * Compute the number of frozen rows and the space they need.
+	 * Eventually this should be added/subtracted when individual rows
+	 * are frozen/unfrozen/enlarged/reduced/deleted and not recomputed
+	 * every time here... or at least have a global flag indicating that
+	 * nothing has changed and that this loop can be skipped.
+	 */
+	nb_frozen_rows = 0;
+	nb_frozen_screenrows = 0;
+	for (i = 0; i < maxrows; i++) {
+		if (row_hidden[i])
+			continue;
+		if (row_frozen[i]) {
+			nb_frozen_rows++;
+			nb_frozen_screenrows += row_format[i];
+		}
+	}
 
-    // we count the number of frozen rows after "rows", from "rows" until maxrows.
-    for (k = i, num_frozen_after_rows = 0, fmtaft = 0; k < maxrows; k++)
-        if (row_frozen[k]) {
-            if (num_frozen_after_rows == 0) first_frozen_after_rows = k;
-            num_frozen_after_rows++;
-            fmtaft += row_format[k]; // count the screen lines needed to display them as well
-        }
+	/* Adjust display start if currow is above it */
+	if (currow < offscr_sc_rows)
+		offscr_sc_rows = currow;
 
-    // TODO: abort in a better way
-    if (fmtaft > row) { sc_debug("calc offscr sc rows: frozen rows overflow"); return 0; }
+	/* Determine the space available for mobile rows. */
+	row_space = LINES - RESROW - RESCOLHEADER - nb_frozen_screenrows;
 
-    // decrease rows until fitting frozen rows after "rows"..
-    int dec = fmtaft;
-    while (dec > 0) {
-        if (row_hidden[--i]) continue;
-        dec -= row_format[i];
-        if (row_frozen[i]) {
-            rows--;
-            num_frozen_after_rows++;
-            if (i < first_frozen_after_rows) first_frozen_after_rows = i;
-            fmtaft += row_format[i--]; // count the screen lines needed to display them as well
-            continue;
-        }
-    }
+	/*
+	 * Find how many visible mobile rows can fit in there
+	 * and remember which one is the last to fit.
+	 */
+	mobile_rows = 0;
+	last = offscr_sc_rows;
+	for (i = offscr_sc_rows; i < maxrows; i++) {
+		if (row_hidden[i])
+			continue;
+		if (row_frozen[i])
+			continue;
+		if (row_format[i] > row_space)
+			break;
+		row_space -= row_format[i];
+		mobile_rows++;
+		last = i;
+	}
 
-    int changed = offscr_sc_rows;
-    while ( offscr_sc_rows + rows - 1 - numbef - num_frozen_after_rows < currow || currow < offscr_sc_rows) {
-        if (offscr_sc_rows - fmtbef + rows > maxrows) {
-            if (row == LINES) offscr_sc_rows++;
-            break;
-        } else if (offscr_sc_rows - fmtbef - 1 == currow) { offscr_sc_rows--;
-        } else if (offscr_sc_rows + rows - 1 - numbef - num_frozen_after_rows < currow) {
-            offscr_sc_rows++;
-            while (row_hidden[offscr_sc_rows] && offscr_sc_rows < maxrows) offscr_sc_rows++;
-        } else if (offscr_sc_rows + rows - 1 - numbef - num_frozen_after_rows > currow) {
-            offscr_sc_rows--;
-            while (offscr_sc_rows && row_hidden[offscr_sc_rows]) offscr_sc_rows--;
-        } else break;
-    }
-    if (changed != offscr_sc_rows) goto count;
-    //sc_debug("off:%d, row_boundary:%d, num:%d first:%d", offscr_sc_rows, offscr_sc_rows + rows - num_frozen_after_rows - numbef, num_frozen_after_rows, first_frozen_after_rows);
-    return rows - num_frozen_after_rows - numbef;
+	/*
+	 * If currow is beyond the last row here then we must  start over,
+	 * moving backward this time, to properly position start of display.
+	 */
+	if (last < currow) {
+		row_space = LINES - RESROW - RESCOLHEADER - nb_frozen_screenrows;
+		mobile_rows = 0;
+		last = currow;
+		for (i = currow; i >= 0; i--) {
+			if (row_hidden[i])
+				continue;
+			if (row_frozen[i])
+				continue;
+			if (row_format[i] > row_space)
+				break;
+			row_space -= row_format[i];
+			mobile_rows++;
+			last = i;
+		}
+		offscr_sc_rows = last;
+	}
+
+	if (last_p)
+		*last_p = last;
+	return mobile_rows;
 }
 
 /**
- * \brief Calculate number of hidden columns to the left
- * \details Calculate number of hidden columns to the left.
- * \return number of hidden columns to the left
+ * \brief Compute number of mobile (unfrozen) columns to fit on screen
+ *
+ * \details This function finds the number of mobile columns that can fit on
+ * the screen. This number excludes frozen columns as they never leave the
+ * screen, hence their total height is subtracted from the available screen
+ * area. This number also excludes hidden columns. Displayed mobile columnss
+ * are considered starting from offscr_sc_cols, however curcol must be within
+ * the displayed columns. If curcol is found to be outside the displayed set
+ * of columns then offscr_sc_cols is adjusted accordingly.
+ *
+ * \param[in] last_p If not NULL then the last mobile column to fit is stored there
+ *
+ * \return Number of mobile columns displayable on the screen
  */
-int calc_offscr_sc_cols() {
-    int i, k, cols, col, fmtbef;
-    int fmtaft = 0; // number of NCURSES screen lines needed to display the frozen after cols.
-    int numbef = 0; // number of frozen cols before offscr cols
+int calc_mobile_cols(int *last_p)
+{
+	int i, col_space, mobile_cols, last;
 
-    // pick up col counts
-    // col : number of NCURSES screen columns counted (for entire grid). must be <= COLS
-    // cols : number de sc cols shown on grid. if you have hidden rows, those get counted.
-    // fmtbef : number of NCURSES screen lines (because of frozen cols) before offscr_sc_cols
-    countc:
-    for (i = 0, cols = 0, fmtbef = 0, col = rescol, numbef = 0; i < maxcols && col + fwidth[i] <= COLS; i++) {
-        if (offscr_sc_cols - fmtbef + cols > maxcols) {
-            return cols - num_frozen_after_cols - numbef; // FIXME -2
-            break;
-        }
-        if (col_hidden[i]) {
-            if (i >= offscr_sc_cols) cols++;
-            continue;
-        }
-        if (col_frozen[i] || i >= offscr_sc_cols) {
-            cols++;
-            col += fwidth[i];
-            if (col_frozen[i] && i < offscr_sc_cols) { fmtbef += fwidth[i]; numbef++; }
-        }
-    }
+	/*
+	 * Compute the number of frozen columns and the space they need.
+	 * Eventually this should be added/subtracted when individual
+	 * columns are frozen/unfrozen/enlarged/reduced/deleted and not
+	 * recomputed every time here... or at least have a flag indicating
+	 * that nothing has changed and that this loop may be skipped.
+	 */
+	nb_frozen_cols = 0;
+	nb_frozen_screencols = 0;
+	for (i = 0; i < maxcols; i++) {
+		if (row_frozen[i])
+			continue;
+		if (col_frozen[i]) {
+			nb_frozen_cols++;
+			nb_frozen_screencols += fwidth[i];
+		}
+	}
 
-    // we count the number of frozen cols after "cols", from "cols" until maxcols.
-    for (k = i, num_frozen_after_cols = 0, fmtaft = 0; k < maxcols; k++)
-        if (col_frozen[k]) {
-            if (num_frozen_after_cols == 0) first_frozen_after_cols = k;
-            num_frozen_after_cols++;
-            fmtaft += fwidth[k]; // count the screen lines needed to display them as well
-        }
+	/* Adjust display start if curcol is left of it */
+	if (curcol < offscr_sc_cols)
+		offscr_sc_cols = curcol;
 
-    // TODO: abort in a better way
-    if (fmtaft > col) { sc_debug("calc offscr sc cols: frozen cols overflow"); return 0; }
+	/* Determine the space available for mobile columns. */
+	col_space = COLS - rescol - nb_frozen_screencols;
 
-    // decrease cols until fitting frozen cols after "cols"..
-    int dec = fmtaft;
-    while (dec > 0) {
-        if (col_hidden[--i]) continue;
-        dec -= fwidth[i];
-        if (col_frozen[i]) {
-            cols--;
-            num_frozen_after_cols++;
-            if (i < first_frozen_after_cols) first_frozen_after_cols = i;
-            fmtaft += fwidth[i--]; // count the screen lines needed to display them as well
-            continue;
-        }
-        //cols--;
-    }
+	/*
+	 * Find how many visible mobile columns can fit in there
+	 * and remember which one is the last to fit.
+	 */
+	mobile_cols = 0;
+	last = offscr_sc_cols;
+	for (i = offscr_sc_cols; i < maxcols; i++) {
+	       if (col_hidden[i])
+		       continue;
+	       if (col_frozen[i])
+		       continue;
+	       if (fwidth[i] > col_space)
+		       break;
+	       col_space -= fwidth[i];
+	       mobile_cols++;
+	       last = i;
+	}
 
-    int changed = offscr_sc_cols;
-    while ( offscr_sc_cols + cols - 1 - numbef - num_frozen_after_cols < curcol || curcol < offscr_sc_cols) {
-        if (offscr_sc_cols - fmtbef + cols > maxcols) {
-            if (col == COLS) offscr_sc_cols++;
-            break;
-        } else if (offscr_sc_cols - fmtbef - 1 == curcol) { offscr_sc_cols--;
-        } else if (offscr_sc_cols + cols - 1 - numbef - num_frozen_after_cols < curcol) {
-            offscr_sc_cols++;
-            while (col_hidden[offscr_sc_cols] && offscr_sc_cols < maxcols) offscr_sc_cols++;
-        } else if (offscr_sc_cols + cols - 1 - numbef - num_frozen_after_cols > curcol) {
-            offscr_sc_cols--;
-            while (offscr_sc_cols && col_hidden[offscr_sc_cols]) offscr_sc_cols--;
-        } else break;
-    }
-    if (changed != offscr_sc_cols) goto countc;
-    //sc_info("maxcol. off:%d cols:%d numb:%d numa:%d col:%d COLS:%d", offscr_sc_cols, cols, numbef, num_frozen_after_cols, col, COLS);
-    return cols - num_frozen_after_cols - numbef;
+	/*
+	 * If curcol is beyond the last column here then we start over,
+	 * moving backward this time, to properly position start of display.
+	 */
+	if (last < curcol) {
+		col_space = COLS - rescol - nb_frozen_screencols;
+		mobile_cols = 0;
+		last = curcol;
+		for (i = curcol; i >= 0; i--) {
+			if (col_hidden[i])
+				continue;
+			if (col_frozen[i])
+				continue;
+			if (fwidth[i] > col_space)
+				break;
+			col_space -= fwidth[i];
+			mobile_cols++;
+			last = i;
+		}
+		offscr_sc_cols = last;
+	}
+
+	if (last_p)
+		*last_p = last;
+	return mobile_cols;
 }
 
 /**

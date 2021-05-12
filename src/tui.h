@@ -61,11 +61,8 @@
 #define WHITE             COLOR_WHITE
 
 extern int offscr_sc_rows, offscr_sc_cols;
-extern int center_hidden_rows, center_hidden_cols;
-extern int num_frozen_after_rows;
-extern int num_frozen_after_cols;
-extern int first_frozen_after_rows;
-extern int first_frozen_after_cols;
+extern int nb_frozen_rows, nb_frozen_cols;
+
 extern unsigned int curmode;
 extern struct srange * ranges;
 extern struct ent ** p;

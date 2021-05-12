@@ -252,7 +252,7 @@ void do_normalmode(struct block * buf) {
         case ctl('f'):
         case OKEY_PGDOWN:
             {
-            int n = LINES - RESROW - 1;
+            int n = calc_mobile_rows(NULL);
             if (get_conf_int("half_page_scroll")) n = n / 2;
             lastcol = curcol;
             lastrow = currow;
@@ -267,7 +267,7 @@ void do_normalmode(struct block * buf) {
         case ctl('b'):
         case OKEY_PGUP:
             {
-            int n = LINES - RESROW - 1;
+            int n = calc_mobile_rows(NULL);
             if (get_conf_int("half_page_scroll")) n = n / 2;
             lastcol = curcol;
             lastrow = currow;
@@ -951,13 +951,13 @@ void do_normalmode(struct block * buf) {
                     break;
 
                 case L'H':
-                    scroll = calc_offscr_sc_cols();
+                    scroll = calc_mobile_cols(NULL);
                     if (get_conf_int("half_page_scroll")) scroll /= 2;
                     scroll_left(scroll);
                     break;
 
                 case L'L':
-                    scroll = calc_offscr_sc_cols();
+                    scroll = calc_mobile_cols(NULL);
                     if (get_conf_int("half_page_scroll")) scroll /= 2;
                     scroll_right(scroll);
                     break;
