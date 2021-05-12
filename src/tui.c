@@ -445,7 +445,7 @@ void ui_update(int header) {
     ui_show_content(main_win, row_boundary, col_boundary);
 
     // Show sc_row headings: 0, 1, 2, 3..
-    ui_show_sc_row_headings(main_win, row_boundary); // schow_sc_row_headings must be after show_content
+    ui_show_sc_row_headings(main_win, row_boundary); // show_sc_row_headings must be after show_content
 
     if (status_line_empty && get_conf_int("show_cursor")) {
         // Leave cursor on selected cell when no status message
@@ -693,19 +693,26 @@ void ui_show_sc_row_headings(WINDOW * win, int row_boundary) {
 
     int i, j;
     int winrow = 1;
-    int outrow = (num_frozen_after_rows != 0) ?
-            (first_frozen_after_rows + num_frozen_after_rows) : row_boundary;
+    int frozen_shown = 0;
+
     srange * s = get_selected_range();
 
-    for (i = 0; i < outrow; i++) {
+    for (i = 0; i < row_boundary || num_frozen_after_rows > frozen_shown; i++) {
+
         // skip this row if before offscr_sc_rows and not frozen
         if (i < offscr_sc_rows && ! row_frozen[i]) continue;
 
         // skip this row if hidden
         if (row_hidden[i]) continue;
 
-        // bridge to downward frozen rows
+        // bridge to downward frozen rows, if reached row_boundary
         if (i == row_boundary) i = first_frozen_after_rows;
+
+        // if passed row_boundary, ignore no frozen rows
+        if (i > row_boundary && ! row_frozen[i]) continue;
+
+        // else count it as shown
+        else if (i >= row_boundary && row_frozen[i]) frozen_shown++;
 
         if (i >= maxrows) {
             sc_debug("i:%d >= maxrows:%d in %s. please check calc_offscr_sc_rows.", i, maxrows, __func__);
@@ -746,22 +753,28 @@ void ui_show_sc_row_headings(WINDOW * win, int row_boundary) {
 
 void ui_show_sc_col_headings(WINDOW * win, int col_boundary) {
     int i, wincol = rescol;
-    int outcol = (num_frozen_after_cols != 0) ?
-            (first_frozen_after_cols + num_frozen_after_cols) : col_boundary;
+    int frozen_shown = 0;
     srange * s = get_selected_range();
 
     wmove(win, 0, 0);
     wclrtoeol(win);
 
-    for (i = 0; i < outcol; i++) {
+    for (i = 0; i < col_boundary || num_frozen_after_cols > frozen_shown; i++) {
+
         // skip this column if before offscr_sc_cols and not frozen
         if (i < offscr_sc_cols && ! col_frozen[i]) continue;
 
         // skip this column if hidden
         if (col_hidden[i]) continue;
 
-        // bridge to rightward frozen columns
+        // bridge to downward frozen rows, if reached row_boundary
         if (i == col_boundary) i = first_frozen_after_cols;
+
+        // if passed col_boundary, ignore no frozen cols
+        if (i > col_boundary && ! col_frozen[i]) continue;
+
+        // else count it as shown
+        else if (i >= col_boundary && col_frozen[i]) frozen_shown++;
 
         if (i >= maxcols) {
             sc_debug("i:%d >= maxcols:%d in %s. please check calc_offscr_sc_cols.", i, maxcols, __func__);
@@ -783,8 +796,7 @@ void ui_show_sc_col_headings(WINDOW * win, int col_boundary) {
             #endif
         }
 
-
-        // if we want ! after column name:
+        // we want ! after column name:
         int k = (fwidth[i] - 1) / 2;
         mvwprintw(win, 0, wincol, "%*s%s%s%*s", k, "", coltoa(i),
         col_frozen[i] ? "!" : "", fwidth[i] - k - (col_frozen[i] ? strlen(coltoa(i))+1 : strlen(coltoa(i))), "");
@@ -815,25 +827,29 @@ void ui_show_sc_col_headings(WINDOW * win, int col_boundary) {
 void ui_show_content(WINDOW * win, int row_boundary, int col_boundary) {
     int row, col;
     int winrow = 1;
-    int outrow = (num_frozen_after_rows != 0) ?
-            (first_frozen_after_rows + num_frozen_after_rows) : row_boundary;
-    int outcol = (num_frozen_after_cols != 0) ?
-            (first_frozen_after_cols + num_frozen_after_cols) : col_boundary;
+    int frozenr_shown = 0;
+    int frozenc_shown = 0;
     srange * s = get_selected_range();
     int conf_underline_grid = get_conf_int("underline_grid");
     int conf_truncate = get_conf_int("truncate");
     int conf_overlap = get_conf_int("overlap");
     int conf_autowrap = get_conf_int("autowrap");
 
-    for (row = 0; row < outrow; row++) {
+    for (row = 0; row < row_boundary || num_frozen_after_rows > frozenr_shown; row++) {
         // skip this row if before offscr_sc_rows and not frozen
         if (row < offscr_sc_rows && ! row_frozen[row]) continue;
 
         // skip this row if hidden
         if (row_hidden[row]) continue;
 
-        // bridge to downward frozen rows
+        // bridge to downward frozen rows, if reached row_boundary
         if (row == row_boundary) row = first_frozen_after_rows;
+
+        // if passed row_boundary, ignore no frozen rows
+        if (row > row_boundary && ! row_frozen[row]) continue;
+
+        // else count it as shown
+        else if (row >= row_boundary && row_frozen[row]) frozenr_shown++;
 
         if (row >= maxrows) {
             sc_debug("i:%d >= maxrows:%d in %s. please check calc_offscr_sc_rows.", row, maxrows, __func__);
@@ -842,15 +858,21 @@ void ui_show_content(WINDOW * win, int row_boundary, int col_boundary) {
 
         int wincol = rescol;
 
-        for (col = 0; col < outcol; col++) {
+        for (col = 0; col < col_boundary || num_frozen_after_cols > frozenc_shown; col++) {
             // skip this column if before offscr_sc_cols and not frozen
             if (col < offscr_sc_cols && ! col_frozen[col]) continue;
 
             // skip this column if hidden
             if (col_hidden[col]) continue;
 
-            // bridge to rightward frozen columns
+            // bridge to downward frozen rows, if reached row_boundary
             if (col == col_boundary) col = first_frozen_after_cols;
+
+            // if passed col_boundary, ignore no frozen cols
+            if (col > col_boundary && ! col_frozen[col]) continue;
+
+            // else count it as shown
+            else if (col >= col_boundary && col_frozen[col]) frozenc_shown++;
 
             if (col >= maxcols) {
                 sc_debug("i:%d >= maxcols:%d in %s. please check calc_offscr_sc_cols.", col, maxcols, __func__);
