@@ -300,7 +300,6 @@ void ui_sc_msg(char * s, int type, ...) {
  *
  * \return none
  */
-
 void ui_do_welcome() {
     char * msg_title = "SC-IM - SpreadSheet Calculator Improvised";
     char * msg_by = "An SC fork by Andrés Martinelli";
@@ -374,6 +373,7 @@ void ui_do_welcome() {
     return;
 }
 
+
 /**
  * \brief Refreshes screen grid
  *
@@ -385,7 +385,6 @@ void ui_do_welcome() {
  *
  * \return none
  */
-
 void ui_update(int header) {
     if (loading) return;
     if (cmd_multiplier > 1) return;
@@ -458,7 +457,6 @@ void ui_update(int header) {
  *
  * \return none
  */
-
 void ui_handle_cursor() {
     switch (curmode) {
         case COMMAND_MODE:
@@ -477,6 +475,7 @@ void ui_handle_cursor() {
     return;
 }
 
+
 /**
  * \brief Print string with alignment
  *
@@ -493,19 +492,18 @@ void ui_handle_cursor() {
  *
  * \return none
  */
-
 void ui_write_j(WINDOW * win, const char * word, const unsigned int row, const unsigned int justif) {
     (justif == 0) ? (wmove(win, row, 0) && wclrtoeol(win)) : wmove(win, row, COLS - strlen(word));
     wprintw(win, "%s", word);
     return;
 }
 
+
 /**
  * \brief Print multiplier and pending operator to the status bar
  *
  * \return none
  */
-
 void ui_print_mult_pend() {
     if (curmode != NORMAL_MODE && curmode != VISUAL_MODE && curmode != EDIT_MODE) return;
 
@@ -543,12 +541,12 @@ void ui_print_mult_pend() {
     }
 }
 
+
 /**
  * \brief Show first and second row (header). Handle cursor position.
  *
  * \return none
  */
-
 void ui_show_header() {
     //ui_clr_header(0);
     ui_clr_header(1);
@@ -579,6 +577,7 @@ void ui_show_header() {
     ui_refresh_pad(scroll);
     return;
 }
+
 
 /**
  * \brief ui_clr_header
@@ -617,7 +616,6 @@ void ui_clr_header(int i) {
  *
  * \return none
  */
-
 void ui_print_mode() {
     unsigned int row = 0; // Print mode in first row
     char strm[PATHLEN+22] = "";
@@ -672,6 +670,7 @@ void ui_print_mode() {
     return;
 }
 
+
 /**
  * \brief Show sc_row headings: 0, 1, 2...
  *
@@ -680,7 +679,6 @@ void ui_print_mode() {
  *
  * \return none
  */
-
 void ui_show_sc_row_headings(WINDOW * win, int nb_mobile_rows) {
     #ifdef USECOLORS
     if (has_colors()) ui_set_ucolor(win, &ucolors[HEADINGS], DEFAULT_COLOR);
@@ -727,6 +725,7 @@ void ui_show_sc_row_headings(WINDOW * win, int nb_mobile_rows) {
     }
 }
 
+
 /**
  * \brief Show sc_col headings: A, B, C...
  *
@@ -735,7 +734,6 @@ void ui_show_sc_row_headings(WINDOW * win, int nb_mobile_rows) {
  *
  * \return none
  */
-
 void ui_show_sc_col_headings(WINDOW * win, int nb_mobile_cols) {
     int i;
     srange * s = get_selected_range();
@@ -791,6 +789,7 @@ void ui_show_sc_col_headings(WINDOW * win, int nb_mobile_cols) {
     }
 }
 
+
 /**
  * \brief Show the content of the cell
  *
@@ -800,7 +799,6 @@ void ui_show_sc_col_headings(WINDOW * win, int nb_mobile_cols) {
  *
  * \return none
  */
-
 void ui_show_content(WINDOW * win, int nb_mobile_rows, int nb_mobile_cols) {
     int row, col;
 
@@ -1047,6 +1045,7 @@ void ui_show_content(WINDOW * win, int nb_mobile_rows, int nb_mobile_cols) {
     }
 }
 
+
 /**
  * \brief Add details of an ent to a char*
  *
@@ -1095,6 +1094,7 @@ void ui_add_cell_detail(char * d, struct ent * p1) {
         }
     }
 }
+
 
 /**
  * \brief Draw cell content detail in header
@@ -1162,6 +1162,7 @@ void ui_show_celldetails() {
     wrefresh(input_win);
 }
 
+
 /**
  * \brief Error routine for yacc (gram.y)
  *
@@ -1176,6 +1177,7 @@ void yyerror(char * err) {
     return;
 }
 
+
 /**
  * \brief Create a string that represents the formatted value of the cell
  *
@@ -1188,7 +1190,6 @@ void yyerror(char * err) {
  * \return 1 if format of number - (numbers with format) - puede harber label.
  * \return -1 if there is no format in the cell
  */
-
 int ui_get_formated_value(struct ent ** p, int col, char * value) {
     //char * cfmt = (*p)->format ? (*p)->format : NULL;
     char * cfmt = (*p)->format ? (*p)->format : (realfmt[col] >= 0 && realfmt[col] < COLFORMATS && colformat[realfmt[col]] != NULL) ? colformat[realfmt[col]] : NULL;
@@ -1210,6 +1211,7 @@ int ui_get_formated_value(struct ent ** p, int col, char * value) {
     }
 }
 
+
 /**
  * \brief Shows text in child process
  *
@@ -1218,7 +1220,6 @@ int ui_get_formated_value(struct ent ** p, int col, char * value) {
  *
  * \param[in] val
  */
-
 void ui_show_text(char * val) {
     int pid;
     char px[MAXCMD];
@@ -1248,7 +1249,6 @@ void ui_show_text(char * val) {
 }
 
 
-
 /**
  * \brief
  * UI function thats called after SIGWINCH signal.
@@ -1269,6 +1269,7 @@ void sig_winchg() {
 
     return;
 }
+
 
 #ifdef XLUA
 /**
@@ -1303,6 +1304,7 @@ void ui_bail(lua_State *L, char * msg) {
 }
 #endif
 
+
 /**
  * \brief Show a message in the screen
  *
@@ -1311,7 +1313,6 @@ void ui_bail(lua_State *L, char * msg) {
  * parameter.
  * \return wchar_t indicating user answer
  */
-
 wchar_t ui_query_opt(wchar_t * initial_msg, wchar_t * valid) {
     if (! wcslen(initial_msg)) return L'\0';
     sc_info("%ls", initial_msg);
@@ -1330,6 +1331,7 @@ wchar_t ui_query_opt(wchar_t * initial_msg, wchar_t * valid) {
     curs_set(0);
     return wdc[0];
 }
+
 
 /**
  * \brief Read text from stdin
@@ -1401,6 +1403,7 @@ char * ui_query(char * initial_msg) {
     return hline;
 }
 
+
 /**
  * \brief Set a color
  * if bg_override != -1 (DEFAULT_COLOR) set this instead of uc->bg
@@ -1410,7 +1413,6 @@ char * ui_query(char * initial_msg) {
  * \param[in} bg_override
  * \return none
  */
-
 void ui_set_ucolor(WINDOW * w, struct ucolor * uc, int bg_override) {
     short color;
     long attr = A_NORMAL;
@@ -1442,6 +1444,7 @@ void ui_set_ucolor(WINDOW * w, struct ucolor * uc, int bg_override) {
     }
     wattr_set (w, attr | COLOR_PAIR(color), color, NULL);
 }
+
 
 /**
  * \brief ui_start_colors()
@@ -1478,6 +1481,7 @@ void ui_start_colors() {
     }
 }
 
+
 /**
  * \brief
  * UI function thats called after SIGTSTP signal.
@@ -1489,6 +1493,7 @@ void ui_pause() {
     endwin();
     return;
 }
+
 
 /**
  * \brief
@@ -1504,6 +1509,7 @@ void ui_resume() {
     return;
 }
 
+
 /**
  * \brief
  * UI function thats moves input bar to bottom or back to the top
@@ -1515,6 +1521,7 @@ void ui_mv_bottom_bar() {
     return;
 }
 
+
 /**
  * \brief
  * UI function thats refresh input_pad
@@ -1524,6 +1531,7 @@ void ui_refresh_pad(int scroll) {
     prefresh(input_pad, 0, scroll, get_conf_int("input_bar_bottom") ? LINES-RESROW+1: RESROW-1, 0,
              get_conf_int("input_bar_bottom") ? LINES-RESROW+1: RESROW-1, COLS-1);
 }
+
 
 /**
  * \brief
