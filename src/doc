@@ -401,7 +401,7 @@ Commands for handling cell content:
      :q[uit]!    Quit sc-im, ignoring unsaved changes.
 
      :load {file}
-                 Load {file} into the sc-im database.
+                 Load (or reload) {file} into the sc-im database.
 
                  {file} can be an sc format file (.sc), a comma-separated file
                  (.csv), a tab-separated file (.tab, .tsv),a markdown table

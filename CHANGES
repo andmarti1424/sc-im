@@ -86,6 +86,7 @@ Added :showcols command that was missing.
 Handled issue #429
 handled issue #374
 Ignore SIGWINCH outside ncurses.
+triggers: Avoid segfault when not being able to load module. Issue #325
 
 
 

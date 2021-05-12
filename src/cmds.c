@@ -68,15 +68,15 @@
 void syncref(register struct enode *e);
 extern int shall_quit;
 char insert_edit_submode;
-struct ent * freeents = NULL; // keep deleted ents around before sync_refs
+struct ent * freeents = NULL;    // keep deleted ents around before sync_refs
 wchar_t interp_line[BUFFERSIZE];
 extern graphADT graph;
 extern int yyparse(void);
 
 int offscr_sc_rows = 0, offscr_sc_cols = 0; // off screen spreadsheet rows and columns
-int num_frozen_after_rows = 0; // number of frozen rows after the calculated rows of calc_offscr_sc_rows()
-int first_frozen_after_rows =0; // starting point for such rows
-int num_frozen_after_cols = 0; // number of frozen cols after the calculated cols of calc_offscr_sc_cols()
+int num_frozen_after_rows = 0;   // number of frozen rows after the calculated rows of calc_offscr_sc_rows()
+int first_frozen_after_rows =0;  // starting point for such rows
+int num_frozen_after_cols = 0;   // number of frozen cols after the calculated cols of calc_offscr_sc_cols()
 int first_frozen_after_cols = 0; // starting point for such columns
 
 int center_hidden_cols = 0; // to be removed
@@ -2374,10 +2374,10 @@ int calc_offscr_sc_rows() {
         if (row_frozen[i]) {
             rows--;
             num_frozen_after_rows++;
+            if (i < first_frozen_after_rows) first_frozen_after_rows = i;
             fmtaft += row_format[i--]; // count the screen lines needed to display them as well
             continue;
         }
-        //rows--;
     }
 
     int changed = offscr_sc_rows;
@@ -2395,7 +2395,7 @@ int calc_offscr_sc_rows() {
         } else break;
     }
     if (changed != offscr_sc_rows) goto count;
-    //sc_info("1.OU off:%d rows%d RESROW:%d fmtbef:%d fmtaft:%d currow:%d maxrows:%d numbef:%d", offscr_sc_rows, rows, -RESROW, -fmtbef, fmtaft, currow, maxrows, numbef);
+    //sc_debug("off:%d, row_boundary:%d, num:%d first:%d", offscr_sc_rows, offscr_sc_rows + rows - num_frozen_after_rows - numbef, num_frozen_after_rows, first_frozen_after_rows);
     return rows - num_frozen_after_rows - numbef;
 }
 
@@ -2449,6 +2449,7 @@ int calc_offscr_sc_cols() {
         if (col_frozen[i]) {
             cols--;
             num_frozen_after_cols++;
+            if (i < first_frozen_after_cols) first_frozen_after_cols = i;
             fmtaft += fwidth[i--]; // count the screen lines needed to display them as well
             continue;
         }
