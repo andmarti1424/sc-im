@@ -120,6 +120,6 @@ void fix_row_frozen(int deltar, int ri, int rf);
 void fix_col_frozen(int deltac, int ci, int cf);
 
 void mark_ent_as_deleted(struct ent * p, int del);
-int calc_offscr_sc_rows();
-int calc_offscr_sc_cols();
+int calc_mobile_rows(int *);
+int calc_mobile_cols(int *);
 void pad_and_align (char * str_value, char * numeric_value, int col_width, int align, int padding, wchar_t * str_out, int rowfmt);

@@ -316,8 +316,8 @@ void ui_do_welcome() {
     #endif
 
     // show headings
-    int nbcols = offscr_sc_cols + calc_offscr_sc_cols();
-    int nbrows = offscr_sc_rows + calc_offscr_sc_rows();
+    int nbcols = calc_mobile_cols(NULL);
+    int nbrows = calc_mobile_rows(NULL);
     ui_show_sc_col_headings(main_win, nbcols);
     ui_show_content(main_win, nbrows, nbcols);
     ui_show_sc_row_headings(main_win, nbrows); // show_sc_row_headings must be after show_content
@@ -420,32 +420,27 @@ void ui_update(int header) {
     /*
      * Calculate offscreen rows and columns
      *
-     * col_boundary-1 is the last visible column in screen grid, excluding
-     * rightward frozen columns. For instance, if col_boundary is 9, last
-     * visible column would be I, possibly followed by frozen columns.
-     * row_boundary-1 is the last visible row in screen grid, possibly
-     * followed by downward frozen rows.
-     *
      * offscr_sc_cols are the number of columns left at the left of start
      * of grid. For instance, if offscr_sc_cols is 4. the first visible
      * column in grid would be column E.
+     *
+     * Mobile rows and columns are not frozen. They can move in and out of
+     * the display screen. Here nb_mobile_cols and nb_mobile_rows contain
+     * the number of visible mobile columns and rows. The more there are
+     * frozen rows/cols, the fewer mobile rows/cols.
      */
-    int cols = calc_offscr_sc_cols();
-    int rows = calc_offscr_sc_rows();
-    int col_boundary = offscr_sc_cols + cols;
-    int row_boundary = offscr_sc_rows + rows;
-    //sc_info("rows:%d off:%d, row_boundary:%d, maxrows:%d aft:%d", rows, offscr_sc_rows, row_boundary, maxrows, num_frozen_after_rows);
-    //sc_info("cols:%d off:%d, col_boundary:%d, maxcols:%d", cols, offscr_sc_cols, col_boundary, maxcols);
+    int nb_mobile_cols = calc_mobile_cols(NULL);
+    int nb_mobile_rows = calc_mobile_rows(NULL);
 
     // Show sc_col headings: A, B, C, D..
-    ui_show_sc_col_headings(main_win, col_boundary);
+    ui_show_sc_col_headings(main_win, nb_mobile_cols);
 
     // Show the content of the cells
     // Numeric values, strings.
-    ui_show_content(main_win, row_boundary, col_boundary);
+    ui_show_content(main_win, nb_mobile_rows, nb_mobile_cols);
 
     // Show sc_row headings: 0, 1, 2, 3..
-    ui_show_sc_row_headings(main_win, row_boundary); // show_sc_row_headings must be after show_content
+    ui_show_sc_row_headings(main_win, nb_mobile_rows); // schow_sc_row_headings must be after show_content
 
     if (status_line_empty && get_conf_int("show_cursor")) {
         // Leave cursor on selected cell when no status message
@@ -686,38 +681,28 @@ void ui_print_mode() {
  * \return none
  */
 
-void ui_show_sc_row_headings(WINDOW * win, int row_boundary) {
+void ui_show_sc_row_headings(WINDOW * win, int nb_mobile_rows) {
     #ifdef USECOLORS
     if (has_colors()) ui_set_ucolor(win, &ucolors[HEADINGS], DEFAULT_COLOR);
     #endif
 
     int i, j;
-    int winrow = 1;
-    int frozen_shown = 0;
-
     srange * s = get_selected_range();
 
-    for (i = 0; i < row_boundary || num_frozen_after_rows > frozen_shown; i++) {
+    int winrow = RESCOLHEADER;
+    int mobile_rows = nb_mobile_rows;
+    int total_rows = nb_mobile_rows + nb_frozen_rows;
 
-        // skip this row if before offscr_sc_rows and not frozen
-        if (i < offscr_sc_rows && ! row_frozen[i]) continue;
-
-        // skip this row if hidden
-        if (row_hidden[i]) continue;
-
-        // bridge to downward frozen rows, if reached row_boundary
-        if (i == row_boundary) i = first_frozen_after_rows;
-
-        // if passed row_boundary, ignore no frozen rows
-        if (i > row_boundary && ! row_frozen[i]) continue;
-
-        // else count it as shown
-        else if (i >= row_boundary && row_frozen[i]) frozen_shown++;
-
-        if (i >= maxrows) {
-            sc_debug("i:%d >= maxrows:%d in %s. please check calc_offscr_sc_rows.", i, maxrows, __func__);
-            break;
+    for (i = 0; i < maxrows && total_rows > 0; i++) {
+        if (row_hidden[i])
+            continue;
+        if (! row_frozen[i]) {
+            if (i < offscr_sc_rows)
+                continue;
+            if (--mobile_rows < 0)
+                continue;
         }
+        --total_rows;
 
         if ( (s != NULL && i >= s->tlrow && i <= s->brrow) || i == currow ) {
             #ifdef USECOLORS
@@ -751,35 +736,27 @@ void ui_show_sc_row_headings(WINDOW * win, int row_boundary) {
  * \return none
  */
 
-void ui_show_sc_col_headings(WINDOW * win, int col_boundary) {
-    int i, wincol = rescol;
-    int frozen_shown = 0;
+void ui_show_sc_col_headings(WINDOW * win, int nb_mobile_cols) {
+    int i;
     srange * s = get_selected_range();
 
     wmove(win, 0, 0);
     wclrtoeol(win);
 
-    for (i = 0; i < col_boundary || num_frozen_after_cols > frozen_shown; i++) {
+    int wincol = rescol;
+    int mobile_cols = nb_mobile_cols;
+    int total_cols = nb_mobile_cols + nb_frozen_cols;
 
-        // skip this column if before offscr_sc_cols and not frozen
-        if (i < offscr_sc_cols && ! col_frozen[i]) continue;
-
-        // skip this column if hidden
-        if (col_hidden[i]) continue;
-
-        // bridge to downward frozen rows, if reached row_boundary
-        if (i == col_boundary) i = first_frozen_after_cols;
-
-        // if passed col_boundary, ignore no frozen cols
-        if (i > col_boundary && ! col_frozen[i]) continue;
-
-        // else count it as shown
-        else if (i >= col_boundary && col_frozen[i]) frozen_shown++;
-
-        if (i >= maxcols) {
-            sc_debug("i:%d >= maxcols:%d in %s. please check calc_offscr_sc_cols.", i, maxcols, __func__);
-            break;
+    for (i = 0; i < maxcols && total_cols > 0; i++) {
+        if (col_hidden[i])
+            continue;
+        if (! col_frozen[i]) {
+            if (i < offscr_sc_cols)
+                continue;
+            if (--mobile_cols < 0)
+                continue;
         }
+        --total_cols;
 
         #ifdef USECOLORS
         if (has_colors() && i % 2 == 0)
@@ -824,60 +801,44 @@ void ui_show_sc_col_headings(WINDOW * win, int col_boundary) {
  * \return none
  */
 
-void ui_show_content(WINDOW * win, int row_boundary, int col_boundary) {
+void ui_show_content(WINDOW * win, int nb_mobile_rows, int nb_mobile_cols) {
     int row, col;
-    int winrow = 1;
-    int frozenr_shown = 0;
-    int frozenc_shown = 0;
+
     srange * s = get_selected_range();
     int conf_underline_grid = get_conf_int("underline_grid");
     int conf_truncate = get_conf_int("truncate");
     int conf_overlap = get_conf_int("overlap");
     int conf_autowrap = get_conf_int("autowrap");
 
-    for (row = 0; row < row_boundary || num_frozen_after_rows > frozenr_shown; row++) {
-        // skip this row if before offscr_sc_rows and not frozen
-        if (row < offscr_sc_rows && ! row_frozen[row]) continue;
+    int winrow = RESCOLHEADER;
+    int mobile_rows = nb_mobile_rows;
+    int total_rows = nb_mobile_rows + nb_frozen_rows;
 
-        // skip this row if hidden
-        if (row_hidden[row]) continue;
-
-        // bridge to downward frozen rows, if reached row_boundary
-        if (row == row_boundary) row = first_frozen_after_rows;
-
-        // if passed row_boundary, ignore no frozen rows
-        if (row > row_boundary && ! row_frozen[row]) continue;
-
-        // else count it as shown
-        else if (row >= row_boundary && row_frozen[row]) frozenr_shown++;
-
-        if (row >= maxrows) {
-            sc_debug("i:%d >= maxrows:%d in %s. please check calc_offscr_sc_rows.", row, maxrows, __func__);
-            break;
+    for (row = 0; row < maxrows && total_rows > 0; row++) {
+        if (row_hidden[row])
+            continue;
+        if (! row_frozen[row]) {
+            if (row < offscr_sc_rows)
+                continue;
+            if (--mobile_rows < 0)
+                continue;
         }
+        --total_rows;
 
         int wincol = rescol;
+        int mobile_cols = nb_mobile_cols;
+        int total_cols = nb_mobile_cols + nb_frozen_cols;
 
-        for (col = 0; col < col_boundary || num_frozen_after_cols > frozenc_shown; col++) {
-            // skip this column if before offscr_sc_cols and not frozen
-            if (col < offscr_sc_cols && ! col_frozen[col]) continue;
-
-            // skip this column if hidden
-            if (col_hidden[col]) continue;
-
-            // bridge to downward frozen rows, if reached row_boundary
-            if (col == col_boundary) col = first_frozen_after_cols;
-
-            // if passed col_boundary, ignore no frozen cols
-            if (col > col_boundary && ! col_frozen[col]) continue;
-
-            // else count it as shown
-            else if (col >= col_boundary && col_frozen[col]) frozenc_shown++;
-
-            if (col >= maxcols) {
-                sc_debug("i:%d >= maxcols:%d in %s. please check calc_offscr_sc_cols.", col, maxcols, __func__);
-                break;
+        for (col = 0; col < maxcols && total_cols > 0; col++) {
+            if (col_hidden[col])
+                continue;
+            if (! col_frozen[col]) {
+                if (col < offscr_sc_cols)
+                    continue;
+                if (--mobile_cols < 0)
+                    continue;
             }
+            --total_cols;
 
             struct ent ** p = ATBL(tbl, row, col);
             int fieldlen = fwidth[col];
@@ -1569,7 +1530,6 @@ void ui_refresh_pad(int scroll) {
  * function thats handles mouse movements
  * \return none
  */
-//TODO handle frozen rows and columns after "rows" "cols"
 #ifdef MOUSE
 void ui_handle_mouse(MEVENT event) {
     if (isendwin()) return;
@@ -1586,7 +1546,7 @@ void ui_handle_mouse(MEVENT event) {
 #ifdef BUTTON5_PRESSED
     if (curmode == NORMAL_MODE && (event.bstate & BUTTON4_PRESSED || // scroll up
         event.bstate & BUTTON5_PRESSED)) { // scroll down
-            int n = LINES - RESROW - 1;
+            int n = calc_mobile_rows(NULL);
             if (get_conf_int("half_page_scroll")) n = n / 2;
             lastcol = curcol;
             lastrow = currow;
@@ -1608,33 +1568,41 @@ void ui_handle_mouse(MEVENT event) {
     c = event.x - RESCOL;
     r = event.y - RESROW + (get_conf_int("input_bar_bottom") ? 1 : - 1);
 
-    int mxcol = calc_offscr_sc_cols() + offscr_sc_cols - 1;
-    int mxrow = calc_offscr_sc_rows() + offscr_sc_rows - 1;
-    int col = 0;
-    int row = 0;
+    int mobile_cols = calc_mobile_cols(NULL);
+    int mobile_rows = calc_mobile_rows(NULL);
+    int scr_col = 0;
+    int scr_row = 0;
 
-    for (i = 0; i <= mxcol; i++) {
-        if (i >= maxcols) {
-            sc_debug("ui_handle_mouse - i:%d >= maxcols:%d in show_content. please check calc_offscr_sc_cols.", i, maxcols);
-            break;
+    for (i = 0; i < maxcols; i++) {
+        if (col_hidden[i])
+            continue;
+        if (! col_frozen[i]) {
+            if (i < offscr_sc_cols)
+                continue;
+            if (--mobile_cols < 0)
+                continue;
         }
-        if (col_hidden[i]) continue;
-        if (col_frozen[i] || i >= offscr_sc_cols) col += fwidth[i];
-        if (col >= c + 1) break;
+
+        scr_col += fwidth[i];
+        if (scr_col >= c + 1) break;
     }
-    if (i > mxcol) i = mxcol;
 
     // same for rows
-    for (j = 0; j <= mxrow; j++) {
-        if (j >= maxrows) {
-            sc_debug("ui_handle_mouse - j:%d >= maxrows:%d in ui_show_sc_row_headings. please check calc_offscr_sc_rows.", j, maxrows);
-            break;
+    for (j = 0; j < maxrows; j++) {
+        if (row_hidden[j])
+            continue;
+        if (! row_frozen[j]) {
+            if (j < offscr_sc_rows)
+                continue;
+            if (--mobile_rows < 0)
+                continue;
         }
-        if (row_hidden[j]) continue;
-        if (row_frozen[j] || j >= offscr_sc_rows) row += row_format[j];
-        if (row >= r + 1) break;
+
+        scr_row += row_format[j];
+        if (scr_row >= r + 1) break;
     }
-    if (j > mxrow) j = mxrow;
+
+    if (i >= maxcols || j >= maxrows) return;
 
     // if in normal mode, change currow and curcol
     if (curmode == NORMAL_MODE) {

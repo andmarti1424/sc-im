@@ -114,12 +114,8 @@ void handle_freeze(struct ent * tl_ent, struct ent * br_ent, char value, char ty
  * \return none
  */
 void remove_frange() {
-    extern int center_hidden_rows;
-    extern int center_hidden_cols;
     free(freeze_ranges);
     freeze_ranges = NULL;
-    center_hidden_rows = 0;
-    center_hidden_cols = 0;
     ui_update(TRUE);
     return;
 }
