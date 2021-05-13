@@ -150,9 +150,9 @@ int growtbl(int rowcol, int toprow, int topcol) {
     /* when we first start up, fill the screen w/ cells */
         {
         int startval;
-        startval = LINES - RESROW;
+        startval = SC_DISPLAY_ROWS;
         newrows = startval > MINROWS ? startval : MINROWS;
-        startval = ((COLS) - rescol) / DEFWIDTH;
+        startval = SC_DISPLAY_COLS / DEFWIDTH;
         newcols = startval > MINCOLS ? startval : MINCOLS;
         }
 #else

@@ -656,7 +656,7 @@ struct enode * copye(register struct enode *e, int Rdelta, int Cdelta, int r1, i
  * \return none
  */
 void dorowformat(int r, unsigned char size) {
-    if (size < 1 || size > UCHAR_MAX || size > LINES - RESROW - 1) { sc_error("Invalid row format"); return; }
+    if (size < 1 || size > UCHAR_MAX || size > SC_DISPLAY_ROWS) { sc_error("Invalid row format"); return; }
 
     if (r >= maxrows && !growtbl(GROWROW, 0, r)) r = maxrows-1 ;
     checkbounds(&r, &curcol);
@@ -689,9 +689,9 @@ void doformat(int c1, int c2, int w, int p, int r) {
         w = 1;
     }
 
-    if (! get_conf_int("nocurses") && w > COLS - rescol - 2) {
-        sc_info("Width too large - Maximum = %d", COLS - rescol - 2);
-        w = COLS - rescol - 2;
+    if (! get_conf_int("nocurses") && w > SC_DISPLAY_COLS - 2) {
+        sc_info("Width too large - Maximum = %d", SC_DISPLAY_COLS - 2);
+        w = SC_DISPLAY_COLS - 2;
     }
 
     if (p > w) {
@@ -743,8 +743,8 @@ void formatcol(int c) {
         case OKEY_RIGHT:
             for (i = curcol; i < curcol + arg; i++) {
                 fwidth[i]++;
-                if (fwidth[i] > COLS - rescol - 2)
-                    fwidth[i] = COLS - rescol - 2;
+                if (fwidth[i] > SC_DISPLAY_COLS - 2)
+                    fwidth[i] = SC_DISPLAY_COLS - 2;
             }
             modflg++;
             break;
@@ -1496,7 +1496,7 @@ struct ent * vert_bottom() {
  */
 struct ent * vert_middle() {
     int i;
-    int midscreen_pos = (LINES - RESROW - RESCOLHEADER - 1)/2;
+    int midscreen_pos = (SC_DISPLAY_ROWS - 1)/2;
     int curr_pos = 0;
     int mobile_rows = calc_mobile_rows(NULL);
 
@@ -1755,7 +1755,7 @@ struct ent * go_eol() {
  */
 struct ent * horiz_middle() {
     int i;
-    int midscreen_pos = (COLS - rescol - 1)/2;
+    int midscreen_pos = (SC_DISPLAY_COLS - 1)/2;
     int curr_pos = 0;
     int mobile_cols = calc_mobile_cols(NULL);
 
@@ -1850,7 +1850,7 @@ void auto_fit(int ci, int cf, int min) {
                     sprintf(field, "%.*f", precision[c], p->v);
                     sum += strlen(field);
                 }
-                if (sum > fwidth[c] && sum < COLS-rescol)
+                if (sum > fwidth[c] && sum < SC_DISPLAY_COLS)
                     fwidth[c] = sum;
             }
         }
@@ -2372,7 +2372,7 @@ int calc_mobile_rows(int *last_p) {
         offscr_sc_rows = currow;
 
     /* Determine the space available for mobile rows. */
-    row_space = LINES - RESROW - RESCOLHEADER - nb_frozen_screenrows;
+    row_space = SC_DISPLAY_ROWS - nb_frozen_screenrows;
 
     /*
      * Find how many visible mobile rows can fit in there
@@ -2397,7 +2397,7 @@ int calc_mobile_rows(int *last_p) {
      * moving backward this time, to properly position start of display.
      */
     if (last < currow) {
-        row_space = LINES - RESROW - RESCOLHEADER - nb_frozen_screenrows;
+        row_space = SC_DISPLAY_ROWS - nb_frozen_screenrows;
         mobile_rows = 0;
         last = currow;
         for (i = currow; i >= 0; i--) {
@@ -2460,7 +2460,7 @@ int calc_mobile_cols(int *last_p) {
         offscr_sc_cols = curcol;
 
     /* Determine the space available for mobile columns. */
-    col_space = COLS - rescol - nb_frozen_screencols;
+    col_space = SC_DISPLAY_COLS - nb_frozen_screencols;
 
     /*
      * Find how many visible mobile columns can fit in there
@@ -2485,7 +2485,7 @@ int calc_mobile_cols(int *last_p) {
      * moving backward this time, to properly position start of display.
      */
     if (last < curcol) {
-        col_space = COLS - rescol - nb_frozen_screencols;
+        col_space = SC_DISPLAY_COLS - nb_frozen_screencols;
         mobile_cols = 0;
         last = curcol;
         for (i = curcol; i >= 0; i--) {
