@@ -38,7 +38,7 @@
 /**
  * \file version.h
  * \author Andrés Martinelli <andmarti@gmail.com>
- * \date 2017-07-18
+ * \date 2021-05-13
  * \brief Header file containing the SC-IM version number
  */
 
@@ -46,4 +46,4 @@
  * CODE REVISION NUMBER:
  */
 
-char * rev = "version 0.8.2-freeze";
+char * rev = "version 0.8.2";

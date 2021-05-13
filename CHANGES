@@ -3,7 +3,7 @@ v0.8.2
 Changes
 -------
 
-+ Improved yank and undo alloc'ing. Malloc as much we need from start in batches and avoid small mallocs.
++ Improved yank and undo alloc'ing. Malloc as much we need from start in a long batch and avoid small mallocs.
 
 + Changed the way lua scripts are referenced in formulas. Now they are input as any other string formula,
     like this: \"@lua("script_name.lua", 1)
@@ -66,8 +66,7 @@ Renamed GRID_PAIR to GRID_EVEN in color.c.
 
 UNDO of :fsum is handled by let.
 
-
-
+calc_offscr_rows/cols rewriten and renamed to calc_mobile_rows/cols
 
 
 Fixes
@@ -88,30 +87,14 @@ handled issue #374
 Ignore SIGWINCH outside ncurses.
 triggers: Avoid segfault when not being able to load module. Issue #325
 
-
-
-
-
-Pending for v0.8.2 release
-----------------------------
-
-+ Add GETENT in seval
-+ remove old references to freezer / freezec / center_hidden_rows: cmds.c cmds_command freeze.c tui.c tui.h
-
-
-
-For v0.8.3 release
--------------------
-create @counta, and modify @count to not count strings
-Reeval of @lastrow @lastcol: check cells that uses @lastrow / @lastcol gets updated everytime it change
-check all cmds movement functions after new frozen mods
-
 --
 Thanks to all that helped and created PR.
 Thanks to all who support and use this program.
 
 Andrés Martinelli
 andmarti1424
+
+
 
 
 ***********
