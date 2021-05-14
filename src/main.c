@@ -109,7 +109,7 @@ unsigned char * row_hidden;
 unsigned char * row_frozen;
 unsigned char * row_format;
 int maxrow, maxcol;
-int rescol = RESCOL; /**< Columns reserved for row numbers */
+int rescol; /**< Columns reserved for row numbers */
 
 char loadingfile[PATHLEN] = { '\0' };
 char line[FBUFLEN];

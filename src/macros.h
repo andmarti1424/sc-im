@@ -53,7 +53,6 @@
 #define COMPLETECMDTIMEOUT     (get_conf_int("command_timeout")/4)     // used for goto cell
 #define ESC_DELAY        25    // Escape timeout
 
-#define RESCOL           4     // columns reserved for row numbers
 #define RESROW           2     // rows reserved for prompt, error, and column numbers
 #define RESCOLHEADER     1     // number of row to show column header. always 1. just to make code cleaner
 #define SC_DISPLAY_ROWS  (LINES - RESROW - RESCOLHEADER)
