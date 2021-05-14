@@ -1542,11 +1542,6 @@ void ui_refresh_pad(int scroll) {
 void ui_handle_mouse(MEVENT event) {
     if (isendwin()) return;
 
-    // if out of range return
-    int i, j, r = 0, c = 0;
-    if ( event.x < RESCOL || ( get_conf_int("input_bar_bottom") && (event.y == 0 || event.y >= LINES - RESROW)) ||
-       ( !get_conf_int("input_bar_bottom") && (event.y <= RESROW))) return;
-
     // if mode is not handled return
     if (curmode != NORMAL_MODE && curmode != INSERT_MODE && curmode != COMMAND_MODE) return;
 
@@ -1573,9 +1568,15 @@ void ui_handle_mouse(MEVENT event) {
     // return if not a single click
     if (! (event.bstate & BUTTON1_CLICKED)) return;
 
-    c = event.x - RESCOL;
-    r = event.y - RESROW + (get_conf_int("input_bar_bottom") ? 1 : - 1);
+    // get coordinates corresponding to the grid area
+    int c = event.x - rescol;
+    int r = event.y - RESROW + (get_conf_int("input_bar_bottom") ? 1 : -1);
 
+    // if out of range return
+    if ( c < 0 || c >= SC_DISPLAY_COLS ||
+         r < 0 || r >= SC_DISPLAY_ROWS ) return;
+
+    int i, j;
     int mobile_cols = calc_mobile_cols(NULL);
     int mobile_rows = calc_mobile_rows(NULL);
     int scr_col = 0;
