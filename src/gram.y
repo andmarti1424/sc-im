@@ -564,8 +564,8 @@ command:
                     scxfree(tmp);
                 }
 */
-    |    S_AUTOJUS COL ':' COL       { auto_justify($2, $4, DEFWIDTH); }  // auto justificado de columnas
-    |    S_AUTOJUS COL               { auto_justify($2, $2, DEFWIDTH); }  // auto justificado de columna
+    |    S_AUTOJUS COL ':' COL       { auto_fit($2, $4, DEFWIDTH); }  // auto justificado de columnas
+    |    S_AUTOJUS COL               { auto_fit($2, $2, DEFWIDTH); }  // auto justificado de columna
 
     |    S_PAD NUMBER COL ':' COL  { pad($2, 0, $3, maxrow, $5); }
     |    S_PAD NUMBER COL          { pad($2, 0, $3, maxrow, $3); }

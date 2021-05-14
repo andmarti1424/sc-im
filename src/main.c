@@ -93,8 +93,9 @@
 #include "lua.h"
 #endif
 
-int currow = 0; /**< Current row of the selected cell. */
-int curcol = 0; /**< Current column of the selected cell. */
+// These are sheet attributes
+int currow = 0; /* Current row of the selected cell. */
+int curcol = 0; /* Current column of the selected cell. */
 int lastrow = 0;
 int lastcol = 0;
 int maxrows;
@@ -107,15 +108,17 @@ int * realfmt;
 unsigned char * row_hidden;
 unsigned char * row_frozen;
 unsigned char * row_format;
+int maxrow, maxcol;
+int rescol = RESCOL; /**< Columns reserved for row numbers */
+
+char loadingfile[PATHLEN] = { '\0' };
 char line[FBUFLEN];
 int modflg; /**< Indicates a change was made since last save */
 struct ent *** tbl;
 int shall_quit = 0;
 unsigned int curmode;
 unsigned int lastmode;
-int maxrow, maxcol;
 char curfile[PATHLEN];
-char loadingfile[PATHLEN] = { '\0' };
 char * exepath;
 
 int changed;
@@ -140,7 +143,6 @@ int colsinrange = DEFWIDTH;
 double eval_result;
 char * seval_result;
 FILE * fdoutput;  /**< Output file descriptor (stdout or file) */
-int rescol = RESCOL; /**< Columns reserved for row numbers */
 
 struct block * buffer;
 struct block * lastcmd_buffer;

@@ -76,6 +76,7 @@
 #include "ods.h"
 #include "xls.h"
 #include "tui.h"
+#include "trigger.h"
 
 extern struct ent * freeents;
 extern int yyparse(void);
@@ -703,6 +704,17 @@ void write_cells(register FILE *f, int r0, int c0, int rn, int cn, int dr, int d
                     editfmt(r, c);
                     (void) fprintf(f, "%s\n",line);
                 }
+                if ((*pp)->trigger != NULL) {
+                    struct trigger * t = (*pp)->trigger;
+                    char * mode = NULL;
+                    if ((t->flag & (TRG_READ | TRG_WRITE)) == (TRG_READ | TRG_WRITE)) mode = "RW";
+                    else if (t->flag & TRG_WRITE) mode = "W";
+                    else if (t->flag & TRG_READ) mode = "R";
+                    char * type = NULL;
+                    if (t->flag & TRG_LUA) type = "LUA";
+                    else type = "C";
+                    fprintf(f, "trigger %s%d \"mode=%s type=%s file=%s function=%s\"\n", coltoa(c), r, mode, type, t->file, t->function);
+                }
             }
     }
     //modflg = mf;
@@ -1168,7 +1180,7 @@ int import_csv(char * fname, char d) {
     maxrow = r-1;
     maxcol = cf-1;
 
-    auto_justify(0, maxcols, DEFWIDTH);
+    auto_fit(0, maxcols, DEFWIDTH);
 
     fclose(f);
 
@@ -1332,7 +1344,7 @@ int import_markdown(char * fname) {
   maxrow = r-1;
   maxcol = cf-1;
 
-  auto_justify(0, maxcols, DEFWIDTH);
+  auto_fit(0, maxcols, DEFWIDTH);
 
   fclose(f);
 

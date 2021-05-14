@@ -1806,7 +1806,7 @@ struct ent * go_backward() {
 
 
 /**
- * \brief TODO Document auto_justify()
+ * \brief TODO Document auto_fit()
  *
  * \param[in] ci
  * \param[in] cf
@@ -1814,7 +1814,7 @@ struct ent * go_backward() {
  *
  * \return none
  */
-void auto_justify(int ci, int cf, int min) {
+void auto_fit(int ci, int cf, int min) {
     // column width is not set below the min value
     int r, c, sum = 0;
     char field[1024] = "";

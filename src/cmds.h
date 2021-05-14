@@ -107,7 +107,7 @@ void dorowformat(int r, unsigned char size);
 struct enode;
 int etype(struct enode *e);
 void erase_area(int sr, int sc, int er, int ec, int ignorelock, int mark_ent_as_deleted);
-void auto_justify(int ci, int cf, int min);
+void auto_fit(int ci, int cf, int min);
 void valueize_area(int sr, int sc, int er, int ec);
 void sync_refs();
 void syncref(struct enode * e);

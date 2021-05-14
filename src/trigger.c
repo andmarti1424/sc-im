@@ -154,6 +154,7 @@ void set_trigger(int r, int c, int rf, int cf, char * str) {
                 }
             }
             n->trigger->flag = tmp;
+            if (!loading) sc_info("Trigger was set");
         }
     }
     destroy_dictionary(d);

@@ -209,7 +209,7 @@ void do_normalmode(struct block * buf) {
                 c = sr->tlcol;
                 cf = sr->brcol;
             }
-            auto_justify(c, cf, DEFWIDTH);  // auto justify columns
+            auto_fit(c, cf, DEFWIDTH);  // auto justify columns
             ui_update(TRUE);
             break;
             }

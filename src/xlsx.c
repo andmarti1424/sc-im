@@ -548,7 +548,7 @@ int open_xlsx(char * fname, char * encoding) {
         return -1;
     }
 
-    auto_justify(0, maxcols, DEFWIDTH);
+    auto_fit(0, maxcols, DEFWIDTH);
     deleterow(currow, 1);
     return 0;
 }

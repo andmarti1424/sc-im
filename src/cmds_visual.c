@@ -394,9 +394,9 @@ void do_visualmode(struct block * buf) {
         chg_mode('.');
         ui_show_header();
 
-    // auto_justify
+    // auto_fit
     } else if (buf->value == ctl('j')) {
-        auto_justify(r->tlcol, r->brcol, DEFWIDTH);  // auto justify columns
+        auto_fit(r->tlcol, r->brcol, DEFWIDTH);  // auto justify columns
         exit_visualmode();
         chg_mode('.');
         ui_show_header();
