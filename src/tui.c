@@ -771,10 +771,12 @@ void ui_show_sc_col_headings(WINDOW * win, int nb_mobile_cols) {
             #endif
         }
 
-        // we want ! after column name:
-        int k = (fwidth[i] - 1) / 2;
-        mvwprintw(win, 0, wincol, "%*s%s%s%*s", k, "", coltoa(i),
-        col_frozen[i] ? "!" : "", fwidth[i] - k - (col_frozen[i] ? strlen(coltoa(i))+1 : strlen(coltoa(i))), "");
+        char *a = coltoa(i);
+        int l1 = (i < 26) ? 1 : 2;
+        int l2 = col_frozen[i] ? 1 : 0;
+        int f1 = (fwidth[i] - l1 - l2)/2 + l1;
+        int f2 = fwidth[i] - f1;
+        mvwprintw(win, 0, wincol, "%*s%*s", f1, a, -f2, col_frozen[i] ? "!" : "");
 
         #ifdef USECOLORS
         if (has_colors() && i % 2 == 0)
