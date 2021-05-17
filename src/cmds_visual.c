@@ -215,7 +215,7 @@ void do_visualmode(struct block * buf) {
     } else if (buf->value == OKEY_UP || buf->value == L'k' || buf->value == ctl('b') ) {
         int n, i;
         if (buf->value == ctl('b')) {
-            n = LINES - RESROW - 1;
+            n = SC_DISPLAY_ROWS;
             if (get_conf_value("half_page_scroll")) n = n / 2;
         } else n = 1;
 
@@ -235,7 +235,7 @@ void do_visualmode(struct block * buf) {
     } else if (buf->value == OKEY_DOWN || buf->value == L'j' || buf->value == ctl('f')) {
         int n, i;
         if (buf->value == ctl('f')) {
-            n = LINES - RESROW - 1;
+            n = SC_DISPLAY_ROWS;
             if (get_conf_value("half_page_scroll")) n = n / 2;
         } else n = 1;
 

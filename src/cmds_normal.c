@@ -969,7 +969,7 @@ void do_normalmode(struct block * buf) {
                     for (i = 0; i < curcol; i++) {
                         for (c = i; c < curcol; c++) {
                             if (!col_hidden[c]) ancho += fwidth[c];
-                            if (ancho >= (COLS - rescol)/ 2) {
+                            if (ancho >= SC_DISPLAY_COLS/2) {
                                 ancho = rescol;
                                 break;
                             }
@@ -987,7 +987,7 @@ void do_normalmode(struct block * buf) {
                     int i = 0, r = offscr_sc_rows-1;
 
                     if (buf->pnext->value == L't') {
-                        while (i < LINES - RESROW - 1 && r < currow) {
+                        while (i < SC_DISPLAY_ROWS && r < currow) {
                             r++;
                             if (row_frozen[r]) continue;
                             i++;
@@ -996,7 +996,7 @@ void do_normalmode(struct block * buf) {
 
                     } else if (buf->pnext->value == L'b') {
                         int hidden = 0;
-                        while (i < LINES - RESROW - 1) {
+                        while (i < SC_DISPLAY_ROWS) {
                             r++;
                             if (row_hidden[r]) { hidden++; continue; }
                             else if (r < offscr_sc_rows && ! (row_frozen[r])) continue;
@@ -1006,14 +1006,14 @@ void do_normalmode(struct block * buf) {
                         scroll_up(r-currow-hidden);
 
                     } else if (buf->pnext->value == L'z' || buf->pnext->value == L'.') {
-                        while (i < LINES - RESROW - 1 && r <= currow) {
+                        while (i < SC_DISPLAY_ROWS && r <= currow) {
                             r++;
                             if (row_frozen[r]) continue;
                             i++;
                         }
                         int top = --i;
                         i = 0, r = offscr_sc_rows-1;
-                        while (i < LINES - RESROW - 1) {
+                        while (i < SC_DISPLAY_ROWS) {
                             r++;
                             if (r < offscr_sc_rows && ! (row_frozen[r])) continue;
                             i++;

@@ -150,9 +150,9 @@ int growtbl(int rowcol, int toprow, int topcol) {
     /* when we first start up, fill the screen w/ cells */
         {
         int startval;
-        startval = LINES - RESROW;
+        startval = SC_DISPLAY_ROWS;
         newrows = startval > MINROWS ? startval : MINROWS;
-        startval = ((COLS) - rescol) / DEFWIDTH;
+        startval = SC_DISPLAY_COLS / DEFWIDTH;
         newcols = startval > MINCOLS ? startval : MINCOLS;
         }
 #else
@@ -265,12 +265,15 @@ int growtbl(int rowcol, int toprow, int topcol) {
     }
 
     maxrows = newrows;
+#endif /* PSC */
 
+    rescol = 2;
+    if (maxrows > 10)      rescol = 3;
+    if (maxrows > 100)     rescol = 4;
     if (maxrows > 1000)    rescol = 5;
     if (maxrows > 10000)   rescol = 6;
     if (maxrows > 100000)  rescol = 7;
     if (maxrows > 1000000) rescol = 8;
-#endif /* PSC */
 
     maxcols = newcols;
     return (TRUE);
