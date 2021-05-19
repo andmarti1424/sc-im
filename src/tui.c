@@ -991,12 +991,6 @@ void ui_show_content(WINDOW * win, int nb_mobile_rows, int nb_mobile_cols) {
                 // }
                 pad_and_align(text, num, fieldlen, align, (*p)->pad, out, row_format[row]);
 
-                // auto wrap
-                if (!conf_truncate && !conf_overlap && conf_autowrap) {
-                    int newheight = (wcslen(out) + fwidth[col] - 1) / fwidth[col];
-                    if (row_format[row] < newheight) row_format[row] = newheight;
-                }
-
 #ifdef USECOLORS
                 if (has_colors() && conf_underline_grid) {
                     attr_t attr;
@@ -1005,20 +999,25 @@ void ui_show_content(WINDOW * win, int nb_mobile_rows, int nb_mobile_cols) {
                     wattr_set(win, attr | A_UNDERLINE, color, NULL);
                 }
 #endif
-                // 'out' may contain the output to fill multiple rows. not just one.
-                int count_row = 0;
-                wchar_t new[wcslen(out)+1];
-                for (count_row = 0; count_row < row_format[row]; count_row++) {
-                    int cw = count_width_widestring(out, fieldlen);
-                    wcscpy(new, out);
-                    if (conf_truncate || !conf_overlap) new[cw] = L'\0';
+ 
+                if (!conf_truncate && !conf_overlap && conf_autowrap) {
+                    // auto wrap
+                    int newheight = (wcslen(out) + fwidth[col] - 1) / fwidth[col];
+                    if (row_format[row] < newheight) row_format[row] = newheight;
 
-                    int whites = fieldlen - cw;
-                    while (whites-- > 0) add_wchar(new, L' ', wcslen(new));
-                    if (wcslen(new)) mvwprintw(win, winrow+count_row, wincol, "%ls", new);
-                    //wclrtoeol(win);
-                    if (cw) del_range_wchars(out, 0, cw-1);
-                    if (conf_overlap) break;
+                    int k;
+                    wchar_t *p_out = out;
+                    for (k = 0; k < row_format[row]; k++) {
+                        int eol = count_width_widestring(p_out, fieldlen);
+                        wchar_t save = p_out[eol];
+                        p_out[eol] = L'\0';
+                        mvwprintw(win, winrow+k, wincol, "%*ls", -fieldlen, p_out);
+                        p_out[eol] = save;
+                        p_out += eol;
+                    }
+                } else {
+                    row_format[row] = 1;
+                    mvwprintw(win, winrow, wincol, "%*ls", -fieldlen, out);
                 }
             }
 
