@@ -25,6 +25,7 @@
 #include "clipboard.h"
 #include "plot.h"
 #include "subtotal.h"
+#include "sheet.h"
 
 #include "cmds_command.h"
 
@@ -207,6 +208,9 @@ token S_YANKCOL
 %token S_UNDO
 %token S_IMAP
 %token S_CMAP
+%token S_NEWSHEET
+%token S_NEXTSHEET
+%token S_PREVSHEET
 %token S_NMAP
 %token S_VMAP
 %token S_INOREMAP
@@ -603,6 +607,28 @@ command:
     |    S_CPASTE                { paste_from_clipboard(); }
     |    S_LOCK var_or_range     { lock_cells($2.left.vp, $2.right.vp); }
     |    S_UNLOCK var_or_range   { unlock_cells($2.left.vp, $2.right.vp); }
+    |    S_NEWSHEET STRING       {
+                                   sc_debug("%s", $2);
+                                   roman->cur_sh = new_sheet(roman, $2);
+                                   scxfree($2);
+                                   ui_update(TRUE);
+                                 }
+    |    S_NEXTSHEET             {
+                                   if (roman->cur_sh->next != NULL)
+                                       roman->cur_sh = roman->cur_sh->next;
+                                   else
+                                       sc_info("we are already in last sheet of file");
+                                   ui_update(TRUE);
+                                 }
+
+    |    S_PREVSHEET             {
+                                   if (roman->cur_sh->prev != NULL)
+                                       roman->cur_sh = roman->cur_sh->prev;
+                                   else
+                                       sc_info("we are already in first sheet of file");
+                                   ui_update(TRUE);
+                                 }
+
     |    S_NMAP STRING STRING    {
                                    add_map($2, $3, NORMAL_MODE, 1);
                                    scxfree($2);

@@ -37,6 +37,7 @@
 /**
  * \file sheet.c
  * \author Andrés Martinelli <andmarti@gmail.com>
+ * some of this code is by Roman Pollak - @roman65536
  * \date 2021-05-20
  * \brief source file to handle sheets
  * \see Homepage: https://github.com/andmarti1424/sc-im
@@ -88,14 +89,31 @@ struct sheet * new_sheet(struct roman * doc, char * name) {
  * \brief search_sheet()
  * \param[doc] roman struct
  * \param[name] sheet name
- * \return sutrct sheet *
+ * \return struct sheet *
  */
 struct sheet * search_sheet(struct roman * doc, char * name) {
+      if (doc == NULL || name == NULL || ! strlen(name)) return 0;
       struct sheet * sh;
 
-      for(sh = doc->first_sh; sh != 0; sh = sh->next)
-          if(!strcmp(name, sh->name)) return sh;
-
+      for(sh = doc->first_sh; sh != 0; sh = sh->next) {
+          if (sh->name == NULL) continue;
+          if (! strcmp(name, sh->name)) return sh; 
+      }
       return 0;
 }
 
+
+/**
+ * \brief get_num_sheets()
+ * \param[doc] roman struct
+ * \return [int] number of sheets
+ */
+int get_num_sheets(struct roman * doc) {
+      if (doc == NULL) return 0;
+      struct sheet * sh;
+      int cnt = 0;
+      for(sh = doc->first_sh; sh != NULL ; sh = sh->next) {
+          cnt++;
+      }
+      return cnt;
+}
