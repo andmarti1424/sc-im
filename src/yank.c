@@ -65,12 +65,14 @@ extern struct ent * forw_row(int arg);
 extern struct ent * back_row(int arg);
 extern struct ent * forw_col(int arg);
 extern struct ent * back_col(int arg);
+extern struct roman * roman;
 
 int yank_arg;                 // number of rows and columns yanked. Used for commands like `4yr`
 char type_of_yank;            // yank type. c=col, r=row, a=range, e=cell, '\0'=no yanking
 static struct ent * yanklist;
 struct ent * yanklist_tail;   // so we can always add ents at the end of the list easily
 unsigned int yanked_cells = 0;// keeping this helps performance
+
 
 /**
  * \brief TODO Document init_yanklist()
@@ -175,6 +177,7 @@ void add_ent_to_yanklist(struct ent * item) {
  */
 
 void yank_area(int tlrow, int tlcol, int brrow, int brcol, char type, int arg) {
+struct sheet * sh = roman->cur_sh;
     int r,c;
     type_of_yank = type;
     yank_arg = arg;
@@ -186,7 +189,7 @@ void yank_area(int tlrow, int tlcol, int brrow, int brcol, char type, int arg) {
 
     for (r = tlrow; r <= brrow; r++)
         for (c = tlcol; c <= brcol; c++) {
-            e_ori = *ATBL(tbl, r, c);
+            e_ori = *ATBL(sh, sh->tbl, r, c);
             if (e_ori == NULL) continue;
 
             // initialize the 'ent'
@@ -232,6 +235,7 @@ void yank_area(int tlrow, int tlcol, int brrow, int brcol, char type, int arg) {
  */
 
 int paste_yanked_ents(int above, int type_paste) {
+    struct sheet * sh = roman->cur_sh;
     if (yanklist == NULL) return 0;
 
     struct ent * yl = yanklist;
@@ -245,38 +249,38 @@ int paste_yanked_ents(int above, int type_paste) {
 
     if (type_of_yank == YANK_SORT) {                              // paste a range that was yanked in the sort function
         diffr = 0;
-        diffc = curcol - yl->col;
+        diffc = sh->curcol - yl->col;
         ignorelock = 1;
 
     } else if (type_of_yank == YANK_RANGE || type_of_yank == YANK_CELL) { // paste cell or range
-        diffr = currow - yl->row;
-        diffc = curcol - yl->col;
+        diffr = sh->currow - yl->row;
+        diffc = sh->curcol - yl->col;
 
     } else if (type_of_yank == YANK_ROW) {                        // paste row
         int c = yank_arg;
 #ifdef UNDO
-        copy_to_undostruct(currow + ! above, 0, currow + ! above - 1 + yank_arg, maxcol, UNDO_DEL, IGNORE_DEPS, NULL);
+        copy_to_undostruct(sh->currow + ! above, 0, sh->currow + ! above - 1 + yank_arg, sh->maxcol, UNDO_DEL, IGNORE_DEPS, NULL);
 #endif
         while (c--) above ? insert_row(0) : insert_row(1);
-        if (! above) currow = forw_row(1)->row;                   // paste below
-        diffr = currow - yl->row;
+        if (! above) sh->currow = forw_row(1)->row;                   // paste below
+        diffr = sh->currow - yl->row;
         diffc = yl->col;
-        fix_marks(yank_arg, 0, currow, maxrow, 0, maxcol);
+        fix_marks(yank_arg, 0, sh->currow, sh->maxrow, 0, sh->maxcol);
 #ifdef UNDO
-        save_undo_range_shift(yank_arg, 0, currow, 0, currow - 1 + yank_arg, maxcol);
+        save_undo_range_shift(yank_arg, 0, sh->currow, 0, sh->currow - 1 + yank_arg, sh->maxcol);
 #endif
 
     } else if (type_of_yank == YANK_COL) {                        // paste col
         int c = yank_arg;
 #ifdef UNDO
-        copy_to_undostruct(0, curcol + above, maxrow, curcol + above - 1 + yank_arg, UNDO_DEL, IGNORE_DEPS, NULL);
+        copy_to_undostruct(0, sh->curcol + above, sh->maxrow, sh->curcol + above - 1 + yank_arg, UNDO_DEL, IGNORE_DEPS, NULL);
 #endif
         while (c--) above ? insert_col(1) : insert_col(0);        // insert cols to the right if above or to the left
         diffr = yl->row;
-        diffc = curcol - yl->col;
-        fix_marks(0, yank_arg, 0, maxrow, curcol, maxcol);
+        diffc = sh->curcol - yl->col;
+        fix_marks(0, yank_arg, 0, sh->maxrow, sh->curcol, sh->maxcol);
 #ifdef UNDO
-        save_undo_range_shift(0, yank_arg, 0, curcol, maxrow, curcol - 1 + yank_arg);
+        save_undo_range_shift(0, yank_arg, 0, sh->curcol, sh->maxrow, sh->curcol - 1 + yank_arg);
 #endif
     }
 
@@ -286,7 +290,7 @@ int paste_yanked_ents(int above, int type_paste) {
         while (yll != NULL) {
             int r = yll->row + diffr;
             int c = yll->col + diffc;
-            checkbounds(&r, &c);
+            checkbounds(sh, &r, &c);
             if (any_locked_cells(yll->row + diffr, yll->col + diffc, yll->row + diffr, yll->col + diffc)) {
 #ifdef UNDO
                 dismiss_undo_item(NULL);
@@ -308,7 +312,7 @@ int paste_yanked_ents(int above, int type_paste) {
     while (yl != NULL) {
 
 #ifdef UNDO
-        copy_cell_to_undostruct(y_cells++, lookat(yl->row + diffr, yl->col + diffc), UNDO_DEL);
+        copy_cell_to_undostruct(y_cells++, lookat(sh, yl->row + diffr, yl->col + diffc), UNDO_DEL);
 
         // Here pass struct ent ** to copy_to_undostruct
         copy_to_undostruct(0, 0, -1, -1, UNDO_DEL, HANDLE_DEPS, &y_cells);
@@ -318,7 +322,7 @@ int paste_yanked_ents(int above, int type_paste) {
         if (type_paste == YANK_RANGE || type_paste == YANK_SORT)
             erase_area(yl->row + diffr, yl->col + diffc, yl->row + diffr, yl->col + diffc, ignorelock, 0);
 
-        struct ent * destino = lookat(yl->row + diffr, yl->col + diffc);
+        struct ent * destino = lookat(sh, yl->row + diffr, yl->col + diffc);
 
         if (type_paste == YANK_RANGE || type_paste == YANK_SORT) {
             (void) copyent(destino, yl, 0, 0, 0, 0, 0, 0, 0);
@@ -327,7 +331,7 @@ int paste_yanked_ents(int above, int type_paste) {
         } else if (type_paste == YANK_VALUE) {
             (void) copyent(destino, yl, 0, 0, 0, 0, 0, 0, 'v');
         } else if (type_paste == YANK_REF) {
-            (void) copyent(destino, yl, diffr, diffc, 0, 0, maxrows, maxcols, 'c');
+            (void) copyent(destino, yl, diffr, diffc, 0, 0, sh->maxrows, sh->maxcols, 'c');
         }
         destino->row += diffr;
         destino->col += diffc;
@@ -351,7 +355,7 @@ int paste_yanked_ents(int above, int type_paste) {
         /*******************/
 
 #ifdef UNDO
-        copy_cell_to_undostruct(y_cells++, lookat(yl->row + diffr, yl->col + diffc), UNDO_ADD);
+        copy_cell_to_undostruct(y_cells++, lookat(sh, yl->row + diffr, yl->col + diffc), UNDO_ADD);
         // store dependencies after the change as well
         copy_to_undostruct(0, 0, -1, -1, UNDO_ADD, HANDLE_DEPS, &y_cells);
 #endif

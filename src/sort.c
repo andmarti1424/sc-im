@@ -65,6 +65,7 @@ struct sortcrit {
 } * sort;
 
 int howmany;
+extern struct roman * roman;
 
 /**
  * \brief TODO Write a brief function description>
@@ -77,6 +78,7 @@ int howmany;
  */
 
 void sortrange(struct ent * left, struct ent * right, char * criteria) {
+    struct sheet * sh = roman->cur_sh;
     int minr, minc, maxr, maxc, r, c;
     int * rows, col = 0;
     int cp = 0;
@@ -172,8 +174,8 @@ void sortrange(struct ent * left, struct ent * right, char * criteria) {
         p_aux->row = minr + c;
     }
 
-    currow = minr;
-    curcol = minc;
+    sh->currow = minr;
+    sh->curcol = minc;
 
     paste_yanked_ents(0, 's'); // paste ents over currow and curcol
 
@@ -193,6 +195,7 @@ void sortrange(struct ent * left, struct ent * right, char * criteria) {
  */
 
 int compare(const void * row1, const void * row2) {
+    struct sheet * sh = roman->cur_sh;
     struct ent * p1;
     struct ent * p2;
     double diff;
@@ -200,8 +203,8 @@ int compare(const void * row1, const void * row2) {
     int i;
 
     for (i = 0; !result && i < howmany; i++) {
-        p1 = *ATBL(tbl, *((int *) row1), sort[i].column);
-        p2 = *ATBL(tbl, *((int *) row2), sort[i].column);
+        p1 = *ATBL(sh, sh->tbl, *((int *) row1), sort[i].column);
+        p2 = *ATBL(sh, sh->tbl, *((int *) row2), sort[i].column);
 
         if (sort[i].type) {
             if (p1 && p1->label) {

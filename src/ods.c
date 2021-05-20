@@ -56,6 +56,8 @@
 #include <libxml/parser.h>
 #endif
 
+extern struct roman * roman;
+
 /**
  * \brief open_ods() files
  *
@@ -67,6 +69,7 @@
 
 int open_ods(char * fname, char * encoding) {
 #ifdef ODS
+    struct sheet * sh = roman->cur_sh;
     struct zip * za;
     struct zip_file * zf;
     struct zip_stat sb_content;
@@ -227,7 +230,7 @@ int open_ods(char * fname, char * encoding) {
         }
         cur_node = cur_node->next; // forward until reach table
     }
-    int_deleterow(currow, 1); /* delete the first row */
+    int_deleterow(sh->currow, 1); /* delete the first row */
 
     // free the document
     xmlFreeDoc(doc);

@@ -99,16 +99,17 @@ void exit_app();
 /* Use this structure to save the last 'g' command */
 struct go_save gs = { .g_type = G_NONE } ;
 
-#define ISVALID(r,c)    ((r)>=0 && (r)<maxrows && (c)>=0 && (c)<maxcols)
+#define ISVALID(s,r,c)    ((r)>=0 && (r) < s->maxrows && (c) >=0 && (c) < s->maxcols)
 
 int exprerr;              /* Set by eval() and seval() if expression errors */
 double prescale = 1.0;    /* Prescale for constants in let() */
-int loading = 0;          /* Set when readfile() is active */
+//int loading = 0;          /* Set when readfile() is active */
 int gmyrow = -1, gmycol = -1;       /* globals used to implement @myrow, @mycol cmds */
 int rowoffset = 0, coloffset = 0;    /* row & col offsets for range functions */
 jmp_buf fpe_save;
 
 extern bool decimal;      /* Set if there was a decimal point in the number */
+extern struct roman * roman;
 
 /* a linked list of free [struct enodes]'s, uses .e.o.left as the pointer */
 
@@ -205,6 +206,7 @@ double finfunc(int fun, double v1, double v2, double v3) {
  * \return char *
  */
 char * dostindex(int minr, int minc, int maxr, int maxc, struct enode * val) {
+    struct sheet * sh = roman->cur_sh;
     int r, c;
     register struct ent * p;
     char * pr;
@@ -221,7 +223,7 @@ char * dostindex(int minr, int minc, int maxr, int maxc, struct enode * val) {
         c = minc + (int) eval(NULL, val->e.o.right) - 1;
     }
     if (c <= maxc && c >=minc && r <= maxr && r >=minr)
-        p = *ATBL(tbl, r, c);
+        p = *ATBL(sh, sh->tbl, r, c);
 
     if (p && p->label) {
         pr = scxmalloc((size_t) (strlen(p->label) + 1));
@@ -262,6 +264,7 @@ double doascii(char * s) {
  * \return double
  */
 double doindex(int minr, int minc, int maxr, int maxc, struct enode * val) {
+    struct sheet * sh = roman->cur_sh;
     int r, c;
     register struct ent * p;
 
@@ -280,7 +283,7 @@ double doindex(int minr, int minc, int maxr, int maxc, struct enode * val) {
     }
 
     if (c <= maxc && c >=minc && r <= maxr && r >=minr &&
-        (p = *ATBL(tbl, r, c)) && p->flags & is_valid) {
+        (p = *ATBL(sh, sh->tbl, r, c)) && p->flags & is_valid) {
         if (p->cellerror)
             cellerror = CELLINVALID;
         return p->v;
@@ -302,6 +305,7 @@ double doindex(int minr, int minc, int maxr, int maxc, struct enode * val) {
  * \return double
  */
 double dolookup(struct enode * val, int minr, int minc, int maxr, int maxc, int offset, int vflag) {
+    struct sheet * sh = roman->cur_sh;
     double v, ret = (double) 0;
     int r, c;
     register struct ent * p = (struct ent *) 0;
@@ -313,15 +317,15 @@ double dolookup(struct enode * val, int minr, int minc, int maxr, int maxc, int 
         cellerror = CELLOK;
         v = eval(NULL, val);
         for (r = minr, c = minc; r <= maxr && c <= maxc; r+=incr, c+=incc) {
-            if ((p = *ATBL(tbl, r, c)) && p->flags & is_valid) {
+            if ((p = *ATBL(sh, sh->tbl, r, c)) && p->flags & is_valid) {
                 if (p->v <= v) {
                     fndr = incc ? (minr + offset) : r;
                     fndc = incr ? (minc + offset) : c;
-                    if (ISVALID(fndr, fndc))
+                    if (ISVALID(sh, fndr, fndc))
                         if (p == NULL) // three lines added
                             cellerror = CELLINVALID;
                         else // useful when the lookup ends up in a cell with no value
-                            p = *ATBL(tbl, fndr, fndc);
+                            p = *ATBL(sh, sh->tbl, fndr, fndc);
                     else {
                         sc_error(" range specified to @[hv]lookup");
                         cellerror = CELLERROR;
@@ -338,12 +342,12 @@ double dolookup(struct enode * val, int minr, int minc, int maxr, int maxc, int 
         cellerror = CELLOK;
         s = seval(NULL, val);
         for (r = minr, c = minc; r <= maxr && c <= maxc; r+=incr, c+=incc) {
-            if ((p = *ATBL(tbl, r, c)) && p->label) {
+            if ((p = *ATBL(sh, sh->tbl, r, c)) && p->label) {
                 if (s && strcmp(p->label,s) == 0) {
                     fndr = incc ? (minr + offset) : r;
                     fndc = incr ? (minc + offset) : c;
-                    if (ISVALID(fndr,fndc)) {
-                        p = *ATBL(tbl, fndr, fndc);
+                    if (ISVALID(sh, fndr,fndc)) {
+                        p = *ATBL(sh, sh->tbl, fndr, fndc);
                         if (p->cellerror)
                             cellerror = CELLINVALID;
                     } else {
@@ -374,6 +378,7 @@ double dolookup(struct enode * val, int minr, int minc, int maxr, int maxc, int 
  * \return double
  */
 double docount(int minr, int minc, int maxr, int maxc, struct enode * e) {
+    struct sheet * sh = roman->cur_sh;
     int v;
     int r, c;
     int cellerr = CELLOK;
@@ -389,7 +394,7 @@ double docount(int minr, int minc, int maxr, int maxc, struct enode * e) {
             if (!e || eval(NULL, e))
                 // the following changed for #430. docount should also count cells with strings. not just numbers
                 // TODO: create @counta to count both, and leave @count for just numbers
-                if ((p = *ATBL(tbl, r, c)) && (p->flags & is_valid || p->label) ) {
+                if ((p = *ATBL(sh, sh->tbl, r, c)) && (p->flags & is_valid || p->label) ) {
                     if (p->cellerror) cellerr = CELLINVALID;
                     v++;
                 }
@@ -410,6 +415,7 @@ double docount(int minr, int minc, int maxr, int maxc, struct enode * e) {
  * \return double
  */
 double dosum(int minr, int minc, int maxr, int maxc, struct enode * e) {
+    struct sheet * sh = roman->cur_sh;
     double v;
     int r, c;
     int cellerr = CELLOK;
@@ -423,7 +429,7 @@ double dosum(int minr, int minc, int maxr, int maxc, struct enode * e) {
                 coloffset = c - minc;
             }
             if ( !e || eval(NULL, e))
-                if ((p = *ATBL(tbl, r, c)) && p->flags & is_valid) {
+                if ((p = *ATBL(sh, sh->tbl, r, c)) && p->flags & is_valid) {
                     if (p->cellerror)
                         cellerr = CELLINVALID;
                     v += p->v;
@@ -446,6 +452,7 @@ double dosum(int minr, int minc, int maxr, int maxc, struct enode * e) {
  * \return double
  */
 double doprod(int minr, int minc, int maxr, int maxc, struct enode * e) {
+    struct sheet * sh = roman->cur_sh;
     double v;
     int r, c;
     int cellerr = CELLOK;
@@ -459,7 +466,7 @@ double doprod(int minr, int minc, int maxr, int maxc, struct enode * e) {
                 coloffset = c - minc;
             }
             if ( !e || eval(NULL, e))
-                if ((p = *ATBL(tbl, r, c)) && p->flags & is_valid) {
+                if ((p = *ATBL(sh, sh->tbl, r, c)) && p->flags & is_valid) {
                     if (p->cellerror) cellerr = CELLINVALID;
                         v *= p->v;
                 }
@@ -482,6 +489,7 @@ double doprod(int minr, int minc, int maxr, int maxc, struct enode * e) {
  * \return double
  */
 double doavg(int minr, int minc, int maxr, int maxc, struct enode * e) {
+    struct sheet * sh = roman->cur_sh;
     double v;
     int r, c;
     int count;
@@ -497,7 +505,7 @@ double doavg(int minr, int minc, int maxr, int maxc, struct enode * e) {
                 coloffset = c - minc;
             }
             if (!e || eval(NULL, e))
-                if ((p = *ATBL(tbl, r, c)) && p->flags & is_valid) {
+                if ((p = *ATBL(sh, sh->tbl, r, c)) && p->flags & is_valid) {
                     if (p->cellerror) cellerr = CELLINVALID;
                     v += p->v;
                     count++;
@@ -523,6 +531,7 @@ double doavg(int minr, int minc, int maxr, int maxc, struct enode * e) {
  * \return double
  */
 double dostddev(int minr, int minc, int maxr, int maxc, struct enode * e) {
+    struct sheet * sh = roman->cur_sh;
     double lp, rp, v, nd;
     int r, c;
     int n;
@@ -539,7 +548,7 @@ double dostddev(int minr, int minc, int maxr, int maxc, struct enode * e) {
                 coloffset = c - minc;
             }
             if (!e || eval(NULL, e))
-                if ((p = *ATBL(tbl, r, c)) && p->flags & is_valid) {
+                if ((p = *ATBL(sh, sh->tbl, r, c)) && p->flags & is_valid) {
                     if (p->cellerror) cellerr = CELLINVALID;
                     v = p->v;
                     lp += v*v;
@@ -567,6 +576,7 @@ double dostddev(int minr, int minc, int maxr, int maxc, struct enode * e) {
  * \return double
  */
 double domax(int minr, int minc, int maxr, int maxc, struct enode * e) {
+    struct sheet * sh = roman->cur_sh;
     double v = (double) 0;
     int r, c;
     int count;
@@ -581,7 +591,7 @@ double domax(int minr, int minc, int maxr, int maxc, struct enode * e) {
                 coloffset = c - minc;
             }
             if (!e || eval(NULL, e))
-                if ((p = *ATBL(tbl, r, c)) && p->flags & is_valid) {
+                if ((p = *ATBL(sh, sh->tbl, r, c)) && p->flags & is_valid) {
                     if (p->cellerror) cellerr = CELLINVALID;
 
                     if (! count) {
@@ -612,6 +622,7 @@ double domax(int minr, int minc, int maxr, int maxc, struct enode * e) {
  * \return double
  */
 double domin(int minr, int minc, int maxr, int maxc, struct enode * e) {
+    struct sheet * sh = roman->cur_sh;
     double v = (double)0;
     int r, c;
     int count;
@@ -626,7 +637,7 @@ double domin(int minr, int minc, int maxr, int maxc, struct enode * e) {
                 coloffset = c - minc;
             }
             if (!e || eval(NULL, e))
-                if ((p = *ATBL(tbl, r, c)) && p->flags & is_valid) {
+                if ((p = *ATBL(sh, sh->tbl, r, c)) && p->flags & is_valid) {
                     if (p->cellerror) cellerr = CELLINVALID;
                     if (! count) {
                         v = p->v;
@@ -861,6 +872,7 @@ double doeqs(char * s1, char * s2) {
  * \return struct ent *
  */
 struct ent * getent(char *colstr, double rowdoub, int alloc) {
+    struct sheet * sh = roman->cur_sh;
     int collen;                         /* length of string */
     int row, col;                       /* integer values   */
     struct ent *p = (struct ent *) 0;   /* selected entry   */
@@ -874,12 +886,12 @@ struct ent * getent(char *colstr, double rowdoub, int alloc) {
     row = (int) floor(rowdoub);
 
     if (row >= 0
-        && (row < maxrows)                      /* in range */
+        && (row < sh->maxrows)                      /* in range */
         && (collen <= 2)                        /* not too long */
         && (col >= 0)
-        && (col < maxcols)) {                   /* in range */
-            if (alloc) p = lookat(row, col);
-            else p = *ATBL(tbl, row, col);
+        && (col < sh->maxcols)) {                   /* in range */
+            if (alloc) p = lookat(sh, row, col);
+            else p = *ATBL(sh, sh->tbl, row, col);
             if ((p != NULL) && p->cellerror) cellerror = CELLINVALID;
     }
     scxfree(colstr);
@@ -965,6 +977,8 @@ double dolmin(struct ent * e, struct enode * ep) {
  * \return double
  */
 double eval(register struct ent * ent, register struct enode * e) {
+    struct sheet * sh = roman->cur_sh;
+
 //    //if (cellerror == CELLERROR || (ent && ent->cellerror == CELLERROR)) {
 //    if (cellerror == CELLERROR) {
 //        return (double) 0;
@@ -1057,7 +1071,7 @@ double eval(register struct ent * ent, register struct enode * e) {
                 sc_debug("@getent shouldnt be called with negative parameters %d %d", r, c);
                 return (double) 0;
             }
-            struct ent * vp = *ATBL(tbl, r, c);
+            struct ent * vp = *ATBL(sh, sh->tbl, r, c);
             if (ent && vp && ent->row == vp->row && ent->col == vp->col) {
                     sc_error("Circular reference in eval (cell %s%d)", coltoa(vp->col), vp->row);
                     e->op = ERR_;
@@ -1067,7 +1081,7 @@ double eval(register struct ent * ent, register struct enode * e) {
                     return (double) 0;
             }
             if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
-            if (ent && vp) GraphAddEdge(getVertex(graph, lookat(ent->row, ent->col), 1), getVertex(graph, lookat(vp->row, vp->col), 1));
+            if (ent && vp) GraphAddEdge(getVertex(graph, lookat(sh, ent->row, ent->col), 1), getVertex(graph, lookat(sh, vp->row, vp->col), 1));
             if (vp && vp->flags & is_valid) return (vp->v);
             return (double) 0;
 
@@ -1080,13 +1094,13 @@ double eval(register struct ent * ent, register struct enode * e) {
                 cellerror = CELLERROR;
 
                 //ent->cellerror = CELLERROR;
-                GraphAddEdge( getVertex(graph, lookat(ent->row, ent->col), 1), getVertex(graph, lookat(vp->row, vp->col), 1) ) ;
+                GraphAddEdge( getVertex(graph, lookat(sh, ent->row, ent->col), 1), getVertex(graph, lookat(sh, vp->row, vp->col), 1) ) ;
                 return (double) 0;
             }
             if (vp && vp->cellerror == CELLERROR && !(vp->flags & is_deleted)) {
                 // here we store the dependences in a graph
-                if (ent && vp) GraphAddEdge( getVertex(graph, lookat(ent->row, ent->col), 1),
-                                             getVertex(graph, lookat(vp->row, vp->col), 1) ) ;
+                if (ent && vp) GraphAddEdge( getVertex(graph, lookat(sh, ent->row, ent->col), 1),
+                                             getVertex(graph, lookat(sh, vp->row, vp->col), 1) ) ;
 
                 //does not change reference to @err in expression
                 //uncomment to do so
@@ -1101,8 +1115,8 @@ double eval(register struct ent * ent, register struct enode * e) {
             if (vp && (rowoffset || coloffset)) {
                 row = e->e.v.vf & FIX_ROW ? vp->row : vp->row + rowoffset;
                 col = e->e.v.vf & FIX_COL ? vp->col : vp->col + coloffset;
-                checkbounds(&row, &col);
-                vp = *ATBL(tbl, row, col);
+                checkbounds(sh, &row, &col);
+                vp = *ATBL(sh, sh->tbl, row, col);
             }
 
 
@@ -1122,8 +1136,8 @@ double eval(register struct ent * ent, register struct enode * e) {
 
             // here we store the dependences in a graph
             if (ent && vp) {
-                vertexT * v_ent = getVertex(graph, lookat(ent->row, ent->col), 0);
-                vertexT * v_vp = getVertex(graph, lookat(vp->row, vp->col), 0);
+                vertexT * v_ent = getVertex(graph, lookat(sh, ent->row, ent->col), 0);
+                vertexT * v_vp = getVertex(graph, lookat(sh, vp->row, vp->col), 0);
                 if (v_ent != NULL && v_vp != NULL && GraphIsReachable(v_ent, v_vp, 1)) {
                     sc_error("Circular reference in eval (cell %s%d)", coltoa(vp->col), vp->row);
                     e->op = ERR_;
@@ -1132,7 +1146,7 @@ double eval(register struct ent * ent, register struct enode * e) {
                     cellerror = CELLERROR;
                     return (double) 0;
                 }
-                GraphAddEdge( getVertex(graph, lookat(ent->row, ent->col), 1), getVertex(graph, lookat(vp->row, vp->col), 1) ) ;
+                GraphAddEdge( getVertex(graph, lookat(sh, ent->row, ent->col), 1), getVertex(graph, lookat(sh, vp->row, vp->col), 1) ) ;
             }
 
             if (vp->cellerror) {
@@ -1175,7 +1189,7 @@ double eval(register struct ent * ent, register struct enode * e) {
                     cellerror = CELLERROR;
                     return (double) 0;
                 }
-                GraphAddEdge(getVertex(graph, lookat(ent->row, ent->col), 1), getVertex(graph, lookat(row, col), 1));
+                GraphAddEdge(getVertex(graph, lookat(sh, ent->row, ent->col), 1), getVertex(graph, lookat(sh, row, col), 1));
             }
         }
 
@@ -1326,7 +1340,7 @@ double eval(register struct ent * ent, register struct enode * e) {
                  double n = eval(ent, e->e.o.right);
                  struct ent * ep = getent(sf, n, 1);
                  if (! ep) { free(s); return (double) (0); }
-                 if (ent && ep) GraphAddEdge(getVertex(graph, lookat(ent->row, ent->col), 1), getVertex(graph, ep, 1));
+                 if (ent && ep) GraphAddEdge(getVertex(graph, lookat(sh, ent->row, ent->col), 1), getVertex(graph, ep, 1));
                  return donval(s, n);
 
     case MYROW:
@@ -1334,22 +1348,22 @@ double eval(register struct ent * ent, register struct enode * e) {
                  // (this might happen during startup when loading file)
                  // gmyrow does not happen to have valid value. handle that.
                  if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
-                 return (gmyrow == -1 ? (ent ? ent->row + rowoffset : (double) currow + rowoffset) : (double) (gmyrow + rowoffset));
+                 return (gmyrow == -1 ? (ent ? ent->row + rowoffset : (double) sh->currow + rowoffset) : (double) (gmyrow + rowoffset));
 
     case MYCOL:
                  // if @mycol is called before EvallJustOneVertex
                  // (this might happen during startup when loading file)
                  // gmycol does not happen to have valid value. handle that.
                  if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
-                 return (gmycol == -1 ? (ent ? ent->col + coloffset : (double) curcol + coloffset) : (double) (gmycol + coloffset));
+                 return (gmycol == -1 ? (ent ? ent->col + coloffset : (double) sh->curcol + coloffset) : (double) (gmycol + coloffset));
 
     case LASTROW:
                  if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
-                 return ((double) maxrow);
+                 return ((double) sh->maxrow);
 
     case LASTCOL:
                  if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
-                 return ((double) maxcol);
+                 return ((double) sh->maxcol);
 
     case ERR_:
                  cellerror = CELLERROR;
@@ -1788,6 +1802,7 @@ char * docapital(char * s) {
  * \return char *
  */
 char * seval(struct ent * ent, struct enode * se) {
+    struct sheet * sh = roman->cur_sh;
     if (se == (struct enode *) 0) return (char *) 0;
 
     char * p;
@@ -1814,8 +1829,8 @@ char * seval(struct ent * ent, struct enode * se) {
             if (vp && (rowoffset || coloffset)) {
                 row = se->e.v.vf & FIX_ROW ? vp->row : vp->row + rowoffset;
                 col = se->e.v.vf & FIX_COL ? vp->col : vp->col + coloffset;
-                checkbounds(&row, &col);
-                vp = *ATBL(tbl, row, col);
+                checkbounds(sh, &row, &col);
+                vp = *ATBL(sh, sh->tbl, row, col);
             }
             if ( !vp || !vp->label)
                 return (NULL);
@@ -1824,7 +1839,7 @@ char * seval(struct ent * ent, struct enode * se) {
 
             // here we store the cell dependences in a graph
             if (ent && vp) {
-                GraphAddEdge( getVertex(graph, lookat(ent->row, ent->col), 1), getVertex(graph, lookat(vp->row, vp->col), 1) ) ;
+                GraphAddEdge( getVertex(graph, lookat(sh, ent->row, ent->col), 1), getVertex(graph, lookat(sh, vp->row, vp->col), 1) ) ;
             }
             return (p);
     }
@@ -2144,16 +2159,17 @@ void go_last() {
  * \return none
  */
 void moveto(int row, int col, int lastrow_, int lastcol_, int cornerrow, int cornercol) {
+    struct sheet * sh = roman->cur_sh;
     register int i;
 
-    lastrow = currow;
-    lastcol = curcol;
-    currow = row;
-    curcol = col;
+    sh->lastrow = sh->currow;
+    sh->lastcol = sh->curcol;
+    sh->currow = row;
+    sh->curcol = col;
     g_free();
     gs.g_type = G_CELL;
-    gs.g_row = currow;
-    gs.g_col = curcol;
+    gs.g_row = sh->currow;
+    gs.g_col = sh->curcol;
     gs.g_lastrow = lastrow_;
     gs.g_lastcol = lastcol_;
     if (cornerrow >= 0) {
@@ -2162,19 +2178,19 @@ void moveto(int row, int col, int lastrow_, int lastcol_, int cornerrow, int cor
         gs.stflag = 0;
 
     for (rowsinrange = 0, i = row; i <= lastrow_; i++) {
-        if (row_hidden[i]) {
+        if (sh->row_hidden[i]) {
             sc_info("Cell's row is hidden");
             continue;
         }
         rowsinrange++;
     }
     for (colsinrange = 0, i = col; i <= lastcol_; i++) {
-        if (col_hidden[i]) {
+        if (sh->col_hidden[i]) {
             colsinrange = 0;
             sc_info("Cell's col is hidden");
             continue;
         }
-        colsinrange += fwidth[i];
+        colsinrange += sh->fwidth[i];
     }
     //if (loading) changed = 0;
 }
@@ -2199,6 +2215,7 @@ void moveto(int row, int col, int lastrow_, int lastcol_, int cornerrow, int cor
  * \return none
  */
 void num_search(double n, int firstrow, int firstcol, int lastrow_, int lastcol_, int errsearch, int flow) {
+    struct sheet * sh = roman->cur_sh;
     register struct ent * p;
     register int r, c;
     int endr, endc;
@@ -2213,9 +2230,9 @@ void num_search(double n, int firstrow, int firstcol, int lastrow_, int lastcol_
     gs.g_lastrow = lastrow_;
     gs.g_lastcol = lastcol_;
     gs.errsearch = errsearch;
-    if (currow >= firstrow && currow <= lastrow_ && curcol >= firstcol && curcol <= lastcol_) {
-        endr = currow;
-        endc = curcol;
+    if (sh->currow >= firstrow && sh->currow <= lastrow_ && sh->curcol >= firstcol && sh->curcol <= lastcol_) {
+        endr = sh->currow;
+        endc = sh->curcol;
     } else {
         endr = lastrow_;
         endc = lastcol_;
@@ -2229,7 +2246,7 @@ void num_search(double n, int firstrow, int firstcol, int lastrow_, int lastcol_
                 c++;
             else {
                 if (r < lastrow_) {
-                    while (++r < lastrow_ && row_hidden[r]) /* */;
+                    while (++r < lastrow_ && sh->row_hidden[r]) /* */;
                     c = firstcol;
                 } else {
                     r = firstrow;
@@ -2241,7 +2258,7 @@ void num_search(double n, int firstrow, int firstcol, int lastrow_, int lastcol_
                 c--;
             else {
                 if (r > firstrow) {
-                    while (--r > firstrow && row_hidden[r]) /* */;
+                    while (--r > firstrow && sh->row_hidden[r]) /* */;
                     c = lastcol_;
                 } else {
                     r = lastrow_;
@@ -2250,8 +2267,8 @@ void num_search(double n, int firstrow, int firstcol, int lastrow_, int lastcol_
             }
         }
 
-        p = *ATBL(tbl, r, c);
-        if (! col_hidden[c] && p && (p->flags & is_valid) && (errsearch || (p->v == n)) && (! errsearch || (p->cellerror == errsearch)))    /* CELLERROR vs CELLINVALID */
+        p = *ATBL(sh, sh->tbl, r, c);
+        if (! sh->col_hidden[c] && p && (p->flags & is_valid) && (errsearch || (p->v == n)) && (! errsearch || (p->cellerror == errsearch)))    /* CELLERROR vs CELLINVALID */
             break;
         if (r == endr && c == endc) {
             if (errsearch) {
@@ -2263,12 +2280,12 @@ void num_search(double n, int firstrow, int firstcol, int lastrow_, int lastcol_
         }
     }
 
-    lastrow = currow;
-    lastcol = curcol;
-    currow = r;
-    curcol = c;
+    sh->lastrow = sh->currow;
+    sh->lastcol = sh->curcol;
+    sh->currow = r;
+    sh->curcol = c;
     rowsinrange = 1;
-    colsinrange = fwidth[curcol];
+    colsinrange = sh->fwidth[sh->curcol];
 }
 
 
@@ -2290,6 +2307,7 @@ void num_search(double n, int firstrow, int firstcol, int lastrow_, int lastcol_
  * \return none
  */
 void str_search(char *s, int firstrow, int firstcol, int lastrow_, int lastcol_, int num, int flow) {
+    struct sheet * sh = roman->cur_sh;
     struct ent * p;
     int r, c;
     int endr, endc;
@@ -2319,9 +2337,9 @@ void str_search(char *s, int firstrow, int firstcol, int lastrow_, int lastcol_,
     gs.g_lastrow = lastrow_;
     gs.g_lastcol = lastcol_;
 
-    if (currow >= firstrow && currow <= lastrow_ && curcol >= firstcol && curcol <= lastcol_) {
-        endr = currow;
-        endc = curcol;
+    if (sh->currow >= firstrow && sh->currow <= lastrow_ && sh->curcol >= firstcol && sh->curcol <= lastcol_) {
+        endr = sh->currow;
+        endc = sh->curcol;
     } else {
         endr = lastrow_;
         endc = lastcol_;
@@ -2335,7 +2353,7 @@ void str_search(char *s, int firstrow, int firstcol, int lastrow_, int lastcol_,
                 c++;
             else {
                 if (r < lastrow_) {
-                    while (++r < lastrow_ && row_hidden[r]) /* */;
+                    while (++r < lastrow_ && sh->row_hidden[r]) /* */;
                     c = firstcol;
                 } else {
                     r = endr;
@@ -2348,7 +2366,7 @@ void str_search(char *s, int firstrow, int firstcol, int lastrow_, int lastcol_,
                 c--;
             else {
                 if (r > firstrow) {
-                    while (--r > firstrow && row_hidden[r]) /* */;
+                    while (--r > firstrow && sh->row_hidden[r]) /* */;
                     c = lastcol_;
                 } else {
                     r = endr;
@@ -2358,7 +2376,7 @@ void str_search(char *s, int firstrow, int firstcol, int lastrow_, int lastcol_,
             }
         }
 
-        p = *ATBL(tbl, r, c);
+        p = *ATBL(sh, sh->tbl, r, c);
         if (gs.g_type == G_NSTR) {
             *line = '\0';
             if (p) {
@@ -2371,9 +2389,9 @@ void str_search(char *s, int firstrow, int firstcol, int lastrow_, int lastcol_,
                             strftime(line, sizeof(line), (p->format)+1,
                             localtime(&i));
                         } else
-                            format(p->format, precision[c], p->v, line, sizeof(line));
+                            format(p->format, sh->precision[c], p->v, line, sizeof(line));
                     } else
-                        engformat(realfmt[c], fwidth[c], precision[c], p->v, line, sizeof(line));
+                        engformat(sh->realfmt[c], sh->fwidth[c], sh->precision[c], p->v, line, sizeof(line));
                 }
             }
         } else if (gs.g_type == G_XSTR) {
@@ -2386,7 +2404,7 @@ void str_search(char *s, int firstrow, int firstcol, int lastrow_, int lastcol_,
                     *line = '\0';
             }
         }
-        if (! col_hidden[c]) {
+        if (! sh->col_hidden[c]) {
             if (gs.g_type == G_STR && p && p->label && regexec(&preg, p->label, 0, NULL, 0) == 0)
                 break;
         } else            /* gs.g_type != G_STR */
@@ -2400,12 +2418,12 @@ void str_search(char *s, int firstrow, int firstcol, int lastrow_, int lastcol_,
         return;
     }
     linelim = -1;
-    lastrow = currow;
-    lastcol = curcol;
-    currow = r;
-    curcol = c;
+    sh->lastrow = sh->currow;
+    sh->lastcol = sh->curcol;
+    sh->currow = r;
+    sh->curcol = c;
     rowsinrange = 1;
-    colsinrange = fwidth[curcol];
+    colsinrange = sh->fwidth[sh->curcol];
     regfree(&preg);
 }
 
@@ -2421,6 +2439,7 @@ void str_search(char *s, int firstrow, int firstcol, int lastrow_, int lastcol_,
  * \return none
  */
 void fill(struct ent *v1, struct ent *v2, double start, double inc) {
+    struct sheet * sh = roman->cur_sh;
     int r, c;
     register struct ent *n;
     int maxr, maxc;
@@ -2432,7 +2451,7 @@ void fill(struct ent *v1, struct ent *v2, double start, double inc) {
     minc = v1->col;
     if (minr>maxr) r = maxr, maxr = minr, minr = r;
     if (minc>maxc) c = maxc, maxc = minc, minc = c;
-    checkbounds(&maxr, &maxc);
+    checkbounds(sh, &maxr, &maxc);
     if (minr < 0) minr = 0;
     if (minc < 0) minc = 0;
 
@@ -2442,25 +2461,25 @@ void fill(struct ent *v1, struct ent *v2, double start, double inc) {
 #endif
 
     if (calc_order == BYROWS) {
-        for (r = minr; r<=maxr; r++)
-            for (c = minc; c<=maxc; c++) {
-                n = lookat(r, c);
-                if (n->flags&is_locked) continue;
+        for (r = minr; r <= maxr; r++)
+            for (c = minc; c <= maxc; c++) {
+                n = lookat(sh, r, c);
+                if (n->flags & is_locked) continue;
                 (void) clearent(n);
                 n->v = start;
                 start += inc;
-                n->flags |= (is_changed|is_valid);
+                n->flags |= (is_changed | is_valid);
                 n->flags &= ~(iscleared);
             }
     }
     else if (calc_order == BYCOLS) {
-        for (c = minc; c<=maxc; c++)
-            for (r = minr; r<=maxr; r++) {
-                n = lookat(r, c);
+        for (c = minc; c <= maxc; c++)
+            for (r = minr; r <= maxr; r++) {
+                n = lookat(sh, r, c);
                 (void) clearent(n);
                 n->v = start;
                 start += inc;
-                n->flags |= (is_changed|is_valid);
+                n->flags |= (is_changed | is_valid);
                 n->flags &= ~(iscleared);
             }
     }
@@ -2484,6 +2503,7 @@ void fill(struct ent *v1, struct ent *v2, double start, double inc) {
  * \return none
  */
 void lock_cells(struct ent * v1, struct ent * v2) {
+    struct sheet * sh = roman->cur_sh;
     int r, c;
     register struct ent * n;
     int maxr, maxc;
@@ -2495,7 +2515,7 @@ void lock_cells(struct ent * v1, struct ent * v2) {
     minc = v1->col;
     if (minr>maxr) r = maxr, maxr = minr, minr = r;
     if (minc>maxc) c = maxc, maxc = minc, minc = c;
-    checkbounds(&maxr, &maxc);
+    checkbounds(sh, &maxr, &maxc);
     if (minr < 0) minr = 0;
     if (minc < 0) minc = 0;
 
@@ -2505,7 +2525,7 @@ void lock_cells(struct ent * v1, struct ent * v2) {
 #endif
     for (r = minr; r <= maxr; r++)
         for (c = minc; c <= maxc; c++) {
-            n = lookat(r, c);
+            n = lookat(sh, r, c);
             n->flags |= is_locked;
         }
 #ifdef UNDO
@@ -2525,6 +2545,7 @@ void lock_cells(struct ent * v1, struct ent * v2) {
  * \return none
  */
 void unlock_cells(struct ent * v1, struct ent * v2) {
+    struct sheet * sh = roman->cur_sh;
     int r, c;
     register struct ent * n;
     int maxr, maxc;
@@ -2536,7 +2557,7 @@ void unlock_cells(struct ent * v1, struct ent * v2) {
     minc = v1->col;
     if (minr>maxr) r = maxr, maxr = minr, minr = r;
     if (minc>maxc) c = maxc, maxc = minc, minc = c;
-    checkbounds(&maxr, &maxc);
+    checkbounds(sh, &maxr, &maxc);
     if (minr < 0) minr = 0;
     if (minc < 0) minc = 0;
 
@@ -2546,7 +2567,7 @@ void unlock_cells(struct ent * v1, struct ent * v2) {
 #endif
     for (r = minr; r <= maxr; r++)
         for (c = minc; c <= maxc; c++) {
-            n = lookat(r, c);
+            n = lookat(sh, r, c);
             n->flags &= ~is_locked;
         }
 #ifdef UNDO
@@ -2566,12 +2587,13 @@ void unlock_cells(struct ent * v1, struct ent * v2) {
  * \return none
  */
 void let(struct ent * v, struct enode * e) {
+    struct sheet * sh = roman->cur_sh;
     if (locked_cell(v->row, v->col)) return;
 
 
     #ifdef UNDO
     extern struct ent_ptr * deps;
-    if (!loading) {
+    if (! roman->loading) {
         create_undo_action();
         // here we save in undostruct, all the ents that depends on the deleted one (before change)
         ents_that_depends_on_range(v->row, v->col, v->row, v->col);
@@ -2582,9 +2604,9 @@ void let(struct ent * v, struct enode * e) {
     double val;
     unsigned isconstant = constant(e);
 
-    if (v->row == currow && v->col == curcol) cellassign = 1;
+    if (v->row == sh->currow && v->col == sh->curcol) cellassign = 1;
 
-    if (loading && ! isconstant)
+    if (roman->loading && ! isconstant)
         val = (double) 0.0;
     else {
         exprerr = 0;
@@ -2599,14 +2621,14 @@ void let(struct ent * v, struct enode * e) {
         }
         if (v->cellerror != cellerror) {
             v->flags |= is_changed;
-            modflg++;
+            roman->modflg++;
             v->cellerror = cellerror;
         }
         (void) signal(SIGFPE, exit_app);
         if (exprerr) {
             efree(e);
             #ifdef UNDO
-            if (!loading) dismiss_undo_item(NULL);
+            if (! roman->loading) dismiss_undo_item(NULL);
             #endif
             return;
         }
@@ -2614,7 +2636,7 @@ void let(struct ent * v, struct enode * e) {
 
     if (isconstant) {
         /* prescale input unless it has a decimal */
-        if ( !loading && !decimal && (prescale < (double) 0.9999999))
+        if ( ! roman->loading && !decimal && (prescale < (double) 0.9999999))
             val *= prescale;
         decimal = FALSE;
 
@@ -2633,17 +2655,17 @@ void let(struct ent * v, struct enode * e) {
         eval(v, e); // ADDED - here we store the cell dependences in a graph
     }
     if (v->cellerror == CELLOK) v->flags |= ( is_changed | is_valid );
-    modflg++;
+    roman->modflg++;
     if (( v->trigger  ) && ((v->trigger->flag & TRG_WRITE) == TRG_WRITE))
         do_trigger(v,TRG_WRITE);
 
 
-    if (!loading && cellerror == CELLERROR) { /* issue #201 */
+    if (! roman->loading && cellerror == CELLERROR) { /* issue #201 */
         if (v->expr) efree(v->expr);
         v->expr = NULL;
     }
     #ifdef UNDO
-    if (!loading) {
+    if (! roman->loading) {
         // here we also save in undostruct, all the ents that depends on the deleted ones (after change)
         copy_to_undostruct(v->row, v->col, v->row, v->col, UNDO_ADD, HANDLE_DEPS, NULL);
         if (deps != NULL) {
@@ -2668,23 +2690,24 @@ void let(struct ent * v, struct enode * e) {
  * \return none
  */
 void slet(struct ent * v, struct enode * se, int flushdir) {
+    struct sheet * sh = roman->cur_sh;
     if (locked_cell(v->row, v->col)) return;
 
     #ifdef UNDO
     extern struct ent_ptr * deps;
-    if (!loading) {
+    if (! roman->loading) {
         // here we save in undostruct, all the ents that depends on the deleted one (before change)
         ents_that_depends_on_range(v->row, v->col, v->row, v->col);
         create_undo_action();
         copy_to_undostruct(v->row, v->col, v->row, v->col, UNDO_DEL, HANDLE_DEPS, NULL);
-        add_undo_row_format(v->row, 'R', row_format[v->row]);
+        add_undo_row_format(v->row, 'R', sh->row_format[v->row]);
     }
     #endif
     // No debe borrarse el vertex. Ver comentario en LET
     //if (getVertex(graph, lookat(v->row, v->col), 0) != NULL) destroy_vertex(lookat(v->row, v->col));
 
     char * p;
-    if (v->row == currow && v->col == curcol) cellassign = 1;
+    if (v->row == sh->currow && v->col == sh->curcol) cellassign = 1;
     exprerr = 0;
 
     (void) signal(SIGFPE, eval_fpe);
@@ -2701,7 +2724,7 @@ void slet(struct ent * v, struct enode * se, int flushdir) {
     }
     if (v->cellerror != cellerror) {
         v->flags |= is_changed;
-        modflg++;
+        roman->modflg++;
         v->cellerror = cellerror;
     }
     (void) signal(SIGFPE, exit_app);
@@ -2746,11 +2769,11 @@ void slet(struct ent * v, struct enode * se, int flushdir) {
         else
             v->flags &= ~is_label;
     }
-    modflg++;
+    roman->modflg++;
     if (( v->trigger  ) && ((v->trigger->flag & TRG_WRITE) == TRG_WRITE)) do_trigger(v,TRG_WRITE);
 
 #ifdef UNDO
-    if (!loading) {
+    if (! roman->loading) {
         // here we also save in undostruct, all the ents that depends on the deleted ones (after change)
         copy_to_undostruct(v->row, v->col, v->row, v->col, UNDO_ADD, HANDLE_DEPS, NULL);
         if (deps != NULL) {
@@ -2774,6 +2797,7 @@ void slet(struct ent * v, struct enode * se, int flushdir) {
  * \return none
  */
 void format_cell(struct ent *v1, struct ent *v2, char *s) {
+    struct sheet * sh = roman->cur_sh;
     int r, c;
     register struct ent *n;
     int maxr, maxc;
@@ -2785,15 +2809,15 @@ void format_cell(struct ent *v1, struct ent *v2, char *s) {
     minc = v1->col;
     if (minr>maxr) r = maxr, maxr = minr, minr = r;
     if (minc>maxc) c = maxc, maxc = minc, minc = c;
-    checkbounds(&maxr, &maxc);
+    checkbounds(sh, &maxr, &maxc);
     if (minr < 0) minr = 0;
     if (minc < 0) minc = 0;
 
-    modflg++;
+    roman->modflg++;
 
     for (r = minr; r <= maxr; r++)
         for (c = minc; c <= maxc; c++) {
-            n = lookat(r, c);
+            n = lookat(sh, r, c);
             if (locked_cell(n->row, n->col))
                 continue;
             if (n->format)
@@ -2907,7 +2931,7 @@ void label(register struct ent * v, register char * s, int flushdir) {
         else v->flags &= ~is_leftflush;
         if (flushdir==0) v->flags |= is_label;
         else v->flags &= ~is_label;
-        modflg++;
+        roman->modflg++;
     }
 }
 
@@ -3358,7 +3382,7 @@ void range_arg(char *s, struct enode *e) {
 void editfmt(int row, int col) {
     register struct ent *p;
 
-    p = lookat(row, col);
+    p = lookat(roman->cur_sh, row, col);
     if (p->format) {
         (void) sprintf(line, "fmt %s \"%s\"", v_name(row, col), p->format);
         linelim = strlen(line);
@@ -3377,7 +3401,7 @@ void editfmt(int row, int col) {
 void editv(int row, int col) {
     register struct ent *p;
 
-    p = lookat(row, col);
+    p = lookat(roman->cur_sh, row, col);
     (void) sprintf(line, "let %s = ", v_name(row, col));
     linelim = strlen(line);
     if (p->flags & is_valid || p->expr) {
@@ -3401,7 +3425,7 @@ void editv(int row, int col) {
 void editexp(int row, int col) {
     register struct ent *p;
 
-    p = lookat(row, col);
+    p = lookat(roman->cur_sh, row, col);
     //if ( !p || !p->expr ) return; 21/06/2014
     decompile(p->expr, 0);
     line[linelim] = '\0';
@@ -3420,7 +3444,7 @@ void editexp(int row, int col) {
 void edits(int row, int col, int saveinfile) {
     register struct ent *p;
 
-    p = lookat(row, col);
+    p = lookat(roman->cur_sh, row, col);
 
     if (saveinfile) {
         if (p->flags & is_label)
@@ -3456,6 +3480,7 @@ void edits(int row, int col, int saveinfile) {
  * \return none
  */
 int dateformat(struct ent *v1, struct ent *v2, char * fmt) {
+    struct sheet * sh = roman->cur_sh;
     if ( ! fmt || *fmt == '\0') return -1;
 
     int r, c;
@@ -3470,7 +3495,7 @@ int dateformat(struct ent *v1, struct ent *v2, char * fmt) {
     minc = v1->col;
     if (minr>maxr) r = maxr, maxr = minr, minr = r;
     if (minc>maxc) c = maxc, maxc = minc, minc = c;
-    checkbounds(&maxr, &maxc);
+    checkbounds(sh, &maxr, &maxc);
     if (minr < 0) minr = 0;
     if (minc < 0) minc = 0;
 
@@ -3480,7 +3505,7 @@ int dateformat(struct ent *v1, struct ent *v2, char * fmt) {
     #endif
     for (r = minr; r <= maxr; r++) {
         for (c = minc; c <= maxc; c++) {
-            n = lookat(r, c);
+            n = lookat(sh, r, c);
             if ( locked_cell(n->row, n->col) || ! (n)->label ) continue;
 
             // free all ent content but its label
@@ -3507,7 +3532,7 @@ int dateformat(struct ent *v1, struct ent *v2, char * fmt) {
         copy_to_undostruct(minr, minc, maxr, maxc, UNDO_ADD, IGNORE_DEPS, NULL);
         end_undo_action();
     #endif
-    modflg++; // increase just one time
+    roman->modflg++; // increase just one time
     return 0;
 }
 

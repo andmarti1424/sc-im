@@ -84,6 +84,7 @@
 #include "vmtbl.h"   // for growtbl
 #include "filter.h"
 #include "dep_graph.h"
+#include "sheet.h"
 
 #ifdef UNDO
 #include "undo.h"
@@ -93,13 +94,17 @@
 #include "lua.h"
 #endif
 
-// These are sheet attributes
-int currow = 0; /* Current row of the selected cell. */
-int curcol = 0; /* Current column of the selected cell. */
-int lastrow = 0;
-int lastcol = 0;
-int maxrows;
-int maxcols;
+// struct to store a workbook
+struct roman * roman;
+
+/* These are sheet attributes
+int currow = 0;     // current row of the selected cell.
+int curcol = 0;     // current column of the selected cell.
+int lastrow = 0;    // row of last selected cell
+int lastcol = 0;    // col of last selected cell
+int maxrows;        // max alloc'ed row
+int maxcols;        // max alloc'ed col
+int maxrow, maxcol; // max row and col with data stored
 unsigned char * col_hidden;
 unsigned char * col_frozen;
 int * fwidth;
@@ -108,55 +113,54 @@ int * realfmt;
 unsigned char * row_hidden;
 unsigned char * row_frozen;
 unsigned char * row_format;
-int maxrow, maxcol;
-int rescol; /**< Columns reserved for row numbers */
+int rescol; // Columns reserved for row numbers
+*/
 
+// workbook attributes
 char loadingfile[PATHLEN] = { '\0' };
-char line[FBUFLEN];
-int modflg; /**< Indicates a change was made since last save */
-struct ent *** tbl;
-int shall_quit = 0;
-unsigned int curmode;
-unsigned int lastmode;
-char curfile[PATHLEN];
-char * exepath;
+//int modflg; /* Indicates a change was made since last save */
+//struct ent *** tbl;
 
+// app attributes. Should be later added to conf
+int calc_order = BYROWS;
+char dpoint = '.'; /* Default decimal point character */
+char thsep = ','; /* Default thousands separator character */
+
+// check
+char curfile[PATHLEN]; //TODO move to roman struct
+char * exepath;
 int changed;
 int cellassign;
 int arg = 1;
-int brokenpipe = FALSE; /**< Set to true if SIGPIPE is received */
-char * ascext;
-char * tbl0ext;
-char * tblext;
-char * latexext;
-char * slatexext;
-char * texext;
-char dpoint = '.'; /**< Default decimal point character */
-char thsep = ','; /**< Default thousands separator character */
-int linelim = -1;
-int calc_order = BYROWS;
-int optimize  = 0; /**< Causes numeric expressions to be optimizedv */
-int tbl_style = 0; /**< Headers for T command output */
+int brokenpipe = FALSE; /* Set to true if SIGPIPE is received */
+int optimize  = 0; /* Causes numeric expressions to be optimizedv */
 int rndtoeven = 0;
 int rowsinrange = 1;
 int colsinrange = DEFWIDTH;
+FILE * fdoutput;  /* Output file descriptor (stdout or file) */
+
+
+char line[FBUFLEN];
+int linelim = -1;
+int shall_quit = 0;
+unsigned int curmode;
+unsigned int lastmode;
 double eval_result;
 char * seval_result;
-FILE * fdoutput;  /**< Output file descriptor (stdout or file) */
 
 struct block * buffer;
 struct block * lastcmd_buffer;
-struct dictionary * user_conf_d; /**< User's configuration dictionary */
+struct dictionary * user_conf_d; /* User's configuration dictionary */
 struct history * commandline_history;
 struct history * insert_history;
 char stderr_buffer[1024] = "";
-struct timeval startup_tv, current_tv; /**< Runtime timer */
+struct timeval startup_tv, current_tv; /* Runtime timer */
 
 #ifdef AUTOBACKUP
-struct timeval lastbackup_tv; /**< Last backup timer */
+struct timeval lastbackup_tv; /* Last backup timer */
 #ifdef HAVE_PTHREAD
 #include <pthread.h>
-int pthread_exists = 0; /**< Return status of pthread_create */
+int pthread_exists = 0; /* Return status of pthread_create */
 pthread_t fthread;
 #endif
 #endif
@@ -205,6 +209,8 @@ int main (int argc, char ** argv) {
     store_default_config_values(); // Stores default values in user_conf_d
 
     // Read the main() parameters and replace values in user_conf_d as necessary
+    // if more than one file is passed to argv. will open the last one.
+    // TODO: change that so we can add multiple files
     read_argv(argc, argv);
 
     // check if help is in argv. if so, show usage and quit
@@ -226,12 +232,6 @@ int main (int argc, char ** argv) {
         load_history(insert_history, '='); // load the insert history file
 #endif
     }
-
-    // create basic structures that will depend on the loaded file
-    create_structures();
-
-    // setup the spreadsheet arrays (tbl)
-    if (! growtbl(GROWNEW, 0, 0)) return exit_app(1);
 
     // initiate NCURSES if that is what is wanted
     if (! get_conf_int("nocurses")) {
@@ -277,20 +277,39 @@ int main (int argc, char ** argv) {
 
     wchar_t stdin_buffer[BUFFERSIZE] = { L'\0' };
 
+    // create basic structures that will depend on the loaded file
+    create_structures();
+
+    // also create a roman struct
+    roman = malloc(sizeof(struct roman));
+    roman->name = NULL;
+    roman->flags &= is_alloced;
+    roman->first_sh = NULL;
+    roman->cur_sh = NULL;
+
+    // malloc a sheet
+    new_sheet(roman, NULL);
+    //roman->first_sh = malloc(sizeof(struct sheet));
+    roman->cur_sh = roman->first_sh;
+    roman->flags &= is_empty;
+
+    // setup the spreadsheet arrays (tbl)
+    // TODO add sheet to growtbl
+    if (! growtbl(roman->first_sh, GROWNEW, 0, 0)) return exit_app(1);
+
     // if there was no file passed to scim executable
     // 1. erase db !
-    if (! loadingfile[0]) erasedb();
+    if (! loadingfile[0]) erasedb(roman->first_sh);
 
     // 2. loadrc
     loadrc();
 
     // 3. read sc file passed as argv
-    load_sc();
+    if (loadingfile[0]) load_sc(loadingfile);
 
     // 4. check input from stdin (pipeline)
     // and send it to interp
     read_stdin();
-
 
     // change curmode to NORMAL_MODE
     chg_mode('.');
@@ -328,21 +347,23 @@ int main (int argc, char ** argv) {
     lastbackup_tv = (struct timeval) {0};
     #endif
 
+    /* Move this out of main */
     if (get_conf_value("export_csv")) {
-        export_delim(NULL, ',', 0, 0, maxrow, maxcol, 0);
+        export_delim(NULL, ',', 0, 0, roman->cur_sh->maxrow, roman->cur_sh->maxcol, 0);
     }
 
     if (get_conf_value("export_tab")) {
-        export_delim(NULL, '\t', 0, 0, maxrow, maxcol, 0);
+        export_delim(NULL, '\t', 0, 0, roman->cur_sh->maxrow, roman->cur_sh->maxcol, 0);
     }
 
     if (get_conf_value("export_mkd")) {
-        export_markdown(NULL, 0, 0, maxrow, maxcol);
+        export_markdown(NULL, 0, 0, roman->cur_sh->maxrow, roman->cur_sh->maxcol);
     }
 
     if (get_conf_value("export") || get_conf_value("export_txt")) {
-        export_plain(NULL, 0, 0, maxrow, maxcol);
+        export_plain(NULL, 0, 0, roman->cur_sh->maxrow, roman->cur_sh->maxcol);
     }
+    /* <-- Move this out of main */
 
 
     while ( ! shall_quit && ! get_conf_int("quit_afterload")) {
@@ -373,13 +394,13 @@ int main (int argc, char ** argv) {
 
 extern graphADT graph;
 
+
 /**
  * \brief Creates the structures used by the program.
- * 
  * \return none
  */
-
 void create_structures() {
+
     // initiate mark array
     create_mark_array();
 
@@ -399,12 +420,12 @@ void create_structures() {
     graph = GraphCreate();
 }
 
+
 /**
- * \brief TODO Document read_stdin()
+ * \brief read_stdin()
  *
  * \return none
  */
-
 void read_stdin() {
     //sc_debug("reading stdin from pipeline");
     fd_set readfds;
@@ -465,11 +486,6 @@ void delete_structures() {
     clear_undo_list();
 #endif
 
-    // Free lua stuff
-#ifdef XLUA
-    doLuaclose();
-#endif
-
     // free deleted ents
     flush_saved();
 
@@ -477,11 +493,21 @@ void delete_structures() {
     destroy_graph(graph);
 
     // Free ents of tbl
-    erasedb();
+    erasedb(roman->cur_sh);
+
+    // free roman struct
+    free(roman);
+    //TODO free the sheets also
 
     // free custom_colors
     free_custom_colors();
+
+    // Free lua stuff
+#ifdef XLUA
+    doLuaclose();
+#endif
 }
+
 
 /**
  * \brief Cleans things up just before exiting the program.
@@ -491,7 +517,6 @@ void delete_structures() {
  *
  * \return status is returned unchanged
  */
-
 int exit_app(int status) {
 
     // free history
@@ -542,6 +567,7 @@ int exit_app(int status) {
     return status;
 }
 
+
 /**
  * \brief Read command line parameters and store them in a dictionary 
  *
@@ -556,7 +582,6 @@ int exit_app(int status) {
  *
  * \return none
  */
-
 void read_argv(int argc, char ** argv) {
     int i;
     for (i = 1; i < argc; i++) {
@@ -570,13 +595,13 @@ void read_argv(int argc, char ** argv) {
     return;
 }
 
+
 /**
  * \brief Attempt to load a file
  *
  * \return none
  */
-
-void load_sc() {
+void load_sc(char * loading_file) {
     char name[PATHLEN];
     strcpy(name, ""); //force name to be empty
     #ifdef NO_WORDEXP
@@ -587,13 +612,13 @@ void load_sc() {
     #endif
 
     #ifdef NO_WORDEXP
-    if ((len = strlen(loadingfile)) >= sizeof(name)) {
-        sc_info("File path too long: '%s'", loadingfile);
+    if ((len = strlen(loading_file)) >= sizeof(name)) {
+        sc_info("File path too long: '%s'", loading_file);
         return;
     }
-    memcpy(name, loadingfile, len+1);
+    memcpy(name, loading_file, len+1);
     #else
-    wordexp(loadingfile, &p, 0);
+    wordexp(loading_file, &p, 0);
     for (c=0; c < p.we_wordc; c++) {
         if (c) sprintf(name + strlen(name), " ");
         sprintf(name + strlen(name), "%s", p.we_wordv[c]);
@@ -614,28 +639,16 @@ void load_sc() {
     }
 }
 
-/**
- * \brief Set the calculation order
- *
- * \return none
- */
-
-void setorder(int i) {
-    if ((i == BYROWS) || (i == BYCOLS)) calc_order = i;
-    return;
-}
 
 /**
- * \brief Set signals catched by sc-im
- *
+ * \brief Set up signals catched by sc-im
  * \return none
  */
-
 void signals() {
     void sig_int();
     void sig_abrt();
     void sig_term();
-    void nopipe();
+    void sig_nopipe();
     void sig_winchg();
     void sig_tstp();
     void sig_cont();
@@ -643,7 +656,7 @@ void signals() {
     signal(SIGINT, sig_int);
     signal(SIGABRT, sig_abrt);
     signal(SIGTERM, sig_term); // kill
-    signal(SIGPIPE, nopipe);
+    signal(SIGPIPE, sig_nopipe);
     //(void) signal(SIGALRM, time_out);
     signal(SIGWINCH, sig_winchg);
     //(void) signal(SIGBUS, doquit);
@@ -653,16 +666,12 @@ void signals() {
     return;
 }
 
+
 /**
  * \brief Handles the SIGPIPE signal
- *
  * \return none
  */
-
-// TODO Possibly rename this function to sig_nopipe() for consistency
-// with the other signal functions.
-
-void nopipe() {
+void sig_nopipe() {
     sc_error("brokenpipe!");
     brokenpipe = TRUE;
     return;
@@ -744,7 +753,6 @@ void sig_term() {
 
 // TODO Split this into two commands. One prints the version number
 // the other prints the version number along with the other information.
-
 void show_version_and_quit() {
     put(user_conf_d, "nocurses", "1");
     sc_info("SC-IM - %s", rev);
@@ -832,18 +840,17 @@ void show_version_and_quit() {
     put(user_conf_d, "quit_afterload", "1");
 }
 
+
 /**
  * \brief Print usage message to stdout text and quit
- *
  * \return none
  */
-
 // NOTE this is a quick and dirty command to search for arguments used in the sources (macOS 10.14)
 // grep "get_conf_value(\"" -r ./src/*.c | grep get_conf_value |sed 's/"//g' |sed 's/.*get_conf_value(//g'|cut -d ')' -f1 |sort|uniq|sed 's/^/--/g'
 void show_usage_and_quit(){
   put(user_conf_d, "nocurses", "1");
   printf("\
-\nSC-IM - SC Improved\
+\nsc-im - sc-improvised\
 \n\
 \nUsage: sc-im [arguments] [file]          specified file\
 \n   or: sc-im [arguments] -               read text from stdin\

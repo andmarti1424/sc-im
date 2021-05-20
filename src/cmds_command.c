@@ -79,6 +79,7 @@
 
 extern char * rev;
 extern struct dictionary * user_conf_d;
+extern struct roman * roman;
 
 wchar_t inputline[BUFFERSIZE];
 extern wchar_t interp_line[BUFFERSIZE];
@@ -185,6 +186,7 @@ L"x",
  */
 
 void do_commandmode(struct block * sb) {
+    struct sheet * sh = roman->cur_sh;
 
     // If a visual selected range exists
     int p = is_range_selected();
@@ -284,7 +286,7 @@ void do_commandmode(struct block * sb) {
     } else if (sb->value == ctl('v') ) {  // VISUAL SUBMODE
         visual_submode = ':';
         chg_mode('v');
-        start_visualmode(currow, curcol, currow, curcol);
+        start_visualmode(sh->currow, sh->curcol, sh->currow, sh->curcol);
         return;
 
     } else if (sb->value == ctl('r') && get_bufsize(sb) == 2 &&        // C-r      // FIXME ???
@@ -311,7 +313,7 @@ void do_commandmode(struct block * sb) {
     } else if (sb->value == ctl('f')) {               // C-f
         wchar_t cline [BUFFERSIZE];
         int i;
-        struct ent * p1 = *ATBL(tbl, currow, curcol);
+        struct ent * p1 = *ATBL(sh, sh->tbl, sh->currow, sh->curcol);
         if (! p1 || ! p1->format) {
             sc_error("cell has no format");
             return;
@@ -412,7 +414,7 @@ void do_commandmode(struct block * sb) {
         } else if ( ! wcsncmp(inputline, L"autojus", 7) ) {
             wchar_t cline [BUFFERSIZE];
             wcscpy(cline, inputline);
-            int c = curcol, cf = curcol;
+            int c = sh->curcol, cf = sh->curcol;
             if (p != -1) {
                 c = sr->tlcol;
                 cf = sr->brcol;
@@ -447,7 +449,7 @@ void do_commandmode(struct block * sb) {
             del_range_chars(name, 0, 4);
             if ( ! strlen(name) ) {
                 sc_error("Path to file to load is missing !");
-            } else if ( modflg && ! force_rewrite ) {
+            } else if (roman->modflg && ! force_rewrite ) {
                 sc_error("Changes were made since last save. Use '!' to force the load");
             } else {
                 #ifdef NO_WORDEXP
@@ -509,21 +511,21 @@ void do_commandmode(struct block * sb) {
         // range lock / unlock
         } else if ( ! wcsncmp(inputline, L"lock", 4) || ! wcsncmp(inputline, L"unlock", 6) ||
                     ! wcsncmp(inputline, L"valueize", 8) ) {
-            int r = currow, c = curcol, rf = currow, cf = curcol;
+            int r = sh->currow, c = sh->curcol, rf = sh->currow, cf = sh->curcol;
             if (p != -1) {
                 c = sr->tlcol;
                 r = sr->tlrow;
                 rf = sr->brrow;
                 cf = sr->brcol;
             }
-            if ( ! wcsncmp(inputline, L"lock", 4) ) lock_cells(lookat(r, c), lookat(rf, cf));
-            else if ( ! wcsncmp(inputline, L"unlock", 6) ) unlock_cells(lookat(r, c), lookat(rf, cf));
+            if ( ! wcsncmp(inputline, L"lock", 4) ) lock_cells(lookat(roman->cur_sh, r, c), lookat(roman->cur_sh, rf, cf));
+            else if ( ! wcsncmp(inputline, L"unlock", 6) ) unlock_cells(lookat(roman->cur_sh, r, c), lookat(roman->cur_sh, rf, cf));
             else if ( ! wcsncmp(inputline, L"valueize", 8) ) valueize_area(r, c, rf, cf);
 
         } else if ( ! wcsncmp(inputline, L"datefmt", 7)) {
             wcscpy(interp_line, inputline);
 
-            int r = currow, c = curcol, rf = currow, cf = curcol;
+            int r = sh->currow, c = sh->curcol, rf = sh->currow, cf = sh->curcol;
             if (p != -1) { // in case there is a range selected
                 c = sr->tlcol;
                 r = sr->tlrow;
@@ -557,7 +559,7 @@ void do_commandmode(struct block * sb) {
             sc_info("Done.");
 
         } else if ( ! wcsncmp(inputline, L"subtotal ", 9) ) {
-            int r = currow, c = curcol, rf = currow, cf = curcol, pos, cancel = 0;
+            int r = sh->currow, c = sh->curcol, rf = sh->currow, cf = sh->curcol, pos, cancel = 0;
             if (p != -1) {
                 c = sr->tlcol;
                 r = sr->tlrow;
@@ -607,7 +609,7 @@ void do_commandmode(struct block * sb) {
                 swprintf(interp_line, BUFFERSIZE, L"freeze %s:", coltoa(sr->tlcol));
                 swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%s", coltoa(sr->brcol));
             } else if (! wcscmp(inputline, L"freezecol")) {
-                swprintf(interp_line, BUFFERSIZE, L"freeze %s", coltoa(curcol));
+                swprintf(interp_line, BUFFERSIZE, L"freeze %s", coltoa(sh->curcol));
             } else
                 swprintf(interp_line, BUFFERSIZE, L"freeze %ls", &inputline[9]);
             send_to_interp(interp_line);
@@ -616,7 +618,7 @@ void do_commandmode(struct block * sb) {
             if (p != -1) {
                 swprintf(interp_line, BUFFERSIZE, L"freeze %d:%d", sr->tlrow, sr->brrow);
             } else if (! wcscmp(inputline, L"freezerow")) {
-                swprintf(interp_line, BUFFERSIZE, L"freeze %d", currow);
+                swprintf(interp_line, BUFFERSIZE, L"freeze %d", sh->currow);
             } else
                 swprintf(interp_line, BUFFERSIZE, L"freeze %ls", &inputline[9]);
             send_to_interp(interp_line);
@@ -626,7 +628,7 @@ void do_commandmode(struct block * sb) {
                 swprintf(interp_line, BUFFERSIZE, L"unfreeze %s:", coltoa(sr->tlcol));
                 swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%s", coltoa(sr->brcol));
             } else if (! wcscmp(inputline, L"unfreezecol")) {
-                swprintf(interp_line, BUFFERSIZE, L"unfreeze %s", coltoa(curcol));
+                swprintf(interp_line, BUFFERSIZE, L"unfreeze %s", coltoa(sh->curcol));
             } else
                 swprintf(interp_line, BUFFERSIZE, L"unfreeze %ls", &inputline[11]);
             send_to_interp(interp_line);
@@ -635,7 +637,7 @@ void do_commandmode(struct block * sb) {
             if (p != -1) {
                 swprintf(interp_line, BUFFERSIZE, L"unfreeze %d:%d", sr->tlrow, sr->brrow);
             } else if (! wcscmp(inputline, L"unfreezerow")) {
-                swprintf(interp_line, BUFFERSIZE, L"unfreeze %d", currow);
+                swprintf(interp_line, BUFFERSIZE, L"unfreeze %d", sh->currow);
             } else
                 swprintf(interp_line, BUFFERSIZE, L"unfreeze %ls", &inputline[11]);
             send_to_interp(interp_line);
@@ -699,7 +701,7 @@ void do_commandmode(struct block * sb) {
 
         } else if ( ! wcsncmp(inputline, L"fill ", 5) ) {
             interp_line[0]=L'\0';
-            int r = currow, c = curcol, rf = currow, cf = curcol;
+            int r = sh->currow, c = sh->curcol, rf = sh->currow, cf = sh->curcol;
             if (p != -1) {
                 c = sr->tlcol;
                 r = sr->tlrow;
@@ -721,7 +723,7 @@ void do_commandmode(struct block * sb) {
             }
 
         } else if ( ! wcsncmp(inputline, L"formatrow ", 10) ) {
-            int r = currow, rf = currow, i;
+            int r = sh->currow, rf = sh->currow, i;
             if (p != -1) {
                 r = sr->tlrow;
                 rf = sr->brrow;
@@ -732,14 +734,14 @@ void do_commandmode(struct block * sb) {
 #endif
             for (i=r; i<=rf;i++) {
 #ifdef UNDO
-                fmt_ori = row_format[i];
-                add_undo_row_format(i, 'R', row_format[i]);
+                fmt_ori = sh->row_format[i];
+                add_undo_row_format(i, 'R', sh->row_format[i]);
 #endif
                 swprintf(interp_line, BUFFERSIZE, L"format %d %ls", i, &inputline[10]);
                 send_to_interp(interp_line);
 #ifdef UNDO
-                if (fmt_ori != row_format[i]) changed = 1;
-                add_undo_row_format(i, 'A', row_format[i]);
+                if (fmt_ori != sh->row_format[i]) changed = 1;
+                add_undo_row_format(i, 'A', sh->row_format[i]);
 #endif
             }
 #ifdef UNDO
@@ -748,7 +750,7 @@ void do_commandmode(struct block * sb) {
 #endif
 
         } else if ( ! wcsncmp(inputline, L"formatcol ", 10) ) {
-            int c = curcol, cf = curcol, i;
+            int c = sh->curcol, cf = sh->curcol, i;
             if (p != -1) {
                 c = sr->tlcol;
                 cf = sr->brcol;
@@ -762,17 +764,17 @@ void do_commandmode(struct block * sb) {
 #endif
             for (i=c; i<=cf;i++) {
 #ifdef UNDO
-                fwidth_ori = fwidth[i];
-                precision_ori = precision[i];
-                realfmt_ori = realfmt[i];
-                add_undo_col_format(i, 'R', fwidth[i], precision[i], realfmt[i]);
+                fwidth_ori = sh->fwidth[i];
+                precision_ori = sh->precision[i];
+                realfmt_ori = sh->realfmt[i];
+                add_undo_col_format(i, 'R', sh->fwidth[i], sh->precision[i], sh->realfmt[i]);
 #endif
                 swprintf(interp_line, BUFFERSIZE, L"format %s", coltoa(i));
                 swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L" %ls", &inputline[10]);
                 send_to_interp(interp_line);
 #ifdef UNDO
-                if (fwidth[i] != fwidth_ori || precision[i] != precision_ori || realfmt[i] != realfmt_ori) changed = 1;
-                add_undo_col_format(i, 'A', fwidth[i], precision[i], realfmt[i]);
+                if (sh->fwidth[i] != fwidth_ori || sh->precision[i] != precision_ori || sh->realfmt[i] != realfmt_ori) changed = 1;
+                add_undo_col_format(i, 'A', sh->fwidth[i], sh->precision[i], sh->realfmt[i]);
 #endif
             }
 #ifdef UNDO
@@ -781,7 +783,7 @@ void do_commandmode(struct block * sb) {
 #endif
 
         } else if ( ! wcsncmp(inputline, L"format ", 7) ) {
-            int r = currow, c = curcol, rf = currow, cf = curcol;
+            int r = sh->currow, c = sh->curcol, rf = sh->currow, cf = sh->curcol;
             if (p != -1) {
                 c = sr->tlcol;
                 r = sr->tlrow;
@@ -810,7 +812,7 @@ void do_commandmode(struct block * sb) {
             }
 
         } else if ( ! wcsncmp(inputline, L"ccopy", 5) ) {
-            int r = currow, c = curcol, rf = currow, cf = curcol;
+            int r = sh->currow, c = sh->curcol, rf = sh->currow, cf = sh->curcol;
             if (p != -1) {
                 c = sr->tlcol;
                 r = sr->tlrow;
@@ -822,7 +824,7 @@ void do_commandmode(struct block * sb) {
             send_to_interp(interp_line);
 
         } else if ( ! wcsncmp(inputline, L"strtonum", 8) ) {
-            int r = currow, c = curcol, rf = currow, cf = curcol;
+            int r = sh->currow, c = sh->curcol, rf = sh->currow, cf = sh->curcol;
             if (p != -1) {
                 c = sr->tlcol;
                 r = sr->tlrow;
@@ -925,7 +927,7 @@ void do_commandmode(struct block * sb) {
             }
 
         } else if ( ! wcsncmp(inputline, L"pad ", 4) ) {
-            int c = curcol, cf = curcol;
+            int c = sh->curcol, cf = sh->curcol;
             if (p != -1) { // in case there is a range selected
                 c = sr->tlcol;
                 cf = sr->brcol;
@@ -936,7 +938,7 @@ void do_commandmode(struct block * sb) {
             send_to_interp(interp_line);
 
         } else if ( ! wcsncmp(inputline, L"plot ", 5) ) {
-            int r = currow, c = curcol, rf = currow, cf = curcol;
+            int r = sh->currow, c = sh->curcol, rf = sh->currow, cf = sh->curcol;
             if (p != -1) {
                 c = sr->tlcol;
                 r = sr->tlrow;
@@ -1075,7 +1077,7 @@ void do_commandmode(struct block * sb) {
                 ! wcsncmp(inputline, L"e txt" , 5) ||
                 ! wcsncmp(inputline, L"e! txt" , 6) ) {
                 do_export( p == -1 ? 0 : sr->tlrow, p == -1 ? 0 : sr->tlcol,
-                p == -1 ? maxrow : sr->brrow, p == -1 ? maxcol : sr->brcol);
+                p == -1 ? sh->maxrow : sr->brrow, p == -1 ? sh->maxcol : sr->brcol);
 
         } else if (
                 ! wcsncmp(inputline, L"e xlsx"  , 6) ||
@@ -1124,7 +1126,7 @@ void do_commandmode(struct block * sb) {
                     #endif
                     if (export_xlsx(
                     filename, p == -1 ? 0 : sr->tlrow, p == -1 ? 0 : sr->tlcol,
-                    p == -1 ? maxrow : sr->brrow, p == -1 ? maxcol : sr->brcol) == 0)
+                    p == -1 ? sh->maxrow : sr->brrow, p == -1 ? sh->maxcol : sr->brcol) == 0)
                     sc_info("File \"%s\" written", filename);
                 }
                 #endif

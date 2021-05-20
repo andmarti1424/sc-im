@@ -68,6 +68,8 @@ struct dictionary * get_d_colors_param() {
 }
 
 static struct custom_color * custom_colors = NULL;
+extern struct roman * roman;
+
 /**
  * @brief Generate DEFAULT 'initcolor' colors
  *
@@ -398,8 +400,8 @@ void color_cell(int r, int c, int rf, int cf, char * str) {
         for (j=c; j<=cf; j++) {
 
             // if we are not loading the file
-            if (! loading) {
-                modflg++;
+            if (! roman->loading) {
+                roman->modflg++;
 
                 #ifdef UNDO
                 create_undo_action();
@@ -408,7 +410,7 @@ void color_cell(int r, int c, int rf, int cf, char * str) {
             }
 
             // action
-            n = lookat(i, j);
+            n = lookat(roman->cur_sh, i, j);
             if (n->ucolor == NULL) {
                 n->ucolor = (struct ucolor *) malloc(sizeof(struct ucolor));
                 n->ucolor->fg = NONE_COLOR;
@@ -452,7 +454,7 @@ void color_cell(int r, int c, int rf, int cf, char * str) {
             if ((cl = get(d, "blink"))     != NULL && cl[0] != '\0')   n->ucolor->blink     = get_int(d, "blink");
             if ((cl = get(d, "underline")) != NULL && cl[0] != '\0')   n->ucolor->underline = get_int(d, "underline");
 
-            if (! loading) {
+            if (! roman->loading) {
                 #ifdef UNDO
                 copy_to_undostruct(i, j, i, j, UNDO_ADD, IGNORE_DEPS, NULL);
                 end_undo_action();
@@ -462,7 +464,7 @@ void color_cell(int r, int c, int rf, int cf, char * str) {
     }
 
     destroy_dictionary(d);
-    if (! loading) ui_update(TRUE);
+    if (! roman->loading) ui_update(TRUE);
     return;
 }
 
@@ -485,8 +487,8 @@ void unformat(int r, int c, int rf, int cf) {
     }
 
     // if we are not loading the file
-    if (! loading) {
-        modflg++;
+    if (! roman->loading) {
+        roman->modflg++;
         #ifdef UNDO
         create_undo_action();
         copy_to_undostruct(r, rf, c, cf, UNDO_DEL, IGNORE_DEPS, NULL);
@@ -500,14 +502,14 @@ void unformat(int r, int c, int rf, int cf) {
         for (j=c; j<=cf; j++) {
 
             // action
-            if ( (n = *ATBL(tbl, i, j)) && n->ucolor != NULL) {
+            if ( (n = *ATBL(roman->cur_sh, roman->cur_sh->tbl, i, j)) && n->ucolor != NULL) {
                 free(n->ucolor);
                 n->ucolor = NULL;
             }
 
        }
     }
-    if (! loading) {
+    if (! roman->loading) {
         #ifdef UNDO
         copy_to_undostruct(r, rf, c, cf, UNDO_ADD, IGNORE_DEPS, NULL);
         end_undo_action();
@@ -577,11 +579,11 @@ int redefine_color(char * color, int r, int g, int b) {
            if (init_color(atoi(s), RGB(r, g, b)) == 0) {
 #endif
                sig_winchg();
-               if (! loading) sc_info("Color %s redefined to %d %d %d.", color, r, g, b);
+               if (! roman->loading) sc_info("Color %s redefined to %d %d %d.", color, r, g, b);
                return 0;
            }
        }
-       if (! loading) sc_error("Could not redefine color");
+       if (! roman->loading) sc_error("Could not redefine color");
     #endif
     return -1;
 }
@@ -643,7 +645,7 @@ int define_color(char * color, int r, int g, int b) {
     init_color(7 + cc->number, RGB(r, g, b));
 #endif
 
-    if (! loading) sc_info("Defined custom color #%d with name '%s' and RGB values %d %d %d", cc->number, cc->name, cc->r, cc->g, cc->b);
+    if (! roman->loading) sc_info("Defined custom color #%d with name '%s' and RGB values %d %d %d", cc->number, cc->name, cc->r, cc->g, cc->b);
     return 0;
 #endif
     sc_error("Could not define color %s", color);

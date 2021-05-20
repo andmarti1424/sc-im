@@ -60,6 +60,7 @@
 char ori_insert_edit_submode;
 #endif
 
+extern struct roman * roman;
 extern void ins_in_line(wint_t d);
 
 /**
@@ -71,11 +72,12 @@ extern void ins_in_line(wint_t d);
  */
 
 void do_insertmode(struct block * sb) {
+    struct sheet * sh = roman->cur_sh;
 
     if (sb->value == ctl('v') ) {  // VISUAL SUBMODE
         visual_submode = insert_edit_submode;
         chg_mode('v');
-        start_visualmode(currow, curcol, currow, curcol);
+        start_visualmode(sh->currow, sh->curcol, sh->currow, sh->curcol);
         return;
 
     } else if (sb->value == OKEY_LEFT) {   // LEFT
@@ -207,7 +209,7 @@ void do_insertmode(struct block * sb) {
             add_wchar(content, L'\"', wcslen(content));
         }
 
-        enter_cell_content(currow, curcol, ope, content);
+        enter_cell_content(sh->currow, sh->curcol, ope, content);
 
 #ifdef INS_HISTORY_FILE
         /*
@@ -233,10 +235,10 @@ void do_insertmode(struct block * sb) {
         char * opt = get_conf_value("newline_action");
         switch (opt[0]) {
             case 'j':
-                currow = forw_row(1)->row;
+                sh->currow = forw_row(1)->row;
                 break;
             case 'l':
-                curcol = forw_col(1)->col;
+                sh->curcol = forw_col(1)->col;
                 break;
         }
         ui_update(TRUE);

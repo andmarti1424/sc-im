@@ -50,6 +50,7 @@
 #include "undo.h"
 
 struct frange * freeze_ranges = NULL;
+extern struct roman * roman;
 
 /**
  * \brief TODO Document add_frange()
@@ -91,14 +92,14 @@ void handle_freeze(struct ent * tl_ent, struct ent * br_ent, char value, char ty
 #endif
     if (type == 'r')
         for (i=tl_ent->row; i<=br_ent->row; i++) {
-            row_frozen[i]=value;
+            roman->cur_sh->row_frozen[i]=value;
 #ifdef UNDO
             undo_freeze_unfreeze(i, -1, value == 1 ? 'f' : 'u', 1);
 #endif
         }
     else if (type == 'c')
         for (i=tl_ent->col; i<=br_ent->col; i++) {
-            col_frozen[i]=value;
+            roman->cur_sh->col_frozen[i]=value;
 #ifdef UNDO
             undo_freeze_unfreeze(-1, i, value == 1 ? 'f' : 'u', 1);
 #endif

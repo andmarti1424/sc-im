@@ -56,6 +56,7 @@
 #include "tui.h"
 
 extern graphADT graph;
+extern struct roman * roman;
 extern int cmd_multiplier;
 
 /**
@@ -73,6 +74,7 @@ extern int cmd_multiplier;
  */
 
 void shift(int r, int c, int rf, int cf, wchar_t type) {
+    struct sheet * sh = roman->cur_sh;
     if ( any_locked_cells(r, c, rf, cf) && (type == L'h' || type == L'k') ) {
         sc_error("Locked cells encountered. Nothing changed");
         return;
@@ -85,7 +87,7 @@ void shift(int r, int c, int rf, int cf, wchar_t type) {
     switch (type) {
 
         case L'j':
-            fix_marks(  (rf - r + 1) * cmd_multiplier, 0, r, maxrow, c, cf);
+            fix_marks(  (rf - r + 1) * cmd_multiplier, 0, r, sh->maxrow, c, cf);
 #ifdef UNDO
             save_undo_range_shift(cmd_multiplier, 0, r, c, rf + (rf-r+1) * (cmd_multiplier - 1), cf);
 #endif
@@ -93,7 +95,7 @@ void shift(int r, int c, int rf, int cf, wchar_t type) {
             break;
 
         case L'k':
-            fix_marks( -(rf - r + 1) * cmd_multiplier, 0, r, maxrow, c, cf);
+            fix_marks( -(rf - r + 1) * cmd_multiplier, 0, r, sh->maxrow, c, cf);
             yank_area(r, c, rf + (rf-r+1) * (cmd_multiplier - 1), cf, 'a', cmd_multiplier); // keep ents in yanklist for sk
 #ifdef UNDO
             ents_that_depends_on_range(r, c, rf + (rf-r+1) * (cmd_multiplier - 1), cf);
@@ -101,14 +103,14 @@ void shift(int r, int c, int rf, int cf, wchar_t type) {
             save_undo_range_shift(-cmd_multiplier, 0, r, c, rf + (rf-r+1) * (cmd_multiplier - 1), cf);
 #endif
             while (ic--) shift_range(-ic, 0, r, c, rf, cf);
-            if (get_conf_int("autocalc") && ! loading) EvalAll();
+            if (get_conf_int("autocalc") && ! roman->loading) EvalAll();
 #ifdef UNDO
             copy_to_undostruct(0, 0, -1, -1, UNDO_ADD, HANDLE_DEPS, NULL);
 #endif
             break;
 
         case L'h':
-            fix_marks(0, -(cf - c + 1) * cmd_multiplier, r, rf, c, maxcol);
+            fix_marks(0, -(cf - c + 1) * cmd_multiplier, r, rf, c, sh->maxcol);
             yank_area(r, c, rf, cf + (cf-c+1) * (cmd_multiplier - 1), 'a', cmd_multiplier); // keep ents in yanklist for sk
 #ifdef UNDO
             // here we save in undostruct, all the ents that depends on the deleted one (before change)
@@ -118,7 +120,7 @@ void shift(int r, int c, int rf, int cf, wchar_t type) {
 #endif
             while (ic--) shift_range(0, -ic, r, c, rf, cf);
 
-            if (get_conf_int("autocalc") && ! loading) EvalAll();
+            if (get_conf_int("autocalc") && ! roman->loading) EvalAll();
             //update(TRUE); // this is used just to make debugging easier
 #ifdef UNDO
             copy_to_undostruct(0, 0, -1, -1, UNDO_ADD, HANDLE_DEPS, NULL);
@@ -126,7 +128,7 @@ void shift(int r, int c, int rf, int cf, wchar_t type) {
             break;
 
         case L'l':
-            fix_marks(0,  (cf - c + 1) * cmd_multiplier, r, rf, c, maxcol);
+            fix_marks(0,  (cf - c + 1) * cmd_multiplier, r, rf, c, sh->maxcol);
 #ifdef UNDO
             save_undo_range_shift(0, cmd_multiplier, r, c, rf, cf + (cf-c+1) * (cmd_multiplier - 1));
 #endif
@@ -162,8 +164,9 @@ void shift(int r, int c, int rf, int cf, wchar_t type) {
  */
 
 void shift_range(int delta_rows, int delta_cols, int tlrow, int tlcol, int brrow, int brcol) {
-    currow = tlrow;
-    curcol = tlcol;
+    struct sheet * sh = roman->cur_sh;
+    sh->currow = tlrow;
+    sh->curcol = tlcol;
 
     if (delta_rows > 0)      shift_cells_down (brrow - tlrow + 1, brcol - tlcol + 1);
     else if (delta_rows < 0) shift_cells_up   (brrow - tlrow + 1, brcol - tlcol + 1);
@@ -185,23 +188,24 @@ void shift_range(int delta_rows, int delta_cols, int tlrow, int tlcol, int brrow
 
 void shift_cells_down(int deltarows, int deltacols) {
     int r, c;
+    struct sheet * sh = roman->cur_sh;
     struct ent ** pp;
-    if (currow > maxrow) maxrow = currow;
-    maxrow += deltarows;
-    if ((maxrow >= maxrows) && !growtbl(GROWROW, maxrow, 0))
+    if (sh->currow > sh->maxrow) sh->maxrow = sh->currow;
+    sh->maxrow += deltarows;
+    if ((sh->maxrow >= sh->maxrows) && !growtbl(sh, GROWROW, sh->maxrow, 0))
         return;
 
-    for (r = maxrow; r > currow + deltarows - 1; r--) {
-        for (c = curcol; c < curcol + deltacols; c++) {
-            pp = ATBL(tbl, r, c);
-            pp[0] = *ATBL(tbl, r-deltarows, c);
+    for (r = sh->maxrow; r > sh->currow + deltarows - 1; r--) {
+        for (c = sh->curcol; c < sh->curcol + deltacols; c++) {
+            pp = ATBL(sh, sh->tbl, r, c);
+            pp[0] = *ATBL(sh, sh->tbl, r-deltarows, c);
             if ( pp[0] ) pp[0]->row += deltarows;
         }
     }
     // blank new ents
-    for (c = curcol; c < curcol + deltacols; c++)
-        for (r = currow; r < currow + deltarows; r++) {
-            pp = ATBL(tbl, r, c);
+    for (c = sh->curcol; c < sh->curcol + deltacols; c++)
+        for (r = sh->currow; r < sh->currow + deltarows; r++) {
+            pp = ATBL(sh, sh->tbl, r, c);
             *pp = (struct ent *) 0;
         }
     return;
@@ -217,24 +221,25 @@ void shift_cells_down(int deltarows, int deltacols) {
  */
 
 void shift_cells_right(int deltarows, int deltacols) {
+    struct sheet * sh = roman->cur_sh;
     int r, c;
     struct ent ** pp;
 
-    if (curcol + deltacols > maxcol)
-        maxcol = curcol + deltacols;
-    maxcol += deltacols;
+    if (sh->curcol + deltacols > sh->maxcol)
+        sh->maxcol = sh->curcol + deltacols;
+    sh->maxcol += deltacols;
 
-    if ((maxcol >= maxcols) && !growtbl(GROWCOL, 0, maxcol))
+    if ((sh->maxcol >= sh->maxcols) && !growtbl(sh, GROWCOL, 0, sh->maxcol))
         return;
 
-    int lim = maxcol - curcol - deltacols;
-    for (r=currow; r < currow + deltarows; r++) {
-        pp = ATBL(tbl, r, maxcol);
+    int lim = sh->maxcol - sh->curcol - deltacols;
+    for (r=sh->currow; r < sh->currow + deltarows; r++) {
+        pp = ATBL(sh, sh->tbl, r, sh->maxcol);
         for (c = lim; c-- >= 0; pp--)
             if ((pp[0] = pp[-deltacols])) pp[0]->col += deltacols;
 
-        pp = ATBL(tbl, r, curcol);
-        for (c = curcol; c < curcol + deltacols; c++, pp++)
+        pp = ATBL(sh, sh->tbl, r, sh->curcol);
+        for (c = sh->curcol; c < sh->curcol + deltacols; c++, pp++)
             *pp = (struct ent *) 0;
     }
     return;
@@ -252,12 +257,13 @@ void shift_cells_right(int deltarows, int deltacols) {
 void shift_cells_up(int deltarows, int deltacols) {
     int r, c;
     struct ent ** pp;
+    struct sheet * sh = roman->cur_sh;
 
-    for (r = currow; r <= maxrow; r++) {
-        for (c = curcol; c < curcol + deltacols; c++) {
+    for (r = sh->currow; r <= sh->maxrow; r++) {
+        for (c = sh->curcol; c < sh->curcol + deltacols; c++) {
 
-            if (r < currow + deltarows) {
-                pp = ATBL(tbl, r, c);
+            if (r < sh->currow + deltarows) {
+                pp = ATBL(sh, sh->tbl, r, c);
 
                 /* delete vertex in graph
                    unless vertex is referenced by other. Shall comment this? See NOTE1 above */
@@ -271,14 +277,14 @@ void shift_cells_up(int deltarows, int deltacols) {
                    *pp = NULL;
                 }
             }
-            if (r <= maxrow - deltarows) {
-                pp = ATBL(tbl, r, c);
-                pp[0] = *ATBL(tbl, r + deltarows, c);
+            if (r <= sh->maxrow - deltarows) {
+                pp = ATBL(sh, sh->tbl, r, c);
+                pp[0] = *ATBL(sh, sh->tbl, r + deltarows, c);
                 if ( pp[0] ) pp[0]->row -= deltarows;
             }
             //blank bottom ents
-            if (r > maxrow - deltarows) {
-                pp = ATBL(tbl, r, c);
+            if (r > sh->maxrow - deltarows) {
+                pp = ATBL(sh, sh->tbl, r, c);
                 *pp = (struct ent *) 0;
             }
         }
@@ -296,14 +302,15 @@ void shift_cells_up(int deltarows, int deltacols) {
  */
 
 void shift_cells_left(int deltarows, int deltacols) {
+    struct sheet * sh = roman->cur_sh;
     int r, c;
     struct ent ** pp;
 
-    for (c = curcol; c <= maxcol; c++) {
-        for (r = currow; r < currow + deltarows; r++) {
+    for (c = sh->curcol; c <= sh->maxcol; c++) {
+        for (r = sh->currow; r < sh->currow + deltarows; r++) {
 
-            if (c < curcol + deltacols) {
-                pp = ATBL(tbl, r, c);
+            if (c < sh->curcol + deltacols) {
+                pp = ATBL(sh, sh->tbl, r, c);
 
                 /* delete vertex in graph
                    unless vertex is referenced by other */
@@ -317,14 +324,14 @@ void shift_cells_left(int deltarows, int deltacols) {
                    *pp = NULL;
                 }
             }
-            if (c <= maxcol - deltacols) {
-                pp = ATBL(tbl, r, c);
-                pp[0] = *ATBL(tbl, r, c + deltacols);
+            if (c <= sh->maxcol - deltacols) {
+                pp = ATBL(sh, sh->tbl, r, c);
+                pp[0] = *ATBL(sh, sh->tbl, r, c + deltacols);
                 if ( pp[0] ) pp[0]->col -= deltacols;
             }
             //blank bottom ents
-            if (c > maxcol - deltacols) {
-                pp = ATBL(tbl, r, c);
+            if (c > sh->maxcol - deltacols) {
+                pp = ATBL(sh, sh->tbl, r, c);
                 *pp = (struct ent *) 0;
             }
         }

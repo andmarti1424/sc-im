@@ -75,6 +75,8 @@
 #include "lua.h"
 #endif
 
+extern struct roman * roman;
+
 /**
  * \brief TODO Document set_trigger()
  *
@@ -88,6 +90,7 @@
  */
 
 void set_trigger(int r, int c, int rf, int cf, char * str) {
+    struct sheet * sh = roman->cur_sh;
     if (any_locked_cells(r, c, rf, cf)) {
         sc_error("Locked cells encountered. Nothing changed");
         return;
@@ -118,7 +121,7 @@ void set_trigger(int r, int c, int rf, int cf, char * str) {
     for (i = r; i <= rf; i++) {
         for (j = c; j <= cf; j++) {
             // action
-            n = lookat(i, j);
+            n = lookat(sh, i, j);
             if (n->trigger == NULL)
                 n->trigger = (struct trigger *) malloc(sizeof(struct trigger));
             else {
@@ -154,7 +157,7 @@ void set_trigger(int r, int c, int rf, int cf, char * str) {
                 }
             }
             n->trigger->flag = tmp;
-            if (!loading) sc_info("Trigger was set");
+            if (! roman->loading) sc_info("Trigger was set");
         }
     }
     destroy_dictionary(d);
@@ -173,6 +176,7 @@ void set_trigger(int r, int c, int rf, int cf, char * str) {
  */
 
 void del_trigger(int r, int c, int rf, int cf ) {
+    struct sheet * sh = roman->cur_sh;
     if (any_locked_cells(r, c, rf, cf)) {
         sc_error("Locked cells encountered. Nothing changed");
         return;
@@ -183,7 +187,7 @@ void del_trigger(int r, int c, int rf, int cf ) {
     for (i = r; i <= rf; i++) {
         for (j = c; j <= cf; j++) {
            // action
-           n = lookat(i, j);
+           n = lookat(sh, i, j);
            if (n->trigger != NULL ) {
                if ((n->trigger->flag & TRG_C) == TRG_C) {
                    dlclose(n->trigger->handle);
@@ -213,12 +217,15 @@ void do_trigger( struct ent *p , int rw) {
     struct trigger * trigger = p->trigger;
     if(in_trigger) return;
     in_trigger = 1;
-#ifdef XLUA
-    if ((trigger->flag & TRG_LUA ) == TRG_LUA)
+
+    if ((trigger->flag & TRG_LUA ) == TRG_LUA) {
+        sc_info("%d %d", p->row, p->col);
         doLuaTrigger_cell(p,rw);
-#endif
-    if ((trigger->flag & TRG_C ) == TRG_C)
+    }
+
+    if ((trigger->flag & TRG_C ) == TRG_C) {
         do_C_Trigger_cell(p,rw);
+    }
     in_trigger = 0;
     return;
 }

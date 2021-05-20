@@ -45,10 +45,10 @@
 #include <string.h>
 #include <wchar.h>
 #include <wctype.h>
+#include "sc.h"    // for rescol
 #include "cmds.h"
 #include "tui.h"
 #include "buffer.h"
-#include "sc.h"    // for rescol
 #include "cmds_edit.h"
 #include "utils/string.h"
 #include "interp.h"
@@ -64,6 +64,7 @@ extern char ori_insert_edit_submode;
 #endif
 
 static wint_t wi; /**< char read from stdin */
+extern struct roman * roman;
 
 /**
  * \brief TODO Document do_editmode()
@@ -74,6 +75,7 @@ static wint_t wi; /**< char read from stdin */
  */
 
 void do_editmode(struct block * sb) {
+    struct sheet * sh = roman->cur_sh;
     int pos;
     int initial_position;
 
@@ -191,7 +193,7 @@ void do_editmode(struct block * sb) {
             add_wchar(content, L'\"', wcslen(content));
         }
 
-        enter_cell_content(currow, curcol, ope, content);
+        enter_cell_content(sh->currow, sh->curcol, ope, content);
 
         inputline[0] = L'\0';
         inputline_pos = 0;
@@ -202,10 +204,10 @@ void do_editmode(struct block * sb) {
         char * opt = get_conf_value("newline_action");
         switch (opt[0]) {
             case 'j':
-                currow = forw_row(1)->row;
+                sh->currow = forw_row(1)->row;
                 break;
             case 'l':
-                curcol = forw_col(1)->col;
+                sh->curcol = forw_col(1)->col;
                 break;
         }
         ui_update(TRUE);
@@ -652,19 +654,20 @@ void del_for_char() {       // X    BS
  */
 
 int start_edit_mode(struct block * buf, char type) {
+    struct sheet * sh = roman->cur_sh;
     chg_mode(buf->value);
 
     line[0]='\0';
     inputline[0]=L'\0';
 
-    struct ent * p1 = lookat(currow, curcol);
+    struct ent * p1 = lookat(sh, sh->currow, sh->curcol);
 
     if (type == 'v') { // && p1->flags & is_valid) {   // numeric value
         if (( ! (p1->expr) ) ) {                       // || (p1->flags & is_strexpr)) {
             (void) swprintf(inputline, BUFFERSIZE, L"%.15g", p1->v);
         } else {              // expression
             linelim = 0;
-            editexp(currow, curcol);
+            editexp(sh->currow, sh->curcol);
             linelim = -1;
             (void) swprintf(inputline, BUFFERSIZE, L"%s", line);
         }
@@ -682,7 +685,7 @@ int start_edit_mode(struct block * buf, char type) {
             insert_edit_submode='>';
         }
         linelim = 0;
-        edits(currow, curcol, 0);
+        edits(sh->currow, sh->curcol, 0);
         linelim = -1;
         if ((p1)->flags & is_strexpr) swprintf(inputline + wcslen(inputline), BUFFERSIZE, L"\"");
         (void) swprintf(inputline + wcslen(inputline), BUFFERSIZE, L"%s", line);

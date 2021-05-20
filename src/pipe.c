@@ -54,6 +54,7 @@
 #include "macros.h"
 #include "tui.h"
 
+extern struct roman * roman;
 // FIXME - pass fd is not neccesary?
 /**
  * \brief TODO Document getnum()
@@ -68,12 +69,13 @@
  */
 
 void getnum(int r0, int c0, int rn, int cn, FILE * fd) {
+    struct sheet * sh = roman->cur_sh;
     struct ent ** pp;
     struct ent * p;
     int r, c;
 
     for (r = r0; r <= rn; r++) {
-        for (c = c0, pp = ATBL(tbl, r, c); c <= cn; pp++, c++) {
+        for (c = c0, pp = ATBL(sh, sh->tbl, r, c); c <= cn; pp++, c++) {
             *line = '\0';
             p = *pp;
             if (p) {
@@ -104,7 +106,8 @@ void getnum(int r0, int c0, int rn, int cn, FILE * fd) {
  */
 
 void getformat(int col, FILE * fd) {
-    sprintf(line, "%d %d %d\n", fwidth[col], precision[col], realfmt[col]);
+    struct sheet * sh = roman->cur_sh;
+    sprintf(line, "%d %d %d\n", sh->fwidth[col], sh->precision[col], sh->realfmt[col]);
     //write(fd, line, strlen(line));
     sc_value("%s", line);
     linelim = -1;
@@ -123,11 +126,12 @@ void getformat(int col, FILE * fd) {
  */
 
 void getfmt(int r0, int c0, int rn, int cn, FILE * fd) {
+    struct sheet * sh = roman->cur_sh;
     struct ent    **pp;
     int        r, c;
 
     for (r = r0; r <= rn; r++) {
-        for (c = c0, pp = ATBL(tbl, r, c); c <= cn; pp++, c++) {
+        for (c = c0, pp = ATBL(sh, sh->tbl, r, c); c <= cn; pp++, c++) {
             *line = '\0';
             if (*pp && (*pp)->format) sprintf(line, "%s", (*pp)->format);
             sc_value("%s", line);
@@ -153,11 +157,12 @@ void getfmt(int r0, int c0, int rn, int cn, FILE * fd) {
  */
 
 void getstring(int r0, int c0, int rn, int cn, FILE * fd) {
+    struct sheet * sh = roman->cur_sh;
     struct ent    **pp;
     int        r, c;
 
     for (r = r0; r <= rn; r++) {
-        for (c = c0, pp = ATBL(tbl, r, c); c <= cn; pp++, c++) {
+        for (c = c0, pp = ATBL(sh, sh->tbl, r, c); c <= cn; pp++, c++) {
             *line = '\0';
             if (*pp && (*pp)->label)
                 sprintf(line, "%s", (*pp)->label);
@@ -184,12 +189,13 @@ void getstring(int r0, int c0, int rn, int cn, FILE * fd) {
  */
 
 void getexp(int r0, int c0, int rn, int cn, FILE * fd) {
+    struct sheet * sh = roman->cur_sh;
     struct ent    **pp;
     struct ent    *p;
     int        r, c;
 
     for (r = r0; r <= rn; r++) {
-        for (c = c0, pp = ATBL(tbl, r, c); c <= cn; pp++, c++) {
+        for (c = c0, pp = ATBL(sh, sh->tbl, r, c); c <= cn; pp++, c++) {
             *line = '\0';
             p = *pp;
             if (p && p->expr) {

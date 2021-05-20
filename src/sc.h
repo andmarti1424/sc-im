@@ -48,8 +48,6 @@
 #include <stdio.h>
 #include <memory.h>
 
-//#define ATBL(tbl, row, col)    (*(tbl + row) + (col))
-extern struct ent ** ATBL(struct ent ***, int, int );
 
 #define MINROWS      100     /* minimum size at startup */
 
@@ -100,6 +98,73 @@ extern struct ent ** ATBL(struct ent ***, int, int );
     # define    TRUE    1
 #endif
 
+// structure to hold an opened file
+struct roman {
+    char * name;
+    struct sheet * first_sh;
+    struct sheet * last_sh;
+    struct sheet * cur_sh;
+    short flags;
+    struct roman * next; // to have more than one file opened in a single session
+    int modflg; /* Indicates a change was made since last save */
+    int loading; // to backwards compatibility. TODO replace
+    /*int open;
+    struct Ent ** cache;
+    int cache_nr;
+    int id; //session_id
+    */
+};
+
+/* flag values for roman struct */
+#define is_loading    0001
+#define is_opened     0002
+#define is_closed     0004
+#define is_empty      0010
+#define is_alloced    0020
+
+/* structure to store sheet data */
+struct sheet {
+    struct ent *** tbl;
+    char * name;
+
+    int currow;         /* current row of the selected cell. */
+    int curcol;         /* current column of the selected cell. */
+    int lastrow;        /* row of last selected cell */
+    int lastcol;        /* col of last selected cell */
+    int maxrows;        /* max alloc'ed row */
+    int maxcols;        /* max alloc'ed col */
+    int maxrow, maxcol; /* max row and col with data stored */
+    unsigned char * col_hidden;
+    unsigned char * col_frozen;
+    int * fwidth;
+    int * precision;
+    int * realfmt;
+    unsigned char * row_hidden;
+    unsigned char * row_frozen;
+    unsigned char * row_format;
+
+    int rescol; /* Columns reserved for row numbers */
+    struct sheet * next;
+    struct sheet * prev;
+
+    int offscr_sc_rows, offscr_sc_cols; // off screen spreadsheet rows and columns
+    int nb_frozen_rows, nb_frozen_cols; // total number of frozen rows/cols
+    int nb_frozen_screenrows; // screen rows occupied by those frozen rows
+    int nb_frozen_screencols; // screen cols occupied by those frozen columns
+    /*
+    int col, row;
+    int ccol , crow;
+    short flags;
+    int maxcol, maxrow;
+    void **hash;
+    int nr_hash;
+    struct Objs_cache cache_ent;
+    */
+};
+
+//#define ATBL(tbl, row, col)    (*(tbl + row) + (col))
+extern struct ent ** ATBL(struct sheet * sh, struct ent ***, int, int );
+
 /*
  * Some not too obvious things about the flags:
  *    is_valid means there is a valid number in v.
@@ -111,8 +176,7 @@ extern struct ent ** ATBL(struct ent ***, int, int );
  *    So, either v or label can be set to a constant.
  *        Either (but not both at the same time) can be set from an expression.
  */
-
-#define VALID_CELL(p, r, c) ((p = *ATBL(tbl, r, c)) && ((p->flags & is_valid) || p->label))
+#define VALID_CELL(s, p, r, c) ((p = *ATBL(s, s->tbl, r, c)) && ((p->flags & is_valid) || p->label))
 
 // TODO Properly document these structs using doxygen tags. Possibly
 // not the same as functions. What is the standard way?
@@ -202,6 +266,42 @@ struct go_save {
     int stflag;
     int errsearch;
 };
+
+#define INSERT(NEW, FIRST,LAST,NEXT,PREV) \
+  do { \
+      if(FIRST == 0) FIRST=LAST=NEW; \
+      else { \
+      NEW->PREV=LAST; \
+      NEW->NEXT=LAST->NEXT; \
+      LAST->NEXT=NEW; \
+      if(NEW->NEXT !=NULL) NEW->NEXT->PREV=NEW; \
+      LAST=NEW; \
+      }\
+  } while(0)
+
+
+  #define INSERT_BEFORE(NEW, FIRST,LAST,NEXT,PREV) \
+  do { \
+      if(FIRST == 0) FIRST=LAST=NEW; \
+      else { \
+      NEW->NEXT=FIRST; \
+      NEW->PREV=FIRST->PREV;\
+      FIRST->PREV=NEW; \
+      FIRST=NEW; \
+      }\
+  } while(0)
+
+  #define REMOVE(ELEM,FIRST,LAST,NEXT,PREV) \
+    do { \
+     if(ELEM==FIRST) { \
+          FIRST=ELEM->NEXT; \
+          if (FIRST == 0)  LAST=0; \
+          else ELEM->NEXT->PREV=0; \
+     } else { \
+       ELEM->PREV->NEXT=ELEM->NEXT; \
+       if (ELEM->NEXT ==0) LAST=ELEM->PREV; \
+       else ELEM->NEXT->PREV=ELEM->PREV; } \
+      } while(0)
 
 /* op values */
 #define O_VAR       'v'
@@ -326,26 +426,26 @@ struct go_save {
 #define GROWCOL       3       /* add columns */
 #define GROWBOTH      4       /* grow both */
 
-extern int currow, curcol;
-extern int maxrow, maxcol;
-extern struct ent *** tbl;     // data table ref. in vmtbl.c and ATBL()
 extern char curfile[];
 extern int arg;
-extern int lastrow, lastcol;
 extern int gmyrow, gmycol;    // globals used for @myrow, @mycol cmds
-extern int rescol;            // columns reserved for row numbers
-extern int maxrows, maxcols;  // # cells currently allocated
 extern int rowsinrange;       // Number of rows in target range of a goto
 extern int colsinrange;       // Number of cols in target range of a goto
-extern int * fwidth;
-extern int * precision;
-extern int * realfmt;
 extern char * colformat[10];
-extern unsigned char * col_hidden;
-extern unsigned char * row_hidden;
-extern unsigned char * row_format;
-extern unsigned char * row_frozen;
-extern unsigned char * col_frozen;
+//extern int currow, curcol;
+//extern int maxrow, maxcol;
+//extern struct ent *** tbl;     // data table ref. in vmtbl.c and ATBL()
+//extern int lastrow, lastcol;
+//extern int rescol;            // columns reserved for row numbers
+//extern int maxrows, maxcols;  // # cells currently allocated
+//extern int * fwidth;
+//extern int * precision;
+//extern int * realfmt;
+//extern unsigned char * col_hidden;
+//extern unsigned char * row_hidden;
+//extern unsigned char * row_format;
+//extern unsigned char * row_frozen;
+//extern unsigned char * col_frozen;
 extern char line[FBUFLEN];
 extern int linelim;
 extern int changed;
@@ -393,9 +493,9 @@ extern struct enode * new_const(int op, double a1);
 extern struct enode * new_range(int op, struct range_s a1);
 extern struct enode * new_str(char * s);
 extern struct enode * new_var(int op, struct ent_ptr a1);
-extern struct ent * lookat(int row, int col);
+extern struct ent * lookat(struct sheet * sh, int row, int col); // return pointer to 'ent' of cell. Create it if it doesn't exist
 extern void EvalAll();
-extern void checkbounds(int * rowp, int * colp);
+extern void checkbounds(struct sheet * sh, int * rowp, int * colp);
 extern void clearent(struct ent * v);
 extern void closefile(FILE * f, int pid, int rfd);
 extern void colshow_op();

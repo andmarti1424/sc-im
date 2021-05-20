@@ -47,18 +47,16 @@ int main(int argc, char ** argv);
 int exit_app(int status);
 void create_structures();
 void delete_structures();
-void load_sc();
+void load_sc(char * loading_file);
 void read_argv(int argc, char ** argv);
 void setorder(int i);
-void nopipe();
 void signals();
 void show_version_and_quit();
 void show_usage_and_quit();
 
-// SIGINT signal
+// signals
 void sig_int();
-
-// SIGWINCH signal - resize of terminal
+void sig_nopipe();
 void sig_winchg();
 
 extern FILE * fdoutput; // output file descriptor (stdout or file)

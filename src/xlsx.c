@@ -68,6 +68,8 @@
 #include <libxml/tree.h>
 #include "xlsx.h"
 
+extern struct roman * roman;
+
 /**
  * \brief TODO Document get_xlsx_string()
  *
@@ -188,6 +190,7 @@ char * get_xlsx_number_format_by_id(xmlDocPtr doc_styles, int id) {
  */
 
 void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) {
+    struct sheet * sh = roman->cur_sh;
     xmlNode * cur_node = xmlDocGetRootElement(doc)->xmlChildrenNode;
     xmlNode * child_node = NULL;
     wchar_t line_interp[FBUFLEN] = L"";
@@ -263,7 +266,7 @@ void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) 
 
                     swprintf(line_interp, FBUFLEN, L"let %s%d=%.15ld", coltoa(c), r, (l - 25568) * 86400 - get_conf_int("tm_gmtoff"));
                     send_to_interp(line_interp);
-                    struct ent * n = lookat(r, c);
+                    struct ent * n = lookat(sh, r, c);
                     n->format = 0;
                     char * stringFormat = scxmalloc((unsigned)(strlen("%d/%m/%Y") + 2));
                     sprintf(stringFormat, "%c", 'd');
@@ -279,7 +282,7 @@ void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) 
                     double l = atof((char *) child_node->xmlChildrenNode->xmlChildrenNode->content);
                     swprintf(line_interp, FBUFLEN, L"let %s%d=%.15f", coltoa(c), r, (l - get_conf_int("tm_gmtoff") * 1.0 / 60 / 60 / 24) * 86400);
                     send_to_interp(line_interp);
-                    struct ent * n = lookat(r, c);
+                    struct ent * n = lookat(sh, r, c);
                     n->format = 0;
                     char * stringFormat = scxmalloc((unsigned)(strlen("%H:%M:%S") + 2));
                     sprintf(stringFormat, "%c", 'd');
@@ -370,6 +373,7 @@ void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) 
  */
 
 int open_xlsx(char * fname, char * encoding) {
+    struct sheet * sh = roman->cur_sh;
     struct zip * za;
     struct zip_file * zf;
     struct zip_stat sb, sb_strings, sb_styles, sh_strings;
@@ -548,8 +552,9 @@ int open_xlsx(char * fname, char * encoding) {
         return -1;
     }
 
-    auto_fit(0, maxcols, DEFWIDTH);
-    deleterow(currow, 1);
+    auto_fit(0, sh->maxcols, DEFWIDTH);
+    deleterow(sh->currow, 1);
+
     return 0;
 }
 #endif
@@ -569,18 +574,19 @@ int open_xlsx(char * fname, char * encoding) {
  */
 
 int export_xlsx(char * filename, int r0, int c0, int rn, int cn) {
+    struct sheet * sh = roman->cur_sh;
     int row, col;
     register struct ent ** pp;
 
     lxw_workbook  * workbook  = workbook_new(filename);
     lxw_worksheet * worksheet = workbook_add_worksheet(workbook, NULL);
 
-    int bkp_currow = currow;
-    currow = 0;
+    int bkp_currow = sh->currow;
+    sh->currow = 0;
     insert_row(0); //add a row so that scim formulas apply to excel
 
     for (row = r0; row <= rn+1; row++)
-        for (pp = ATBL(tbl, row, col = c0); col <= cn; col++, pp++)
+        for (pp = ATBL(sh, sh->tbl, row, col = c0); col <= cn; col++, pp++)
             if (*pp) {
                 // Check format here
                 lxw_format * format = workbook_add_format(workbook);
@@ -740,8 +746,8 @@ int export_xlsx(char * filename, int r0, int c0, int rn, int cn) {
                 }
                 /* TODO: handle hidden rows and columns? */
             }
-    int_deleterow(currow, 1); /* delete the added row */
-    currow = bkp_currow;
+    int_deleterow(sh->currow, 1); /* delete the added row */
+    sh->currow = bkp_currow;
 
     return workbook_close(workbook);
 }

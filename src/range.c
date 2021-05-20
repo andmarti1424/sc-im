@@ -56,10 +56,7 @@
 
 srange * ranges = NULL;
 
-extern int currow;
-extern int curcol;
-extern unsigned char * col_hidden;
-extern unsigned char * row_hidden;
+extern struct roman * roman;
 
 /**
 * \brief Create a range from either to marks or two cells. 
@@ -73,6 +70,7 @@ extern unsigned char * row_hidden;
 */
 
 srange * create_range(char c, char d, struct ent * tl, struct ent * br) {
+    struct sheet * sh = roman->cur_sh;
     int tlrow, tlcol, brrow, brcol;
 
     if (c == '\0' && d == '\0') {
@@ -91,12 +89,12 @@ srange * create_range(char c, char d, struct ent * tl, struct ent * br) {
         brcol = md->col > mc->col ? md->col : mc->col;
     }
 
-    if ( row_hidden[tlrow] || row_hidden[brrow] ) {
+    if (sh->row_hidden[tlrow] || sh->row_hidden[brrow] ) {
         sc_error("Row of cell is hidden");
         return NULL;
     }
 
-    if ( col_hidden[tlcol] || col_hidden[brcol] ) {
+    if (sh->col_hidden[tlcol] || sh->col_hidden[brcol] ) {
         sc_error("Column of cell is hidden");
         return NULL;
     }
@@ -113,14 +111,14 @@ srange * create_range(char c, char d, struct ent * tl, struct ent * br) {
     r->brcol = brcol;
     //r->orig_col = -1;
     //r->orig_row = -1;
-    r->orig_row = currow;
-    r->orig_col = curcol;
+    r->orig_row = sh->currow;
+    r->orig_col = sh->curcol;
     r->marks[0] = c;
     r->marks[1] = d;
     r->pnext = NULL;
     r->selected = 1;
-    currow = r->tlrow;
-    curcol = r->tlcol;
+    sh->currow = r->tlrow;
+    sh->curcol = r->tlcol;
 
     // Only add to list if a range was created
     if (exists_range == NULL && ranges == NULL) {
@@ -331,6 +329,7 @@ static struct range * rng_base;
 */
 
 void add_range(char * name, struct ent_ptr left, struct ent_ptr right, int is_range) {
+    struct sheet * sh = roman->cur_sh;
     register char * p;
     int minr, minc, maxr, maxc;
     int minrf, mincf, maxrf, maxcf;
@@ -352,9 +351,9 @@ void add_range(char * name, struct ent_ptr left, struct ent_ptr right, int is_ra
         maxc = left.vp->col; maxcf = left.vf & FIX_COL;
     }
 
-    left.vp = lookat(minr, minc);
+    left.vp = lookat(sh, minr, minc);
     left.vf = minrf | mincf;
-    right.vp = lookat(maxr, maxc);
+    right.vp = lookat(sh, maxr, maxc);
     right.vf = maxrf | maxcf;
 
     if ( ! find_range(name, strlen(name), (struct ent *) 0, (struct ent *) 0, &prev)) {
@@ -407,7 +406,7 @@ void add_range(char * name, struct ent_ptr left, struct ent_ptr right, int is_ra
             rng_base->r_prev = rng;
         rng_base = rng;
     }
-    modflg++;
+    roman->modflg++;
 }
 
 /**
@@ -420,6 +419,7 @@ void add_range(char * name, struct ent_ptr left, struct ent_ptr right, int is_ra
 */
 
 void del_range(struct ent * left, struct ent * right) {
+    struct sheet * sh = roman->cur_sh;
     struct range * r;
     int minr, minc, maxr, maxc;
 
@@ -428,8 +428,8 @@ void del_range(struct ent * left, struct ent * right) {
     maxr = left->row > right->row ? left->row : right->row;
     maxc = left->col > right->col ? left->col : right->col;
 
-    left = lookat(minr, minc);
-    right = lookat(maxr, maxc);
+    left = lookat(sh, minr, minc);
+    right = lookat(sh, maxr, maxc);
 
     if ( find_range((char *) 0, 0, left, right, &r))
         return;
@@ -442,7 +442,7 @@ void del_range(struct ent * left, struct ent * right) {
         rng_base = r->r_next;
     scxfree((char *) (r->r_name));
     scxfree((char *) r);
-    modflg++;
+    roman->modflg++;
 }
 
 /**

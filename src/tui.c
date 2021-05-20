@@ -103,6 +103,7 @@ extern struct dictionary * d_colors_param;
 extern int cmd_pending;
 extern int cmd_multiplier;
 extern char insert_edit_submode;
+extern struct roman * roman;
 
 WINDOW * main_win;
 WINDOW * input_win;
@@ -269,7 +270,7 @@ void ui_sc_msg(char * s, int type, ...) {
 #ifdef USECOLORS
         ui_set_ucolor(input_win, &ucolors[INPUT], DEFAULT_COLOR);
 #endif
-        if (type == DEBUG_MSG || (loading && type == ERROR_MSG)) {
+        if (type == DEBUG_MSG || (roman->loading && type == ERROR_MSG)) {
             wtimeout(input_pad, -1);
             wgetch(input_pad);
             wtimeout(input_pad, TIMEOUT_CURSES);
@@ -386,7 +387,9 @@ void ui_do_welcome() {
  * \return none
  */
 void ui_update(int header) {
-    if (loading) return;
+    struct sheet * sh = roman->cur_sh;
+
+    if (roman->loading) return;
     if (cmd_multiplier > 1) return;
     if (get_conf_int("nocurses")) return;
 
@@ -411,10 +414,10 @@ void ui_update(int header) {
     }
 
     /* You can't hide the last row or col */
-    while (row_hidden[currow])
-        currow++;
-    while (col_hidden[curcol])
-        curcol++;
+    while (sh->row_hidden[sh->currow])
+        sh->currow++;
+    while (sh->col_hidden[sh->curcol])
+        sh->curcol++;
 
     /*
      * Calculate offscreen rows and columns
@@ -505,6 +508,7 @@ void ui_write_j(WINDOW * win, const char * word, const unsigned int row, const u
  * \return none
  */
 void ui_print_mult_pend() {
+    struct sheet * sh = roman->cur_sh;
     if (curmode != NORMAL_MODE && curmode != VISUAL_MODE && curmode != EDIT_MODE) return;
 
     int row_orig, col_orig;
@@ -521,13 +525,13 @@ void ui_print_mult_pend() {
         strcat(strm, "?");
     }
 
-    char field[rescol+1];
+    char field[sh->rescol+1];
     field[0]='\0';
-    sprintf(field, "%0*d", rescol - (int) strlen(strm), 0);
+    sprintf(field, "%0*d", sh->rescol - (int) strlen(strm), 0);
     subst(field, '0', ' ');
     strcat(strm, field);
 
-    mvwprintw(input_win, 0, COLS - rescol - 14, "%s", strm);
+    mvwprintw(input_win, 0, COLS - sh->rescol - 14, "%s", strm);
     wrefresh(input_win);
 
     // Return cursor to previous position
@@ -680,6 +684,7 @@ void ui_print_mode() {
  * \return none
  */
 void ui_show_sc_row_headings(WINDOW * win, int nb_mobile_rows) {
+    struct sheet * sh = roman->cur_sh;
     #ifdef USECOLORS
     if (has_colors()) ui_set_ucolor(win, &ucolors[HEADINGS], DEFAULT_COLOR);
     #endif
@@ -689,31 +694,31 @@ void ui_show_sc_row_headings(WINDOW * win, int nb_mobile_rows) {
 
     int winrow = RESCOLHEADER;
     int mobile_rows = nb_mobile_rows;
-    int total_rows = nb_mobile_rows + nb_frozen_rows;
+    int total_rows = nb_mobile_rows + sh->nb_frozen_rows;
 
-    for (i = 0; i < maxrows && total_rows > 0; i++) {
-        if (row_hidden[i])
+    for (i = 0; i < sh->maxrows && total_rows > 0; i++) {
+        if (sh->row_hidden[i])
             continue;
-        if (! row_frozen[i]) {
-            if (i < offscr_sc_rows)
+        if (! sh->row_frozen[i]) {
+            if (i < sh->offscr_sc_rows)
                 continue;
             if (--mobile_rows < 0)
                 continue;
         }
         --total_rows;
 
-        if ( (s != NULL && i >= s->tlrow && i <= s->brrow) || i == currow ) {
+        if ( (s != NULL && i >= s->tlrow && i <= s->brrow) || i == sh->currow ) {
             #ifdef USECOLORS
             if (has_colors()) ui_set_ucolor(win, &ucolors[CELL_SELECTION], DEFAULT_COLOR);
             #else
             wattron(win, A_REVERSE);
             #endif
         }
-        mvwprintw (win, winrow, 0, "%*d ", rescol-1, i);
-        if (row_frozen[i]) mvwprintw (win, winrow, rescol-1, "!");
+        mvwprintw (win, winrow, 0, "%*d ", sh->rescol-1, i);
+        if (sh->row_frozen[i]) mvwprintw (win, winrow, sh->rescol-1, "!");
 
-        for (j = 1; j < row_format[i]; j++)
-            mvwprintw (win, winrow+j, 0, "%*c ", rescol-1, ' ');
+        for (j = 1; j < sh->row_format[i]; j++)
+            mvwprintw (win, winrow+j, 0, "%*c ", sh->rescol-1, ' ');
 
         #ifdef USECOLORS
         if (has_colors()) ui_set_ucolor(win, &ucolors[HEADINGS], DEFAULT_COLOR);
@@ -721,7 +726,7 @@ void ui_show_sc_row_headings(WINDOW * win, int nb_mobile_rows) {
         wattroff(win, A_REVERSE);
         #endif
 
-        winrow += row_format[i];
+        winrow += sh->row_format[i];
     }
 }
 
@@ -735,21 +740,22 @@ void ui_show_sc_row_headings(WINDOW * win, int nb_mobile_rows) {
  * \return none
  */
 void ui_show_sc_col_headings(WINDOW * win, int nb_mobile_cols) {
+    struct sheet * sh = roman->cur_sh;
     int i;
     srange * s = get_selected_range();
 
     wmove(win, 0, 0);
     wclrtoeol(win);
 
-    int wincol = rescol;
+    int wincol = sh->rescol;
     int mobile_cols = nb_mobile_cols;
-    int total_cols = nb_mobile_cols + nb_frozen_cols;
+    int total_cols = nb_mobile_cols + sh->nb_frozen_cols;
 
-    for (i = 0; i < maxcols && total_cols > 0; i++) {
-        if (col_hidden[i])
+    for (i = 0; i < sh->maxcols && total_cols > 0; i++) {
+        if (sh->col_hidden[i])
             continue;
-        if (! col_frozen[i]) {
-            if (i < offscr_sc_cols)
+        if (! sh->col_frozen[i]) {
+            if (i < sh->offscr_sc_cols)
                 continue;
             if (--mobile_cols < 0)
                 continue;
@@ -763,7 +769,7 @@ void ui_show_sc_col_headings(WINDOW * win, int nb_mobile_cols) {
             ui_set_ucolor(win, &ucolors[HEADINGS_ODD], DEFAULT_COLOR);
         #endif
 
-        if ( (s != NULL && i >= s->tlcol && i <= s->brcol) || i == curcol ) {
+        if ( (s != NULL && i >= s->tlcol && i <= s->brcol) || i == sh->curcol ) {
             #ifdef USECOLORS
             if (has_colors()) ui_set_ucolor(win, &ucolors[CELL_SELECTION], DEFAULT_COLOR);
             #else
@@ -773,10 +779,10 @@ void ui_show_sc_col_headings(WINDOW * win, int nb_mobile_cols) {
 
         char *a = coltoa(i);
         int l1 = (i < 26) ? 1 : 2;
-        int l2 = col_frozen[i] ? 1 : 0;
-        int f1 = (fwidth[i] - l1 - l2)/2 + l1;
-        int f2 = fwidth[i] - f1;
-        mvwprintw(win, 0, wincol, "%*s%*s", f1, a, -f2, col_frozen[i] ? "!" : "");
+        int l2 = sh->col_frozen[i] ? 1 : 0;
+        int f1 = (sh->fwidth[i] - l1 - l2)/2 + l1;
+        int f2 = sh->fwidth[i] - f1;
+        mvwprintw(win, 0, wincol, "%*s%*s", f1, a, -f2, sh->col_frozen[i] ? "!" : "");
 
         #ifdef USECOLORS
         if (has_colors() && i % 2 == 0)
@@ -787,7 +793,7 @@ void ui_show_sc_col_headings(WINDOW * win, int nb_mobile_cols) {
         wattroff(win, A_REVERSE);
         #endif
 
-        wincol += fwidth[i];
+        wincol += sh->fwidth[i];
     }
 }
 
@@ -802,6 +808,7 @@ void ui_show_sc_col_headings(WINDOW * win, int nb_mobile_cols) {
  * \return none
  */
 void ui_show_content(WINDOW * win, int nb_mobile_rows, int nb_mobile_cols) {
+    struct sheet * sh = roman->cur_sh;
     int row, col;
 
     srange * s = get_selected_range();
@@ -812,36 +819,36 @@ void ui_show_content(WINDOW * win, int nb_mobile_rows, int nb_mobile_cols) {
 
     int winrow = RESCOLHEADER;
     int mobile_rows = nb_mobile_rows;
-    int total_rows = nb_mobile_rows + nb_frozen_rows;
+    int total_rows = nb_mobile_rows + sh->nb_frozen_rows;
 
-    for (row = 0; row < maxrows && total_rows > 0; row++) {
-        if (row_hidden[row])
+    for (row = 0; row < sh->maxrows && total_rows > 0; row++) {
+        if (sh->row_hidden[row])
             continue;
-        if (! row_frozen[row]) {
-            if (row < offscr_sc_rows)
+        if (! sh->row_frozen[row]) {
+            if (row < sh->offscr_sc_rows)
                 continue;
             if (--mobile_rows < 0)
                 continue;
         }
         --total_rows;
 
-        int wincol = rescol;
+        int wincol = sh->rescol;
         int mobile_cols = nb_mobile_cols;
-        int total_cols = nb_mobile_cols + nb_frozen_cols;
+        int total_cols = nb_mobile_cols + sh->nb_frozen_cols;
 
-        for (col = 0; col < maxcols && total_cols > 0; col++) {
-            if (col_hidden[col])
+        for (col = 0; col < sh->maxcols && total_cols > 0; col++) {
+            if (sh->col_hidden[col])
                 continue;
-            if (! col_frozen[col]) {
-                if (col < offscr_sc_cols)
+            if (! sh->col_frozen[col]) {
+                if (col < sh->offscr_sc_cols)
                     continue;
                 if (--mobile_cols < 0)
                     continue;
             }
             --total_cols;
 
-            struct ent ** p = ATBL(tbl, row, col);
-            int fieldlen = fwidth[col];
+            struct ent ** p = ATBL(sh, sh->tbl, row, col);
+            int fieldlen = sh->fwidth[col];
 
             // Clean format
 #ifdef USECOLORS
@@ -868,7 +875,7 @@ void ui_show_content(WINDOW * win, int nb_mobile_rows, int nb_mobile_cols) {
             }
 
             // setup color for selected cell
-            if ((currow == row) && (curcol == col)) {
+            if ((sh->currow == row) && (sh->curcol == col)) {
 #ifdef USECOLORS
                     if (has_colors()) ui_set_ucolor(win, &ucolors[CELL_SELECTION_SC], ucolors[CELL_SELECTION_SC].bg != DEFAULT_COLOR ? DEFAULT_COLOR : col % 2 == 0 ? ucolors[GRID_EVEN].bg : ucolors[GRID_ODD].bg);
 #else
@@ -913,7 +920,7 @@ void ui_show_content(WINDOW * win, int nb_mobile_rows, int nb_mobile_cols) {
                 if (res == 0 || res == 1) {
                     strcpy(num, formated_s);
                 } else if (res == -1) {
-                    sprintf(num, "%.*f", precision[col], (*p)->v);
+                    sprintf(num, "%.*f", sh->precision[col], (*p)->v);
                 }
             }
 
@@ -944,7 +951,7 @@ void ui_show_content(WINDOW * win, int nb_mobile_rows, int nb_mobile_cols) {
             }
 
             // repaint a blank cell or range
-            if ( (currow == row && curcol == col) ||
+            if ( (sh->currow == row && sh->curcol == col) ||
                ( in_range && row >= ranges->tlrow && row <= ranges->brrow &&
                  col >= ranges->tlcol && col <= ranges->brcol ) ) {
 #ifdef USECOLORS
@@ -968,7 +975,7 @@ void ui_show_content(WINDOW * win, int nb_mobile_rows, int nb_mobile_cols) {
             wchar_t w;
             int i, j, k;
 
-            for (k=0; k < row_format[row]; k++) {
+            for (k=0; k < sh->row_format[row]; k++) {
                 for (i = 0; i < fieldlen; ) {
                     w = L' ';
                     j = mvwin_wchnstr (win, winrow+k, wincol+i, cht, 1);
@@ -989,7 +996,7 @@ void ui_show_content(WINDOW * win, int nb_mobile_rows, int nb_mobile_cols) {
                 //    else if get_conf_int("hide_number_from_combined"))
                 //        num[0]='\0';
                 // }
-                pad_and_align(text, num, fieldlen, align, (*p)->pad, out, row_format[row]);
+                pad_and_align(text, num, fieldlen, align, (*p)->pad, out, sh->row_format[row]);
 
 #ifdef USECOLORS
                 if (has_colors() && conf_underline_grid) {
@@ -1002,12 +1009,12 @@ void ui_show_content(WINDOW * win, int nb_mobile_rows, int nb_mobile_cols) {
  
                 if (!conf_truncate && !conf_overlap && conf_autowrap) {
                     // auto wrap
-                    int newheight = (wcslen(out) + fwidth[col] - 1) / fwidth[col];
-                    if (row_format[row] < newheight) row_format[row] = newheight;
+                    int newheight = (wcslen(out) + sh->fwidth[col] - 1) / sh->fwidth[col];
+                    if (sh->row_format[row] < newheight) sh->row_format[row] = newheight;
 
                     int k;
                     wchar_t *p_out = out;
-                    for (k = 0; k < row_format[row]; k++) {
+                    for (k = 0; k < sh->row_format[row]; k++) {
                         int eol = count_width_widestring(p_out, fieldlen);
                         wchar_t save = p_out[eol];
                         p_out[eol] = L'\0';
@@ -1016,12 +1023,12 @@ void ui_show_content(WINDOW * win, int nb_mobile_rows, int nb_mobile_cols) {
                         p_out += eol;
                     }
                 } else {
-                    row_format[row] = 1;
+                    sh->row_format[row] = 1;
                     mvwprintw(win, winrow, wincol, "%*ls", -fieldlen, out);
                 }
             }
 
-            if (currow == row && curcol == col) {
+            if (sh->currow == row && sh->curcol == col) {
                 curwinrow = winrow;
                 curwincol = wincol;
                 if (out[0] == L'\0') {
@@ -1042,7 +1049,7 @@ void ui_show_content(WINDOW * win, int nb_mobile_rows, int nb_mobile_cols) {
 
             wincol += fieldlen;
         }
-        winrow += row_format[row];
+        winrow += sh->row_format[row];
     }
 }
 
@@ -1102,6 +1109,7 @@ void ui_add_cell_detail(char * d, struct ent * p1) {
  * \return none
  */
 void ui_show_celldetails() {
+    struct sheet * sh = roman->cur_sh;
     char head[FBUFLEN];
     int il_pos = 0;
 
@@ -1109,7 +1117,7 @@ void ui_show_celldetails() {
     #ifdef USECOLORS
         ui_set_ucolor(input_win, &ucolors[CELL_ID], DEFAULT_COLOR);
     #endif
-    sprintf(head, "%s%d ", coltoa(curcol), currow);
+    sprintf(head, "%s%d ", coltoa(sh->curcol), sh->currow);
     mvwprintw(input_win, 0, 0, "%s", head);
     il_pos += strlen(head);
 
@@ -1118,7 +1126,7 @@ void ui_show_celldetails() {
         ui_set_ucolor(input_win, &ucolors[CELL_FORMAT], DEFAULT_COLOR);
     #endif
 
-    register struct ent *p1 = *ATBL(tbl, currow, curcol);
+    register struct ent *p1 = *ATBL(sh, sh->tbl, sh->currow, sh->curcol);
 
     // show padding
     if (p1 != NULL && p1->pad)
@@ -1130,7 +1138,7 @@ void ui_show_celldetails() {
     if ((p1) && p1->format)
         sprintf(head + strlen(head), "(%s) ", p1->format);
     else
-        sprintf(head + strlen(head), "(%d %d %d) ", fwidth[curcol], precision[curcol], realfmt[curcol]);
+        sprintf(head + strlen(head), "(%d %d %d) ", sh->fwidth[sh->curcol], sh->precision[sh->curcol], sh->realfmt[sh->curcol]);
     mvwprintw(input_win, 0, il_pos, "%s", head);
     il_pos += strlen(head);
 
@@ -1140,7 +1148,7 @@ void ui_show_celldetails() {
     #endif
     if (p1 && p1->expr) {
         linelim = 0;
-        editexp(currow, curcol);  /* set line to expr */
+        editexp(sh->currow, sh->curcol);  /* set line to expr */
         linelim = -1;
         sprintf(head, "[%.*s] ", FBUFLEN-4, line);
         mvwprintw(input_win, 0, il_pos, "%s", head);
@@ -1192,8 +1200,9 @@ void yyerror(char * err) {
  * \return -1 if there is no format in the cell
  */
 int ui_get_formated_value(struct ent ** p, int col, char * value) {
+    struct sheet * sh = roman->cur_sh;
     //char * cfmt = (*p)->format ? (*p)->format : NULL;
-    char * cfmt = (*p)->format ? (*p)->format : (realfmt[col] >= 0 && realfmt[col] < COLFORMATS && colformat[realfmt[col]] != NULL) ? colformat[realfmt[col]] : NULL;
+    char * cfmt = (*p)->format ? (*p)->format : (sh->realfmt[col] >= 0 && sh->realfmt[col] < COLFORMATS && colformat[sh->realfmt[col]] != NULL) ? colformat[sh->realfmt[col]] : NULL;
 
     if (cfmt) {
         if (*cfmt == 'd') {
@@ -1201,12 +1210,12 @@ int ui_get_formated_value(struct ent ** p, int col, char * value) {
             strftime(value, sizeof(char) * FBUFLEN, cfmt + 1, localtime(&v));
             return 0;
         } else {
-            format(cfmt, precision[col], (*p)->v, value, sizeof(char) * FBUFLEN);
+            format(cfmt, sh->precision[col], (*p)->v, value, sizeof(char) * FBUFLEN);
             return 1;
         }
     } else { // there is no format
         // FIXME: error with number and text in same cell and no overlap
-        engformat(realfmt[col], fwidth[col], precision[col], (*p)->v, value, sizeof(char) * FBUFLEN);
+        engformat(sh->realfmt[col], sh->fwidth[col], sh->precision[col], (*p)->v, value, sizeof(char) * FBUFLEN);
         ltrim(value, ' ');
         return 1;
     }
@@ -1356,11 +1365,11 @@ char * ui_query(char * initial_msg) {
 
     // curses is enabled
     int loading_o;
-    if (loading) {
-        loading_o=loading;
-        loading=0;
+    if (roman->loading) {
+        loading_o = roman->loading;
+        roman->loading = 0;
         ui_update(0);
-        loading=loading_o;
+        roman->loading = loading_o;
     }
     curs_set(1);
 
@@ -1541,6 +1550,7 @@ void ui_refresh_pad(int scroll) {
  */
 #ifdef MOUSE
 void ui_handle_mouse(MEVENT event) {
+    struct sheet * sh = roman->cur_sh;
     if (isendwin()) return;
 
     // if mode is not handled return
@@ -1552,9 +1562,9 @@ void ui_handle_mouse(MEVENT event) {
         event.bstate & BUTTON5_PRESSED)) { // scroll down
             int n = calc_mobile_rows(NULL);
             if (get_conf_int("half_page_scroll")) n = n / 2;
-            lastcol = curcol;
-            lastrow = currow;
-            currow = event.bstate & BUTTON5_PRESSED ? forw_row(n)->row : back_row(n)->row;
+            sh->lastcol = sh->curcol;
+            sh->lastrow = sh->currow;
+            sh->currow = event.bstate & BUTTON5_PRESSED ? forw_row(n)->row : back_row(n)->row;
             if (event.bstate & BUTTON5_PRESSED) scroll_down(n);
             else scroll_up(n);
             unselect_ranges();
@@ -1570,7 +1580,7 @@ void ui_handle_mouse(MEVENT event) {
     if (! (event.bstate & BUTTON1_CLICKED)) return;
 
     // get coordinates corresponding to the grid area
-    int c = event.x - rescol;
+    int c = event.x - sh->rescol;
     int r = event.y - RESROW + (get_conf_int("input_bar_bottom") ? 1 : -1);
 
     // if out of range return
@@ -1583,41 +1593,41 @@ void ui_handle_mouse(MEVENT event) {
     int scr_col = 0;
     int scr_row = 0;
 
-    for (i = 0; i < maxcols; i++) {
-        if (col_hidden[i])
+    for (i = 0; i < sh->maxcols; i++) {
+        if (sh->col_hidden[i])
             continue;
-        if (! col_frozen[i]) {
-            if (i < offscr_sc_cols)
+        if (! sh->col_frozen[i]) {
+            if (i < sh->offscr_sc_cols)
                 continue;
             if (--mobile_cols < 0)
                 continue;
         }
 
-        scr_col += fwidth[i];
+        scr_col += sh->fwidth[i];
         if (scr_col >= c + 1) break;
     }
 
     // same for rows
-    for (j = 0; j < maxrows; j++) {
-        if (row_hidden[j])
+    for (j = 0; j < sh->maxrows; j++) {
+        if (sh->row_hidden[j])
             continue;
-        if (! row_frozen[j]) {
-            if (j < offscr_sc_rows)
+        if (! sh->row_frozen[j]) {
+            if (j < sh->offscr_sc_rows)
                 continue;
             if (--mobile_rows < 0)
                 continue;
         }
 
-        scr_row += row_format[j];
+        scr_row += sh->row_format[j];
         if (scr_row >= r + 1) break;
     }
 
-    if (i >= maxcols || j >= maxrows) return;
+    if (i >= sh->maxcols || j >= sh->maxrows) return;
 
     // if in normal mode, change currow and curcol
     if (curmode == NORMAL_MODE) {
-        curcol = i;
-        currow = j;
+        sh->curcol = i;
+        sh->currow = j;
         unselect_ranges();
 
     // if in insert or command mode, we add the selected cell to inputbar

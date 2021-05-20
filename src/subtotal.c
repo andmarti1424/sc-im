@@ -63,6 +63,8 @@
 #include "xmalloc.h" // for scxfree
 */
 
+extern struct roman * roman;
+
 /**
  * \brief TODO  Document subtotal()
  *
@@ -83,18 +85,19 @@
  */
 
 int subtotal(int r, int c, int rf, int cf, int group_col, char * operation, int ope_col, int replace_subtotals) {
+    struct sheet * sh = roman->cur_sh;
     // check ope_col and group_col are valid
     if (ope_col < c || ope_col > cf || group_col < c || group_col > cf) return -1;
 
     // check if they are headers in first row
     struct ent * p, * q;
     int headers_in_first_row = 0;
-    if ((p = *ATBL(tbl, r, ope_col)) && p->label &&
-        (q = *ATBL(tbl, r+1, ope_col)) && ! q->label) headers_in_first_row=1;
+    if ((p = *ATBL(sh, sh->tbl, r, ope_col)) && p->label &&
+        (q = *ATBL(sh, sh->tbl, r+1, ope_col)) && ! q->label) headers_in_first_row=1;
 
     // group operation shall be done over text content !
     wchar_t cline [BUFFERSIZE];
-    p = *ATBL(tbl, r + headers_in_first_row, group_col);
+    p = *ATBL(sh, sh->tbl, r + headers_in_first_row, group_col);
     swprintf(cline, BUFFERSIZE, L"+$%s", coltoa(group_col));
 
     // sort the range
@@ -112,7 +115,7 @@ int subtotal(int r, int c, int rf, int cf, int group_col, char * operation, int 
     for (i=r+headers_in_first_row; i <= rf; i++) {
         is_subtotal_row=0;
         for (j=c; j<cf; j++) {
-            p = *ATBL(tbl, i, j);
+            p = *ATBL(sh, sh->tbl, i, j);
             if (p && p->label && p->label[0] == '+' && p->label[1] == '@') { is_subtotal_row=1; break; }
         }
         if (is_subtotal_row) {
@@ -129,8 +132,8 @@ int subtotal(int r, int c, int rf, int cf, int group_col, char * operation, int 
     wchar_t cmd[BUFFERSIZE];
     int row_start_range = r + headers_in_first_row;
     for (i=r+headers_in_first_row+1; i <= rf + new_rows + 1; i++) {
-        p = *ATBL(tbl, i-1, group_col);
-        q = *ATBL(tbl, i, group_col);
+        p = *ATBL(sh, sh->tbl, i-1, group_col);
+        q = *ATBL(sh, sh->tbl, i, group_col);
 
         // TODO ignore preexistance subtotals by default
 

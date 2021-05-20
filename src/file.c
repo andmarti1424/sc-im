@@ -87,24 +87,26 @@ extern pthread_t fthread;
 extern int pthread_exists;
 #endif
 
+extern struct roman * roman;
+
 /**
  * \brief Erase the database (tbl, etc.)
  *
  * \return none
  */
-void erasedb() {
+void erasedb(struct sheet * sheet) {
     int  r, c;
 
-    for (c = 0; c <= maxcol; c++) {
-        fwidth[c] = DEFWIDTH;
-        precision[c] = DEFPREC;
-        realfmt[c] = DEFREFMT;
+    for (c = 0; c <= sheet->maxcol; c++) {
+        sheet->fwidth[c] = DEFWIDTH;
+        sheet->precision[c] = DEFPREC;
+        sheet->realfmt[c] = DEFREFMT;
     }
 
-    for (r = 0; r <= maxrow; r++) {
-        row_format[r] = 1;
-        register struct ent ** pp = ATBL(tbl, r, 0);
-        for (c = 0; c++ <= maxcol; pp++)
+    for (r = 0; r <= sheet->maxrow; r++) {
+        sheet->row_format[r] = 1;
+        register struct ent ** pp = ATBL(sheet, sheet->tbl, r, 0);
+        for (c = 0; c++ <= sheet->maxcol; pp++)
             if (*pp != NULL) {
                 //(*pp)->next = freeents;    /* save [struct ent] for reuse */
                 //freeents = *pp;
@@ -119,18 +121,19 @@ void erasedb() {
         colformat[c] = NULL;
     }
 
-    maxrow = 0;
-    maxcol = 0;
+    sheet->maxrow = 0;
+    sheet->maxcol = 0;
 
     clean_range();
 
+    // take this out of here -->
     calc_order = BYROWS;
     prescale = 1.0;
-    tbl_style = 0;
-    optimize = 0;
-    currow = curcol = 0;
+    optimize = 0; // <----
 
-    *curfile = '\0';
+    sheet->currow = sheet->curcol = 0;
+
+    *curfile = '\0'; // take this out of here
 }
 
 /**
@@ -187,7 +190,7 @@ int file_exists(const char * fname) {
  * \return 0 if not modified; 1 if modified
  */
 int modcheck() {
-    if (modflg && ! get_conf_int("nocurses")) {
+    if (roman->modflg && ! get_conf_int("nocurses")) {
         sc_error("File not saved since last change. Add '!' to force");
         return(1);
     }
@@ -292,22 +295,22 @@ int savefile() {
 
     // treat csv
     } else if (strlen(curfile) > 4 && (! strcasecmp( & curfile[strlen(curfile)-4], ".csv"))) {
-        export_delim(curfile, get_delim("csv"), 0, 0, maxrow, maxcol, 1);
-        modflg = 0;
+        export_delim(curfile, get_delim("csv"), 0, 0, roman->cur_sh->maxrow, roman->cur_sh->maxcol, 1);
+        roman->modflg = 0;
         return 0;
 
     // treat tab
     } else if (strlen(curfile) > 4 && (! strcasecmp( & curfile[strlen(curfile)-4], ".tsv") ||
         ! strcasecmp( & curfile[strlen(curfile)-4], ".tab"))){
-        export_delim(curfile, '\t', 0, 0, maxrow, maxcol, 1);
-        modflg = 0;
+        export_delim(curfile, '\t', 0, 0, roman->cur_sh->maxrow, roman->cur_sh->maxcol, 1);
+        roman->modflg = 0;
         return 0;
 
     // treat markdown format
     } else if (strlen(curfile) > 3 && ( ! strcasecmp( & curfile[strlen(curfile)-3], ".md") ||
           ! strcasecmp( & curfile[strlen(curfile)-4], ".mkd"))){
-      export_markdown(curfile, 0, 0, maxrow, maxcol);
-      modflg = 0;
+      export_markdown(curfile, 0, 0, roman->cur_sh->maxrow, roman->cur_sh->maxcol);
+      roman->modflg = 0;
       return 0;
 
     // treat xlsx format
@@ -317,9 +320,9 @@ int savefile() {
         sc_error("XLSX export support not compiled in. Please save file in other extension.");
         return -1;
 #else
-        if (export_xlsx(curfile, 0, 0, maxrow, maxcol) == 0) {
+        if (export_xlsx(curfile, 0, 0, roman->cur_sh->maxrow, roman->cur_sh->maxcol) == 0) {
             sc_info("File \"%s\" written", curfile);
-            modflg = 0;
+            roman->modflg = 0;
         } else
             sc_error("File could not be saved");
         return 0;
@@ -327,11 +330,11 @@ int savefile() {
     }
 
     // save in sc format
-    if (writefile(curfile, 0, 0, maxrow, maxcol, 1) < 0) {
+    if (writefile(curfile, 0, 0, roman->cur_sh->maxrow, roman->cur_sh->maxcol, 1) < 0) {
         sc_error("File could not be saved");
         return -1;
     }
-    modflg = 0;
+    roman->modflg = 0;
     return 0;
 }
 
@@ -371,7 +374,7 @@ int writefile(char * fname, int r0, int c0, int rn, int cn, int verbose) {
 
     if (! pid) {
         (void) strcpy(curfile, save);
-        modflg = 0;
+        roman->modflg = 0;
         if (verbose) sc_info("File \"%s\" written", curfile);
     }
 
@@ -390,6 +393,7 @@ int writefile(char * fname, int r0, int c0, int rn, int cn, int verbose) {
  * \return none
  */
 void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
+    struct sheet * sh = roman->cur_sh;
     register struct ent **pp;
     int r, c;
 
@@ -401,18 +405,18 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
             (void) fprintf (f, "format %d = \"%s\"\n", c, colformat[c]);
 
     for (c = c0; c <= cn; c++)
-        if (fwidth[c] != DEFWIDTH || precision[c] != DEFPREC || realfmt[c] != DEFREFMT)
-            (void) fprintf (f, "format %s %d %d %d\n", coltoa(c), fwidth[c], precision[c], realfmt[c]);
+        if (sh->fwidth[c] != DEFWIDTH || sh->precision[c] != DEFPREC || sh->realfmt[c] != DEFREFMT)
+            (void) fprintf (f, "format %s %d %d %d\n", coltoa(c), sh->fwidth[c], sh->precision[c], sh->realfmt[c]);
 
     for (r = r0; r <= rn; r++)
-        if (row_format[r] != 1)
-            (void) fprintf (f, "format %d %d\n", r, row_format[r]);
+        if (sh->row_format[r] != 1)
+            (void) fprintf (f, "format %d %d\n", r, sh->row_format[r]);
 
     // new implementation of hidecol. group by ranges
     for (c = c0; c <= cn; c++) {
         int c_aux = c;
-        if ( col_hidden[c] && c <= maxcol && ( c == 0 || !col_hidden[c-1] )) {
-            while (c_aux <= maxcol && col_hidden[c_aux])
+        if ( sh->col_hidden[c] && c <= sh->maxcol && ( c == 0 || ! sh->col_hidden[c-1] )) {
+            while (c_aux <= sh->maxcol && sh->col_hidden[c_aux])
                 c_aux++;
             fprintf(f, "hidecol %s", coltoa(c));
             if (c_aux-1 != c) {
@@ -426,8 +430,8 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
     // new implementation of hiderow. group by ranges
     for (r = r0; r <= rn; r++) {
         int r_aux = r;
-        if ( row_hidden[r] && r <= maxrow && ( r == 0 || !row_hidden[r-1] )) {
-            while (r_aux <= maxrow && row_hidden[r_aux])
+        if ( sh->row_hidden[r] && r <= sh->maxrow && ( r == 0 || ! sh->row_hidden[r-1] )) {
+            while (r_aux <= sh->maxrow && sh->row_hidden[r_aux])
                 r_aux++;
             fprintf(f, "hiderow %d", r);
             if (r_aux-1 != r) {
@@ -441,8 +445,8 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
     // frozen cols. group by ranges
     for (c = c0; c <= cn; c++) {
         int c_aux = c;
-        if (col_frozen[c] && c <= maxcol && (c == 0 || ! col_frozen[c-1])) {
-            while (c_aux <= maxcol && col_frozen[c_aux]) c_aux++;
+        if (sh->col_frozen[c] && c <= sh->maxcol && (c == 0 || ! sh->col_frozen[c-1])) {
+            while (c_aux <= sh->maxcol && sh->col_frozen[c_aux]) c_aux++;
             fprintf(f, "freeze %s", coltoa(c));
             if (c_aux-1 != c) {
                 fprintf(f, ":%s\n", coltoa(c_aux-1));
@@ -455,8 +459,8 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
     // frozen rows. group by ranges
     for (r = r0; r <= rn; r++) {
         int r_aux = r;
-        if (row_frozen[r] && r <= maxrow && (r == 0 || ! row_frozen[r-1])) {
-            while (r_aux <= maxrow && row_frozen[r_aux]) r_aux++;
+        if (sh->row_frozen[r] && r <= sh->maxrow && (r == 0 || ! sh->row_frozen[r-1])) {
+            while (r_aux <= sh->maxrow && sh->row_frozen[r_aux]) r_aux++;
             fprintf(f, "freeze %d", r);
             if (r_aux-1 != r) {
                 fprintf(f, ":%d\n", r_aux-1);
@@ -473,7 +477,7 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
 
     struct custom_color * cc;
     for (r = r0; r <= rn; r++) {
-        pp = ATBL(tbl, r, c0);
+        pp = ATBL(sh, sh->tbl, r, c0);
         for (c = c0; c <= cn; c++, pp++)
             if (*pp) {
                 // Write ucolors
@@ -531,11 +535,11 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
                     int c_aux = c;
                     struct ucolor * u = (*pp)->ucolor;
                     struct ucolor * a = NULL;
-                    if ( c > 0 && *ATBL(tbl, r, c-1) != NULL)
-                         a = (*ATBL(tbl, r, c-1))->ucolor;
+                    if ( c > 0 && *ATBL(sh, sh->tbl, r, c-1) != NULL)
+                         a = (*ATBL(sh, sh->tbl, r, c-1))->ucolor;
 
-                    if ( *strcolor != '\0' && (u != NULL) && (c <= maxcol) && ( c == 0 || ( a == NULL ) || ( a != NULL && ! same_ucolor( a, u ) ))) {
-                        while (c_aux <= maxcol && *ATBL(tbl, r, c_aux) != NULL && same_ucolor( (*ATBL(tbl, r, c_aux))->ucolor, (*pp)->ucolor ))
+                    if ( *strcolor != '\0' && (u != NULL) && (c <= sh->maxcol) && ( c == 0 || ( a == NULL ) || ( a != NULL && ! same_ucolor( a, u ) ))) {
+                        while (c_aux <= sh->maxcol && *ATBL(sh, sh->tbl, r, c_aux) != NULL && same_ucolor( (*ATBL(sh, sh->tbl, r, c_aux))->ucolor, (*pp)->ucolor ))
                             c_aux++;
                         fprintf(f, "cellcolor %s%d", coltoa((*pp)->col), (*pp)->row);
                         if (c_aux-1 != (*pp)->col)
@@ -558,9 +562,9 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
                 //    (void) fprintf(f, "pad %d %s%d\n", (*pp)->pad, coltoa((*pp)->col), (*pp)->row);
                 // new implementation
                 int r_aux = r;
-                if ( (*pp)->pad  && r <= maxrow && ( r == 0 || (*ATBL(tbl, r-1, c) == NULL) ||
-                    (*ATBL(tbl, r-1, c) != NULL && ((*ATBL(tbl, r-1, c))->pad != (*pp)->pad)) )) {
-                    while (r_aux <= maxrow && *ATBL(tbl, r_aux, c) != NULL && (*pp)->pad == (*ATBL(tbl, r_aux, c))->pad )
+                if ( (*pp)->pad  && r <= sh->maxrow && ( r == 0 || (*ATBL(sh, sh->tbl, r-1, c) == NULL) ||
+                    (*ATBL(sh, sh->tbl, r-1, c) != NULL && ((*ATBL(sh, sh->tbl, r-1, c))->pad != (*pp)->pad)) )) {
+                    while (r_aux <= sh->maxrow && *ATBL(sh, sh->tbl, r_aux, c) != NULL && (*pp)->pad == (*ATBL(sh, sh->tbl, r_aux, c))->pad )
                         r_aux++;
                     fprintf(f, "pad %d %s%d", (*pp)->pad, coltoa((*pp)->col), (*pp)->row);
                     if (r_aux-1 != (*pp)->row)
@@ -574,7 +578,7 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
     // write locked cells
     // lock should be stored after any other command
     for (r = r0; r <= rn; r++) {
-        pp = ATBL(tbl, r, c0);
+        pp = ATBL(sh, sh->tbl, r, c0);
         for (c = c0; c <= cn; c++, pp++)
             if (*pp) {
                 // previous implementation
@@ -582,8 +586,8 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
                 //    (void) fprintf(f, "lock %s%d\n", coltoa((*pp)->col), (*pp)->row);
                 // new implementation
                 int c_aux = c;
-                if ( (*pp)->flags & is_locked && c <= maxcol && ( c == 0 || ( *ATBL(tbl, r, c-1) != NULL && ! ((*ATBL(tbl, r, c-1))->flags & is_locked) ) )) {
-                    while (c_aux <= maxcol && *ATBL(tbl, r, c_aux) != NULL && (*ATBL(tbl, r, c_aux))->flags & is_locked )
+                if ( (*pp)->flags & is_locked && c <= sh->maxcol && ( c == 0 || ( *ATBL(sh, sh->tbl, r, c-1) != NULL && ! ((*ATBL(sh, sh->tbl, r, c-1))->flags & is_locked) ) )) {
+                    while (c_aux <= sh->maxcol && *ATBL(sh, sh->tbl, r, c_aux) != NULL && (*ATBL(sh, sh->tbl, r, c_aux))->flags & is_locked )
                         c_aux++;
                     fprintf(f, "lock %s%d", coltoa((*pp)->col), (*pp)->row);
                     if (c_aux-1 != (*pp)->col)
@@ -599,7 +603,7 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
      * a single buffer that is overwritten on each call, so the first part
      * needs to be written to the file before making the second call.
      */
-    fprintf(f, "goto %s", v_name(currow, curcol));
+    fprintf(f, "goto %s", v_name(sh->currow, sh->curcol));
     //fprintf(f, " %s\n", v_name(strow, stcol));
     fprintf(f, "\n");
 }
@@ -668,24 +672,25 @@ void write_marks(register FILE *f) {
  * \return none
  */
 void write_cells(register FILE *f, int r0, int c0, int rn, int cn, int dr, int dc) {
+    struct sheet * sh = roman->cur_sh;
     register struct ent **pp;
     int r, c;
     //int r, c, mf;
     char *dpointptr;
 
-    //mf = modflg;
+    //mf = roman->modflg;
     if (dr != r0 || dc != c0) {
         //yank_area(r0, c0, rn, cn);
         rn += dr - r0;
         cn += dc - c0;
-        //rs = currow;
-        //cs = curcol;
-        currow = dr;
-        curcol = dc;
+        //rs = sh->currow;
+        //cs = sh->curcol;
+        sh->currow = dr;
+        sh->curcol = dc;
     }
     //if (Vopt) valueize_area(dr, dc, rn, cn);
     for (r = dr; r <= rn; r++) {
-        pp = ATBL(tbl, r, dc);
+        pp = ATBL(sh, sh->tbl, r, dc);
         for (c = dc; c <= cn; c++, pp++)
             if (*pp) {
                 if ((*pp)->label || (*pp)->flags & is_strexpr) {
@@ -717,7 +722,7 @@ void write_cells(register FILE *f, int r0, int c0, int rn, int cn, int dr, int d
                 }
             }
     }
-    //modflg = mf;
+    //roman->modflg = mf;
 }
 
 /**
@@ -731,16 +736,16 @@ void write_cells(register FILE *f, int r0, int c0, int rn, int cn, int dr, int d
  */
 sc_readfile_result readfile(char * fname, int eraseflg) {
     if (!strlen(fname)) return 0;
-    loading = 1;
+    roman->loading = 1;
 
 #ifdef AUTOBACKUP
     // Check if curfile is set and backup exists..
     if (str_in_str(fname, CONFIG_FILE) == -1 && strlen(curfile) &&
     backup_exists(curfile) && strcmp(fname, curfile)) {
-        if (modflg) {
+        if (roman->modflg) {
             // TODO - force load with '!' ??
             sc_error("There are changes unsaved. Cannot load file: %s", fname);
-            loading = 0;
+            roman->loading = 0;
             return SC_READFILE_ERROR;
         }
         remove_backup(curfile);
@@ -755,7 +760,7 @@ sc_readfile_result readfile(char * fname, int eraseflg) {
         switch (t) {
             case L'q':
             case L'Q':
-                loading = 0;
+                roman->loading = 0;
                 extern int shall_quit;
                 shall_quit = 1;
                 return SC_READFILE_ERROR;
@@ -795,9 +800,9 @@ sc_readfile_result readfile(char * fname, int eraseflg) {
         #else
         open_xlsx(fname, "UTF-8");
         strcpy(curfile, fname);
-        modflg = 0;
+        roman->modflg = 0;
         #endif
-        loading = 0;
+        roman->loading = 0;
         return SC_READFILE_SUCCESS;
 
     // If file is an ODS file, we import it
@@ -807,9 +812,9 @@ sc_readfile_result readfile(char * fname, int eraseflg) {
         #else
         open_ods(fname, "UTF-8");
         strcpy(curfile, fname);
-        modflg = 0;
+        roman->modflg = 0;
         #endif
-        loading = 0;
+        roman->loading = 0;
         return SC_READFILE_SUCCESS;
 
     // If file is an xls file, we import it
@@ -818,10 +823,10 @@ sc_readfile_result readfile(char * fname, int eraseflg) {
         sc_error("XLS import support not compiled in");
         #else
         open_xls(fname, "UTF-8");
-        modflg = 0;
+        roman->modflg = 0;
         strcpy(curfile, fname);
         #endif
-        loading = 0;
+        roman->loading = 0;
         return SC_READFILE_SUCCESS;
 
     // If file is an delimited text file, we import it
@@ -831,8 +836,8 @@ sc_readfile_result readfile(char * fname, int eraseflg) {
 
         import_csv(fname, get_delim(&fname[len-3])); // csv tsv tab txt delim import
         strcpy(curfile, fname);
-        modflg = 0;
-        loading = 0;
+        roman->modflg = 0;
+        roman->loading = 0;
         return SC_READFILE_SUCCESS;
 
     // If file is a markdown text file, we try to import it
@@ -841,13 +846,13 @@ sc_readfile_result readfile(char * fname, int eraseflg) {
 
       import_markdown(fname);
       strcpy(curfile, fname);
-      modflg = 0;
-      loading = 0;
+      roman->modflg = 0;
+      roman->loading = 0;
       return SC_READFILE_SUCCESS;
 
     } else {
         sc_info("\"%s\" is not a SC-IM compatible file", fname);
-        loading = 0;
+        roman->loading = 0;
         return SC_READFILE_ERROR;
     }
 
@@ -859,12 +864,12 @@ sc_readfile_result readfile(char * fname, int eraseflg) {
     (void) strcpy(save, fname);
     f = fopen(save, "r");
     if (f == NULL) {
-        loading = 0;
+        roman->loading = 0;
         strcpy(curfile, save);
         return SC_READFILE_DOESNTEXIST;
     } /* */
 
-    if (eraseflg) erasedb();
+    if (eraseflg) erasedb(roman->cur_sh);//TODO handle file
 
     while (! brokenpipe && fgets(line, sizeof(line), f)) {
         linelim = 0;
@@ -872,14 +877,14 @@ sc_readfile_result readfile(char * fname, int eraseflg) {
     }
     fclose(f);
 
-    loading = 0;
+    roman->loading = 0;
     linelim = -1;
     if (eraseflg) {
         cellassign = 0;
     }
     strcpy(curfile, save);
     EvalAll();
-    modflg = 0;
+    roman->modflg = 0;
     return SC_READFILE_SUCCESS;
 }
 
@@ -1053,8 +1058,7 @@ void print_options(FILE *f) {
             ! rndtoeven &&
             calc_order == BYROWS &&
             prescale == 1.0 &&
-            ! get_conf_int("external_functions") &&
-            tbl_style == 0
+            ! get_conf_int("external_functions")
        )
         return; // No reason to do this
 
@@ -1064,7 +1068,6 @@ void print_options(FILE *f) {
     if (calc_order != BYROWS ) (void) fprintf(f, " bycols");
     if (prescale != 1.0)       (void) fprintf(f, " prescale");
     if ( get_conf_int("external_functions") ) (void) fprintf(f, " external_functions");
-    if (tbl_style)             (void) fprintf(f, " tblstyle = %s", tbl_style == TBL ? "tbl" : tbl_style == LATEX ? "latex" : tbl_style == SLATEX ? "slatex" : tbl_style == TEX ? "tex" : tbl_style == FRAME ? "frame" : "0" );
     (void) fprintf(f, "\n");
 }
 
@@ -1116,8 +1119,7 @@ int import_csv(char * fname, char d) {
     // CSV file traversing
     while ( ! feof(f) && (fgets(line_in, sizeof(line_in), f) != NULL) ) {
         // show file loading progress
-        i++; // increase number of line;
-        if (i % 10 == 0 ) sc_info("loading line %d of %d", i, max_lines);
+        if (++i % 10 == 0 ) sc_info("loading line %d of %d", i, max_lines);
 
         // this hack is for importing file that have DOS eol
         int l = strlen(line_in);
@@ -1177,10 +1179,10 @@ int import_csv(char * fname, char d) {
         r++;
         if (r > MAXROWS - GROWAMT - 1 || c > ABSMAXCOLS - 1) break;
     }
-    maxrow = r-1;
-    maxcol = cf-1;
+    roman->cur_sh->maxrow = r-1;
+    roman->cur_sh->maxcol = cf-1;
 
-    auto_fit(0, maxcols, DEFWIDTH);
+    auto_fit(0, roman->cur_sh->maxcols, DEFWIDTH);
 
     fclose(f);
 
@@ -1337,14 +1339,14 @@ int import_markdown(char * fname) {
       }
     }
 
-    maxcol = cf-1;
+    roman->cur_sh->maxcol = cf-1;
     r++;
     if (r > MAXROWS - GROWAMT - 1 || c > ABSMAXCOLS - 1) break;
   }
-  maxrow = r-1;
-  maxcol = cf-1;
+  roman->cur_sh->maxrow = r-1;
+  roman->cur_sh->maxcol = cf-1;
 
-  auto_fit(0, maxcols, DEFWIDTH);
+  auto_fit(0, roman->cur_sh->maxcols, DEFWIDTH);
 
   fclose(f);
 
@@ -1485,12 +1487,12 @@ void export_markdown(char * fname, int r0, int c0, int rn, int cn) {
     int rowfmt;
 
     for (row = r0; row <= rn; row++) {
-        for (rowfmt=0; rowfmt<row_format[row]; rowfmt++) {
+        for (rowfmt=0; rowfmt < roman->cur_sh->row_format[row]; rowfmt++) {
 
             // ignore hidden rows
             //if (row_hidden[row]) continue;
 
-            for (pp = ATBL(tbl, row, col = c0); col <= cn; col++, pp++) {
+            for (pp = ATBL(roman->cur_sh, roman->cur_sh->tbl, row, col = c0); col <= cn; col++, pp++) {
                 // ignore hidden cols
                 //if (col_hidden[col]) continue;
 
@@ -1508,7 +1510,7 @@ void export_markdown(char * fname, int r0, int c0, int rn, int cn) {
                     } else {
                         strcat (dashline, "-");
                     }
-                    for (dash_num = 0; dash_num < fwidth[col]; dash_num++) {
+                    for (dash_num = 0; dash_num < roman->cur_sh->fwidth[col]; dash_num++) {
                         strcat (dashline, "-");
                     }
                     if(align >= 0) {
@@ -1535,7 +1537,7 @@ void export_markdown(char * fname, int r0, int c0, int rn, int cn) {
                         if (res == 0 || res == 1) {
                             strcpy(num, formated_s);
                         } else if (res == -1) {
-                            sprintf(num, "%.*f", precision[col], (*pp)->v);
+                            sprintf(num, "%.*f", roman->cur_sh->precision[col], (*pp)->v);
                         }
                     }
 
@@ -1553,18 +1555,18 @@ void export_markdown(char * fname, int r0, int c0, int rn, int cn) {
                     }
 
 
-                    pad_and_align (text, num, fwidth[col], align, 0, out, row_format[row]);
+                    pad_and_align (text, num, roman->cur_sh->fwidth[col], align, 0, out, roman->cur_sh->row_format[row]);
 
                     wchar_t new[wcslen(out)+1];
                     wcscpy(new, out);
-                    int cw = count_width_widestring(new, fwidth[col]);
+                    int cw = count_width_widestring(new, roman->cur_sh->fwidth[col]);
 
                     if (wcslen(new) > cw && rowfmt) {
                         int count_row = 0;
                         for (count_row = 0; count_row < rowfmt; count_row++) {
-                            cw = count_width_widestring(new, fwidth[col]);
+                            cw = count_width_widestring(new, roman->cur_sh->fwidth[col]);
                             if (cw) del_range_wchars(new, 0, cw-1);
-                            int whites = fwidth[col] - wcslen(new);
+                            int whites = roman->cur_sh->fwidth[col] - wcslen(new);
                             while (whites-- > 0) add_wchar(new, L' ', wcslen(new));
                         }
                         new[cw] = L'\0';
@@ -1573,10 +1575,10 @@ void export_markdown(char * fname, int r0, int c0, int rn, int cn) {
                         if (get_conf_int("truncate") || !get_conf_int("overlap")) new[cw] = L'\0';
                         fprintf (f, "%ls", new);
                     } else {
-                        fprintf (f, "%*s", fwidth[col], " ");
+                        fprintf (f, "%*s", roman->cur_sh->fwidth[col], " ");
                     }
                 } else {
-                    fprintf (f, "%*s", fwidth[col], " ");
+                    fprintf (f, "%*s", roman->cur_sh->fwidth[col], " ");
                 }
             }
             fprintf(f," |\n");
@@ -1635,12 +1637,12 @@ void export_plain(char * fname, int r0, int c0, int rn, int cn) {
     int rowfmt;
 
     for (row = r0; row <= rn; row++) {
-        for (rowfmt=0; rowfmt<row_format[row]; rowfmt++) {
+        for (rowfmt = 0; rowfmt < roman->cur_sh->row_format[row]; rowfmt++) {
 
             // ignore hidden rows
             //if (row_hidden[row]) continue;
 
-            for (pp = ATBL(tbl, row, col = c0); col <= cn; col++, pp++) {
+            for (pp = ATBL(roman->cur_sh, roman->cur_sh->tbl, row, col = c0); col <= cn; col++, pp++) {
                 // ignore hidden cols
                 //if (col_hidden[col]) continue;
 
@@ -1661,7 +1663,7 @@ void export_plain(char * fname, int r0, int c0, int rn, int cn) {
                         if (res == 0 || res == 1) {
                             strcpy(num, formated_s);
                         } else if (res == -1) {
-                            sprintf(num, "%.*f", precision[col], (*pp)->v);
+                            sprintf(num, "%.*f", roman->cur_sh->precision[col], (*pp)->v);
                         }
                     }
 
@@ -1678,18 +1680,18 @@ void export_plain(char * fname, int r0, int c0, int rn, int cn) {
                         }
                     }
 
-                    pad_and_align (text, num, fwidth[col], align, 0, out, row_format[row]);
+                    pad_and_align (text, num, roman->cur_sh->fwidth[col], align, 0, out, roman->cur_sh->row_format[row]);
 
                     wchar_t new[wcslen(out)+1];
                     wcscpy(new, out);
-                    int cw = count_width_widestring(new, fwidth[col]);
+                    int cw = count_width_widestring(new, roman->cur_sh->fwidth[col]);
 
                     if (wcslen(new) > cw && rowfmt) {
                         int count_row = 0;
                         for (count_row = 0; count_row < rowfmt; count_row++) {
-                            cw = count_width_widestring(new, fwidth[col]);
+                            cw = count_width_widestring(new, roman->cur_sh->fwidth[col]);
                             if (cw) del_range_wchars(new, 0, cw-1);
-                            int whites = fwidth[col] - wcslen(new);
+                            int whites = roman->cur_sh->fwidth[col] - wcslen(new);
                             while (whites-- > 0) add_wchar(new, L' ', wcslen(new));
                         }
                         new[cw] = L'\0';
@@ -1698,10 +1700,10 @@ void export_plain(char * fname, int r0, int c0, int rn, int cn) {
                         if (get_conf_int("truncate") || !get_conf_int("overlap")) new[cw] = L'\0';
                         fprintf (f, "%ls", new);
                     } else {
-                        fprintf (f, "%*s", fwidth[col], " ");
+                        fprintf (f, "%*s", roman->cur_sh->fwidth[col], " ");
                     }
                 } else {
-                    fprintf (f, "%*s", fwidth[col], " ");
+                    fprintf (f, "%*s", roman->cur_sh->fwidth[col], " ");
                 }
             }
             fprintf(f,"\n");
@@ -1745,23 +1747,23 @@ void export_latex(char * fname, int r0, int c0, int rn, int cn, int verbose) {
     fprintf(f, "}\n");
     char coldelim = '&';
     for (row=r0; row<=rn; row++) {
-        for (pp = ATBL(tbl, row, col=c0); col<=cn; col++, pp++) {
+        for (pp = ATBL(roman->cur_sh, roman->cur_sh->tbl, row, col=c0); col<=cn; col++, pp++) {
             if (*pp) {
                 char *s;
                 if ((*pp)->flags & is_valid) {
                     if ((*pp)->cellerror) {
-                        (void) fprintf (f, "%*s", fwidth[col], ((*pp)->cellerror == CELLERROR ? "ERROR" : "INVALID"));
+                        (void) fprintf (f, "%*s", roman->cur_sh->fwidth[col], ((*pp)->cellerror == CELLERROR ? "ERROR" : "INVALID"));
                     } else if ((*pp)->format) {
                         char field[FBUFLEN];
                         if (*((*pp)->format) == ctl('d')) {
                             time_t v = (time_t) ((*pp)->v);
                             strftime(field, sizeof(field), ((*pp)->format)+1, localtime(&v));
                         } else
-                            format((*pp)->format, precision[col], (*pp)->v, field, sizeof(field));
+                            format((*pp)->format, roman->cur_sh->precision[col], (*pp)->v, field, sizeof(field));
                         unspecial(f, field, coldelim);
                     } else {
                         char field[FBUFLEN];
-                        (void) engformat(realfmt[col], fwidth[col], precision[col], (*pp) -> v, field, sizeof(field));
+                        (void) engformat(roman->cur_sh->realfmt[col], roman->cur_sh->fwidth[col], roman->cur_sh->precision[col], (*pp) -> v, field, sizeof(field));
                         unspecial(f, field, coldelim);
                     }
                 }
@@ -1846,27 +1848,27 @@ void export_delim(char * fname, char coldelim, int r0, int c0, int rn, int cn, i
     }
 
     for (row = r0; row <= rn; row++) {
-        for (pp = ATBL(tbl, row, col = c0); col <= cn; col++, pp++) {
+        for (pp = ATBL(roman->cur_sh, roman->cur_sh->tbl, row, col = c0); col <= cn; col++, pp++) {
             int last_valid_col = right_limit(row)->col; // for issue #374
             if (col > last_valid_col) continue;
             if (*pp) {
                 char * s;
                 if ((*pp)->flags & is_valid) {
                     if ((*pp)->cellerror) {
-                        (void) fprintf (f, "%*s", fwidth[col], ((*pp)->cellerror == CELLERROR ? "ERROR" : "INVALID"));
+                        (void) fprintf (f, "%*s", roman->cur_sh->fwidth[col], ((*pp)->cellerror == CELLERROR ? "ERROR" : "INVALID"));
                     } else if ((*pp)->format) {
                         char field[FBUFLEN];
                         if (*((*pp)->format) == 'd') {  // Date format
                             time_t v = (time_t) ((*pp)->v);
                             strftime(field, sizeof(field), ((*pp)->format)+1, localtime(&v));
                         } else {                        // Numeric format
-                            format((*pp)->format, precision[col], (*pp)->v, field, sizeof(field));
+                            format((*pp)->format, roman->cur_sh->precision[col], (*pp)->v, field, sizeof(field));
                         }
                         ltrim(field, ' ');
                         unspecial(f, field, coldelim);
                     } else { //eng number format
                         char field[FBUFLEN] = "";
-                        (void) engformat(realfmt[col], fwidth[col], precision[col], (*pp)->v, field, sizeof(field));
+                        (void) engformat(roman->cur_sh->realfmt[col], roman->cur_sh->fwidth[col], roman->cur_sh->precision[col], (*pp)->v, field, sizeof(field));
                         ltrim(field, ' ');
                         unspecial(f, field, coldelim);
                     }
@@ -2001,8 +2003,8 @@ int plugin_exists(char * name, int len, char * path) {
  */
 void * do_autobackup() {
     int len = strlen(curfile);
-    //if (loading || ! len) return (void *) -1;
-    //if (! len || ! modflg) return (void *) -1;
+    //if (roman->loading || ! len) return (void *) -1;
+    //if (! len || ! roman->modflg) return (void *) -1;
     if (! len) return (void *) -1;
 
     char * pstr = strrchr(curfile, '/');
@@ -2019,17 +2021,17 @@ void * do_autobackup() {
     if (! strcmp(&name[strlen(name)-7], ".sc.bak")) {
         register FILE * f;
         if ((f = fopen(namenew , "w")) == NULL) return (void *) -1;
-        write_fd(f, 0, 0, maxrow, maxcol);
+        write_fd(f, 0, 0, roman->cur_sh->maxrow, roman->cur_sh->maxcol);
         fclose(f);
     } else if (! strcmp(&name[strlen(name)-8], ".csv.bak")) {
-        export_delim(namenew, get_delim("csv"), 1, 0, maxrow, maxcol, 0);
+        export_delim(namenew, get_delim("csv"), 1, 0, roman->cur_sh->maxrow, roman->cur_sh->maxcol, 0);
 #ifdef XLSX_EXPORT
     } else if (! strcmp(&name[strlen(name)-9], ".xlsx.bak")) {
-        export_delim(namenew, ',', 0, 0, maxrow, maxcol, 0);
-        export_xlsx(namenew, 0, 0, maxrow, maxcol);
+        export_delim(namenew, ',', 0, 0, roman->cur_sh->maxrow, roman->cur_sh->maxcol, 0);
+        export_xlsx(namenew, 0, 0, roman->cur_sh->maxrow, roman->cur_sh->maxcol);
 #endif
     } else if (! strcmp(&name[strlen(name)-8], ".tab.bak") || ! strcmp(&name[strlen(name)-8], ".tsv.bak")) {
-        export_delim(namenew, '\t', 0, 0, maxrow, maxcol, 0);
+        export_delim(namenew, '\t', 0, 0, roman->cur_sh->maxrow, roman->cur_sh->maxcol, 0);
     }
 
     // delete if exists name
@@ -2127,7 +2129,7 @@ void openfile_nested(char * file) {
  */
 void openfile_under_cursor(int r, int c) {
     register struct ent ** pp;
-    pp = ATBL(tbl, r, c);
+    pp = ATBL(roman->cur_sh, roman->cur_sh->tbl, r, c);
     if (*pp && (*pp)->label) {
         char text[FBUFLEN] = "";
         strcpy(text, (*pp)->label);

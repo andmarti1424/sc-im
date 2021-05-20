@@ -150,6 +150,8 @@
 #include "shift.h"
 #include "dep_graph.h"
 
+extern struct roman * roman;
+
 // undolist
 static struct undo * undo_list = NULL;
 
@@ -208,7 +210,7 @@ void end_undo_action() {
         undo_item.row_frozed  == NULL && undo_item.col_frozed  == NULL &&
         undo_item.row_unfrozed  == NULL && undo_item.col_unfrozed  == NULL &&
         undo_item.cols_format == NULL && undo_item.rows_format == NULL &&
-        undo_item.col_hidded  == NULL && undo_item.col_showed  == NULL) || loading) {
+        undo_item.col_hidded  == NULL && undo_item.col_showed  == NULL) || roman->loading) {
         if (undo_list->p_ant != NULL) undo_list = undo_list->p_ant;
         undo_list_pos--;
         clear_from_current_pos();
@@ -271,6 +273,7 @@ void add_to_undolist(struct undo u) {
     return;
 }
 
+
 /**
  * \brief Dismiss current undo_item
  *
@@ -284,7 +287,6 @@ void add_to_undolist(struct undo u) {
  *
  * \return none
  */
-
 void dismiss_undo_item(struct undo * ul) {
 
     if (ul == NULL) ul = &undo_item;
@@ -321,21 +323,21 @@ void dismiss_undo_item(struct undo * ul) {
     free(ul->allocations);
     ul->allocations = NULL;
 
-    if (ul->range_shift != NULL) free(ul->range_shift); // Free undo_range_shift memory
-    if (ul->cols_format != NULL) {                      // Free cols_format memory
+    if (ul->range_shift != NULL) free(ul->range_shift);    // Free undo_range_shift memory
+    if (ul->cols_format != NULL) {                         // Free cols_format memory
         free(ul->cols_format->cols);
         free(ul->cols_format);
     }
-    if (ul->rows_format != NULL) {                      // Free rows_format memory
+    if (ul->rows_format != NULL) {                         // Free rows_format memory
         free(ul->rows_format->rows);
         free(ul->rows_format);
     }
-    if (ul->row_hidded  != NULL) free(ul->row_hidded); // Free hidden row memory
-    if (ul->col_hidded  != NULL) free(ul->col_hidded); // Free hidden col memory
-    if (ul->row_showed  != NULL) free(ul->row_showed); // Free showed row memory
-    if (ul->row_frozed  != NULL) free(ul->row_frozed); // Free frozed row memory
-    if (ul->col_showed  != NULL) free(ul->col_showed); // Free showed col memory
-    if (ul->col_frozed  != NULL) free(ul->col_frozed); // Free frozed col memory
+    if (ul->row_hidded  != NULL) free(ul->row_hidded);     // Free hidden row memory
+    if (ul->col_hidded  != NULL) free(ul->col_hidded);     // Free hidden col memory
+    if (ul->row_showed  != NULL) free(ul->row_showed);     // Free showed row memory
+    if (ul->row_frozed  != NULL) free(ul->row_frozed);     // Free frozed row memory
+    if (ul->col_showed  != NULL) free(ul->col_showed);     // Free showed col memory
+    if (ul->col_frozed  != NULL) free(ul->col_frozed);     // Free frozed col memory
     if (ul->row_unfrozed  != NULL) free(ul->row_unfrozed); // Free unfrozed row memory
     if (ul->col_unfrozed  != NULL) free(ul->col_unfrozed); // Free unfrozed col memory
 
@@ -436,6 +438,7 @@ int len_undo_list() {
  */
 
 void copy_to_undostruct (int ri, int ci, int rf, int cf, char type, short handle_deps, struct ent ** destination) {
+    struct sheet * sh = roman->cur_sh;
     int i, c, r;
     struct ent * p;
     extern struct ent_ptr * deps;
@@ -456,7 +459,7 @@ void copy_to_undostruct (int ri, int ci, int rf, int cf, char type, short handle
 
     for (r = ri; r <= rf; r++)
         for (c = ci; c <= cf; c++) {
-            p = *ATBL(tbl, r, c);
+            p = *ATBL(sh, sh->tbl, r, c);
             if (p == NULL) continue;
 
             // initialize the 'ent'
@@ -478,7 +481,7 @@ void copy_to_undostruct (int ri, int ci, int rf, int cf, char type, short handle
              */
 
             // Copy cell at 'r, c' contents to 'y_cells' ent
-            copyent(y_cells, lookat(r, c), 0, 0, 0, 0, 0, 0, 'u');
+            copyent(y_cells, lookat(sh, r, c), 0, 0, 0, 0, 0, 0, 'u');
 
             // Append 'ent' element at the beginning
             if (type == UNDO_ADD) {
@@ -497,14 +500,14 @@ void copy_to_undostruct (int ri, int ci, int rf, int cf, char type, short handle
     // do the same for dependencies
     if (handle_deps == HANDLE_DEPS)
         for (i = 0; deps != NULL && i < deps->vf; i++) {
-            p = *ATBL(tbl, deps[i].vp->row, deps[i].vp->col);
+            p = *ATBL(sh, sh->tbl, deps[i].vp->row, deps[i].vp->col);
             if (p == NULL) continue;
 
             // initialize the 'ent'
             cleanent(y_cells);
 
             // Copy cell at deps[i].vp->row, deps[i].vp->col contents to 'y_cells' ent
-            copyent(y_cells, lookat(deps[i].vp->row, deps[i].vp->col), 0, 0, 0, 0, 0, 0, 'u');
+            copyent(y_cells, lookat(sh, deps[i].vp->row, deps[i].vp->col), 0, 0, 0, 0, 0, 0, 'u');
 
             // Append 'ent' element at the beginning
             if (type == UNDO_ADD) {
@@ -816,23 +819,23 @@ void undo_freeze_unfreeze(int row, int col, char type, int arg) {
  *
  * \return none
  */
-
 void do_undo() {
+    struct sheet * sh = roman->cur_sh;
     if (undo_list == NULL || undo_list_pos == 0) {
         sc_error("No UNDO's left.");
         return;
     }
 
-    int ori_currow = currow;
-    int ori_curcol = curcol;
-    int mf = modflg; // save modflag status
+    int ori_currow = sh->currow;
+    int ori_curcol = sh->curcol;
+    int mf = roman->modflg; // save modflag status
 
     struct undo * ul = undo_list;
 
     // removed added ents
     struct ent * i = ul->added;
     while (i != NULL) {
-        struct ent * pp = *ATBL(tbl, i->row, i->col);
+        struct ent * pp = *ATBL(sh, sh->tbl, i->row, i->col);
         clearent(pp);
         cleanent(pp);
         i = i->next;
@@ -842,57 +845,57 @@ void do_undo() {
     if (ul->range_shift != NULL) {
         // fix marks for rows
         if (ul->range_shift->delta_rows > 0)      // sj
-            fix_marks(-(ul->range_shift->brrow - ul->range_shift->tlrow + 1), 0, ul->range_shift->tlrow, maxrow, ul->range_shift->tlcol, ul->range_shift->brcol);
+            fix_marks(-(ul->range_shift->brrow - ul->range_shift->tlrow + 1), 0, ul->range_shift->tlrow, sh->maxrow, ul->range_shift->tlcol, ul->range_shift->brcol);
         else if (ul->range_shift->delta_rows < 0) // sk
-            fix_marks( (ul->range_shift->brrow - ul->range_shift->tlrow + 1), 0, ul->range_shift->tlrow, maxrow, ul->range_shift->tlcol, ul->range_shift->brcol);
+            fix_marks( (ul->range_shift->brrow - ul->range_shift->tlrow + 1), 0, ul->range_shift->tlrow, sh->maxrow, ul->range_shift->tlcol, ul->range_shift->brcol);
 
         // handle row_hidden
-        fix_row_hidden(ul->range_shift->delta_rows, ul->range_shift->tlrow, maxrow);
+        fix_row_hidden(ul->range_shift->delta_rows, ul->range_shift->tlrow, sh->maxrow);
 
         // fix marks for cols
         if (ul->range_shift->delta_cols > 0)      // sl
-            fix_marks(0, -(ul->range_shift->brcol - ul->range_shift->tlcol + 1), ul->range_shift->tlrow, ul->range_shift->brrow, ul->range_shift->tlcol, maxcol);
+            fix_marks(0, -(ul->range_shift->brcol - ul->range_shift->tlcol + 1), ul->range_shift->tlrow, ul->range_shift->brrow, ul->range_shift->tlcol, sh->maxcol);
         else if (ul->range_shift->delta_cols < 0) // sh
-            fix_marks(0,  (ul->range_shift->brcol - ul->range_shift->tlcol + 1), ul->range_shift->tlrow, ul->range_shift->brrow, ul->range_shift->tlcol, maxcol);
+            fix_marks(0,  (ul->range_shift->brcol - ul->range_shift->tlcol + 1), ul->range_shift->tlrow, ul->range_shift->brrow, ul->range_shift->tlcol, sh->maxcol);
 
         // handle col_hidden
-        fix_col_hidden(ul->range_shift->delta_cols, ul->range_shift->tlcol, maxcol);
+        fix_col_hidden(ul->range_shift->delta_cols, ul->range_shift->tlcol, sh->maxcol);
 
         // handle row_frozen
-        fix_row_frozen(ul->range_shift->delta_rows, ul->range_shift->tlrow, maxrow);
+        fix_row_frozen(ul->range_shift->delta_rows, ul->range_shift->tlrow, sh->maxrow);
 
         // handle col_frozen
-        fix_col_frozen(ul->range_shift->delta_cols, ul->range_shift->tlcol, maxcol);
+        fix_col_frozen(ul->range_shift->delta_cols, ul->range_shift->tlcol, sh->maxcol);
 
         // shift range now
         shift_range(- ul->range_shift->delta_rows, - ul->range_shift->delta_cols,
             ul->range_shift->tlrow, ul->range_shift->tlcol, ul->range_shift->brrow, ul->range_shift->brcol);
 
         // shift col_formats here.
-        if (ul->range_shift->tlcol >= 0 && ul->range_shift->tlrow == 0 && ul->range_shift->brrow == maxrow) { // && ul->range_shift->delta_cols > 0) {
+        if (ul->range_shift->tlcol >= 0 && ul->range_shift->tlrow == 0 && ul->range_shift->brrow == sh->maxrow) { // && ul->range_shift->delta_cols > 0) {
             int i;
             if (ul->range_shift->delta_cols > 0)
-            for (i = ul->range_shift->brcol + ul->range_shift->delta_cols; i <= maxcol; i++) {
-                fwidth[i - ul->range_shift->delta_cols] = fwidth[i];
-                precision[i - ul->range_shift->delta_cols] = precision[i];
-                realfmt[i - ul->range_shift->delta_cols] = realfmt[i];
+            for (i = ul->range_shift->brcol + ul->range_shift->delta_cols; i <= sh->maxcol; i++) {
+                sh->fwidth[i - ul->range_shift->delta_cols] = sh->fwidth[i];
+                sh->precision[i - ul->range_shift->delta_cols] = sh->precision[i];
+                sh->realfmt[i - ul->range_shift->delta_cols] = sh->realfmt[i];
             }
             else
-            for (i = maxcol; i >= ul->range_shift->tlcol - ul->range_shift->delta_cols; i--) {
-                 fwidth[i] = fwidth[i + ul->range_shift->delta_cols];
-                 precision[i] = precision[i + ul->range_shift->delta_cols];
-                 realfmt[i] = realfmt[i + ul->range_shift->delta_cols];
+            for (i = sh->maxcol; i >= ul->range_shift->tlcol - ul->range_shift->delta_cols; i--) {
+                 sh->fwidth[i] = sh->fwidth[i + ul->range_shift->delta_cols];
+                 sh->precision[i] = sh->precision[i + ul->range_shift->delta_cols];
+                 sh->realfmt[i] = sh->realfmt[i + ul->range_shift->delta_cols];
             }
         }
         // do the same for rows here.
-        if (ul->range_shift->tlrow >= 0 && ul->range_shift->tlcol == 0 && ul->range_shift->brcol == maxcol) { // && ul->range_shift->delta_rows > 0) {
+        if (ul->range_shift->tlrow >= 0 && ul->range_shift->tlcol == 0 && ul->range_shift->brcol == sh->maxcol) { // && ul->range_shift->delta_rows > 0) {
             int i;
             if (ul->range_shift->delta_rows > 0)
-                for (i = ul->range_shift->brrow + ul->range_shift->delta_rows; i <= maxrow; i++)
-                    row_format[i - ul->range_shift->delta_rows] = row_format[i];
+                for (i = ul->range_shift->brrow + ul->range_shift->delta_rows; i <= sh->maxrow; i++)
+                    sh->row_format[i - ul->range_shift->delta_rows] = sh->row_format[i];
             else
-                for (i = maxrow; i >= ul->range_shift->tlrow - ul->range_shift->delta_rows; i--)
-                    row_format[i] = row_format[i + ul->range_shift->delta_rows];
+                for (i = sh->maxrow; i >= ul->range_shift->tlrow - ul->range_shift->delta_rows; i--)
+                    sh->row_format[i] = sh->row_format[i + ul->range_shift->delta_rows];
         }
     }
 
@@ -906,8 +909,8 @@ void do_undo() {
     struct ent * j = ul->removed;
     while (j != NULL) {
         struct ent * h;
-        if ((h = *ATBL(tbl, j->row, j->col))) clearent(h);
-        struct ent * e_now = lookat(j->row, j->col);
+        if ((h = *ATBL(sh, sh->tbl, j->row, j->col))) clearent(h);
+        struct ent * e_now = lookat(sh, j->row, j->col);
         (void) copyent(e_now, j, 0, 0, 0, 0, 0, 0, 0);
         j = j->next;
     }
@@ -918,28 +921,28 @@ void do_undo() {
         int * pd = ul->col_hidded;
         int left = *(pd++);
         while (left--) {
-            col_hidden[*(pd++)] = FALSE;
+            sh->col_hidden[*(pd++)] = FALSE;
         }
     }
     else if (ul->col_showed  != NULL) {
         int * pd = ul->col_showed;
         int left = *(pd++);
         while (left--) {
-            col_hidden[*(pd++)] = TRUE;
+            sh->col_hidden[*(pd++)] = TRUE;
         }
     }
     else if (ul->row_hidded  != NULL) {
         int * pd = ul->row_hidded;
         int left = *(pd++);
         while (left--) {
-            row_hidden[*(pd++)] = FALSE;
+            sh->row_hidden[*(pd++)] = FALSE;
         }
     }
     else if (ul->row_showed  != NULL) {
         int * pd = ul->row_showed;
         int left = *(pd++);
         while (left--) {
-            row_hidden[*(pd++)] = TRUE;
+            sh->row_hidden[*(pd++)] = TRUE;
         }
     }
 
@@ -949,28 +952,28 @@ void do_undo() {
         int * pd = ul->col_unfrozed;
         int left = *(pd++);
         while (left--) {
-            col_frozen[*(pd++)] = TRUE;
+            sh->col_frozen[*(pd++)] = TRUE;
         }
     }
-    if (ul->col_frozed  != NULL) {
+    if (ul->col_frozed != NULL) {
         int * pd = ul->col_frozed;
         int left = *(pd++);
         while (left--) {
-            col_frozen[*(pd++)] = FALSE;
+            sh->col_frozen[*(pd++)] = FALSE;
         }
     }
     if (ul->row_unfrozed  != NULL) {
         int * pd = ul->row_unfrozed;
         int left = *(pd++);
         while (left--) {
-            row_frozen[*(pd++)] = TRUE;
+            sh->row_frozen[*(pd++)] = TRUE;
         }
     }
     if (ul->row_frozed  != NULL) {
         int * pd = ul->row_frozed;
         int left = *(pd++);
         while (left--) {
-            row_frozen[*(pd++)] = FALSE;
+            sh->row_frozen[*(pd++)] = FALSE;
         }
     }
 
@@ -982,9 +985,9 @@ void do_undo() {
 
         for (i=0; i < size; i++) {
            if (uf->cols[i].type == 'R') {
-               fwidth[uf->cols[i].col]    = uf->cols[i].fwidth;
-               precision[uf->cols[i].col] = uf->cols[i].precision;
-               realfmt[uf->cols[i].col]   = uf->cols[i].realfmt;
+               sh->fwidth[uf->cols[i].col]    = uf->cols[i].fwidth;
+               sh->precision[uf->cols[i].col] = uf->cols[i].precision;
+               sh->realfmt[uf->cols[i].col]   = uf->cols[i].realfmt;
            }
         }
     }
@@ -997,7 +1000,7 @@ void do_undo() {
 
         for (i=0; i < size; i++) {
            if (uf->rows[i].type == 'R') {
-               row_format[uf->rows[i].row] = uf->rows[i].format;
+               sh->row_format[uf->rows[i].row] = uf->rows[i].format;
            }
         }
     }
@@ -1006,24 +1009,24 @@ void do_undo() {
     struct ent * ie = ul->added;
     while (ie != NULL) {
         struct ent * p;
-        if ((p = *ATBL(tbl, ie->row, ie->col)) && p->expr)
+        if ((p = *ATBL(sh, sh->tbl, ie->row, ie->col)) && p->expr)
             EvalJustOneVertex(p, 1);
         ie = ie->next;
     }
     ie = ul->removed;
     while (ie != NULL) {
         struct ent * p;
-        if ((p = *ATBL(tbl, ie->row, ie->col)) && p->expr)
+        if ((p = *ATBL(sh, sh->tbl, ie->row, ie->col)) && p->expr)
             EvalJustOneVertex(p, 1);
         ie = ie->next;
     }
 
     // Restores cursor position
-    currow = ori_currow;
-    curcol = ori_curcol;
+    sh->currow = ori_currow;
+    sh->curcol = ori_curcol;
 
     // decrease modflg
-    modflg = mf - 1;
+    roman->modflg = mf - 1;
 
     if (undo_list->p_ant != NULL) undo_list = undo_list->p_ant;
     sc_info("Change: %d of %d", --undo_list_pos, len_undo_list());
@@ -1040,6 +1043,7 @@ void do_undo() {
  */
 
 void do_redo() {
+    struct sheet * sh = roman->cur_sh;
     //FIXME check why undo_list_pos can sometimes be > len_undo_list(). it shouldnt!!
     //if ( undo_list == NULL || undo_list_pos >= len_undo_list()  ) {
     if ( undo_list == NULL || undo_list_pos == len_undo_list()  ) {
@@ -1047,9 +1051,9 @@ void do_redo() {
         return;
     }
 
-    int ori_currow = currow;
-    int ori_curcol = curcol;
-    int mf = modflg; // save modflag status
+    int ori_currow = sh->currow;
+    int ori_curcol = sh->curcol;
+    int mf = roman->modflg; // save modflag status
 
     //if (undo_list->p_ant == NULL && undo_list_pos == 0);
     //else if (undo_list->p_sig != NULL) undo_list = undo_list->p_sig;
@@ -1061,7 +1065,7 @@ void do_redo() {
     // Remove 'ent' elements
     struct ent * i = ul->removed;
     while (i != NULL) {
-        struct ent * pp = *ATBL(tbl, i->row, i->col);
+        struct ent * pp = *ATBL(sh, sh->tbl, i->row, i->col);
         clearent(pp);
         cleanent(pp);
         i = i->next;
@@ -1071,51 +1075,51 @@ void do_redo() {
     if (ul->range_shift != NULL) {
         // fix marks for rows
         if (ul->range_shift->delta_rows > 0)      // sj
-            fix_marks( (ul->range_shift->brrow - ul->range_shift->tlrow + 1), 0, ul->range_shift->tlrow, maxrow, ul->range_shift->tlcol, ul->range_shift->brcol);
+            fix_marks( (ul->range_shift->brrow - ul->range_shift->tlrow + 1), 0, ul->range_shift->tlrow, sh->maxrow, ul->range_shift->tlcol, ul->range_shift->brcol);
         else if (ul->range_shift->delta_rows < 0) // sk
-            fix_marks(-(ul->range_shift->brrow - ul->range_shift->tlrow + 1), 0, ul->range_shift->tlrow, maxrow, ul->range_shift->tlcol, ul->range_shift->brcol);
+            fix_marks(-(ul->range_shift->brrow - ul->range_shift->tlrow + 1), 0, ul->range_shift->tlrow, sh->maxrow, ul->range_shift->tlcol, ul->range_shift->brcol);
 
         // handle row_hidden
-        fix_row_hidden(-ul->range_shift->delta_rows, ul->range_shift->tlrow, maxrow);
+        fix_row_hidden(-ul->range_shift->delta_rows, ul->range_shift->tlrow, sh->maxrow);
 
         // fix marks for cols
         if (ul->range_shift->delta_cols > 0)      // sl
-            fix_marks(0,  (ul->range_shift->brcol - ul->range_shift->tlcol + 1), ul->range_shift->tlrow, ul->range_shift->brrow, ul->range_shift->tlcol, maxcol);
+            fix_marks(0,  (ul->range_shift->brcol - ul->range_shift->tlcol + 1), ul->range_shift->tlrow, ul->range_shift->brrow, ul->range_shift->tlcol, sh->maxcol);
         else if (ul->range_shift->delta_cols < 0) // sh
-            fix_marks(0, -(ul->range_shift->brcol - ul->range_shift->tlcol + 1), ul->range_shift->tlrow, ul->range_shift->brrow, ul->range_shift->tlcol, maxcol);
+            fix_marks(0, -(ul->range_shift->brcol - ul->range_shift->tlcol + 1), ul->range_shift->tlrow, ul->range_shift->brrow, ul->range_shift->tlcol, sh->maxcol);
 
         // handle col_hidden
-        fix_col_hidden(-ul->range_shift->delta_cols, ul->range_shift->tlcol, maxcol);
+        fix_col_hidden(-ul->range_shift->delta_cols, ul->range_shift->tlcol, sh->maxcol);
 
         // shift range now
         shift_range(ul->range_shift->delta_rows, ul->range_shift->delta_cols,
             ul->range_shift->tlrow, ul->range_shift->tlcol, ul->range_shift->brrow, ul->range_shift->brcol);
 
         // shift col_formats here
-        if (ul->range_shift->tlcol >= 0 && ul->range_shift->tlrow == 0 && ul->range_shift->brrow == maxrow) {
+        if (ul->range_shift->tlcol >= 0 && ul->range_shift->tlrow == 0 && ul->range_shift->brrow == sh->maxrow) {
             int i;
             if (ul->range_shift->delta_cols > 0)
-            for (i = maxcol; i >= ul->range_shift->tlcol + ul->range_shift->delta_cols; i--) {
-                fwidth[i] = fwidth[i - ul->range_shift->delta_cols];
-                precision[i] = precision[i - ul->range_shift->delta_cols];
-                realfmt[i] = realfmt[i - ul->range_shift->delta_cols];
+            for (i = sh->maxcol; i >= ul->range_shift->tlcol + ul->range_shift->delta_cols; i--) {
+                sh->fwidth[i] = sh->fwidth[i - ul->range_shift->delta_cols];
+                sh->precision[i] = sh->precision[i - ul->range_shift->delta_cols];
+                sh->realfmt[i] = sh->realfmt[i - ul->range_shift->delta_cols];
             }
             else
-            for (i = ul->range_shift->tlcol; i - ul->range_shift->delta_cols <= maxcol; i++) {
-                fwidth[i] = fwidth[i - ul->range_shift->delta_cols];
-                precision[i] = precision[i - ul->range_shift->delta_cols];
-                realfmt[i] = realfmt[i - ul->range_shift->delta_cols];
+            for (i = ul->range_shift->tlcol; i - ul->range_shift->delta_cols <= sh->maxcol; i++) {
+                sh->fwidth[i] = sh->fwidth[i - ul->range_shift->delta_cols];
+                sh->precision[i] = sh->precision[i - ul->range_shift->delta_cols];
+                sh->realfmt[i] = sh->realfmt[i - ul->range_shift->delta_cols];
             }
         }
         // do the same for rows here
-        if (ul->range_shift->tlrow >= 0 && ul->range_shift->tlcol == 0 && ul->range_shift->brcol == maxcol) {
+        if (ul->range_shift->tlrow >= 0 && ul->range_shift->tlcol == 0 && ul->range_shift->brcol == sh->maxcol) {
             int i;
             if (ul->range_shift->delta_rows > 0)
-                for (i = maxrow; i >= ul->range_shift->tlrow + ul->range_shift->delta_rows; i--)
-                    row_format[i] = row_format[i - ul->range_shift->delta_rows];
+                for (i = sh->maxrow; i >= ul->range_shift->tlrow + ul->range_shift->delta_rows; i--)
+                    sh->row_format[i] = sh->row_format[i - ul->range_shift->delta_rows];
             else
-                for (i = ul->range_shift->tlrow; i - ul->range_shift->delta_rows <= maxrow; i++)
-                    row_format[i] = row_format[i - ul->range_shift->delta_rows];
+                for (i = ul->range_shift->tlrow; i - ul->range_shift->delta_rows <= sh->maxrow; i++)
+                    sh->row_format[i] = sh->row_format[i - ul->range_shift->delta_rows];
         }
     }
 
@@ -1129,8 +1133,8 @@ void do_redo() {
     struct ent * j = ul->added;
     while (j != NULL) {
         struct ent * h;
-        if ((h = *ATBL(tbl, j->row, j->col))) clearent(h);
-        struct ent * e_now = lookat(j->row, j->col);
+        if ((h = *ATBL(sh, sh->tbl, j->row, j->col))) clearent(h);
+        struct ent * e_now = lookat(sh, j->row, j->col);
         (void) copyent(e_now, j, 0, 0, 0, 0, 0, 0, 0);
         j = j->next;
     }
@@ -1141,28 +1145,28 @@ void do_redo() {
         int * pd = ul->col_hidded;
         int left = *(pd++);
         while (left--) {
-            col_hidden[*(pd++)] = TRUE;
+            sh->col_hidden[*(pd++)] = TRUE;
         }
     }
     else if (ul->col_showed  != NULL) {
         int * pd = ul->col_showed;
         int left = *(pd++);
         while (left--) {
-            col_hidden[*(pd++)] = FALSE;
+            sh->col_hidden[*(pd++)] = FALSE;
         }
     }
     else if (ul->row_hidded  != NULL) {
         int * pd = ul->row_hidded;
         int left = *(pd++);
         while (left--) {
-            row_hidden[*(pd++)] = TRUE;
+            sh->row_hidden[*(pd++)] = TRUE;
         }
     }
     else if (ul->row_showed  != NULL) {
         int * pd = ul->row_showed;
         int left = *(pd++);
         while (left--) {
-            row_hidden[*(pd++)] = FALSE;
+            sh->row_hidden[*(pd++)] = FALSE;
         }
     }
 
@@ -1172,28 +1176,28 @@ void do_redo() {
         int * pd = ul->col_unfrozed;
         int left = *(pd++);
         while (left--) {
-            col_frozen[*(pd++)] = FALSE;
+            sh->col_frozen[*(pd++)] = FALSE;
         }
     }
     if (ul->col_frozed  != NULL) {
         int * pd = ul->col_frozed;
         int left = *(pd++);
         while (left--) {
-            col_frozen[*(pd++)] = TRUE;
+            sh->col_frozen[*(pd++)] = TRUE;
         }
     }
     if (ul->row_unfrozed  != NULL) {
         int * pd = ul->row_unfrozed;
         int left = *(pd++);
         while (left--) {
-            row_frozen[*(pd++)] = FALSE;
+            sh->row_frozen[*(pd++)] = FALSE;
         }
     }
     if (ul->row_frozed  != NULL) {
         int * pd = ul->row_frozed;
         int left = *(pd++);
         while (left--) {
-            row_frozen[*(pd++)] = TRUE;
+            sh->row_frozen[*(pd++)] = TRUE;
         }
     }
 
@@ -1205,9 +1209,9 @@ void do_redo() {
 
         for (i=0; i < size; i++) {
             if (uf->cols[i].type == 'A') {
-                fwidth[uf->cols[i].col]    = uf->cols[i].fwidth;
-                precision[uf->cols[i].col] = uf->cols[i].precision;
-                realfmt[uf->cols[i].col]   = uf->cols[i].realfmt;
+                sh->fwidth[uf->cols[i].col]    = uf->cols[i].fwidth;
+                sh->precision[uf->cols[i].col] = uf->cols[i].precision;
+                sh->realfmt[uf->cols[i].col]   = uf->cols[i].realfmt;
             }
         }
     }
@@ -1220,7 +1224,7 @@ void do_redo() {
 
         for (i=0; i < size; i++) {
            if (uf->rows[i].type == 'A') {
-               row_format[uf->rows[i].row] = uf->rows[i].format;
+               sh->row_format[uf->rows[i].row] = uf->rows[i].format;
            }
         }
     }
@@ -1229,24 +1233,24 @@ void do_redo() {
     struct ent * ie = ul->added;
     while (ie != NULL) {
         struct ent * p;
-        if ((p = *ATBL(tbl, ie->row, ie->col)) && p->expr)
+        if ((p = *ATBL(sh, sh->tbl, ie->row, ie->col)) && p->expr)
             EvalJustOneVertex(p, 1);
         ie = ie->next;
     }
     ie = ul->removed;
     while (ie != NULL) {
         struct ent * p;
-        if ((p = *ATBL(tbl, ie->row, ie->col)) && p->expr)
+        if ((p = *ATBL(sh, sh->tbl, ie->row, ie->col)) && p->expr)
             EvalJustOneVertex(p, 1);
         ie = ie->next;
     }
 
     // Restores cursor position
-    currow = ori_currow;
-    curcol = ori_curcol;
+    sh->currow = ori_currow;
+    sh->curcol = ori_curcol;
 
     // increase modflg
-    modflg = mf + 1;
+    roman->modflg = mf + 1;
 
     sc_info("Change: %d of %d", ++undo_list_pos, len_undo_list());
 

@@ -72,6 +72,7 @@
 #include "conf.h"
 #include "file.h"
 
+extern struct roman * roman;
 extern FILE * fdoutput;
 
 #define LC_NUMBER2(n,v)                     \
@@ -92,13 +93,14 @@ lua_State * L = NULL;
  */
 
 static int l_getnum (lua_State *L) {
-    int r,c;
+    struct sheet * sh = roman->cur_sh;
+    int r, c;
     struct ent **pp;
     struct ent *p;
     c = lua_tointeger(L, 1);      /* get argument */
     r = lua_tointeger(L, 2);
     // sc_debug("getnum !!");
-    pp = ATBL(tbl,r,c);
+    pp = ATBL(sh, sh->tbl, r, c);
 
     p = *pp;
     if (p == 0) return 0;
@@ -117,20 +119,21 @@ static int l_getnum (lua_State *L) {
  */
 
 static int l_setnum (lua_State *L) {
-    int r,c;
+    struct sheet * sh = roman->cur_sh;
+    int r, c;
     double val;
     //struct ent ** pp;
     struct ent *p;
     c = lua_tointeger(L, 1);  /* get argument */
     r = lua_tointeger(L, 2);
-    val=lua_tonumber(L,3);
+    val=lua_tonumber(L, 3);
     //sc_debug("getnum !!");
 
-    p=lookat(r,c);
+    p=lookat(sh, r,c);
     p->v=val;
     p->flags |= is_changed |is_valid;
     p->flags &= ~iscleared;
-    modflg++;
+    roman->modflg++;
     p->cellerror =CELLOK;
 
     return 0;
@@ -145,16 +148,17 @@ static int l_setnum (lua_State *L) {
  */
 
 static int l_setstr (lua_State *L) {
-    int r,c;
+    struct sheet * sh = roman->cur_sh;
+    int r, c;
     char * val;
     //struct ent ** pp;
-    struct ent *p;
+    struct ent * p;
     c = lua_tointeger(L, 1);  /* get argument */
     r = lua_tointeger(L, 2);
-    val=(char *) lua_tostring(L,3);
+    val=(char *) lua_tostring(L, 3);
     //sc_debug("setstr !!");
 
-    p=lookat(r,c);
+    p=lookat(sh, r,c);
     label(p,val,-1);
 
     return 0;
@@ -168,7 +172,8 @@ static int l_setstr (lua_State *L) {
  */
 
 static int l_getstr (lua_State *L) {
-    int r,c;
+    struct sheet * sh = roman->cur_sh;
+    int r, c;
 
     //struct ent ** pp;
     struct ent *p;
@@ -177,10 +182,10 @@ static int l_getstr (lua_State *L) {
 
     //sc_debug("setstr !!");
 
-    p=lookat(r,c);
-    if(p == 0) return 0;
-    if(p->label !=0) {
-        lua_pushstring(L,p->label);
+    p = lookat(sh, r, c);
+    if (p == 0) return 0;
+    if (p->label !=0) {
+        lua_pushstring(L, p->label);
         return 1;
     }
 
@@ -194,7 +199,7 @@ static int l_getstr (lua_State *L) {
  */
 
 static int l_setform (lua_State *L) {
-    int r,c;
+    int r, c;
     char * val;
     wchar_t buf[BUFFERSIZE];
     r = lua_tointeger(L, 1);  /* get argument */
@@ -290,10 +295,11 @@ int l_query (lua_State *L) {
     return 1;
 }
 
-LC_NUMBER2(currow,currow)
-LC_NUMBER2(curcol,curcol)
-LC_NUMBER2(maxcols,maxcols)
-LC_NUMBER2(maxrows,maxrows)
+
+LC_NUMBER2(currow, roman->cur_sh->currow)
+LC_NUMBER2(curcol, roman->cur_sh->curcol)
+LC_NUMBER2(maxcols, roman->cur_sh->maxcols)
+LC_NUMBER2(maxrows, roman->cur_sh->maxrows)
 
 static const luaL_Reg sclib[] = {
     { "lgetnum", l_getnum },

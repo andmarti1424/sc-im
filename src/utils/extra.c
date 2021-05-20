@@ -52,6 +52,7 @@
 //#include "../range.h"
 
 extern int find_range(char * name, int len, struct ent * lmatch, struct ent * rmatch, struct range ** rng);
+extern struct roman * roman;
 
 #define freen(x) nofreeNULL(x)
 void nofreeNULL(void *x) {
@@ -70,11 +71,12 @@ void nofreeNULL(void *x) {
  */
 
 char * v_name(int row, int col) {
+    struct sheet * sh = roman->cur_sh;
     struct ent *v;
     struct range *r;
     static char buf[20];
 
-    v = lookat(row, col);
+    v = lookat(sh, row, col);
     if ( ! find_range((char *) 0, 0, v, v, &r) ) {
         return (r->r_name);
     } else {

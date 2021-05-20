@@ -56,7 +56,7 @@
 #define RESROW           2     // rows reserved for prompt, error, and column numbers
 #define RESCOLHEADER     1     // number of row to show column header. always 1. just to make code cleaner
 #define SC_DISPLAY_ROWS  (LINES - RESROW - RESCOLHEADER)
-#define SC_DISPLAY_COLS  (COLS - rescol)
+#define SC_DISPLAY_COLS  (COLS - roman->cur_sh->rescol)
 
 #define NORMAL_MODE      0x01
 #define INSERT_MODE      0x02

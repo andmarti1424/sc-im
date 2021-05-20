@@ -30,6 +30,7 @@
 
 void yyerror(char *err);               // error routine for yacc (gram.y)
 int yylex();
+extern struct roman * roman;
 
 #ifdef USELOCALE
 #include <locale.h>
@@ -402,6 +403,7 @@ token K_COLORERR
 %left '*' '/' '%'
 %left '^'
 
+
 %%
 command:
          S_LET var_or_range '=' e { let($2.left.vp, $4); }
@@ -417,7 +419,7 @@ command:
                                   copy_to_undostruct($2.left.vp->row, $2.left.vp->col, $2.left.vp->row, $2.left.vp->col, UNDO_DEL, HANDLE_DEPS, NULL);
 #endif
 
-                                  if (getVertex(graph, lookat($2.left.vp->row, $2.left.vp->col), 0) != NULL) destroy_vertex(lookat($2.left.vp->row, $2.left.vp->col));
+                                  if (getVertex(graph, lookat(roman->cur_sh, $2.left.vp->row, $2.left.vp->col), 0) != NULL) destroy_vertex(lookat(roman->cur_sh, $2.left.vp->row, $2.left.vp->col));
 
                                   $2.left.vp->v = (double) 0.0;
                                   if ($2.left.vp->expr && !($2.left.vp->flags & is_strexpr)) {
@@ -427,7 +429,7 @@ command:
                                   $2.left.vp->cellerror = CELLOK;
                                   $2.left.vp->flags &= ~is_valid;
                                   $2.left.vp->flags |= is_changed;
-                                  modflg++;
+                                  roman->modflg++;
 
                                   // clearing the value counts as a write, so run write triggers
                                   if (( $2.left.vp->trigger  ) && (($2.left.vp->trigger->flag & TRG_WRITE) == TRG_WRITE))
@@ -458,7 +460,7 @@ command:
 
     |    S_DATEFMT var_or_range STRING { dateformat($2.left.vp, $2.right.vp, $3);
                                        scxfree($3); }
-    |    S_DATEFMT STRING            { dateformat(lookat(currow, curcol), lookat(currow, curcol), $2);
+    |    S_DATEFMT STRING            { dateformat(lookat(roman->cur_sh, roman->cur_sh->currow, roman->cur_sh->curcol), lookat(roman->cur_sh, roman->cur_sh->currow, roman->cur_sh->curcol), $2);
                                        scxfree($2); }
 /* para compatibilidad con sc */
     |    S_HIDE COL                  { hide_col($2, 1); }        // hide de una unica columna
@@ -484,31 +486,31 @@ command:
     |    S_SHOWROW NUMBER ':' NUMBER {
                                        show_row($2, $4-$2+1); }  // show de un rango de filas
     |    S_HIDECOL COL ':' COL       {
-                                       int c = curcol, arg;
+                                       int c = roman->cur_sh->curcol, arg;
                                        if ($2 < $4) {
-                                            curcol = $2;
+                                            roman->cur_sh->curcol = $2;
                                             arg = $4 - $2 + 1;
                                        } else {
-                                            curcol = $4;
+                                            roman->cur_sh->curcol = $4;
                                             arg = $2 - $4 + 1;
                                        }
                                        hide_col($2, arg);        // hide de un rango de columnas
-                                       curcol = c < curcol ? c : c < curcol + arg ? curcol : c - arg;
+                                       roman->cur_sh->curcol = c < roman->cur_sh->curcol ? c : c < roman->cur_sh->curcol + arg ? roman->cur_sh->curcol : c - arg;
                                      }
     |    S_HIDEROW NUMBER ':' NUMBER {
-                                       int r = currow, arg;      // hide de un rango de filas
+                                       int r = roman->cur_sh->currow, arg;      // hide de un rango de filas
                                        if ($2 < $4) {
-                                           currow = $2;
+                                           roman->cur_sh->currow = $2;
                                            arg = $4 - $2 + 1;
                                        } else {
-                                           currow = $4;
+                                           roman->cur_sh->currow = $4;
                                            arg = $2 - $4 + 1;
                                        }
                                        hide_row($2, arg);
-                                       currow = r < currow ? r : r < currow + arg ? currow : r - arg;
+                                       roman->cur_sh->currow = r < roman->cur_sh->currow ? r : r < roman->cur_sh->currow + arg ? roman->cur_sh->currow : r - arg;
                                      }
 
-    |    S_VALUEIZEALL               { valueize_area(0, 0, maxrow, maxcol); }
+    |    S_VALUEIZEALL               { valueize_area(0, 0, roman->cur_sh->maxrow, roman->cur_sh->maxcol); }
     |    S_SHIFT var_or_range STRING {
                                        if (strlen($3) != 1 || ($3[0] != 'h' && $3[0] != 'j' && $3[0] != 'k' && $3[0] != 'l')) {
                                            sc_error("wrong parameter for shift command");
@@ -532,14 +534,14 @@ command:
 
     |    S_FILL num num              { sc_error("Not enough parameters for fill command"); }
 
-    |    S_FREEZE NUMBER ':' NUMBER  { handle_freeze(lookat($2, 0), lookat($4, 0), 1, 'r'); }
-    |    S_FREEZE NUMBER             { handle_freeze(lookat($2, 0), lookat($2, 0), 1, 'r'); }
-    |    S_FREEZE COL ':' COL        { handle_freeze(lookat(0, $2), lookat(0, $4), 1, 'c'); }
-    |    S_FREEZE COL                { handle_freeze(lookat(0, $2), lookat(0, $2), 1, 'c'); }
-    |    S_UNFREEZE NUMBER ':' NUMBER{ handle_freeze(lookat($2, 0), lookat($4, 0), 0, 'r'); }
-    |    S_UNFREEZE NUMBER           { handle_freeze(lookat($2, 0), lookat($2, 0), 0, 'r'); }
-    |    S_UNFREEZE COL ':' COL      { handle_freeze(lookat(0, $2), lookat(0, $4), 0, 'c'); }
-    |    S_UNFREEZE COL              { handle_freeze(lookat(0, $2), lookat(0, $2), 0, 'c'); }
+    |    S_FREEZE NUMBER ':' NUMBER  { handle_freeze(lookat(roman->cur_sh, $2, 0), lookat(roman->cur_sh, $4, 0), 1, 'r'); }
+    |    S_FREEZE NUMBER             { handle_freeze(lookat(roman->cur_sh, $2, 0), lookat(roman->cur_sh, $2, 0), 1, 'r'); }
+    |    S_FREEZE COL ':' COL        { handle_freeze(lookat(roman->cur_sh, 0, $2), lookat(roman->cur_sh, 0, $4), 1, 'c'); }
+    |    S_FREEZE COL                { handle_freeze(lookat(roman->cur_sh, 0, $2), lookat(roman->cur_sh, 0, $2), 1, 'c'); }
+    |    S_UNFREEZE NUMBER ':' NUMBER{ handle_freeze(lookat(roman->cur_sh, $2, 0), lookat(roman->cur_sh, $4, 0), 0, 'r'); }
+    |    S_UNFREEZE NUMBER           { handle_freeze(lookat(roman->cur_sh, $2, 0), lookat(roman->cur_sh, $2, 0), 0, 'r'); }
+    |    S_UNFREEZE COL ':' COL      { handle_freeze(lookat(roman->cur_sh, 0, $2), lookat(roman->cur_sh, 0, $4), 0, 'c'); }
+    |    S_UNFREEZE COL              { handle_freeze(lookat(roman->cur_sh, 0, $2), lookat(roman->cur_sh, 0, $2), 0, 'c'); }
 
     |    S_SORT range STRING         { sortrange($2.left.vp, $2.right.vp, $3);
                                        //scxfree($3);
@@ -567,8 +569,8 @@ command:
     |    S_AUTOJUS COL ':' COL       { auto_fit($2, $4, DEFWIDTH); }  // auto justificado de columnas
     |    S_AUTOJUS COL               { auto_fit($2, $2, DEFWIDTH); }  // auto justificado de columna
 
-    |    S_PAD NUMBER COL ':' COL  { pad($2, 0, $3, maxrow, $5); }
-    |    S_PAD NUMBER COL          { pad($2, 0, $3, maxrow, $3); }
+    |    S_PAD NUMBER COL ':' COL  { pad($2, 0, $3, roman->cur_sh->maxrow, $5); }
+    |    S_PAD NUMBER COL          { pad($2, 0, $3, roman->cur_sh->maxrow, $3); }
     |    S_PAD NUMBER var_or_range { pad($2, $3.left.vp->row, $3.left.vp->col, $3.right.vp->row, $3.right.vp->col); }
     |    S_GETFORMAT COL           { getformat($2, fdoutput); }
     |    S_FORMAT COL NUMBER NUMBER NUMBER { doformat($2,$2,$3,$4,$5); }
@@ -578,21 +580,21 @@ command:
                                      }
     |    S_GOTO var_or_range var_or_range { moveto($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col, $3.left.vp->row, $3.left.vp->col); }
     |    S_GOTO var_or_range     { moveto($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col, -1, -1); }
-    |    S_GOTO num              { num_search($2, 0, 0, maxrow, maxcol, 0, 1); }
-    |    S_GOTO STRING           { str_search($2, 0, 0, maxrow, maxcol, 0, 1); }
+    |    S_GOTO num              { num_search($2, 0, 0, roman->cur_sh->maxrow, roman->cur_sh->maxcol, 0, 1); }
+    |    S_GOTO STRING           { str_search($2, 0, 0, roman->cur_sh->maxrow, roman->cur_sh->maxcol, 0, 1); }
                                    //scxfree($2); shall not free here
-    |    S_GOTO '#' STRING       { str_search($3, 0, 0, maxrow, maxcol, 1, 1); }
+    |    S_GOTO '#' STRING       { str_search($3, 0, 0, roman->cur_sh->maxrow, roman->cur_sh->maxcol, 1, 1); }
                                    //scxfree($3); shall not free here
-    |    S_GOTO '%' STRING       { str_search($3, 0, 0, maxrow, maxcol, 2, 1); }
+    |    S_GOTO '%' STRING       { str_search($3, 0, 0, roman->cur_sh->maxrow, roman->cur_sh->maxcol, 2, 1); }
                                    //scxfree($3); shall not free here
 
-    |    S_GOTOB num              { num_search($2, 0, 0, maxrow, maxcol, 0, 0); }
+    |    S_GOTOB num              { num_search($2, 0, 0, roman->cur_sh->maxrow, roman->cur_sh->maxcol, 0, 0); }
 
-    |    S_GOTOB STRING           { str_search($2, 0, 0, maxrow, maxcol, 0, 0); }
+    |    S_GOTOB STRING           { str_search($2, 0, 0, roman->cur_sh->maxrow, roman->cur_sh->maxcol, 0, 0); }
 
-    |    S_GOTOB '#' STRING       { str_search($3, 0, 0, maxrow, maxcol, 1, 0); }
+    |    S_GOTOB '#' STRING       { str_search($3, 0, 0, roman->cur_sh->maxrow, roman->cur_sh->maxcol, 1, 0); }
 
-    |    S_GOTOB '%' STRING       { str_search($3, 0, 0, maxrow, maxcol, 2, 0); }
+    |    S_GOTOB '%' STRING       { str_search($3, 0, 0, roman->cur_sh->maxrow, roman->cur_sh->maxcol, 2, 0); }
 
  // |    S_GOTO WORD             { /* don't repeat last goto on "unintelligible word" */ ; }
 
@@ -710,7 +712,7 @@ command:
     |    S_CELLCOLOR STRING        {
 #ifdef USECOLORS
                                    if ( ! get_conf_int("nocurses"))
-                                       color_cell(currow, curcol, currow, curcol, $2);
+                                       color_cell(roman->cur_sh->currow, roman->cur_sh->curcol, roman->cur_sh->currow, roman->cur_sh->curcol, $2);
 #endif
                                    scxfree($2);
                                    }
@@ -723,7 +725,7 @@ command:
 
     |    S_UNFORMAT                {
 #ifdef USECOLORS
-                                   if ( ! get_conf_int("nocurses")) unformat(currow, curcol, currow, curcol);
+                                   if ( ! get_conf_int("nocurses")) unformat(roman->cur_sh->currow, roman->cur_sh->curcol, roman->cur_sh->currow, roman->cur_sh->curcol);
 #endif
                                    }
 
@@ -751,9 +753,9 @@ command:
                                    }
 /*
     |    S_DEFINE strarg           { struct ent_ptr arg1, arg2;
-                                          arg1.vp = lookat(showsr, showsc);
+                                          arg1.vp = lookat(roman->cur_sh, showsr, showsc);
                                           arg1.vf = 0;
-                                          arg2.vp = lookat(currow, curcol);
+                                          arg2.vp = lookat(roman->cur_sh, roman->cur_sh->currow, roman->cur_sh->curcol);
                                           arg2.vf = 0;
                                           if (arg1.vp == arg2.vp )
                                               add_range($2, arg2, arg2, 0);
@@ -796,7 +798,7 @@ command:
                                    }
     |    S_EXPORT STRING STRING    {
                                          swprintf(inputline, BUFFERSIZE, L"e! %s %s", $2, $3);
-                                         do_export(0, 0, maxrow, maxcol);
+                                         do_export(0, 0, roman->cur_sh->maxrow, roman->cur_sh->maxcol);
                                          scxfree($2);
                                          scxfree($3);
                                    }
@@ -1077,22 +1079,22 @@ range:   var ':' var              {
     |    RANGE                    { $$ = $1; }
     ;
 
-var:     COL NUMBER               { $$.vp = lookat($2, $1);
+var:     COL NUMBER               { $$.vp = lookat(roman->cur_sh, $2, $1);
                                     $$.vf = 0;
                                   }
-    |    '$' COL NUMBER           { $$.vp = lookat($3, $2);
+    |    '$' COL NUMBER           { $$.vp = lookat(roman->cur_sh, $3, $2);
                                     $$.vf = FIX_COL;
                                   }
-    |    COL '$' NUMBER           { $$.vp = lookat($3, $1);
+    |    COL '$' NUMBER           { $$.vp = lookat(roman->cur_sh, $3, $1);
                                     $$.vf = FIX_ROW;
                                   }
     |    '$' COL '$' NUMBER       {
-                                    $$.vp = lookat($4, $2);
+                                    $$.vp = lookat(roman->cur_sh, $4, $2);
                                     $$.vf = FIX_ROW | FIX_COL;
                                   }
 
     | '@' K_GETENT '(' e ',' e ')' {
-                                    $$.vp = lookat(eval(NULL, $4), eval(NULL, $6));
+                                    $$.vp = lookat(roman->cur_sh, eval(NULL, $4), eval(NULL, $6));
                                     $$.vf = GETENT;
                                     if ($$.expr != NULL) efree($$.expr);
                                     $$.expr = new(GETENT, $4, $6);

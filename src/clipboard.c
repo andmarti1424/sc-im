@@ -58,6 +58,8 @@
 #include "conf.h"
 #include "utils/string.h"
 
+extern struct roman * roman;
+
 int convert_string_to_number( int r0, int c0, int rn, int cn) {
     int row, col;
     register struct ent ** pp;
@@ -66,7 +68,7 @@ int convert_string_to_number( int r0, int c0, int rn, int cn) {
         // ignore hidden rows
         //if (row_hidden[row]) continue;
 
-        for (pp = ATBL(tbl, row, col = c0); col <= cn; col++, pp++) {
+        for (pp = ATBL(roman->cur_sh, roman->cur_sh->tbl, row, col = c0); col <= cn; col++, pp++) {
             // ignore hidden cols
             //if (col_hidden[col]) continue;
 
@@ -118,14 +120,14 @@ int paste_from_clipboard() {
     FILE * fp = fdopen(fd, "r");
     char line_in[BUFFERSIZE];
     wchar_t line_interp[FBUFLEN] = L"";
-    int c, r = currow;
+    int c, r = roman->cur_sh->currow;
     char * token;
     char delim[2] = { '\t', '\0' } ;
 
     while ( ! feof(fp) && (fgets(line_in, sizeof(line_in), fp) != NULL) ) {
         // Split string using the delimiter
         token = xstrtok(line_in, delim);
-        c = curcol;
+        c = roman->cur_sh->curcol;
         while( token != NULL ) {
             if (r > MAXROWS - GROWAMT - 1 || c > ABSMAXCOLS - 1) break;
             clean_carrier(token);
@@ -139,10 +141,10 @@ int paste_from_clipboard() {
             c++;
             token = xstrtok(NULL, delim);
             //free(st);
-            if (c > maxcol) maxcol = c;
+            if (c > roman->cur_sh->maxcol) roman->cur_sh->maxcol = c;
         }
         r++;
-        if (r > maxrow) maxrow = r;
+        if (r > roman->cur_sh->maxrow) roman->cur_sh->maxrow = r;
         if (r > MAXROWS - GROWAMT - 1 || c > ABSMAXCOLS - 1) break;
     }
     sc_info("Content pasted from clipboard");
@@ -227,7 +229,7 @@ int save_plain(FILE * fout, int r0, int c0, int rn, int cn) {
         // ignore hidden rows
         //if (row_hidden[row]) continue;
 
-        for (pp = ATBL(tbl, row, col = c0); col <= cn; col++, pp++) {
+        for (pp = ATBL(roman->cur_sh, roman->cur_sh->tbl, row, col = c0); col <= cn; col++, pp++) {
             // ignore hidden cols
             //if (col_hidden[col]) continue;
             emptyfield=-1;
@@ -248,7 +250,7 @@ int save_plain(FILE * fout, int r0, int c0, int rn, int cn) {
                     if (res == 0 || res == 1) {
                         strcpy(num, formated_s);
                     } else if (res == -1) {
-                        sprintf(num, "%.*f", precision[col], (*pp)->v);
+                        sprintf(num, "%.*f", roman->cur_sh->precision[col], (*pp)->v);
                     }
                 }
                 else {
@@ -274,7 +276,7 @@ int save_plain(FILE * fout, int r0, int c0, int rn, int cn) {
                    fwprintf(fout, L"\t");
                 }
                 if (! get_conf_int("copy_to_clipboard_delimited_tab")) {
-                    pad_and_align(text, num, fwidth[col], align, 0, out, row_format[row]);
+                    pad_and_align(text, num, roman->cur_sh->fwidth[col], align, 0, out, roman->cur_sh->row_format[row]);
                     fwprintf(fout, L"%ls", out);
                 } else if ( (*pp)->flags & is_valid) {
                     fwprintf(fout, L"%s\t", num);
@@ -282,7 +284,7 @@ int save_plain(FILE * fout, int r0, int c0, int rn, int cn) {
                     fwprintf(fout, L"%s\t", text);
                 }
             } else if (! get_conf_int("copy_to_clipboard_delimited_tab")) {
-                fwprintf(fout, L"%*s", fwidth[col], " ");
+                fwprintf(fout, L"%*s", roman->cur_sh->fwidth[col], " ");
             } else {
                 fwprintf(fout, L"\t");
             }

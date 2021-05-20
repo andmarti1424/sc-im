@@ -73,10 +73,8 @@ wchar_t interp_line[BUFFERSIZE];
 extern graphADT graph;
 extern int yyparse(void);
 
-int offscr_sc_rows = 0, offscr_sc_cols = 0; // off screen spreadsheet rows and columns
-int nb_frozen_rows = 0, nb_frozen_cols = 0; // total number of frozen rows/cols
-int nb_frozen_screenrows = 0; // screen rows occupied by those frozen rows
-int nb_frozen_screencols = 0; // screen cols occupied by those frozen columns
+
+extern struct roman * roman;
 
 /**
  * \brief Maintain ent strucs until they are release for deletion by sync_refs.
@@ -143,9 +141,9 @@ void flush_saved() {
 void sync_refs() {
     int i, j;
     register struct ent * p;
-    for (i=0; i <= maxrow; i++)
-        for (j=0; j <= maxcol; j++)
-            if ( (p = *ATBL(tbl, i, j)) && p->expr ) {
+    for (i=0; i <= roman->cur_sh->maxrow; i++)
+        for (j=0; j <= roman->cur_sh->maxcol; j++)
+            if ( (p = *ATBL(roman->cur_sh, roman->cur_sh->tbl, i, j)) && p->expr ) {
                 syncref(p->expr);
             }
     return;
@@ -179,8 +177,8 @@ void syncref(register struct enode * e) {
         e->e.o.right = NULL;
         return;
     } else if (e->op & REDUCE) {
-        e->e.r.right.vp = lookat(e->e.r.right.vp->row, e->e.r.right.vp->col);
-        e->e.r.left.vp = lookat(e->e.r.left.vp->row, e->e.r.left.vp->col);
+        e->e.r.right.vp = lookat(roman->cur_sh, e->e.r.right.vp->row, e->e.r.right.vp->col);
+        e->e.r.left.vp = lookat(roman->cur_sh, e->e.r.left.vp->row, e->e.r.left.vp->col);
     } else {
         switch (e->op) {
         case 'v':
@@ -190,7 +188,7 @@ void syncref(register struct enode * e) {
                 //e->e.o.right = NULL;
                 break;
             } else if (e->e.v.vp->flags & may_sync)
-                e->e.v.vp = lookat(e->e.v.vp->row, e->e.v.vp->col);
+                e->e.v.vp = lookat(roman->cur_sh, e->e.v.vp->row, e->e.v.vp->col);
             break;
         case 'k':
             break;
@@ -215,35 +213,35 @@ void syncref(register struct enode * e) {
  * \return none
  */
 void deletecol(int col, int mult) {
-    if (any_locked_cells(0, col, maxrow, col + mult)) {
+    if (any_locked_cells(0, col, roman->cur_sh->maxrow, col + mult)) {
         sc_error("Locked cells encountered. Nothing changed");
         return;
     }
 #ifdef UNDO
     create_undo_action();
     // here we save in undostruct, all the ents that depends on the deleted one (before change)
-    ents_that_depends_on_range(0, col, maxrow, col - 1 + mult);
-    copy_to_undostruct(0, col, maxrow, col - 1 + mult, UNDO_DEL, HANDLE_DEPS, NULL);
-    save_undo_range_shift(0, -mult, 0, col, maxrow, col - 1 + mult);
+    ents_that_depends_on_range(0, col, roman->cur_sh->maxrow, col - 1 + mult);
+    copy_to_undostruct(0, col, roman->cur_sh->maxrow, col - 1 + mult, UNDO_DEL, HANDLE_DEPS, NULL);
+    save_undo_range_shift(0, -mult, 0, col, roman->cur_sh->maxrow, col - 1 + mult);
 
     int i;
     for (i=col; i < col + mult; i++) {
-        add_undo_col_format(i, 'R', fwidth[i], precision[i], realfmt[i]);
-        if (col_hidden[i]) undo_hide_show(-1, i, 's', 1);
+        add_undo_col_format(i, 'R', roman->cur_sh->fwidth[i], roman->cur_sh->precision[i], roman->cur_sh->realfmt[i]);
+        if (roman->cur_sh->col_hidden[i]) undo_hide_show(-1, i, 's', 1);
         else undo_hide_show(-1, i, 'h', 1);
         // TODO undo col_frozen
     }
 #endif
 
-    fix_marks(0, -mult, 0, maxrow,  col + mult -1, maxcol);
-    if (!loading) yank_area(0, col, maxrow, col + mult - 1, 'c', mult);
+    fix_marks(0, -mult, 0, roman->cur_sh->maxrow,  col + mult -1, roman->cur_sh->maxcol);
+    if (! roman->loading) yank_area(0, col, roman->cur_sh->maxrow, col + mult - 1, 'c', mult);
 
     // do the job
     int_deletecol(col, mult);
 
     // if (get_conf_int("autocalc")) EvalAll();
 
-    if (!loading) modflg++;
+    if (! roman->loading) roman->modflg++;
 
 #ifdef UNDO
     // here we save in undostruct, just the ents that depends on the deleted one (after change)
@@ -276,8 +274,8 @@ void int_deletecol(int col, int mult) {
 
     while (mult--) {
         // mark ent of column to erase with is_deleted flag
-        for (r = 0; r <= maxrow; r++) {
-            pp = ATBL(tbl, r, col);
+        for (r = 0; r <= roman->cur_sh->maxrow; r++) {
+            pp = ATBL(roman->cur_sh, roman->cur_sh->tbl, r, col);
             if ( *pp != NULL ) {
                 mark_ent_as_deleted(*pp, TRUE);
                 //clearent(*pp);
@@ -290,38 +288,38 @@ void int_deletecol(int col, int mult) {
         //But shouldnt! TODO
 
         // Copy references from right column cells to left column (which gets removed)
-        for (r = 0; r <= maxrow; r++) {
-            for (c = col; c < maxcol; c++) {
-                pp = ATBL(tbl, r, c);
+        for (r = 0; r <= roman->cur_sh->maxrow; r++) {
+            for (c = col; c < roman->cur_sh->maxcol; c++) {
+                pp = ATBL(roman->cur_sh, roman->cur_sh->tbl, r, c);
 
-                // nota: pp[1] = ATBL(tbl, r, c+1);
+                // nota: pp[1] = ATBL(roman->cur_sh, roman->cur_sh->tbl, r, c+1);
                 if ( pp[1] != NULL ) pp[1]->col--;
                 pp[0] = pp[1];
             }
 
             // Free last column memory (Could also initialize 'ent' to zero with `cleanent`).
-            pp = ATBL(tbl, r, maxcol);
+            pp = ATBL(roman->cur_sh, roman->cur_sh->tbl, r, roman->cur_sh->maxcol);
             *pp = (struct ent *) 0;
         }
 
         // Fix columns precision and width
-        for (i = col; i < maxcols - 2; i++) {
-            fwidth[i] = fwidth[i+1];
-            precision[i] = precision[i+1];
-            realfmt[i] = realfmt[i+1];
-            col_hidden[i] = col_hidden[i+1];
-            col_frozen[i] = col_frozen[i+1];
+        for (i = col; i < roman->cur_sh->maxcols - 2; i++) {
+            roman->cur_sh->fwidth[i] = roman->cur_sh->fwidth[i+1];
+            roman->cur_sh->precision[i] = roman->cur_sh->precision[i+1];
+            roman->cur_sh->realfmt[i] = roman->cur_sh->realfmt[i+1];
+            roman->cur_sh->col_hidden[i] = roman->cur_sh->col_hidden[i+1];
+            roman->cur_sh->col_frozen[i] = roman->cur_sh->col_frozen[i+1];
         }
 
-        for (; i < maxcols - 1; i++) {
-            fwidth[i] = DEFWIDTH;
-            precision[i] = DEFPREC;
-            realfmt[i] = DEFREFMT;
-            col_hidden[i] = FALSE;
-            col_frozen[i] = FALSE;
+        for (; i < roman->cur_sh->maxcols - 1; i++) {
+            roman->cur_sh->fwidth[i] = DEFWIDTH;
+            roman->cur_sh->precision[i] = DEFPREC;
+            roman->cur_sh->realfmt[i] = DEFREFMT;
+            roman->cur_sh->col_hidden[i] = FALSE;
+            roman->cur_sh->col_frozen[i] = FALSE;
         }
 
-        maxcol--;
+        roman->cur_sh->maxcol--;
         sync_refs();
         EvalAll();
         //flush_saved(); // we have to flush_saved only at exit.
@@ -496,7 +494,7 @@ void erase_area(int sr, int sc, int er, int ec, int ignorelock, int mark_as_dele
         sr = 0;
     if (sc < 0)
         sc = 0;
-    checkbounds(&er, &ec);
+    checkbounds(roman->cur_sh, &er, &ec);
 
     /* mark the ent as deleted
      * Do a lookat() for the upper left and lower right cells of the range
@@ -504,11 +502,11 @@ void erase_area(int sr, int sc, int er, int ec, int ignorelock, int mark_as_dele
      * that pulling cells always works correctly even if the cells at one
      * or more edges of the range are all empty.
      */
-    (void) lookat(sr, sc);
-    (void) lookat(er, ec);
+    (void) lookat(roman->cur_sh, sr, sc);
+    (void) lookat(roman->cur_sh, er, ec);
     for (r = sr; r <= er; r++) {
         for (c = sc; c <= ec; c++) {
-            pp = ATBL(tbl, r, c);
+            pp = ATBL(roman->cur_sh, roman->cur_sh->tbl, r, c);
             if (*pp && (!((*pp)->flags & is_locked) || ignorelock)) {
 
                 /* delete vertex in graph
@@ -562,11 +560,11 @@ struct enode * copye(register struct enode *e, int Rdelta, int Cdelta, int r1, i
         ret->e.r.right.expr = e->e.r.right.expr ? copye(e->e.r.right.expr, Rdelta, Cdelta, r1, c1, r2, c2, special) : NULL; // important to initialize
         newrow = e->e.r.left.vf & FIX_ROW || e->e.r.left.vp->row < r1 || e->e.r.left.vp->row > r2 || e->e.r.left.vp->col < c1 || e->e.r.left.vp->col > c2 ?  e->e.r.left.vp->row : special == 1 ? r1 + Rdelta + e->e.r.left.vp->col - c1 : e->e.r.left.vp->row + Rdelta;
         newcol = e->e.r.left.vf & FIX_COL || e->e.r.left.vp->row < r1 || e->e.r.left.vp->row > r2 || e->e.r.left.vp->col < c1 || e->e.r.left.vp->col > c2 ?  e->e.r.left.vp->col : special == 1 ? c1 + Cdelta + e->e.r.left.vp->row - r1 : e->e.r.left.vp->col + Cdelta;
-        ret->e.r.left.vp = lookat(newrow, newcol);
+        ret->e.r.left.vp = lookat(roman->cur_sh, newrow, newcol);
         ret->e.r.left.vf = e->e.r.left.vf;
         newrow = e->e.r.right.vf & FIX_ROW || e->e.r.right.vp->row < r1 || e->e.r.right.vp->row > r2 || e->e.r.right.vp->col < c1 || e->e.r.right.vp->col > c2 ?  e->e.r.right.vp->row : special == 1 ? r1 + Rdelta + e->e.r.right.vp->col - c1 : e->e.r.right.vp->row + Rdelta;
         newcol = e->e.r.right.vf & FIX_COL || e->e.r.right.vp->row < r1 || e->e.r.right.vp->row > r2 || e->e.r.right.vp->col < c1 || e->e.r.right.vp->col > c2 ?  e->e.r.right.vp->col : special == 1 ? c1 + Cdelta + e->e.r.right.vp->row - r1 : e->e.r.right.vp->col + Cdelta;
-        ret->e.r.right.vp = lookat(newrow, newcol);
+        ret->e.r.right.vp = lookat(roman->cur_sh, newrow, newcol);
         ret->e.r.right.vf = e->e.r.right.vf;
     } else {
         struct enode *temprange=0;
@@ -588,8 +586,8 @@ struct enode * copye(register struct enode *e, int Rdelta, int Cdelta, int r1, i
                 range = e->e.o.left;
                 r1 = 0;
                 c1 = 0;
-                r2 = maxrow;
-                c2 = maxcol;
+                r2 = roman->cur_sh->maxrow;
+                c2 = roman->cur_sh->maxcol;
         }
         switch (ret->op) {
             case 'v':
@@ -602,7 +600,7 @@ struct enode * copye(register struct enode *e, int Rdelta, int Cdelta, int r1, i
                         newrow = e->e.v.vf & FIX_ROW || e->e.v.vp->row < r1 || e->e.v.vp->row > r2 || e->e.v.vp->col < c1 || e->e.v.vp->col > c2 ?  e->e.v.vp->row : special == 1 ? r1 + Rdelta + e->e.v.vp->col - c1 : e->e.v.vp->row + Rdelta;
                         newcol = e->e.v.vf & FIX_COL || e->e.v.vp->row < r1 || e->e.v.vp->row > r2 || e->e.v.vp->col < c1 || e->e.v.vp->col > c2 ?  e->e.v.vp->col : special == 1 ? c1 + Cdelta + e->e.v.vp->row - r1 : e->e.v.vp->col + Cdelta;
                     }
-                    ret->e.v.vp = lookat(newrow, newcol);
+                    ret->e.v.vp = lookat(roman->cur_sh, newrow, newcol);
                     ret->e.v.vf = e->e.v.vf;
                     break;
                 }
@@ -658,10 +656,10 @@ struct enode * copye(register struct enode *e, int Rdelta, int Cdelta, int r1, i
 void dorowformat(int r, unsigned char size) {
     if (size < 1 || size > UCHAR_MAX || size > SC_DISPLAY_ROWS) { sc_error("Invalid row format"); return; }
 
-    if (r >= maxrows && !growtbl(GROWROW, 0, r)) r = maxrows-1 ;
-    checkbounds(&r, &curcol);
-    row_format[r] = size;
-    if (! loading) modflg++;
+    if (r >= roman->cur_sh->maxrows && !growtbl(roman->cur_sh, GROWROW, 0, r)) r = roman->cur_sh->maxrows-1 ;
+    checkbounds(roman->cur_sh, &r, &(roman->cur_sh->curcol));
+    roman->cur_sh->row_format[r] = size;
+    if (! roman->loading) roman->modflg++;
     return;
 }
 
@@ -681,8 +679,8 @@ void doformat(int c1, int c2, int w, int p, int r) {
     int crows = 0;
     int ccols = c2;
 
-    if (c1 >= maxcols && !growtbl(GROWCOL, 0, c1)) c1 = maxcols-1 ;
-    if (c2 >= maxcols && !growtbl(GROWCOL, 0, c2)) c2 = maxcols-1 ;
+    if (c1 >= roman->cur_sh->maxcols && !growtbl(roman->cur_sh, GROWCOL, 0, c1)) c1 = roman->cur_sh->maxcols-1 ;
+    if (c2 >= roman->cur_sh->maxcols && !growtbl(roman->cur_sh, GROWCOL, 0, c2)) c2 = roman->cur_sh->maxcols-1 ;
 
     if (w == 0) {
         sc_info("Width too small - setting to 1");
@@ -699,16 +697,16 @@ void doformat(int c1, int c2, int w, int p, int r) {
         p = w;
     }
 
-    checkbounds(&crows, &ccols);
+    checkbounds(roman->cur_sh, &crows, &ccols);
     if (ccols < c2) {
         sc_error("Format statement failed to create implied column %d", c2);
         return;
     }
 
     for (i = c1; i <= c2; i++)
-        fwidth[i] = w, precision[i] = p, realfmt[i] = r;
+        roman->cur_sh->fwidth[i] = w, roman->cur_sh->precision[i] = p, roman->cur_sh->realfmt[i] = r;
 
-    modflg++;
+    roman->modflg++;
     return;
 
 }
@@ -727,42 +725,42 @@ void formatcol(int c) {
         case '<':
         case 'h':
         case OKEY_LEFT:
-            for (i = curcol; i < curcol + arg; i++) {
-                if (fwidth[i] <= 2) {
+            for (i = roman->cur_sh->curcol; i < roman->cur_sh->curcol + arg; i++) {
+                if (roman->cur_sh->fwidth[i] <= 2) {
                     sc_error("Cannot resize column any longer");
                     return;
                 }
-                fwidth[i]--;
-                if (fwidth[i] <= 1)
-                    fwidth[i] = 1;
+                roman->cur_sh->fwidth[i]--;
+                if (roman->cur_sh->fwidth[i] <= 1)
+                    roman->cur_sh->fwidth[i] = 1;
             }
-            modflg++;
+             roman->modflg++;
             break;
         case '>':
         case 'l':
         case OKEY_RIGHT:
-            for (i = curcol; i < curcol + arg; i++) {
-                fwidth[i]++;
-                if (fwidth[i] > SC_DISPLAY_COLS - 2)
-                    fwidth[i] = SC_DISPLAY_COLS - 2;
+            for (i = roman->cur_sh->curcol; i < roman->cur_sh->curcol + arg; i++) {
+                roman->cur_sh->fwidth[i]++;
+                if (roman->cur_sh->fwidth[i] > SC_DISPLAY_COLS - 2)
+                    roman->cur_sh->fwidth[i] = SC_DISPLAY_COLS - 2;
             }
-            modflg++;
+             roman->modflg++;
             break;
         case '-':
-            for (i = curcol; i < curcol + arg; i++) {
-                precision[i]--;
-                if (precision[i] < 0)
-                    precision[i] = 0;
+            for (i = roman->cur_sh->curcol; i < roman->cur_sh->curcol + arg; i++) {
+                roman->cur_sh->precision[i]--;
+                if (roman->cur_sh->precision[i] < 0)
+                    roman->cur_sh->precision[i] = 0;
             }
-            modflg++;
+            roman->modflg++;
             break;
         case '+':
-            for (i = curcol; i < curcol + arg; i++)
-                precision[i]++;
-            modflg++;
+            for (i = roman->cur_sh->curcol; i < roman->cur_sh->curcol + arg; i++)
+                roman->cur_sh->precision[i]++;
+             roman->modflg++;
             break;
     }
-    sc_info("Current format is %d %d %d", fwidth[curcol], precision[curcol], realfmt[curcol]);
+    sc_info("Current format is %d %d %d", roman->cur_sh->fwidth[roman->cur_sh->curcol], roman->cur_sh->precision[roman->cur_sh->curcol], roman->cur_sh->realfmt[roman->cur_sh->curcol]);
     ui_update(TRUE);
     return;
 }
@@ -779,34 +777,34 @@ void insert_row(int after) {
     int r, c;
     struct ent ** tmprow, ** pp, ** qq;
     struct ent * p;
-    int lim = maxrow - currow + 1;
+    int lim = roman->cur_sh->maxrow - roman->cur_sh->currow + 1;
 
-    if (currow > maxrow) maxrow = currow;
-    maxrow++;
-    lim = maxrow - lim + after;
-    if (maxrow >= maxrows && ! growtbl(GROWROW, maxrow, 0)) return;
+    if (roman->cur_sh->currow > roman->cur_sh->maxrow) roman->cur_sh->maxrow = roman->cur_sh->currow;
+    roman->cur_sh->maxrow++;
+    lim = roman->cur_sh->maxrow - lim + after;
+    if (roman->cur_sh->maxrow >= roman->cur_sh->maxrows && ! growtbl(roman->cur_sh, GROWROW, roman->cur_sh->maxrow, 0)) return;
 
-    tmprow = tbl[maxrow];
-    for (r = maxrow; r > lim; r--) {
-        row_hidden[r] = row_hidden[r-1];
-        row_frozen[r] = row_frozen[r-1];
-        row_format[r] = row_format[r-1];
-        tbl[r] = tbl[r-1];
-        for (c = 0, pp = ATBL(tbl, r, 0); c < maxcols; c++, pp++)
+    tmprow = roman->cur_sh->tbl[roman->cur_sh->maxrow];
+    for (r = roman->cur_sh->maxrow; r > lim; r--) {
+        roman->cur_sh->row_hidden[r] = roman->cur_sh->row_hidden[r-1];
+        roman->cur_sh->row_frozen[r] = roman->cur_sh->row_frozen[r-1];
+        roman->cur_sh->row_format[r] = roman->cur_sh->row_format[r-1];
+        roman->cur_sh->tbl[r] = roman->cur_sh->tbl[r-1];
+        for (c = 0, pp = ATBL(roman->cur_sh, roman->cur_sh->tbl, r, 0); c < roman->cur_sh->maxcols; c++, pp++)
             if (*pp) (*pp)->row = r;
     }
-    tbl[r] = tmprow;        // the last row is never used
-    row_format[r] = 1;
+    roman->cur_sh->tbl[r] = tmprow;        // the last row is never used
+    roman->cur_sh->row_format[r] = 1;
 
     // if padding exists in the old currow, we copy it to the new row!
-    for (c = 0; c < maxcols; c++) {
-        if (r >= 0 && (qq = ATBL(tbl, r+1, c)) && (*qq) && (*qq)->pad) {
-            p = lookat(r, c);
+    for (c = 0; c < roman->cur_sh->maxcols; c++) {
+        if (r >= 0 && (qq = ATBL(roman->cur_sh, roman->cur_sh->tbl, r+1, c)) && (*qq) && (*qq)->pad) {
+            p = lookat(roman->cur_sh, r, c);
             p->pad = (*qq)->pad;
         }
     }
 
-    modflg++;
+    roman->modflg++;
     return;
 }
 
@@ -823,50 +821,50 @@ void insert_col(int after) {
     int r, c;
     register struct ent ** pp, ** qq;
     struct ent * p;
-    int lim = maxcol - curcol - after + 1;
+    int lim = roman->cur_sh->maxcol - roman->cur_sh->curcol - after + 1;
 
-    if (curcol + after > maxcol)
-        maxcol = curcol + after;
-    maxcol++;
+    if (roman->cur_sh->curcol + after > roman->cur_sh->maxcol)
+        roman->cur_sh->maxcol = roman->cur_sh->curcol + after;
+    roman->cur_sh->maxcol++;
 
-    if ((maxcol >= maxcols) && !growtbl(GROWCOL, 0, maxcol))
+    if ((roman->cur_sh->maxcol >= roman->cur_sh->maxcols) && !growtbl(roman->cur_sh, GROWCOL, 0, roman->cur_sh->maxcol))
         return;
 
-    for (c = maxcol; c >= curcol + after + 1; c--) {
-        fwidth[c] = fwidth[c-1];
-        precision[c] = precision[c-1];
-        realfmt[c] = realfmt[c-1];
-        col_hidden[c] = col_hidden[c-1];
-        col_frozen[c] = col_frozen[c-1];
+    for (c = roman->cur_sh->maxcol; c >= roman->cur_sh->curcol + after + 1; c--) {
+        roman->cur_sh->fwidth[c] = roman->cur_sh->fwidth[c-1];
+        roman->cur_sh->precision[c] = roman->cur_sh->precision[c-1];
+        roman->cur_sh->realfmt[c] = roman->cur_sh->realfmt[c-1];
+        roman->cur_sh->col_hidden[c] = roman->cur_sh->col_hidden[c-1];
+        roman->cur_sh->col_frozen[c] = roman->cur_sh->col_frozen[c-1];
     }
-    for (c = curcol + after; c - curcol - after < 1; c++) {
-        fwidth[c] = DEFWIDTH;
-        precision[c] =  DEFPREC;
-        realfmt[c] = DEFREFMT;
-        col_hidden[c] = FALSE;
-        col_frozen[c] = FALSE;
+    for (c = roman->cur_sh->curcol + after; c - roman->cur_sh->curcol - after < 1; c++) {
+        roman->cur_sh->fwidth[c] = DEFWIDTH;
+        roman->cur_sh->precision[c] =  DEFPREC;
+        roman->cur_sh->realfmt[c] = DEFREFMT;
+        roman->cur_sh->col_hidden[c] = FALSE;
+        roman->cur_sh->col_frozen[c] = FALSE;
     }
 
-    for (r=0; r <= maxrow; r++) {
-        pp = ATBL(tbl, r, maxcol);
+    for (r=0; r <= roman->cur_sh->maxrow; r++) {
+        pp = ATBL(roman->cur_sh, roman->cur_sh->tbl, r, roman->cur_sh->maxcol);
         for (c = lim; --c >= 0; pp--)
             if ((pp[0] = pp[-1])) pp[0]->col++;
 
-        pp = ATBL(tbl, r, curcol + after);
-        for (c = curcol + after; c - curcol - after < 1; c++, pp++)
+        pp = ATBL(roman->cur_sh, roman->cur_sh->tbl, r, roman->cur_sh->curcol + after);
+        for (c = roman->cur_sh->curcol + after; c - roman->cur_sh->curcol - after < 1; c++, pp++)
             *pp = (struct ent *) 0;
     }
 
     // if padding exists in the old curcol, we copy it to the new col!
-    for (r = 0; r < maxrows; r++) {
-        if (c >= 0 && (qq = ATBL(tbl, r, c+1)) && (*qq) && (*qq)->pad) {
-            p = lookat(r, c);
+    for (r = 0; r < roman->cur_sh->maxrows; r++) {
+        if (c >= 0 && (qq = ATBL(roman->cur_sh, roman->cur_sh->tbl, r, c+1)) && (*qq) && (*qq)->pad) {
+            p = lookat(roman->cur_sh, r, c);
             p->pad = (*qq)->pad;
         }
     }
 
-    curcol += after;
-    modflg++;
+    roman->cur_sh->curcol += after;
+    roman->modflg++;
     return;
 }
 
@@ -878,33 +876,33 @@ void insert_col(int after) {
  * \return none
  */
 void deleterow(int row, int mult) {
-    if (any_locked_cells(row, 0, row + mult - 1, maxcol)) {
+    if (any_locked_cells(row, 0, row + mult - 1, roman->cur_sh->maxcol)) {
         sc_error("Locked cells encountered. Nothing changed");
         return;
     }
 #ifdef UNDO
     create_undo_action();
     // here we save in undostruct, all the ents that depends on the deleted one (before change)
-    ents_that_depends_on_range(row, 0, row + mult - 1, maxcol);
-    copy_to_undostruct(row, 0, row + mult - 1, maxcol, UNDO_DEL, HANDLE_DEPS, NULL);
-    save_undo_range_shift(-mult, 0, row, 0, row - 1 + mult, maxcol);
+    ents_that_depends_on_range(row, 0, row + mult - 1, roman->cur_sh->maxcol);
+    copy_to_undostruct(row, 0, row + mult - 1, roman->cur_sh->maxcol, UNDO_DEL, HANDLE_DEPS, NULL);
+    save_undo_range_shift(-mult, 0, row, 0, row - 1 + mult, roman->cur_sh->maxcol);
     int i;
     for (i=row; i < row + mult; i++) {
-        add_undo_row_format(i, 'R', row_format[currow]);
-        if (row_hidden[i]) undo_hide_show(i, -1, 's', 1);
+        add_undo_row_format(i, 'R', roman->cur_sh->row_format[roman->cur_sh->currow]);
+        if (roman->cur_sh->row_hidden[i]) undo_hide_show(i, -1, 's', 1);
         //else undo_hide_show(i, -1, 'h', 1);
     }
 #endif
 
-    fix_marks(-mult, 0, row + mult - 1, maxrow, 0, maxcol);
-    if (!loading) yank_area(row, 0, row + mult - 1, maxcol, 'r', mult);
+    fix_marks(-mult, 0, row + mult - 1, roman->cur_sh->maxrow, 0, roman->cur_sh->maxcol);
+    if (! roman->loading) yank_area(row, 0, row + mult - 1, roman->cur_sh->maxcol, 'r', mult);
 
     // do the job
     int_deleterow(row, mult);
 
     //flush_saved(); // we have to flush only at exit. this is in case we want to UNDO
 
-    if (!loading) modflg++;
+    if (! roman->loading) roman->modflg++;
 
 #ifdef UNDO
     // here we save in undostruct, just the ents that depends on the deleted one (after the change)
@@ -932,41 +930,41 @@ void int_deleterow(int row, int mult) {
     register struct ent * q;
     int r, c;
 
-    //if (currow > maxrow) return;
+    //if (roman->cur_sh->currow > roman->cur_sh->maxrow) return;
 
     while (mult--) {
         // we need to decrease row of the row that we delete if
         // other cells refers to this one.
-        for (c = 0; c < maxcols; c++) {
-            if (row <= maxrow) {
-                pp = ATBL(tbl, row, c);
-                if ((q = *ATBL(tbl, row, c)) != NULL && q->row > 0) q->row--;
+        for (c = 0; c < roman->cur_sh->maxcols; c++) {
+            if (row <= roman->cur_sh->maxrow) {
+                pp = ATBL(roman->cur_sh, roman->cur_sh->tbl, row, c);
+                if ((q = *ATBL(roman->cur_sh, roman->cur_sh->tbl, row, c)) != NULL && q->row > 0) q->row--;
             }
         }
         sync_refs();
 
         // and after that the erase_area of the deleted row
-        erase_area(row, 0, row, maxcol, 0, 1); //important: this mark the ents as deleted
+        erase_area(row, 0, row, roman->cur_sh->maxcol, 0, 1); //important: this mark the ents as deleted
 
         // and we decrease ->row of all rows after the deleted one
-        for (r = row; r < maxrows - 1; r++) {
-            for (c = 0; c < maxcols; c++) {
-                if (r <= maxrow) {
-                    pp = ATBL(tbl, r, c);
-                    pp[0] = *ATBL(tbl, r+1, c);
+        for (r = row; r < roman->cur_sh->maxrows - 1; r++) {
+            for (c = 0; c < roman->cur_sh->maxcols; c++) {
+                if (r <= roman->cur_sh->maxrow) {
+                    pp = ATBL(roman->cur_sh, roman->cur_sh->tbl, r, c);
+                    pp[0] = *ATBL(roman->cur_sh, roman->cur_sh->tbl, r+1, c);
                     if ( pp[0] ) pp[0]->row--;
                 }
             }
             //update row_hidden and row_format here
-            row_hidden[r] = row_hidden[r+1];
-            row_frozen[r] = row_frozen[r+1];
-            row_format[r] = row_format[r+1];
+            roman->cur_sh->row_hidden[r] = roman->cur_sh->row_hidden[r+1];
+            roman->cur_sh->row_frozen[r] = roman->cur_sh->row_frozen[r+1];
+            roman->cur_sh->row_format[r] = roman->cur_sh->row_format[r+1];
         }
 
         rebuild_graph(); //TODO CHECK HERE WHY REBUILD IS NEEDED. See NOTE1 in shift.c
         sync_refs();
         EvalAll();
-        maxrow--;
+        roman->cur_sh->maxrow--;
     }
     return;
 }
@@ -996,11 +994,11 @@ void ljustify(int sr, int sc, int er, int ec) {
     }
     for (i = sr; i <= er; i++) {
         for (j = sc; j <= ec; j++) {
-            p = *ATBL(tbl, i, j);
+            p = *ATBL(roman->cur_sh, roman->cur_sh->tbl, i, j);
             if (p && p->label) {
                 p->flags &= ~is_label;
                 p->flags |= is_leftflush | is_changed;
-                modflg++;
+                roman->modflg++;
             }
         }
     }
@@ -1032,11 +1030,11 @@ void rjustify(int sr, int sc, int er, int ec) {
     }
     for (i = sr; i <= er; i++) {
         for (j = sc; j <= ec; j++) {
-            p = *ATBL(tbl, i, j);
+            p = *ATBL(roman->cur_sh, roman->cur_sh->tbl, i, j);
             if (p && p->label) {
                 p->flags &= ~(is_label | is_leftflush);
                 p->flags |= is_changed;
-                modflg++;
+                roman->modflg++;
             }
         }
     }
@@ -1068,11 +1066,11 @@ void center(int sr, int sc, int er, int ec) {
     }
     for (i = sr; i <= er; i++) {
         for (j = sc; j <= ec; j++) {
-            p = *ATBL(tbl, i, j);
+            p = *ATBL(roman->cur_sh, roman->cur_sh->tbl, i, j);
             if (p && p->label) {
                 p->flags &= ~is_leftflush;
                 p->flags |= is_label | is_changed;
-                modflg++;
+                roman->modflg++;
             }
         }
     }
@@ -1126,10 +1124,10 @@ void chg_mode(char strcmd){
  * \return none
  */
 void del_selected_cells() {
-    int tlrow = currow;
-    int tlcol = curcol;
-    int brrow = currow;
-    int brcol = curcol;
+    int tlrow = roman->cur_sh->currow;
+    int tlcol = roman->cur_sh->curcol;
+    int brrow = roman->cur_sh->currow;
+    int brcol = roman->cur_sh->curcol;
 
     // is we delete a range
     if (is_range_selected() != -1) {
@@ -1158,7 +1156,7 @@ void del_selected_cells() {
 #endif
 
     erase_area(tlrow, tlcol, brrow, brcol, 0, 0); //important: this erases the ents, but does NOT mark them as deleted
-    modflg++;
+    roman->modflg++;
     sync_refs();
     //flush_saved(); DO NOT UNCOMMENT! flush_saved shall not be called other than at exit.
 
@@ -1190,7 +1188,7 @@ void del_selected_cells() {
 void enter_cell_content(int r, int c, char * submode,  wchar_t * content) {
     (void) swprintf(interp_line, BUFFERSIZE, L"%s %s = %ls", submode, v_name(r, c), content);
     send_to_interp(interp_line);
-    if (get_conf_int("autocalc") && ! loading) EvalRange(r, c, r, c);
+    if (get_conf_int("autocalc") && ! roman->loading) EvalRange(r, c, r, c);
 }
 
 
@@ -1216,7 +1214,7 @@ void send_to_interp(wchar_t * oper) {
     line[0]='\0';
     // commented on 28/04/2021. EvalAll should be used only on certain ocasions.
     // Use EvalRange instead when possible, and certainly not here everytime sending to interp.
-    //if (get_conf_int("autocalc") && ! loading) EvalAll();
+    //if (get_conf_int("autocalc") && ! roman->loading) EvalAll();
     return;
 }
 
@@ -1228,11 +1226,11 @@ void send_to_interp(wchar_t * oper) {
  * \param[in] col
  * \return none
  */
-struct ent * lookat(int row, int col) {
+struct ent * lookat(struct sheet * sh, int row, int col) {
     register struct ent **pp;
 
-    checkbounds(&row, &col);
-    pp = ATBL(tbl, row, col);
+    checkbounds(sh, &row, &col);
+    pp = ATBL(sh, sh->tbl, row, col);
     if ( *pp == NULL) {
          *pp = (struct ent *) malloc( (unsigned) sizeof(struct ent) );
         (*pp)->label = (char *) 0;
@@ -1248,8 +1246,8 @@ struct ent * lookat(int row, int col) {
     }
     (*pp)->row = row;
     (*pp)->col = col;
-    if (row > maxrow) maxrow = row;
-    if (col > maxcol) maxcol = col;
+    if (row > roman->cur_sh->maxrow) roman->cur_sh->maxrow = row;
+    if (col > roman->cur_sh->maxcol) roman->cur_sh->maxcol = col;
     return (*pp);
 }
 
@@ -1300,7 +1298,7 @@ void clearent(struct ent * v) {
 
     v->flags = is_changed;
 
-    modflg++;
+    roman->modflg++;
 
     return;
 }
@@ -1312,23 +1310,23 @@ void clearent(struct ent * v) {
  * \return lookat
  */
 struct ent * back_col(int arg) {
-    int c = curcol;
+    int c = roman->cur_sh->curcol;
 
     while (--arg >= 0) {
         if (c) {
-            curcol = --c;
+            roman->cur_sh->curcol = --c;
         } else {
             sc_info ("At column A");
             break;
         }
-        while (col_hidden[c] && c) {
-            curcol = --c;
+        while (roman->cur_sh->col_hidden[c] && c) {
+            roman->cur_sh->curcol = --c;
         }
     }
-    if (curcol < offscr_sc_cols)
-        offscr_sc_cols = curcol;
+    if (roman->cur_sh->curcol < roman->cur_sh->offscr_sc_cols)
+        roman->cur_sh->offscr_sc_cols = roman->cur_sh->curcol;
 
-    return lookat(currow, c);
+    return lookat(roman->cur_sh, roman->cur_sh->currow, c);
 }
 
 
@@ -1338,25 +1336,25 @@ struct ent * back_col(int arg) {
  * \return lookat
  */
 struct ent * forw_col(int arg) {
-    int c = curcol;
+    int c = roman->cur_sh->curcol;
 
     while (--arg >= 0) {
-        if (c < maxcols - 1) {
+        if (c < roman->cur_sh->maxcols - 1) {
             c++;
         } else {
-            if (! growtbl(GROWCOL, 0, arg)) {    /* get as much as needed */
+            if (! growtbl(roman->cur_sh, GROWCOL, 0, arg)) {    /* get as much as needed */
                 sc_error("cannot grow");
-                return lookat(currow, curcol);
+                return lookat(roman->cur_sh, roman->cur_sh->currow, roman->cur_sh->curcol);
             } else {
                 c++;
             }
         }
-        while (col_hidden[c] && c < maxcols - 1) {
+        while (roman->cur_sh->col_hidden[c] && c < roman->cur_sh->maxcols - 1) {
             c++;
         }
 
     }
-    return lookat(currow, c);
+    return lookat(roman->cur_sh, roman->cur_sh->currow, c);
 }
 
 
@@ -1366,21 +1364,21 @@ struct ent * forw_col(int arg) {
  * \return lookat
  */
 struct ent * forw_row(int arg) {
-    int r = currow;
+    int r = roman->cur_sh->currow;
 
     while (arg--) {
-        if (r < maxrows - 1)
+        if (r < roman->cur_sh->maxrows - 1)
             r++;
         else {
-            if (! growtbl(GROWROW, arg, 0)) {
+            if (! growtbl(roman->cur_sh, GROWROW, arg, 0)) {
                 sc_error("cannot grow");
-                return lookat(currow, curcol);
+                return lookat(roman->cur_sh, roman->cur_sh->currow, roman->cur_sh->curcol);
             } else
                 r++;
         }
-        while (row_hidden[r] && r < maxrows - 1) r++;
+        while (roman->cur_sh->row_hidden[r] && r < roman->cur_sh->maxrows - 1) r++;
     }
-    return lookat(r, curcol);
+    return lookat(roman->cur_sh, r, roman->cur_sh->curcol);
 }
 
 
@@ -1389,7 +1387,7 @@ struct ent * forw_row(int arg) {
  * \return lookat
  */
 struct ent * back_row(int arg) {
-    int r = currow;
+    int r = roman->cur_sh->currow;
 
     while (--arg >= 0) {
         if (r) {
@@ -1398,9 +1396,9 @@ struct ent * back_row(int arg) {
             sc_info ("At row 0");
             break;
         }
-        while (row_hidden[r] && r) --r;
+        while (roman->cur_sh->row_hidden[r] && r) --r;
     }
-    return lookat(r, curcol);
+    return lookat(roman->cur_sh, r, roman->cur_sh->curcol);
 }
 
 
@@ -1411,22 +1409,22 @@ struct ent * back_row(int arg) {
  */
 void scroll_down(int n) {
     while (n--) {
-        int last, currow_orig = currow;
+        int last, currow_orig = roman->cur_sh->currow;
         /* find last mobile row */
         calc_mobile_rows(&last);
         /* move to next non-hidden non-frozen row */
         do {
-            lookat(++last, curcol);
-            if (last >= maxrows)
+            lookat(roman->cur_sh, ++last, roman->cur_sh->curcol);
+            if (last >= roman->cur_sh->maxrows)
                 return;
-        } while (row_hidden[last] || row_frozen[last]);
+        } while (roman->cur_sh->row_hidden[last] || roman->cur_sh->row_frozen[last]);
         /* this will adjust offscr_sc_rows */
-        currow = last;
+        roman->cur_sh->currow = last;
         calc_mobile_rows(NULL);
         /* restore currow */
-        currow = currow_orig;
-        if (currow < offscr_sc_rows)
-            currow = offscr_sc_rows;
+        roman->cur_sh->currow = currow_orig;
+        if (roman->cur_sh->currow < roman->cur_sh->offscr_sc_rows)
+            roman->cur_sh->currow = roman->cur_sh->offscr_sc_rows;
         unselect_ranges();
     }
 }
@@ -1439,21 +1437,21 @@ void scroll_down(int n) {
  */
 void scroll_up(int n) {
     while (n--) {
-        int first, last, currow_orig = currow;
+        int first, last, currow_orig = roman->cur_sh->currow;
         /* move to previous non-hidden non-frozen row */
-        first = offscr_sc_rows;
+        first = roman->cur_sh->offscr_sc_rows;
         do {
             if (--first < 0)
                 return;
-        } while (row_hidden[first] || row_frozen[first]);
-        offscr_sc_rows = first;
+        } while (roman->cur_sh->row_hidden[first] || roman->cur_sh->row_frozen[first]);
+        roman->cur_sh->offscr_sc_rows = first;
         /* find corresponding last mobile row */
-        currow = first;
+        roman->cur_sh->currow = first;
         calc_mobile_rows(&last);
         /* restore/adjust currow */
-        currow = currow_orig;
-        if (currow > last)
-            currow = last;
+        roman->cur_sh->currow = currow_orig;
+        if (roman->cur_sh->currow > last)
+            roman->cur_sh->currow = last;
         unselect_ranges();
     }
 }
@@ -1464,7 +1462,7 @@ void scroll_up(int n) {
  * \return lookat
  */
 struct ent * go_home() {
-    return lookat(0, 0);
+    return lookat(roman->cur_sh, 0, 0);
 }
 
 
@@ -1473,9 +1471,9 @@ struct ent * go_home() {
  * \return lookat
  */
 struct ent * vert_top() {
-    int r = offscr_sc_rows;
-    while (row_hidden[r] || row_frozen[r]) r++;
-    return lookat(r, curcol);
+    int r = roman->cur_sh->offscr_sc_rows;
+    while (roman->cur_sh->row_hidden[r] || roman->cur_sh->row_frozen[r]) r++;
+    return lookat(roman->cur_sh, r, roman->cur_sh->curcol);
 }
 
 
@@ -1486,7 +1484,7 @@ struct ent * vert_top() {
 struct ent * vert_bottom() {
     int last;
     calc_mobile_rows(&last);
-    return lookat(last, curcol);
+    return lookat(roman->cur_sh, last, roman->cur_sh->curcol);
 }
 
 
@@ -1500,21 +1498,21 @@ struct ent * vert_middle() {
     int curr_pos = 0;
     int mobile_rows = calc_mobile_rows(NULL);
 
-    for (i = 0; i < maxrows; i++) {
-        if (row_hidden[i])
+    for (i = 0; i < roman->cur_sh->maxrows; i++) {
+        if (roman->cur_sh->row_hidden[i])
             continue;
-        if (! row_frozen[i]) {
-            if (i < offscr_sc_rows)
+        if (! roman->cur_sh->row_frozen[i]) {
+            if (i < roman->cur_sh->offscr_sc_rows)
                 continue;
             if (--mobile_rows < 0)
                 continue;
         }
 
         /* compare middle of current row against middle of screen */
-        if (curr_pos + (row_format[i] - 1)/2 >= midscreen_pos)
-            return lookat(i, curcol);
+        if (curr_pos + (roman->cur_sh->row_format[i] - 1)/2 >= midscreen_pos)
+            return lookat(roman->cur_sh, i, roman->cur_sh->curcol);
 
-        curr_pos += row_format[i];
+        curr_pos += roman->cur_sh->row_format[i];
     }
     return NULL;
 }
@@ -1527,20 +1525,21 @@ struct ent * vert_middle() {
 struct ent * go_end() {
     int r = 0, c = 0;
     int raux = r, caux = c;
+    struct sheet * sh = roman->cur_sh;
     register struct ent *p;
     do {
-        if (c < maxcols - 1)
+        if (c < sh->maxcols - 1)
             c++;
         else {
-            if (r < maxrows - 1) {
+            if (r < sh->maxrows - 1) {
                 r++;
                 c = 0;
             } else break;
         }
-        if (VALID_CELL(p, r, c) && ! col_hidden[c] && ! row_hidden[r]) { raux = r; caux = c; }
-    } while ( r < maxrows || c < maxcols );
-    if ( ! VALID_CELL(p, r, c) && ! col_hidden[c] && ! row_hidden[r] )
-        return lookat(raux, caux);
+        if (VALID_CELL(sh, p, r, c) && ! sh->col_hidden[c] && ! sh->row_hidden[r]) { raux = r; caux = c; }
+    } while ( r < sh->maxrows || c < sh->maxcols );
+    if ( ! VALID_CELL(sh, p, r, c) && ! sh->col_hidden[c] && ! sh->row_hidden[r] )
+        return lookat(sh, raux, caux);
     return NULL;
 }
 
@@ -1558,8 +1557,8 @@ struct ent * tick(char ch) {
     r = m->row;
 
     if (r != -1) {
-        checkbounds(&r, &curcol);
-        return lookat(r, m->col);
+        checkbounds(roman->cur_sh, &r, &(roman->cur_sh->curcol));
+        return lookat(roman->cur_sh, r, m->col);
     }
 
     // tick range
@@ -1567,8 +1566,8 @@ struct ent * tick(char ch) {
         r = m->rng->tlrow;
         c = m->rng->tlcol;
         m->rng->selected = 1;
-        checkbounds(&r, &c);
-        return lookat(r, c);
+        checkbounds(roman->cur_sh, &r, &c);
+        return lookat(roman->cur_sh, r, c);
     }
     return NULL;
 }
@@ -1581,22 +1580,22 @@ struct ent * tick(char ch) {
  */
 void scroll_right(int n) {
     while (n--) {
-        int last, curcol_orig = curcol;
+        int last, curcol_orig = roman->cur_sh->curcol;
         /* find last mobile column */
         calc_mobile_cols(&last);
         /* move to next non-hidden non-frozen column */
         do {
-            lookat(currow, ++last);
-            if (last >= maxcols)
+            lookat(roman->cur_sh, roman->cur_sh->currow, ++last);
+            if (last >= roman->cur_sh->maxcols)
                 return;
-        } while (col_hidden[last] || col_frozen[last]);
+        } while (roman->cur_sh->col_hidden[last] || roman->cur_sh->col_frozen[last]);
         /* this will adjust offscr_sc_cols */
-        curcol = last;
+        roman->cur_sh->curcol = last;
         calc_mobile_cols(NULL);
         /* restore curcol */
-        curcol = curcol_orig;
-        if (curcol < offscr_sc_cols)
-            curcol = offscr_sc_cols;
+        roman->cur_sh->curcol = curcol_orig;
+        if (roman->cur_sh->curcol < roman->cur_sh->offscr_sc_cols)
+            roman->cur_sh->curcol = roman->cur_sh->offscr_sc_cols;
         unselect_ranges();
     }
 }
@@ -1608,21 +1607,21 @@ void scroll_right(int n) {
  */
 void scroll_left(int n) {
     while (n--) {
-        int first, last, curcol_orig = curcol;
+        int first, last, curcol_orig = roman->cur_sh->curcol;
         /* move to previous non-hidden non-frozen column */
-        first = offscr_sc_cols;
+        first = roman->cur_sh->offscr_sc_cols;
         do {
             if (--first < 0)
                 return;
-        } while (col_hidden[first] || col_frozen[first]);
-        offscr_sc_cols = first;
+        } while (roman->cur_sh->col_hidden[first] || roman->cur_sh->col_frozen[first]);
+        roman->cur_sh->offscr_sc_cols = first;
         /* find corresponding last mobile column */
-        curcol = first;
+        roman->cur_sh->curcol = first;
         calc_mobile_cols(&last);
         /* restore/adjust curcol */
-        curcol = curcol_orig;
-        if (curcol > last)
-            curcol = last;
+        roman->cur_sh->curcol = curcol_orig;
+        if (roman->cur_sh->curcol > last)
+            roman->cur_sh->curcol = last;
         unselect_ranges();
     }
 }
@@ -1635,8 +1634,8 @@ void scroll_left(int n) {
  */
 struct ent * left_limit() {
     int c = 0;
-    while ( col_hidden[c] && c < curcol ) c++;
-    return lookat(currow, c);
+    while ( roman->cur_sh->col_hidden[c] && c < roman->cur_sh->curcol ) c++;
+    return lookat(roman->cur_sh, roman->cur_sh->currow, c);
 }
 
 
@@ -1648,9 +1647,9 @@ struct ent * left_limit() {
  */
 struct ent * right_limit(int row) {
     register struct ent *p;
-    int c = maxcols - 1;
-    while ( (! VALID_CELL(p, row, c) && c > 0) || col_hidden[c]) c--;
-    return lookat(row, c);
+    int c = roman->cur_sh->maxcols - 1;
+    while ( (! VALID_CELL(roman->cur_sh, p, row, c) && c > 0) || roman->cur_sh->col_hidden[c]) c--;
+    return lookat(roman->cur_sh, row, c);
 }
 
 
@@ -1661,8 +1660,8 @@ struct ent * right_limit(int row) {
  */
 struct ent * goto_top() {
     int r = 0;
-    while ( row_hidden[r] && r < currow ) r++;
-    return lookat(r, curcol);
+    while ( roman->cur_sh->row_hidden[r] && r < roman->cur_sh->currow ) r++;
+    return lookat(roman->cur_sh, r, roman->cur_sh->curcol);
 }
 
 
@@ -1674,9 +1673,9 @@ struct ent * goto_top() {
 // FIXME to handle freeze rows/cols
 struct ent * goto_bottom() {
     register struct ent *p;
-    int r = maxrows - 1;
-    while ( (! VALID_CELL(p, r, curcol) && r > 0) || row_hidden[r]) r--;
-    return lookat(r, curcol);
+    int r = roman->cur_sh->maxrows - 1;
+    while ( (! VALID_CELL(roman->cur_sh, p, r, roman->cur_sh->curcol) && r > 0) || roman->cur_sh->row_hidden[r]) r--;
+    return lookat(roman->cur_sh, r, roman->cur_sh->curcol);
 }
 
 
@@ -1688,17 +1687,17 @@ struct ent * goto_bottom() {
  * \return lookat
  */
 struct ent * goto_last_col() {
-    int r, mr = maxrows;
+    int r, mr = roman->cur_sh->maxrows;
     int c, mc = 0;
     register struct ent *p;
     int rf = 0;
 
     for (r=0; r<mr; r++) {
-        for (c=0; c<maxcols; c++) {
-            if (c >= mc && VALID_CELL(p, r, c)) { mc = c; rf = r; }
+        for (c=0; c<roman->cur_sh->maxcols; c++) {
+            if (c >= mc && VALID_CELL(roman->cur_sh, p, r, c)) { mc = c; rf = r; }
         }
     }
-    return lookat(rf, mc);
+    return lookat(roman->cur_sh, rf, mc);
 }
 
 
@@ -1708,23 +1707,23 @@ struct ent * goto_last_col() {
  * \return lookat
  */
 struct ent * go_forward() {
-    int r = currow, c = curcol;
+    int r = roman->cur_sh->currow, c = roman->cur_sh->curcol;
     int r_ori = r, c_ori = c;
     register struct ent * p;
     do {
-        if (c < maxcols - 1) {
+        if (c < roman->cur_sh->maxcols - 1) {
             c++;
         } else {
-            if (r < maxrows - 1) {
+            if (r < roman->cur_sh->maxrows - 1) {
                 r++;
                 c = 0;
             } else break;
         }
-        if (VALID_CELL(p, r, c) && ! col_hidden[c] && ! row_hidden[r] )
-            return lookat(r, c);
-    } while (r < maxrows || c < maxcols);
+        if (VALID_CELL(roman->cur_sh, p, r, c) && ! roman->cur_sh->col_hidden[c] && ! roman->cur_sh->row_hidden[r] )
+            return lookat(roman->cur_sh, r, c);
+    } while (r < roman->cur_sh->maxrows || c < roman->cur_sh->maxcols);
 
-    return lookat(r_ori, c_ori);
+    return lookat(roman->cur_sh, r_ori, c_ori);
 }
 
 
@@ -1734,7 +1733,7 @@ struct ent * go_forward() {
  * \return lookat
  */
 struct ent * go_bol() {
-    return lookat(currow, offscr_sc_cols);
+    return lookat(roman->cur_sh, roman->cur_sh->currow, roman->cur_sh->offscr_sc_cols);
 }
 
 
@@ -1745,7 +1744,7 @@ struct ent * go_bol() {
 struct ent * go_eol() {
     int last_col;
     calc_mobile_cols(&last_col);
-    return lookat(currow, last_col);
+    return lookat(roman->cur_sh, roman->cur_sh->currow, last_col);
 }
 
 
@@ -1759,21 +1758,21 @@ struct ent * horiz_middle() {
     int curr_pos = 0;
     int mobile_cols = calc_mobile_cols(NULL);
 
-    for (i = 0; i < maxcols; i++) {
-        if (col_hidden[i])
+    for (i = 0; i < roman->cur_sh->maxcols; i++) {
+        if (roman->cur_sh->col_hidden[i])
             continue;
-        if (! col_frozen[i]) {
-            if (i < offscr_sc_cols)
+        if (! roman->cur_sh->col_frozen[i]) {
+            if (i < roman->cur_sh->offscr_sc_cols)
                 continue;
             if (--mobile_cols < 0)
                 continue;
         }
 
         /* compare middle of current col against middle of screen */
-        if (curr_pos + (fwidth[i] - 1)/2 >= midscreen_pos)
-            return lookat(currow, i);
+        if (curr_pos + (roman->cur_sh->fwidth[i] - 1)/2 >= midscreen_pos)
+            return lookat(roman->cur_sh, roman->cur_sh->currow, i);
 
-        curr_pos += fwidth[i];
+        curr_pos += roman->cur_sh->fwidth[i];
     }
     return NULL;
 }
@@ -1785,7 +1784,7 @@ struct ent * horiz_middle() {
  * \return lookat
  */
 struct ent * go_backward() {
-    int r = currow, c = curcol;
+    int r = roman->cur_sh->currow, c = roman->cur_sh->curcol;
     int r_ori = r, c_ori = c;
     register struct ent * p;
     do {
@@ -1794,14 +1793,14 @@ struct ent * go_backward() {
         else {
             if (r) {
                 r--;
-                c = maxcols - 1;
+                c = roman->cur_sh->maxcols - 1;
             } else break;
         }
-        if ( VALID_CELL(p, r, c) && ! col_hidden[c] && ! row_hidden[r] )
-            return lookat(r, c);
-    } while ( currow || curcol );
+        if ( VALID_CELL(roman->cur_sh, p, r, c) && ! roman->cur_sh->col_hidden[c] && ! roman->cur_sh->row_hidden[r] )
+            return lookat(roman->cur_sh, r, c);
+    } while ( roman->cur_sh->currow || roman->cur_sh->curcol );
 
-    return lookat(r_ori, c_ori);
+    return lookat(roman->cur_sh, r_ori, c_ori);
 }
 
 
@@ -1828,15 +1827,15 @@ void auto_fit(int ci, int cf, int min) {
     create_undo_action();
 #endif
 
-    checkbounds(&maxrow, &cf);
+    checkbounds(roman->cur_sh, &(roman->cur_sh->maxrow), &cf);
 
     for (c = ci; c <= cf; c++) {
 #ifdef UNDO
-        add_undo_col_format(c, 'R', fwidth[c], precision[c], realfmt[c]);
+        add_undo_col_format(c, 'R', roman->cur_sh->fwidth[c], roman->cur_sh->precision[c], roman->cur_sh->realfmt[c]);
 #endif
-        fwidth[c] = min;
-        for (r = 0; r <= maxrow; r++) {
-            if ((p = *ATBL(tbl, r, c)) != NULL) {
+        roman->cur_sh->fwidth[c] = min;
+        for (r = 0; r <= roman->cur_sh->maxrow; r++) {
+            if ((p = *ATBL(roman->cur_sh, roman->cur_sh->tbl, r, c)) != NULL) {
                 sum = 0;
                 if (p->pad) sum += p->pad;
                 if (p->label) {
@@ -1847,15 +1846,15 @@ void auto_fit(int ci, int cf, int min) {
                         sum += wcswidth(widestring, wcslen(widestring));
                 }
                 if (p->flags & is_valid) {
-                    sprintf(field, "%.*f", precision[c], p->v);
+                    sprintf(field, "%.*f", roman->cur_sh->precision[c], p->v);
                     sum += strlen(field);
                 }
-                if (sum > fwidth[c] && sum < SC_DISPLAY_COLS)
-                    fwidth[c] = sum;
+                if (sum > roman->cur_sh->fwidth[c] && sum < SC_DISPLAY_COLS)
+                    roman->cur_sh->fwidth[c] = sum;
             }
         }
 #ifdef UNDO
-        add_undo_col_format(c, 'A', fwidth[c], precision[c], realfmt[c]);
+        add_undo_col_format(c, 'A', roman->cur_sh->fwidth[c], roman->cur_sh->precision[c], roman->cur_sh->realfmt[c]);
 #endif
     }
 #ifdef UNDO
@@ -1895,7 +1894,7 @@ void valueize_area(int sr, int sc, int er, int ec) {
         sr = 0;
     if (sc < 0)
         sc = 0;
-    checkbounds(&er, &ec);
+    checkbounds(roman->cur_sh, &er, &ec);
 
     #ifdef UNDO
     create_undo_action();
@@ -1903,7 +1902,7 @@ void valueize_area(int sr, int sc, int er, int ec) {
     #endif
     for (r = sr; r <= er; r++) {
         for (c = sc; c <= ec; c++) {
-            p = *ATBL(tbl, r, c);
+            p = *ATBL(roman->cur_sh, roman->cur_sh->tbl, r, c);
             if (p && p->flags & is_locked) {
                 sc_error(" Cell %s%d is locked", coltoa(c), r);
                 continue;
@@ -1968,8 +1967,8 @@ void select_inner_range(int * vir_tlrow, int * vir_tlcol, int * vir_brrow, int *
                 for (r=-1; r<=1; r++)
                     for (c=-1; c<=1; c++) {
                         if (r == 0 && c == 0) continue;
-                        else if (rr + r < 0 || cc + c < 0 || rr + r > maxrow || cc + c > maxcol) continue;
-                        p = *ATBL(tbl, rr + r, cc + c);
+                        else if (rr + r < 0 || cc + c < 0 || rr + r > roman->cur_sh->maxrow || cc + c > roman->cur_sh->maxcol) continue;
+                        p = *ATBL(roman->cur_sh, roman->cur_sh->tbl, rr + r, cc + c);
                         if ( p != NULL && (p->label || p->flags & is_valid) ) {
                             if (*vir_brcol < cc + c) {
                                 *vir_brcol = cc + c;
@@ -2002,7 +2001,7 @@ void select_inner_range(int * vir_tlrow, int * vir_tlcol, int * vir_brrow, int *
  * \return 1 if cell if locked; 0 otherwise
  */
 int locked_cell(int r, int c) {
-    struct ent *p = *ATBL(tbl, r, c);
+    struct ent *p = *ATBL(roman->cur_sh, roman->cur_sh->tbl, r, c);
     if (p && (p->flags & is_locked)) {
         sc_error("Cell %s%d is locked", coltoa(c), r) ;
         return 1;
@@ -2027,7 +2026,7 @@ int any_locked_cells(int r1, int c1, int r2, int c2) {
 
     for (r = r1; r <= r2; r++)
         for (c = c1; c <= c2; c++) {
-            p = *ATBL(tbl, r, c);
+            p = *ATBL(roman->cur_sh, roman->cur_sh->tbl, r, c);
             if (p && (p->flags & is_locked))
                 return 1;
         }
@@ -2040,36 +2039,36 @@ int any_locked_cells(int r1, int c1, int r2, int c2) {
  * \return none
  */
 int fsum() {
-    int r = currow, c = curcol;
+    int r = roman->cur_sh->currow, c = roman->cur_sh->curcol;
     struct ent * p;
 
-    if (r > 0 && (*ATBL(tbl, r-1, c) != NULL) && (*ATBL(tbl, r-1, c))->flags & is_valid) {
-        for (r = currow-1; r >= 0; r--) {
-            p = *ATBL(tbl, r, c);
+    if (r > 0 && (*ATBL(roman->cur_sh, roman->cur_sh->tbl, r-1, c) != NULL) && (*ATBL(roman->cur_sh, roman->cur_sh->tbl, r-1, c))->flags & is_valid) {
+        for (r = roman->cur_sh->currow-1; r >= 0; r--) {
+            p = *ATBL(roman->cur_sh, roman->cur_sh->tbl, r, c);
             if (p == NULL) break;
             if (! (p->flags & is_valid)) break;
         }
-        if (currow != r) {
-            swprintf(interp_line, BUFFERSIZE, L"let %s%d = @SUM(", coltoa(curcol), currow);
-            swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%s%d:", coltoa(curcol), r+1);
-            swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%s%d)", coltoa(curcol), currow-1);
+        if (roman->cur_sh->currow != r) {
+            swprintf(interp_line, BUFFERSIZE, L"let %s%d = @SUM(", coltoa(roman->cur_sh->curcol), roman->cur_sh->currow);
+            swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%s%d:", coltoa(roman->cur_sh->curcol), r+1);
+            swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%s%d)", coltoa(roman->cur_sh->curcol), roman->cur_sh->currow-1);
         }
-    } else if (c > 0 && (*ATBL(tbl, r, c-1) != NULL) && (*ATBL(tbl, r, c-1))->flags & is_valid) {
-        for (c = curcol-1; c >= 0; c--) {
-            p = *ATBL(tbl, r, c);
+    } else if (c > 0 && (*ATBL(roman->cur_sh, roman->cur_sh->tbl, r, c-1) != NULL) && (*ATBL(roman->cur_sh, roman->cur_sh->tbl, r, c-1))->flags & is_valid) {
+        for (c = roman->cur_sh->curcol-1; c >= 0; c--) {
+            p = *ATBL(roman->cur_sh, roman->cur_sh->tbl, r, c);
             if (p == NULL) break;
             if (! (p->flags & is_valid)) break;
         }
-        if (curcol != c) {
-            swprintf(interp_line, BUFFERSIZE, L"let %s%d = @SUM(", coltoa(curcol), currow);
+        if (roman->cur_sh->curcol != c) {
+            swprintf(interp_line, BUFFERSIZE, L"let %s%d = @SUM(", coltoa(roman->cur_sh->curcol), roman->cur_sh->currow);
             swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%s%d:", coltoa(c+1), r);
-            swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%s%d)", coltoa(curcol-1), r);
+            swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%s%d)", coltoa(roman->cur_sh->curcol-1), r);
         }
     }
 
-    if ((currow != r || curcol != c) && wcslen(interp_line))
+    if ((roman->cur_sh->currow != r || roman->cur_sh->curcol != c) && wcslen(interp_line))
         send_to_interp(interp_line);
-    EvalRange(currow, curcol, currow, curcol);
+    EvalRange(roman->cur_sh->currow, roman->cur_sh->curcol, roman->cur_sh->currow, roman->cur_sh->curcol);
     return 0;
 }
 
@@ -2089,15 +2088,15 @@ int fcopy(char * action) {
 
     if (p == -1) { // no range selected
         // fail if the cursor is on the first column
-        if (curcol == 0) {
+        if (roman->cur_sh->curcol == 0) {
             sc_error("Can't fcopy with no arguments while on column 'A'");
             return -1;
         }
 
-        ri = currow;
-        ci = curcol;
-        cf = curcol;
-        for (r=ri+1; r<maxrow && (*ATBL(tbl, r, cf-1)) != NULL && (*ATBL(tbl, r, cf-1))->flags & is_valid ; r++) {}
+        ri = roman->cur_sh->currow;
+        ci = roman->cur_sh->curcol;
+        cf = roman->cur_sh->curcol;
+        for (r=ri+1; r<roman->cur_sh->maxrow && (*ATBL(roman->cur_sh, roman->cur_sh->tbl, r, cf-1)) != NULL && (*ATBL(roman->cur_sh, roman->cur_sh->tbl, r, cf-1))->flags & is_valid ; r++) {}
         rf = --r;
     } else { // range is selected
         ri = sr->tlrow;
@@ -2108,17 +2107,17 @@ int fcopy(char * action) {
 
     // check if all cells that will be copied to somewhere have a formula in them
     if (! strcmp(action, "") || ! strcmp(action, "cells")) {
-        if (!  *ATBL(tbl, ri, ci)       ) goto formula_not_found;
-        if (! (*ATBL(tbl, ri, ci))->expr) goto formula_not_found;
+        if (!  *ATBL(roman->cur_sh, roman->cur_sh->tbl, ri, ci)       ) goto formula_not_found;
+        if (! (*ATBL(roman->cur_sh, roman->cur_sh->tbl, ri, ci))->expr) goto formula_not_found;
     } else if (! strcmp(action, "c") || ! strcmp(action, "columns")) {
         for (c=ci; c<=cf; c++) {
-            if (!  *ATBL(tbl, ri, c)       ) goto formula_not_found;
-            if (! (*ATBL(tbl, ri, c))->expr) goto formula_not_found;
+            if (!  *ATBL(roman->cur_sh, roman->cur_sh->tbl, ri, c)       ) goto formula_not_found;
+            if (! (*ATBL(roman->cur_sh, roman->cur_sh->tbl, ri, c))->expr) goto formula_not_found;
         }
     } else if (! strcmp(action, "r") || ! strcmp(action, "rows")) {
         for (r=ri; r<=rf; r++) {
-            if (!  *ATBL(tbl, r, ci)       ) goto formula_not_found;
-            if (! (*ATBL(tbl, r, ci))->expr) goto formula_not_found;
+            if (!  *ATBL(roman->cur_sh, roman->cur_sh->tbl, r, ci)       ) goto formula_not_found;
+            if (! (*ATBL(roman->cur_sh, roman->cur_sh->tbl, r, ci))->expr) goto formula_not_found;
         }
     } else {
         sc_error("Invalid parameter");
@@ -2144,36 +2143,36 @@ int fcopy(char * action) {
 
     if (! strcmp(action, "")) {
         // copy first column down (old behavior), for backwards compatibility
-        pact = *ATBL(tbl, ri, ci);
+        pact = *ATBL(roman->cur_sh, roman->cur_sh->tbl, ri, ci);
         for (r=ri+1; r<=rf; r++) {
-            pdest = lookat(r, ci);
-            copyent(pdest, pact, r - ri, 0, 0, 0, maxrows, maxcols, 'c');
+            pdest = lookat(roman->cur_sh, r, ci);
+            copyent(pdest, pact, r - ri, 0, 0, 0, roman->cur_sh->maxrows, roman->cur_sh->maxcols, 'c');
         }
     } else if (! strcmp(action, "c") || ! strcmp(action, "columns")) {
         // copy all selected columns down
         for (c=ci; c<=cf; c++) {
-            pact = *ATBL(tbl, ri, c);
+            pact = *ATBL(roman->cur_sh, roman->cur_sh->tbl, ri, c);
             for (r=ri+1; r<=rf; r++) {
-                pdest = lookat(r, c);
-                copyent(pdest, pact, r - ri, 0, 0, 0, maxrows, maxcols, 'c');
+                pdest = lookat(roman->cur_sh, r, c);
+                copyent(pdest, pact, r - ri, 0, 0, 0, roman->cur_sh->maxrows, roman->cur_sh->maxcols, 'c');
             }
         }
     } else if (! strcmp(action, "r") || ! strcmp(action, "rows")) {
         // copy all selected rows right
         for (r=ri; r<=rf; r++) {
-            pact = *ATBL(tbl, r, ci);
+            pact = *ATBL(roman->cur_sh, roman->cur_sh->tbl, r, ci);
             for (c=ci+1; c<=cf; c++) {
-                pdest = lookat(r, c);
-                copyent(pdest, pact, 0, c - ci, 0, 0, maxrows, maxcols, 'c');
+                pdest = lookat(roman->cur_sh, r, c);
+                copyent(pdest, pact, 0, c - ci, 0, 0, roman->cur_sh->maxrows, roman->cur_sh->maxcols, 'c');
             }
         }
     } else if (! strcmp(action, "cells")) {
         // copy selected cell down and right
-        pact = *ATBL(tbl, ri, ci);
+        pact = *ATBL(roman->cur_sh, roman->cur_sh->tbl, ri, ci);
         for (r=ri; r<=rf; r++) {
             for(c=(r==ri?ci+1:ci); c<=cf; c++) {
-                pdest = lookat(r, c);
-                copyent(pdest, pact, r - ri, c - ci, 0, 0, maxrows, maxcols, 'c');
+                pdest = lookat(roman->cur_sh, r, c);
+                copyent(pdest, pact, r - ri, c - ci, 0, 0, roman->cur_sh->maxrows, roman->cur_sh->maxcols, 'c');
             }
         }
     }
@@ -2213,12 +2212,12 @@ int pad(int n, int r1, int c1, int r2, int c2) {
 
     for (r = r1; r <= r2; r++) {
         for (c = c1; c <= c2; c++) {
-            if (n > fwidth[c]) {
+            if (n > roman->cur_sh->fwidth[c]) {
                 pad_exceed_width = 1;
                 continue;
             }
-            if ((p = *ATBL(tbl, r, c)) != NULL) p->pad = n;
-            modflg++;
+            if ((p = *ATBL(roman->cur_sh, roman->cur_sh->tbl, r, c)) != NULL) p->pad = n;
+            roman->modflg++;
         }
     }
 
@@ -2248,13 +2247,13 @@ void fix_row_hidden(int deltar, int ri, int rf) {
     if (deltar > 0)
         while (d-- > 0)
             for (r = ri; r < rf; r++)
-                row_hidden[r] = row_hidden[r+1];
+                roman->cur_sh->row_hidden[r] = roman->cur_sh->row_hidden[r+1];
 
     // increase / for ir
     if (deltar < 0)
         while (d++ < 0)
             for (r = rf; r > ri; r--)
-                row_hidden[r] = row_hidden[r-1];
+                roman->cur_sh->row_hidden[r] = roman->cur_sh->row_hidden[r-1];
     return;
 }
 
@@ -2272,13 +2271,13 @@ void fix_col_hidden(int deltac, int ci, int cf) {
     if (deltac > 0)
         while (d-- > 0)
             for (c = ci; c < cf; c++)
-                col_hidden[c] = col_hidden[c+1];
+                roman->cur_sh->col_hidden[c] = roman->cur_sh->col_hidden[c+1];
 
     // increase / for ic
     if (deltac < 0)
         while (d++ < 0)
             for (c = cf; c > ci; c--)
-                col_hidden[c] = col_hidden[c-1];
+                roman->cur_sh->col_hidden[c] = roman->cur_sh->col_hidden[c-1];
     return;
 }
 
@@ -2296,13 +2295,13 @@ void fix_row_frozen(int deltar, int ri, int rf) {
     if (deltar > 0)
         while (d-- > 0)
             for (r = ri; r < rf; r++)
-                row_frozen[r] = row_frozen[r+1];
+                roman->cur_sh->row_frozen[r] = roman->cur_sh->row_frozen[r+1];
 
     // increase / for ir
     if (deltar < 0)
         while (d++ < 0)
             for (r = rf; r > ri; r--)
-                row_frozen[r] = row_frozen[r-1];
+                roman->cur_sh->row_frozen[r] = roman->cur_sh->row_frozen[r-1];
     return;
 }
 
@@ -2320,13 +2319,13 @@ void fix_col_frozen(int deltac, int ci, int cf) {
     if (deltac > 0)
         while (d-- > 0)
             for (c = ci; c < cf; c++)
-                col_frozen[c] = col_frozen[c+1];
+                roman->cur_sh->col_frozen[c] = roman->cur_sh->col_frozen[c+1];
 
     // increase / for ic
     if (deltac < 0)
         while (d++ < 0)
             for (c = cf; c > ci; c--)
-                col_frozen[c] = col_frozen[c-1];
+                roman->cur_sh->col_frozen[c] = roman->cur_sh->col_frozen[c-1];
     return;
 }
 
@@ -2356,38 +2355,38 @@ int calc_mobile_rows(int *last_p) {
      * every time here... or at least have a global flag indicating that
      * nothing has changed and that this loop can be skipped.
      */
-    nb_frozen_rows = 0;
-    nb_frozen_screenrows = 0;
-    for (i = 0; i < maxrows; i++) {
-        if (row_hidden[i])
+    roman->cur_sh->nb_frozen_rows = 0;
+    roman->cur_sh->nb_frozen_screenrows = 0;
+    for (i = 0; i < roman->cur_sh->maxrows; i++) {
+        if (roman->cur_sh->row_hidden[i])
             continue;
-        if (row_frozen[i]) {
-            nb_frozen_rows++;
-            nb_frozen_screenrows += row_format[i];
+        if (roman->cur_sh->row_frozen[i]) {
+            roman->cur_sh->nb_frozen_rows++;
+            roman->cur_sh->nb_frozen_screenrows += roman->cur_sh->row_format[i];
         }
     }
 
     /* Adjust display start if currow is above it */
-    if (currow < offscr_sc_rows)
-        offscr_sc_rows = currow;
+    if (roman->cur_sh->currow < roman->cur_sh->offscr_sc_rows)
+        roman->cur_sh->offscr_sc_rows = roman->cur_sh->currow;
 
     /* Determine the space available for mobile rows. */
-    row_space = SC_DISPLAY_ROWS - nb_frozen_screenrows;
+    row_space = SC_DISPLAY_ROWS - roman->cur_sh->nb_frozen_screenrows;
 
     /*
      * Find how many visible mobile rows can fit in there
      * and remember which one is the last to fit.
      */
     mobile_rows = 0;
-    last = offscr_sc_rows;
-    for (i = offscr_sc_rows; i < maxrows; i++) {
-        if (row_hidden[i])
+    last = roman->cur_sh->offscr_sc_rows;
+    for (i = roman->cur_sh->offscr_sc_rows; i < roman->cur_sh->maxrows; i++) {
+        if (roman->cur_sh->row_hidden[i])
             continue;
-        if (row_frozen[i])
+        if (roman->cur_sh->row_frozen[i])
             continue;
-        if (row_format[i] > row_space)
+        if (roman->cur_sh->row_format[i] > row_space)
             break;
-        row_space -= row_format[i];
+        row_space -= roman->cur_sh->row_format[i];
         mobile_rows++;
         last = i;
     }
@@ -2396,22 +2395,22 @@ int calc_mobile_rows(int *last_p) {
      * If currow is beyond the last row here then we must  start over,
      * moving backward this time, to properly position start of display.
      */
-    if (last < currow) {
-        row_space = SC_DISPLAY_ROWS - nb_frozen_screenrows;
+    if (last < roman->cur_sh->currow) {
+        row_space = SC_DISPLAY_ROWS - roman->cur_sh->nb_frozen_screenrows;
         mobile_rows = 0;
-        last = currow;
-        for (i = currow; i >= 0; i--) {
-            if (row_hidden[i])
+        last = roman->cur_sh->currow;
+        for (i = roman->cur_sh->currow; i >= 0; i--) {
+            if (roman->cur_sh->row_hidden[i])
                 continue;
-            if (row_frozen[i])
+            if (roman->cur_sh->row_frozen[i])
                 continue;
-            if (row_format[i] > row_space)
+            if (roman->cur_sh->row_format[i] > row_space)
                 break;
-            row_space -= row_format[i];
+            row_space -= roman->cur_sh->row_format[i];
             mobile_rows++;
             last = i;
         }
-        offscr_sc_rows = last;
+        roman->cur_sh->offscr_sc_rows = last;
     }
 
     if (last_p)
@@ -2444,38 +2443,38 @@ int calc_mobile_cols(int *last_p) {
      * recomputed every time here... or at least have a flag indicating
      * that nothing has changed and that this loop may be skipped.
      */
-    nb_frozen_cols = 0;
-    nb_frozen_screencols = 0;
-    for (i = 0; i < maxcols; i++) {
-        if (row_frozen[i])
+    roman->cur_sh->nb_frozen_cols = 0;
+    roman->cur_sh->nb_frozen_screencols = 0;
+    for (i = 0; i < roman->cur_sh->maxcols; i++) {
+        if (roman->cur_sh->row_frozen[i])
             continue;
-        if (col_frozen[i]) {
-            nb_frozen_cols++;
-            nb_frozen_screencols += fwidth[i];
+        if (roman->cur_sh->col_frozen[i]) {
+            roman->cur_sh->nb_frozen_cols++;
+            roman->cur_sh->nb_frozen_screencols += roman->cur_sh->fwidth[i];
         }
     }
 
     /* Adjust display start if curcol is left of it */
-    if (curcol < offscr_sc_cols)
-        offscr_sc_cols = curcol;
+    if (roman->cur_sh->curcol < roman->cur_sh->offscr_sc_cols)
+        roman->cur_sh->offscr_sc_cols = roman->cur_sh->curcol;
 
     /* Determine the space available for mobile columns. */
-    col_space = SC_DISPLAY_COLS - nb_frozen_screencols;
+    col_space = SC_DISPLAY_COLS - roman->cur_sh->nb_frozen_screencols;
 
     /*
      * Find how many visible mobile columns can fit in there
      * and remember which one is the last to fit.
      */
     mobile_cols = 0;
-    last = offscr_sc_cols;
-    for (i = offscr_sc_cols; i < maxcols; i++) {
-        if (col_hidden[i])
+    last = roman->cur_sh->offscr_sc_cols;
+    for (i = roman->cur_sh->offscr_sc_cols; i < roman->cur_sh->maxcols; i++) {
+        if (roman->cur_sh->col_hidden[i])
             continue;
-        if (col_frozen[i])
+        if (roman->cur_sh->col_frozen[i])
             continue;
-        if (fwidth[i] > col_space)
+        if (roman->cur_sh->fwidth[i] > col_space)
             break;
-        col_space -= fwidth[i];
+        col_space -= roman->cur_sh->fwidth[i];
         mobile_cols++;
         last = i;
     }
@@ -2484,22 +2483,22 @@ int calc_mobile_cols(int *last_p) {
      * If curcol is beyond the last column here then we start over,
      * moving backward this time, to properly position start of display.
      */
-    if (last < curcol) {
-        col_space = SC_DISPLAY_COLS - nb_frozen_screencols;
+    if (last < roman->cur_sh->curcol) {
+        col_space = SC_DISPLAY_COLS - roman->cur_sh->nb_frozen_screencols;
         mobile_cols = 0;
-        last = curcol;
-        for (i = curcol; i >= 0; i--) {
-            if (col_hidden[i])
+        last = roman->cur_sh->curcol;
+        for (i = roman->cur_sh->curcol; i >= 0; i--) {
+            if (roman->cur_sh->col_hidden[i])
                 continue;
-            if (col_frozen[i])
+            if (roman->cur_sh->col_frozen[i])
                 continue;
-            if (fwidth[i] > col_space)
+            if (roman->cur_sh->fwidth[i] > col_space)
                 break;
-            col_space -= fwidth[i];
+            col_space -= roman->cur_sh->fwidth[i];
             mobile_cols++;
             last = i;
         }
-        offscr_sc_cols = last;
+        roman->cur_sh->offscr_sc_cols = last;
     }
 
     if (last_p)

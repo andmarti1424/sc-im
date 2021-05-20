@@ -42,6 +42,7 @@
  * \brief Header file for cmds.c
  */
 
+#include "sc.h"
 #include "macros.h"
 #include <wchar.h>
 
@@ -69,7 +70,7 @@ void deletecol();
 void int_deletecol(int col, int mult);
 void formatcol(int c);
 void del_selected_cells();
-struct ent * lookat(int row, int col); // return pointer to 'ent' of cell. Create it if it doesn't exist
+struct ent * lookat(struct sheet * sh, int row, int col); // return pointer to 'ent' of cell. Create it if it doesn't exist
 void cleanent(struct ent * p);         // Initialize 'ent' to zero. Won't free memory
 void clearent(struct ent * v);         // free 'ent' memory.
 int locked_cell(int r, int c);
