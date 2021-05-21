@@ -2739,6 +2739,8 @@ int is_single_command (struct block * buf, long timeout) {
                  buf->pnext->value == L'G' ||
                  buf->pnext->value == L'0' ||
                  buf->pnext->value == L'l' ||
+                 buf->pnext->value == L't' ||
+                 buf->pnext->value == L'T' ||
                  buf->pnext->value == L'$'))
                  result = MOVEMENT_CMD;
 

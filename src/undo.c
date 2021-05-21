@@ -142,6 +142,7 @@
 #include <stdlib.h>
 #include "undo.h"
 #include "macros.h"
+#include "color.h"
 #include "curses.h"
 #include "conf.h"
 #include "sc.h"

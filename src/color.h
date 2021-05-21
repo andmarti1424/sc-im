@@ -47,7 +47,35 @@
 #include <math.h>
 #define RGB(r, g, b)    r*999/255, g*999/255, b*999/255
 
-#define N_INIT_PAIRS      25
+#define N_INIT_PAIRS      27
+
+#define HEADINGS          0
+#define WELCOME           1
+#define CELL_SELECTION    2
+#define CELL_SELECTION_SC 3
+#define NUMB              4
+#define STRG              5
+#define DATEF             6
+#define EXPRESSION        7
+#define INFO_MSG          8
+#define ERROR_MSG         9
+#define MODE              10
+#define CELL_ID           11
+#define CELL_FORMAT       12
+#define CELL_CONTENT      13
+#define INPUT             14
+#define NORMAL            15
+#define CELL_ERROR        16
+#define CELL_NEGATIVE     17
+#define DEFAULT           18
+#define DEBUG_MSG         19
+#define VALUE_MSG         20
+#define GRID_EVEN         21
+#define GRID_ODD          22
+#define HEADINGS_ODD      23
+#define HELP_HIGHLIGHT    24
+#define SHEET             25
+#define CURRENT_SHEET     26
 
 struct ucolor {
     int fg;

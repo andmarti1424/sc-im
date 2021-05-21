@@ -138,12 +138,15 @@ L"iunmap",
 L"load!",
 L"load",
 L"lock",
+L"newsheet",
+L"nextsheet",
 L"nmap",
 L"nnoremap",
 L"nunmap",
 L"pad",
 L"plot",
 L"plotedit",
+L"prevsheet",
 L"q!",
 L"q",
 L"quit!",
@@ -971,6 +974,11 @@ void do_commandmode(struct block * sb) {
             char valores[MAXMAPITEM * len_maps];
             get_mappings(valores);
             ui_show_text(valores);
+
+        } else if ( ! wcsncmp(inputline, L"newsheet", 8) ||
+                    ! wcsncmp(inputline, L"nextsheet", 9) ||
+                    ! wcsncmp(inputline, L"prevsheet", 9)) {
+            send_to_interp(inputline);
 
         } else if ( ! wcsncmp(inputline, L"nmap", 4) ||
                     ! wcsncmp(inputline, L"imap", 4) ||

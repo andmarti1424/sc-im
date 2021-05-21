@@ -5,6 +5,10 @@ Changes
 Renamed auto_justify to auto_fit
 Save triggers in files
 ui optimizations
+adding support for multisheet
+gt command of normal mode renamed to go
+gt and gT commands in normal mode are now used for moving between sheets`
+added new colors types SHEET and CURRENT_SHEET
 
 
 For v0.8.3 release

@@ -621,21 +621,20 @@ command:
                                    }
                                  }
     |    S_NEXTSHEET             {
-                                   if (roman->cur_sh->next != NULL) {
+                                   if (roman->cur_sh->next != NULL)
                                        roman->cur_sh = roman->cur_sh->next;
-                                       chg_mode('.');
-                                       ui_update(TRUE);
-                                   } else
-                                       sc_info("we are already in last sheet of file");
+                                   else
+                                       roman->cur_sh = roman->first_sh;
+                                   chg_mode('.');
+                                   ui_update(TRUE);
                                  }
-
     |    S_PREVSHEET             {
-                                   if (roman->cur_sh->prev != NULL) {
+                                   if (roman->cur_sh->prev != NULL)
                                        roman->cur_sh = roman->cur_sh->prev;
-                                       chg_mode('.');
-                                       ui_update(TRUE);
-                                   } else
-                                       sc_info("we are already in first sheet of file");
+                                   else
+                                       roman->cur_sh = roman->last_sh;
+                                   chg_mode('.');
+                                   ui_update(TRUE);
                                  }
 
     |    S_NMAP STRING STRING    {

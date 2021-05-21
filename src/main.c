@@ -288,8 +288,7 @@ int main (int argc, char ** argv) {
     roman->cur_sh = NULL;
 
     // malloc a sheet
-    new_sheet(roman, NULL);
-    //roman->first_sh = malloc(sizeof(struct sheet));
+    new_sheet(roman, "Sheet 1");
     roman->cur_sh = roman->first_sh;
     roman->flags &= is_empty;
 

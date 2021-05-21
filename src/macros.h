@@ -92,32 +92,6 @@
 #define EDITION_CMD      1
 #define MOVEMENT_CMD     2
 
-#define HEADINGS          0
-#define WELCOME           1
-#define CELL_SELECTION    2
-#define CELL_SELECTION_SC 3
-#define NUMB              4
-#define STRG              5
-#define DATEF             6
-#define EXPRESSION        7
-#define INFO_MSG          8
-#define ERROR_MSG         9
-#define MODE              10
-#define CELL_ID           11
-#define CELL_FORMAT       12
-#define CELL_CONTENT      13
-#define INPUT             14
-#define NORMAL            15
-#define CELL_ERROR        16
-#define CELL_NEGATIVE     17
-#define DEFAULT           18
-#define DEBUG_MSG         19
-#define VALUE_MSG         20
-#define GRID_EVEN         21
-#define GRID_ODD          22
-#define HEADINGS_ODD      23
-#define HELP_HIGHLIGHT    24
-
 void ui_sc_msg(char * s, int type, ...);
 #define sc_error(x, ...)     ui_sc_msg(x, ERROR_MSG, ##__VA_ARGS__)
 #define sc_debug(x, ...)     ui_sc_msg(x, DEBUG_MSG, ##__VA_ARGS__)

@@ -153,6 +153,11 @@ void start_default_ucolors() {
     ucolors[ CELL_NEGATIVE   ].bg = DEFAULT_COLOR;
     ucolors[ HELP_HIGHLIGHT  ].fg = BLACK;               // cell selection in spreadsheet
     ucolors[ HELP_HIGHLIGHT  ].bg = YELLOW;
+    ucolors[ CURRENT_SHEET   ].fg = CYAN;
+    ucolors[ CURRENT_SHEET   ].bg = DEFAULT_COLOR;
+    ucolors[ CURRENT_SHEET   ].bold = 1;
+    ucolors[ SHEET           ].fg = MAGENTA;
+    ucolors[ SHEET           ].bg = DEFAULT_COLOR;
 
     ui_start_colors(); // call specific ui startup routine
 }

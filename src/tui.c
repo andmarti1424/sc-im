@@ -1114,12 +1114,25 @@ void ui_show_celldetails() {
     char head[FBUFLEN];
     int il_pos = 0;
 
+    // show sheets
+    for (struct sheet * sh = roman->first_sh; sh != NULL; sh = sh->next) {
+        #ifdef USECOLORS
+        if (sh == roman->cur_sh) {
+            ui_set_ucolor(input_win, &ucolors[CURRENT_SHEET], DEFAULT_COLOR);
+            if (get_conf_int("show_cursor")) mvwprintw(input_win, 0, il_pos++, "*");
+        } else
+            ui_set_ucolor(input_win, &ucolors[SHEET], DEFAULT_COLOR);
+        #endif
+        mvwprintw(input_win, 0, il_pos, "{%s} ", sh->name);
+        il_pos += strlen(sh->name) + 3;
+    }
+
     // show cell in header
     #ifdef USECOLORS
         ui_set_ucolor(input_win, &ucolors[CELL_ID], DEFAULT_COLOR);
     #endif
     sprintf(head, "%s%d ", coltoa(sh->curcol), sh->currow);
-    mvwprintw(input_win, 0, 0, "%s", head);
+    mvwprintw(input_win, 0, il_pos, "%s", head);
     il_pos += strlen(head);
 
     // show the current cell's format

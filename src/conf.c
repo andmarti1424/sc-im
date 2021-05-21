@@ -73,6 +73,7 @@ const char default_config[] =
     "autowrap=0\n"
     "debug=0\n"
     "ignorecase=0\n"
+    "show_cursor=0\n"
     "trigger=1\n"
     "version=0\n"
     "help=0\n"
