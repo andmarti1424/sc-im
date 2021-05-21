@@ -2201,7 +2201,7 @@ void load_file(char * file) {
     session->cur_doc = roman; // important: set cur_doc!
 
     // malloc a sheet
-    roman->cur_sh = roman->first_sh = new_sheet(roman, "Sheet A");
+    roman->cur_sh = roman->first_sh = new_sheet(roman, "Sheet 1");
 
     // grow sheet tbl
     growtbl(roman->first_sh, GROWNEW, 0, 0);
@@ -2241,7 +2241,7 @@ void load_tbl(char * loading_file) {
 
     if (strlen(name) != 0) {
         sc_readfile_result result = readfile(name, 0);
-        if (!get_conf_int("nocurses")) {
+        if (! get_conf_int("nocurses")) {
             if (result == SC_READFILE_DOESNTEXIST) {
                 // It's a new record!
                 sc_info("New file: \"%s\"", name);

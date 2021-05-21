@@ -7,18 +7,17 @@ Save triggers in files
 ui optimizations
 `gt` command of normal mode renamed to `go`
 
-+MultiSheet
-    adding support for multiple sheets
-    `gt` and `gT` commands in normal mode are now used for moving between sheets
-    added new colors types SHEET and CURRENT_SHEET
++Added MultiSheet support
+added :newsheet, :nextsheet, :prevsheet commands
+`gt` and `gT` commands in normal mode are now used for moving between sheets
+added new colors types SHEET, CURRENT_SHEET and FILENM
 
 
 For v0.8.3 release
 -------------------
-also support multiple files opened ?
+replace calls to curfile with roman->name
 reference cells from different sheets in formulas
 UNDO should save reference to the sheet where the action took place
-move `curfile` variable to roman struct
 modify file functions to read roman struct
 
 + Show range detail in inputbar

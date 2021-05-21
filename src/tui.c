@@ -552,12 +552,11 @@ void ui_print_mult_pend() {
 
 /**
  * \brief Show first and second row (header). Handle cursor position.
- *
  * \return none
  */
 void ui_show_header() {
     //ui_clr_header(0);
-    ui_clr_header(1);
+    //ui_clr_header(1); // the clr stuff should be called outside this function
 
     // print multiplier
     ui_print_mult_pend();
