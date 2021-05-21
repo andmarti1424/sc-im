@@ -79,7 +79,7 @@
 
 extern char * rev;
 extern struct dictionary * user_conf_d;
-extern struct roman * roman;
+extern struct session * session;
 
 wchar_t inputline[BUFFERSIZE];
 extern wchar_t interp_line[BUFFERSIZE];
@@ -189,6 +189,7 @@ L"x",
  */
 
 void do_commandmode(struct block * sb) {
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
 
     // If a visual selected range exists

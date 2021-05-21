@@ -56,7 +56,7 @@
 extern struct undo undo_item;
 #endif
 
-extern struct roman * roman;
+extern struct session * session;
 
 
 /**
@@ -68,6 +68,8 @@ extern struct roman * roman;
  * \return none
  */
 void hide_row(int from_row, int arg) {
+    struct roman * roman = session->cur_doc;
+    struct sheet * sh = roman->cur_sh;
     register int r2;
 
     r2 = from_row + arg - 1;
@@ -75,10 +77,10 @@ void hide_row(int from_row, int arg) {
         sc_error("Cannot hide row: Invalid range.");
         return;
     }
-    if (r2 >= roman->cur_sh->maxrows - 1) {
+    if (r2 >= sh->maxrows - 1) {
         // error: tried to hide a row higher than maxrow.
-        lookat(roman->cur_sh, from_row + arg + 1, roman->cur_sh->curcol); //FIXME this HACK
-        if (! growtbl(roman->cur_sh, GROWROW, arg + 1, 0)) {
+        lookat(sh, from_row + arg + 1, sh->curcol); //FIXME this HACK
+        if (! growtbl(sh, GROWROW, arg + 1, 0)) {
             sc_error("You can't hide the last row");
             return;
         }
@@ -93,7 +95,7 @@ void hide_row(int from_row, int arg) {
         #endif
     }
     while ( from_row <= r2)
-        roman->cur_sh->row_hidden[ from_row++ ] = TRUE;
+        sh->row_hidden[ from_row++ ] = TRUE;
     return;
 }
 
@@ -107,15 +109,17 @@ void hide_row(int from_row, int arg) {
  * \return none
  */
 void hide_col(int from_col, int arg) {
+    struct roman * roman = session->cur_doc;
+    struct sheet * sh = roman->cur_sh;
     int c2 = from_col + arg - 1;
     if (from_col < 0 || from_col > c2) {
         sc_error ("Cannot hide col: Invalid range.");
         return;
     }
-    if (c2 >= roman->cur_sh->maxcols - 1) {
+    if (c2 >= sh->maxcols - 1) {
         // sc_error: tried to hide a column higher than maxcol.
-        lookat(roman->cur_sh, roman->cur_sh->currow, from_col + arg + 1); //FIXME this HACK
-        if ((arg >= ABSMAXCOLS - 1) || ! growtbl(roman->cur_sh, GROWCOL, 0, arg + 1)) {
+        lookat(sh, sh->currow, from_col + arg + 1); //FIXME this HACK
+        if ((arg >= ABSMAXCOLS - 1) || ! growtbl(sh, GROWCOL, 0, arg + 1)) {
             sc_error("You can't hide the last col");
             return;
         }
@@ -132,7 +136,7 @@ void hide_col(int from_col, int arg) {
         #endif
     }
     while (from_col <= c2)
-        roman->cur_sh->col_hidden[ from_col++ ] = TRUE;
+        sh->col_hidden[ from_col++ ] = TRUE;
     return;
 }
 
@@ -146,13 +150,15 @@ void hide_col(int from_col, int arg) {
  * \return none
  */
 void show_row(int from_row, int arg) {
+    struct roman * roman = session->cur_doc;
+    struct sheet * sh = roman->cur_sh;
     int r2 = from_row + arg - 1;
     if (from_row < 0 || from_row > r2) {
         sc_error ("Cannot show row: Invalid range.");
         return;
     }
-    if (r2 > roman->cur_sh->maxrows - 1) {
-        r2 = roman->cur_sh->maxrows - 1;
+    if (r2 > sh->maxrows - 1) {
+        r2 = sh->maxrows - 1;
     }
 
     roman->modflg++;
@@ -161,9 +167,9 @@ void show_row(int from_row, int arg) {
     #endif
     while (from_row <= r2) {
         #ifdef UNDO
-        if (roman->cur_sh->row_hidden[from_row] ) undo_hide_show(from_row, -1, 's', 1);
+        if (sh->row_hidden[from_row] ) undo_hide_show(from_row, -1, 's', 1);
         #endif
-        roman->cur_sh->row_hidden[ from_row++ ] = FALSE;
+        sh->row_hidden[ from_row++ ] = FALSE;
     }
     #ifdef UNDO
     end_undo_action();
@@ -181,13 +187,15 @@ void show_row(int from_row, int arg) {
  * \return none
  */
 void show_col(int from_col, int arg) {
+    struct roman * roman = session->cur_doc;
+    struct sheet * sh = roman->cur_sh;
     int c2 = from_col + arg - 1;
     if (from_col < 0 || from_col > c2) {
         sc_error ("Cannot show col: Invalid range.");
         return;
     }
-    if (c2 > roman->cur_sh->maxcols - 1) {
-        c2 =  roman->cur_sh->maxcols - 1;
+    if (c2 > sh->maxcols - 1) {
+        c2 =  sh->maxcols - 1;
     }
 
     roman->modflg++;
@@ -196,9 +204,9 @@ void show_col(int from_col, int arg) {
     #endif
     while (from_col <= c2) {
         #ifdef UNDO
-        if (roman->cur_sh->col_hidden[from_col] ) undo_hide_show(-1, from_col, 's', 1);
+        if (sh->col_hidden[from_col] ) undo_hide_show(-1, from_col, 's', 1);
         #endif
-         roman->cur_sh->col_hidden[ from_col++ ] = FALSE;
+         sh->col_hidden[ from_col++ ] = FALSE;
     }
     #ifdef UNDO
     end_undo_action();
@@ -213,15 +221,17 @@ void show_col(int from_col, int arg) {
  * \return none
  */
 void show_hiddenrows() {
+    struct roman * roman = session->cur_doc;
+    struct sheet * sh = roman->cur_sh;
     int r, c = 0;
-    for (r = 0; r < roman->cur_sh->maxrow; r++) {
-        if (roman->cur_sh->row_hidden[r]) c++;
+    for (r = 0; r < sh->maxrow; r++) {
+        if (sh->row_hidden[r]) c++;
     }
     char valores[12 * c + 20];
     valores[0]='\0';
     strcpy(valores, "Hidden rows:\n"); // 20
-    for (r = 0; r < roman->cur_sh->maxrow; r++) {
-       if (roman->cur_sh->row_hidden[r]) sprintf(valores + strlen(valores), "- %d\n", r); // 12
+    for (r = 0; r < sh->maxrow; r++) {
+       if (sh->row_hidden[r]) sprintf(valores + strlen(valores), "- %d\n", r); // 12
     }
     ui_show_text(valores);
 
@@ -235,15 +245,17 @@ void show_hiddenrows() {
  * \return none
  */
 void show_hiddencols() {
+    struct roman * roman = session->cur_doc;
+    struct sheet * sh = roman->cur_sh;
     int c, count = 0;
-    for (c = 0; c < roman->cur_sh->maxcol; c++) {
-        if (roman->cur_sh->col_hidden[c]) count++;
+    for (c = 0; c < sh->maxcol; c++) {
+        if (sh->col_hidden[c]) count++;
     }
     char valores[8 * c + 20];
     valores[0]='\0';
     strcpy(valores, "Hidden cols:\n"); // 20
-    for (c = 0; c < roman->cur_sh->maxcol; c++) {
-       if (roman->cur_sh->col_hidden[c]) sprintf(valores + strlen(valores), "- %s\n", coltoa(c)); // 8
+    for (c = 0; c < sh->maxcol; c++) {
+       if (sh->col_hidden[c]) sprintf(valores + strlen(valores), "- %s\n", coltoa(c)); // 8
     }
     ui_show_text(valores);
 

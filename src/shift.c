@@ -56,8 +56,8 @@
 #include "tui.h"
 
 extern graphADT graph;
-extern struct roman * roman;
 extern int cmd_multiplier;
+extern struct session * session;
 
 /**
  * @brief Shift function - handles undo
@@ -74,6 +74,7 @@ extern int cmd_multiplier;
  */
 
 void shift(int r, int c, int rf, int cf, wchar_t type) {
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
     if ( any_locked_cells(r, c, rf, cf) && (type == L'h' || type == L'k') ) {
         sc_error("Locked cells encountered. Nothing changed");
@@ -164,6 +165,7 @@ void shift(int r, int c, int rf, int cf, wchar_t type) {
  */
 
 void shift_range(int delta_rows, int delta_cols, int tlrow, int tlcol, int brrow, int brcol) {
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
     sh->currow = tlrow;
     sh->curcol = tlcol;
@@ -187,6 +189,7 @@ void shift_range(int delta_rows, int delta_cols, int tlrow, int tlcol, int brrow
  */
 
 void shift_cells_down(int deltarows, int deltacols) {
+    struct roman * roman = session->cur_doc;
     int r, c;
     struct sheet * sh = roman->cur_sh;
     struct ent ** pp;
@@ -221,6 +224,7 @@ void shift_cells_down(int deltarows, int deltacols) {
  */
 
 void shift_cells_right(int deltarows, int deltacols) {
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
     int r, c;
     struct ent ** pp;
@@ -257,6 +261,7 @@ void shift_cells_right(int deltarows, int deltacols) {
 void shift_cells_up(int deltarows, int deltacols) {
     int r, c;
     struct ent ** pp;
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
 
     for (r = sh->currow; r <= sh->maxrow; r++) {
@@ -302,6 +307,7 @@ void shift_cells_up(int deltarows, int deltacols) {
  */
 
 void shift_cells_left(int deltarows, int deltacols) {
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
     int r, c;
     struct ent ** pp;

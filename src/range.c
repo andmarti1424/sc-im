@@ -57,7 +57,7 @@
 
 srange * ranges = NULL;
 
-extern struct roman * roman;
+extern struct session * session;
 
 /**
 * \brief Create a range from either to marks or two cells. 
@@ -71,6 +71,7 @@ extern struct roman * roman;
 */
 
 srange * create_range(char c, char d, struct ent * tl, struct ent * br) {
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
     int tlrow, tlcol, brrow, brcol;
 
@@ -330,6 +331,7 @@ static struct range * rng_base;
 */
 
 void add_range(char * name, struct ent_ptr left, struct ent_ptr right, int is_range) {
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
     register char * p;
     int minr, minc, maxr, maxc;
@@ -420,6 +422,7 @@ void add_range(char * name, struct ent_ptr left, struct ent_ptr right, int is_ra
 */
 
 void del_range(struct ent * left, struct ent * right) {
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
     struct range * r;
     int minr, minc, maxr, maxc;

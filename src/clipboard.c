@@ -58,9 +58,10 @@
 #include "conf.h"
 #include "utils/string.h"
 
-extern struct roman * roman;
+extern struct session * session;
 
 int convert_string_to_number( int r0, int c0, int rn, int cn) {
+    struct roman * roman = session->cur_doc;
     int row, col;
     register struct ent ** pp;
     wchar_t out[FBUFLEN] = L"";
@@ -97,6 +98,7 @@ int convert_string_to_number( int r0, int c0, int rn, int cn) {
 */
 
 int paste_from_clipboard() {
+    struct roman * roman = session->cur_doc;
     if (! strlen(get_conf_value("default_paste_from_clipboard_cmd"))) return -1;
 
     // create tmp file
@@ -215,6 +217,7 @@ int copy_to_clipboard(int r0, int c0, int rn, int cn) {
 // TODO Does this check if the file is already open?
 // TODO What are the returns? Does 0 mean success?
 int save_plain(FILE * fout, int r0, int c0, int rn, int cn) {
+    struct roman * roman = session->cur_doc;
     int row, col;
     register struct ent ** pp;
     wchar_t out[FBUFLEN] = L"";

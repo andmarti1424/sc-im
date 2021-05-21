@@ -65,7 +65,7 @@ struct sortcrit {
 } * sort;
 
 int howmany;
-extern struct roman * roman;
+extern struct session * session;
 
 /**
  * \brief TODO Write a brief function description>
@@ -78,6 +78,7 @@ extern struct roman * roman;
  */
 
 void sortrange(struct ent * left, struct ent * right, char * criteria) {
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
     int minr, minc, maxr, maxc, r, c;
     int * rows, col = 0;
@@ -195,6 +196,7 @@ void sortrange(struct ent * left, struct ent * right, char * criteria) {
  */
 
 int compare(const void * row1, const void * row2) {
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
     struct ent * p1;
     struct ent * p2;

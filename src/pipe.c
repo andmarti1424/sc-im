@@ -54,7 +54,7 @@
 #include "macros.h"
 #include "tui.h"
 
-extern struct roman * roman;
+extern struct session * session;
 // FIXME - pass fd is not neccesary?
 /**
  * \brief TODO Document getnum()
@@ -69,6 +69,7 @@ extern struct roman * roman;
  */
 
 void getnum(int r0, int c0, int rn, int cn, FILE * fd) {
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
     struct ent ** pp;
     struct ent * p;
@@ -106,6 +107,7 @@ void getnum(int r0, int c0, int rn, int cn, FILE * fd) {
  */
 
 void getformat(int col, FILE * fd) {
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
     sprintf(line, "%d %d %d\n", sh->fwidth[col], sh->precision[col], sh->realfmt[col]);
     //write(fd, line, strlen(line));
@@ -126,8 +128,9 @@ void getformat(int col, FILE * fd) {
  */
 
 void getfmt(int r0, int c0, int rn, int cn, FILE * fd) {
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
-    struct ent    **pp;
+    struct ent ** pp;
     int        r, c;
 
     for (r = r0; r <= rn; r++) {
@@ -157,8 +160,9 @@ void getfmt(int r0, int c0, int rn, int cn, FILE * fd) {
  */
 
 void getstring(int r0, int c0, int rn, int cn, FILE * fd) {
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
-    struct ent    **pp;
+    struct ent ** pp;
     int        r, c;
 
     for (r = r0; r <= rn; r++) {
@@ -189,10 +193,11 @@ void getstring(int r0, int c0, int rn, int cn, FILE * fd) {
  */
 
 void getexp(int r0, int c0, int rn, int cn, FILE * fd) {
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
-    struct ent    **pp;
-    struct ent    *p;
-    int        r, c;
+    struct ent ** pp;
+    struct ent * p;
+    int r, c;
 
     for (r = r0; r <= rn; r++) {
         for (c = c0, pp = ATBL(sh, sh->tbl, r, c); c <= cn; pp++, c++) {

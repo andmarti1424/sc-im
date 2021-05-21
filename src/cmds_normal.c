@@ -72,7 +72,7 @@ extern void ins_in_line(wint_t d);
 extern void openfile_under_cursor(int r, int c);
 
 extern wchar_t interp_line[BUFFERSIZE];
-extern struct roman * roman;
+extern struct session * session;
 
 #ifdef HISTORY_FILE
 extern struct history * commandline_history;
@@ -92,6 +92,7 @@ extern char ori_insert_edit_submode;
  */
 
 void do_normalmode(struct block * buf) {
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
     int bs = get_bufsize(buf);
     struct ent * e;
@@ -112,36 +113,36 @@ void do_normalmode(struct block * buf) {
         // MOVEMENT COMMANDS
         case L'j':
         case OKEY_DOWN:
-            roman->cur_sh->lastcol = roman->cur_sh->curcol;
-            roman->cur_sh->lastrow = roman->cur_sh->currow;
-            roman->cur_sh->currow = forw_row(1)->row;
+            sh->lastcol = sh->curcol;
+            sh->lastrow = sh->currow;
+            sh->currow = forw_row(1)->row;
             unselect_ranges();
             ui_update(TRUE);
             break;
 
         case L'k':
         case OKEY_UP:
-            roman->cur_sh->lastcol = roman->cur_sh->curcol;
-            roman->cur_sh->lastrow = roman->cur_sh->currow;
-            roman->cur_sh->currow = back_row(1)->row;
+            sh->lastcol = sh->curcol;
+            sh->lastrow = sh->currow;
+            sh->currow = back_row(1)->row;
             unselect_ranges();
             ui_update(TRUE);
             break;
 
         case L'h':
         case OKEY_LEFT:
-            roman->cur_sh->lastrow = roman->cur_sh->currow;
-            roman->cur_sh->lastcol = roman->cur_sh->curcol;
-            roman->cur_sh->curcol = back_col(1)->col;
+            sh->lastrow = sh->currow;
+            sh->lastcol = sh->curcol;
+            sh->curcol = back_col(1)->col;
             unselect_ranges();
             ui_update(TRUE);
             break;
 
         case L'l':
         case OKEY_RIGHT:
-            roman->cur_sh->lastrow = roman->cur_sh->currow;
-            roman->cur_sh->lastcol = roman->cur_sh->curcol;
-            roman->cur_sh->curcol = forw_col(1)->col;
+            sh->lastrow = sh->currow;
+            sh->lastcol = sh->curcol;
+            sh->curcol = forw_col(1)->col;
             unselect_ranges();
             ui_update(TRUE);
             break;
@@ -149,35 +150,35 @@ void do_normalmode(struct block * buf) {
         case L'0':
             if (get_conf_int("numeric_zero") == 1 && get_conf_int("numeric") == 1) goto numeric;
         case OKEY_HOME:
-            roman->cur_sh->lastrow = roman->cur_sh->currow;
-            roman->cur_sh->lastcol = roman->cur_sh->curcol;
-            roman->cur_sh->curcol = left_limit()->col;
+            sh->lastrow = sh->currow;
+            sh->lastcol = sh->curcol;
+            sh->curcol = left_limit()->col;
             unselect_ranges();
             ui_update(TRUE);
             break;
 
         case L'$':
         case OKEY_END:
-            roman->cur_sh->lastrow = roman->cur_sh->currow;
-            roman->cur_sh->lastcol = roman->cur_sh->curcol;
-            roman->cur_sh->curcol = right_limit(roman->cur_sh->currow)->col;
+            sh->lastrow = sh->currow;
+            sh->lastcol = sh->curcol;
+            sh->curcol = right_limit(sh->currow)->col;
             unselect_ranges();
             ui_update(TRUE);
             break;
 
         case L'^':
-            roman->cur_sh->lastcol = roman->cur_sh->curcol;
-            roman->cur_sh->lastrow = roman->cur_sh->currow;
-            roman->cur_sh->currow = goto_top()->row;
+            sh->lastcol = sh->curcol;
+            sh->lastrow = sh->currow;
+            sh->currow = goto_top()->row;
             unselect_ranges();
             ui_update(TRUE);
             break;
 
         case L'#':
-            roman->cur_sh->lastcol = roman->cur_sh->curcol;
-            roman->cur_sh->lastrow = roman->cur_sh->currow;
-            roman->cur_sh->currow = goto_bottom()->row;
-            if (roman->cur_sh->currow == roman->cur_sh->lastrow && roman->cur_sh->curcol == roman->cur_sh->lastcol) roman->cur_sh->currow = go_end()->row;
+            sh->lastcol = sh->curcol;
+            sh->lastrow = sh->currow;
+            sh->currow = goto_bottom()->row;
+            if (sh->currow == sh->lastrow && sh->curcol == sh->lastcol) sh->currow = go_end()->row;
             unselect_ranges();
             ui_update(TRUE);
             break;
@@ -195,10 +196,10 @@ void do_normalmode(struct block * buf) {
                 sc_error("Cell column is hidden");
                 break;
             }
-            roman->cur_sh->lastrow = roman->cur_sh->currow;
-            roman->cur_sh->lastcol = roman->cur_sh->curcol;
-            roman->cur_sh->currow = e->row;
-            roman->cur_sh->curcol = e->col;
+            sh->lastrow = sh->currow;
+            sh->lastcol = sh->curcol;
+            sh->currow = e->row;
+            sh->curcol = e->col;
             ui_update(TRUE);
             break;
 
@@ -230,7 +231,7 @@ void do_normalmode(struct block * buf) {
             } else {
                 sc_error("No locale set. Nothing changed");
             }
-            int p, r = roman->cur_sh->currow, c = roman->cur_sh->curcol, rf = roman->cur_sh->currow, cf = roman->cur_sh->curcol;
+            int p, r = sh->currow, c = sh->curcol, rf = sh->currow, cf = sh->curcol;
             if ( (p = is_range_selected()) != -1) {
                 struct srange * sr = get_range_by_pos(p);
                 r = sr->tlrow;
@@ -242,7 +243,7 @@ void do_normalmode(struct block * buf) {
                 sc_error("Locked cells encountered. Nothing changed");
                 return;
             }
-            dateformat(lookat(roman->cur_sh, r, c), lookat(roman->cur_sh, rf, cf), f);
+            dateformat(lookat(sh, r, c), lookat(sh, rf, cf), f);
             ui_update(TRUE);
             break;
         #else
@@ -256,9 +257,9 @@ void do_normalmode(struct block * buf) {
             {
             int n = calc_mobile_rows(NULL);
             if (get_conf_int("half_page_scroll")) n = n / 2;
-            roman->cur_sh->lastcol = roman->cur_sh->curcol;
-            roman->cur_sh->lastrow = roman->cur_sh->currow;
-            roman->cur_sh->currow = forw_row(n)->row;
+            sh->lastcol = sh->curcol;
+            sh->lastrow = sh->currow;
+            sh->currow = forw_row(n)->row;
             unselect_ranges();
             scroll_down(n);
             ui_update(TRUE);
@@ -271,9 +272,9 @@ void do_normalmode(struct block * buf) {
             {
             int n = calc_mobile_rows(NULL);
             if (get_conf_int("half_page_scroll")) n = n / 2;
-            roman->cur_sh->lastcol = roman->cur_sh->curcol;
-            roman->cur_sh->lastrow = roman->cur_sh->currow;
-            roman->cur_sh->currow = back_row(n)->row;
+            sh->lastcol = sh->curcol;
+            sh->lastrow = sh->currow;
+            sh->currow = back_row(n)->row;
             unselect_ranges();
             scroll_up(n);
             ui_update(TRUE);
@@ -282,10 +283,10 @@ void do_normalmode(struct block * buf) {
 
         case L'w':
             e = go_forward();
-            roman->cur_sh->lastrow = roman->cur_sh->currow;
-            roman->cur_sh->lastcol = roman->cur_sh->curcol;
-            roman->cur_sh->currow = e->row;
-            roman->cur_sh->curcol = e->col;
+            sh->lastrow = sh->currow;
+            sh->lastcol = sh->curcol;
+            sh->currow = e->row;
+            sh->curcol = e->col;
             unselect_ranges();
             ui_update(TRUE);
             break;
@@ -474,7 +475,7 @@ void do_normalmode(struct block * buf) {
             chg_mode('v');
             ui_show_header();
             ui_handle_cursor();
-            start_visualmode(roman->cur_sh->currow, roman->cur_sh->curcol, roman->cur_sh->currow, roman->cur_sh->curcol);
+            start_visualmode(sh->currow, sh->curcol, sh->currow, sh->curcol);
             break;
 
         // INPUT COMMANDS
@@ -482,7 +483,7 @@ void do_normalmode(struct block * buf) {
         case L'\\':
         case L'<':
         case L'>':
-            if (locked_cell(roman->cur_sh->currow, roman->cur_sh->curcol)) return;
+            if (locked_cell(sh->currow, sh->curcol)) return;
             insert_edit_submode = buf->value;
             chg_mode(insert_edit_submode);
 #ifdef INS_HISTORY_FILE
@@ -497,7 +498,7 @@ void do_normalmode(struct block * buf) {
         // EDITION COMMANDS
         // edit cell (v)
         case L'e':
-            if (locked_cell(roman->cur_sh->currow, roman->cur_sh->curcol)) return;
+            if (locked_cell(sh->currow, sh->curcol)) return;
             inputline_pos = 0;
             real_inputline_pos = 0;
             if (start_edit_mode(buf, 'v')) ui_show_header();
@@ -505,7 +506,7 @@ void do_normalmode(struct block * buf) {
 
         // edit cell (s)
         case L'E':
-            if (locked_cell(roman->cur_sh->currow, roman->cur_sh->curcol)) return;
+            if (locked_cell(sh->currow, sh->curcol)) return;
             inputline_pos = 0;
             real_inputline_pos = 0;
             if (start_edit_mode(buf, 's')) ui_show_header();

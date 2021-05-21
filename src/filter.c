@@ -61,7 +61,7 @@ static int howmany = 0;      /**< how many filters were definedi */
 static int active = 0;       /**< indicates if those filters are applied or not */
 static int * results = NULL; /**< this keeps the results of the applied filters */
 static struct filter_item * filters = NULL;
-extern struct roman * roman;
+extern struct session * session;
 
 /**
  * \brief Add a filter to filters structure
@@ -107,6 +107,8 @@ void add_filter(char * criteria) {
  */
 
 void enable_filters(struct ent * left, struct ent * right) {
+    struct roman * roman = session->cur_doc;
+    struct sheet * sh = roman->cur_sh;
     int minr = left->row < right->row ? left->row : right->row;
     int maxr = left->row > right->row ? left->row : right->row;
     int i, r, c = 0;
@@ -152,7 +154,7 @@ void enable_filters(struct ent * left, struct ent * right) {
 
     // Hide rows that don't match with filters
     for (r = results[0]; r <= results[1]; r++) {
-        roman->cur_sh->row_hidden[r] = results[r-results[0]+2];
+        sh->row_hidden[r] = results[r-results[0]+2];
     }
     sc_info("Filters enabled");
     return;
@@ -165,6 +167,8 @@ void enable_filters(struct ent * left, struct ent * right) {
  */
 
 void disable_filters() {
+    struct roman * roman = session->cur_doc;
+    struct sheet * sh = roman->cur_sh;
     if (results == NULL) {
         sc_error("There are no filters active");
         return;
@@ -172,7 +176,7 @@ void disable_filters() {
     // Hide rows that don't match with filters
     int r;
     for (r = results[0]; r <= results[1]; r++) {
-        roman->cur_sh->row_hidden[r] = 0;
+        sh->row_hidden[r] = 0;
     }
     active = 0;
     sc_info("Filters disabled");

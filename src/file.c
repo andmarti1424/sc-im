@@ -77,6 +77,8 @@
 #include "xls.h"
 #include "tui.h"
 #include "trigger.h"
+#include "sheet.h"
+#include "vmtbl.h"
 
 extern struct ent * freeents;
 extern int yyparse(void);
@@ -87,7 +89,7 @@ extern pthread_t fthread;
 extern int pthread_exists;
 #endif
 
-extern struct roman * roman;
+extern struct session * session;
 
 /**
  * \brief Erase the database (tbl, etc.)
@@ -160,7 +162,6 @@ void loadrc(void) {
         snprintf(rcpath, PATHLEN, "%s/%s/%s", home,CONFIG_DIR,CONFIG_FILE);
         (void) readfile(rcpath, 0);
     }
-    *curfile = '\0';
 }
 
 /**
@@ -190,6 +191,7 @@ int file_exists(const char * fname) {
  * \return 0 if not modified; 1 if modified
  */
 int modcheck() {
+    struct roman * roman = session->cur_doc;
     if (roman->modflg && ! get_conf_int("nocurses")) {
         sc_error("File not saved since last change. Add '!' to force");
         return(1);
@@ -231,6 +233,7 @@ char get_delim(char *type) {
  * \return 0 on OK; -1 on error
  */
 int savefile() {
+    struct roman * roman = session->cur_doc;
     int force_rewrite = 0;
     char name[BUFFERSIZE];
 #ifndef NO_WORDEXP
@@ -353,6 +356,7 @@ int savefile() {
  * \return 0 on success; -1 on error
  */
 int writefile(char * fname, int r0, int c0, int rn, int cn, int verbose) {
+    struct roman * roman = session->cur_doc;
     register FILE *f;
     char save[PATHLEN];
     char tfname[PATHLEN];
@@ -393,6 +397,7 @@ int writefile(char * fname, int r0, int c0, int rn, int cn, int verbose) {
  * \return none
  */
 void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
     register struct ent **pp;
     int r, c;
@@ -672,6 +677,7 @@ void write_marks(register FILE *f) {
  * \return none
  */
 void write_cells(register FILE *f, int r0, int c0, int rn, int cn, int dr, int dc) {
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
     register struct ent **pp;
     int r, c;
@@ -735,6 +741,7 @@ void write_cells(register FILE *f, int r0, int c0, int rn, int cn, int dr, int d
  * SC_READFILE_DOESNTEXIST if the file doesn't exist.
  */
 sc_readfile_result readfile(char * fname, int eraseflg) {
+    struct roman * roman = session->cur_doc;
     if (!strlen(fname)) return 0;
     roman->loading = 1;
 
@@ -1081,6 +1088,7 @@ void print_options(FILE *f) {
  * \return 0 on success; -1 on error
  */
 int import_csv(char * fname, char d) {
+    struct roman * roman = session->cur_doc;
     register FILE * f;
     int r = 0, c = 0, cf = 0;
     wchar_t line_interp[FBUFLEN] = L"";
@@ -1200,158 +1208,159 @@ int import_csv(char * fname, char d) {
  */
 
 int import_markdown(char * fname) {
-  register FILE * f;
-  int r = 0, c = 0, cf = 0;
-  wchar_t line_interp[FBUFLEN] = L"";
-  wchar_t line_interp_align[FBUFLEN] = L"";
-  char * token;
+    struct roman * roman = session->cur_doc;
+    register FILE * f;
+    int r = 0, c = 0, cf = 0;
+    wchar_t line_interp[FBUFLEN] = L"";
+    wchar_t line_interp_align[FBUFLEN] = L"";
+    char * token;
 
-  //int pipe = 0; // if value has '"'. ex: 12,"1234,450.00",56
-  int rownr = 0;
-  char d = '|';
-  char delim[2] = ""; //strtok receives a char *, not a char
-  add_char(delim, d, 0);
-  //    int linenumber = 0;
+    //int pipe = 0; // if value has '"'. ex: 12,"1234,450.00",56
+    int rownr = 0;
+    char d = '|';
+    char delim[2] = ""; //strtok receives a char *, not a char
+    add_char(delim, d, 0);
+    //    int linenumber = 0;
 
-  if ((f = fopen(fname , "r")) == NULL) {
-    sc_error("Can't read file \"%s\"", fname);
-    return -1;
-  }
-
-  // Check max length of line
-  int max = max_length(f) + 1;
-  if (max == 0) {
-    sc_error("Can't read file \"%s\"", fname);
-    return -1;
-  }
-  char line_in[max];
-  char line_in_head[max];
-  char align[max];
-  rewind(f);
-
-  while ( ! feof(f) && (fgets(line_in, sizeof(line_in), f) != NULL) ) {
-
-    // this hack is for importing file that have DOS eol
-    int l = strlen(line_in);
-    while (l--){
-      if (line_in[l] == 0x0d) {
-        line_in[l] = '\0';
-        break;
-      }
+    if ((f = fopen(fname , "r")) == NULL) {
+        sc_error("Can't read file \"%s\"", fname);
+        return -1;
     }
 
-    /*
-       if ( line_in[0] == '|' && line_in[strlen(line_in)-1] == '|') {
-       pipe = 1;
-       }
-       */
-    //pipe = 0;
-    del_char(line_in, 0);
-    del_char(line_in, strlen(line_in)-1);
+    // Check max length of line
+    int max = max_length(f) + 1;
+    if (max == 0) {
+        sc_error("Can't read file \"%s\"", fname);
+        return -1;
+    }
+    char line_in[max];
+    char line_in_head[max];
+    char align[max];
+    rewind(f);
 
-    if(r==1){
-      strcpy(line_in_head, line_in);
+    while ( ! feof(f) && (fgets(line_in, sizeof(line_in), f) != NULL) ) {
 
-      token = xstrtok(line_in_head, delim);
-      c = 0;
-
-      while( token != NULL ) {
-        if (r > MAXROWS - GROWAMT - 1 || c > ABSMAXCOLS - 1) break;
-        clean_carrier(token);
-        token = ltrim(token, ' ');
-        token = rtrim(token, ' ');
-
-        if((token[0] == ':' && token[strlen(token)-1] == '-') ||
-            (token[0] == '-' && token[strlen(token)-1] == '-')){
-          align[c] = 'l';
-          swprintf(line_interp_align, BUFFERSIZE, L"leftjustify %s", v_name(r-1, c));
-
+        // this hack is for importing file that have DOS eol
+        int l = strlen(line_in);
+        while (l--){
+            if (line_in[l] == 0x0d) {
+                line_in[l] = '\0';
+                break;
+            }
         }
-        else if(token[0] == '-' && token[strlen(token)-1] == ':'){
-          align[c] = 'r';
-          swprintf(line_interp_align, BUFFERSIZE, L"rightjustify %s", v_name(r-1, c));
+
+        /*
+           if ( line_in[0] == '|' && line_in[strlen(line_in)-1] == '|') {
+           pipe = 1;
+           }
+           */
+        //pipe = 0;
+        del_char(line_in, 0);
+        del_char(line_in, strlen(line_in)-1);
+
+        if(r==1){
+            strcpy(line_in_head, line_in);
+
+            token = xstrtok(line_in_head, delim);
+            c = 0;
+
+            while( token != NULL ) {
+                if (r > MAXROWS - GROWAMT - 1 || c > ABSMAXCOLS - 1) break;
+                clean_carrier(token);
+                token = ltrim(token, ' ');
+                token = rtrim(token, ' ');
+
+                if((token[0] == ':' && token[strlen(token)-1] == '-') ||
+                        (token[0] == '-' && token[strlen(token)-1] == '-')){
+                    align[c] = 'l';
+                    swprintf(line_interp_align, BUFFERSIZE, L"leftjustify %s", v_name(r-1, c));
+
+                }
+                else if(token[0] == '-' && token[strlen(token)-1] == ':'){
+                    align[c] = 'r';
+                    swprintf(line_interp_align, BUFFERSIZE, L"rightjustify %s", v_name(r-1, c));
+                }
+                else{
+                    swprintf(line_interp_align, BUFFERSIZE, L"center %s", v_name(r-1, c));
+                    align[c] = 'c';
+                }
+
+                send_to_interp(line_interp_align);
+                token = xstrtok(NULL, delim);
+                c++;
+            }
         }
         else{
-          swprintf(line_interp_align, BUFFERSIZE, L"center %s", v_name(r-1, c));
-          align[c] = 'c';
+
+            // Split string using the delimiter
+            token = xstrtok(line_in, delim);
+
+            c = 0;
+
+            while( token != NULL ) {
+                if (r > MAXROWS - GROWAMT - 1 || c > ABSMAXCOLS - 1) break;
+
+                if(r == 0){
+                    rownr = r;
+                }
+                else{
+                    rownr = r-1;
+                }
+
+                clean_carrier(token);
+                token = ltrim(token, ' ');
+                token = rtrim(token, ' ');
+
+                char * st = str_replace(token, "\"", "''"); //replace double quotes inside string
+
+                // number import
+                if (isnumeric(st) && strlen(st) && ! atoi(get_conf_value("import_delimited_as_text"))) {
+                    //wide char
+                    swprintf(line_interp, BUFFERSIZE, L"let %s%d=%s", coltoa(c), rownr, st);
+
+                    // text import
+                } else if (strlen(st)){
+                    //wide char
+                    swprintf(line_interp, BUFFERSIZE, L"label %s%d=\"%s\"", coltoa(c), rownr, st);
+                }
+                //wide char
+                if (strlen(st)){
+                    send_to_interp(line_interp);
+
+                    if(r>0){
+                        if(align[c] == 'l'){
+                            swprintf(line_interp_align, BUFFERSIZE, L"leftjustify %s", v_name(rownr, c));
+                        }
+                        else if(align[c] == 'r'){
+                            swprintf(line_interp_align, BUFFERSIZE, L"rightjustify %s", v_name(rownr, c));
+                        }
+                        else{
+                            swprintf(line_interp_align, BUFFERSIZE, L"center %s", v_name(rownr, c));
+                        }
+                        send_to_interp(line_interp_align);
+                    }
+
+                }
+                free(st);
+
+                if (++c > cf) cf = c;
+                token = xstrtok(NULL, delim);
+            }
         }
 
-        send_to_interp(line_interp_align);
-        token = xstrtok(NULL, delim);
-        c++;
-      }
-    }
-    else{
-
-      // Split string using the delimiter
-      token = xstrtok(line_in, delim);
-
-      c = 0;
-
-      while( token != NULL ) {
+        roman->cur_sh->maxcol = cf-1;
+        r++;
         if (r > MAXROWS - GROWAMT - 1 || c > ABSMAXCOLS - 1) break;
-
-        if(r == 0){
-          rownr = r;
-        }
-        else{
-          rownr = r-1;
-        }
-
-        clean_carrier(token);
-        token = ltrim(token, ' ');
-        token = rtrim(token, ' ');
-
-        char * st = str_replace(token, "\"", "''"); //replace double quotes inside string
-
-        // number import
-        if (isnumeric(st) && strlen(st) && ! atoi(get_conf_value("import_delimited_as_text"))) {
-          //wide char
-          swprintf(line_interp, BUFFERSIZE, L"let %s%d=%s", coltoa(c), rownr, st);
-
-          // text import
-        } else if (strlen(st)){
-          //wide char
-          swprintf(line_interp, BUFFERSIZE, L"label %s%d=\"%s\"", coltoa(c), rownr, st);
-        }
-        //wide char
-        if (strlen(st)){
-          send_to_interp(line_interp);
-
-          if(r>0){
-            if(align[c] == 'l'){
-              swprintf(line_interp_align, BUFFERSIZE, L"leftjustify %s", v_name(rownr, c));
-            }
-            else if(align[c] == 'r'){
-              swprintf(line_interp_align, BUFFERSIZE, L"rightjustify %s", v_name(rownr, c));
-            }
-            else{
-              swprintf(line_interp_align, BUFFERSIZE, L"center %s", v_name(rownr, c));
-            }
-            send_to_interp(line_interp_align);
-          }
-
-        }
-        free(st);
-
-        if (++c > cf) cf = c;
-        token = xstrtok(NULL, delim);
-      }
     }
-
+    roman->cur_sh->maxrow = r-1;
     roman->cur_sh->maxcol = cf-1;
-    r++;
-    if (r > MAXROWS - GROWAMT - 1 || c > ABSMAXCOLS - 1) break;
-  }
-  roman->cur_sh->maxrow = r-1;
-  roman->cur_sh->maxcol = cf-1;
 
-  auto_fit(0, roman->cur_sh->maxcols, DEFWIDTH);
+    auto_fit(0, roman->cur_sh->maxcols, DEFWIDTH);
 
-  fclose(f);
+    fclose(f);
 
-  EvalAll();
-  return 0;
+    EvalAll();
+    return 0;
 }
 
 
@@ -1455,6 +1464,7 @@ void do_export(int r0, int c0, int rn, int cn) {
  * \return none
  */
 void export_markdown(char * fname, int r0, int c0, int rn, int cn) {
+    struct roman * roman = session->cur_doc;
     FILE * f;
     int row, col;
     register struct ent ** pp;
@@ -1607,6 +1617,7 @@ void export_markdown(char * fname, int r0, int c0, int rn, int cn) {
  * \return none
  */
 void export_plain(char * fname, int r0, int c0, int rn, int cn) {
+    struct roman * roman = session->cur_doc;
     FILE * f;
     int row, col;
     register struct ent ** pp;
@@ -1719,6 +1730,7 @@ void export_plain(char * fname, int r0, int c0, int rn, int cn) {
 }
 
 void export_latex(char * fname, int r0, int c0, int rn, int cn, int verbose) {
+    struct roman * roman = session->cur_doc;
     FILE * f;
     int row, col;
     register struct ent ** pp;
@@ -1825,9 +1837,10 @@ void unspecial(FILE * f, char * str, int delim) {
  * \return none
  */
 void export_delim(char * fname, char coldelim, int r0, int c0, int rn, int cn, int verbose) {
+    struct roman * roman = session->cur_doc;
     FILE * f;
     int row, col;
-    register struct ent ** pp;
+    struct ent ** pp;
     int pid;
 
     // to prevent empty lines at the end of the file
@@ -2002,6 +2015,7 @@ int plugin_exists(char * name, int len, char * path) {
  * \return none
  */
 void * do_autobackup() {
+    struct roman * roman = session->cur_doc;
     int len = strlen(curfile);
     //if (roman->loading || ! len) return (void *) -1;
     //if (! len || ! roman->modflg) return (void *) -1;
@@ -2128,6 +2142,7 @@ void openfile_nested(char * file) {
  * \return none
  */
 void openfile_under_cursor(int r, int c) {
+    struct roman * roman = session->cur_doc;
     register struct ent ** pp;
     pp = ATBL(roman->cur_sh, roman->cur_sh->tbl, r, c);
     if (*pp && (*pp)->label) {
@@ -2136,3 +2151,104 @@ void openfile_under_cursor(int r, int c) {
         openfile_nested(text);
     }
 }
+
+/*
+ * function that takes argv arguments and create a new
+ * roman struct for earch file and attach it to main session
+ * DISABLED BY DESIGN
+void readfile_argv(int argc, char ** argv) {
+    for (int i = 1; i < argc; i++) {
+        if (strncmp(argv[i], "--", 2) ) { // a file was passed as argv. try to handle it
+            printf("%s\n", argv[i]);
+
+            struct roman * roman = calloc(1, sizeof(struct roman));
+            roman->name = argv[i];
+            //roman->flags &= is_allocated;
+            roman->first_sh = NULL;
+            roman->cur_sh = NULL;
+
+            // save roman inside session
+            INSERT(roman, (session->first_doc), (session->last_doc), next, prev);
+            session->cur_doc = roman; // important: set cur_doc!
+
+            // malloc a sheet
+            roman->cur_sh = roman->first_sh = new_sheet(roman, "Sheet A");
+
+            // grow sheet tbl
+            growtbl(roman->first_sh, GROWNEW, 0, 0);
+
+            load_sc(argv[i]);
+        }
+    }
+    return;
+}
+*/
+
+/*
+ * \brief load a file into a roman struct
+ * the file may contain multiple sheets
+ * \return none
+ */
+void load_file(char * file) {
+    struct roman * roman = calloc(1, sizeof(struct roman));
+    roman->name = ! strlen(file) ? NULL : file;
+    //roman->flags &= is_allocated;
+    roman->first_sh = NULL;
+    roman->cur_sh = NULL;
+
+    // save roman inside session
+    INSERT(roman, (session->first_doc), (session->last_doc), next, prev);
+    session->cur_doc = roman; // important: set cur_doc!
+
+    // malloc a sheet
+    roman->cur_sh = roman->first_sh = new_sheet(roman, "Sheet A");
+
+    // grow sheet tbl
+    growtbl(roman->first_sh, GROWNEW, 0, 0);
+
+    load_tbl(file);
+    return;
+}
+
+/**
+ * \brief Attempt to load a tbl into a sheet
+ * \return none
+ */
+void load_tbl(char * loading_file) {
+    char name[PATHLEN];
+    strcpy(name, ""); //force name to be empty
+    #ifdef NO_WORDEXP
+    size_t len;
+    #else
+    int c;
+    wordexp_t p;
+    #endif
+
+    #ifdef NO_WORDEXP
+    if ((len = strlen(loading_file)) >= sizeof(name)) {
+        sc_info("File path too long: '%s'", loading_file);
+        return;
+    }
+    memcpy(name, loading_file, len+1);
+    #else
+    wordexp(loading_file, &p, 0);
+    for (c=0; c < p.we_wordc; c++) {
+        if (c) sprintf(name + strlen(name), " ");
+        sprintf(name + strlen(name), "%s", p.we_wordv[c]);
+    }
+    wordfree(&p);
+    #endif
+
+    if (strlen(name) != 0) {
+        sc_readfile_result result = readfile(name, 0);
+        if (!get_conf_int("nocurses")) {
+            if (result == SC_READFILE_DOESNTEXIST) {
+                // It's a new record!
+                sc_info("New file: \"%s\"", name);
+            } else if (result == SC_READFILE_ERROR) {
+                sc_info("\"%s\" is not a SC-IM compatible file", name);
+            }
+        }
+    }
+}
+

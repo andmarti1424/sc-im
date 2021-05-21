@@ -109,7 +109,7 @@ int rowoffset = 0, coloffset = 0;    /* row & col offsets for range functions */
 jmp_buf fpe_save;
 
 extern bool decimal;      /* Set if there was a decimal point in the number */
-extern struct roman * roman;
+extern struct session * session;
 
 /* a linked list of free [struct enodes]'s, uses .e.o.left as the pointer */
 
@@ -206,6 +206,7 @@ double finfunc(int fun, double v1, double v2, double v3) {
  * \return char *
  */
 char * dostindex(int minr, int minc, int maxr, int maxc, struct enode * val) {
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
     int r, c;
     register struct ent * p;
@@ -264,6 +265,7 @@ double doascii(char * s) {
  * \return double
  */
 double doindex(int minr, int minc, int maxr, int maxc, struct enode * val) {
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
     int r, c;
     register struct ent * p;
@@ -305,6 +307,7 @@ double doindex(int minr, int minc, int maxr, int maxc, struct enode * val) {
  * \return double
  */
 double dolookup(struct enode * val, int minr, int minc, int maxr, int maxc, int offset, int vflag) {
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
     double v, ret = (double) 0;
     int r, c;
@@ -378,6 +381,7 @@ double dolookup(struct enode * val, int minr, int minc, int maxr, int maxc, int 
  * \return double
  */
 double docount(int minr, int minc, int maxr, int maxc, struct enode * e) {
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
     int v;
     int r, c;
@@ -415,6 +419,7 @@ double docount(int minr, int minc, int maxr, int maxc, struct enode * e) {
  * \return double
  */
 double dosum(int minr, int minc, int maxr, int maxc, struct enode * e) {
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
     double v;
     int r, c;
@@ -452,6 +457,7 @@ double dosum(int minr, int minc, int maxr, int maxc, struct enode * e) {
  * \return double
  */
 double doprod(int minr, int minc, int maxr, int maxc, struct enode * e) {
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
     double v;
     int r, c;
@@ -489,6 +495,7 @@ double doprod(int minr, int minc, int maxr, int maxc, struct enode * e) {
  * \return double
  */
 double doavg(int minr, int minc, int maxr, int maxc, struct enode * e) {
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
     double v;
     int r, c;
@@ -531,6 +538,7 @@ double doavg(int minr, int minc, int maxr, int maxc, struct enode * e) {
  * \return double
  */
 double dostddev(int minr, int minc, int maxr, int maxc, struct enode * e) {
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
     double lp, rp, v, nd;
     int r, c;
@@ -576,6 +584,7 @@ double dostddev(int minr, int minc, int maxr, int maxc, struct enode * e) {
  * \return double
  */
 double domax(int minr, int minc, int maxr, int maxc, struct enode * e) {
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
     double v = (double) 0;
     int r, c;
@@ -622,6 +631,7 @@ double domax(int minr, int minc, int maxr, int maxc, struct enode * e) {
  * \return double
  */
 double domin(int minr, int minc, int maxr, int maxc, struct enode * e) {
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
     double v = (double)0;
     int r, c;
@@ -872,6 +882,7 @@ double doeqs(char * s1, char * s2) {
  * \return struct ent *
  */
 struct ent * getent(char *colstr, double rowdoub, int alloc) {
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
     int collen;                         /* length of string */
     int row, col;                       /* integer values   */
@@ -977,6 +988,7 @@ double dolmin(struct ent * e, struct enode * ep) {
  * \return double
  */
 double eval(register struct ent * ent, register struct enode * e) {
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
 
 //    //if (cellerror == CELLERROR || (ent && ent->cellerror == CELLERROR)) {
@@ -1802,6 +1814,7 @@ char * docapital(char * s) {
  * \return char *
  */
 char * seval(struct ent * ent, struct enode * se) {
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
     if (se == (struct enode *) 0) return (char *) 0;
 
@@ -2159,6 +2172,7 @@ void go_last() {
  * \return none
  */
 void moveto(int row, int col, int lastrow_, int lastcol_, int cornerrow, int cornercol) {
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
     register int i;
 
@@ -2215,6 +2229,7 @@ void moveto(int row, int col, int lastrow_, int lastcol_, int cornerrow, int cor
  * \return none
  */
 void num_search(double n, int firstrow, int firstcol, int lastrow_, int lastcol_, int errsearch, int flow) {
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
     register struct ent * p;
     register int r, c;
@@ -2307,6 +2322,7 @@ void num_search(double n, int firstrow, int firstcol, int lastrow_, int lastcol_
  * \return none
  */
 void str_search(char *s, int firstrow, int firstcol, int lastrow_, int lastcol_, int num, int flow) {
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
     struct ent * p;
     int r, c;
@@ -2439,9 +2455,10 @@ void str_search(char *s, int firstrow, int firstcol, int lastrow_, int lastcol_,
  * \return none
  */
 void fill(struct ent *v1, struct ent *v2, double start, double inc) {
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
     int r, c;
-    register struct ent *n;
+    struct ent *n;
     int maxr, maxc;
     int minr, minc;
 
@@ -2503,9 +2520,10 @@ void fill(struct ent *v1, struct ent *v2, double start, double inc) {
  * \return none
  */
 void lock_cells(struct ent * v1, struct ent * v2) {
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
     int r, c;
-    register struct ent * n;
+    struct ent * n;
     int maxr, maxc;
     int minr, minc;
 
@@ -2545,9 +2563,10 @@ void lock_cells(struct ent * v1, struct ent * v2) {
  * \return none
  */
 void unlock_cells(struct ent * v1, struct ent * v2) {
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
     int r, c;
-    register struct ent * n;
+    struct ent * n;
     int maxr, maxc;
     int minr, minc;
 
@@ -2587,9 +2606,9 @@ void unlock_cells(struct ent * v1, struct ent * v2) {
  * \return none
  */
 void let(struct ent * v, struct enode * e) {
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
     if (locked_cell(v->row, v->col)) return;
-
 
     #ifdef UNDO
     extern struct ent_ptr * deps;
@@ -2690,6 +2709,7 @@ void let(struct ent * v, struct enode * e) {
  * \return none
  */
 void slet(struct ent * v, struct enode * se, int flushdir) {
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
     if (locked_cell(v->row, v->col)) return;
 
@@ -2797,6 +2817,7 @@ void slet(struct ent * v, struct enode * se, int flushdir) {
  * \return none
  */
 void format_cell(struct ent *v1, struct ent *v2, char *s) {
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
     int r, c;
     register struct ent *n;
@@ -2910,6 +2931,7 @@ void efree(struct enode * e) {
  * \return none
  */
 void label(register struct ent * v, register char * s, int flushdir) {
+    struct roman * roman = session->cur_doc;
     if (v) {
         /*if (flushdir == 0 && v->flags & is_valid) {
             register struct ent * tv;
@@ -3380,7 +3402,8 @@ void range_arg(char *s, struct enode *e) {
  * \return none
  */
 void editfmt(int row, int col) {
-    register struct ent *p;
+    struct roman * roman = session->cur_doc;
+    struct ent *p;
 
     p = lookat(roman->cur_sh, row, col);
     if (p->format) {
@@ -3399,7 +3422,8 @@ void editfmt(int row, int col) {
  * \return none
  */
 void editv(int row, int col) {
-    register struct ent *p;
+    struct roman * roman = session->cur_doc;
+    struct ent *p;
 
     p = lookat(roman->cur_sh, row, col);
     (void) sprintf(line, "let %s = ", v_name(row, col));
@@ -3423,8 +3447,8 @@ void editv(int row, int col) {
  * \return none
  */
 void editexp(int row, int col) {
-    register struct ent *p;
-
+    struct roman * roman = session->cur_doc;
+    struct ent *p;
     p = lookat(roman->cur_sh, row, col);
     //if ( !p || !p->expr ) return; 21/06/2014
     decompile(p->expr, 0);
@@ -3442,8 +3466,8 @@ void editexp(int row, int col) {
  * \return none
  */
 void edits(int row, int col, int saveinfile) {
-    register struct ent *p;
-
+    struct roman * roman = session->cur_doc;
+    struct ent *p;
     p = lookat(roman->cur_sh, row, col);
 
     if (saveinfile) {
@@ -3480,6 +3504,7 @@ void edits(int row, int col, int saveinfile) {
  * \return none
  */
 int dateformat(struct ent *v1, struct ent *v2, char * fmt) {
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
     if ( ! fmt || *fmt == '\0') return -1;
 

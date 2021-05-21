@@ -63,7 +63,7 @@
 #include "xmalloc.h" // for scxfree
 */
 
-extern struct roman * roman;
+extern struct session * session;
 
 /**
  * \brief TODO  Document subtotal()
@@ -85,6 +85,7 @@ extern struct roman * roman;
  */
 
 int subtotal(int r, int c, int rf, int cf, int group_col, char * operation, int ope_col, int replace_subtotals) {
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
     // check ope_col and group_col are valid
     if (ope_col < c || ope_col > cf || group_col < c || group_col > cf) return -1;

@@ -60,7 +60,7 @@ struct sheet * new_sheet(struct roman * doc, char * name) {
       INSERT(sh, (doc->first_sh), (doc->last_sh), next, prev);
       sh->name = name != NULL ? strdup(name) : NULL;
 
-      sh->tbl = 0;
+      sh->tbl = NULL;
 
       sh->currow = 0;     /* current row of the selected cell. */
       sh->curcol = 0;     /* current column of the selected cell. */
@@ -73,15 +73,16 @@ struct sheet * new_sheet(struct roman * doc, char * name) {
       sh->nb_frozen_cols = 0; // total number of frozen rows/cols
       sh->nb_frozen_screenrows = 0; // screen rows occupied by those frozen rows
       sh->nb_frozen_screencols = 0; // screen cols occupied by those frozen columns
+
+      sh->maxcol = 0;
+      sh->maxrow = 0;
       /*
       sh->hash= (void *) calloc(HASH_NR,sizeof(void *));
       sh->nr_hash=HASH_NR;
-      sh->maxcol = sh->maxrow = 0;
       sh->ccol = 16;
       sh->crow = 32768;
       objs_cache_init(&sh->cache_ent, sizeof(struct Ent), NULL);
       */
-
       return sh;
   }
 

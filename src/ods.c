@@ -56,7 +56,7 @@
 #include <libxml/parser.h>
 #endif
 
-extern struct roman * roman;
+extern struct session * session;
 
 /**
  * \brief open_ods() files
@@ -69,6 +69,7 @@ extern struct roman * roman;
 
 int open_ods(char * fname, char * encoding) {
 #ifdef ODS
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
     struct zip * za;
     struct zip_file * zf;

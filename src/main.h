@@ -47,7 +47,6 @@ int main(int argc, char ** argv);
 int exit_app(int status);
 void create_structures();
 void delete_structures();
-void load_sc(char * loading_file);
 void read_argv(int argc, char ** argv);
 void setorder(int i);
 void signals();

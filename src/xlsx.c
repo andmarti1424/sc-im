@@ -68,7 +68,7 @@
 #include <libxml/tree.h>
 #include "xlsx.h"
 
-extern struct roman * roman;
+extern struct session * session;
 
 /**
  * \brief TODO Document get_xlsx_string()
@@ -190,6 +190,7 @@ char * get_xlsx_number_format_by_id(xmlDocPtr doc_styles, int id) {
  */
 
 void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) {
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
     xmlNode * cur_node = xmlDocGetRootElement(doc)->xmlChildrenNode;
     xmlNode * child_node = NULL;
@@ -373,6 +374,7 @@ void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) 
  */
 
 int open_xlsx(char * fname, char * encoding) {
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
     struct zip * za;
     struct zip_file * zf;
@@ -574,6 +576,7 @@ int open_xlsx(char * fname, char * encoding) {
  */
 
 int export_xlsx(char * filename, int r0, int c0, int rn, int cn) {
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
     int row, col;
     register struct ent ** pp;

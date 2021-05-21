@@ -65,7 +65,7 @@ extern int offscr_sc_rows, offscr_sc_cols;
 extern unsigned int curmode;
 extern int cmd_multiplier;
 extern struct history * commandline_history;
-extern struct roman * roman;
+extern struct session * session;
 
 char visual_submode = '0';
 srange * r;                       // SELECTED RANGE!
@@ -84,6 +84,7 @@ int moving = FALSE;
 
 void start_visualmode(int tlrow, int tlcol, int brrow, int brcol) {
     unselect_ranges();
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
 
     struct srange * sr = get_range_by_marks('\t', '\t'); // visual mode selected range
@@ -127,6 +128,7 @@ void start_visualmode(int tlrow, int tlcol, int brrow, int brcol) {
  */
 
 void exit_visualmode() {
+    struct roman * roman = session->cur_doc;
     moving = FALSE;
     visual_submode = '0';
     r->selected = 0;
@@ -145,6 +147,7 @@ void exit_visualmode() {
  */
 
 void do_visualmode(struct block * buf) {
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
 
     // we are moving (previous to a 'C-o' keypress)
@@ -392,7 +395,7 @@ void do_visualmode(struct block * buf) {
     // mark a range
     } else if (buf->value == L'm' && get_bufsize(buf) == 2) {
         del_ranges_by_mark(buf->pnext->value);
-        srange * rn = create_range('\0', '\0', lookat(roman->cur_sh, r->tlrow, r->tlcol), lookat(roman->cur_sh, r->brrow, r->brcol));
+        srange * rn = create_range('\0', '\0', lookat(sh, r->tlrow, r->tlcol), lookat(sh, r->brrow, r->brcol));
         set_range_mark(buf->pnext->value, rn);
         exit_visualmode();
         chg_mode('.');
@@ -422,7 +425,7 @@ void do_visualmode(struct block * buf) {
                 sc_error("Locked cells encountered. Nothing changed");
                 return;
             }
-            dateformat(lookat(roman->cur_sh, r->tlrow, r->tlcol), lookat(roman->cur_sh, r->brrow, r->brcol), f);
+            dateformat(lookat(sh, r->tlrow, r->tlcol), lookat(sh, r->brrow, r->brcol), f);
         exit_visualmode();
         chg_mode('.');
         ui_show_header();
@@ -507,8 +510,8 @@ void do_visualmode(struct block * buf) {
 
     // freeze a range
     } else if (buf->value == L'f') {
-        handle_freeze(lookat(roman->cur_sh, r->tlrow, r->tlcol), lookat(roman->cur_sh, r->brrow, r->brcol), 1, 'r');
-        handle_freeze(lookat(roman->cur_sh, r->tlrow, r->tlcol), lookat(roman->cur_sh, r->brrow, r->brcol), 1, 'c');
+        handle_freeze(lookat(sh, r->tlrow, r->tlcol), lookat(sh, r->brrow, r->brcol), 1, 'r');
+        handle_freeze(lookat(sh, r->tlrow, r->tlcol), lookat(sh, r->brrow, r->brcol), 1, 'c');
         cmd_multiplier = 0;
 
         exit_visualmode();
@@ -520,9 +523,9 @@ void do_visualmode(struct block * buf) {
     } else if ( buf->value == L'r' && (buf->pnext->value == L'l' || buf->pnext->value == L'u' ||
             buf->pnext->value == L'v' )) {
         if (buf->pnext->value == L'l') {
-            lock_cells(lookat(roman->cur_sh, r->tlrow, r->tlcol), lookat(roman->cur_sh, r->brrow, r->brcol));
+            lock_cells(lookat(sh, r->tlrow, r->tlcol), lookat(sh, r->brrow, r->brcol));
         } else if (buf->pnext->value == L'u') {
-            unlock_cells(lookat(roman->cur_sh, r->tlrow, r->tlcol), lookat(roman->cur_sh, r->brrow, r->brcol));
+            unlock_cells(lookat(sh, r->tlrow, r->tlcol), lookat(sh, r->brrow, r->brcol));
         } else if (buf->pnext->value == L'v') {
             valueize_area(r->tlrow, r->tlcol, r->brrow, r->brcol);
         }

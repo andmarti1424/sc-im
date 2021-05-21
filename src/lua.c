@@ -72,7 +72,7 @@
 #include "conf.h"
 #include "file.h"
 
-extern struct roman * roman;
+extern struct session * session;
 extern FILE * fdoutput;
 
 #define LC_NUMBER2(n,v)                     \
@@ -93,6 +93,7 @@ lua_State * L = NULL;
  */
 
 static int l_getnum (lua_State *L) {
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
     int r, c;
     struct ent **pp;
@@ -119,6 +120,7 @@ static int l_getnum (lua_State *L) {
  */
 
 static int l_setnum (lua_State *L) {
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
     int r, c;
     double val;
@@ -148,6 +150,7 @@ static int l_setnum (lua_State *L) {
  */
 
 static int l_setstr (lua_State *L) {
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
     int r, c;
     char * val;
@@ -172,6 +175,7 @@ static int l_setstr (lua_State *L) {
  */
 
 static int l_getstr (lua_State *L) {
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
     int r, c;
 
@@ -296,10 +300,10 @@ int l_query (lua_State *L) {
 }
 
 
-LC_NUMBER2(currow, roman->cur_sh->currow)
-LC_NUMBER2(curcol, roman->cur_sh->curcol)
-LC_NUMBER2(maxcols, roman->cur_sh->maxcols)
-LC_NUMBER2(maxrows, roman->cur_sh->maxrows)
+LC_NUMBER2(currow, session->cur_doc->cur_sh->currow)
+LC_NUMBER2(curcol, session->cur_doc->cur_sh->curcol)
+LC_NUMBER2(maxcols, session->cur_doc->cur_sh->maxcols)
+LC_NUMBER2(maxrows, session->cur_doc->cur_sh->maxrows)
 
 static const luaL_Reg sclib[] = {
     { "lgetnum", l_getnum },

@@ -103,7 +103,7 @@ extern struct dictionary * d_colors_param;
 extern int cmd_pending;
 extern int cmd_multiplier;
 extern char insert_edit_submode;
-extern struct roman * roman;
+extern struct session * session;
 
 WINDOW * main_win;
 WINDOW * input_win;
@@ -248,6 +248,7 @@ int ui_getch_b(wint_t * wd) {
  */
 
 void ui_sc_msg(char * s, int type, ...) {
+    struct roman * roman = session->cur_doc;
     if (get_conf_int("quiet")) return;
     if (type == DEBUG_MSG && ! get_conf_int("debug")) return;
     char t[BUFFERSIZE];
@@ -387,6 +388,7 @@ void ui_do_welcome() {
  * \return none
  */
 void ui_update(int header) {
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
 
     if (roman->loading) return;
@@ -509,6 +511,7 @@ void ui_write_j(WINDOW * win, const char * word, const unsigned int row, const u
  * \return none
  */
 void ui_print_mult_pend() {
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
     if (curmode != NORMAL_MODE && curmode != VISUAL_MODE && curmode != EDIT_MODE) return;
 
@@ -685,6 +688,7 @@ void ui_print_mode() {
  * \return none
  */
 void ui_show_sc_row_headings(WINDOW * win, int nb_mobile_rows) {
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
     #ifdef USECOLORS
     if (has_colors()) ui_set_ucolor(win, &ucolors[HEADINGS], DEFAULT_COLOR);
@@ -741,6 +745,7 @@ void ui_show_sc_row_headings(WINDOW * win, int nb_mobile_rows) {
  * \return none
  */
 void ui_show_sc_col_headings(WINDOW * win, int nb_mobile_cols) {
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
     int i;
     srange * s = get_selected_range();
@@ -809,6 +814,7 @@ void ui_show_sc_col_headings(WINDOW * win, int nb_mobile_cols) {
  * \return none
  */
 void ui_show_content(WINDOW * win, int nb_mobile_rows, int nb_mobile_cols) {
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
     int row, col;
 
@@ -1107,38 +1113,56 @@ void ui_add_cell_detail(char * d, struct ent * p1) {
 
 /**
  * \brief Draw cell content detail in header
+ * Also show current sheet name
  * \return none
  */
 void ui_show_celldetails() {
-    struct sheet * sh = roman->cur_sh;
+    struct sheet * sh = session->cur_doc->cur_sh;
+
     char head[FBUFLEN];
     int il_pos = 0;
 
-    // show sheets
-    for (struct sheet * sh = roman->first_sh; sh != NULL; sh = sh->next) {
-        #ifdef USECOLORS
-        if (sh == roman->cur_sh) {
-            ui_set_ucolor(input_win, &ucolors[CURRENT_SHEET], DEFAULT_COLOR);
-            if (get_conf_int("show_cursor")) mvwprintw(input_win, 0, il_pos++, "*");
-        } else
-            ui_set_ucolor(input_win, &ucolors[SHEET], DEFAULT_COLOR);
-        #endif
-        mvwprintw(input_win, 0, il_pos, "{%s} ", sh->name);
-        il_pos += strlen(sh->name) + 3;
+    // show filenames
+    for (struct roman * rom = session->first_doc; rom != NULL; rom = rom->next) {
+#ifdef USECOLORS
+        ui_set_ucolor(input_win, &ucolors[FILENM], DEFAULT_COLOR);
+#endif
+        char * file_name = rom->name == NULL ? "[No Name]" : rom->name;
+        mvwprintw(input_win, 0, il_pos, "%s:", file_name);
+        il_pos += strlen(file_name) + 1;
+
+        // show sheets
+        for (struct sheet * sh = rom->first_sh; sh != NULL; sh = sh->next) {
+            if (sh == session->cur_doc->cur_sh) {
+#ifdef USECOLORS
+                ui_set_ucolor(input_win, &ucolors[CURRENT_SHEET], DEFAULT_COLOR);
+#endif
+                if (get_conf_int("show_cursor")) mvwprintw(input_win, 0, il_pos++, "*");
+            } else {
+#ifdef USECOLORS
+                ui_set_ucolor(input_win, &ucolors[SHEET], DEFAULT_COLOR);
+#endif
+                if (get_conf_int("show_cursor")) mvwprintw(input_win, 0, il_pos++, " ");
+            }
+            mvwprintw(input_win, 0, il_pos, "{%s}", sh->name);
+            il_pos += strlen(sh->name) + 2;
+        }
+        mvwprintw(input_win, 0, il_pos, "  ");
+        il_pos += 2;
     }
 
     // show cell in header
-    #ifdef USECOLORS
+#ifdef USECOLORS
         ui_set_ucolor(input_win, &ucolors[CELL_ID], DEFAULT_COLOR);
-    #endif
+#endif
     sprintf(head, "%s%d ", coltoa(sh->curcol), sh->currow);
     mvwprintw(input_win, 0, il_pos, "%s", head);
     il_pos += strlen(head);
 
     // show the current cell's format
-    #ifdef USECOLORS
+#ifdef USECOLORS
         ui_set_ucolor(input_win, &ucolors[CELL_FORMAT], DEFAULT_COLOR);
-    #endif
+#endif
 
     register struct ent *p1 = *ATBL(sh, sh->tbl, sh->currow, sh->curcol);
 
@@ -1157,9 +1181,9 @@ void ui_show_celldetails() {
     il_pos += strlen(head);
 
     // show expr
-    #ifdef USECOLORS
+#ifdef USECOLORS
         ui_set_ucolor(input_win, &ucolors[CELL_CONTENT], DEFAULT_COLOR);
-    #endif
+#endif
     if (p1 && p1->expr) {
         linelim = 0;
         editexp(sh->currow, sh->curcol);  /* set line to expr */
@@ -1214,6 +1238,7 @@ void yyerror(char * err) {
  * \return -1 if there is no format in the cell
  */
 int ui_get_formated_value(struct ent ** p, int col, char * value) {
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
     //char * cfmt = (*p)->format ? (*p)->format : NULL;
     char * cfmt = (*p)->format ? (*p)->format : (sh->realfmt[col] >= 0 && sh->realfmt[col] < COLFORMATS && colformat[sh->realfmt[col]] != NULL) ? colformat[sh->realfmt[col]] : NULL;
@@ -1363,6 +1388,7 @@ wchar_t ui_query_opt(wchar_t * initial_msg, wchar_t * valid) {
  * \return user input
  */
 char * ui_query(char * initial_msg) {
+    struct roman * roman = session->cur_doc;
     char * hline = (char *) malloc(sizeof(char) * BUFFERSIZE);
     hline[0]='\0';
 
@@ -1564,6 +1590,7 @@ void ui_refresh_pad(int scroll) {
  */
 #ifdef MOUSE
 void ui_handle_mouse(MEVENT event) {
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
     if (isendwin()) return;
 

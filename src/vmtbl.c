@@ -55,7 +55,7 @@
 
 #define ATBL_P(tbl, row, col)    (*(tbl + row) + (col))
 
-extern struct roman * roman;
+extern struct session * session;
 
 /*
  * check to see if *rowp && *colp are currently allocated, if not expand the

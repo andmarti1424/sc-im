@@ -94,40 +94,22 @@
 #include "lua.h"
 #endif
 
-// struct to store a workbook
-struct roman * roman;
+// global variable to store a session
+struct session * session;
 
-/* These are sheet attributes
-int currow = 0;     // current row of the selected cell.
-int curcol = 0;     // current column of the selected cell.
-int lastrow = 0;    // row of last selected cell
-int lastcol = 0;    // col of last selected cell
-int maxrows;        // max alloc'ed row
-int maxcols;        // max alloc'ed col
-int maxrow, maxcol; // max row and col with data stored
-unsigned char * col_hidden;
-unsigned char * col_frozen;
-int * fwidth;
-int * precision;
-int * realfmt;
-unsigned char * row_hidden;
-unsigned char * row_frozen;
-unsigned char * row_format;
-int rescol; // Columns reserved for row numbers
-*/
-
-// workbook attributes
+// this variable stores the filename passed to sc-im via argv
+// by design, if more than one is passed, we keep the last one.
 char loadingfile[PATHLEN] = { '\0' };
-//int modflg; /* Indicates a change was made since last save */
-//struct ent *** tbl;
 
-// app attributes. Should be later added to conf
+// worksheet attributes
+char curfile[PATHLEN]; //TODO move to roman struct
+
+// app attributes. TODO: should be later added to conf
 int calc_order = BYROWS;
 char dpoint = '.'; /* Default decimal point character */
 char thsep = ','; /* Default thousands separator character */
 
 // check
-char curfile[PATHLEN]; //TODO move to roman struct
 char * exepath;
 int changed;
 int cellassign;
@@ -139,14 +121,15 @@ int rowsinrange = 1;
 int colsinrange = DEFWIDTH;
 FILE * fdoutput;  /* Output file descriptor (stdout or file) */
 
-
+// used by interp
 char line[FBUFLEN];
 int linelim = -1;
+double eval_result;
+char * seval_result;
+
 int shall_quit = 0;
 unsigned int curmode;
 unsigned int lastmode;
-double eval_result;
-char * seval_result;
 
 struct block * buffer;
 struct block * lastcmd_buffer;
@@ -166,7 +149,9 @@ pthread_t fthread;
 #endif
 
 void read_stdin();
+
 extern char * rev;
+extern graphADT graph;
 
 /**
  * \brief The main() function
@@ -209,8 +194,6 @@ int main (int argc, char ** argv) {
     store_default_config_values(); // Stores default values in user_conf_d
 
     // Read the main() parameters and replace values in user_conf_d as necessary
-    // if more than one file is passed to argv. will open the last one.
-    // TODO: change that so we can add multiple files
     read_argv(argc, argv);
 
     // check if help is in argv. if so, show usage and quit
@@ -280,33 +263,55 @@ int main (int argc, char ** argv) {
     // create basic structures that will depend on the loaded file
     create_structures();
 
-    // also create a roman struct
-    roman = malloc(sizeof(struct roman));
-    roman->name = NULL;
-    roman->flags &= is_allocated;
-    roman->first_sh = NULL;
-    roman->cur_sh = NULL;
+    // create main session
+    session = (struct session *) calloc(1, sizeof(struct session));
 
-    // malloc a sheet
-    new_sheet(roman, "Sheet 1");
-    roman->cur_sh = roman->first_sh;
-    roman->flags &= is_empty;
+    /*
+     * create a new roman struct for each file passed as argv
+     * and attach it to main session
+     * DISABLED BY DESIGN
+     * readfile_argv(argc, argv);
+     */
 
-    // TODO add sheet to growtbl
-    // setup the spreadsheet arrays (tbl)
-    if (! growtbl(roman->first_sh, GROWNEW, 0, 0)) return exit_app(1);
+    /* load file passed as argv to sc-im.
+     * if more than one file is passed, consider the last one.
+     */
+     load_file(loadingfile);
 
-    // if there was no file passed to scim executable
-    // 1. erase db !
-    if (! loadingfile[0]) erasedb(roman->first_sh);
+    /*
+     * check if session->cur_doc is NULL (no file passed as argv).
+     * if so, create an empty doc with just one sheet
+     */
+    if (session->cur_doc == NULL) {
+        struct roman * roman = calloc(1, sizeof(struct roman));
+        roman->name = NULL;
+        //roman->flags &= is_allocated;
+        roman->first_sh = NULL;
+        roman->cur_sh = NULL;
 
-    // 2. loadrc
+        // save roman inside session
+        INSERT(roman, (session->first_doc), (session->last_doc), next, prev);
+        session->cur_doc = roman; // important: set cur_doc!
+
+        // malloc a sheet
+        roman->cur_sh = roman->first_sh = new_sheet(roman, "Sheet 1");
+        //roman->flags &= is_empty;
+
+        // grow sheet tbl
+        if (! growtbl(roman->first_sh, GROWNEW, 0, 0)) return exit_app(1);
+
+        erasedb(roman->first_sh);
+    }
+
+    /*
+     * loadrc. Since we are not sure what people put it their scimrc file,
+     * other than configuration variables and mappings,
+     * we call the loadrc() routine after session / roman / sheet are alloc'ed.
+     */
     loadrc();
+    *curfile = '\0';
 
-    // 3. read sc file passed as argv
-    if (loadingfile[0]) load_sc(loadingfile);
-
-    // 4. check input from stdin (pipeline)
+    // check input from stdin (pipeline)
     // and send it to interp
     read_stdin();
 
@@ -318,7 +323,8 @@ int main (int argc, char ** argv) {
     if ( ! get_conf_int("nocurses")) {
         // we show welcome screen if no spreadsheet was passed to SC-IM
         // and no input was sent throw pipeline
-        if ( ! curfile[0] && ! wcslen(stdin_buffer)) {
+        if ( ! session->cur_doc->name && ! wcslen(stdin_buffer)) {
+            //curfile[0]
             ui_do_welcome();
             // show mode and cell's details in status bar
             ui_print_mode();
@@ -346,21 +352,21 @@ int main (int argc, char ** argv) {
     lastbackup_tv = (struct timeval) {0};
     #endif
 
-    /* Move this out of main */
-    if (get_conf_value("export_csv")) {
-        export_delim(NULL, ',', 0, 0, roman->cur_sh->maxrow, roman->cur_sh->maxcol, 0);
+    /* TODO Move this out of main */
+    if (get_conf_value("export_csv") && session->cur_doc != NULL) {
+        export_delim(NULL, ',', 0, 0, session->cur_doc->cur_sh->maxrow, session->cur_doc->cur_sh->maxcol, 0);
     }
 
-    if (get_conf_value("export_tab")) {
-        export_delim(NULL, '\t', 0, 0, roman->cur_sh->maxrow, roman->cur_sh->maxcol, 0);
+    if (get_conf_value("export_tab") && session->cur_doc != NULL) {
+        export_delim(NULL, '\t', 0, 0, session->cur_doc->cur_sh->maxrow, session->cur_doc->cur_sh->maxcol, 0);
     }
 
-    if (get_conf_value("export_mkd")) {
-        export_markdown(NULL, 0, 0, roman->cur_sh->maxrow, roman->cur_sh->maxcol);
+    if (get_conf_value("export_mkd") && session->cur_doc != NULL) {
+        export_markdown(NULL, 0, 0, session->cur_doc->cur_sh->maxrow, session->cur_doc->cur_sh->maxcol);
     }
 
-    if (get_conf_value("export") || get_conf_value("export_txt")) {
-        export_plain(NULL, 0, 0, roman->cur_sh->maxrow, roman->cur_sh->maxcol);
+    if ((get_conf_value("export") || get_conf_value("export_txt")) && session->cur_doc != NULL) {
+        export_plain(NULL, 0, 0, session->cur_doc->cur_sh->maxrow, session->cur_doc->cur_sh->maxcol);
     }
     /* <-- Move this out of main */
 
@@ -391,7 +397,6 @@ int main (int argc, char ** argv) {
     return shall_quit == -1 ? exit_app(-1) : exit_app(0);
 }
 
-extern graphADT graph;
 
 
 /**
@@ -491,12 +496,17 @@ void delete_structures() {
     // free calc chain graph
     destroy_graph(graph);
 
-    // Free ents of tbl
+    // Free tbl / sheet / roman / session
+    //  TODO
+    /* traverse each roman struct inside session
+    traverse each sheet struct inside roman
+    free each tbl
     erasedb(roman->cur_sh);
-
     // free roman struct
-    free(roman);
-    //TODO free the sheets also
+    free(roman); */
+
+    // free session
+    free(session);
 
     // free custom_colors
     free_custom_colors();
@@ -587,6 +597,7 @@ void read_argv(int argc, char ** argv) {
         if ( ! strncmp(argv[i], "--", 2) ) {       // it was passed a parameter
             parse_str(user_conf_d, argv[i] + 2, 0);
         } else {                                   // it was passed a file
+            //printf("%s-\n", argv[i]);
             strncpy(loadingfile, argv[i], PATHLEN-1);
         }
     }
@@ -594,49 +605,6 @@ void read_argv(int argc, char ** argv) {
     return;
 }
 
-
-/**
- * \brief Attempt to load a file
- *
- * \return none
- */
-void load_sc(char * loading_file) {
-    char name[PATHLEN];
-    strcpy(name, ""); //force name to be empty
-    #ifdef NO_WORDEXP
-    size_t len;
-    #else
-    int c;
-    wordexp_t p;
-    #endif
-
-    #ifdef NO_WORDEXP
-    if ((len = strlen(loading_file)) >= sizeof(name)) {
-        sc_info("File path too long: '%s'", loading_file);
-        return;
-    }
-    memcpy(name, loading_file, len+1);
-    #else
-    wordexp(loading_file, &p, 0);
-    for (c=0; c < p.we_wordc; c++) {
-        if (c) sprintf(name + strlen(name), " ");
-        sprintf(name + strlen(name), "%s", p.we_wordv[c]);
-    }
-    wordfree(&p);
-    #endif
-
-    if (strlen(name) != 0) {
-        sc_readfile_result result = readfile(name, 0);
-        if (!get_conf_int("nocurses")) {
-            if (result == SC_READFILE_DOESNTEXIST) {
-                // It's a new record!
-                sc_info("New file: \"%s\"", name);
-            } else if (result == SC_READFILE_ERROR) {
-                sc_info("\"%s\" is not a SC-IM compatible file", name);
-            }
-        }
-    }
-}
 
 
 /**

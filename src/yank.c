@@ -65,7 +65,7 @@ extern struct ent * forw_row(int arg);
 extern struct ent * back_row(int arg);
 extern struct ent * forw_col(int arg);
 extern struct ent * back_col(int arg);
-extern struct roman * roman;
+extern struct session * session;
 
 int yank_arg;                 // number of rows and columns yanked. Used for commands like `4yr`
 char type_of_yank;            // yank type. c=col, r=row, a=range, e=cell, '\0'=no yanking
@@ -177,7 +177,8 @@ void add_ent_to_yanklist(struct ent * item) {
  */
 
 void yank_area(int tlrow, int tlcol, int brrow, int brcol, char type, int arg) {
-struct sheet * sh = roman->cur_sh;
+    struct roman * roman = session->cur_doc;
+    struct sheet * sh = roman->cur_sh;
     int r,c;
     type_of_yank = type;
     yank_arg = arg;
@@ -235,6 +236,7 @@ struct sheet * sh = roman->cur_sh;
  */
 
 int paste_yanked_ents(int above, int type_paste) {
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
     if (yanklist == NULL) return 0;
 

@@ -151,7 +151,7 @@
 #include "shift.h"
 #include "dep_graph.h"
 
-extern struct roman * roman;
+extern struct session * session;
 
 // undolist
 static struct undo * undo_list = NULL;
@@ -202,6 +202,7 @@ void create_undo_action() {
  */
 
 void end_undo_action() {
+    struct roman * roman = session->cur_doc;
     add_to_undolist(undo_item);
 
     // in case we need to dismiss this undo_item!
@@ -439,6 +440,7 @@ int len_undo_list() {
  */
 
 void copy_to_undostruct (int ri, int ci, int rf, int cf, char type, short handle_deps, struct ent ** destination) {
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
     int i, c, r;
     struct ent * p;
@@ -821,6 +823,7 @@ void undo_freeze_unfreeze(int row, int col, char type, int arg) {
  * \return none
  */
 void do_undo() {
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
     if (undo_list == NULL || undo_list_pos == 0) {
         sc_error("No UNDO's left.");
@@ -1044,6 +1047,7 @@ void do_undo() {
  */
 
 void do_redo() {
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
     //FIXME check why undo_list_pos can sometimes be > len_undo_list(). it shouldnt!!
     //if ( undo_list == NULL || undo_list_pos >= len_undo_list()  ) {

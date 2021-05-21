@@ -75,7 +75,7 @@
 #include "lua.h"
 #endif
 
-extern struct roman * roman;
+extern struct session * session;
 
 /**
  * \brief TODO Document set_trigger()
@@ -90,6 +90,7 @@ extern struct roman * roman;
  */
 
 void set_trigger(int r, int c, int rf, int cf, char * str) {
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
     if (any_locked_cells(r, c, rf, cf)) {
         sc_error("Locked cells encountered. Nothing changed");
@@ -176,6 +177,7 @@ void set_trigger(int r, int c, int rf, int cf, char * str) {
  */
 
 void del_trigger(int r, int c, int rf, int cf ) {
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
     if (any_locked_cells(r, c, rf, cf)) {
         sc_error("Locked cells encountered. Nothing changed");

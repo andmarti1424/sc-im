@@ -122,19 +122,19 @@ int plot(char * s, int r, int c, int rf, int cf) {
     export_delim(datafile, ',', r, c, rf, cf, 0);
 
     // call gnuplot with  ~/.scim/plotline (or /usr/local/share/scim/plotline) and temp data file
-    char command[BUFFERSIZE];
+    char command[BUFFERSIZE+PATHLEN];
     char buffer[PATHLEN];
-    char buffer1[PATHLEN];
+    char plug_buffer[PATHLEN];
     sprintf(command, "gnuplot -e \"filename='%s'\"", datafile);
 
     if (! strcmp(s, "line") || ! strcmp(s, "scatter") ||
         ! strcmp(s, "pie")  || ! strcmp(s, "bar")) {
         sprintf(buffer, "plot_%s", s);
-        if (! plugin_exists(buffer, strlen(buffer), buffer1)) {
+        if (! plugin_exists(buffer, strlen(buffer), plug_buffer)) {
             sc_error("could not load default plotline file");
             return -1;
         }
-        sprintf(command + strlen(command), " %s", buffer1);
+        sprintf(command + strlen(command), " %s", plug_buffer);
 
     } else {
         sc_error("plot option not valid");

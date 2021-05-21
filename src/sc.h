@@ -48,7 +48,6 @@
 #include <stdio.h>
 #include <memory.h>
 
-
 #define MINROWS      100     /* minimum size at startup */
 
 /* MAX rows size of sheet. Default 65536.   */
@@ -98,21 +97,27 @@
     # define    TRUE    1
 #endif
 
-// structure to hold an opened file
+/* structure to hold multiple documents */
+struct session {
+    struct roman * first_doc;
+    struct roman * last_doc;
+    struct roman * cur_doc;
+};
+
+/* structure to hold an opened document with its sheets */
 struct roman {
     char * name;
     struct sheet * first_sh;
     struct sheet * last_sh;
     struct sheet * cur_sh;
     short flags;
-    struct roman * next; // to have more than one file opened in a single session
-    int modflg; /* Indicates a change was made since last save */
-    int loading; // to backwards compatibility. TODO replace
-    /*int open;
-    struct Ent ** cache;
-    int cache_nr;
-    int id; //session_id
-    */
+    struct roman * next; /* to link to other roman structs */
+    struct roman * prev; /* to link to other roman structs */
+    int modflg;          /* Indicates a change was made since last save */
+    int loading;         /* kept for backwards compatibility.
+                          * TODO replace it and use it with flags. use a macro
+                          * to check in every roman struct of session
+                          */
 };
 
 /* flag values for roman struct */
@@ -124,9 +129,8 @@ struct roman {
 
 /* structure to store sheet data */
 struct sheet {
-    struct ent *** tbl;
+    struct ent *** tbl; /* matrix to hold sheet cells */
     char * name;
-
     int currow;         /* current row of the selected cell. */
     int curcol;         /* current column of the selected cell. */
     int lastrow;        /* row of last selected cell */
@@ -134,32 +138,21 @@ struct sheet {
     int maxrows;        /* max alloc'ed row */
     int maxcols;        /* max alloc'ed col */
     int maxrow, maxcol; /* max row and col with data stored */
+    int * fwidth;       /* columns width */
+    int * precision;    /* columns decimal precision */
+    int * realfmt;
     unsigned char * col_hidden;
     unsigned char * col_frozen;
-    int * fwidth;
-    int * precision;
-    int * realfmt;
     unsigned char * row_hidden;
     unsigned char * row_frozen;
-    unsigned char * row_format;
-
-    int rescol; /* Columns reserved for row numbers */
-    struct sheet * next;
-    struct sheet * prev;
-
-    int offscr_sc_rows, offscr_sc_cols; // off screen spreadsheet rows and columns
-    int nb_frozen_rows, nb_frozen_cols; // total number of frozen rows/cols
-    int nb_frozen_screenrows; // screen rows occupied by those frozen rows
-    int nb_frozen_screencols; // screen cols occupied by those frozen columns
-    /*
-    int col, row;
-    int ccol , crow;
-    short flags;
-    int maxcol, maxrow;
-    void **hash;
-    int nr_hash;
-    struct Objs_cache cache_ent;
-    */
+    unsigned char * row_format; /* rows height */
+    struct sheet * next; /* to link to other sheets */
+    struct sheet * prev; /* to link to other sheets */
+    int rescol;         /* Columns reserved for row numbers */
+    int offscr_sc_rows, offscr_sc_cols; /* off screen spreadsheet rows and columns */
+    int nb_frozen_rows, nb_frozen_cols; /* total number of frozen rows/cols */
+    int nb_frozen_screenrows; /* screen rows occupied by those frozen rows */
+    int nb_frozen_screencols; /* screen cols occupied by those frozen columns */
 };
 
 //#define ATBL(tbl, row, col)    (*(tbl + row) + (col))
@@ -178,10 +171,7 @@ extern struct ent ** ATBL(struct sheet * sh, struct ent ***, int, int );
  */
 #define VALID_CELL(s, p, r, c) ((p = *ATBL(s, s->tbl, r, c)) && ((p->flags & is_valid) || p->label))
 
-// TODO Properly document these structs using doxygen tags. Possibly
-// not the same as functions. What is the standard way?
-
-/* info for each cell, only alloc'd when something is stored in a cell */
+/* structure to store cell contents */
 struct ent {
     double v;             /* v && label are set in EvalAll() */
     char * label;

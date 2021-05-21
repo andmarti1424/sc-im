@@ -93,7 +93,7 @@ graphADT graph; /**< Creates an empty graph, with no vertices. Allocate memory f
 struct ent_ptr * deps = NULL;
 int dep_size = 0;
 
-extern struct roman * roman;
+extern struct session * session;
 
 /************************************************************
  * These are the functions used for creating the depgraph
@@ -515,6 +515,7 @@ int All_vertexs_of_edges_visited(struct edgeTag * e, int eval_visited) {
  * \return none
  */
 void ents_that_depends_on (struct ent * ent) {
+    struct roman * roman = session->cur_doc;
    if (graph == NULL) return;
    vertexT * v = getVertex(graph, ent, 0);
    if (v == NULL || v->visited) return;
@@ -584,24 +585,26 @@ int GraphIsReachable(vertexT * src, vertexT * dest, int back_dep) {
  * \return none
  */
 void ents_that_depends_on_range (int r1, int c1, int r2, int c2) {
-        if (graph == NULL) return;
+    struct roman * roman = session->cur_doc;
+    struct sheet * sh = roman->cur_sh;
+    if (graph == NULL) return;
 
-        int r, c;
-        struct ent * p;
+    int r, c;
+    struct ent * p;
 
-        // at this point deps must be NULL
-        deps = NULL;
-        dep_size = 0;
+    // at this point deps must be NULL
+    deps = NULL;
+    dep_size = 0;
 
-        for (r = r1; r <= r2; r++) {
-            for (c = c1; c <= c2; c++) {
-                markAllVerticesNotVisited(0);
-                p = *ATBL(roman->cur_sh, roman->cur_sh->tbl, r, c);
-                if (p == NULL) continue;
-                ents_that_depends_on(p);
-            }
+    for (r = r1; r <= r2; r++) {
+        for (c = c1; c <= c2; c++) {
+            markAllVerticesNotVisited(0);
+            p = *ATBL(sh, sh->tbl, r, c);
+            if (p == NULL) continue;
+            ents_that_depends_on(p);
         }
-        return;
+    }
+    return;
 }
 
 
@@ -621,6 +624,8 @@ void ents_that_depends_on_range (int r1, int c1, int r2, int c2) {
  * \return none
  */
 void ents_that_depends_on_list(struct ent * e_ori, int deltar,  int deltac) {
+    struct roman * roman = session->cur_doc;
+    struct sheet * sh = roman->cur_sh;
     struct ent * e = e_ori;
     struct ent * p;
     if (graph == NULL || e == NULL) return;
@@ -630,7 +635,7 @@ void ents_that_depends_on_list(struct ent * e_ori, int deltar,  int deltac) {
     dep_size = 0;
 
     while (e != NULL) {
-        p = *ATBL(roman->cur_sh, roman->cur_sh->tbl, e->row+deltar, e->col+deltac);
+        p = *ATBL(sh, sh->tbl, e->row+deltar, e->col+deltac);
         if (p != NULL) {
             markAllVerticesNotVisited(0);
             ents_that_depends_on(p);
@@ -646,17 +651,19 @@ void ents_that_depends_on_list(struct ent * e_ori, int deltar,  int deltac) {
  * \return none
  */
 void rebuild_graph() {
+    struct roman * roman = session->cur_doc;
+    struct sheet * sh = roman->cur_sh;
     destroy_graph(graph);
     graph = GraphCreate();
     int first, second, fb, gb;
     struct ent * p;
 
-    fb = calc_order == BYROWS ? roman->cur_sh->maxrow : roman->cur_sh->maxcol;
-    gb = calc_order == BYROWS ? roman->cur_sh->maxcol : roman->cur_sh->maxrow;
+    fb = calc_order == BYROWS ? sh->maxrow : sh->maxcol;
+    gb = calc_order == BYROWS ? sh->maxcol : sh->maxrow;
 
     for (first = 0; first <= fb; first++)
         for (second = 0; second <= gb; second++) {
-            p = *ATBL(roman->cur_sh, roman->cur_sh->tbl, calc_order == BYROWS ? first : second, calc_order == BYROWS ? second : first);
+            p = *ATBL(sh, sh->tbl, calc_order == BYROWS ? first : second, calc_order == BYROWS ? second : first);
             if (p && p->expr) {
                 EvalJustOneVertex(p, 1);
                 //sc_debug("Expr %d %d", p->row, p->col);
@@ -691,6 +698,8 @@ void EvalAll() {
  * \return none
  */
 void EvalBottomUp() {
+    struct roman * roman = session->cur_doc;
+    struct sheet * sh = roman->cur_sh;
     //print_vertexs();
     vertexT * temp = graph->vertices;
     struct ent * p;
@@ -703,7 +712,7 @@ void EvalBottomUp() {
         if ( ! temp->eval_visited && (temp->edges == NULL || All_vertexs_of_edges_visited(temp->edges, 1))) {
             //sc_debug("visito %d %d", temp->ent->row, temp->ent->col);
 
-            if ((p = *ATBL(roman->cur_sh, roman->cur_sh->tbl, temp->ent->row, temp->ent->col)) && p->expr) {
+            if ((p = *ATBL(sh, sh->tbl, temp->ent->row, temp->ent->col)) && p->expr) {
                 EvalJustOneVertex(temp->ent, 0);
             }
             temp->eval_visited = 1;
@@ -728,6 +737,8 @@ void EvalBottomUp() {
  * \return none
  */
 void EvalRange(int tlrow, int tlcol, int brrow, int brcol) {
+    struct roman * roman = session->cur_doc;
+    struct sheet * sh = roman->cur_sh;
     if (roman->loading) return;
     extern struct ent_ptr * deps;
     extern int dep_size;
@@ -742,7 +753,7 @@ void EvalRange(int tlrow, int tlcol, int brrow, int brcol) {
     for (first = fa; first <= fb; first++) {
         for (second = ga; second <= gb; second++) {
             // eval the cell
-            e = *ATBL(roman->cur_sh, roman->cur_sh->tbl, calc_order == BYROWS ? first : second, calc_order == BYROWS ? second : first);
+            e = *ATBL(sh, sh->tbl, calc_order == BYROWS ? first : second, calc_order == BYROWS ? second : first);
 
             if (!e) continue;
             if (e->expr) EvalJustOneVertex(e, 0);
@@ -754,7 +765,7 @@ void EvalRange(int tlrow, int tlcol, int brrow, int brcol) {
             ents_that_depends_on(e);
 
            for (i = 0; deps != NULL && i < deps->vf; i++) {
-               f = *ATBL(roman->cur_sh, roman->cur_sh->tbl, deps[i].vp->row, deps[i].vp->col);
+               f = *ATBL(sh, sh->tbl, deps[i].vp->row, deps[i].vp->col);
                if (f == NULL || ! f->expr) continue;
                EvalJustOneVertex(f, 0);
             }
@@ -774,6 +785,8 @@ void EvalRange(int tlrow, int tlcol, int brrow, int brcol) {
  * \return none
  */
 void EvalAllVertexs() {
+    struct roman * roman = session->cur_doc;
+    struct sheet * sh = roman->cur_sh;
     struct ent * p;
 
     //(void) signal(SIGFPE, eval_fpe);
@@ -781,7 +794,7 @@ void EvalAllVertexs() {
     //int i = 0;
     while (temp != NULL) {
         //sc_debug("Evaluating cell %d %d: %d", temp->ent->row, temp->ent->col, ++i);
-        if ((p = *ATBL(roman->cur_sh, roman->cur_sh->tbl, temp->ent->row, temp->ent->col)) && p->expr)
+        if ((p = *ATBL(sh, sh->tbl, temp->ent->row, temp->ent->col)) && p->expr)
             EvalJustOneVertex(p, 0);
         temp = temp->next;
     }

@@ -60,8 +60,8 @@
 char ori_insert_edit_submode;
 #endif
 
-extern struct roman * roman;
 extern void ins_in_line(wint_t d);
+extern struct session * session;
 
 /**
  * \brief TODO Document do_insertmode()
@@ -72,6 +72,7 @@ extern void ins_in_line(wint_t d);
  */
 
 void do_insertmode(struct block * sb) {
+    struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
 
     if (sb->value == ctl('v') ) {  // VISUAL SUBMODE

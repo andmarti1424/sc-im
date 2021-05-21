@@ -68,7 +68,7 @@ struct dictionary * get_d_colors_param() {
 }
 
 static struct custom_color * custom_colors = NULL;
-extern struct roman * roman;
+extern struct session * session;
 
 /**
  * @brief Generate DEFAULT 'initcolor' colors
@@ -158,6 +158,8 @@ void start_default_ucolors() {
     ucolors[ CURRENT_SHEET   ].bold = 1;
     ucolors[ SHEET           ].fg = MAGENTA;
     ucolors[ SHEET           ].bg = DEFAULT_COLOR;
+    ucolors[ FILENM          ].fg = GREEN;
+    ucolors[ FILENM          ].bg = DEFAULT_COLOR;
 
     ui_start_colors(); // call specific ui startup routine
 }
@@ -371,6 +373,8 @@ void chg_color(char * str) {
  */
 
 void color_cell(int r, int c, int rf, int cf, char * str) {
+    struct roman * roman = session->cur_doc;
+    struct sheet * sh = roman->cur_sh;
     if (any_locked_cells(r, c, rf, cf)) {
         sc_error("Locked cells encountered. Nothing changed");
         return;
@@ -415,7 +419,7 @@ void color_cell(int r, int c, int rf, int cf, char * str) {
             }
 
             // action
-            n = lookat(roman->cur_sh, i, j);
+            n = lookat(sh, i, j);
             if (n->ucolor == NULL) {
                 n->ucolor = (struct ucolor *) malloc(sizeof(struct ucolor));
                 n->ucolor->fg = NONE_COLOR;
@@ -486,6 +490,8 @@ void color_cell(int r, int c, int rf, int cf, char * str) {
  */
 
 void unformat(int r, int c, int rf, int cf) {
+    struct roman * roman = session->cur_doc;
+    struct sheet * sh = roman->cur_sh;
     if (any_locked_cells(r, c, rf, cf)) {
         sc_error("Locked cells encountered. Nothing changed");
         return;
@@ -507,7 +513,7 @@ void unformat(int r, int c, int rf, int cf) {
         for (j=c; j<=cf; j++) {
 
             // action
-            if ( (n = *ATBL(roman->cur_sh, roman->cur_sh->tbl, i, j)) && n->ucolor != NULL) {
+            if ( (n = *ATBL(sh, sh->tbl, i, j)) && n->ucolor != NULL) {
                 free(n->ucolor);
                 n->ucolor = NULL;
             }
@@ -567,6 +573,7 @@ int same_ucolor(struct ucolor * u, struct ucolor * v) {
  */
 
 int redefine_color(char * color, int r, int g, int b) {
+    struct roman * roman = session->cur_doc;
     #if defined(NCURSES) && defined(USECOLORS)
     extern void sig_winchg();
     if (
@@ -605,6 +612,7 @@ int redefine_color(char * color, int r, int g, int b) {
  * returns: 0 on success, -1 on error
  */
 int define_color(char * color, int r, int g, int b) {
+    struct roman * roman = session->cur_doc;
 
 #if defined(NCURSES) && defined(USECOLORS)
     if (get_conf_int("nocurses")) {
