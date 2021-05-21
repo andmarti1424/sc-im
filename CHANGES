@@ -5,19 +5,27 @@ Changes
 Renamed auto_justify to auto_fit
 Save triggers in files
 ui optimizations
-adding support for multisheet
-gt command of normal mode renamed to go
-gt and gT commands in normal mode are now used for moving between sheets`
-added new colors types SHEET and CURRENT_SHEET
+`gt` command of normal mode renamed to `go`
+
++MultiSheet
+    adding support for multiple sheets
+    `gt` and `gT` commands in normal mode are now used for moving between sheets
+    added new colors types SHEET and CURRENT_SHEET
 
 
 For v0.8.3 release
 -------------------
+also support multiple files opened ?
+reference cells from different sheets in formulas
+UNDO should save reference to the sheet where the action took place
+move `curfile` variable to roman struct
+modify file functions to read roman struct
+
 + Show range detail in inputbar
 + Add GETENT in seval
 + create @counta, and modify @count to not count strings
 + Reeval of @lastrow @lastcol: check cells that uses @lastrow / @lastcol gets updated everytime it change
-+ Start work on multisheet?
+
 
 --
 Thanks to all that helped and created PR.
@@ -25,7 +33,6 @@ Thanks to all who support and use this program.
 
 Andrés Martinelli
 andmarti1424
-
 
 ***********
 v0.8.2
