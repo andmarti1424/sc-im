@@ -393,7 +393,6 @@ void ui_update(int header) {
     if (cmd_multiplier > 1) return;
     if (get_conf_int("nocurses")) return;
 
-    if (header) {
     #ifdef USECOLORS
     wbkgd(main_win, COLOR_PAIR((ucolors[DEFAULT].fg+1) * (COLORS) + ucolors[DEFAULT].bg + 2));
     // comment this to prevent bold to be reset
@@ -401,9 +400,11 @@ void ui_update(int header) {
     wbkgd(input_pad, COLOR_PAIR((ucolors[DEFAULT].fg+1) * (COLORS) + ucolors[DEFAULT].bg + 2));
     #endif
 
+    if (header) {
         // Clean from top to bottom
         wmove(main_win, 0, 0);
         wclrtobot(main_win);
+
         // comment this to prevent info message to be erased
         //wmove(input_win, 0, 0);
         //wclrtobot(input_win);

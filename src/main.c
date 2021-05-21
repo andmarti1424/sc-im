@@ -283,7 +283,7 @@ int main (int argc, char ** argv) {
     // also create a roman struct
     roman = malloc(sizeof(struct roman));
     roman->name = NULL;
-    roman->flags &= is_alloced;
+    roman->flags &= is_allocated;
     roman->first_sh = NULL;
     roman->cur_sh = NULL;
 
@@ -293,8 +293,8 @@ int main (int argc, char ** argv) {
     roman->cur_sh = roman->first_sh;
     roman->flags &= is_empty;
 
-    // setup the spreadsheet arrays (tbl)
     // TODO add sheet to growtbl
+    // setup the spreadsheet arrays (tbl)
     if (! growtbl(roman->first_sh, GROWNEW, 0, 0)) return exit_app(1);
 
     // if there was no file passed to scim executable

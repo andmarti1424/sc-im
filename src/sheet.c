@@ -92,14 +92,14 @@ struct sheet * new_sheet(struct roman * doc, char * name) {
  * \return struct sheet *
  */
 struct sheet * search_sheet(struct roman * doc, char * name) {
-      if (doc == NULL || name == NULL || ! strlen(name)) return 0;
+      if (doc == NULL || name == NULL || ! strlen(name)) return NULL;
       struct sheet * sh;
 
       for(sh = doc->first_sh; sh != 0; sh = sh->next) {
           if (sh->name == NULL) continue;
-          if (! strcmp(name, sh->name)) return sh; 
+          if (! strcmp(name, sh->name)) return sh;
       }
-      return 0;
+      return NULL;
 }
 
 

@@ -120,7 +120,7 @@ struct roman {
 #define is_opened     0002
 #define is_closed     0004
 #define is_empty      0010
-#define is_alloced    0020
+#define is_allocated  0020
 
 /* structure to store sheet data */
 struct sheet {

@@ -26,7 +26,7 @@
 #include "plot.h"
 #include "subtotal.h"
 #include "sheet.h"
-
+#include "vmtbl.h"
 #include "cmds_command.h"
 
 void yyerror(char *err);               // error routine for yacc (gram.y)
@@ -608,25 +608,34 @@ command:
     |    S_LOCK var_or_range     { lock_cells($2.left.vp, $2.right.vp); }
     |    S_UNLOCK var_or_range   { unlock_cells($2.left.vp, $2.right.vp); }
     |    S_NEWSHEET STRING       {
-                                   sc_debug("%s", $2);
-                                   roman->cur_sh = new_sheet(roman, $2);
-                                   scxfree($2);
-                                   ui_update(TRUE);
+                                   struct sheet * sh;
+                                   if ((sh = search_sheet(roman, $2)) != NULL ) {
+                                       sc_info("sheet already exist with that name");
+                                   } else {
+                                       roman->cur_sh = new_sheet(roman, $2);
+                                       growtbl(roman->cur_sh, GROWNEW, 0, 0);
+                                       erasedb(roman->cur_sh);
+                                       scxfree($2);
+                                       chg_mode('.');
+                                       ui_update(TRUE);
+                                   }
                                  }
     |    S_NEXTSHEET             {
-                                   if (roman->cur_sh->next != NULL)
+                                   if (roman->cur_sh->next != NULL) {
                                        roman->cur_sh = roman->cur_sh->next;
-                                   else
+                                       chg_mode('.');
+                                       ui_update(TRUE);
+                                   } else
                                        sc_info("we are already in last sheet of file");
-                                   ui_update(TRUE);
                                  }
 
     |    S_PREVSHEET             {
-                                   if (roman->cur_sh->prev != NULL)
+                                   if (roman->cur_sh->prev != NULL) {
                                        roman->cur_sh = roman->cur_sh->prev;
-                                   else
+                                       chg_mode('.');
+                                       ui_update(TRUE);
+                                   } else
                                        sc_info("we are already in first sheet of file");
-                                   ui_update(TRUE);
                                  }
 
     |    S_NMAP STRING STRING    {
