@@ -38,8 +38,7 @@
 /**
  * \file format.c
  * \author Andrés Martinelli <andmarti@gmail.com>
- * \date 2017-07-18
- * \brief TODO Write a tbrief file description.
+ * \date 2021-05-22
  */
 
 /*
@@ -55,7 +54,7 @@
  * The format function will produce a string representation of a number
  * given a _format_ (described below) and a double value.  The result is
  * written into the passed buffer -- if the resulting string is too
- * long to fit into the passed buffer, the function returns false.
+ * long to fit into the passed buffer, the function returns FALSE.
  * Otherwise the function returns true.
  *
  * The fmt parameter contains the format to use to convert the number.
@@ -125,23 +124,21 @@
  *    into the formatted number with no change made to the actual
  *      number.
  */
-
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
 #include <time.h>
 #include "sc.h"
 
-#define true     1
-#define false    0
 #define EOS      '\0'
 #define MAXBUF   256
 
-static char *fmt_int(char *val, char *fmt, int comma, int negative);
-static char *fmt_frac(char *val, char *fmt, int lprecision);
-static char *fmt_exp(int val, char *fmt);
-static void reverse(register char *buf);
+static char * fmt_int(char * val, char * fmt, int comma, int negative);
+static char * fmt_frac(char * val, char * fmt, int lprecision);
+static char * fmt_exp(int val, char * fmt);
+static void reverse(char * buf);
 char * colformat[COLFORMATS];
+
 
 /**
  * \brief TODO Document format()
@@ -154,11 +151,10 @@ char * colformat[COLFORMATS];
  *
  * returns: ret
  */
-
 int format(char *fmt, int lprecision, double val, char *buf, int buflen) {
     register char *cp;
     char *tmp, *tp;
-    int comma = false, negative = false;
+    int comma = FALSE, negative = FALSE;
     char *integer = NULL, *decimal = NULL;
     char *exponent = NULL;
     int exp_val = 0;
@@ -171,7 +167,7 @@ int format(char *fmt, int lprecision, double val, char *buf, int buflen) {
     int zero_pad = 0;
 
     if (fmt == NULL)
-        return(true);
+        return(TRUE);
 
     if (strlen(fmt) + 1 > fmtlen) {
         fmtlen = strlen(fmt) + 40;
@@ -213,7 +209,7 @@ int format(char *fmt, int lprecision, double val, char *buf, int buflen) {
             break;
 
         case ',':
-            comma = true;
+            comma = TRUE;
             break;
 
         case '.':
@@ -242,7 +238,7 @@ int format(char *fmt, int lprecision, double val, char *buf, int buflen) {
  */
     val = (val + 1.0) - 1.0;
     if (val < 0.0) {
-        negative = true;
+        negative = TRUE;
         val = -val;
     }
 /*
@@ -327,7 +323,7 @@ int format(char *fmt, int lprecision, double val, char *buf, int buflen) {
     static unsigned cilen = 0, cflen = 0;
     char * ci, * cf, * ce;
     int len_ci, len_cf, len_ce;
-    int ret = false;
+    int ret = FALSE;
 
     ci = fmt_int(integer, fmt, comma, negative);
     len_ci = strlen(ci);
@@ -354,7 +350,7 @@ int format(char *fmt, int lprecision, double val, char *buf, int buflen) {
  */
     if (len_ci + len_cf + len_ce < buflen) {
         (void) sprintf(buf, "%s%s%s", ci, cf, ce);
-        ret = true;
+        ret = TRUE;
     }
 
     return (ret);
@@ -366,11 +362,10 @@ int format(char *fmt, int lprecision, double val, char *buf, int buflen) {
  *
  * \param[in] val integer part of the value to be formatted
  * \param[in] fmt integer part of the format
- * \param[in] comma true if we should comma-ify the value
- * \param[in] negative true if the value is actually negative
+ * \param[in] comma TRUE if we should comma-ify the value
+ * \param[in] negative TRUE if the value is actually negative
  * \return none
  */
-
 static char * fmt_int(char *val, char *fmt, int comma, int negative) {
 
     int digit, f, v;
@@ -423,16 +418,16 @@ static char * fmt_int(char *val, char *fmt, int comma, int negative) {
     return (buf);
 }
 
+
 /**
  * \brief TODO Document fmt_frac()
  *
  * \param[in] val fractional part of the value to be formatted
  * \param[in] fmt fractional portion of format
  * \param[in] precision, for interpreting the "&"
- * 
+ *
  * \return none
  */
-
 static char * fmt_frac(char *val, char *fmt, int lprecision) {
 
     static char buf[MAXBUF];
@@ -462,20 +457,20 @@ static char * fmt_frac(char *val, char *fmt, int lprecision) {
         return (buf);
 }
 
+
 /**
  * \brief TODO Document fmt_exp
  *
  * \param[in] val value of the exponent
  * \param[in] fmt exponent part of the format
- * 
+ *
  * \return none
  */
-
 static char * fmt_exp(int val, char *fmt) {
     static char buf[MAXBUF];
     register char *bufptr = buf;
     char valbuf[64];
-    int negative = false;
+    int negative = FALSE;
 
     *bufptr++ = *fmt++;
     if (*fmt == '+')
@@ -487,13 +482,14 @@ static char * fmt_exp(int val, char *fmt) {
 
     if (val < 0) {
         val = -val;
-        negative = false;
+        negative = FALSE;
     }
     (void) sprintf(valbuf, "%d", val);
 
-    (void) strcat(buf, fmt_int(valbuf, fmt, false, negative));
+    (void) strcat(buf, fmt_int(valbuf, fmt, FALSE, negative));
     return (buf);
 }
+
 
 /**
  * \brief TODO Document reverse()
@@ -502,7 +498,6 @@ static char * fmt_exp(int val, char *fmt) {
  *
  * \return none
  */
-
 static void reverse(register char *buf) {
     register char *cp = buf + strlen(buf) - 1;
     register char tmp;
@@ -513,6 +508,7 @@ static void reverse(register char *buf) {
         *buf++ = tmp;
     }
 }
+
 
 /*
  * Tom Anderson    <toma@hpsad.hp.com>
@@ -531,7 +527,7 @@ static void reverse(register char *buf) {
  *
  * This formatted value is written into the passed buffer.  if the
  * resulting string is too long to fit into the passed buffer, the
- * function returns false.  Otherwise the function returns true.
+ * function returns FALSE.  Otherwise the function returns TRUE.
  *
  * When a number is formatted as engineering and is outside of the range,
  * the format reverts to scientific.
@@ -552,7 +548,7 @@ static void reverse(register char *buf) {
 #endif
 
 /**
- * \brief TODO Document engformat()
+ * \brief engformat()
  *
  * \param[in] fmt
  * \param[in] width
@@ -563,7 +559,6 @@ static void reverse(register char *buf) {
  *
  * \return none
  */
-
 int engformat(int fmt, int width, int lprecision, double val, char *buf, int buflen) {
 
     static char * engmult[] = {
@@ -574,16 +569,16 @@ int engformat(int fmt, int width, int lprecision, double val, char *buf, int buf
     int engind = 0;
     double engmant, pow(), engabs, engexp;
 
-    if (buflen < width) return (false);
+    if (buflen < width) return (FALSE);
     if (fmt >= 0 && fmt < COLFORMATS && colformat[fmt])
         return (format(colformat[fmt], lprecision, val, buf, buflen));
     if (fmt == REFMTFIX)
-        (void) sprintf(buf,"%*.*f", width, lprecision, val);
+        (void) snprintf(buf, buflen, "%*.*f", width, lprecision, val);
     if (fmt == REFMTFLT)
-        (void) sprintf(buf,"%*.*e", width, lprecision, val);
+        (void) snprintf(buf, buflen, "%*.*e", width, lprecision, val);
     if (fmt == REFMTENG) {
         if (val == 0e0) {    /* Hack to get zeroes to line up in engr fmt */
-            (void) sprintf((buf-1),"%*.*f ", width, lprecision, val);
+            (void) snprintf(buf-1, buflen, "%*.*f ", width, lprecision, val);
         } else {
             engabs = (val);
             if ( engabs <  0e0)       engabs = -engabs;
@@ -602,11 +597,11 @@ int engformat(int fmt, int width, int lprecision, double val, char *buf, int buf
             if ((engabs >= 1e18)  && (engabs <  1e21 )) engind=12;
             if ((engabs < 1e-18)  || (engabs >= 1e21 )) {
                 /* Revert to floating point */
-                (void) sprintf(buf,"%*.*e", width, lprecision, val);
+                (void) snprintf(buf, buflen, "%*.*e", width, lprecision, val);
             } else {
                 engexp = (double) (engind-6)*3;
-                engmant = val/pow(10.0e0,engexp);
-                (void) sprintf(buf,"%*.*fe%s", width-4, lprecision, engmant, engmult[engind]);
+                engmant = val/pow(10.0e0, engexp);
+                (void) snprintf(buf, buflen, "%*.*fe%s", width-4, lprecision, engmant, engmult[engind]);
             }
         }
     }
@@ -619,7 +614,7 @@ int engformat(int fmt, int width, int lprecision, double val, char *buf, int buf
             buf[i] = '\0';
         } else {
             secs = (time_t)val;
-            strftime(buf,buflen,"%e %b %y",localtime(&secs));
+            strftime(buf, buflen, "%e %b %y", localtime(&secs));
             for (i = 9; i < width; i++) buf[i] = ' ';
             buf[i] = '\0';
         }
@@ -633,10 +628,10 @@ int engformat(int fmt, int width, int lprecision, double val, char *buf, int buf
             buf[i] = '\0';
         } else {
             secs = (time_t)val;
-            strftime(buf,buflen,"%e %b %Y",localtime(&secs));
+            strftime(buf, buflen, "%e %b %Y", localtime(&secs));
             for (i = 11; i < width; i++) buf[i] = ' ';
             buf[i] = '\0';
         }
     }
-    return (true);
+    return (TRUE);
 }
