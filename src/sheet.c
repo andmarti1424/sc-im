@@ -58,7 +58,7 @@ struct sheet * new_sheet(struct roman * doc, char * name) {
 
       sh = (struct sheet *) calloc(1, sizeof(struct sheet));
       INSERT(sh, (doc->first_sh), (doc->last_sh), next, prev);
-      sh->name = name != NULL ? strdup(name) : NULL;
+      sh->name = name != NULL ? strdup(name) : "Sheet 1";
 
       sh->tbl = NULL;
 

@@ -80,8 +80,6 @@
 #include "sheet.h"
 #include "vmtbl.h"
 
-extern struct ent * freeents;
-extern int yyparse(void);
 
 #ifdef HAVE_PTHREAD
 #include <pthread.h>
@@ -89,11 +87,13 @@ extern pthread_t fthread;
 extern int pthread_exists;
 #endif
 
+extern struct ent * freeents;
+extern int yyparse(void);
+extern int exit_app(int status);
 extern struct session * session;
 
 /**
  * \brief Erase the database (tbl, etc.)
- *
  * \return none
  */
 void erasedb(struct sheet * sheet) {
@@ -134,13 +134,10 @@ void erasedb(struct sheet * sheet) {
     optimize = 0; // <----
 
     sheet->currow = sheet->curcol = 0;
-
-    *curfile = '\0'; // take this out of here
 }
 
 /**
  * \brief load rc config file
- *
  * \return none
  */
 void loadrc(void) {
@@ -157,12 +154,13 @@ void loadrc(void) {
     /* Default to compile time if XDG_CONFIG_HOME not found */
     else if ((home = getenv("HOME"))) {
         char config_dir[PATHLEN];
-        sprintf(config_dir, "%s/%s", home,CONFIG_DIR);
+        sprintf(config_dir, "%s/%s", home, CONFIG_DIR);
         mkdir(config_dir,0777);
-        snprintf(rcpath, PATHLEN, "%s/%s/%s", home,CONFIG_DIR,CONFIG_FILE);
+        snprintf(rcpath, PATHLEN, "%s/%s/%s", home, CONFIG_DIR, CONFIG_FILE);
         (void) readfile(rcpath, 0);
     }
 }
+
 
 /**
  * \brief Check if a file exists
@@ -173,7 +171,6 @@ void loadrc(void) {
  *
  * \return 1 if file exises; 0 otherwise
  */
-
 int file_exists(const char * fname) {
     FILE * file;
     if ((file = fopen(fname, "r"))) {
@@ -183,11 +180,10 @@ int file_exists(const char * fname) {
     return 0;
 }
 
+
 /**
  * \brief Check if file has been modified since last save.
- *
  * \details This function checks if a file suffered mods since it was open.
- *
  * \return 0 if not modified; 1 if modified
  */
 int modcheck() {
@@ -199,11 +195,10 @@ int modcheck() {
     return 0;
 }
 
+
 /**
  * \brief Return the proper delimiter for delimiter separated files.
- *
  * \details This function checks the type of a file as well as txtdelim conf value
- *
  * \return one of , ; \t |
  */
 char get_delim(char *type) {
@@ -225,23 +220,24 @@ char get_delim(char *type) {
     return delim;
 }
 
+
 /**
  * \brief TODO Handle the save file process
- *
  * This funciton handles the save file process in SC-IM format..
- *
  * \return 0 on OK; -1 on error
  */
 int savefile() {
     struct roman * roman = session->cur_doc;
+    char * curfile = roman->name;
     int force_rewrite = 0;
     char name[BUFFERSIZE];
+
 #ifndef NO_WORDEXP
     size_t len;
     wordexp_t p;
 #endif
 
-    if (! curfile[0] && wcslen(inputline) < 3) { // casos ":w" ":w!" ":x" ":x!"
+    if ((curfile == NULL || ! curfile[0]) && wcslen(inputline) < 3) { // casos ":w" ":w!" ":x" ":x!"
         sc_error("There is no filename");
         return -1;
     }
@@ -279,7 +275,7 @@ int savefile() {
     // check if backup of newfilename exists.
     // if it exists and '!' is set, remove it.
     // if it exists and no '!' is set, return.
-    if (!strlen(curfile) && backup_exists(name)) {
+    if (! strlen(curfile) && backup_exists(name)) {
         if (!force_rewrite) {
             sc_error("Backup file of %s exists. Use \"!\" to force the write process.", name);
             return -1;
@@ -341,11 +337,10 @@ int savefile() {
     return 0;
 }
 
+
 /**
  * \brief Write a file
- *
  * \details Write a file. Receives parameter range and file name.
- *
  * \param[in] fname file name
  * \param[in] r0
  * \param[in] c0
@@ -377,13 +372,14 @@ int writefile(char * fname, int r0, int c0, int rn, int cn, int verbose) {
     closefile(f, pid, 0);
 
     if (! pid) {
-        (void) strcpy(curfile, save);
+        (void) strcpy(roman->name, save);
         roman->modflg = 0;
-        if (verbose) sc_info("File \"%s\" written", curfile);
+        if (verbose) sc_info("File \"%s\" written", roman->name);
     }
 
     return 0;
 }
+
 
 /**
  * \brief TODO Document write_fd
@@ -613,11 +609,10 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
     fprintf(f, "\n");
 }
 
+
 /**
  * \brief TODO Document write_franges()
- *
  * \param[in] f file pointer
- *
  * \return none
  */
 void write_franges(register FILE *f) {
@@ -637,11 +632,10 @@ void write_franges(register FILE *f) {
     }
 }
 
+
 /**
  * \brief TODO Document write_marks()
- *
  * \param[in] f file pointer
- *
  * \return none
  */
 void write_marks(register FILE *f) {
@@ -662,6 +656,7 @@ void write_marks(register FILE *f) {
 
     return;
 }
+
 
 /**
  * \brief TODO Document write_cells()
@@ -731,6 +726,7 @@ void write_cells(register FILE *f, int r0, int c0, int rn, int cn, int dr, int d
     //roman->modflg = mf;
 }
 
+
 /**
  * \brief Try to open a spreadsheet file.
  *
@@ -742,7 +738,8 @@ void write_cells(register FILE *f, int r0, int c0, int rn, int cn, int dr, int d
  */
 sc_readfile_result readfile(char * fname, int eraseflg) {
     struct roman * roman = session->cur_doc;
-    if (!strlen(fname)) return 0;
+    char * curfile = roman->name;
+    if (! strlen(fname)) return 0;
     roman->loading = 1;
 
 #ifdef AUTOBACKUP
@@ -806,7 +803,8 @@ sc_readfile_result readfile(char * fname, int eraseflg) {
         sc_error("XLSX import support not compiled in");
         #else
         open_xlsx(fname, "UTF-8");
-        strcpy(curfile, fname);
+        if (roman->name == NULL) roman->name = malloc(sizeof(char)*PATHLEN);
+        strcpy(roman->name, fname);
         roman->modflg = 0;
         #endif
         roman->loading = 0;
@@ -818,7 +816,8 @@ sc_readfile_result readfile(char * fname, int eraseflg) {
         sc_error("ODS import support not compiled in");
         #else
         open_ods(fname, "UTF-8");
-        strcpy(curfile, fname);
+        if (roman->name == NULL) roman->name = malloc(sizeof(char)*PATHLEN);
+        strcpy(roman->name, fname);
         roman->modflg = 0;
         #endif
         roman->loading = 0;
@@ -831,7 +830,8 @@ sc_readfile_result readfile(char * fname, int eraseflg) {
         #else
         open_xls(fname, "UTF-8");
         roman->modflg = 0;
-        strcpy(curfile, fname);
+        if (roman->name == NULL) roman->name = malloc(sizeof(char)*PATHLEN);
+        strcpy(roman->name, fname);
         #endif
         roman->loading = 0;
         return SC_READFILE_SUCCESS;
@@ -842,7 +842,8 @@ sc_readfile_result readfile(char * fname, int eraseflg) {
         ! strcasecmp( & fname[len-4], ".txt") )){
 
         import_csv(fname, get_delim(&fname[len-3])); // csv tsv tab txt delim import
-        strcpy(curfile, fname);
+        if (roman->name == NULL) roman->name = malloc(sizeof(char)*PATHLEN);
+        strcpy(roman->name, fname);
         roman->modflg = 0;
         roman->loading = 0;
         return SC_READFILE_SUCCESS;
@@ -852,7 +853,8 @@ sc_readfile_result readfile(char * fname, int eraseflg) {
           ! strcasecmp( & fname[len-4], ".mkd"))){
 
       import_markdown(fname);
-      strcpy(curfile, fname);
+      if (roman->name == NULL) roman->name = malloc(sizeof(char)*PATHLEN);
+      strcpy(roman->name, fname);
       roman->modflg = 0;
       roman->loading = 0;
       return SC_READFILE_SUCCESS;
@@ -872,7 +874,8 @@ sc_readfile_result readfile(char * fname, int eraseflg) {
     f = fopen(save, "r");
     if (f == NULL) {
         roman->loading = 0;
-        strcpy(curfile, save);
+        if (roman->name == NULL) roman->name = malloc(sizeof(char)*PATHLEN);
+        strcpy(roman->name, save);
         return SC_READFILE_DOESNTEXIST;
     } /* */
 
@@ -889,11 +892,15 @@ sc_readfile_result readfile(char * fname, int eraseflg) {
     if (eraseflg) {
         cellassign = 0;
     }
-    strcpy(curfile, save);
+    if (strstr(save, "scimrc") == NULL) {
+        roman->name = malloc(sizeof(char)*PATHLEN);
+        strcpy(roman->name, save);
+    }
     EvalAll();
     roman->modflg = 0;
     return SC_READFILE_SUCCESS;
 }
+
 
 /**
  * \brief Expand a ~ in path to the user's home directory
@@ -937,6 +944,7 @@ char * findhome(char * path) {
     }
     return (path);
 }
+
 
 /**
  * \brief Open the input or output file
@@ -1009,10 +1017,8 @@ FILE * openfile(char *fname, int *rpid, int *rfd) {
     return (f);
 }
 
-// close a file opened by openfile(), if process wait for return
 /**
  * \brief Close a file opened by openfile()
- *
  * \details Close a file opened by openfile(). If process, wait for return
  *
  * \param[in] f file pointer
@@ -1052,11 +1058,10 @@ void closefile(FILE *f, int pid, int rfd) {
     }
 }
 
+
 /**
  * \brief TODO <brief function description>
- *
  * \param[in] f file pointer
- *
  * \return none
  */
 void print_options(FILE *f) {
@@ -1081,10 +1086,8 @@ void print_options(FILE *f) {
 
 /**
  * \brief Import csv to sc
- *
  * \param[in] fname file name
  * \param[in] d = delim character
- *
  * \return 0 on success; -1 on error
  */
 int import_csv(char * fname, char d) {
@@ -1198,15 +1201,13 @@ int import_csv(char * fname, char d) {
     return 0;
 }
 
+
 /**
  * \brief Import Markdown to sc
- *
  * \param[in] fname file name
  * \param[in] d
- *
  * \return 0 on success; -1 on error
  */
-
 int import_markdown(char * fname) {
     struct roman * roman = session->cur_doc;
     register FILE * f;
@@ -1364,18 +1365,16 @@ int import_markdown(char * fname) {
 }
 
 
-
 /**
  * \brief Export to CSV, TAB, or plain TXT
- *
  * \param[in] r0
  * \param[in] c0
  * \param[in] rn
  * \param[in] cn
- *
  * \return none
  */
 void do_export(int r0, int c0, int rn, int cn) {
+    char * curfile = session->cur_doc->name;
     int force_rewrite = 0;
     char type_export[4] = "";
     char ruta[PATHLEN];
@@ -1406,7 +1405,7 @@ void do_export(int r0, int c0, int rn, int cn) {
 
     // Use curfile name and '.csv' o '.tab' extension
     // Remove current '.sc' extension if necessary
-    } else if (curfile[0]) {
+    } else if (curfile != NULL && curfile[0]) {
         strcpy(ruta, curfile);
         char * ext = strrchr(ruta, '.');
         if (ext != NULL) del_range_chars(ruta, strlen(ruta) - strlen(ext), strlen(ruta)-1);
@@ -1454,13 +1453,11 @@ void do_export(int r0, int c0, int rn, int cn) {
 
 /**
  * \brief Export to md file with markdown table
- *
  * \param[in] fname file name
  * \param[in] r0
  * \param[in] c0
  * \param[in] rn
  * \param[in] cn
- *
  * \return none
  */
 void export_markdown(char * fname, int r0, int c0, int rn, int cn) {
@@ -1605,15 +1602,14 @@ void export_markdown(char * fname, int r0, int c0, int rn, int cn) {
     }
 }
 
+
 /**
  * \brief Export to plain TXT
- *
  * \param[in] fname file name
  * \param[in] r0
  * \param[in] c0
  * \param[in] rn
  * \param[in] cn
- *
  * \return none
  */
 void export_plain(char * fname, int r0, int c0, int rn, int cn) {
@@ -1729,6 +1725,16 @@ void export_plain(char * fname, int r0, int c0, int rn, int cn) {
 
 }
 
+
+/**
+ * \brief Export current tbl to latex format
+ * \param[in] fname file name
+ * \param[in] r0
+ * \param[in] c0
+ * \param[in] rn
+ * \param[in] cn
+ * \return none
+ */
 void export_latex(char * fname, int r0, int c0, int rn, int cn, int verbose) {
     struct roman * roman = session->cur_doc;
     FILE * f;
@@ -1794,8 +1800,9 @@ void export_latex(char * fname, int r0, int c0, int rn, int cn, int verbose) {
     if (! pid && verbose) sc_info("File \"%s\" written", fname);
 }
 
+
 /**
- * \brief TODO Document unspecial()
+ * \brief unspecial()
  *
  * \details Unspecial (backquotes - > ") things that are special
  * chars in a table
@@ -1823,9 +1830,9 @@ void unspecial(FILE * f, char * str, int delim) {
     if (backquote) putc('\"', f);
 }
 
+
 /**
- * \brief TODO Document export_delim
- *
+ * \brief export_delim() - export current tbl to delimited format
  * \param[in] fname full path of the file
  * \param[in] coldelim
  * \param[in] r0
@@ -1833,7 +1840,6 @@ void unspecial(FILE * f, char * str, int delim) {
  * \param[in] rn
  * \param[in] cn
  * \param[in] verbose
- *
  * \return none
  */
 void export_delim(char * fname, char coldelim, int r0, int c0, int rn, int cn, int verbose) {
@@ -1904,12 +1910,11 @@ void export_delim(char * fname, char coldelim, int r0, int c0, int rn, int cn, i
     }
 }
 
+
 /**
  * \brief Check what is the max length of all the lines in a file
- *
  * \details Check the maximum length of lines in a file. Note:
  * FILE * f shall be opened.
- *
  * \param[in] f file pointer
  * \return file length + 1
  */
@@ -1932,12 +1937,11 @@ int max_length(FILE * f) {
     return max + 1;
 }
 
+
 /**
  * \brief Check the number of lines of a file
- *
  * \details Check the numbers of lines of a file. it count \n chars.
  * FILE * f shall be opened.
- *
  * \param[in] f file pointer
  * \return number
  */
@@ -1953,13 +1957,12 @@ int count_lines(FILE * f) {
     return count;
 }
 
+
 /**
  * \brief TODO Document plugin_exists()
- *
  * \param[in] name
  * \param[in] len
  * \param[in] path
- *
  * \return none
  */
 int plugin_exists(char * name, int len, char * path) {
@@ -2010,12 +2013,14 @@ int plugin_exists(char * name, int len, char * path) {
     return 0;
 }
 
+
 /**
  * \brief TODO Document do_autobackup()
  * \return none
  */
 void * do_autobackup() {
     struct roman * roman = session->cur_doc;
+    char * curfile = roman->name;
     int len = strlen(curfile);
     //if (roman->loading || ! len) return (void *) -1;
     //if (! len || ! roman->modflg) return (void *) -1;
@@ -2057,6 +2062,7 @@ void * do_autobackup() {
     return (void *) 0;
 }
 
+
 /**
  * \brief Check if it is time to do an autobackup
  * \return none
@@ -2080,6 +2086,7 @@ void handle_backup() {
     return;
 }
 
+
 /**
  * \brief Remove autobackup file
  * \details Remove autobackup file. Used when quitting or when loading
@@ -2099,6 +2106,7 @@ void remove_backup(char * file) {
     remove(name);
     return;
 }
+
 
 /**
  * \brief TODO Document backup_exists()
@@ -2122,6 +2130,7 @@ int backup_exists(char * file) {
     return 0;
 }
 
+
 /**
  * \brief open file nested
  * \param[in] file name string
@@ -2135,6 +2144,7 @@ void openfile_nested(char * file) {
     sprintf(syscmd + strlen(syscmd), " %s", file);
     system(syscmd);
 }
+
 
 /**
  * \brief open file under cursor
@@ -2152,9 +2162,10 @@ void openfile_under_cursor(int r, int c) {
     }
 }
 
+
 /*
  * function that takes argv arguments and create a new
- * roman struct for earch file and attach it to main session
+ * roman struct for each file and attach it to main session
  * DISABLED BY DESIGN
 void readfile_argv(int argc, char ** argv) {
     for (int i = 1; i < argc; i++) {
@@ -2184,6 +2195,7 @@ void readfile_argv(int argc, char ** argv) {
 }
 */
 
+
 /*
  * \brief load a file into a roman struct
  * the file may contain multiple sheets
@@ -2209,6 +2221,7 @@ void load_file(char * file) {
     load_tbl(file);
     return;
 }
+
 
 /**
  * \brief Attempt to load a tbl into a sheet
@@ -2252,3 +2265,32 @@ void load_tbl(char * loading_file) {
     }
 }
 
+
+/**
+ * \brief create an empty workbook and attach it to session
+ * \return [int] -> return -1 (and quit app) if cannot alloc - return 0 on success
+ */
+int create_empty_wb() {
+        struct roman * roman = calloc(1, sizeof(struct roman));
+        roman->name = NULL;
+        //roman->flags &= is_allocated;
+        roman->first_sh = NULL;
+        roman->cur_sh = NULL;
+
+        // save roman inside session
+        INSERT(roman, (session->first_doc), (session->last_doc), next, prev);
+        session->cur_doc = roman; // important: set cur_doc!
+
+        // malloc a sheet
+        roman->cur_sh = roman->first_sh = new_sheet(roman, NULL);
+        //roman->flags &= is_empty;
+
+        // grow sheet tbl
+        if (! growtbl(roman->first_sh, GROWNEW, 0, 0)) {
+            exit_app(-1);
+            return -1;
+        }
+
+        erasedb(roman->first_sh);
+        return 0;
+}

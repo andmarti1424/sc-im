@@ -15,11 +15,10 @@ added new colors types SHEET, CURRENT_SHEET and FILENM
 
 For v0.8.3 release
 -------------------
-replace calls to curfile with roman->name
+free session / roman / sheets
 reference cells from different sheets in formulas
 UNDO should save reference to the sheet where the action took place
 modify file functions to read roman struct
-
 + Show range detail in inputbar
 + Add GETENT in seval
 + create @counta, and modify @count to not count strings

@@ -1011,7 +1011,7 @@ void do_commandmode(struct block * sb) {
           savefile();
 
         } else if ( ! wcsncmp(inputline, L"file ", 5) ) {
-
+            char * curfile = session->cur_doc->name;
             char name [BUFFERSIZE];
             int name_ok = 0;
             #ifndef NO_WORDEXP
@@ -1040,17 +1040,18 @@ void do_commandmode(struct block * sb) {
 
             if (name_ok) {
                 #ifdef AUTOBACKUP
-                // check if backup of curfile exists.
+                // check if backup of current loaded file exists.
                 // if it exists, remove it.
-                if (strlen(curfile) && backup_exists(curfile)) remove_backup(curfile);
+                if (curfile != NULL && strlen(curfile) && backup_exists(curfile)) remove_backup(curfile);
                 #endif
-                strncpy(curfile, name, PATHLEN - 1);
-                sc_info("File name set to \"%s\"", curfile);
+                if (roman->name == NULL) roman->name = malloc(sizeof(char)*PATHLEN);
+                strncpy(roman->name, name, PATHLEN - 1);
+                sc_info("File name set to \"%s\"", roman->name);
             }
 
         } else if ( ! wcscmp(inputline, L"file") ) {
-
-            if( ! *curfile ) {
+            char * curfile = session->cur_doc->name;
+            if( curfile == NULL || ! curfile ) {
                 sc_info("Current file has no name");
             } else {
                 sc_info("Current file: \"%s\"", curfile);
@@ -1063,7 +1064,6 @@ void do_commandmode(struct block * sb) {
             fcopy("");
 
         } else if ( ! wcsncmp(inputline, L"fcopy ", 6)) {
-
             wchar_t line [BUFFERSIZE];
             wcscpy(line, inputline);
             del_range_wchars(line, 0, 5);
@@ -1075,22 +1075,23 @@ void do_commandmode(struct block * sb) {
             fsum();
 
         } else if (
-                ! wcsncmp(inputline, L"e csv"  , 5) ||
-                ! wcsncmp(inputline, L"e! csv" , 6) ||
-                ! wcsncmp(inputline, L"e tex"  , 5) ||
-                ! wcsncmp(inputline, L"e! tex" , 6) ||
-                ! wcsncmp(inputline, L"e tab"  , 5) ||
-                ! wcsncmp(inputline, L"e! tab" , 6) ||
-                ! wcsncmp(inputline, L"e mkd"  , 4) ||
-                ! wcsncmp(inputline, L"e! mkd" , 5) ||
-                ! wcsncmp(inputline, L"e txt" , 5) ||
-                ! wcsncmp(inputline, L"e! txt" , 6) ) {
+            ! wcsncmp(inputline, L"e csv"  , 5) ||
+            ! wcsncmp(inputline, L"e! csv" , 6) ||
+            ! wcsncmp(inputline, L"e tex"  , 5) ||
+            ! wcsncmp(inputline, L"e! tex" , 6) ||
+            ! wcsncmp(inputline, L"e tab"  , 5) ||
+            ! wcsncmp(inputline, L"e! tab" , 6) ||
+            ! wcsncmp(inputline, L"e mkd"  , 4) ||
+            ! wcsncmp(inputline, L"e! mkd" , 5) ||
+            ! wcsncmp(inputline, L"e txt" , 5) ||
+            ! wcsncmp(inputline, L"e! txt" , 6) ) {
                 do_export( p == -1 ? 0 : sr->tlrow, p == -1 ? 0 : sr->tlcol,
                 p == -1 ? sh->maxrow : sr->brrow, p == -1 ? sh->maxcol : sr->brcol);
 
         } else if (
-                ! wcsncmp(inputline, L"e xlsx"  , 6) ||
-                ! wcsncmp(inputline, L"e! xlsx" , 7)) {
+            ! wcsncmp(inputline, L"e xlsx"  , 6) ||
+            ! wcsncmp(inputline, L"e! xlsx" , 7)) {
+                char * curfile = session->cur_doc->name;
                 #ifndef XLSX_EXPORT
                 sc_error("XLSX export support not compiled in");
                 #else
@@ -1108,7 +1109,7 @@ void do_commandmode(struct block * sb) {
                     strcpy(filename, linea);
                     // Use curfile name and '.xlsx' extension
                     // Remove current '.sc' extension if necessary
-                } else if (curfile[0]) {
+                } else if (curfile != NULL && strlen(curfile)) {
                     strcpy(filename, curfile);
                     char * ext = strrchr(filename, '.');
                     if (ext != NULL) del_range_chars(filename, strlen(filename) - strlen(ext), strlen(filename)-1);
@@ -1126,7 +1127,7 @@ void do_commandmode(struct block * sb) {
                     // if it exists and curfile = fname, remove it.
                     // else return.
                 } else if (strlen(filename) && backup_exists(filename)
-                    && !force_rewrite && !(strlen(curfile) && !strcmp(curfile, filename))) {
+                    && ! force_rewrite && ! (strlen(curfile) && ! strcmp(curfile, filename))) {
                     sc_error("Backup file of %s exists. Use \"!\" to force the write process.", filename);
                 #endif
                 } else if (strlen(filename)) {

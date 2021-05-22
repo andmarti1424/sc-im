@@ -212,7 +212,7 @@ void subst(char * s, char from, char to) {
 }
 
 /**
- * \brief Rind string B inside string S
+ * \brief Find string B inside string S
  *
  * \param[in]
  * \param[in[ b

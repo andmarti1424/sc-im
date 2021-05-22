@@ -82,9 +82,10 @@ int backup_exists(char * file);
 void openfile_nested(char * file);
 void openfile_under_cursor(int r, int c);
 
-//void readfile_argv(int argc, char ** argv);
 void load_file(char * loading_file);
 void load_tbl(char * loading_file);
 FILE * openfile(char *fname, int *rpid, int *rfd);
 int import_csv(char * fname, char d);
 int import_markdown(char * fname);
+int create_empty_wb();
+//void readfile_argv(int argc, char ** argv);

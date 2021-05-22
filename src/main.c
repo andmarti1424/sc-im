@@ -38,18 +38,10 @@
 /**
  * \file main.c
  * \author Andrés Martinelli <andmarti@gmail.com>
- * \date 2017-07-18
+ * \date 2021-05-22
  * \brief The main file of sc-im
- *
  * \details This is the main file for sc-im.
- *
  * \see Homepage: https://github.com/andmarti1424/sc-im
- *
- * \bug It has been detected that libxls can produce memory leaks. One example
- * is when you try to read a non xls file (e.g. xlsx file).
- *
- * \bug Extended ascii characters are not showing correctly. Compile sc-im
- * against -lncursesw and not -lncurses.
  */
 
 #include <signal.h>
@@ -101,9 +93,6 @@ struct session * session;
 // by design, if more than one is passed, we keep the last one.
 char loadingfile[PATHLEN] = { '\0' };
 
-// worksheet attributes
-char curfile[PATHLEN]; //TODO move to roman struct
-
 // app attributes. TODO: should be later added to conf
 int calc_order = BYROWS;
 char dpoint = '.'; /* Default decimal point character */
@@ -127,7 +116,16 @@ int linelim = -1;
 double eval_result;
 char * seval_result;
 
+
+/* shall_quit is a variable to determinate if sc-im must be closed
+ * shall_quit=0 means normal operation of app
+ * shall_quit=1 means :q
+ * shall_quit=-1 means ERROR or SIGABRT signal
+ * shall_quit=2 means :q!
+ * TODO: add macros here
+ */
 int shall_quit = 0;
+
 unsigned int curmode;
 unsigned int lastmode;
 
@@ -148,8 +146,6 @@ pthread_t fthread;
 #endif
 #endif
 
-void read_stdin();
-
 extern char * rev;
 extern graphADT graph;
 
@@ -167,7 +163,7 @@ extern graphADT graph;
  * first string is the executable's name. This is passed to main() by
  * the system.
  *
- * \return 0 on success; 1 on some errors; -1 on error
+ * \return 0 on success; -1 on errors
  */
 
 // TODO Document the possible errors. Why are some things -1 while others
@@ -197,12 +193,10 @@ int main (int argc, char ** argv) {
     read_argv(argc, argv);
 
     // check if help is in argv. if so, show usage and quit
-    if (get_conf_int("help"))
-        show_usage_and_quit();
+    if (get_conf_int("help")) show_usage_and_quit();
 
     // check if version is in argv. if so, show version and quit
-    if (get_conf_int("version"))
-        show_version_and_quit();
+    if (get_conf_int("version")) show_version_and_quit();
 
     // create command line history structure
     if (! get_conf_int("nocurses")) {
@@ -282,26 +276,7 @@ int main (int argc, char ** argv) {
      * check if session->cur_doc is NULL (no file passed as argv).
      * if so, create an empty doc with just one sheet
      */
-    if (session->cur_doc == NULL) {
-        struct roman * roman = calloc(1, sizeof(struct roman));
-        roman->name = NULL;
-        //roman->flags &= is_allocated;
-        roman->first_sh = NULL;
-        roman->cur_sh = NULL;
-
-        // save roman inside session
-        INSERT(roman, (session->first_doc), (session->last_doc), next, prev);
-        session->cur_doc = roman; // important: set cur_doc!
-
-        // malloc a sheet
-        roman->cur_sh = roman->first_sh = new_sheet(roman, "Sheet 1");
-        //roman->flags &= is_empty;
-
-        // grow sheet tbl
-        if (! growtbl(roman->first_sh, GROWNEW, 0, 0)) return exit_app(1);
-
-        erasedb(roman->first_sh);
-    }
+    if (session->cur_doc == NULL) create_empty_wb();
 
     /*
      * loadrc. Since we are not sure what people put it their scimrc file,
@@ -309,7 +284,6 @@ int main (int argc, char ** argv) {
      * we call the loadrc() routine after session / roman / sheet are alloc'ed.
      */
     loadrc();
-    *curfile = '\0';
 
     // check input from stdin (pipeline)
     // and send it to interp
@@ -324,7 +298,6 @@ int main (int argc, char ** argv) {
         // we show welcome screen if no spreadsheet was passed to SC-IM
         // and no input was sent throw pipeline
         if ( ! session->cur_doc->name && ! wcslen(stdin_buffer)) {
-            //curfile[0]
             ui_do_welcome();
             // show mode and cell's details in status bar
             ui_print_mode();
@@ -339,8 +312,8 @@ int main (int argc, char ** argv) {
     }
 
     // handle input from keyboard
-    if (! get_conf_int("nocurses"))
-        buffer = (struct block *) create_buf(); // this should only take place if curses ui
+    // this should only take place if curses ui
+    if (! get_conf_int("nocurses")) buffer = (struct block *) create_buf();
 
     wchar_t nocurses_buffer[BUFFERSIZE];
 
@@ -352,24 +325,8 @@ int main (int argc, char ** argv) {
     lastbackup_tv = (struct timeval) {0};
     #endif
 
-    /* TODO Move this out of main */
-    if (get_conf_value("export_csv") && session->cur_doc != NULL) {
-        export_delim(NULL, ',', 0, 0, session->cur_doc->cur_sh->maxrow, session->cur_doc->cur_sh->maxcol, 0);
-    }
-
-    if (get_conf_value("export_tab") && session->cur_doc != NULL) {
-        export_delim(NULL, '\t', 0, 0, session->cur_doc->cur_sh->maxrow, session->cur_doc->cur_sh->maxcol, 0);
-    }
-
-    if (get_conf_value("export_mkd") && session->cur_doc != NULL) {
-        export_markdown(NULL, 0, 0, session->cur_doc->cur_sh->maxrow, session->cur_doc->cur_sh->maxcol);
-    }
-
-    if ((get_conf_value("export") || get_conf_value("export_txt")) && session->cur_doc != NULL) {
-        export_plain(NULL, 0, 0, session->cur_doc->cur_sh->maxrow, session->cur_doc->cur_sh->maxcol);
-    }
-    /* <-- Move this out of main */
-
+    // handle --exports passed as argv
+    handle_argv_exports();
 
     while ( ! shall_quit && ! get_conf_int("quit_afterload")) {
         // save current time for runtime timer
@@ -388,8 +345,11 @@ int main (int argc, char ** argv) {
             send_to_interp(nocurses_buffer);
         }
 
-        /* shall_quit=1 means :q
-           shall_quit=2 means :q! */
+        /* shall_quit=0 means normal operation of app
+         * shall_quit=1 means :q
+         * shall_quit=-1 means ERROR or ABRT signal
+         * shall_quit=2 means :q!
+         */
         if (shall_quit == 1 && modcheck()) shall_quit = 0;
     }
     if (get_conf_int("nocurses") && f != NULL) fclose(f);
@@ -398,9 +358,8 @@ int main (int argc, char ** argv) {
 }
 
 
-
 /**
- * \brief Creates the structures used by the program.
+ * \brief Creates the basic structures used by sc-im
  * \return none
  */
 void create_structures() {
@@ -427,7 +386,6 @@ void create_structures() {
 
 /**
  * \brief read_stdin()
- *
  * \return none
  */
 void read_stdin() {
@@ -463,9 +421,9 @@ void read_stdin() {
     //sc_debug("finish reading");
 }
 
+
 /**
  * \brief Delete basic structures that depend on the loaded files.
- *
  * \return none
  */
 void delete_structures() {
@@ -524,10 +482,11 @@ void delete_structures() {
  * \param[in] status
  * \param[out] status
  *
- * \return status is returned unchanged
+ * \return status is returned unchanged:
+ *         return 0 on normal exit.
+ *         return -1 on error.
  */
 int exit_app(int status) {
-
     // free history
     if (! get_conf_int("nocurses")) {
 
@@ -549,7 +508,8 @@ int exit_app(int status) {
 
     // remove backup file
 #ifdef AUTOBACKUP
-    if (strlen(curfile) && backup_exists(curfile)) remove_backup(curfile);
+    char * filename = session->cur_doc->name;
+    if (filename != NULL && strlen(filename) && backup_exists(filename)) remove_backup(filename);
 #endif
 
     // erase structures
@@ -578,7 +538,7 @@ int exit_app(int status) {
 
 
 /**
- * \brief Read command line parameters and store them in a dictionary 
+ * \brief Read command line parameters and store them in a dictionary
  *
  * \details Read parameters passed to SC-IM executable and
  * store them in user_conf dictionary.
@@ -604,7 +564,6 @@ void read_argv(int argc, char ** argv) {
     exepath = argv[0];
     return;
 }
-
 
 
 /**
@@ -644,12 +603,12 @@ void sig_nopipe() {
     return;
 }
 
+
 /**
  * \brief Handles the SIGTSTP signal
  *
  * \return none
  */
-
 void sig_tstp() {
     //sc_info("Got SIGTSTP.");
     def_prog_mode();
@@ -664,7 +623,6 @@ void sig_tstp() {
  *
  * \return none
  */
-
 void sig_cont() {
     signal(SIGTSTP, sig_tstp); /* set handler back to this */
     sig_winchg();
@@ -674,12 +632,12 @@ void sig_cont() {
     //sc_info("Got SIGCONT.");
 }
 
+
 /**
  * \brief Handles the SIGINT signal
  *
  * \return none
  */
-
 void sig_int() {
     if ( ! get_conf_int("debug"))
         sc_error("Got SIGINT. Press «:q<Enter>» to quit SC-IM");
@@ -688,36 +646,35 @@ void sig_int() {
     return;
 }
 
+
 /**
  * \brief Handles the SIGABRT signal
  *
  * \return none
  */
-
 void sig_abrt() {
     sc_error("Error !!! Quitting SC-IM.");
     shall_quit = -1; // error !
     return;
 }
 
+
 /**
  * \brief Handles the SIGABRT signal
  *
  * \return none
  */
-
 void sig_term() {
     sc_error("Got SIGTERM signal. Quitting SC-IM.");
     shall_quit = 2;
     return;
 }
 
+
 /**
  * \brief Send the version number to standard output and quit.
- *
  * \return none
  */
-
 // TODO Split this into two commands. One prints the version number
 // the other prints the version number along with the other information.
 void show_version_and_quit() {
@@ -857,4 +814,23 @@ void show_usage_and_quit(){
 \n  --version                   Print version information and exit\
 \n  --help                      Print Help (this message) and exit\n");
     put(user_conf_d, "quit_afterload", "1");
+}
+
+void handle_argv_exports() {
+    if (get_conf_value("export_csv") && session->cur_doc != NULL) {
+        export_delim(NULL, ',', 0, 0, session->cur_doc->cur_sh->maxrow, session->cur_doc->cur_sh->maxcol, 0);
+    }
+
+    if (get_conf_value("export_tab") && session->cur_doc != NULL) {
+        export_delim(NULL, '\t', 0, 0, session->cur_doc->cur_sh->maxrow, session->cur_doc->cur_sh->maxcol, 0);
+    }
+
+    if (get_conf_value("export_mkd") && session->cur_doc != NULL) {
+        export_markdown(NULL, 0, 0, session->cur_doc->cur_sh->maxrow, session->cur_doc->cur_sh->maxcol);
+    }
+
+    if ((get_conf_value("export") || get_conf_value("export_txt")) && session->cur_doc != NULL) {
+        export_plain(NULL, 0, 0, session->cur_doc->cur_sh->maxrow, session->cur_doc->cur_sh->maxcol);
+    }
+    return;
 }

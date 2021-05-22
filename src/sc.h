@@ -416,7 +416,6 @@ struct go_save {
 #define GROWCOL       3       /* add columns */
 #define GROWBOTH      4       /* grow both */
 
-extern char curfile[];
 extern int arg;
 extern int gmyrow, gmycol;    // globals used for @myrow, @mycol cmds
 extern int rowsinrange;       // Number of rows in target range of a goto

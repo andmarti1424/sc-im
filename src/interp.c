@@ -1945,9 +1945,10 @@ char * seval(struct ent * ent, struct enode * se) {
              return dosevaluate(seval(ent, se->e.o.left));
 
     case FILENAME: {
+             char * curfile = session->cur_doc->name;
+             if (curfile == NULL) return curfile;
              int n = eval(NULL, se->e.o.left);
              char *s = strrchr(curfile, '/');
-
              if (n || s++ == NULL) s = curfile;
              p = scxmalloc( (size_t) (strlen(s) + 1));
              (void) strcpy(p, s);
