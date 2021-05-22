@@ -254,6 +254,11 @@ int main (int argc, char ** argv) {
 
     wchar_t stdin_buffer[BUFFERSIZE] = { L'\0' };
 
+    // take this out of here -->
+    calc_order = BYROWS;
+    prescale = 1.0;
+    optimize = 0; // <----
+
     // create basic structures that will depend on the loaded file
     create_structures();
 
@@ -345,7 +350,8 @@ int main (int argc, char ** argv) {
             send_to_interp(nocurses_buffer);
         }
 
-        /* shall_quit=0 means normal operation of app
+        /*
+         * shall_quit=0 means normal operation of app
          * shall_quit=1 means :q
          * shall_quit=-1 means ERROR or ABRT signal
          * shall_quit=2 means :q!
@@ -455,16 +461,7 @@ void delete_structures() {
     destroy_graph(graph);
 
     // Free tbl / sheet / roman / session
-    //  TODO
-    /* traverse each roman struct inside session
-    traverse each sheet struct inside roman
-    free each tbl
-    erasedb(roman->cur_sh);
-    // free roman struct
-    free(roman); */
-
-    // free session
-    free(session);
+    free_session(session);
 
     // free custom_colors
     free_custom_colors();

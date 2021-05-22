@@ -421,20 +421,6 @@ extern int gmyrow, gmycol;    // globals used for @myrow, @mycol cmds
 extern int rowsinrange;       // Number of rows in target range of a goto
 extern int colsinrange;       // Number of cols in target range of a goto
 extern char * colformat[10];
-//extern int currow, curcol;
-//extern int maxrow, maxcol;
-//extern struct ent *** tbl;     // data table ref. in vmtbl.c and ATBL()
-//extern int lastrow, lastcol;
-//extern int rescol;            // columns reserved for row numbers
-//extern int maxrows, maxcols;  // # cells currently allocated
-//extern int * fwidth;
-//extern int * precision;
-//extern int * realfmt;
-//extern unsigned char * col_hidden;
-//extern unsigned char * row_hidden;
-//extern unsigned char * row_format;
-//extern unsigned char * row_frozen;
-//extern unsigned char * col_frozen;
 extern char line[FBUFLEN];
 extern int linelim;
 extern int changed;

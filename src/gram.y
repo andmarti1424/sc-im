@@ -672,7 +672,7 @@ command:
                                    } else {
                                        roman->cur_sh = new_sheet(roman, $2);
                                        growtbl(roman->cur_sh, GROWNEW, 0, 0);
-                                       erasedb(roman->cur_sh);
+                                       erasedb(roman->cur_sh, 0);
                                        scxfree($2);
                                        chg_mode('.');
                                        ui_update(TRUE);

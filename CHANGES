@@ -15,10 +15,12 @@ added new colors types SHEET, CURRENT_SHEET and FILENM
 
 For v0.8.3 release
 -------------------
-free session / roman / sheets
+loadingfile invalid free when opening csv files
+file saving and loading with multiple sheets
 reference cells from different sheets in formulas
 UNDO should save reference to the sheet where the action took place
-modify file functions to read roman struct
+
+rearrange file loading and saving functions
 + Show range detail in inputbar
 + Add GETENT in seval
 + create @counta, and modify @count to not count strings

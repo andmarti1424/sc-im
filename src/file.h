@@ -44,7 +44,7 @@
 
 #include "freeze.h"
 
-void erasedb();
+void erasedb(struct sheet * sheet, int _free);
 void loadrc(void);
 int modcheck();
 int savefile();

@@ -45,6 +45,7 @@
 
 #include <stdlib.h>
 #include "sheet.h"
+#include "file.h"
 
 /**
  * \brief new_sheet()
@@ -58,7 +59,7 @@ struct sheet * new_sheet(struct roman * doc, char * name) {
 
       sh = (struct sheet *) calloc(1, sizeof(struct sheet));
       INSERT(sh, (doc->first_sh), (doc->last_sh), next, prev);
-      sh->name = name != NULL ? strdup(name) : "Sheet 1";
+      sh->name = strdup(name);
 
       sh->tbl = NULL;
 
@@ -118,3 +119,57 @@ int get_num_sheets(struct roman * doc) {
       }
       return cnt;
 }
+
+void free_session(struct session * session) {
+    while (session != NULL) {
+        struct roman * r_aux, * r = session->first_doc;
+        // traverse romans
+        while (r != NULL) {
+            r_aux = r->next;
+            // traverse sheets
+            struct sheet * s_aux, * sh = r->first_sh;
+            while (sh != NULL) {
+                s_aux = sh->next;
+                // free sheet
+                erasedb(sh, 1); // clear sh and also free
+
+                for (int row = 0; sh->tbl != NULL && row < sh->maxrows; row++) {
+                    if (sh->tbl[row] != NULL) {
+                        free(sh->tbl[row]);
+                        sh->tbl[row] = NULL;
+                    }
+                }
+
+                free(sh->tbl);
+                free(sh->fwidth);
+                free(sh->precision);
+                free(sh->realfmt);
+                free(sh->col_hidden);
+                free(sh->col_frozen);
+                free(sh->row_hidden);
+                free(sh->row_frozen);
+                free(sh->row_format);
+
+                if (sh->name != NULL) {
+                    free(sh->name);
+                    sh->name = NULL;
+                }
+                free(sh);
+                sh = s_aux;
+            }
+
+            if (r->name != NULL) {
+                free(r->name);
+                r->name = NULL;
+            }
+            free(r);
+            r = r_aux;
+        }
+        // free session
+        free(session);
+        session = NULL;
+    }
+    return;
+}
+
+

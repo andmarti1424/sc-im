@@ -96,7 +96,7 @@ extern struct session * session;
  * \brief Erase the database (tbl, etc.)
  * \return none
  */
-void erasedb(struct sheet * sheet) {
+void erasedb(struct sheet * sheet, int _free) {
     int  r, c;
 
     for (c = 0; c <= sheet->maxcol; c++) {
@@ -107,19 +107,18 @@ void erasedb(struct sheet * sheet) {
 
     for (r = 0; r <= sheet->maxrow; r++) {
         sheet->row_format[r] = 1;
-        register struct ent ** pp = ATBL(sheet, sheet->tbl, r, 0);
+        struct ent ** pp = ATBL(sheet, sheet->tbl, r, 0);
         for (c = 0; c++ <= sheet->maxcol; pp++)
             if (*pp != NULL) {
                 //(*pp)->next = freeents;    /* save [struct ent] for reuse */
                 //freeents = *pp;
-
                 clearent(*pp);
+                if (_free) free(*pp);
             }
     }
 
     for (c = 0; c < COLFORMATS; c++) {
-        if (colformat[c] != NULL)
-            scxfree(colformat[c]);
+        if (colformat[c] != NULL) scxfree(colformat[c]);
         colformat[c] = NULL;
     }
 
@@ -127,11 +126,6 @@ void erasedb(struct sheet * sheet) {
     sheet->maxcol = 0;
 
     clean_range();
-
-    // take this out of here -->
-    calc_order = BYROWS;
-    prescale = 1.0;
-    optimize = 0; // <----
 
     sheet->currow = sheet->curcol = 0;
 }
@@ -879,7 +873,7 @@ sc_readfile_result readfile(char * fname, int eraseflg) {
         return SC_READFILE_DOESNTEXIST;
     } /* */
 
-    if (eraseflg) erasedb(roman->cur_sh);//TODO handle file
+    if (eraseflg) erasedb(roman->cur_sh, 0); //TODO handle file
 
     while (! brokenpipe && fgets(line, sizeof(line), f)) {
         linelim = 0;
@@ -1140,7 +1134,9 @@ int import_csv(char * fname, char d) {
                 break;
             }
 
-        strcpy(line_in, str_replace(line_in, lookf, repls)); // handle "," case
+        char * str_rep = str_replace(line_in, lookf, repls); // handle "," case
+        strcpy(line_in, str_rep);
+        free(str_rep);
 
         // Split string using the delimiter
         token = xstrtok(line_in, delim);
@@ -2202,6 +2198,7 @@ void readfile_argv(int argc, char ** argv) {
  * \return none
  */
 void load_file(char * file) {
+    if (file == NULL || file[0] == '\0') return;
     struct roman * roman = calloc(1, sizeof(struct roman));
     roman->name = ! strlen(file) ? NULL : file;
     //roman->flags &= is_allocated;
@@ -2213,7 +2210,7 @@ void load_file(char * file) {
     session->cur_doc = roman; // important: set cur_doc!
 
     // malloc a sheet
-    roman->cur_sh = roman->first_sh = new_sheet(roman, "Sheet 1");
+    roman->cur_sh = roman->first_sh = new_sheet(roman, "Sheet A");
 
     // grow sheet tbl
     growtbl(roman->first_sh, GROWNEW, 0, 0);
@@ -2282,7 +2279,7 @@ int create_empty_wb() {
         session->cur_doc = roman; // important: set cur_doc!
 
         // malloc a sheet
-        roman->cur_sh = roman->first_sh = new_sheet(roman, NULL);
+        roman->cur_sh = roman->first_sh = new_sheet(roman, "Sheet 1");
         //roman->flags &= is_empty;
 
         // grow sheet tbl
@@ -2291,6 +2288,6 @@ int create_empty_wb() {
             return -1;
         }
 
-        erasedb(roman->first_sh);
+        erasedb(roman->first_sh, 0);
         return 0;
 }
