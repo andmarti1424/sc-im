@@ -146,7 +146,6 @@ pthread_t fthread;
 #endif
 #endif
 
-extern char * rev;
 extern graphADT graph;
 
 /**
@@ -564,6 +563,31 @@ void read_argv(int argc, char ** argv) {
 
 
 /**
+ * \brief handle_argv_exports()
+ * TODO: move to a new offline.c
+ * \return none
+ */
+void handle_argv_exports() {
+    if (get_conf_value("export_csv") && session->cur_doc != NULL) {
+        export_delim(NULL, ',', 0, 0, session->cur_doc->cur_sh->maxrow, session->cur_doc->cur_sh->maxcol, 0);
+    }
+
+    if (get_conf_value("export_tab") && session->cur_doc != NULL) {
+        export_delim(NULL, '\t', 0, 0, session->cur_doc->cur_sh->maxrow, session->cur_doc->cur_sh->maxcol, 0);
+    }
+
+    if (get_conf_value("export_mkd") && session->cur_doc != NULL) {
+        export_markdown(NULL, 0, 0, session->cur_doc->cur_sh->maxrow, session->cur_doc->cur_sh->maxcol);
+    }
+
+    if ((get_conf_value("export") || get_conf_value("export_txt")) && session->cur_doc != NULL) {
+        export_plain(NULL, 0, 0, session->cur_doc->cur_sh->maxrow, session->cur_doc->cur_sh->maxcol);
+    }
+    return;
+}
+
+
+/**
  * \brief Set up signals catched by sc-im
  * \return none
  */
@@ -664,170 +688,5 @@ void sig_abrt() {
 void sig_term() {
     sc_error("Got SIGTERM signal. Quitting SC-IM.");
     shall_quit = 2;
-    return;
-}
-
-
-/**
- * \brief Send the version number to standard output and quit.
- * \return none
- */
-// TODO Split this into two commands. One prints the version number
-// the other prints the version number along with the other information.
-void show_version_and_quit() {
-    put(user_conf_d, "nocurses", "1");
-    sc_info("SC-IM - %s", rev);
-#ifdef NCURSES
-    sc_info("-DNCURSES");
-#endif
-#ifdef MAXROWS
-    sc_info("-DMAXROWS %d", MAXROWS);
-#endif
-#ifdef UNDO
-    sc_info("-DUNDO");
-#endif
-#ifdef XLS
-    sc_info("-DXLS");
-#endif
-#ifdef XLSX
-    sc_info("-DXLSX");
-#endif
-#ifdef XLSX_EXPORT
-    sc_info("-DXLSX_EXPORT");
-#endif
-#ifdef XLUA
-    sc_info("-DXLUA");
-#endif
-#ifdef DEFAULT_COPY_TO_CLIPBOARD_CMD
-    sc_info("-DDEFAULT_COPY_TO_CLIPBOARD_CMD=\"%s\"", DEFAULT_COPY_TO_CLIPBOARD_CMD);
-#endif
-#ifdef DEFAULT_PASTE_FROM_CLIPBOARD_CMD
-    sc_info("-DDEFAULT_PASTE_FROM_CLIPBOARD_CMD=\"%s\"", DEFAULT_PASTE_FROM_CLIPBOARD_CMD);
-#endif
-#ifdef DEFAULT_OPEN_FILE_UNDER_CURSOR_CMD
-    sc_info("-DDEFAULT_OPEN_FILE_UNDER_CURSOR_CMD=\"%s\"", DEFAULT_OPEN_FILE_UNDER_CURSOR_CMD);
-#endif
-#ifdef USELOCALE
-    sc_info("-DUSELOCALE");
-#endif
-#ifdef MOUSE
-    sc_info("-DMOUSE");
-#endif
-#ifdef USECOLORS
-    sc_info("-DUSECOLORS");
-#endif
-#ifdef _XOPEN_SOURCE_EXTENDED
-    sc_info("-D_XOPEN_SOURCE_EXTENDED");
-#endif
-#ifdef _GNU_SOURCE
-    sc_info("-D_GNU_SOURCE");
-#endif
-#ifdef SNAME
-    sc_info("-DSNAME=\"%s\"", SNAME);
-#endif
-#ifdef HELP_PATH
-    sc_info("-DHELP_PATH=\"%s\"", HELP_PATH);
-#endif
-#ifdef LIBDIR
-    sc_info("-DLIBDIR=\"%s\"", LIBDIR);
-#endif
-#ifdef DFLT_PAGER
-    sc_info("-DDFLT_PAGER=\"%s\"", DFLT_PAGER);
-#endif
-#ifdef DFLT_EDITOR
-    sc_info("-DDFLT_EDITOR=\"%s\"", DFLT_EDITOR);
-#endif
-#ifdef CONFIG_DIR
-    sc_info("-DCONFIG_DIR=\"%s\"", CONFIG_DIR);
-#endif
-#ifdef CONFIG_FILE
-    sc_info("-DCONFIG_FILE=\"%s\"", CONFIG_FILE);
-#endif
-#ifdef HISTORY_DIR
-    sc_info("-DHISTORY_DIR=\"%s\"", HISTORY_DIR);
-#endif
-#ifdef HISTORY_FILE
-    sc_info("-DHISTORY_FILE=\"%s\"", HISTORY_FILE);
-#endif
-#ifdef INS_HISTORY_FILE
-    sc_info("-DINS_HISTORY_FILE=\"%s\"", INS_HISTORY_FILE);
-#endif
-#ifdef HAVE_PTHREAD
-    sc_info("-DHAVE_PTHREAD");
-#endif
-#ifdef AUTOBACKUP
-    sc_info("-DAUTOBACKUP");
-#endif
-    put(user_conf_d, "quit_afterload", "1");
-}
-
-
-/**
- * \brief Print usage message to stdout text and quit
- * \return none
- */
-// NOTE this is a quick and dirty command to search for arguments used in the sources (macOS 10.14)
-// grep "get_conf_value(\"" -r ./src/*.c | grep get_conf_value |sed 's/"//g' |sed 's/.*get_conf_value(//g'|cut -d ')' -f1 |sort|uniq|sed 's/^/--/g'
-void show_usage_and_quit(){
-  put(user_conf_d, "nocurses", "1");
-  printf("\
-\nsc-im - sc-improvised\
-\n\
-\nUsage: sc-im [arguments] [file]          specified file\
-\n   or: sc-im [arguments] -               read text from stdin\
-\n\
-\nArguments:\
-\n\
-\n  --autocalc                  Set variable 'autocalc'.\
-\n  --copy_to_clipboard_delimited_tab  Set variable 'copy_to_clipboard_delimited_tab'\
-\n  --debug                     Set variable 'debug'\
-\n  --default_copy_to_clipboard_cmd=COMMAND  set variable 'default_copy_from_clipboard_cmd'\
-\n  --default_paste_from_clipboard_cmd=COMMAND  set variable 'default_paste_from_clipboard_cmd'\
-\n  --default_open_file_under_cursor_cmd=COMMAND  set variable 'default_open_file_under_cursor_cmd'\
-\n  --export_csv                Export to csv without interaction\
-\n  --export_tab                Export to tab without interaction\
-\n  --export_txt                Export to txt without interaction\
-\n  --export_mkd                Export to markdown without interaction\
-\n  --external_functions        Set variable 'external_functions'\
-\n  --half_page_scroll          Set variable 'half_page_scroll'\
-\n  --ignorecase                Set variable 'ignorecase'\
-\n  --import_delimited_as_text Import text as\
-\n  --newline_action={j or l}   Set variable 'newline_action'\
-\n  --nocurses                  Run interactive but without ncurses interface.\
-\n  --numeric                   Set variable 'numeric'\
-\n  --numeric_decimal           Set variable 'numeric_decimal'\
-\n  --output=FILE               Save the results in FILE\
-\n  --overlap                   Set variable 'overlap variable'\
-\n  --quit_afterload            Quit after loading all the files\
-\n  --show_cursor               Make the screen cursor follow the active cell\
-\n  --tm_gmtoff={seconds}       set gmt offset used for converting datetimes to localtime.\
-\n  --txtdelim={\",\" or \";\" or \"\\t\" or \"|\"}  Sets delimiter when opening a .tab of .csv file");
-#ifdef XLSX
-  printf("\n\
-\n  --sheet=SHEET               Open SHEET when loading xlsx file. Default is 1.\
-\n  --xlsx_readformulas         Set variable 'xlsx_readformulas'");
-#endif
-  printf("\n\
-\n  --version                   Print version information and exit\
-\n  --help                      Print Help (this message) and exit\n");
-    put(user_conf_d, "quit_afterload", "1");
-}
-
-void handle_argv_exports() {
-    if (get_conf_value("export_csv") && session->cur_doc != NULL) {
-        export_delim(NULL, ',', 0, 0, session->cur_doc->cur_sh->maxrow, session->cur_doc->cur_sh->maxcol, 0);
-    }
-
-    if (get_conf_value("export_tab") && session->cur_doc != NULL) {
-        export_delim(NULL, '\t', 0, 0, session->cur_doc->cur_sh->maxrow, session->cur_doc->cur_sh->maxcol, 0);
-    }
-
-    if (get_conf_value("export_mkd") && session->cur_doc != NULL) {
-        export_markdown(NULL, 0, 0, session->cur_doc->cur_sh->maxrow, session->cur_doc->cur_sh->maxcol);
-    }
-
-    if ((get_conf_value("export") || get_conf_value("export_txt")) && session->cur_doc != NULL) {
-        export_plain(NULL, 0, 0, session->cur_doc->cur_sh->maxrow, session->cur_doc->cur_sh->maxcol);
-    }
     return;
 }

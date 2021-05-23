@@ -248,7 +248,6 @@ int ui_getch_b(wint_t * wd) {
  */
 
 void ui_sc_msg(char * s, int type, ...) {
-    struct roman * roman = session->cur_doc;
     if (get_conf_int("quiet")) return;
     if (type == DEBUG_MSG && ! get_conf_int("debug")) return;
     char t[BUFFERSIZE];
@@ -271,7 +270,7 @@ void ui_sc_msg(char * s, int type, ...) {
 #ifdef USECOLORS
         ui_set_ucolor(input_win, &ucolors[INPUT], DEFAULT_COLOR);
 #endif
-        if (type == DEBUG_MSG || (roman->loading && type == ERROR_MSG)) {
+        if (type == DEBUG_MSG || (session != NULL && session->cur_doc != NULL && session->cur_doc->loading && type == ERROR_MSG)) {
             wtimeout(input_pad, -1);
             wgetch(input_pad);
             wtimeout(input_pad, TIMEOUT_CURSES);

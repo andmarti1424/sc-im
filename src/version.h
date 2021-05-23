@@ -44,6 +44,6 @@
 
 /*
  * CODE REVISION NUMBER:
+ * the definition is on last line of help.c
  */
-
-char * rev = "version 0.8.3-multisheet";
+extern char * rev;

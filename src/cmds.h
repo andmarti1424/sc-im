@@ -59,7 +59,6 @@ void send_to_interpp(char * oper);
 void chg_mode(char strcmd);            // Change mode function
 int modcheck();                        // Verify if open file has been modified
 int savefile();                        // Save open file
-struct ent;
 void copyent(struct ent * n, struct ent * p, int dr, int dc, int r1, int c1, int r2, int c2, int special);
 void flush_saved();
 void insert_row(int after);
@@ -105,7 +104,6 @@ void rjustify(int sr, int sc, int er, int ec);
 void center(int sr, int sc, int er, int ec);
 void doformat(int c1, int c2, int w, int p, int r);
 void dorowformat(int r, unsigned char size);
-struct enode;
 int etype(struct enode *e);
 void erase_area(int sr, int sc, int er, int ec, int ignorelock, int mark_ent_as_deleted);
 void auto_fit(int ci, int cf, int min);
