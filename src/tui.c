@@ -1114,6 +1114,9 @@ void ui_add_cell_detail(char * d, struct ent * p1) {
  * \return none
  */
 void ui_show_celldetails() {
+    // return if no open file
+    if (session->cur_doc == NULL) return;
+
     struct sheet * sh = session->cur_doc->cur_sh;
 
     char head[FBUFLEN];

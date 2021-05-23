@@ -706,8 +706,16 @@ command:
                                    struct roman * roman = session->cur_doc;
                                    struct sheet * sh;
                                    if ((sh = search_sheet(roman, $2)) == NULL ) {
-                                       sc_info("no sheet exists with that name");
+                                       sc_info("No sheet exists with that name");
+                                       scxfree($2);
+                                   } else if (roman->cur_sh == sh && sh->next == NULL && sh->prev == NULL) {
+                                       sc_info("Cannot delete the only sheet of document");
+                                       scxfree($2);
                                    } else {
+                                       if (roman->cur_sh == sh && sh->next != NULL)
+                                           roman->cur_sh = sh->next;
+                                       else if (roman->cur_sh == sh)
+                                           roman->cur_sh = sh->prev;
                                        delete_sheet(roman, sh);
                                        scxfree($2);
                                        chg_mode('.');
