@@ -3277,10 +3277,8 @@ void index_arg(char *s, struct enode *e) {
 
 /**
  * \brief two_arg_index()
- *
  * \param[in] s
  * \param[in] e
- *
  * \return none
  */
 void two_arg_index(char *s, struct enode *e) {
@@ -3298,10 +3296,8 @@ void two_arg_index(char *s, struct enode *e) {
 
 /**
  * \brief list_arg()
- *
  * \param[in] s
  * \param[in] e
- *
  * \return none
  */
 void list_arg(char *s, struct enode *e) {
@@ -3317,10 +3313,8 @@ void list_arg(char *s, struct enode *e) {
 
 /**
  * \brief one_arg()
- *
  * \param[in] s
  * \param[in] e
- *
  * \return none
  */
 void one_arg(char *s, struct enode *e) {
@@ -3333,10 +3327,8 @@ void one_arg(char *s, struct enode *e) {
 
 /**
  * \brief two_arg()
- *
  * \param[in] s
  * \param[in] e
- *
  * \return none
  */
 void two_arg(char *s, struct enode *e) {
@@ -3351,10 +3343,8 @@ void two_arg(char *s, struct enode *e) {
 
 /**
  * \brief three_arg()
- *
  * \param[in] s
  * \param[in] e
- *
  * \return none
  */
 void three_arg(char *s, struct enode *e) {
@@ -3371,10 +3361,8 @@ void three_arg(char *s, struct enode *e) {
 
 /**
  * \brief range_arg()
- *
  * \param[in] s
  * \param[in] e
- *
  * \return none
  */
 void range_arg(char *s, struct enode *e) {
@@ -3396,17 +3384,13 @@ void range_arg(char *s, struct enode *e) {
 
 /**
  * \brief editfmt()
- *
+ * \param[in] struct sheet * sh
  * \param[in] row
  * \param[in] col
- *
  * \return none
  */
-void editfmt(int row, int col) {
-    struct roman * roman = session->cur_doc;
-    struct ent *p;
-
-    p = lookat(roman->cur_sh, row, col);
+void editfmt(struct sheet * sh, int row, int col) {
+    struct ent * p = lookat(sh, row, col);
     if (p->format) {
         (void) sprintf(line, "fmt %s \"%s\"", v_name(row, col), p->format);
         linelim = strlen(line);
@@ -3416,17 +3400,15 @@ void editfmt(int row, int col) {
 
 /**
  * \brief editv()
- *
+ * \param[in] struct sheet * sh
  * \param[in] row
  * \param[in] col
- *
  * \return none
  */
-void editv(int row, int col) {
-    struct roman * roman = session->cur_doc;
+void editv(struct sheet * sh, int row, int col) {
     struct ent *p;
 
-    p = lookat(roman->cur_sh, row, col);
+    p = lookat(sh, row, col);
     (void) sprintf(line, "let %s = ", v_name(row, col));
     linelim = strlen(line);
     if (p->flags & is_valid || p->expr) {
@@ -3434,23 +3416,21 @@ void editv(int row, int col) {
             (void) sprintf(line+linelim, "%.15g", p->v);
             linelim = strlen(line);
         } else
-            editexp(row, col);
+            editexp(sh, row, col);
     }
 }
 
 
 /**
  * \brief editexp()
- *
+ * \param[in] struct sheet * sh
  * \param[in] row
  * \param[in] col
- *
  * \return none
  */
-void editexp(int row, int col) {
-    struct roman * roman = session->cur_doc;
-    struct ent *p;
-    p = lookat(roman->cur_sh, row, col);
+void editexp(struct sheet * sh, int row, int col) {
+    struct ent * p;
+    p = lookat(sh, row, col);
     //if ( !p || !p->expr ) return; 21/06/2014
     decompile(p->expr, 0);
     line[linelim] = '\0';
@@ -3459,17 +3439,15 @@ void editexp(int row, int col) {
 
 /**
  * \brief edits()
- *
+ * \param[in] struct sheet * sh
  * \param[in] row
  * \param[in] col
  * \param[in] saveinfile
- *
  * \return none
  */
-void edits(int row, int col, int saveinfile) {
-    struct roman * roman = session->cur_doc;
+void edits(struct sheet * sh, int row, int col, int saveinfile) {
     struct ent *p;
-    p = lookat(roman->cur_sh, row, col);
+    p = lookat(sh, row, col);
 
     if (saveinfile) {
         if (p->flags & is_label)
@@ -3480,7 +3458,7 @@ void edits(int row, int col, int saveinfile) {
 
     linelim = strlen(line);
     if (p->flags & is_strexpr && p->expr) {
-    editexp(row, col);
+    editexp(sh, row, col);
     } else if (p->label) {
         if (saveinfile) {
             (void) sprintf(line+linelim, "\"%s\"", p->label);

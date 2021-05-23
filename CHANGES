@@ -11,12 +11,12 @@ ui optimizations
 added :newsheet, :nextsheet, :prevsheet :delsheet commands
 `gt` and `gT` commands in normal mode are now used for moving between sheets
 added new colors types SHEET, CURRENT_SHEET and FILENM
+file saving with multiple sheets
 
 
 For v0.8.3 release
 -------------------
 loadingfile invalid free when opening csv files
-file saving with multiple sheets
 reference cells from different sheets in formulas
 UNDO should save reference to the sheet where the action took place
 
@@ -25,6 +25,7 @@ rearrange file loading and saving functions
 + Add GETENT in seval
 + create @counta, and modify @count to not count strings
 + Reeval of @lastrow @lastcol: check cells that uses @lastrow / @lastcol gets updated everytime it change
++ mark should consider sheet.
 
 
 --

@@ -94,7 +94,9 @@ extern int exit_app(int status);
 extern struct session * session;
 
 /**
- * \brief Erase the database (tbl, etc.)
+ * \brief erasedb()
+ * \details Erase the database of a sheet (tbl) and set it default values.
+ * if _free is set we also free the memory of the ents alloc'ed in the tbl
  * \return none
  */
 void erasedb(struct sheet * sheet, int _free) {
@@ -159,12 +161,9 @@ void loadrc(void) {
 
 /**
  * \brief Check if a file exists
- *
- * \details Check if a file exists. Returns 1 if so. Returns 0 otherwise.
- *
+ * \details Check if a file exists.
  * \param[in] fname file name
- *
- * \return 1 if file exises; 0 otherwise
+ * \return 1 if file exists; 0 otherwise
  */
 int file_exists(const char * fname) {
     FILE * file;
@@ -217,13 +216,13 @@ char get_delim(char *type) {
 
 
 /**
- * \brief TODO Handle the save file process
- * This funciton handles the save file process in SC-IM format..
+ * \brief Handle the save file process
+ * This function handles the save file process
  * \return 0 on OK; -1 on error
  */
 int savefile() {
-    struct roman * roman = session->cur_doc;
-    char * curfile = roman->name;
+    struct roman * doc = session->cur_doc;
+    char * curfile = doc->name;
     int force_rewrite = 0;
     char name[BUFFERSIZE];
 
@@ -278,9 +277,11 @@ int savefile() {
     }
 #endif
 
+    if (doc->name == NULL) doc->name = malloc(sizeof(char)*PATHLEN);
+    curfile = doc->name;
     // copy newfilename to curfile
     if (wcslen(inputline) > 2) {
-        strcpy(curfile, name);
+        strcpy(doc->name, name);
     }
 
     // add sc extension if not present
@@ -289,22 +290,22 @@ int savefile() {
 
     // treat csv
     } else if (strlen(curfile) > 4 && (! strcasecmp( & curfile[strlen(curfile)-4], ".csv"))) {
-        export_delim(curfile, get_delim("csv"), 0, 0, roman->cur_sh->maxrow, roman->cur_sh->maxcol, 1);
-        roman->modflg = 0;
+        export_delim(curfile, get_delim("csv"), 0, 0, doc->cur_sh->maxrow, doc->cur_sh->maxcol, 1);
+        doc->modflg = 0;
         return 0;
 
     // treat tab
     } else if (strlen(curfile) > 4 && (! strcasecmp( & curfile[strlen(curfile)-4], ".tsv") ||
         ! strcasecmp( & curfile[strlen(curfile)-4], ".tab"))){
-        export_delim(curfile, '\t', 0, 0, roman->cur_sh->maxrow, roman->cur_sh->maxcol, 1);
-        roman->modflg = 0;
+        export_delim(curfile, '\t', 0, 0, doc->cur_sh->maxrow, doc->cur_sh->maxcol, 1);
+        doc->modflg = 0;
         return 0;
 
     // treat markdown format
     } else if (strlen(curfile) > 3 && ( ! strcasecmp( & curfile[strlen(curfile)-3], ".md") ||
           ! strcasecmp( & curfile[strlen(curfile)-4], ".mkd"))){
-      export_markdown(curfile, 0, 0, roman->cur_sh->maxrow, roman->cur_sh->maxcol);
-      roman->modflg = 0;
+      export_markdown(curfile, 0, 0, doc->cur_sh->maxrow, doc->cur_sh->maxcol);
+      doc->modflg = 0;
       return 0;
 
     // treat xlsx format
@@ -314,9 +315,9 @@ int savefile() {
         sc_error("XLSX export support not compiled in. Please save file in other extension.");
         return -1;
 #else
-        if (export_xlsx(curfile, 0, 0, roman->cur_sh->maxrow, roman->cur_sh->maxcol) == 0) {
+        if (export_xlsx(curfile, 0, 0, doc->cur_sh->maxrow, doc->cur_sh->maxcol) == 0) {
             sc_info("File \"%s\" written", curfile);
-            roman->modflg = 0;
+            doc->modflg = 0;
         } else
             sc_error("File could not be saved");
         return 0;
@@ -324,17 +325,17 @@ int savefile() {
     }
 
     // save in sc format
-    if (writefile(curfile, 0, 0, roman->cur_sh->maxrow, roman->cur_sh->maxcol, 1) < 0) {
+    if (writefile(curfile, 1) < 0) {
         sc_error("File could not be saved");
         return -1;
     }
-    roman->modflg = 0;
+    doc->modflg = 0;
     return 0;
 }
 
 
 /**
- * \brief Write a file
+ * \brief Write current Doc(roman) to file in (.sc) sc-im format
  * \details Write a file. Receives parameter range and file name.
  * \param[in] fname file name
  * \param[in] r0
@@ -345,8 +346,7 @@ int savefile() {
  *
  * \return 0 on success; -1 on error
  */
-int writefile(char * fname, int r0, int c0, int rn, int cn, int verbose) {
-    struct roman * roman = session->cur_doc;
+int writefile(char * fname, int verbose) {
     register FILE *f;
     char save[PATHLEN];
     char tfname[PATHLEN];
@@ -362,14 +362,16 @@ int writefile(char * fname, int r0, int c0, int rn, int cn, int verbose) {
     }
 
     if (verbose) sc_info("Writing file \"%s\"...", save);
-    write_fd(f, r0, c0, rn, cn);
+
+    // traverse sheets of the current doc and save the data to file
+    write_fd(f, session->cur_doc);
 
     closefile(f, pid, 0);
 
     if (! pid) {
-        (void) strcpy(roman->name, save);
-        roman->modflg = 0;
-        if (verbose) sc_info("File \"%s\" written", roman->name);
+        (void) strcpy(session->cur_doc->name, save);
+        session->cur_doc->modflg = 0;
+        if (verbose) sc_info("File \"%s\" written", session->cur_doc->name);
     }
 
     return 0;
@@ -377,7 +379,8 @@ int writefile(char * fname, int r0, int c0, int rn, int cn, int verbose) {
 
 
 /**
- * \brief TODO Document write_fd
+ * \brief write_fd()
+ * \details traverse sheets of the given Doc and save the data to file
  *
  * \param[in] f file pointer
  * \param[in] r0
@@ -387,10 +390,8 @@ int writefile(char * fname, int r0, int c0, int rn, int cn, int verbose) {
  *
  * \return none
  */
-void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
-    register struct ent **pp;
+void write_fd(FILE * f, struct roman * doc) {
+    struct ent **pp;
     int r, c;
 
     (void) fprintf(f, "# This data file was generated by the Spreadsheet Calculator Improvised (SC-IM)\n");
@@ -400,208 +401,220 @@ void write_fd(register FILE *f, int r0, int c0, int rn, int cn) {
         if (colformat[c])
             (void) fprintf (f, "format %d = \"%s\"\n", c, colformat[c]);
 
-    for (c = c0; c <= cn; c++)
-        if (sh->fwidth[c] != DEFWIDTH || sh->precision[c] != DEFPREC || sh->realfmt[c] != DEFREFMT)
-            (void) fprintf (f, "format %s %d %d %d\n", coltoa(c), sh->fwidth[c], sh->precision[c], sh->realfmt[c]);
 
-    for (r = r0; r <= rn; r++)
-        if (sh->row_format[r] != 1)
-            (void) fprintf (f, "format %d %d\n", r, sh->row_format[r]);
+    //traverse sheets
+    struct sheet * sh = doc->first_sh;
+    while (sh != NULL) {
+        fprintf (f, "newsheet \"%s\"\n", sh->name);
 
-    // new implementation of hidecol. group by ranges
-    for (c = c0; c <= cn; c++) {
-        int c_aux = c;
-        if ( sh->col_hidden[c] && c <= sh->maxcol && ( c == 0 || ! sh->col_hidden[c-1] )) {
-            while (c_aux <= sh->maxcol && sh->col_hidden[c_aux])
-                c_aux++;
-            fprintf(f, "hidecol %s", coltoa(c));
-            if (c_aux-1 != c) {
-                fprintf(f, ":%s\n", coltoa(c_aux-1));
-                c = c_aux-1;
-            } else
-                fprintf(f, "\n");
+        for (c = 0; c <= sh->maxcol; c++)
+            if (sh->fwidth[c] != DEFWIDTH || sh->precision[c] != DEFPREC || sh->realfmt[c] != DEFREFMT)
+                (void) fprintf (f, "format %s %d %d %d\n", coltoa(c), sh->fwidth[c], sh->precision[c], sh->realfmt[c]);
+
+        for (r = 0; r <= sh->maxrow; r++)
+            if (sh->row_format[r] != 1)
+                (void) fprintf (f, "format %d %d\n", r, sh->row_format[r]);
+
+        // new implementation of hidecol. group by ranges
+        for (c = 0; c <= sh->maxcol; c++) {
+            int c_aux = c;
+            if ( sh->col_hidden[c] && c <= sh->maxcol && ( c == 0 || ! sh->col_hidden[c-1] )) {
+                while (c_aux <= sh->maxcol && sh->col_hidden[c_aux])
+                    c_aux++;
+                fprintf(f, "hidecol %s", coltoa(c));
+                if (c_aux-1 != c) {
+                    fprintf(f, ":%s\n", coltoa(c_aux-1));
+                    c = c_aux-1;
+                } else
+                    fprintf(f, "\n");
+            }
         }
-    }
 
-    // new implementation of hiderow. group by ranges
-    for (r = r0; r <= rn; r++) {
-        int r_aux = r;
-        if ( sh->row_hidden[r] && r <= sh->maxrow && ( r == 0 || ! sh->row_hidden[r-1] )) {
-            while (r_aux <= sh->maxrow && sh->row_hidden[r_aux])
-                r_aux++;
-            fprintf(f, "hiderow %d", r);
-            if (r_aux-1 != r) {
-                fprintf(f, ":%d\n", r_aux-1);
-                r = r_aux-1;
-            } else
-                fprintf(f, "\n");
+        // new implementation of hiderow. group by ranges
+        for (r = 0; r <= sh->maxrow; r++) {
+            int r_aux = r;
+            if ( sh->row_hidden[r] && r <= sh->maxrow && ( r == 0 || ! sh->row_hidden[r-1] )) {
+                while (r_aux <= sh->maxrow && sh->row_hidden[r_aux])
+                    r_aux++;
+                fprintf(f, "hiderow %d", r);
+                if (r_aux-1 != r) {
+                    fprintf(f, ":%d\n", r_aux-1);
+                    r = r_aux-1;
+                } else
+                    fprintf(f, "\n");
+            }
         }
-    }
 
-    // frozen cols. group by ranges
-    for (c = c0; c <= cn; c++) {
-        int c_aux = c;
-        if (sh->col_frozen[c] && c <= sh->maxcol && (c == 0 || ! sh->col_frozen[c-1])) {
-            while (c_aux <= sh->maxcol && sh->col_frozen[c_aux]) c_aux++;
-            fprintf(f, "freeze %s", coltoa(c));
-            if (c_aux-1 != c) {
-                fprintf(f, ":%s\n", coltoa(c_aux-1));
-                c = c_aux-1;
-            } else
-                fprintf(f, "\n");
+        // frozen cols. group by ranges
+        for (c = 0; c <= sh->maxcol; c++) {
+            int c_aux = c;
+            if (sh->col_frozen[c] && c <= sh->maxcol && (c == 0 || ! sh->col_frozen[c-1])) {
+                while (c_aux <= sh->maxcol && sh->col_frozen[c_aux]) c_aux++;
+                fprintf(f, "freeze %s", coltoa(c));
+                if (c_aux-1 != c) {
+                    fprintf(f, ":%s\n", coltoa(c_aux-1));
+                    c = c_aux-1;
+                } else
+                    fprintf(f, "\n");
+            }
         }
-    }
 
-    // frozen rows. group by ranges
-    for (r = r0; r <= rn; r++) {
-        int r_aux = r;
-        if (sh->row_frozen[r] && r <= sh->maxrow && (r == 0 || ! sh->row_frozen[r-1])) {
-            while (r_aux <= sh->maxrow && sh->row_frozen[r_aux]) r_aux++;
-            fprintf(f, "freeze %d", r);
-            if (r_aux-1 != r) {
-                fprintf(f, ":%d\n", r_aux-1);
-                r = r_aux-1;
-            } else
-                fprintf(f, "\n");
+        // frozen rows. group by ranges
+        for (r = 0; r <= sh->maxrow; r++) {
+            int r_aux = r;
+            if (sh->row_frozen[r] && r <= sh->maxrow && (r == 0 || ! sh->row_frozen[r-1])) {
+                while (r_aux <= sh->maxrow && sh->row_frozen[r_aux]) r_aux++;
+                fprintf(f, "freeze %d", r);
+                if (r_aux-1 != r) {
+                    fprintf(f, ":%d\n", r_aux-1);
+                    r = r_aux-1;
+                } else
+                    fprintf(f, "\n");
+            }
         }
-    }
 
-    write_marks(f);
-    write_franges(f);
+        write_marks(f);
 
-    write_cells(f, r0, c0, rn, cn, r0, c0);
+        // write freeze ranges
+        write_franges(f);
 
-    struct custom_color * cc;
-    for (r = r0; r <= rn; r++) {
-        pp = ATBL(sh, sh->tbl, r, c0);
-        for (c = c0; c <= cn; c++, pp++)
-            if (*pp) {
-                // Write ucolors
-                if ((*pp)->ucolor != NULL) {
-                    char strcolorbuf[BUFFERSIZE];
-                    char * strcolor = strcolorbuf;
-                    strcolor[0] = 0;
-                    strcolor[1] = 0;
+        write_cells(f, doc, sh, 0, 0, sh->maxrow, sh->maxcol, 0, 0);
 
-                    // decompile int value of color to its string description
-                    if ((*pp)->ucolor->fg != NONE_COLOR) {
-                        if ((*pp)->ucolor->fg <= 8) {
-                            linelim=0;
-                            struct enode * e = new((*pp)->ucolor->fg, (struct enode *)0, (struct enode *)0);
-                            decompile(e, 0);
-                            uppercase(line);
-                            del_char(line, 0);
-                            sprintf(strcolor, " fg=%.*s", BUFFERSIZE-5, &line[0]);
-                            free(e);
-                        } else if ((cc = get_custom_color_by_number((*pp)->ucolor->fg - 7)) != NULL) {
-                            sprintf(strcolor, " fg=%.*s", BUFFERSIZE, cc->name);
+        struct custom_color * cc;
+        for (r = 0; r <= sh->maxrow; r++) {
+            pp = ATBL(sh, sh->tbl, r, 0);
+            for (c = 0; c <= sh->maxcol; c++, pp++)
+                if (*pp) {
+                    // Write ucolors
+                    if ((*pp)->ucolor != NULL) {
+                        char strcolorbuf[BUFFERSIZE];
+                        char * strcolor = strcolorbuf;
+                        strcolor[0] = 0;
+                        strcolor[1] = 0;
+
+                        // decompile int value of color to its string description
+                        if ((*pp)->ucolor->fg != NONE_COLOR) {
+                            if ((*pp)->ucolor->fg <= 8) {
+                                linelim=0;
+                                struct enode * e = new((*pp)->ucolor->fg, (struct enode *)0, (struct enode *)0);
+                                decompile(e, 0);
+                                uppercase(line);
+                                del_char(line, 0);
+                                sprintf(strcolor, " fg=%.*s", BUFFERSIZE-5, &line[0]);
+                                free(e);
+                            } else if ((cc = get_custom_color_by_number((*pp)->ucolor->fg - 7)) != NULL) {
+                                sprintf(strcolor, " fg=%.*s", BUFFERSIZE, cc->name);
+                            }
                         }
+
+                        if ((*pp)->ucolor->bg != NONE_COLOR) {
+                            if ((*pp)->ucolor->bg <= WHITE) {
+                                linelim=0;
+                                struct enode * e = new((*pp)->ucolor->bg, (struct enode *)0, (struct enode *)0);
+                                decompile(e, 0);
+                                uppercase(line);
+                                del_char(line, 0);
+                                sprintf(strcolor + strlen(strcolor), " bg=%s", &line[0]);
+                                free(e);
+                            } else if ((cc = get_custom_color_by_number((*pp)->ucolor->bg - 7)) != NULL) {
+                                sprintf(strcolor + strlen(strcolor), " bg=%.*s", BUFFERSIZE, cc->name);
+                            }
+                        }
+
+                        if ((*pp)->ucolor->bold)      sprintf(strcolor + strlen(strcolor), " bold=1");
+                        if ((*pp)->ucolor->italic)    sprintf(strcolor + strlen(strcolor), " italic=1");
+                        if ((*pp)->ucolor->dim)       sprintf(strcolor + strlen(strcolor), " dim=1");
+                        if ((*pp)->ucolor->reverse)   sprintf(strcolor + strlen(strcolor), " reverse=1");
+                        if ((*pp)->ucolor->standout)  sprintf(strcolor + strlen(strcolor), " standout=1");
+                        if ((*pp)->ucolor->underline) sprintf(strcolor + strlen(strcolor), " underline=1");
+                        if ((*pp)->ucolor->blink)     sprintf(strcolor + strlen(strcolor), " blink=1");
+
+                        // Remove the leading space
+                        strcolor++;
+
+                        // previous implementation
+                        //(void) fprintf(f, "cellcolor %s%d \"%s\"\n", coltoa((*pp)->col), (*pp)->row, strcolor);
+
+                        // new implementation
+                        // by row, store cellcolors grouped by ranges
+                        int c_aux = c;
+                        struct ucolor * u = (*pp)->ucolor;
+                        struct ucolor * a = NULL;
+                        if ( c > 0 && *ATBL(sh, sh->tbl, r, c-1) != NULL)
+                            a = (*ATBL(sh, sh->tbl, r, c-1))->ucolor;
+
+                        if ( *strcolor != '\0' && (u != NULL) && (c <= sh->maxcol) && ( c == 0 || ( a == NULL ) || ( a != NULL && ! same_ucolor( a, u ) ))) {
+                            while (c_aux <= sh->maxcol && *ATBL(sh, sh->tbl, r, c_aux) != NULL && same_ucolor( (*ATBL(sh, sh->tbl, r, c_aux))->ucolor, (*pp)->ucolor ))
+                                c_aux++;
+                            fprintf(f, "cellcolor %s%d", coltoa((*pp)->col), (*pp)->row);
+                            if (c_aux-1 != (*pp)->col)
+                                fprintf(f, ":%s%d \"%s\"\n", coltoa(c_aux-1), (*pp)->row, strcolor);
+                            else
+                                fprintf(f, " \"%s\"\n", strcolor);
+                        }
+
                     }
 
-                    if ((*pp)->ucolor->bg != NONE_COLOR) {
-                        if ((*pp)->ucolor->bg <= WHITE) {
-                            linelim=0;
-                            struct enode * e = new((*pp)->ucolor->bg, (struct enode *)0, (struct enode *)0);
-                            decompile(e, 0);
-                            uppercase(line);
-                            del_char(line, 0);
-                            sprintf(strcolor + strlen(strcolor), " bg=%s", &line[0]);
-                            free(e);
-                        } else if ((cc = get_custom_color_by_number((*pp)->ucolor->bg - 7)) != NULL) {
-                            sprintf(strcolor + strlen(strcolor), " bg=%.*s", BUFFERSIZE, cc->name);
-                        }
-                    }
 
-                    if ((*pp)->ucolor->bold)      sprintf(strcolor + strlen(strcolor), " bold=1");
-                    if ((*pp)->ucolor->italic)    sprintf(strcolor + strlen(strcolor), " italic=1");
-                    if ((*pp)->ucolor->dim)       sprintf(strcolor + strlen(strcolor), " dim=1");
-                    if ((*pp)->ucolor->reverse)   sprintf(strcolor + strlen(strcolor), " reverse=1");
-                    if ((*pp)->ucolor->standout)  sprintf(strcolor + strlen(strcolor), " standout=1");
-                    if ((*pp)->ucolor->underline) sprintf(strcolor + strlen(strcolor), " underline=1");
-                    if ((*pp)->ucolor->blink)     sprintf(strcolor + strlen(strcolor), " blink=1");
+                    /* if ((*pp)->nrow >= 0) {
+                       (void) fprintf(f, "addnote %s ", v_name((*pp)->row, (*pp)->col));
+                       (void) fprintf(f, "%s\n", r_name((*pp)->nrow, (*pp)->ncol, (*pp)->nlastrow, (*pp)->nlastcol));
+                       } */
 
-                    // Remove the leading space
-                    strcolor++;
-
+                    // padding
                     // previous implementation
-                    //(void) fprintf(f, "cellcolor %s%d \"%s\"\n", coltoa((*pp)->col), (*pp)->row, strcolor);
-
+                    //if ((*pp)->pad)
+                    //    (void) fprintf(f, "pad %d %s%d\n", (*pp)->pad, coltoa((*pp)->col), (*pp)->row);
                     // new implementation
-                    // by row, store cellcolors grouped by ranges
-                    int c_aux = c;
-                    struct ucolor * u = (*pp)->ucolor;
-                    struct ucolor * a = NULL;
-                    if ( c > 0 && *ATBL(sh, sh->tbl, r, c-1) != NULL)
-                         a = (*ATBL(sh, sh->tbl, r, c-1))->ucolor;
-
-                    if ( *strcolor != '\0' && (u != NULL) && (c <= sh->maxcol) && ( c == 0 || ( a == NULL ) || ( a != NULL && ! same_ucolor( a, u ) ))) {
-                        while (c_aux <= sh->maxcol && *ATBL(sh, sh->tbl, r, c_aux) != NULL && same_ucolor( (*ATBL(sh, sh->tbl, r, c_aux))->ucolor, (*pp)->ucolor ))
-                            c_aux++;
-                        fprintf(f, "cellcolor %s%d", coltoa((*pp)->col), (*pp)->row);
-                        if (c_aux-1 != (*pp)->col)
-                            fprintf(f, ":%s%d \"%s\"\n", coltoa(c_aux-1), (*pp)->row, strcolor);
+                    int r_aux = r;
+                    if ( (*pp)->pad  && r <= sh->maxrow && ( r == 0 || (*ATBL(sh, sh->tbl, r-1, c) == NULL) ||
+                                (*ATBL(sh, sh->tbl, r-1, c) != NULL && ((*ATBL(sh, sh->tbl, r-1, c))->pad != (*pp)->pad)) )) {
+                        while (r_aux <= sh->maxrow && *ATBL(sh, sh->tbl, r_aux, c) != NULL && (*pp)->pad == (*ATBL(sh, sh->tbl, r_aux, c))->pad )
+                            r_aux++;
+                        fprintf(f, "pad %d %s%d", (*pp)->pad, coltoa((*pp)->col), (*pp)->row);
+                        if (r_aux-1 != (*pp)->row)
+                            fprintf(f, ":%s%d\n", coltoa((*pp)->col), r_aux-1);
                         else
-                            fprintf(f, " \"%s\"\n", strcolor);
+                            fprintf(f, "\n");
                     }
-
                 }
+        }
 
-
-                /* if ((*pp)->nrow >= 0) {
-                    (void) fprintf(f, "addnote %s ", v_name((*pp)->row, (*pp)->col));
-                    (void) fprintf(f, "%s\n", r_name((*pp)->nrow, (*pp)->ncol, (*pp)->nlastrow, (*pp)->nlastcol));
-                } */
-
-                // padding
-                // previous implementation
-                //if ((*pp)->pad)
-                //    (void) fprintf(f, "pad %d %s%d\n", (*pp)->pad, coltoa((*pp)->col), (*pp)->row);
-                // new implementation
-                int r_aux = r;
-                if ( (*pp)->pad  && r <= sh->maxrow && ( r == 0 || (*ATBL(sh, sh->tbl, r-1, c) == NULL) ||
-                    (*ATBL(sh, sh->tbl, r-1, c) != NULL && ((*ATBL(sh, sh->tbl, r-1, c))->pad != (*pp)->pad)) )) {
-                    while (r_aux <= sh->maxrow && *ATBL(sh, sh->tbl, r_aux, c) != NULL && (*pp)->pad == (*ATBL(sh, sh->tbl, r_aux, c))->pad )
-                        r_aux++;
-                    fprintf(f, "pad %d %s%d", (*pp)->pad, coltoa((*pp)->col), (*pp)->row);
-                    if (r_aux-1 != (*pp)->row)
-                        fprintf(f, ":%s%d\n", coltoa((*pp)->col), r_aux-1);
-                    else
-                        fprintf(f, "\n");
+        // write locked cells
+        // lock should be stored after any other command
+        for (r = 0; r <= sh->maxrow; r++) {
+            pp = ATBL(sh, sh->tbl, r, 0);
+            for (c = 0; c <= sh->maxcol; c++, pp++)
+                if (*pp) {
+                    // previous implementation
+                    //if ((*pp)->flags & is_locked)
+                    //    (void) fprintf(f, "lock %s%d\n", coltoa((*pp)->col), (*pp)->row);
+                    // new implementation
+                    int c_aux = c;
+                    if ( (*pp)->flags & is_locked && c <= sh->maxcol && ( c == 0 || ( *ATBL(sh, sh->tbl, r, c-1) != NULL && ! ((*ATBL(sh, sh->tbl, r, c-1))->flags & is_locked) ) )) {
+                        while (c_aux <= sh->maxcol && *ATBL(sh, sh->tbl, r, c_aux) != NULL && (*ATBL(sh, sh->tbl, r, c_aux))->flags & is_locked )
+                            c_aux++;
+                        fprintf(f, "lock %s%d", coltoa((*pp)->col), (*pp)->row);
+                        if (c_aux-1 != (*pp)->col)
+                            fprintf(f, ":%s%d\n", coltoa(c_aux-1), (*pp)->row);
+                        else
+                            fprintf(f, "\n");
+                    }
                 }
-            }
+        }
+
+        /*
+         * Don't try to combine these into a single fprintf().  v_name() has
+         * a single buffer that is overwritten on each call, so the first part
+         * needs to be written to the file before making the second call.
+         */
+        fprintf(f, "goto %s", v_name(sh->currow, sh->curcol));
+        //fprintf(f, " %s\n", v_name(strow, stcol));
+        fprintf(f, "\n");
+
+        sh = sh->next;
     }
 
-    // write locked cells
-    // lock should be stored after any other command
-    for (r = r0; r <= rn; r++) {
-        pp = ATBL(sh, sh->tbl, r, c0);
-        for (c = c0; c <= cn; c++, pp++)
-            if (*pp) {
-                // previous implementation
-                //if ((*pp)->flags & is_locked)
-                //    (void) fprintf(f, "lock %s%d\n", coltoa((*pp)->col), (*pp)->row);
-                // new implementation
-                int c_aux = c;
-                if ( (*pp)->flags & is_locked && c <= sh->maxcol && ( c == 0 || ( *ATBL(sh, sh->tbl, r, c-1) != NULL && ! ((*ATBL(sh, sh->tbl, r, c-1))->flags & is_locked) ) )) {
-                    while (c_aux <= sh->maxcol && *ATBL(sh, sh->tbl, r, c_aux) != NULL && (*ATBL(sh, sh->tbl, r, c_aux))->flags & is_locked )
-                        c_aux++;
-                    fprintf(f, "lock %s%d", coltoa((*pp)->col), (*pp)->row);
-                    if (c_aux-1 != (*pp)->col)
-                        fprintf(f, ":%s%d\n", coltoa(c_aux-1), (*pp)->row);
-                    else
-                        fprintf(f, "\n");
-                }
-            }
-    }
-
-    /*
-     * Don't try to combine these into a single fprintf().  v_name() has
-     * a single buffer that is overwritten on each call, so the first part
-     * needs to be written to the file before making the second call.
-     */
-    fprintf(f, "goto %s", v_name(sh->currow, sh->curcol));
-    //fprintf(f, " %s\n", v_name(strow, stcol));
-    fprintf(f, "\n");
 }
 
 
@@ -641,7 +654,7 @@ void write_marks(register FILE *f) {
         m = get_mark((char) i);
 
         // m->rng should never be NULL if both m->col and m->row are -1 !!
-        if ( m->row == -1 && m->col == -1) { // && m->rng != NULL ) {  
+        if ( m->row == -1 && m->col == -1) { // && m->rng != NULL ) {
             fprintf(f, "mark %c %s%d ", i, coltoa(m->rng->tlcol), m->rng->tlrow);
             fprintf(f, "%s%d\n", coltoa(m->rng->brcol), m->rng->brrow);
         } else if ( m->row != 0 && m->row != 0) { // && m->rng == NULL) {
@@ -656,6 +669,9 @@ void write_marks(register FILE *f) {
 /**
  * \brief TODO Document write_cells()
  *
+ * \param[in] struct roman * doc
+ * \param[in] struct sheet * sh
+ * \param[in] r0
  * \param[in] f file pointer
  * \param[in] r0
  * \param[in] c0
@@ -666,15 +682,12 @@ void write_marks(register FILE *f) {
  *
  * \return none
  */
-void write_cells(register FILE *f, int r0, int c0, int rn, int cn, int dr, int dc) {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
-    register struct ent **pp;
+void write_cells(FILE * f, struct roman * doc, struct sheet * sh, int r0, int c0, int rn, int cn, int dr, int dc) {
+    struct ent ** pp;
     int r, c;
-    //int r, c, mf;
-    char *dpointptr;
+    char * dpointptr;
 
-    //mf = roman->modflg;
+    int mf = doc->modflg;
     if (dr != r0 || dc != c0) {
         //yank_area(r0, c0, rn, cn);
         rn += dr - r0;
@@ -690,19 +703,19 @@ void write_cells(register FILE *f, int r0, int c0, int rn, int cn, int dr, int d
         for (c = dc; c <= cn; c++, pp++)
             if (*pp) {
                 if ((*pp)->label || (*pp)->flags & is_strexpr) {
-                    edits(r, c, 1);
+                    edits(sh, r, c, 1);
                     (void) fprintf(f, "%s\n", line);
                 }
                 if ((*pp)->flags & is_valid) {
                 //if ((*pp)->flags & is_valid || (*pp)->expr) { // for #541
-                    editv(r, c);
+                    editv(sh, r, c);
                     dpointptr = strchr(line, dpoint);
                     if (dpointptr != NULL)
                         *dpointptr = '.';
                     (void) fprintf(f, "%s\n", line);
                 }
                 if ((*pp)->format) {
-                    editfmt(r, c);
+                    editfmt(sh, r, c);
                     (void) fprintf(f, "%s\n",line);
                 }
                 if ((*pp)->trigger != NULL) {
@@ -718,7 +731,8 @@ void write_cells(register FILE *f, int r0, int c0, int rn, int cn, int dr, int d
                 }
             }
     }
-    //roman->modflg = mf;
+    // restore modflg
+    doc->modflg = mf;
 }
 
 
@@ -2016,11 +2030,11 @@ int plugin_exists(char * name, int len, char * path) {
  * \return none
  */
 void * do_autobackup() {
-    struct roman * roman = session->cur_doc;
-    char * curfile = roman->name;
+    struct sheet  * sh = session->cur_doc->cur_sh;
+    char * curfile = session->cur_doc->name;
     int len = strlen(curfile);
-    //if (roman->loading || ! len) return (void *) -1;
-    //if (! len || ! roman->modflg) return (void *) -1;
+    //if (session->cur_doc->loading || ! len) return (void *) -1;
+    //if (! len || ! session->cur_doc->modflg) return (void *) -1;
     if (! len) return (void *) -1;
 
     char * pstr = strrchr(curfile, '/');
@@ -2037,17 +2051,17 @@ void * do_autobackup() {
     if (! strcmp(&name[strlen(name)-7], ".sc.bak")) {
         register FILE * f;
         if ((f = fopen(namenew , "w")) == NULL) return (void *) -1;
-        write_fd(f, 0, 0, roman->cur_sh->maxrow, roman->cur_sh->maxcol);
+        write_fd(f, session->cur_doc);
         fclose(f);
     } else if (! strcmp(&name[strlen(name)-8], ".csv.bak")) {
-        export_delim(namenew, get_delim("csv"), 1, 0, roman->cur_sh->maxrow, roman->cur_sh->maxcol, 0);
+        export_delim(namenew, get_delim("csv"), 1, 0, sh->maxrow, sh->maxcol, 0);
 #ifdef XLSX_EXPORT
     } else if (! strcmp(&name[strlen(name)-9], ".xlsx.bak")) {
-        export_delim(namenew, ',', 0, 0, roman->cur_sh->maxrow, roman->cur_sh->maxcol, 0);
-        export_xlsx(namenew, 0, 0, roman->cur_sh->maxrow, roman->cur_sh->maxcol);
+        export_delim(namenew, ',', 0, 0, sh->maxrow, sh->maxcol, 0);
+        export_xlsx(namenew, 0, 0, sh->maxrow, sh->maxcol);
 #endif
     } else if (! strcmp(&name[strlen(name)-8], ".tab.bak") || ! strcmp(&name[strlen(name)-8], ".tsv.bak")) {
-        export_delim(namenew, '\t', 0, 0, roman->cur_sh->maxrow, roman->cur_sh->maxcol, 0);
+        export_delim(namenew, '\t', 0, 0, sh->maxrow, sh->maxcol, 0);
     }
 
     // delete if exists name

@@ -60,6 +60,7 @@
 #include "tui.h"
 #include "conf.h"
 #include "lex.h"
+#include "interp.h"
 #include "utils/string.h"
 
 #ifdef XLSX
@@ -698,7 +699,7 @@ int export_xlsx(char * filename, int r0, int c0, int rn, int cn) {
                 // formula
                 } else if ((*pp) && (*pp)->expr && get_conf_int("xlsx_readformulas"))  {
                     linelim = 0;
-                    editexp((*pp)->row, (*pp)->col);
+                    editexp(sh, (*pp)->row, (*pp)->col);
                     linelim = -1;
 
                     char * strf;

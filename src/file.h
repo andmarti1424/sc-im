@@ -44,15 +44,7 @@
 
 #include "freeze.h"
 
-void erasedb(struct sheet * sheet, int _free);
-void loadrc(void);
 int modcheck();
-int savefile();
-int writefile(char *fname, int r0, int c0, int rn, int cn, int verbose);
-void write_fd(register FILE *f, int r0, int c0, int rn, int cn);
-void write_cells(register FILE *f, int r0, int c0, int rn, int cn, int dr, int dc);
-void write_marks(register FILE *f);
-void write_franges(register FILE *f);
 
 typedef enum {
     SC_READFILE_ERROR = 0,
@@ -82,10 +74,21 @@ int backup_exists(char * file);
 void openfile_nested(char * file);
 void openfile_under_cursor(int r, int c);
 
+// load functions
 void load_file(char * loading_file);
 void load_tbl(char * loading_file);
+void erasedb(struct sheet * sheet, int _free);
+void loadrc(void);
 FILE * openfile(char *fname, int *rpid, int *rfd);
 int import_csv(char * fname, char d);
 int import_markdown(char * fname);
 int create_empty_wb();
 //void readfile_argv(int argc, char ** argv);
+
+// save functions
+int savefile();
+int writefile(char * fname, int verbose);
+void write_fd(FILE * f, struct roman * roman);
+void write_cells(FILE * f, struct roman * doc, struct sheet * sh, int r0, int c0, int rn, int cn, int dr, int dc);
+void write_marks(FILE *f);
+void write_franges(FILE *f);

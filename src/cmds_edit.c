@@ -613,12 +613,11 @@ int for_word(int end_of_word, int delete, int big_word) {
     return 0;
 }
 
+
 /**
- * \brief TODO Document del_back_char()
- *
+ * \brief del_back_char()
  * \return none
  */
-
 void del_back_char() {      // x   DEL
     int max = wcswidth(inputline, wcslen(inputline));
     if (inputline_pos > max) return;
@@ -633,12 +632,11 @@ void del_back_char() {      // x   DEL
     return;
 }
 
+
 /**
- * \brief TODO Document del_for_char()
- *
+ * \brief del_for_char()
  * \return none
  */
-
 void del_for_char() {       // X    BS
     if ( ! wcslen(inputline) || ! real_inputline_pos ) return;
     int l = wcwidth(inputline[real_inputline_pos - 1]);
@@ -648,12 +646,11 @@ void del_for_char() {       // X    BS
     return;
 }
 
+
 /**
- * \brief TODO Document start_edit_mode()
- *
+ * \brief start_edit_mode()
  * \returns: 1 on success; 0 on error
  */
-
 int start_edit_mode(struct block * buf, char type) {
     struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
@@ -669,7 +666,7 @@ int start_edit_mode(struct block * buf, char type) {
             (void) swprintf(inputline, BUFFERSIZE, L"%.15g", p1->v);
         } else {              // expression
             linelim = 0;
-            editexp(sh->currow, sh->curcol);
+            editexp(sh, sh->currow, sh->curcol);
             linelim = -1;
             (void) swprintf(inputline, BUFFERSIZE, L"%s", line);
         }
@@ -687,7 +684,7 @@ int start_edit_mode(struct block * buf, char type) {
             insert_edit_submode='>';
         }
         linelim = 0;
-        edits(sh->currow, sh->curcol, 0);
+        edits(sh, sh->currow, sh->curcol, 0);
         linelim = -1;
         if ((p1)->flags & is_strexpr) swprintf(inputline + wcslen(inputline), BUFFERSIZE, L"\"");
         (void) swprintf(inputline + wcslen(inputline), BUFFERSIZE, L"%s", line);

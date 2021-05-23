@@ -480,7 +480,6 @@ extern void clearent(struct ent * v);
 extern void closefile(FILE * f, int pid, int rfd);
 extern void colshow_op();
 extern struct colorpair *cpairs[8];
-extern void editexp(int row, int col);
 extern void efree(struct enode * e);
 extern void label(struct ent * v, char * s, int flushdir);
 

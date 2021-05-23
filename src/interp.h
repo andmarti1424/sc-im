@@ -117,10 +117,10 @@ void one_arg(char * s, struct enode * e);
 void two_arg(char * s, struct enode * e);
 void three_arg(char * s, struct enode * e);
 void range_arg(char * s, struct enode * e);
-void editfmt(int row, int col);
-void editv(int row, int col);
-void editexp(int row, int col);
-void edits(int row, int col, int saveinfile);
+void editfmt(struct sheet * sh, int row, int col);
+void editv(struct sheet * sh, int row, int col);
+void editexp(struct sheet * sh, int row, int col);
+void edits(struct sheet * sh, int row, int col, int saveinfile);
 int dateformat(struct ent * v1, struct ent * v2, char * fmt);
 double rint(double d);
 

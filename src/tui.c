@@ -88,6 +88,7 @@
 #include "input.h"
 #include "tui.h"
 #include "range.h"
+#include "interp.h"
 #include "sc.h"
 #include "cmds.h"
 #include "cmds_visual.h"
@@ -1186,7 +1187,7 @@ void ui_show_celldetails() {
 #endif
     if (p1 && p1->expr) {
         linelim = 0;
-        editexp(sh->currow, sh->curcol);  /* set line to expr */
+        editexp(sh, sh->currow, sh->curcol);  /* set line to expr */
         linelim = -1;
         sprintf(head, "[%.*s] ", FBUFLEN-4, line);
         mvwprintw(input_win, 0, il_pos, "%s", head);
