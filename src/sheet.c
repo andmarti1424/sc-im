@@ -120,49 +120,18 @@ int get_num_sheets(struct roman * doc) {
       return cnt;
 }
 
+/**
+ * \brief free_session(): free memory of a session calling delete_doc
+ * \param[doc] roman struct
+ * \return void
+ */
 void free_session(struct session * session) {
     while (session != NULL) {
         struct roman * r_aux, * r = session->first_doc;
         // traverse romans
         while (r != NULL) {
             r_aux = r->next;
-            // traverse sheets
-            struct sheet * s_aux, * sh = r->first_sh;
-            while (sh != NULL) {
-                s_aux = sh->next;
-                // free sheet
-                erasedb(sh, 1); // clear sh and also free
-
-                for (int row = 0; sh->tbl != NULL && row < sh->maxrows; row++) {
-                    if (sh->tbl[row] != NULL) {
-                        free(sh->tbl[row]);
-                        sh->tbl[row] = NULL;
-                    }
-                }
-
-                free(sh->tbl);
-                free(sh->fwidth);
-                free(sh->precision);
-                free(sh->realfmt);
-                free(sh->col_hidden);
-                free(sh->col_frozen);
-                free(sh->row_hidden);
-                free(sh->row_frozen);
-                free(sh->row_format);
-
-                if (sh->name != NULL) {
-                    free(sh->name);
-                    sh->name = NULL;
-                }
-                free(sh);
-                sh = s_aux;
-            }
-
-            if (r->name != NULL) {
-                free(r->name);
-                r->name = NULL;
-            }
-            free(r);
+            delete_doc(session, r);
             r = r_aux;
         }
         // free session
@@ -172,4 +141,68 @@ void free_session(struct session * session) {
     return;
 }
 
+
+/**
+ * \brief delete_doc()
+ * \details delete content of a doc and free its memory calling delete_sheet()
+ * \param[doc] struct roman *
+ * \param[sh] struct sheet *
+ * \return void
+ */
+void delete_doc(struct session * session, struct roman * doc) {
+    // remove the link of doc to session
+    REMOVE(doc, (session->first_doc), (session->last_doc), next, prev);
+
+    // traverse doc sheets
+    struct sheet * s_aux, * sh = doc->first_sh;
+    while (sh != NULL) {
+        s_aux = sh->next;
+        delete_sheet(doc, sh);
+        sh = s_aux;
+    }
+    if (doc->name != NULL) {
+        free(doc->name);
+        doc->name = NULL;
+    }
+    free(doc);
+    return;
+}
+
+/**
+ * \brief delete_sheet()
+ * \details delete content of a sheet and free its memory
+ * \param[doc] struct roman *
+ * \param[sh] struct sheet *
+ * \return void
+ */
+void delete_sheet(struct roman * roman, struct sheet * sh) {
+    REMOVE(sh, (roman->first_sh), (roman->last_sh), next, prev);
+
+    // free sheet
+    erasedb(sh, 1); // clear sh and also free
+
+    for (int row = 0; sh->tbl != NULL && row < sh->maxrows; row++) {
+        if (sh->tbl[row] != NULL) {
+            free(sh->tbl[row]);
+            sh->tbl[row] = NULL;
+        }
+    }
+
+    free(sh->tbl);
+    free(sh->fwidth);
+    free(sh->precision);
+    free(sh->realfmt);
+    free(sh->col_hidden);
+    free(sh->col_frozen);
+    free(sh->row_hidden);
+    free(sh->row_frozen);
+    free(sh->row_format);
+
+    if (sh->name != NULL) {
+        free(sh->name);
+        sh->name = NULL;
+    }
+    free(sh);
+    return;
+}
 

@@ -8,7 +8,7 @@ ui optimizations
 `gt` command of normal mode renamed to `go`
 
 +Added MultiSheet support
-added :newsheet, :nextsheet, :prevsheet commands
+added :newsheet, :nextsheet, :prevsheet :delsheet commands
 `gt` and `gT` commands in normal mode are now used for moving between sheets
 added new colors types SHEET, CURRENT_SHEET and FILENM
 
@@ -16,7 +16,7 @@ added new colors types SHEET, CURRENT_SHEET and FILENM
 For v0.8.3 release
 -------------------
 loadingfile invalid free when opening csv files
-file saving and loading with multiple sheets
+file saving and loading with multiple sheets(loading works but adds the `Sheet 1` when not needed)
 reference cells from different sheets in formulas
 UNDO should save reference to the sheet where the action took place
 

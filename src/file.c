@@ -264,12 +264,12 @@ int savefile() {
 #ifdef AUTOBACKUP
     // check if backup of curfile exists.
     // if it exists, remove it.
-    if (strlen(curfile) && backup_exists(curfile)) remove_backup(curfile);
+    if (curfile != NULL && strlen(curfile) && backup_exists(curfile)) remove_backup(curfile);
 
     // check if backup of newfilename exists.
     // if it exists and '!' is set, remove it.
     // if it exists and no '!' is set, return.
-    if (! strlen(curfile) && backup_exists(name)) {
+    if ((curfile == NULL || ! strlen(curfile)) && backup_exists(name)) {
         if (!force_rewrite) {
             sc_error("Backup file of %s exists. Use \"!\" to force the write process.", name);
             return -1;

@@ -102,6 +102,7 @@ L"datefmt",
 L"define_color",
 L"delfilter",
 L"delfilters",
+L"delsheet",
 L"e csv",
 L"e! csv",
 L"e mkd",
@@ -977,6 +978,7 @@ void do_commandmode(struct block * sb) {
             ui_show_text(valores);
 
         } else if ( ! wcsncmp(inputline, L"newsheet", 8) ||
+                    ! wcsncmp(inputline, L"delsheet", 8) ||
                     ! wcsncmp(inputline, L"nextsheet", 9) ||
                     ! wcsncmp(inputline, L"prevsheet", 9)) {
             send_to_interp(inputline);

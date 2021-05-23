@@ -211,6 +211,7 @@ token S_YANKCOL
 %token S_NEWSHEET
 %token S_NEXTSHEET
 %token S_PREVSHEET
+%token S_DELSHEET
 %token S_NMAP
 %token S_VMAP
 %token S_INOREMAP
@@ -673,6 +674,18 @@ command:
                                        roman->cur_sh = new_sheet(roman, $2);
                                        growtbl(roman->cur_sh, GROWNEW, 0, 0);
                                        erasedb(roman->cur_sh, 0);
+                                       scxfree($2);
+                                       chg_mode('.');
+                                       ui_update(TRUE);
+                                   }
+                                 }
+    |    S_DELSHEET STRING       {
+                                   struct roman * roman = session->cur_doc;
+                                   struct sheet * sh;
+                                   if ((sh = search_sheet(roman, $2)) == NULL ) {
+                                       sc_info("no sheet exists with that name");
+                                   } else {
+                                       delete_sheet(roman, sh);
                                        scxfree($2);
                                        chg_mode('.');
                                        ui_update(TRUE);

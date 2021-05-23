@@ -38,7 +38,7 @@
 /**
  * \file sc.h
  * \author Andrés Martinelli <andmarti@gmail.com>
- * \date 2017-07-18
+ * \date 23/05/2021
  * \brief Header file for sc.c
  */
 
@@ -93,8 +93,8 @@
 //#endif
 
 #ifndef FALSE
-    # define    FALSE   0
-    # define    TRUE    1
+    #define    FALSE   0
+    #define    TRUE    1
 #endif
 
 /* structure to hold multiple documents */
@@ -235,12 +235,12 @@ struct enode {
     } e;
 };
 
-struct impexfilt {
+/* struct impexfilt {
     char ext[PATHLEN];
     char plugin[PATHLEN];
     char type;
     struct impexfilt * next;
-};
+}; */
 
 /* Use this structure to save the last 'g' command */
 struct go_save {
@@ -393,20 +393,24 @@ struct go_save {
 #define is_label      0100
 #define iscleared     0200
 #define may_sync      0400
+
 /* cell error (1st generation (ERROR) or 2nd+ (INVALID)) */
 #define CELLOK        0
 #define CELLERROR     1
 #define CELLINVALID   2
 #define CELLREF       3
+
 /* calculation order */
 #define BYCOLS        1
 #define BYROWS        2
+
 /* tblprint style output for: */
 #define TBL           1       /* 'tbl' */
 #define LATEX         2       /* 'LaTeX' */
 #define TEX           3       /* 'TeX' */
 #define SLATEX        4       /* 'SLaTeX' (Scandinavian LaTeX) */
 #define FRAME         5       /* tblprint style output for FrameMaker */
+
 /* Types for etype() */
 #define NUM           1
 #define STR           2
