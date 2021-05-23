@@ -140,6 +140,7 @@ struct sheet {
     int maxrow, maxcol; /* max row and col with data stored */
     int * fwidth;       /* columns width */
     int * precision;    /* columns decimal precision */
+    short flags;        /* to keep some flags */
     int * realfmt;
     unsigned char * col_hidden;
     unsigned char * col_frozen;

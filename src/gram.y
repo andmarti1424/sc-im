@@ -668,8 +668,31 @@ command:
     |    S_NEWSHEET STRING       {
                                    struct roman * roman = session->cur_doc;
                                    struct sheet * sh;
-                                   if ((sh = search_sheet(roman, $2)) != NULL ) {
+
+                                   // do not need to alloc a new 'Sheet 1'
+                                   // just reuse the just allocated 'Sheet 1' in load_file();
+                                   if (! strcmp($2, "Sheet 1") && (sh = search_sheet(roman, $2)) != NULL && sh->flags & is_allocated) {
+                                       sh->flags &= ~is_allocated;
+                                       sh->flags |= is_empty;
+                                       scxfree($2);
+                                       chg_mode('.');
+
+                                   // if a sheet already exists with the name we are trying to create
+                                   } else if ((sh = search_sheet(roman, $2)) != NULL ) {
                                        sc_info("sheet already exist with that name");
+                                       scxfree($2);
+                                       chg_mode('.');
+
+                                   // if a just allocated 'Sheet 1' exists, reuse it and do not malloc a new one.
+                                   } else if ((sh = search_sheet(roman, "Sheet 1")) != NULL && sh->flags & is_allocated) {
+                                       sh->flags &= ~is_allocated;
+                                       sh->flags |= is_empty;
+                                       free(sh->name);
+                                       sh->name = $2;
+                                       chg_mode('.');
+                                       ui_update(TRUE);
+
+                                   // if reached here, now yes malloc a new one
                                    } else {
                                        roman->cur_sh = new_sheet(roman, $2);
                                        growtbl(roman->cur_sh, GROWNEW, 0, 0);

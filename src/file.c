@@ -42,6 +42,7 @@
  * \brief TODO Write a brief file description.
  */
 
+#include "sc.h"
 #include <pwd.h>
 #include <sys/stat.h>
 #include <time.h>
@@ -2170,7 +2171,6 @@ void readfile_argv(int argc, char ** argv) {
 
             struct roman * roman = calloc(1, sizeof(struct roman));
             roman->name = argv[i];
-            //roman->flags &= is_allocated;
             roman->first_sh = NULL;
             roman->cur_sh = NULL;
 
@@ -2201,7 +2201,6 @@ void load_file(char * file) {
     if (file == NULL || file[0] == '\0') return;
     struct roman * roman = calloc(1, sizeof(struct roman));
     roman->name = ! strlen(file) ? NULL : file;
-    //roman->flags &= is_allocated;
     roman->first_sh = NULL;
     roman->cur_sh = NULL;
 
@@ -2209,13 +2208,21 @@ void load_file(char * file) {
     INSERT(roman, (session->first_doc), (session->last_doc), next, prev);
     session->cur_doc = roman; // important: set cur_doc!
 
-    // malloc a sheet
-    roman->cur_sh = roman->first_sh = new_sheet(roman, "Sheet A");
+    // malloc a clean sheet
+    // to make old sc file loading backwards compatible, mark it as is_allocated
+    roman->cur_sh = roman->first_sh = new_sheet(roman, "Sheet 1");
+    roman->cur_sh->flags |= is_allocated;
 
     // grow sheet tbl
     growtbl(roman->first_sh, GROWNEW, 0, 0);
 
+    // load_tbl may open an sc file or a new sc-im file that can handle sheets.
+    // new_sheet() would reuse Sheet 1 if loading sc-im file.
     load_tbl(file);
+
+    // now mark 'Sheet 1' as empty, removing is_allocated mark.
+    roman->first_sh->flags &= ~is_allocated;
+    roman->first_sh->flags |= is_empty;
     return;
 }
 
@@ -2270,7 +2277,6 @@ void load_tbl(char * loading_file) {
 int create_empty_wb() {
         struct roman * roman = calloc(1, sizeof(struct roman));
         roman->name = NULL;
-        //roman->flags &= is_allocated;
         roman->first_sh = NULL;
         roman->cur_sh = NULL;
 
@@ -2280,7 +2286,6 @@ int create_empty_wb() {
 
         // malloc a sheet
         roman->cur_sh = roman->first_sh = new_sheet(roman, "Sheet 1");
-        //roman->flags &= is_empty;
 
         // grow sheet tbl
         if (! growtbl(roman->first_sh, GROWNEW, 0, 0)) {
@@ -2289,5 +2294,8 @@ int create_empty_wb() {
         }
 
         erasedb(roman->first_sh, 0);
+
+        // mark 'Sheet 1' as empty, removing is_allocated mark.
+        roman->first_sh->flags |= is_empty;
         return 0;
 }
