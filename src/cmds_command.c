@@ -154,6 +154,7 @@ L"quit!",
 L"quit",
 L"redefine_color",
 L"refresh",
+L"renamesheet",
 L"set",
 L"showcol",
 L"showcols",
@@ -980,6 +981,7 @@ void do_commandmode(struct block * sb) {
         } else if ( ! wcsncmp(inputline, L"newsheet", 8) ||
                     ! wcsncmp(inputline, L"delsheet", 8) ||
                     ! wcsncmp(inputline, L"nextsheet", 9) ||
+                    ! wcsncmp(inputline, L"renamesheet", 11) ||
                     ! wcsncmp(inputline, L"prevsheet", 9)) {
             send_to_interp(inputline);
 

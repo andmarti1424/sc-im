@@ -14,19 +14,19 @@ added new colors types SHEET, CURRENT_SHEET and FILENM
 .sc file saving with multiple sheets
 loading xlsx with multiple sheet
 saving xlsx with multiple sheets
+add :renamesheet command
 
 
 For v0.8.3 release
 -------------------
 get rid of --sheet and --filename_with_mode
-add :renamesheet
 calc_mobile_cols/rows invalid read with l1.csv or l2.csv
 reference cells from different sheets in formulas
-reeval in multiple sheets
-
+reeval in multiple sheets: graph should keep track of the different sheets
 
 + UNDO should save reference to the sheet where the action took place
 rearrange file loading and saving functions
+
 + Show range detail in inputwin as A0:C3
 + Add GETENT in seval
 + Reeval of @lastrow @lastcol: check cells that uses @lastrow / @lastcol gets updated everytime it change

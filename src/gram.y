@@ -212,6 +212,7 @@ token S_YANKCOL
 %token S_NEXTSHEET
 %token S_PREVSHEET
 %token S_DELSHEET
+%token S_RENAMESHEET
 %token S_NMAP
 %token S_VMAP
 %token S_INOREMAP
@@ -698,6 +699,7 @@ command:
                                        growtbl(roman->cur_sh, GROWNEW, 0, 0);
                                        erasedb(roman->cur_sh, 0);
                                        scxfree($2);
+                                       roman->modflg++;
                                        chg_mode('.');
                                        ui_update(TRUE);
                                    }
@@ -717,6 +719,7 @@ command:
                                        else if (roman->cur_sh == sh)
                                            roman->cur_sh = sh->prev;
                                        delete_sheet(roman, sh);
+                                       roman->modflg++;
                                        scxfree($2);
                                        chg_mode('.');
                                        ui_update(TRUE);
@@ -733,6 +736,7 @@ command:
                                        else if (roman->cur_sh == sh)
                                            roman->cur_sh = sh->prev;
                                        delete_sheet(roman, sh);
+                                       roman->modflg++;
                                        chg_mode('.');
                                        ui_update(TRUE);
                                    }
@@ -764,6 +768,15 @@ command:
                                    }
                                    chg_mode('.');
                                    ui_update(TRUE);
+                                 }
+
+    |    S_RENAMESHEET STRING    {
+                                   struct sheet * sh = session->cur_doc->cur_sh;
+                                   if (sh->name != NULL) free(sh->name);
+                                   session->cur_doc->modflg++;
+                                   sh->name = $2;
+                                   chg_mode('.');
+                                   ui_show_header();
                                  }
 
     |    S_NMAP STRING STRING    {

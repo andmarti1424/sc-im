@@ -553,6 +553,9 @@ Commands for handling cell content:
      :delsheet
                  deletes the current sheet.
 
+     :renamesheet "{name}"
+                 rename the current sheet to {name}.
+
      :showmaps   Show all key mappings.
 
      :nmap {lhs} {rhs}
