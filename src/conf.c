@@ -67,7 +67,6 @@ const char default_config[] =
     "quiet=0\n"
     "numeric_zero=1\n"
     "numeric_decimal=1\n"
-    "filename_with_mode=0\n"
     "overlap=0\n"
     "truncate=0\n"
     "autowrap=0\n"

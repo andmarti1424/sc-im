@@ -247,6 +247,12 @@ void set_colors_param_dict() {
     put(d_colors_param, "CELL_NEGATIVE", str);
     sprintf(str, "%d", DEFAULT);
     put(d_colors_param, "DEFAULT", str);
+    sprintf(str, "%d", CURRENT_SHEET);
+    put(d_colors_param, "CURRENT_SHEET", str);
+    sprintf(str, "%d", SHEET);
+    put(d_colors_param, "SHEET", str);
+    sprintf(str, "%d", FILENM);
+    put(d_colors_param, "FILENM", str);
 }
 
 /**

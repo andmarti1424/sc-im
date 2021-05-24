@@ -16,10 +16,10 @@ loading xlsx with multiple sheet
 saving xlsx with multiple sheets
 add :renamesheet command
 reference cells from different sheets in formulas: ={Sheet2}!A2
+removed --sheet and --filename_with_mode configuration variables
 
 For v0.8.3 release
 -------------------
-get rid of --sheet and --filename_with_mode
 calc_mobile_cols/rows invalid read with l1.csv and l2.csv examples
 + reeval in multiple sheets: graph should keep track of the different sheets
 + UNDO should save reference to the sheet where the action took place

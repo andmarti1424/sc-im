@@ -1342,11 +1342,6 @@ Commands for handling cell content:
     Enabled by default, set this variable to enable the execution of @lua
     scripts. See @lua function below.
 
-    'filename_with_mode' [default 0]
-    Set it to '1' to display current filename along with the current mode at
-    the right end of the status line.
-    Set it to '0', to display the current mode only.
-
     'overlap' [default off]
     If cell content exceedes column width it gets cut off to fit the column
     width.  If overlap is set, the content overflows into the next column.
@@ -1858,15 +1853,6 @@ Commands for handling cell content:
         --txtdelim=";"
         --txtdelim="|"
 
-    If you pass a .xlsx file to sc-im, you can specify which sheet to load
-    with the --sheet parameter, which can be the name or number of a sheet.
-    Default value is 1.
-
-    Example: ./sc-im --sheet=dogs file.xlsx
-
-    Some possible values are:
-        --sheet=3
-        --sheet=dogs
 ==============================================================================
 &THEMES&
 

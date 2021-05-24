@@ -482,7 +482,9 @@ void do_commandmode(struct block * sb) {
                 } else {
                     delete_structures();
                     create_structures();
-                    readfile(name, 0);
+                    // create main session
+                    session = (struct session *) calloc(1, sizeof(struct session));
+                    load_file(name);
 
                     if (! get_conf_int("nocurses")) {
                       ui_show_header();

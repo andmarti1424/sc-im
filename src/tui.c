@@ -631,10 +631,6 @@ void ui_print_mode() {
     ui_set_ucolor(input_win, &ucolors[MODE], DEFAULT_COLOR);
     #endif
 
-    char * curfile = session->cur_doc->name;
-    if (get_conf_int("filename_with_mode") && curfile != NULL)
-        sprintf(strm, "%s ", curfile);
-
     if (curmode == NORMAL_MODE) {
         strcat(strm, " -- NORMAL --");
         ui_write_j(input_win, strm, row, RIGHT);
