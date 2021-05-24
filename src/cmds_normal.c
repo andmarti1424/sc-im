@@ -797,7 +797,7 @@ void do_normalmode(struct block * buf) {
                 save_undo_range_shift(1, 0, sh->currow, 0, sh->currow, sh->maxcol);
 #endif
                 fix_marks(1, 0, sh->currow, sh->maxrow, 0, sh->maxcol);
-                insert_row(0);
+                insert_row(sh, 0);
 #ifdef UNDO
                 add_undo_row_format(sh->currow, 'A', sh->row_format[sh->currow]);
 #endif
@@ -831,7 +831,7 @@ void do_normalmode(struct block * buf) {
                 save_undo_range_shift(1, 0, sh->currow+1, 0, sh->currow+1, sh->maxcol);
 #endif
                 fix_marks(1, 0, sh->currow+1, sh->maxrow, 0, sh->maxcol);
-                insert_row(1);
+                insert_row(sh, 1);
 #ifdef UNDO
                 add_undo_row_format(sh->currow, 'A', sh->row_format[sh->currow]);
 #endif

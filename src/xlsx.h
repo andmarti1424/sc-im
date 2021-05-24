@@ -51,5 +51,5 @@ char * get_xlsx_number_format_by_id(xmlDocPtr doc_styles, int id);
 #endif
 int open_xlsx(char * fname, char * encoding);
 #ifdef XLSX_EXPORT
-int export_xlsx(char * filename, int r0, int c0, int rn, int cn);
+int export_xlsx(char * filename);
 #endif

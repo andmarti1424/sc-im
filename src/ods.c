@@ -231,7 +231,7 @@ int open_ods(char * fname, char * encoding) {
         }
         cur_node = cur_node->next; // forward until reach table
     }
-    int_deleterow(sh->currow, 1); /* delete the first row */
+    int_deleterow(sh, sh->currow, 1); /* delete the first row */
 
     // free the document
     xmlFreeDoc(doc);

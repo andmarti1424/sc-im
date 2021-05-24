@@ -315,7 +315,7 @@ int savefile() {
         sc_error("XLSX export support not compiled in. Please save file in other extension.");
         return -1;
 #else
-        if (export_xlsx(curfile, 0, 0, doc->cur_sh->maxrow, doc->cur_sh->maxcol) == 0) {
+        if (export_xlsx(curfile) == 0) {
             sc_info("File \"%s\" written", curfile);
             doc->modflg = 0;
         } else
@@ -2048,7 +2048,7 @@ void * do_autobackup() {
 #ifdef XLSX_EXPORT
     } else if (! strcmp(&name[strlen(name)-9], ".xlsx.bak")) {
         export_delim(namenew, ',', 0, 0, sh->maxrow, sh->maxcol, 0);
-        export_xlsx(namenew, 0, 0, sh->maxrow, sh->maxcol);
+        export_xlsx(namenew);
 #endif
     } else if (! strcmp(&name[strlen(name)-8], ".tab.bak") || ! strcmp(&name[strlen(name)-8], ".tsv.bak")) {
         export_delim(namenew, '\t', 0, 0, sh->maxrow, sh->maxcol, 0);

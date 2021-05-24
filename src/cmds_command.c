@@ -1136,10 +1136,8 @@ void do_commandmode(struct block * sb) {
                     #ifdef AUTOBACKUP
                     if (backup_exists(filename)) remove_backup(filename);
                     #endif
-                    if (export_xlsx(
-                    filename, p == -1 ? 0 : sr->tlrow, p == -1 ? 0 : sr->tlcol,
-                    p == -1 ? sh->maxrow : sr->brrow, p == -1 ? sh->maxcol : sr->brcol) == 0)
-                    sc_info("File \"%s\" written", filename);
+                    if (export_xlsx(filename) == 0)
+                        sc_info("File \"%s\" written", filename);
                 }
                 #endif
 

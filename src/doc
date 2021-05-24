@@ -543,8 +543,15 @@ Commands for handling cell content:
 
      :nextsheet
                  move to next sheet in file
+
      :prevsheet
                  move to previous sheet in file
+
+     :delsheet "{name}"
+                 deletes the sheet named {name}.
+
+     :delsheet
+                 deletes the current sheet.
 
      :showmaps   Show all key mappings.
 

@@ -263,7 +263,7 @@ int paste_yanked_ents(int above, int type_paste) {
 #ifdef UNDO
         copy_to_undostruct(sh->currow + ! above, 0, sh->currow + ! above - 1 + yank_arg, sh->maxcol, UNDO_DEL, IGNORE_DEPS, NULL);
 #endif
-        while (c--) above ? insert_row(0) : insert_row(1);
+        while (c--) above ? insert_row(sh, 0) : insert_row(sh, 1);
         if (! above) sh->currow = forw_row(1)->row;                   // paste below
         diffr = sh->currow - yl->row;
         diffc = yl->col;
@@ -322,7 +322,7 @@ int paste_yanked_ents(int above, int type_paste) {
 
         // here we delete current content of "destino" ent.
         if (type_paste == YANK_RANGE || type_paste == YANK_SORT)
-            erase_area(yl->row + diffr, yl->col + diffc, yl->row + diffr, yl->col + diffc, ignorelock, 0);
+            erase_area(sh, yl->row + diffr, yl->col + diffc, yl->row + diffr, yl->col + diffc, ignorelock, 0);
 
         struct ent * destino = lookat(sh, yl->row + diffr, yl->col + diffc);
 

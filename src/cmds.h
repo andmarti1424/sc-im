@@ -61,10 +61,10 @@ int modcheck();                        // Verify if open file has been modified
 int savefile();                        // Save open file
 void copyent(struct ent * n, struct ent * p, int dr, int dc, int r1, int c1, int r2, int c2, int special);
 void flush_saved();
-void insert_row(int after);
+void insert_row(struct sheet * sh, int after);
 void insert_col(int after);
 void deleterow(int row, int mult);
-void int_deleterow(int row, int multi);
+void int_deleterow(struct sheet * sh, int row, int mult);
 void deletecol();
 void int_deletecol(int col, int mult);
 void formatcol(int c);
@@ -105,7 +105,7 @@ void center(int sr, int sc, int er, int ec);
 void doformat(int c1, int c2, int w, int p, int r);
 void dorowformat(int r, unsigned char size);
 int etype(struct enode *e);
-void erase_area(int sr, int sc, int er, int ec, int ignorelock, int mark_ent_as_deleted);
+void erase_area(struct sheet * sh, int sr, int sc, int er, int ec, int ignorelock, int mark_as_deleted);
 void auto_fit(int ci, int cf, int min);
 void valueize_area(int sr, int sc, int er, int ec);
 void sync_refs();

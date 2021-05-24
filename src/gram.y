@@ -722,6 +722,21 @@ command:
                                        ui_update(TRUE);
                                    }
                                  }
+    |    S_DELSHEET              {
+                                   struct roman * roman = session->cur_doc;
+                                   struct sheet * sh = roman->cur_sh;
+                                   if (sh->next == NULL && sh->prev == NULL) {
+                                       sc_info("Cannot delete the only sheet of document");
+                                   } else {
+                                       if (roman->cur_sh == sh && sh->next != NULL)
+                                           roman->cur_sh = sh->next;
+                                       else if (roman->cur_sh == sh)
+                                           roman->cur_sh = sh->prev;
+                                       delete_sheet(roman, sh);
+                                       chg_mode('.');
+                                       ui_update(TRUE);
+                                   }
+                                 }
     |    S_NEXTSHEET             {
                                    struct roman * roman = session->cur_doc;
                                    if (roman->cur_sh->next != NULL) {

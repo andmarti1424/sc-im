@@ -486,9 +486,7 @@ int etype(register struct enode *e) {
  * \param[in] mark_as_deleted
  * \return none
  */
-void erase_area(int sr, int sc, int er, int ec, int ignorelock, int mark_as_deleted) {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
+void erase_area(struct sheet * sh, int sr, int sc, int er, int ec, int ignorelock, int mark_as_deleted) {
     int r, c;
     struct ent **pp;
 
@@ -785,15 +783,14 @@ void formatcol(int c) {
 
 
 /**
- * \brief TODO Document insert_row()
- * \details Insert a single rox. It will be inserted before currow.
- * if after is 0; after if it is 1.
+ * \brief insert_row()
+ * \details Insert a single row. It will be inserted before currow
+ * if after is 0. After if it is 1.
+ * \param[in] struct sheet * sh
  * \param[in] after
  * \returnsnone
  */
-void insert_row(int after) {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
+void insert_row(struct sheet * sh, int after) {
     int r, c;
     struct ent ** tmprow, ** pp, ** qq;
     struct ent * p;
@@ -824,7 +821,8 @@ void insert_row(int after) {
         }
     }
 
-    roman->modflg++;
+    // TODO pass roman as parameter
+    session->cur_doc->modflg++;
     return;
 }
 
@@ -922,7 +920,7 @@ void deleterow(int row, int mult) {
     if (! roman->loading) yank_area(row, 0, row + mult - 1, sh->maxcol, 'r', mult);
 
     // do the job
-    int_deleterow(row, mult);
+    int_deleterow(sh, row, mult);
 
     //flush_saved(); // we have to flush only at exit. this is in case we want to UNDO
 
@@ -945,15 +943,13 @@ void deleterow(int row, int mult) {
 /**
  * \brief Delete a row
  * \details Delete a row - internal function
- * \param[in] row row to delete
- * \param[in] multi commands multiplier (usually 1)
+ * \param[in] row - row to delete
+ * \param[in] multi - command multiplier (usually 1)
  * \return none
  */
-void int_deleterow(int row, int mult) {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
-    register struct ent ** pp;
-    register struct ent * q;
+void int_deleterow(struct sheet * sh, int row, int mult) {
+    struct ent ** pp;
+    struct ent * q;
     int r, c;
 
     //if (sh->currow > sh->maxrow) return;
@@ -970,7 +966,7 @@ void int_deleterow(int row, int mult) {
         sync_refs();
 
         // and after that the erase_area of the deleted row
-        erase_area(row, 0, row, sh->maxcol, 0, 1); //important: this mark the ents as deleted
+        erase_area(sh, row, 0, row, sh->maxcol, 0, 1); //important: this mark the ents as deleted
 
         // and we decrease ->row of all rows after the deleted one
         for (r = row; r < sh->maxrows - 1; r++) {
@@ -1189,7 +1185,7 @@ void del_selected_cells() {
     copy_to_undostruct(tlrow, tlcol, brrow, brcol, UNDO_DEL, HANDLE_DEPS, NULL);
 #endif
 
-    erase_area(tlrow, tlcol, brrow, brcol, 0, 0); //important: this erases the ents, but does NOT mark them as deleted
+    erase_area(sh, tlrow, tlcol, brrow, brcol, 0, 0); //important: this erases the ents, but does NOT mark them as deleted
     roman->modflg++;
     sync_refs();
     //flush_saved(); DO NOT UNCOMMENT! flush_saved shall not be called other than at exit.
