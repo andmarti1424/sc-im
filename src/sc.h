@@ -202,6 +202,7 @@ struct ent_ptr {
     int vf;
     struct ent * vp;
     struct enode * expr;  /* for getent */
+    struct sheet * sheet;
 };
 
 // stores a range (left, right)

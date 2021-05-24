@@ -65,7 +65,7 @@
 #include "undo.h"
 #endif
 
-void syncref(register struct enode *e);
+void syncref(struct enode *e);
 extern int shall_quit;
 char insert_edit_submode;
 struct ent * freeents = NULL;    // keep deleted ents around before sync_refs
@@ -88,7 +88,7 @@ extern struct session * session;
  *
  * \return none
  */
-void mark_ent_as_deleted(register struct ent * p, int delete) {
+void mark_ent_as_deleted(struct ent * p, int delete) {
     if (p == NULL) return;
     if (delete) p->flags |= is_deleted;
 
@@ -111,8 +111,8 @@ void mark_ent_as_deleted(register struct ent * p, int delete) {
  * \return none
  */
 void flush_saved() {
-    register struct ent * p;
-    register struct ent * q;
+    struct ent * p;
+    struct ent * q;
 
     p = freeents;
     while (p != NULL) {
@@ -140,7 +140,7 @@ void flush_saved() {
 void sync_refs() {
     struct roman * roman = session->cur_doc;
     int i, j;
-    register struct ent * p;
+    struct ent * p;
     for (i=0; i <= roman->cur_sh->maxrow; i++)
         for (j=0; j <= roman->cur_sh->maxcol; j++)
             if ( (p = *ATBL(roman->cur_sh, roman->cur_sh->tbl, i, j)) && p->expr ) {
@@ -164,7 +164,7 @@ void sync_refs() {
  * @endcode
  * returns: none
  */
-void syncref(register struct enode * e) {
+void syncref(struct enode * e) {
     struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
 
@@ -360,7 +360,7 @@ void int_deletecol(int col, int mult) {
  * \param[in] special
  * \return none
  */
-void copyent(register struct ent * n, register struct ent * p, int dr, int dc, int r1, int c1, int r2, int c2, int special) {
+void copyent(struct ent * n, struct ent * p, int dr, int dc, int r1, int c1, int r2, int c2, int special) {
     if (!n || !p) {
         sc_error("copyent: internal error");
         return;
@@ -440,7 +440,7 @@ void copyent(register struct ent * n, register struct ent * p, int dr, int dc, i
  * \brief TODO Write brief description
  * \return NUM; STR; etc.
  */
-int etype(register struct enode *e) {
+int etype(struct enode *e) {
     if (e == (struct enode *)0)
         return NUM;
     switch (e->op) {
@@ -457,7 +457,7 @@ int etype(register struct enode *e) {
             return (etype(e->e.o.right));
 
         case O_VAR: {
-            register struct ent *p;
+            struct ent *p;
             p = e->e.v.vp;
             if (p->expr)
                 return (p->flags & is_strexpr ? STR : NUM);
@@ -553,7 +553,7 @@ void erase_area(struct sheet * sh, int sr, int sc, int er, int ec, int ignoreloc
  * \param[in] special
  * \return none
  */
-struct enode * copye(register struct enode *e, int Rdelta, int Cdelta, int r1, int c1, int r2, int c2, int special) {
+struct enode * copye(struct enode *e, int Rdelta, int Cdelta, int r1, int c1, int r2, int c2, int special) {
     struct enode * ret;
     static struct enode * range = NULL;
     struct roman * roman = session->cur_doc;
@@ -572,17 +572,21 @@ struct enode * copye(register struct enode *e, int Rdelta, int Cdelta, int r1, i
         newcol = e->e.r.left.vf & FIX_COL || e->e.r.left.vp->row < r1 || e->e.r.left.vp->row > r2 || e->e.r.left.vp->col < c1 || e->e.r.left.vp->col > c2 ?  e->e.r.left.vp->col : special == 1 ? c1 + Cdelta + e->e.r.left.vp->row - r1 : e->e.r.left.vp->col + Cdelta;
         ret->e.r.left.vp = lookat(sh, newrow, newcol);
         ret->e.r.left.vf = e->e.r.left.vf;
+        ret->e.r.left.sheet = e->e.r.left.sheet;
         newrow = e->e.r.right.vf & FIX_ROW || e->e.r.right.vp->row < r1 || e->e.r.right.vp->row > r2 || e->e.r.right.vp->col < c1 || e->e.r.right.vp->col > c2 ?  e->e.r.right.vp->row : special == 1 ? r1 + Rdelta + e->e.r.right.vp->col - c1 : e->e.r.right.vp->row + Rdelta;
         newcol = e->e.r.right.vf & FIX_COL || e->e.r.right.vp->row < r1 || e->e.r.right.vp->row > r2 || e->e.r.right.vp->col < c1 || e->e.r.right.vp->col > c2 ?  e->e.r.right.vp->col : special == 1 ? c1 + Cdelta + e->e.r.right.vp->row - r1 : e->e.r.right.vp->col + Cdelta;
         ret->e.r.right.vp = lookat(sh, newrow, newcol);
         ret->e.r.right.vf = e->e.r.right.vf;
+        ret->e.r.right.sheet = e->e.r.right.sheet;
     } else {
         struct enode *temprange=0;
         ret = (struct enode *) scxmalloc((unsigned) sizeof (struct enode));
-        ret->e.r.left.expr = e->e.r.left.expr ? copye(e->e.r.left.expr, Rdelta, Cdelta, r1, c1, r2, c2, special) : NULL; // important to initialize
-        ret->e.r.right.expr = e->e.r.right.expr ? copye(e->e.r.right.expr, Rdelta, Cdelta, r1, c1, r2, c2, special) : NULL; // important to initialize
+        ret->e.r.left.expr = e->e.r.left.expr != NULL ? copye(e->e.r.left.expr, Rdelta, Cdelta, r1, c1, r2, c2, special) : NULL; // important to initialize
+        ret->e.r.right.expr = e->e.r.right.expr != NULL ? copye(e->e.r.right.expr, Rdelta, Cdelta, r1, c1, r2, c2, special) : NULL; // important to initialize
         ret->e.r.left.vp = e->e.r.left.vp;
         ret->e.r.right.vp = e->e.r.right.vp;
+        ret->e.r.left.sheet = e->e.r.left.sheet;
+        ret->e.r.right.sheet = e->e.r.right.sheet;
         ret->op = e->op;
         switch (ret->op) {
             case SUM:
@@ -612,6 +616,7 @@ struct enode * copye(register struct enode *e, int Rdelta, int Cdelta, int r1, i
                     }
                     ret->e.v.vp = lookat(sh, newrow, newcol);
                     ret->e.v.vf = e->e.v.vf;
+                    ret->e.v.sheet = e->e.v.sheet;
                     break;
                 }
             case 'k':
@@ -839,7 +844,7 @@ void insert_col(int after) {
     struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
     int r, c;
-    register struct ent ** pp, ** qq;
+    struct ent ** pp, ** qq;
     struct ent * p;
     int lim = sh->maxcol - sh->curcol - after + 1;
 
@@ -1258,7 +1263,7 @@ void send_to_interp(wchar_t * oper) {
  * \return none
  */
 struct ent * lookat(struct sheet * sh, int row, int col) {
-    register struct ent **pp;
+    struct ent **pp;
 
     checkbounds(sh, &row, &col);
     pp = ATBL(sh, sh->tbl, row, col);
@@ -1575,7 +1580,7 @@ struct ent * go_end() {
     struct sheet * sh = roman->cur_sh;
     int r = 0, c = 0;
     int raux = r, caux = c;
-    register struct ent *p;
+    struct ent *p;
     do {
         if (c < sh->maxcols - 1)
             c++;
@@ -1705,7 +1710,7 @@ struct ent * left_limit() {
 struct ent * right_limit(int row) {
     struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
-    register struct ent *p;
+    struct ent *p;
     int c = sh->maxcols - 1;
     while ( (! VALID_CELL(sh, p, row, c) && c > 0) || sh->col_hidden[c]) c--;
     return lookat(sh, row, c);
@@ -1732,7 +1737,7 @@ struct ent * goto_top() {
 struct ent * goto_bottom() {
     struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
-    register struct ent *p;
+    struct ent *p;
     int r = sh->maxrows - 1;
     while ( (! VALID_CELL(sh, p, r, sh->curcol) && r > 0) || sh->row_hidden[r]) r--;
     return lookat(sh, r, sh->curcol);
@@ -1751,7 +1756,7 @@ struct ent * goto_last_col() {
     struct sheet * sh = roman->cur_sh;
     int r, mr = sh->maxrows;
     int c, mc = 0;
-    register struct ent *p;
+    struct ent *p;
     int rf = 0;
 
     for (r = 0; r < mr; r++) {
@@ -1772,7 +1777,7 @@ struct ent * go_forward() {
     struct sheet * sh = roman->cur_sh;
     int r = sh->currow, c = sh->curcol;
     int r_ori = r, c_ori = c;
-    register struct ent * p;
+    struct ent * p;
     do {
         if (c < sh->maxcols - 1) {
             c++;
@@ -1854,7 +1859,7 @@ struct ent * go_backward() {
     struct sheet * sh = roman->cur_sh;
     int r = sh->currow, c = sh->curcol;
     int r_ori = r, c_ori = c;
-    register struct ent * p;
+    struct ent * p;
     do {
         if (c)
             c--;

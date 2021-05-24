@@ -116,9 +116,9 @@ extern struct session * session;
 double dolookup      (struct enode * val, int minr, int minc, int maxr, int maxc, int offr, int offc);
 double fn1_eval      (double (* fn)(), double arg);
 double fn2_eval      (double (* fn)(), double arg1, double arg2);
-int    constant      (register struct enode * e);
+int    constant      (struct enode * e);
 void   copydbuf      (int deltar, int deltac);
-void   decompile     (register struct enode * e, int priority);
+void   decompile     (struct enode * e, int priority);
 void   index_arg     (char * s, struct enode * e);
 void   list_arg      (char * s, struct enode * e);
 void   one_arg       (char * s, struct enode * e);
@@ -209,7 +209,7 @@ char * dostindex(int minr, int minc, int maxr, int maxc, struct enode * val) {
     struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
     int r, c;
-    register struct ent * p;
+    struct ent * p;
     char * pr;
 
     p = (struct ent *) 0;
@@ -268,7 +268,7 @@ double doindex(int minr, int minc, int maxr, int maxc, struct enode * val) {
     struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
     int r, c;
-    register struct ent * p;
+    struct ent * p;
 
     if (val->op == ',') {        /* index by both row and column */
         r = minr + (int) eval(NULL, val->e.o.left) - 1;
@@ -311,7 +311,7 @@ double dolookup(struct enode * val, int minr, int minc, int maxr, int maxc, int 
     struct sheet * sh = roman->cur_sh;
     double v, ret = (double) 0;
     int r, c;
-    register struct ent * p = (struct ent *) 0;
+    struct ent * p = (struct ent *) 0;
     int incr, incc, fndr, fndc;
     char * s;
 
@@ -386,7 +386,7 @@ double docount(int minr, int minc, int maxr, int maxc, struct enode * e) {
     int v;
     int r, c;
     int cellerr = CELLOK;
-    register struct ent *p;
+    struct ent *p;
 
     v = 0;
     for (r = minr; r <= maxr; r++)
@@ -424,7 +424,7 @@ double dosum(int minr, int minc, int maxr, int maxc, struct enode * e) {
     double v;
     int r, c;
     int cellerr = CELLOK;
-    register struct ent * p;
+    struct ent * p;
 
     v = (double)0;
     for (r = minr; r <= maxr; r++)
@@ -462,7 +462,7 @@ double doprod(int minr, int minc, int maxr, int maxc, struct enode * e) {
     double v;
     int r, c;
     int cellerr = CELLOK;
-    register struct ent * p;
+    struct ent * p;
 
     v = 1;
     for (r = minr; r <= maxr; r++)
@@ -501,7 +501,7 @@ double doavg(int minr, int minc, int maxr, int maxc, struct enode * e) {
     int r, c;
     int count;
     int cellerr = CELLOK;
-    register struct ent * p;
+    struct ent * p;
 
     v = (double) 0;
     count = 0;
@@ -544,7 +544,7 @@ double dostddev(int minr, int minc, int maxr, int maxc, struct enode * e) {
     int r, c;
     int n;
     int cellerr = CELLOK;
-    register struct ent * p;
+    struct ent * p;
 
     n = 0;
     lp = 0;
@@ -590,7 +590,7 @@ double domax(int minr, int minc, int maxr, int maxc, struct enode * e) {
     int r, c;
     int count;
     int cellerr = CELLOK;
-    register struct ent * p;
+    struct ent * p;
 
     count = 0;
     for (r = minr; r <= maxr; r++)
@@ -637,7 +637,7 @@ double domin(int minr, int minc, int maxr, int maxc, struct enode * e) {
     int r, c;
     int count;
     int cellerr = CELLOK;
-    register struct ent * p;
+    struct ent * p;
 
     count = 0;
     for (r = minr; r <= maxr; r++)
@@ -940,10 +940,10 @@ double donval(char * colstr, double rowdoub) {
  * \return double
  */
 double dolmax(struct ent * e, struct enode * ep) {
-    register int count = 0;
-    register double maxval = 0; /* Assignment to shut up lint */
-    register struct enode * p;
-    register double v;
+    int count = 0;
+    double maxval = 0; /* Assignment to shut up lint */
+    struct enode * p;
+    double v;
 
     cellerror = CELLOK;
     for (p = ep; p; p = p->e.o.left) {
@@ -964,10 +964,10 @@ double dolmax(struct ent * e, struct enode * ep) {
  * \return double
  */
 double dolmin(struct ent * e, struct enode * ep) {
-    register int count = 0;
-    register double minval = 0; /* Assignment to shut up lint */
-    register struct enode * p;
-    register double v;
+    int count = 0;
+    double minval = 0; /* Assignment to shut up lint */
+    struct enode * p;
+    double v;
 
     cellerror = CELLOK;
     for (p = ep; p; p = p->e.o.left) {
@@ -987,7 +987,7 @@ double dolmin(struct ent * e, struct enode * ep) {
  * \param[in] e
  * \return double
  */
-double eval(register struct ent * ent, register struct enode * e) {
+double eval(struct ent * ent, struct enode * e) {
     struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
 
@@ -1480,8 +1480,8 @@ double fn2_eval(double (*fn)(), double arg1, double arg2) {
  *
  * \return char *
  */
-char * docat(register char * s1, register char * s2) {
-    register char * p;
+char * docat(char * s1, char * s2) {
+    char * p;
     char * arg1, * arg2;
 
     if ( !s1 && !s2 )
@@ -1689,8 +1689,8 @@ char * doreplace(char * source, char * old, char * new) {
  *
  * \return char *
  */
-char * dosubstr(char * s, register int v1, register int v2) {
-    register char * s1, * s2;
+char * dosubstr(char * s, int v1, int v2) {
+    char * s1, * s2;
     char * p;
 
     if ( !s ) return ((char *) 0);
@@ -1971,7 +1971,7 @@ char * seval(struct ent * ent, struct enode * se) {
  * \return struct enode *
  */
 struct enode * new(int op, struct enode * a1, struct enode * a2) {
-    register struct enode * p;
+    struct enode * p;
     //if (freeenodes) {
     //     p = freeenodes;
     //    freeenodes = p->e.o.left;
@@ -1981,6 +1981,8 @@ struct enode * new(int op, struct enode * a1, struct enode * a2) {
     p->e.r.left.expr = NULL;  // important to initialize
     p->e.r.right.vp = NULL;   // important to initialize
     p->e.r.right.expr = NULL; // important to initialize
+    p->e.r.left.sheet = NULL; // important to initialize
+    p->e.r.right.sheet = NULL;// important to initialize
     p->op = op;
     p->e.o.left = a1;
     p->e.o.right = a2;
@@ -1996,7 +1998,7 @@ struct enode * new(int op, struct enode * a1, struct enode * a2) {
  * \return struct enotde *
  */
 struct enode * new_var(int op, struct ent_ptr a1) {
-    register struct enode * p;
+    struct enode * p;
     //if (freeenodes) {
     //    p = freeenodes;
     //    freeenodes = p->e.o.left;
@@ -2006,6 +2008,8 @@ struct enode * new_var(int op, struct ent_ptr a1) {
     p->e.r.left.expr = NULL;  // important to initialize
     p->e.r.right.vp = NULL;   // important to initialize
     p->e.r.right.expr = NULL; // important to initialize
+    p->e.r.left.sheet = NULL; // important to initialize
+    p->e.r.right.sheet = NULL;// important to initialize
     p->op = op;
     p->e.v = a1; // ref to cell needed for this expr
     return p;
@@ -2021,7 +2025,7 @@ struct enode * new_var(int op, struct ent_ptr a1) {
  * \return none
  */
 struct enode * new_range(int op, struct range_s a1) {
-    register struct enode * p;
+    struct enode * p;
     //if (freeenodes)
     //{   p = freeenodes;
     //    freeenodes = p->e.o.left;
@@ -2032,6 +2036,8 @@ struct enode * new_range(int op, struct range_s a1) {
     p->e.r.left.expr = NULL;  // important to initialize
     p->e.r.right.vp = NULL;   // important to initialize
     p->e.r.right.expr = NULL; // important to initialize
+    p->e.r.left.sheet = NULL; // important to initialize
+    p->e.r.right.sheet = NULL;// important to initialize
     p->op = op;
     p->e.r = a1;
     return p;
@@ -2045,7 +2051,7 @@ struct enode * new_range(int op, struct range_s a1) {
  * \return struct enotde *
  */
 struct enode * new_const(int op, double a1) {
-    register struct enode * p;
+    struct enode * p;
     //if (freeenodes) {    /* reuse an already free'd enode */
     //    p = freeenodes;
     //    freeenodes = p->e.o.left;
@@ -2055,6 +2061,8 @@ struct enode * new_const(int op, double a1) {
     p->e.r.left.expr = NULL;  // important to initialize
     p->e.r.right.vp = NULL;   // important to initialize
     p->e.r.right.expr = NULL; // important to initialize
+    p->e.r.left.sheet = NULL; // important to initialize
+    p->e.r.right.sheet = NULL;// important to initialize
     p->op = op;
     p->e.k = a1;
     return p;
@@ -2067,7 +2075,7 @@ struct enode * new_const(int op, double a1) {
  * \return struct enode *
  */
 struct enode * new_str(char * s) {
-    register struct enode * p;
+    struct enode * p;
     //if (freeenodes) {    /* reuse an already free'd enode */
     //    p = freeenodes;
     //    freeenodes = p->e.o.left;
@@ -2077,6 +2085,8 @@ struct enode * new_str(char * s) {
     p->e.r.left.expr = NULL;  // important to initialize
     p->e.r.right.vp = NULL;   // important to initialize
     p->e.r.right.expr = NULL; // important to initialize
+    p->e.r.left.sheet = NULL; // important to initialize
+    p->e.r.right.sheet = NULL;// important to initialize
     p->op = O_SCONST;
     p->e.s = s;
     return (p);
@@ -2175,7 +2185,7 @@ void go_last() {
 void moveto(int row, int col, int lastrow_, int lastcol_, int cornerrow, int cornercol) {
     struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
-    register int i;
+    int i;
 
     sh->lastrow = sh->currow;
     sh->lastcol = sh->curcol;
@@ -2232,8 +2242,8 @@ void moveto(int row, int col, int lastrow_, int lastcol_, int cornerrow, int cor
 void num_search(double n, int firstrow, int firstcol, int lastrow_, int lastcol_, int errsearch, int flow) {
     struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
-    register struct ent * p;
-    register int r, c;
+    struct ent * p;
+    int r, c;
     int endr, endc;
 
     //if (!loading) remember(0);
@@ -2821,7 +2831,7 @@ void format_cell(struct ent *v1, struct ent *v2, char *s) {
     struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
     int r, c;
-    register struct ent *n;
+    struct ent *n;
     int maxr, maxc;
     int minr, minc;
 
@@ -2860,7 +2870,7 @@ void format_cell(struct ent *v1, struct ent *v2, char *s) {
  * \return 1 function is an expression
  * \return 0 function is not an expression
  */
-int constant(register struct enode *e) {
+int constant(struct enode *e) {
     return e == NULL
      || e->op == O_CONST
      || e->op == O_SCONST
@@ -2931,11 +2941,11 @@ void efree(struct enode * e) {
  *
  * \return none
  */
-void label(register struct ent * v, register char * s, int flushdir) {
+void label(struct ent * v, char * s, int flushdir) {
     struct roman * roman = session->cur_doc;
     if (v) {
         /*if (flushdir == 0 && v->flags & is_valid) {
-            register struct ent * tv;
+            struct ent * tv;
             if (v->col > 0 && ((tv=lookat(v->row, v->col-1))->flags & is_valid) == 0)
             v = tv, flushdir = 1;
             else if (((tv=lookat(v->row, v->col+1))->flags & is_valid) == 0)
@@ -2966,6 +2976,10 @@ void label(register struct ent * v, register char * s, int flushdir) {
  */
 void decodev(struct ent_ptr v) {
     struct range * r;
+    if (v.sheet != NULL) {
+        (void) sprintf(line + linelim, "{%s}!", v.sheet->name);
+        linelim += strlen(line + linelim);
+    }
     //if ( ! v.vp || v.vp->flags & is_deleted)
     //    (void) sprintf(line + linelim, "@ERR");
     //else
@@ -2996,7 +3010,7 @@ void decodev(struct ent_ptr v) {
  */
 char * coltoa(int col) {
     static char rname[3];
-    register char *p = rname;
+    char *p = rname;
 
     if (col > 25) {
         *p++ = col/26 + 'A' - 1;
@@ -3035,8 +3049,8 @@ void decompile_list(struct enode *p) {
  *
  * \return none
  */
-void decompile(register struct enode *e, int priority) {
-    register char *s;
+void decompile(struct enode *e, int priority) {
+    char *s;
     if (e) {
     int mypriority;
     switch (e->op) {

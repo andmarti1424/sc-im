@@ -2183,7 +2183,7 @@ void readfile_argv(int argc, char ** argv) {
             session->cur_doc = roman; // important: set cur_doc!
 
             // malloc a sheet
-            roman->cur_sh = roman->first_sh = new_sheet(roman, "Sheet A");
+            roman->cur_sh = roman->first_sh = new_sheet(roman, "Sheet1");
 
             // grow sheet tbl
             growtbl(roman->first_sh, GROWNEW, 0, 0);
@@ -2214,17 +2214,17 @@ void load_file(char * file) {
 
     // malloc a clean sheet
     // to make old sc file loading backwards compatible, mark it as is_allocated
-    roman->cur_sh = roman->first_sh = new_sheet(roman, "Sheet 1");
+    roman->cur_sh = roman->first_sh = new_sheet(roman, "Sheet1");
     roman->cur_sh->flags |= is_allocated;
 
     // grow sheet tbl
     growtbl(roman->first_sh, GROWNEW, 0, 0);
 
     // load_tbl may open an sc file or a new sc-im file that can handle sheets.
-    // new_sheet() would reuse Sheet 1 if loading sc-im file.
+    // new_sheet() would reuse Sheet1 if loading sc-im file.
     load_tbl(file);
 
-    // now mark 'Sheet 1' as empty, removing is_allocated mark.
+    // now mark 'Sheet1' as empty, removing is_allocated mark.
     roman->first_sh->flags &= ~is_allocated;
     roman->first_sh->flags |= is_empty;
     return;
@@ -2289,7 +2289,7 @@ int create_empty_wb() {
         session->cur_doc = roman; // important: set cur_doc!
 
         // malloc a sheet
-        roman->cur_sh = roman->first_sh = new_sheet(roman, "Sheet 1");
+        roman->cur_sh = roman->first_sh = new_sheet(roman, "Sheet1");
 
         // grow sheet tbl
         if (! growtbl(roman->first_sh, GROWNEW, 0, 0)) {
@@ -2299,7 +2299,7 @@ int create_empty_wb() {
 
         erasedb(roman->first_sh, 0);
 
-        // mark 'Sheet 1' as empty, removing is_allocated mark.
+        // mark 'Sheet1' as empty, removing is_allocated mark.
         roman->first_sh->flags |= is_empty;
         return 0;
 }

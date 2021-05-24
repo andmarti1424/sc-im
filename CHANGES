@@ -15,16 +15,15 @@ added new colors types SHEET, CURRENT_SHEET and FILENM
 loading xlsx with multiple sheet
 saving xlsx with multiple sheets
 add :renamesheet command
-
+reference cells from different sheets in formulas: ={Sheet2}!A2
 
 For v0.8.3 release
 -------------------
 get rid of --sheet and --filename_with_mode
-calc_mobile_cols/rows invalid read with l1.csv or l2.csv
-reference cells from different sheets in formulas
-reeval in multiple sheets: graph should keep track of the different sheets
-
+calc_mobile_cols/rows invalid read with l1.csv and l2.csv examples
++ reeval in multiple sheets: graph should keep track of the different sheets
 + UNDO should save reference to the sheet where the action took place
+fix circular references in eval/seval (for instance it shows circular when referencing sheet!A2 from current_sheet!A2)
 rearrange file loading and saving functions
 
 + Show range detail in inputwin as A0:C3
