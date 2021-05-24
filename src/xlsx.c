@@ -155,7 +155,7 @@ char * get_xlsx_styles(xmlDocPtr doc_styles, int pos) {
  */
 
 char * get_xlsx_number_format_by_id(xmlDocPtr doc_styles, int id) {
-    if (doc_styles == NULL || !((id >= 165 && id <= 180) || id == 100)) 
+    if (doc_styles == NULL || !((id >= 165 && id <= 180) || id == 100))
         return NULL;
 
     // we go forward up to numFmts section
@@ -375,11 +375,11 @@ void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) 
  */
 
 int open_xlsx(char * fname, char * encoding) {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
+    //struct roman * roman = session->cur_doc;
+    //struct sheet * sh = roman->cur_sh;
     struct zip * za;
     struct zip_file * zf;
-    struct zip_stat sb, sb_strings, sb_styles, sh_strings;
+    struct zip_stat sb_sheet, sb_strings, sb_styles, sh_strings;
     char buf[100];
     int err;
     int len;
@@ -417,7 +417,8 @@ int open_xlsx(char * fname, char * encoding) {
         return -1;
     }
     zip_stat(za, name, ZIP_FL_UNCHANGED, &sb_styles);
-    char * styles = (char *) malloc(sb_styles.size);
+    char * styles = NULL;
+    styles = (char *) malloc(sb_styles.size);
     len = zip_fread(zf, styles, sb_styles.size);
     if (len < 0) {
         sc_error("cannot read file %s.", name);
@@ -427,136 +428,127 @@ int open_xlsx(char * fname, char * encoding) {
     }
     zip_fclose(zf);
 
+    //open xml file with sheet names
+    name = "xl/workbook.xml";
+    zf = zip_fopen(za, name, ZIP_FL_UNCHANGED);
+    if ( zf ) {
+        zip_stat(za, name, ZIP_FL_UNCHANGED, &sh_strings);
+        char * wb_strings = (char *) malloc(sh_strings.size);
+        len = zip_fread(zf, wb_strings, sh_strings.size);
+        if (len < 0) {
+            sc_error("cannot read file %s.", name);
+            if (strings != NULL) free(strings);
+            if (styles != NULL) free(styles);
+            free(wb_strings);
+            return -1;
+        }
+        zip_fclose(zf);
 
-    // find specified sheet
-    if (get_conf_value("sheet") != NULL){
+        // search workbook xml for sheet names
+        xmlDoc * sheet_search = xmlReadMemory(wb_strings, sh_strings.size, "noname.xml", NULL, XML_PARSE_NOBLANKS);
+        xmlNode * cur_node = xmlDocGetRootElement(sheet_search)->xmlChildrenNode;
+        while (cur_node != NULL && strcmp((char *) cur_node->name,"sheets"))
+            cur_node = cur_node->next;
+        cur_node = cur_node->xmlChildrenNode;
 
-        //open xml file with sheet names
-        name = "xl/workbook.xml";
-        char namebuf[30];
-        int found = 0;
-        zf = zip_fopen(za, name, ZIP_FL_UNCHANGED);
+        char * sheet_name = NULL;
+        char * sheet_id = NULL;
+        wchar_t cline [BUFFERSIZE];
+        char sheet_filename [BUFFERSIZE];
+        // here traverse for the sheets
+        while (cur_node != NULL) {
+            sheet_name = (char *) xmlGetProp(cur_node, (xmlChar *) "name");
 
-        if ( zf ) {
-            zip_stat(za, name, ZIP_FL_UNCHANGED, &sh_strings);
-            char * wb_strings = (char *) malloc(sh_strings.size);
-            len = zip_fread(zf, wb_strings, sh_strings.size);
+            swprintf(cline, BUFFERSIZE, L"newsheet \"%s\"", sheet_name);
+            send_to_interp(cline);
+
+            sheet_id = (char *) xmlGetProp(cur_node, (xmlChar *) "sheetId");
+
+            snprintf(sheet_filename, BUFFERSIZE, "xl/worksheets/sheet%s.xml", sheet_id);
+
+            // open the sheet and load it
+            //sheet_filename = name = "xl/worksheets/sheet1.xml";
+            //open each xml sheet file and parse it
+            zf = zip_fopen(za, sheet_filename, ZIP_FL_UNCHANGED);
+            if ( ! zf ) {
+                sc_error("cannot open %s file.", sheet_filename);
+                if (strings != NULL) free(strings);
+                if (styles != NULL) free(styles);
+                return -1;
+            }
+            zip_stat(za, sheet_filename, ZIP_FL_UNCHANGED, &sb_sheet);
+            char * sheet = NULL;
+            sheet = (char *) malloc(sb_sheet.size);
+            len = zip_fread(zf, sheet, sb_sheet.size);
             if (len < 0) {
-                sc_error("cannot read file %s.", name);
-                free(wb_strings);
+                sc_error("cannot read file %s.", sheet_filename);
+                if (strings != NULL) free(strings);
+                if (styles != NULL) free(styles);
+                if (sheet != NULL) free(sheet);
                 return -1;
             }
             zip_fclose(zf);
 
-            // search workbook xml for sheet with the right name
-            xmlDoc * sheet_search = xmlReadMemory(wb_strings, sh_strings.size, "noname.xml", NULL, XML_PARSE_NOBLANKS);
-            xmlNode * cur_node = xmlDocGetRootElement(sheet_search)->xmlChildrenNode;
-            while (cur_node != NULL && strcmp((char *) cur_node->name,"sheets"))
-                cur_node = cur_node->next;
-            cur_node = cur_node->xmlChildrenNode;
+            // XML parse for the sheet file
+            xmlDoc * doc = NULL;
+            xmlDoc * doc_strings = NULL;
+            xmlDoc * doc_styles = NULL;
 
-            char * sheet_name = NULL;
-            while (cur_node != NULL && cur_node->next != NULL && sheet_name == NULL) {
-                sheet_name = (char *) xmlGetProp(cur_node, (xmlChar *) "name");
-                if (strcmp(sheet_name, get_conf_value("sheet"))) {
-                    xmlFree(sheet_name);
-                    sheet_name = NULL;
-                    cur_node = cur_node->next;
-                }
+            // this initialize the library and check potential ABI mismatches
+            // between the version it was compiled for and the actual shared
+            // library used.
+            LIBXML_TEST_VERSION
+
+            // parse the file and get the DOM
+            doc_strings = xmlReadMemory(strings, sb_strings.size, "noname.xml", NULL, XML_PARSE_NOBLANKS);
+            doc_styles = xmlReadMemory(styles, sb_styles.size, "noname.xml", NULL, XML_PARSE_NOBLANKS);
+            doc = xmlReadMemory(sheet, sb_sheet.size, "noname.xml", NULL, XML_PARSE_NOBLANKS);
+
+            if (doc == NULL) {
+                sc_error("error: could not parse file");
+                if (strings != NULL) free(strings);
+                if (styles != NULL) free(styles);
+                if (sheet != NULL) free(sheet);
+                return -1;
             }
-            if (sheet_name != NULL){
-                char * sheet_id = (char *) xmlGetProp(cur_node, (xmlChar *) "sheetId");
-                snprintf(namebuf,30,"xl/worksheets/sheet%s.xml", sheet_id);
-                name = namebuf;
-                found = 1;
-                xmlFree(sheet_id);
-                xmlFree(sheet_name);
-            }
-            xmlFreeDoc(sheet_search);
-            if (wb_strings != NULL) free(wb_strings);
+
+            get_sheet_data(doc, doc_strings, doc_styles);
+
+            // free the document
+            xmlFreeDoc(doc);
+            xmlFreeDoc(doc_strings);
+            xmlFreeDoc(doc_styles);
+
+            // now free and iterate to other sheet
+            xmlFree(sheet_name);
+            sheet_name = NULL;
+            xmlFree(sheet_id);
+            sheet_id = NULL;
+            if (sheet != NULL) free(sheet);
+
+            struct roman * roman = session->cur_doc;
+            struct sheet * sh = roman->cur_sh;
+            auto_fit(0, sh->maxcols, DEFWIDTH);
+            deleterow(sh->currow, 1);
+
+            cur_node = cur_node->next;
         }
-
-        if ( ! found ){
-            // use sheet number if sheet name does not match
-            name  = get_conf_value("sheet");
-            int i = strlen(name);
-            while( --i >= 0 && isdigit(name[i]) > 0 );
-            name = i < 0 ? "sheet":"";
-            snprintf(namebuf,30,"xl/worksheets/%s%s.xml",name,get_conf_value("sheet"));
-            name = namebuf;
-        }
-    } else {
-        // select sheet1 if none specified
-        name = "xl/worksheets/sheet1.xml";
+        xmlFreeDoc(sheet_search);
+        if (wb_strings != NULL) free(wb_strings);
     }
-
-    //open sheet
-    zf = zip_fopen(za, name, ZIP_FL_UNCHANGED);
-    if ( ! zf ) {
-        sc_error("cannot open %s file.", name);
-        if (strings != NULL) free(strings);
-        free(styles);
-        return -1;
-    }
-    zip_stat(za, name, ZIP_FL_UNCHANGED, &sb);
-    char * sheet = (char *) malloc(sb.size);
-    len = zip_fread(zf, sheet, sb.size);
-    if (len < 0) {
-        sc_error("cannot read file %s.", name);
-        if (strings != NULL) free(strings);
-        free(styles);
-        free(sheet);
-        return -1;
-    }
-    zip_fclose(zf);
-
-
-    // XML parse for the sheet file
-    xmlDoc * doc = NULL;
-    xmlDoc * doc_strings = NULL;
-    xmlDoc * doc_styles = NULL;
-
-    // this initialize the library and check potential ABI mismatches
-    // between the version it was compiled for and the actual shared
-    // library used.
-    LIBXML_TEST_VERSION
-
-    // parse the file and get the DOM
-    doc_strings = xmlReadMemory(strings, sb_strings.size, "noname.xml", NULL, XML_PARSE_NOBLANKS);
-    doc_styles = xmlReadMemory(styles, sb_styles.size, "noname.xml", NULL, XML_PARSE_NOBLANKS);
-    doc = xmlReadMemory(sheet, sb.size, "noname.xml", NULL, XML_PARSE_NOBLANKS);
-
-    if (doc == NULL) {
-        sc_error("error: could not parse file");
-        if (strings != NULL) free(strings);
-        free(styles);
-        free(sheet);
-        return -1;
-    }
-
-    get_sheet_data(doc, doc_strings, doc_styles);
-
-    // free the document
-    xmlFreeDoc(doc);
-    xmlFreeDoc(doc_strings);
-    xmlFreeDoc(doc_styles);
 
     // Free the global variables that may have been allocated by the parser
     xmlCleanupParser();
 
-    // free both sheet and strings variables
+    // free both styles and strings variables
     if (strings != NULL) free(strings);
-    free(styles);
-    free(sheet);
+    if (styles != NULL) free(styles);
 
     // close zip file
     if (zip_close(za) == -1) {
         sc_error("cannot close zip archive `%s'", fname);
         return -1;
     }
-
-    auto_fit(0, sh->maxcols, DEFWIDTH);
-    deleterow(sh->currow, 1);
 
     return 0;
 }

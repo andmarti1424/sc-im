@@ -11,21 +11,25 @@ ui optimizations
 added :newsheet, :nextsheet, :prevsheet :delsheet commands
 `gt` and `gT` commands in normal mode are now used for moving between sheets
 added new colors types SHEET, CURRENT_SHEET and FILENM
-file saving with multiple sheets
+.sc file saving with multiple sheets
+loading xlsx with multiple sheet
 
 
 For v0.8.3 release
 -------------------
-loadingfile invalid free when opening csv files
+calc_mobile_cols/rows invalid read with l1.csv or l2.csv
+saving xlsx with multiple sheets
+
 reference cells from different sheets in formulas
-UNDO should save reference to the sheet where the action took place
+
++ UNDO should save reference to the sheet where the action took place
 
 rearrange file loading and saving functions
-+ Show range detail in inputbar
++ Show range detail in inputwin as A0:C3
 + Add GETENT in seval
-+ create @counta, and modify @count to not count strings
 + Reeval of @lastrow @lastcol: check cells that uses @lastrow / @lastcol gets updated everytime it change
-+ mark should consider sheet.
++ mark should consider sheet. We should have mark A in Sheet 1, and mark B on Sheet 2..
++ create @counta, and modify @count to not count strings
 
 
 --

@@ -274,7 +274,7 @@ int main (int argc, char ** argv) {
     /* load file passed as argv to sc-im.
      * if more than one file is passed, consider the last one.
      */
-     load_file(loadingfile);
+    load_file(strlen(loadingfile) ? loadingfile : NULL);
 
     /*
      * check if session->cur_doc is NULL (no file passed as argv).

@@ -555,7 +555,6 @@ void write_fd(FILE * f, struct roman * doc) {
 
                     }
 
-
                     /* if ((*pp)->nrow >= 0) {
                        (void) fprintf(f, "addnote %s ", v_name((*pp)->row, (*pp)->col));
                        (void) fprintf(f, "%s\n", r_name((*pp)->nrow, (*pp)->ncol, (*pp)->nlastrow, (*pp)->nlastcol));
@@ -619,11 +618,12 @@ void write_fd(FILE * f, struct roman * doc) {
 
 
 /**
- * \brief TODO Document write_franges()
+ * \brief write_franges()
+ * \details write freeze ranges to file
  * \param[in] f file pointer
  * \return none
  */
-void write_franges(register FILE *f) {
+void write_franges(FILE *f) {
     if (! freeze_ranges) return;
     if (freeze_ranges->type == 'a') {
         fprintf(f, "freeze %s%d", coltoa(freeze_ranges->tl->col), freeze_ranges->tl->row);
@@ -642,7 +642,7 @@ void write_franges(register FILE *f) {
 
 
 /**
- * \brief TODO Document write_marks()
+ * \brief write_marks()
  * \param[in] f file pointer
  * \return none
  */
@@ -661,14 +661,12 @@ void write_marks(register FILE *f) {
             fprintf(f, "mark %c %s%d\n", i, coltoa(m->col), m->row);
         }
     }
-
     return;
 }
 
 
 /**
- * \brief TODO Document write_cells()
- *
+ * \brief write_cells()
  * \param[in] struct roman * doc
  * \param[in] struct sheet * sh
  * \param[in] r0
@@ -679,7 +677,6 @@ void write_marks(register FILE *f) {
  * \param[in] cn
  * \param[in] dr
  * \param[in[ dc
- *
  * \return none
  */
 void write_cells(FILE * f, struct roman * doc, struct sheet * sh, int r0, int c0, int rn, int cn, int dr, int dc) {
@@ -731,7 +728,7 @@ void write_cells(FILE * f, struct roman * doc, struct sheet * sh, int r0, int c0
                 }
             }
     }
-    // restore modflg
+    // restore modflg just in case
     doc->modflg = mf;
 }
 
@@ -845,7 +842,7 @@ sc_readfile_result readfile(char * fname, int eraseflg) {
         roman->loading = 0;
         return SC_READFILE_SUCCESS;
 
-    // If file is an delimited text file, we import it
+    // If file is a delimited text file, we import it
     } else if (len > 4 && ( ! strcasecmp( & fname[len-4], ".csv") ||
         ! strcasecmp( & fname[len-4], ".tsv") || ! strcasecmp( & fname[len-4], ".tab") ||
         ! strcasecmp( & fname[len-4], ".txt") )){
@@ -913,9 +910,7 @@ sc_readfile_result readfile(char * fname, int eraseflg) {
 
 /**
  * \brief Expand a ~ in path to the user's home directory
- *
  * \param[in] path
- *
  * \return path
  */
 char * findhome(char * path) {
@@ -957,13 +952,10 @@ char * findhome(char * path) {
 
 /**
  * \brief Open the input or output file
- *
  * \details Open the input or output file, setting up a pipe if needed.
- *
  * \param[in] fname file name
  * \param[in] rpid
  * \param[in] rfd
- *
  * \return file pointer
  */
 FILE * openfile(char *fname, int *rpid, int *rfd) {
@@ -1029,11 +1021,9 @@ FILE * openfile(char *fname, int *rpid, int *rfd) {
 /**
  * \brief Close a file opened by openfile()
  * \details Close a file opened by openfile(). If process, wait for return
- *
  * \param[in] f file pointer
  * \param[in] pid
  * \param[in] rfd
- *
  * \return none
  */
 void closefile(FILE *f, int pid, int rfd) {
@@ -2214,7 +2204,7 @@ void readfile_argv(int argc, char ** argv) {
 void load_file(char * file) {
     if (file == NULL || file[0] == '\0') return;
     struct roman * roman = calloc(1, sizeof(struct roman));
-    roman->name = ! strlen(file) ? NULL : file;
+    roman->name = ! strlen(file) ? NULL : strdup(file);
     roman->first_sh = NULL;
     roman->cur_sh = NULL;
 
