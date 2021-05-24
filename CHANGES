@@ -20,10 +20,12 @@ removed --sheet and --filename_with_mode configuration variables
 
 For v0.8.3 release
 -------------------
-calc_mobile_cols/rows invalid read with l1.csv and l2.csv examples
-+ reeval in multiple sheets: graph should keep track of the different sheets
++ reeval in multiple sheets: graph should keep track of the different sheets -> GraphIsReachable()
++ fix circular references in eval/seval (for instance it shows circular when
+  referencing sheet!A2 from current_sheet!A2) -> would be done doing the previous item.
 + UNDO should save reference to the sheet where the action took place
-fix circular references in eval/seval (for instance it shows circular when referencing sheet!A2 from current_sheet!A2)
+
+calc_mobile_cols/rows invalid read with l1.csv and l2.csv examples
 rearrange file loading and saving functions
 
 + Show range detail in inputwin as A0:C3

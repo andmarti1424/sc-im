@@ -42,42 +42,10 @@
  * \brief Header file for interp.c
  */
 
-#include <time.h>
-double finfunc(int fun, double v1, double v2, double v3);
-char * dostindex(int minr, int minc, int maxr, int maxc, struct enode * val);
-double doindex(int minr, int minc, int maxr, int maxc, struct enode * val);
-double dolookup(struct enode * val, int minr, int minc, int maxr, int maxc, int offset, int vflag);
-double docount(int minr, int minc, int maxr, int maxc, struct enode * e);
-double dosum(int minr, int minc, int maxr, int maxc, struct enode * e);
-double doprod(int minr, int minc, int maxr, int maxc, struct enode * e);
-double doavg(int minr, int minc, int maxr, int maxc, struct enode * e);
-double dostddev(int minr, int minc, int maxr, int maxc, struct enode * e);
-double domax(int minr, int minc, int maxr, int maxc, struct enode * e);
-double domin(int minr, int minc, int maxr, int maxc, struct enode * e);
-double dodts(int e1, int e2, int e3);
-double dotts(int hr, int min, int sec);
-double dotime(int which, double when);
-double doston(char * s);
-int    doslen(char * s);
-double doeqs(char * s1, char * s2);
 struct ent * getent(char * colstr, double rowdoub, int alloc);
-struct ent * dogetent(int r, int c);
-double donval(char * colstr, double rowdoub);
-double dolmax(struct ent * e, struct enode * ep);
-double dolmin(struct ent * e, struct enode * ep);
-//double eval(struct enode *e);
 double eval(struct ent * ent, struct enode * e);
 double fn1_eval(double (* fn)(), double arg);
 double fn2_eval(double (* fn)(), double arg1, double arg2);
-char * docat(char * s1, char * s2);
-char * dodate(time_t tloc, char * fmtstr);
-char * dofmt(char * fmtstr, double v);
-char * doext(struct enode * se);
-char * doext(struct enode * se);
-char * dosval(char * colstr, double rowdoub);
-char * dosubstr(char * s, int v1, int v2);
-char * docase(int acase, char * s);
-char * docapital(char * s);
 char * seval(struct ent * ent, struct enode * se);
 void setiterations(int i);
 void EvalAll();
@@ -122,9 +90,6 @@ void editv(struct sheet * sh, int row, int col);
 void editexp(struct sheet * sh, int row, int col);
 void edits(struct sheet * sh, int row, int col, int saveinfile);
 int dateformat(struct ent * v1, struct ent * v2, char * fmt);
-double rint(double d);
 
 void EvalAllVertexs();
 void EvalJustOneVertex(struct ent * p, int rebuild_graph);
-double doevaluate(char * s);
-char * dosevaluate(char * s);

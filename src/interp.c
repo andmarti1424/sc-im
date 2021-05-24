@@ -2,10 +2,10 @@
  * Copyright (c) 2013-2021, Andrés Martinelli <andmarti@gmail.com>             *
  * All rights reserved.                                                        *
  *                                                                             *
- * This file is a part of SC-IM                                                *
+ * This file is a part of sc-im                                                *
  *                                                                             *
- * SC-IM is a spreadsheet program that is based on SC. The original authors    *
- * of SC are James Gosling and Mark Weiser, and mods were later added by       *
+ * sc-im is a spreadsheet program that is based on sc. The original authors    *
+ * of sc are James Gosling and Mark Weiser, and mods were later added by       *
  * Chuck Martin.                                                               *
  *                                                                             *
  * Redistribution and use in source and binary forms, with or without          *
@@ -36,21 +36,20 @@
  *******************************************************************************/
 
 /**
- * \file intrep.c
+ * \file interp.c
  * \author Andrés Martinelli <andmarti@gmail.com>
- * \date 2021-04-28
- * \brief TODO Write a tbrief file description.
+ * \date 24/05/2021
+ * \brief source file that implements the eval seval functions
+ * Based on SC
  *
  * \details Expression interpreter and assorted support routines
- * Based on SC
  * \details Original by James Gosling, September 1982
  * \details Modified by Mark Weiser and Bruce Israel, University of Maryland
  * \details More mods Robert Bond, 12/86
- * \details More mods by Alan Silverstein, 3-4/88, see list of changes.
+ * \details More mods by Alan Silverstein, 3-4/88.
  */
 
 #include <sys/types.h>
-#include <math.h>
 #include <signal.h>
 #include <setjmp.h>
 #include <ctype.h>
@@ -60,7 +59,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <regex.h>
-
 #ifdef IEEE_MATH
 #include <ieeefp.h>
 #endif
@@ -74,19 +72,17 @@
 #include "range.h"
 #include "xmalloc.h" // for scxfree
 #include "lex.h"     // for atocol
+#include "function.h"
 #include "interp.h"
 #include "utils/string.h"
 #include "trigger.h"
-
 #ifdef XLUA
 #include "lua.h"
 #endif
-
 #ifdef UNDO
 #include "undo.h"
 #endif
-
-void exit_app();
+#include "dep_graph.h"
 
 /* g_type can be: */
 #define G_NONE 0          /* Starting value - must be 0 */
@@ -96,24 +92,13 @@ void exit_app();
 #define G_XSTR 4
 #define G_CELL 5
 
-/* Use this structure to save the last 'g' command */
-struct go_save gs = { .g_type = G_NONE } ;
-
-#define ISVALID(s,r,c)    ((r)>=0 && (r) < s->maxrows && (c) >=0 && (c) < s->maxcols)
-
-int exprerr;              /* Set by eval() and seval() if expression errors */
-double prescale = 1.0;    /* Prescale for constants in let() */
-//int loading = 0;          /* Set when readfile() is active */
-int gmyrow = -1, gmycol = -1;       /* globals used to implement @myrow, @mycol cmds */
-int rowoffset = 0, coloffset = 0;    /* row & col offsets for range functions */
-jmp_buf fpe_save;
-
+extern int find_range(char * name, int len, struct ent * lmatch, struct ent * rmatch, struct range ** rng);
 extern bool decimal;      /* Set if there was a decimal point in the number */
 extern struct session * session;
+extern graphADT graph;
+extern WINDOW * input_win;
 
-/* a linked list of free [struct enodes]'s, uses .e.o.left as the pointer */
-
-double dolookup      (struct enode * val, int minr, int minc, int maxr, int maxc, int offr, int offc);
+void exit_app();
 double fn1_eval      (double (* fn)(), double arg);
 double fn2_eval      (double (* fn)(), double arg1, double arg2);
 int    constant      (struct enode * e);
@@ -126,860 +111,17 @@ void   range_arg     (char * s, struct enode * e);
 void   three_arg     (char * s, struct enode * e);
 void   two_arg       (char * s, struct enode * e);
 void   two_arg_index (char * s, struct enode * e);
-double rint          (double d);
+
+int exprerr;              /* Set by eval() and seval() if expression errors */
+double prescale = 1.0;    /* Prescale for constants in let() */
+int gmyrow = -1, gmycol = -1;       /* globals used to implement @myrow, @mycol cmds */
+int rowoffset = 0, coloffset = 0;    /* row & col offsets for range functions */
+jmp_buf fpe_save;
 int    cellerror = CELLOK;    /**< is there an error in this cell */
 
-#ifndef M_PI
-    #define M_PI (double)3.14159265358979323846
-#endif
+struct go_save gs = { .g_type = G_NONE }; /* Use this structure to save the last 'g' command */
 
-#define dtr(x) ((x)*(M_PI/(double)180.0))
-#define rtd(x) ((x)*(180.0/(double)M_PI))
-
-extern int find_range(char * name, int len, struct ent * lmatch, struct ent * rmatch, struct range ** rng);
-
-#include "dep_graph.h"
-extern graphADT graph;
-
-extern WINDOW * input_win;
-
-
-
-/**
- * \brief finfunc()
- *
- * \param[in] fun
- * \param[in] v1
- * \param[in] v2
- * \param[in] v3
- *
- * \return double
- */
-double finfunc(int fun, double v1, double v2, double v3) {
-    double answer,p;
-
-    p = fn2_eval(pow, 1 + v2, v3);
-
-    switch (fun) {
-        case PV:
-            if (v2)
-                answer = v1 * (1 - 1/p) / v2;
-            else {
-                cellerror = CELLERROR;
-                answer = (double)0;
-            }
-             break;
-        case FV:
-            if (v2)
-                answer = v1 * (p - 1) / v2;
-            else {
-                cellerror = CELLERROR;
-                answer = (double)0;
-            }
-            break;
-        case PMT:
-            /* CHECK IF ~= 1 - 1/1 */
-            if (p && p != (double)1)
-                answer = v1 * v2 / (1 - 1/p);
-            else {
-                cellerror = CELLERROR;
-                answer = (double)0;
-            }
-            break;
-        default:
-            sc_error("Unknown function in finfunc");
-            cellerror = CELLERROR;
-            return ((double)0);
-        }
-        return (answer);
-}
-
-/**
- * \brief dostindex()
- *
- * \param[in] minr
- * \param[in] minc
- * \param[in] maxr
- * \param[in] maxc
- * \param[in] val
- *
- * \return char *
- */
-char * dostindex(int minr, int minc, int maxr, int maxc, struct enode * val) {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
-    int r, c;
-    struct ent * p;
-    char * pr;
-
-    p = (struct ent *) 0;
-    if (minr == maxr) {            /* look along the row */
-        r = minr;
-        c = minc + (int) eval(NULL, val) - 1;
-    } else if (minc == maxc) {        /* look down the column */
-        r = minr + (int) eval(NULL, val) - 1;
-        c = minc;
-    } else {
-        r = minr + (int) eval(NULL, val->e.o.left) - 1;
-        c = minc + (int) eval(NULL, val->e.o.right) - 1;
-    }
-    if (c <= maxc && c >=minc && r <= maxr && r >=minr)
-        p = *ATBL(sh, sh->tbl, r, c);
-
-    if (p && p->label) {
-        pr = scxmalloc((size_t) (strlen(p->label) + 1));
-        (void) strcpy(pr, p->label);
-        if (p->cellerror)
-            cellerror = CELLINVALID;
-        return (pr);
-    } else
-        return ((char *) 0);
-}
-
-
-/**
- * \brief doascii()
- * \param[in] s
- * \return double
- */
-double doascii(char * s) {
-    double v = 0.;
-    int i ;
-    if ( !s ) return ((double) 0);
-
-    for (i = 0; s[i] != '\0' ; v = v*256 + (unsigned char)(s[i++]) ) ;
-    scxfree(s);
-    return(v);
-}
-
-
-/**
- * \brief doindex()
- *
- * \param[in] minr
- * \param[in] minc
- * \param[in] maxr
- * \param[in] maxc
- * \param[in] val
- *
- * \return double
- */
-double doindex(int minr, int minc, int maxr, int maxc, struct enode * val) {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
-    int r, c;
-    struct ent * p;
-
-    if (val->op == ',') {        /* index by both row and column */
-        r = minr + (int) eval(NULL, val->e.o.left) - 1;
-        c = minc + (int) eval(NULL, val->e.o.right) - 1;
-    } else if (minr == maxr) {        /* look along the row */
-        r = minr;
-        c = minc + (int) eval(NULL, val) - 1;
-    } else if (minc == maxc) {        /* look down the column */
-        r = minr + (int) eval(NULL, val) - 1;
-        c = minc;
-    } else {
-        sc_error("Improper indexing operation");
-        return (double) 0;
-    }
-
-    if (c <= maxc && c >=minc && r <= maxr && r >=minr &&
-        (p = *ATBL(sh, sh->tbl, r, c)) && p->flags & is_valid) {
-        if (p->cellerror)
-            cellerror = CELLINVALID;
-        return p->v;
-    } else
-        return (double) 0;
-}
-
-/**
- * \brief dolookup()
- *
- * \param[in] val
- * \param[in] minr
- * \param[in] minc
- * \param[in] maxr
- * \param[in] maxc
- * \param[in] offset
- * \param[in] vflag
- *
- * \return double
- */
-double dolookup(struct enode * val, int minr, int minc, int maxr, int maxc, int offset, int vflag) {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
-    double v, ret = (double) 0;
-    int r, c;
-    struct ent * p = (struct ent *) 0;
-    int incr, incc, fndr, fndc;
-    char * s;
-
-    incr = vflag; incc = 1 - vflag;
-    if (etype(val) == NUM) {
-        cellerror = CELLOK;
-        v = eval(NULL, val);
-        for (r = minr, c = minc; r <= maxr && c <= maxc; r+=incr, c+=incc) {
-            if ((p = *ATBL(sh, sh->tbl, r, c)) && p->flags & is_valid) {
-                if (p->v <= v) {
-                    fndr = incc ? (minr + offset) : r;
-                    fndc = incr ? (minc + offset) : c;
-                    if (ISVALID(sh, fndr, fndc))
-                        if (p == NULL) // three lines added
-                            cellerror = CELLINVALID;
-                        else // useful when the lookup ends up in a cell with no value
-                            p = *ATBL(sh, sh->tbl, fndr, fndc);
-                    else {
-                        sc_error(" range specified to @[hv]lookup");
-                        cellerror = CELLERROR;
-                    }
-                    if (p && p->flags & is_valid) {
-                        if (p->cellerror)
-                            cellerror = CELLINVALID;
-                        ret = p->v;
-                    }
-                } else break;
-            }
-        }
-    } else {
-        cellerror = CELLOK;
-        s = seval(NULL, val);
-        for (r = minr, c = minc; r <= maxr && c <= maxc; r+=incr, c+=incc) {
-            if ((p = *ATBL(sh, sh->tbl, r, c)) && p->label) {
-                if (s && strcmp(p->label,s) == 0) {
-                    fndr = incc ? (minr + offset) : r;
-                    fndc = incr ? (minc + offset) : c;
-                    if (ISVALID(sh, fndr,fndc)) {
-                        p = *ATBL(sh, sh->tbl, fndr, fndc);
-                        if (p->cellerror)
-                            cellerror = CELLINVALID;
-                    } else {
-                        sc_error(" range specified to @[hv]lookup");
-                        cellerror = CELLERROR;
-                    }
-                    break;
-                }
-            }
-        }
-        if (p && p->flags & is_valid)
-            ret = p->v;
-        if (s != NULL) scxfree(s);
-    }
-    return ret;
-}
-
-
-/**
- * \brief docount()
- *
- * \param[in] minr
- * \param[in] minc
- * \param[in] maxr
- * \param[in] maxc
- * \param[in] e
- *
- * \return double
- */
-double docount(int minr, int minc, int maxr, int maxc, struct enode * e) {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
-    int v;
-    int r, c;
-    int cellerr = CELLOK;
-    struct ent *p;
-
-    v = 0;
-    for (r = minr; r <= maxr; r++)
-        for (c = minc; c <= maxc; c++) {
-            if (e) {
-                rowoffset = r - minr;
-                coloffset = c - minc;
-            }
-            if (!e || eval(NULL, e))
-                // the following changed for #430. docount should also count cells with strings. not just numbers
-                // TODO: create @counta to count both, and leave @count for just numbers
-                if ((p = *ATBL(sh, sh->tbl, r, c)) && (p->flags & is_valid || p->label) ) {
-                    if (p->cellerror) cellerr = CELLINVALID;
-                    v++;
-                }
-        }
-    cellerror = cellerr;
-    rowoffset = coloffset = 0;
-    return v;
-}
-
-
-/**
- * \brief dosum()
- * \param[in] minr
- * \param[in] minc
- * \param[in] maxr
- * \param[in] maxc
- * \param[in] e
- * \return double
- */
-double dosum(int minr, int minc, int maxr, int maxc, struct enode * e) {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
-    double v;
-    int r, c;
-    int cellerr = CELLOK;
-    struct ent * p;
-
-    v = (double)0;
-    for (r = minr; r <= maxr; r++)
-        for (c = minc; c <= maxc; c++) {
-            if (e) {
-                rowoffset = r - minr;
-                coloffset = c - minc;
-            }
-            if ( !e || eval(NULL, e))
-                if ((p = *ATBL(sh, sh->tbl, r, c)) && p->flags & is_valid) {
-                    if (p->cellerror)
-                        cellerr = CELLINVALID;
-                    v += p->v;
-                }
-        }
-    cellerror = cellerr;
-    rowoffset = coloffset = 0;
-    return v;
-}
-
-/**
- * \brief doprod()
- *
- * \param[in] minr
- * \param[in] minc
- * \param[in] maxr
- * \param[in] maxc
- * \param[in] e
- *
- * \return double
- */
-double doprod(int minr, int minc, int maxr, int maxc, struct enode * e) {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
-    double v;
-    int r, c;
-    int cellerr = CELLOK;
-    struct ent * p;
-
-    v = 1;
-    for (r = minr; r <= maxr; r++)
-        for (c = minc; c <= maxc; c++) {
-            if (e) {
-                rowoffset = r - minr;
-                coloffset = c - minc;
-            }
-            if ( !e || eval(NULL, e))
-                if ((p = *ATBL(sh, sh->tbl, r, c)) && p->flags & is_valid) {
-                    if (p->cellerror) cellerr = CELLINVALID;
-                        v *= p->v;
-                }
-        }
-    cellerror = cellerr;
-    rowoffset = coloffset = 0;
-    return v;
-}
-
-
-/**
- * \brief doavg()
- *
- * \param[in] minr
- * \param[in] minc
- * \param[in] maxr
- * \param[in] maxc
- * \param[in] e
- *
- * \return double
- */
-double doavg(int minr, int minc, int maxr, int maxc, struct enode * e) {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
-    double v;
-    int r, c;
-    int count;
-    int cellerr = CELLOK;
-    struct ent * p;
-
-    v = (double) 0;
-    count = 0;
-    for (r = minr; r <= maxr; r++)
-        for (c = minc; c <= maxc; c++) {
-            if (e) {
-                rowoffset = r - minr;
-                coloffset = c - minc;
-            }
-            if (!e || eval(NULL, e))
-                if ((p = *ATBL(sh, sh->tbl, r, c)) && p->flags & is_valid) {
-                    if (p->cellerror) cellerr = CELLINVALID;
-                    v += p->v;
-                    count++;
-                }
-        }
-    cellerror = cellerr;
-    rowoffset = coloffset = 0;
-
-    if (count == 0) return ((double)0);
-
-    return (v / (double)count);
-}
-
-/**
- * \brief dostddev()
- *
- * \param[in] minr
- * \param[in] minc
- * \param[in] maxr
- * \param[in] maxc
- * \param[in] e
- *
- * \return double
- */
-double dostddev(int minr, int minc, int maxr, int maxc, struct enode * e) {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
-    double lp, rp, v, nd;
-    int r, c;
-    int n;
-    int cellerr = CELLOK;
-    struct ent * p;
-
-    n = 0;
-    lp = 0;
-    rp = 0;
-    for (r = minr; r <= maxr; r++)
-        for (c = minc; c <= maxc; c++) {
-            if (e) {
-                rowoffset = r - minr;
-                coloffset = c - minc;
-            }
-            if (!e || eval(NULL, e))
-                if ((p = *ATBL(sh, sh->tbl, r, c)) && p->flags & is_valid) {
-                    if (p->cellerror) cellerr = CELLINVALID;
-                    v = p->v;
-                    lp += v*v;
-                    rp += v;
-                    n++;
-                }
-        }
-    cellerror = cellerr;
-    rowoffset = coloffset = 0;
-
-    if ((n == 0) || (n == 1)) return ((double)0);
-    nd = (double) n;
-    return ( sqrt((nd*lp-rp*rp) / (nd*(nd-1))) );
-}
-
-/**
- * \brief domax()
- *
- * \param[in] minr
- * \param[in] minc
- * \param[in] maxr
- * \param[in] maxc
- * \param[in] e
- *
- * \return double
- */
-double domax(int minr, int minc, int maxr, int maxc, struct enode * e) {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
-    double v = (double) 0;
-    int r, c;
-    int count;
-    int cellerr = CELLOK;
-    struct ent * p;
-
-    count = 0;
-    for (r = minr; r <= maxr; r++)
-        for (c = minc; c <= maxc; c++) {
-            if (e) {
-                rowoffset = r - minr;
-                coloffset = c - minc;
-            }
-            if (!e || eval(NULL, e))
-                if ((p = *ATBL(sh, sh->tbl, r, c)) && p->flags & is_valid) {
-                    if (p->cellerror) cellerr = CELLINVALID;
-
-                    if (! count) {
-                        v = p->v;
-                        count++;
-                    } else if (p->v > v)
-                        v = p->v;
-                }
-        }
-    cellerror = cellerr;
-    rowoffset = coloffset = 0;
-
-    if (count == 0) return ((double)0);
-
-    return (v);
-}
-
-
-/**
- * \brief domin()
- *
- * \param[in] minr
- * \param[in] minc
- * \param[in] maxr
- * \param[in] maxc
- * \param[in] e
- *
- * \return double
- */
-double domin(int minr, int minc, int maxr, int maxc, struct enode * e) {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
-    double v = (double)0;
-    int r, c;
-    int count;
-    int cellerr = CELLOK;
-    struct ent * p;
-
-    count = 0;
-    for (r = minr; r <= maxr; r++)
-        for (c = minc; c <= maxc; c++) {
-            if (e) {
-                rowoffset = r - minr;
-                coloffset = c - minc;
-            }
-            if (!e || eval(NULL, e))
-                if ((p = *ATBL(sh, sh->tbl, r, c)) && p->flags & is_valid) {
-                    if (p->cellerror) cellerr = CELLINVALID;
-                    if (! count) {
-                        v = p->v;
-                        count++;
-                    } else if (p->v < v)
-                        v = p->v;
-                }
-        }
-    cellerror = cellerr;
-    rowoffset = coloffset = 0;
-
-    if (count == 0) return ((double) 0);
-
-    return (v);
-}
-
-
-int mdays[12]={ 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
-
-
-/**
- * \brief dodts()
- * \param[in] e1
- * \param[in] e2
- * \param[in] e3
- * \return double
- */
-double dodts(int e1, int e2, int e3) {
-    int yr, mo, day;
-    time_t secs;
-    struct tm t;
-
-    if (e2 > 12 || e3 > 31) {
-        mo  = e1;
-        day = e2;
-        yr  = e3;
-    } else {
-        yr  = e1;
-        mo  = e2;
-        day = e3;
-    }
-    mdays[1] = 28 + (yr % 4 == 0) - (yr % 100 == 0) + (yr % 400 == 0);
-
-    t.tm_hour = t.tm_min = t.tm_sec = 0;
-    t.tm_mon = --mo;
-    t.tm_mday = day;
-    t.tm_year = yr -= 1900;
-    t.tm_isdst = -1;
-
-    if (mo < 0 || mo > 11 || day < 1 || day > mdays[mo] || (secs = mktime(&t)) == -1) {
-        sc_error("@dts: invalid argument or date out of range");
-        cellerror = CELLERROR;
-        return (0.0);
-    }
-
-    return ((double) secs);
-}
-
-
-/**
- * \brief dotts()
- * \param[in] hr
- * \param[in] min
- * \param[in] sec
- * \return double
- */
-double dotts(int hr, int min, int sec) {
-    if (hr < 0 || hr > 23 || min < 0 || min > 59 || sec < 0 || sec > 59) {
-        sc_error ("@tts: Invalid argument");
-        cellerror = CELLERROR;
-        return ((double) 0);
-    }
-    return ((double) (sec + min * 60 + hr * 3600));
-}
-
-
-/**
- * \brief dorow()
- * \param[in] ep
- * \return double
- */
-double dorow(struct enode * ep) {
-    return (double) ep->e.v.vp->row;
-}
-
-
-/**
- * \brief docol()
- *
- * \param[in] ep
- *
- * \return double
- */
-double docol(struct enode * ep) {
-    return (double) ep->e.v.vp->col;
-}
-
-
-/**
- * \brief dotime()
- *
- * \param[in] which
- * \param[in] when
- *
- * \return double
- */
-double dotime(int which, double when) {
-    static time_t t_cache;
-    static struct tm tm_cache;
-    struct tm *tp;
-    time_t tloc;
-
-    if (which == NOW)
-        return (double) time(NULL);
-
-    tloc = (time_t)when;
-
-    if (tloc != t_cache) {
-        tp = localtime(&tloc);
-        tm_cache = *tp;
-        tm_cache.tm_mon += 1;
-        tm_cache.tm_year += 1900;
-        t_cache = tloc;
-    }
-
-    switch (which) {
-        case HOUR:     return ((double)(tm_cache.tm_hour));
-        case MINUTE:   return ((double)(tm_cache.tm_min));
-        case SECOND:   return ((double)(tm_cache.tm_sec));
-        case MONTH:    return ((double)(tm_cache.tm_mon));
-        case DAY:      return ((double)(tm_cache.tm_mday));
-        case YEAR:     return ((double)(tm_cache.tm_year));
-    }
-    /* Safety net */
-    cellerror = CELLERROR;
-    return ((double)0);
-}
-
-
-/**
- * \brief doston()
- * \param[in] s
- * \return double
- */
-double doston(char * s) {
-    double v;
-
-    if ( !s ) return ((double)0);
-
-    v = strtod(s, NULL);
-    scxfree(s);
-    return(v);
-}
-
-
-/**
- * \brief doevaluate(): take a char * with a formula and eval it
- * \param[in] s
- * \return double
- */
-double doevaluate(char * s) {
-    if ( !s) return ((double)0);
-    wchar_t cline [BUFFERSIZE];
-    swprintf(cline, BUFFERSIZE, L"eval %s", s);
-    send_to_interp(cline);
-    double d = eval_result;
-    scxfree(s);
-    return (double) d;
-}
-
-
-/**
- * \brief doslen()
- * \param[in] s
- * \return int
- */
-int doslen(char * s) {
-    if (!s) return 0;
-
-    //int i = strlen(s);
-    int i = 0;
-
-    wchar_t widestring[BUFFERSIZE] = { L'\0' };
-    const char * mbsptr = s;
-    size_t result = mbsrtowcs(widestring, &mbsptr, BUFFERSIZE, NULL);
-    if ( result != (size_t) -1 ) i = wcslen(widestring);
-    scxfree(s);
-    return i;
-}
-
-
-/**
- * \brief doeqs()
- *
- * \param[in] s1
- * \param[in] s2
- *
- * \return double
- */
-double doeqs(char * s1, char * s2) {
-    double v;
-
-    if ( !s1 && !s2 ) return ((double)1.0);
-
-    if ( !s1 || !s2 )
-        v = 0.0;
-    else if (strcmp(s1, s2) == 0)
-        v = 1.0;
-    else
-        v = 0.0;
-
-    if (s1) scxfree(s1);
-
-    if (s2) scxfree(s2);
-
-    return(v);
-}
-
-
-/**
- * \brief getent()
- *
- * \details Given a string representing a column name and a value which
- * is a row number, return a pointer to the selected cell's entry.
- * if alloc == 0 and no cell is alloc, return NULL.
- * Use only the integer part of the column number. Always
- * free the string
- *
- * \param[in] colstr
- * \param[in] rwodoub
- *
- * \return struct ent *
- */
-struct ent * getent(char *colstr, double rowdoub, int alloc) {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
-    int collen;                         /* length of string */
-    int row, col;                       /* integer values   */
-    struct ent *p = (struct ent *) 0;   /* selected entry   */
-
-    if (!colstr) {
-        cellerror = CELLERROR;
-        return ((struct ent *) 0);
-    }
-    collen = strlen(colstr);
-    col = atocol(colstr, collen);
-    row = (int) floor(rowdoub);
-
-    if (row >= 0
-        && (row < sh->maxrows)                      /* in range */
-        && (collen <= 2)                        /* not too long */
-        && (col >= 0)
-        && (col < sh->maxcols)) {                   /* in range */
-            if (alloc) p = lookat(sh, row, col);
-            else p = *ATBL(sh, sh->tbl, row, col);
-            if ((p != NULL) && p->cellerror) cellerror = CELLINVALID;
-    }
-    scxfree(colstr);
-    return (p);
-}
-
-
-/**
- * \brief donval()
- *
- * \details Given a string representing a column name and a value which is a
- * column number, return the selected cell's numeric value, if any.
- *
- * \param[in] colstr
- * \param[in] rowdoub
- *
- * \return double
- */
-double donval(char * colstr, double rowdoub) {
-    struct ent * ep;
-    return (((ep = getent(colstr, rowdoub, 0)) && ((ep->flags) & is_valid)) ? (ep->v) : (double)0);
-}
-
-
-/**
- * \brief dolmax()
- *
- * \details The list routines (e.g. dolmax) are called with an LMAX
- * enode. The left pointer is a chain of ELIST nodes, the right
- * pointer is a value.
- *
- * \param[in] e
- * \param[in] ep
- *
- * \return double
- */
-double dolmax(struct ent * e, struct enode * ep) {
-    int count = 0;
-    double maxval = 0; /* Assignment to shut up lint */
-    struct enode * p;
-    double v;
-
-    cellerror = CELLOK;
-    for (p = ep; p; p = p->e.o.left) {
-        v = eval(e, p->e.o.right);
-        if ( !count || v > maxval) {
-            maxval = v;
-            count++;
-        }
-    }
-    if (count) return maxval;
-    else return (double)0;
-}
-
-/**
- * \brief dolmin()
- * \param[in] e
- * \param[in] ep
- * \return double
- */
-double dolmin(struct ent * e, struct enode * ep) {
-    int count = 0;
-    double minval = 0; /* Assignment to shut up lint */
-    struct enode * p;
-    double v;
-
-    cellerror = CELLOK;
-    for (p = ep; p; p = p->e.o.left) {
-        v = eval(e, p->e.o.right);
-        if ( !count || v < minval) {
-            minval = v;
-            count++;
-        }
-    }
-    if (count) return minval;
-    else return (double)0;
-}
+/***********************************************************************************************/
 
 /**
  * \brief eval()
@@ -991,10 +133,10 @@ double eval(struct ent * ent, struct enode * e) {
     struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
 
-//    //if (cellerror == CELLERROR || (ent && ent->cellerror == CELLERROR)) {
-//    if (cellerror == CELLERROR) {
-//        return (double) 0;
-//    }
+//  if (cellerror == CELLERROR || (ent && ent->cellerror == CELLERROR)) {
+//  if (cellerror == CELLERROR) {
+//      return (double) 0;
+//  }
     if (e == (struct enode *) 0) {
         cellerror = CELLINVALID;
         return (double) 0;
@@ -1099,20 +241,23 @@ double eval(struct ent * ent, struct enode * e) {
 
     case O_VAR:    {
             struct ent * vp = e->e.v.vp;
+            struct sheet * sh_vp = e->e.v.sheet;
+            if (sh_vp == NULL) sh_vp = sh;
             //sc_debug("var %d %d", vp->row, vp->col);
-            if (vp && ent && vp->row == ent->row && vp->col == ent->col && !(vp->flags & is_deleted) ) {
+            //if (vp && ent && vp->row == ent->row && vp->col == ent->col && !(vp->flags & is_deleted) ) {
+            if (vp && ent && vp == ent && !(vp->flags & is_deleted) ) {
                 sc_error("Circular reference in eval (cell %s%d)", coltoa(vp->col), vp->row);
                 //ERR propagates. comment to make it not to.
                 cellerror = CELLERROR;
 
                 //ent->cellerror = CELLERROR;
-                GraphAddEdge( getVertex(graph, lookat(sh, ent->row, ent->col), 1), getVertex(graph, lookat(sh, vp->row, vp->col), 1) ) ;
+                GraphAddEdge( getVertex(graph, lookat(sh, ent->row, ent->col), 1), getVertex(graph, lookat(sh_vp, vp->row, vp->col), 1) ) ;
                 return (double) 0;
             }
             if (vp && vp->cellerror == CELLERROR && !(vp->flags & is_deleted)) {
                 // here we store the dependences in a graph
                 if (ent && vp) GraphAddEdge( getVertex(graph, lookat(sh, ent->row, ent->col), 1),
-                                             getVertex(graph, lookat(sh, vp->row, vp->col), 1) ) ;
+                                             getVertex(graph, lookat(sh_vp, vp->row, vp->col), 1) ) ;
 
                 //does not change reference to @err in expression
                 //uncomment to do so
@@ -1128,7 +273,7 @@ double eval(struct ent * ent, struct enode * e) {
                 row = e->e.v.vf & FIX_ROW ? vp->row : vp->row + rowoffset;
                 col = e->e.v.vf & FIX_COL ? vp->col : vp->col + coloffset;
                 checkbounds(sh, &row, &col);
-                vp = *ATBL(sh, sh->tbl, row, col);
+                vp = *ATBL(sh_vp, sh_vp->tbl, row, col);
             }
 
 
@@ -1149,7 +294,7 @@ double eval(struct ent * ent, struct enode * e) {
             // here we store the dependences in a graph
             if (ent && vp) {
                 vertexT * v_ent = getVertex(graph, lookat(sh, ent->row, ent->col), 0);
-                vertexT * v_vp = getVertex(graph, lookat(sh, vp->row, vp->col), 0);
+                vertexT * v_vp = getVertex(graph, lookat(sh_vp, vp->row, vp->col), 0);
                 if (v_ent != NULL && v_vp != NULL && GraphIsReachable(v_ent, v_vp, 1)) {
                     sc_error("Circular reference in eval (cell %s%d)", coltoa(vp->col), vp->row);
                     e->op = ERR_;
@@ -1158,7 +303,7 @@ double eval(struct ent * ent, struct enode * e) {
                     cellerror = CELLERROR;
                     return (double) 0;
                 }
-                GraphAddEdge( getVertex(graph, lookat(sh, ent->row, ent->col), 1), getVertex(graph, lookat(sh, vp->row, vp->col), 1) ) ;
+                GraphAddEdge( getVertex(graph, lookat(sh, ent->row, ent->col), 1), getVertex(graph, lookat(sh_vp, vp->row, vp->col), 1) ) ;
             }
 
             if (vp->cellerror) {
@@ -1192,9 +337,8 @@ double eval(struct ent * ent, struct enode * e) {
         if (minr>maxr) r = maxr, maxr = minr, minr = r;
         if (minc>maxc) c = maxc, maxc = minc, minc = c;
 
-        for (row=minr; row <= maxr; row++) {
+        for (row=minr; ent != NULL && row <= maxr; row++) {
             for (col=minc; col <= maxc; col++) {
-                if (ent == NULL) continue;
                 if (ent->row == row && ent->col == col) {
                     sc_error("Circular reference in eval (cell %s%d)", coltoa(col), row);
                     e->op = ERR_;
@@ -1416,401 +560,11 @@ double eval(struct ent * ent, struct enode * e) {
     return ((double) 0.0);
 }
 
-/*
- * \brief TODO Document eval_fpe()
- * \return none
- */
-void eval_fpe() { /* Trap for FPE errors in eval */
-#if defined(i386)
-    sc_debug("eval_fpe i386");
-    asm("    fnclex");
-    asm("    fwait");
-#else
- #ifdef IEEE_MATH
-    (void)fpsetsticky((fp_except)0);    /* Clear exception */
- #endif /* IEEE_MATH */
-#endif
-    /* re-establish signal handler for next time */
-    (void) signal(SIGFPE, eval_fpe);
-    longjmp(fpe_save, 1);
-}
-
-/**
- * \brief fn1_eval()
- * \param[in] fn
- * \param[in] arg
- * \return double
- */
-double fn1_eval(double (*fn)(), double arg) {
-    double res;
-    errno = 0;
-    res = (*fn) (arg);
-    if (errno) cellerror = CELLERROR;
-
-    return res;
-}
-
-
-/**
- * \brief fn2_eval()
- * \param[in] fn
- * \param[in] arg1
- * \param[in] arg2
- * \return double
- */
-double fn2_eval(double (*fn)(), double arg1, double arg2) {
-    double res;
-    errno = 0;
-    res = (*fn) (arg1, arg2);
-    if (errno) cellerror = CELLERROR;
-
-    return res;
-}
-
-
-/**
- * \brief docat()
- *
- * \details Tules for string functions:
- * Take string arguments which they scxfree. All returned strings
- * are assumed to be xalloced.
- *
- * \param[in] s1
- * \param[in] s2
- *
- * \return char *
- */
-char * docat(char * s1, char * s2) {
-    char * p;
-    char * arg1, * arg2;
-
-    if ( !s1 && !s2 )
-        return ((char *) 0);
-    arg1 = s1 ? s1 : "";
-    arg2 = s2 ? s2 : "";
-    p = scxmalloc( (size_t) (strlen(arg1) + strlen(arg2) + 1));
-    (void) strcpy(p, arg1);
-    (void) strcat(p, arg2);
-    if (s1)
-        scxfree(s1);
-    if (s2)
-        scxfree(s2);
-    return (p);
-}
-
-
-/**
- * \brief dodate()
- * \param[in] tloc
- * \param[in] fmstr
- * \return char *
- */
-char * dodate(time_t tloc, char * fmtstr) {
-    char buff[FBUFLEN];
-    char * p;
-
-    if (! fmtstr)
-        fmtstr = "%a %b %d %H:%M:%S %Y";
-    strftime(buff, FBUFLEN, fmtstr, localtime(&tloc));
-    p = scxmalloc( (size_t) (strlen(buff) + 1));
-    (void) strcpy(p, buff);
-    return (p);
-}
-
-
-/**
- * \brief Conversion reverse from doascii
- * \param[in] ascii
- * \return char *
- */
-char * dochr(double ascii) {
-    char * p = scxmalloc((size_t) 10);
-    char * q = p;
-    int digit ;
-    int nbdigits = 0;
-    int i = 0;
-    double stopnbdigits = 1;
-
-    for (stopnbdigits = 1; ascii >= stopnbdigits && nbdigits < 9 ; stopnbdigits *= 256, ++ nbdigits) ;
-    for (; nbdigits > 0 ; -- nbdigits) {
-        for (stopnbdigits = 1, i = 0; i < nbdigits - 1 ; stopnbdigits *= 256, ++ i) ;
-        digit = floor (ascii / stopnbdigits) ;
-        ascii -= digit * stopnbdigits ;
-        if (ascii >= stopnbdigits && digit < 256) { digit ++ ; ascii += stopnbdigits ; }
-        if (ascii < 0 && digit >= 0) { digit -- ; ascii -= stopnbdigits ; }
-        *q++ = digit ;
-    }
-    *q = '\0';
-    return p;
-}
-
-
-/**
- * \brief dofmt()
- *
- * \param[in] fmtstr
- * \param[in] v
- *
- * \return char *
- */
-char * dofmt(char * fmtstr, double v) {
-    char buff[FBUFLEN];
-    char * p;
-
-    if (!fmtstr)
-        return ((char *) 0);
-    (void) snprintf(buff, FBUFLEN, fmtstr, v);
-    p = scxmalloc( (size_t) (strlen(buff) + 1));
-    (void) strcpy(p, buff);
-    scxfree(fmtstr);
-    return (p);
-}
-
-
-
-/**
- * \brief doext()
- *
- * \details Given a command name and a value, run the command with the given
- * value and read and return its first output line (only) as an allocated
- * string, always a copy of se->e.o.s, whic is set appropriately first
- * unless external functions are disabled, in which case the previous value
- * is used. The handling of se->e.o.s. and freezing of command is tricky.
- * Returning an allocated string in all cases, even if null, insures cell
- * expressions are written to files, etc..
- *
- * \param[in] se
- *
- * \return char *
- */
-char * doext(struct enode *se) {
-    char buff[FBUFLEN];        /* command line/return, not permanently alloc */
-    char * command;
-    double value;
-
-    command = seval(NULL, se->e.o.left);
-    value = eval(NULL, se->e.o.right);
-    if ( ! get_conf_int("external_functions") ) {
-        sc_error("Warning: external functions disabled; using %s value",
-        (se->e.o.s && *se->e.o.s) ? "previous" : "null");
-
-        if (command) scxfree(command);
-    } else {
-        if (( !command ) || ( ! *command )) {
-            sc_error ("Warning: external function given null command name");
-            cellerror = CELLERROR;
-            if (command) scxfree(command);
-        } else {
-            FILE *pp;
-
-            (void) sprintf(buff, "%s %g", command, value); /* build cmd line */
-            scxfree(command);
-
-            sc_info("Running external function...");
-            //(void) refresh();
-
-            if ((pp = popen(buff, "r")) == (FILE *) NULL) {    /* run it */
-                sc_error("Warning: running \"%s\" failed", buff);
-                cellerror = CELLERROR;
-            } else {
-                if (fgets(buff, sizeof(buff)-1, pp) == NULL) {    /* one line */
-                    sc_error("Warning: external function returned nothing");
-                } else {
-                    char *cp;
-                    //sc_error("");                /* erase notice */
-                    buff[sizeof(buff)-1] = '\0';
-
-                    if ((cp = strchr(buff, '\n')))    /* contains newline */
-                        *cp = '\0';            /* end string there */
-
-                    if (!se->e.o.s || strlen(buff) != strlen(se->e.o.s))
-                        se->e.o.s = scxrealloc(se->e.o.s, strlen(buff));
-                    (void) strcpy (se->e.o.s, buff);
-                /* save alloc'd copy */
-                }
-                (void) pclose(pp);
-
-            } /* else */
-        } /* else */
-    } /* else */
-    if (se->e.o.s)
-        return (strcpy(scxmalloc((size_t) (strlen(se->e.o.s)+1)), se->e.o.s));
-    else
-        return (strcpy(scxmalloc((size_t)1), ""));
-}
-
-
-/**
- * \brief dosval()
- *
- * \details Given a string representing a column name and a value which
- * is a column number, return the selected cell's string value, if any.
- * Even if none, still allocate and return a null string, so the cell
- * has a label value, so the expression is saved in a file, etc..
- *
- * \param[in] colstr
- * \param[in] rowdoub
- *
- * \return char *
- */
-char * dosval(char * colstr, double rowdoub) {
-    struct ent * ep;
-    char * llabel;
-
-    //llabel = (ep = getent(colstr, rowdoub, 0)) ? (ep -> label) : "";
-
-    // getent don't return NULL for a cell with no string.
-    llabel = ( ep = getent(colstr, rowdoub, 0) ) && ep -> label ? (ep -> label) : "";
-
-    return (strcpy(scxmalloc( (size_t) (strlen(llabel) + 1)), llabel));
-}
-
-
-/**
- * \brief doreplace()
- *
- * \param[in] source
- * \param[in] old
- * \param[in] new
- *
- * \return char *
- */
-char * doreplace(char * source, char * old, char * new) {
-    return str_replace(source, old, new);
-}
-
-
-/**
- * \brief dosubstring()
- *
- * \param[in] s
- * \param[in] v1
- * \param[in] v2
- *
- * \return char *
- */
-char * dosubstr(char * s, int v1, int v2) {
-    char * s1, * s2;
-    char * p;
-
-    if ( !s ) return ((char *) 0);
-
-    if (v2 >= strlen(s))        /* past end */
-        v2 =  strlen(s) - 1;    /* to end   */
-
-    if (v1 < 0 || v1 > v2) {        /* out of range, return null string */
-        scxfree(s);
-        p = scxmalloc( (size_t) 1);
-        p[0] = '\0';
-        return (p);
-    }
-    s2 = p = scxmalloc( (size_t) (v2-v1 + 2));
-    s1 = &s[v1];
-    for (; v1 <= v2; s1++, s2++, v1++)
-        *s2 = *s1;
-    *s2 = '\0';
-    scxfree (s);
-    return (p);
-}
-
-
-/**
- * \brief dosevaluate(): take a char * with a formula and seval it
- * \param[in] s
- * \return char *
- */
-char * dosevaluate(char * s) {
-    if ( !s ) return ((char *) 0);
-    char * p;
-
-    wchar_t cline [BUFFERSIZE];
-    swprintf(cline, BUFFERSIZE, L"seval %s", s);
-    send_to_interp(cline);
-
-    p = scxmalloc(sizeof(char) * strlen(seval_result)+1);
-    strcpy(p, seval_result);
-    free(seval_result);
-
-    scxfree(s);
-    return p;
-}
-
-
-/**
- * \brief Character casing: make upper case, make lower case, set 8th bit
- *
- * \param[in] acase
- * \param[in] s
- *
- * \return char *
- */
-char * docase(int acase, char * s) {
-    char * p = s;
-
-    if (s == NULL)
-        return(NULL);
-
-    if ( acase == UPPER ) {
-        while( *p != '\0' ) {
-            if( islower(*p) )
-                *p = toupper(*p);
-            p++;
-        }
-    } else if (acase == SET8BIT) {
-        while (*p != '\0') {
-            if (*p >= 0)
-                *p += 128 ;
-            p++;
-        }
-    } else if (acase == LOWER) {
-        while (*p != '\0') {
-            if (isupper(*p))
-                *p = tolower(*p);
-            p++;
-        }
-    }
-    return (s);
-}
-
-/**
- * \brief docapital
- *
- * \details Make proper capitals of every word in a string. If the string
- * has mixed case, we say the string is lower and we will upcase only
- * first letters of words. If the string is all upper, we will lower rest
- * of words.
- *
- * \param[in] s
- *
- * \return char *
- */
-char * docapital(char * s) {
-    char * p;
-    int skip = 1;
-    int AllUpper = 1;
-
-    if (s == NULL)
-        return (NULL);
-    for (p = s; *p != '\0' && AllUpper != 0; p++)
-        if (isalpha(*p) && islower(*p))  AllUpper = 0;
-    for (p = s; *p != '\0'; p++) {
-        if (!isalnum(*p)) skip = 1;
-        else if (skip == 1) {
-            skip = 0;
-            if (islower(*p)) *p = toupper(*p);
-        } else    /* if the string was all upper before */
-            if (isupper(*p) && AllUpper != 0)
-                *p = tolower(*p);
-    }
-    return (s);
-}
 
 /**
  * \brief seval()
- *
  * \param[in] ent
  * \param[in] se
- *
  * \return char *
  */
 char * seval(struct ent * ent, struct enode * se) {
@@ -1963,8 +717,101 @@ char * seval(struct ent * ent, struct enode * se) {
 
 
 /**
- * \brief new()
+ * \brief getent()
  *
+ * \details Given a string representing a column name and a value which
+ * is a row number, return a pointer to the selected cell's entry.
+ * if alloc == 0 and no cell is alloc, return NULL.
+ * Use only the integer part of the column number. Always
+ * free the string
+ *
+ * \param[in] colstr
+ * \param[in] rwodoub
+ *
+ * \return struct ent *
+ */
+struct ent * getent(char *colstr, double rowdoub, int alloc) {
+    struct roman * roman = session->cur_doc;
+    struct sheet * sh = roman->cur_sh;
+    int collen;                         /* length of string */
+    int row, col;                       /* integer values   */
+    struct ent *p = (struct ent *) 0;   /* selected entry   */
+
+    if (!colstr) {
+        cellerror = CELLERROR;
+        return ((struct ent *) 0);
+    }
+    collen = strlen(colstr);
+    col = atocol(colstr, collen);
+    row = (int) floor(rowdoub);
+
+    if (row >= 0
+        && (row < sh->maxrows)                      /* in range */
+        && (collen <= 2)                        /* not too long */
+        && (col >= 0)
+        && (col < sh->maxcols)) {                   /* in range */
+            if (alloc) p = lookat(sh, row, col);
+            else p = *ATBL(sh, sh->tbl, row, col);
+            if ((p != NULL) && p->cellerror) cellerror = CELLINVALID;
+    }
+    scxfree(colstr);
+    return (p);
+}
+
+
+/*
+ * \brief eval_fpe()
+ * \return none
+ */
+void eval_fpe() { /* Trap for FPE errors in eval */
+#if defined(i386)
+    sc_debug("eval_fpe i386");
+    asm("    fnclex");
+    asm("    fwait");
+#else
+ #ifdef IEEE_MATH
+    (void)fpsetsticky((fp_except)0);    /* Clear exception */
+ #endif /* IEEE_MATH */
+#endif
+    /* re-establish signal handler for next time */
+    (void) signal(SIGFPE, eval_fpe);
+    longjmp(fpe_save, 1);
+}
+
+/**
+ * \brief fn1_eval()
+ * \param[in] fn
+ * \param[in] arg
+ * \return double
+ */
+double fn1_eval(double (*fn)(), double arg) {
+    double res;
+    errno = 0;
+    res = (*fn) (arg);
+    if (errno) cellerror = CELLERROR;
+
+    return res;
+}
+
+
+/**
+ * \brief fn2_eval()
+ * \param[in] fn
+ * \param[in] arg1
+ * \param[in] arg2
+ * \return double
+ */
+double fn2_eval(double (*fn)(), double arg1, double arg2) {
+    double res;
+    errno = 0;
+    res = (*fn) (arg1, arg2);
+    if (errno) cellerror = CELLERROR;
+    return res;
+}
+
+
+/**
+ * \brief new()
  * \param[in] op
  * \param[in] a1
  * \param[in] a2
@@ -2168,18 +1015,15 @@ void go_last() {
 
 /**
  * \brief Place the cursor on a given cell.
- *
  * \details Place the cursor on a given cell. If cornerrow >= 0, place
  * the cell at row cornerrow and column cornercol in the upper corner
  * of the screen possible.
- *
  * \param[in] row
  * \param[in] col
  * \param[in] lastrow_
  * \param[in] lastcol_
  * \param[in] cornerrow
  * \param[in] cornercol
- *
  * \return none
  */
 void moveto(int row, int col, int lastrow_, int lastcol_, int cornerrow, int cornercol) {
@@ -2317,11 +1161,9 @@ void num_search(double n, int firstrow, int firstcol, int lastrow_, int lastcol_
 
 /**
  * \brief 'goto' a cell containing a matching string
- *
  * \details 'goto' a cell containing a matching string.
  * \details flow = 1, look forward
  * \details flow = 0, look backwards
- *
  * \param[in] s
  * \param[in] firstrow
  * \param[in] firstcol
@@ -2329,7 +1171,6 @@ void num_search(double n, int firstrow, int firstcol, int lastrow_, int lastcol_
  * \param[in] lastcol_
  * \param[in] num
  * \param[in] flow
- *
  * \return none
  */
 void str_search(char *s, int firstrow, int firstcol, int lastrow_, int lastcol_, int num, int flow) {
@@ -2457,12 +1298,10 @@ void str_search(char *s, int firstrow, int firstcol, int lastrow_, int lastcol_,
 
 /**
  * \brief Fill a range with constants
- *
  * \param[in] v1
  * \param[in] v2
  * \param[in] start
  * \param[in] inc
- *
  * \return none
  */
 void fill(struct ent *v1, struct ent *v2, double start, double inc) {
@@ -2524,10 +1363,8 @@ void fill(struct ent *v1, struct ent *v2, double start, double inc) {
 
 /**
  * \brief Lock a range of cells
- *
  * \param[in] v1
  * \param[in] v2
- *
  * \return none
  */
 void lock_cells(struct ent * v1, struct ent * v2) {
@@ -2567,10 +1404,8 @@ void lock_cells(struct ent * v1, struct ent * v2) {
 
 /**
  * \brief Unlock a range of cells
- *
  * \param[in] v1
  * \param[in] v2
- *
  * \return none
  */
 void unlock_cells(struct ent * v1, struct ent * v2) {
@@ -2610,10 +1445,8 @@ void unlock_cells(struct ent * v1, struct ent * v2) {
 
 /**
  * \brief Set the numeric part of a cell
- *
  * \param[in] v
  * \param[in] e
- *
  * \return none
  */
 void let(struct ent * v, struct enode * e) {
@@ -2712,11 +1545,9 @@ void let(struct ent * v, struct enode * e) {
 
 /**
  * \brief slet()
- *
  * \param[in] v
  * \param[in] se
  * \param[in] flushdir
- *
  * \return none
  */
 void slet(struct ent * v, struct enode * se, int flushdir) {
@@ -2820,11 +1651,9 @@ void slet(struct ent * v, struct enode * se, int flushdir) {
 
 /**
  * \brief format_cell()
- *
  * \param[in] v1
  * \param[in] v2
  * \param[in] s
- *
  * \return none
  */
 void format_cell(struct ent *v1, struct ent *v2, char *s) {
@@ -2864,9 +1693,7 @@ void format_cell(struct ent *v1, struct ent *v2, char *s) {
 
 /**
  * \brief Say if an expression is a constant or not
- *
  * \param[in] e
- *
  * \return 1 function is an expression
  * \return 0 function is not an expression
  */
@@ -2934,11 +1761,9 @@ void efree(struct enode * e) {
 
 /**
  * \brief label()
- *
  * \param[in] v
  * \param[in] s
  * \param[in] flushdir
- *
  * \return none
  */
 void label(struct ent * v, char * s, int flushdir) {
@@ -3024,13 +1849,10 @@ char * coltoa(int col) {
 
 /**
  * \brief decompile_list()
- *
  * \details To make list elements come out in the same order
  * they were entered, we must do a depth-first eval of the
  * ELIST tree.
- *
  * \param[in] p
- *
  * \return none
  */
 void decompile_list(struct enode *p) {
@@ -3043,10 +1865,8 @@ void decompile_list(struct enode *p) {
 
 /**
  * \brief decompile()
- *
  * \param[in] e
  * \param[in] priority
- *
  * \return none
  */
 void decompile(struct enode *e, int priority) {
@@ -3266,10 +2086,8 @@ void decompile(struct enode *e, int priority) {
 
 /**
  * \brief index_arg()
- *
  * \param[in] s
  * \param[in] e
- *
  * \return none
  */
 void index_arg(char *s, struct enode *e) {
@@ -3489,11 +2307,9 @@ void edits(struct sheet * sh, int row, int col, int saveinfile) {
 
 /**
  * \brief dateformat()
- *
  * \param[in] v1
  * \param[in] v2
  * \param[in] fmt
- *
  * \return none
  */
 int dateformat(struct ent *v1, struct ent *v2, char * fmt) {
@@ -3553,30 +2369,3 @@ int dateformat(struct ent *v1, struct ent *v2, char * fmt) {
     roman->modflg++; // increase just one time
     return 0;
 }
-
-
-#ifdef RINT
-/**
- * \brief Round-to-even
- *
- * \details Round-to-even, also known as "banker's rounding". With
- * round-to-even, a number exactly halfway between two values is
- * rounded to whichever is even; e.g. rnd(0.5)=0, rnd(1.5)=2,
- * rnd(3.5)=4. This is the default rounding mode for IEEE floating
- * point. for good reason: it has better njmeric properties. For example,
- * if X+Y is an integer, then X+Y = rnd(X)+rnd(Y) will round-to-even, but
- * not always with sc's rounding (which is round-to-positive-infinity). I
- * ran into this problem when trying to split interest in an account to
- * two people fairly.
- *
- * \param[in] d
- *
- * \return none
- */
-double rint(double d) {
-    /* as sent */
-    double fl = floor(d), fr = d-fl;
-    return
-        fr<0.5 || fr==0.5 && fl==floor(fl/2)*2 ? fl : ceil(d);
-}
-#endif
