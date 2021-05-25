@@ -87,7 +87,7 @@ extern struct session * session;
 %token S_FREEZE
 %token S_UNFREEZE
 %token S_MARK
-%token S_AUTOJUS
+%token S_AUTOFIT
 %token S_PAD
 /*
 token S_INSERTCOL
@@ -471,7 +471,7 @@ command:
                                        struct sheet * sh = roman->cur_sh;
                                        dateformat(lookat(sh, sh->currow, sh->curcol), lookat(sh, sh->currow, sh->curcol), $2);
                                        scxfree($2); }
-/* para compatibilidad con sc */
+/* to be sc compatible */
     |    S_HIDE COL                  { hide_col($2, 1); }        // hide de una unica columna
     |    S_HIDE NUMBER               { hide_row($2, 1); }        // hide de una unica fila
     |    S_SHOW COL                  { show_col($2, 1); }        // show de una unica columna
@@ -481,7 +481,7 @@ command:
     |    S_DELETECOL COL             { deletecol($2, 1); }
     |    S_DELETEROW NUMBER          { deleterow($2, 1); }
 
-/* agregados para scim */
+/* added for sc-im */
     |    S_HIDECOL COL               {
                                        hide_col($2, 1); }        // hide de una unica columna
     |    S_SHOWCOL COL               {
@@ -527,6 +527,7 @@ command:
                                        struct roman * roman = session->cur_doc;
                                        struct sheet * sh = roman->cur_sh;
                                        valueize_area(0, 0, sh->maxrow, sh->maxcol); }
+
     |    S_SHIFT var_or_range STRING {
                                        if (strlen($3) != 1 || ($3[0] != 'h' && $3[0] != 'j' && $3[0] != 'k' && $3[0] != 'l')) {
                                            sc_error("wrong parameter for shift command");
@@ -606,8 +607,8 @@ command:
                     scxfree(tmp);
                 }
 */
-    |    S_AUTOJUS COL ':' COL       { auto_fit($2, $4, DEFWIDTH); }  // auto justificado de columnas
-    |    S_AUTOJUS COL               { auto_fit($2, $2, DEFWIDTH); }  // auto justificado de columna
+    |    S_AUTOFIT COL ':' COL       { auto_fit($2, $4, DEFWIDTH); }  // auto justificado de columnas
+    |    S_AUTOFIT COL               { auto_fit($2, $2, DEFWIDTH); }  // auto justificado de columna
 
     |    S_PAD NUMBER COL ':' COL  {
                                        struct roman * roman = session->cur_doc;
