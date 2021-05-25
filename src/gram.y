@@ -212,6 +212,7 @@ token S_YANKCOL
 %token S_NEXTSHEET
 %token S_PREVSHEET
 %token S_DELSHEET
+%token S_MOVETOSHEET
 %token S_RENAMESHEET
 %token S_NMAP
 %token S_VMAP
@@ -416,16 +417,16 @@ command:
                                   {
                                   // TODO get this code out of gram.y - reeval cells that depends on $2
                                   extern graphADT graph;
+                                  struct roman * roman = session->cur_doc;
+                                  struct sheet * sh = roman->cur_sh;
 #ifdef UNDO
                                   // here we save in undostruct, all the ents that depends on the deleted one (before change)
-                                  ents_that_depends_on_range($2.left.vp->row, $2.left.vp->col, $2.left.vp->row, $2.left.vp->col);
+                                  ents_that_depends_on_range(sh, $2.left.vp->row, $2.left.vp->col, $2.left.vp->row, $2.left.vp->col);
                                   create_undo_action();
                                   copy_to_undostruct($2.left.vp->row, $2.left.vp->col, $2.left.vp->row, $2.left.vp->col, UNDO_DEL, HANDLE_DEPS, NULL);
 #endif
 
-                                  struct roman * roman = session->cur_doc;
-                                  struct sheet * sh = roman->cur_sh;
-                                  if (getVertex(graph, lookat(sh, $2.left.vp->row, $2.left.vp->col), 0) != NULL) destroy_vertex(lookat(sh, $2.left.vp->row, $2.left.vp->col));
+                                  if (getVertex(graph, sh, lookat(sh, $2.left.vp->row, $2.left.vp->col), 0) != NULL) destroy_vertex(sh, lookat(sh, $2.left.vp->row, $2.left.vp->col));
 
                                   $2.left.vp->v = (double) 0.0;
                                   if ($2.left.vp->expr && !($2.left.vp->flags & is_strexpr)) {
@@ -769,6 +770,12 @@ command:
                                    ui_update(TRUE);
                                  }
 
+    |    S_MOVETOSHEET STRING    {
+                                   struct sheet * sh;
+                                   if ((sh = search_sheet(session->cur_doc, $2)) != NULL )
+                                       session->cur_doc->cur_sh = sh;
+                                   scxfree($2);
+                                 }
     |    S_RENAMESHEET STRING    {
                                    struct sheet * sh = session->cur_doc->cur_sh;
                                    if (sh->name != NULL) free(sh->name);

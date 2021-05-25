@@ -131,6 +131,8 @@ struct roman {
 struct sheet {
     struct ent *** tbl; /* matrix to hold sheet cells */
     char * name;
+    int id;             /* an id of sheet must be kept so that we can insert vertex's ordered
+                           (and look them up) in the dependency graph. */
     int currow;         /* current row of the selected cell. */
     int curcol;         /* current column of the selected cell. */
     int lastrow;        /* row of last selected cell */

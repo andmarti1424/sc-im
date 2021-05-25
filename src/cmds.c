@@ -226,7 +226,7 @@ void deletecol(int col, int mult) {
 #ifdef UNDO
     create_undo_action();
     // here we save in undostruct, all the ents that depends on the deleted one (before change)
-    ents_that_depends_on_range(0, col, sh->maxrow, col - 1 + mult);
+    ents_that_depends_on_range(sh, 0, col, sh->maxrow, col - 1 + mult);
     copy_to_undostruct(0, col, sh->maxrow, col - 1 + mult, UNDO_DEL, HANDLE_DEPS, NULL);
     save_undo_range_shift(0, -mult, 0, col, sh->maxrow, col - 1 + mult);
 
@@ -519,9 +519,9 @@ void erase_area(struct sheet * sh, int sr, int sc, int er, int ec, int ignoreloc
 
                 /* delete vertex in graph
                    only if this vertex is not referenced by other */
-                vertexT * v = getVertex(graph, *pp, 0);
+                vertexT * v = getVertex(graph, sh, *pp, 0);
                 if (v != NULL && v->back_edges == NULL )
-                    destroy_vertex(*pp);
+                    destroy_vertex(sh, *pp);
 
                 if (mark_as_deleted) {
                     mark_ent_as_deleted(*pp, TRUE);
@@ -910,7 +910,7 @@ void deleterow(int row, int mult) {
 #ifdef UNDO
     create_undo_action();
     // here we save in undostruct, all the ents that depends on the deleted one (before change)
-    ents_that_depends_on_range(row, 0, row + mult - 1, sh->maxcol);
+    ents_that_depends_on_range(sh, row, 0, row + mult - 1, sh->maxcol);
     copy_to_undostruct(row, 0, row + mult - 1, sh->maxcol, UNDO_DEL, HANDLE_DEPS, NULL);
     save_undo_range_shift(-mult, 0, row, 0, row - 1 + mult, sh->maxcol);
     int i;
@@ -1186,7 +1186,7 @@ void del_selected_cells() {
 #ifdef UNDO
     create_undo_action();
     // here we save in undostruct, all the ents that depends on the deleted one (before change)
-    ents_that_depends_on_range(tlrow, tlcol, brrow, brcol);
+    ents_that_depends_on_range(sh, tlrow, tlcol, brrow, brcol);
     copy_to_undostruct(tlrow, tlcol, brrow, brcol, UNDO_DEL, HANDLE_DEPS, NULL);
 #endif
 
@@ -1195,7 +1195,7 @@ void del_selected_cells() {
     sync_refs();
     //flush_saved(); DO NOT UNCOMMENT! flush_saved shall not be called other than at exit.
 
-    EvalRange(tlrow, tlcol, brrow, brcol);
+    EvalRange(sh, tlrow, tlcol, brrow, brcol);
 
 #ifdef UNDO
     // here we save in undostruct, all the ents that depends on the deleted one (after the change)
@@ -1224,7 +1224,7 @@ void enter_cell_content(int r, int c, char * submode,  wchar_t * content) {
     struct roman * roman = session->cur_doc;
     (void) swprintf(interp_line, BUFFERSIZE, L"%s %s = %ls", submode, v_name(r, c), content);
     send_to_interp(interp_line);
-    if (get_conf_int("autocalc") && ! roman->loading) EvalRange(r, c, r, c);
+    if (get_conf_int("autocalc") && ! roman->loading) EvalRange(roman->cur_sh, r, c, r, c);
 }
 
 
@@ -1990,7 +1990,7 @@ void valueize_area(int sr, int sc, int er, int ec) {
                 p->flags &= ~is_strexpr;
 
                 // TODO move this to depgraph ?
-                vertexT * v_cur = getVertex(graph, p, 0);
+                vertexT * v_cur = getVertex(graph, sh, p, 0);
                 if (v_cur != NULL) { // just in case
 
                     // for each edge in edges, we look for the reference to the vertex we are deleting, and we erase it!
@@ -2000,7 +2000,7 @@ void valueize_area(int sr, int sc, int er, int ec) {
 
                         // delete vertex only if it end up having no edges, no expression, no value, no label....
                         if (e->connectsTo->edges == NULL && e->connectsTo->back_edges == NULL && !e->connectsTo->ent->expr && !(e->connectsTo->ent->flags & is_valid) && ! e->connectsTo->ent->label)
-                            destroy_vertex(e->connectsTo->ent);
+                            destroy_vertex(sh, e->connectsTo->ent);
                         //     WARNING: an orphan vertex now represents an ent that has an enode thats
                         //     need to be evaluated, but do not depend in another cell.
                         e = e->next;
@@ -2011,7 +2011,7 @@ void valueize_area(int sr, int sc, int er, int ec) {
 
                     /* delete vertex in graph
                        only if this vertex is not referenced by other */
-                    if (v_cur->back_edges == NULL ) destroy_vertex(p);
+                    if (v_cur->back_edges == NULL ) destroy_vertex(sh, p);
                     }
             }
         }
@@ -2151,7 +2151,7 @@ int fsum() {
 
     if ((sh->currow != r || sh->curcol != c) && wcslen(interp_line))
         send_to_interp(interp_line);
-    EvalRange(sh->currow, sh->curcol, sh->currow, sh->curcol);
+    EvalRange(sh, sh->currow, sh->curcol, sh->currow, sh->curcol);
     return 0;
 }
 
@@ -2261,7 +2261,7 @@ int fcopy(char * action) {
             }
         }
     }
-    EvalRange(ri, ci, rf, cf);
+    EvalRange(sh, ri, ci, rf, cf);
 
 #ifdef UNDO
     copy_to_undostruct(ri, ci, rf, cf, UNDO_ADD, IGNORE_DEPS, NULL);

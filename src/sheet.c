@@ -47,6 +47,8 @@
 #include "sheet.h"
 #include "file.h"
 
+int id_sheet = 0;
+
 /**
  * \brief new_sheet()
  * \param[doc] roman struct
@@ -77,6 +79,8 @@ struct sheet * new_sheet(struct roman * doc, char * name) {
 
       sh->maxcol = 0;
       sh->maxrow = 0;
+      sh->id = id_sheet++; /* an id of sheet must be kept so that we can insert vertex's ordered
+                              (and look them up) in the dependency graph. */
       /*
       sh->hash= (void *) calloc(HASH_NR,sizeof(void *));
       sh->nr_hash=HASH_NR;

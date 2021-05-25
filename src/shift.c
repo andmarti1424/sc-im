@@ -38,8 +38,7 @@
 /**
  * \file shift.c
  * \author Andrés Martinelli <andmarti@gmail.com>
- * \date 2017-07-18
- * \brief TODO Write a tbrief file description.
+ * \date 25/05/2021
  */
 
 #include <stdio.h>
@@ -76,7 +75,7 @@ extern struct session * session;
 void shift(int r, int c, int rf, int cf, wchar_t type) {
     struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
-    if ( any_locked_cells(r, c, rf, cf) && (type == L'h' || type == L'k') ) {
+    if (any_locked_cells(r, c, rf, cf) && (type == L'h' || type == L'k') ) {
         sc_error("Locked cells encountered. Nothing changed");
         return;
     }
@@ -99,7 +98,7 @@ void shift(int r, int c, int rf, int cf, wchar_t type) {
             fix_marks( -(rf - r + 1) * cmd_multiplier, 0, r, sh->maxrow, c, cf);
             yank_area(r, c, rf + (rf-r+1) * (cmd_multiplier - 1), cf, 'a', cmd_multiplier); // keep ents in yanklist for sk
 #ifdef UNDO
-            ents_that_depends_on_range(r, c, rf + (rf-r+1) * (cmd_multiplier - 1), cf);
+            ents_that_depends_on_range(sh, r, c, rf + (rf-r+1) * (cmd_multiplier - 1), cf);
             copy_to_undostruct(r, c, rf + (rf-r+1) * (cmd_multiplier - 1), cf, UNDO_DEL, HANDLE_DEPS, NULL);
             save_undo_range_shift(-cmd_multiplier, 0, r, c, rf + (rf-r+1) * (cmd_multiplier - 1), cf);
 #endif
@@ -115,7 +114,7 @@ void shift(int r, int c, int rf, int cf, wchar_t type) {
             yank_area(r, c, rf, cf + (cf-c+1) * (cmd_multiplier - 1), 'a', cmd_multiplier); // keep ents in yanklist for sk
 #ifdef UNDO
             // here we save in undostruct, all the ents that depends on the deleted one (before change)
-            ents_that_depends_on_range(r, c, rf, cf + (cf-c+1) * (cmd_multiplier - 1));
+            ents_that_depends_on_range(sh, r, c, rf, cf + (cf-c+1) * (cmd_multiplier - 1));
             copy_to_undostruct(r, c, rf, cf + (cf-c+1) * (cmd_multiplier - 1), UNDO_DEL, HANDLE_DEPS, NULL);
             save_undo_range_shift(0, -cmd_multiplier, r, c, rf, cf + (cf-c+1) * (cmd_multiplier - 1));
 #endif
@@ -272,8 +271,8 @@ void shift_cells_up(int deltarows, int deltacols) {
 
                 /* delete vertex in graph
                    unless vertex is referenced by other. Shall comment this? See NOTE1 above */
-                vertexT * v = getVertex(graph, *pp, 0);
-                if (v != NULL && v->back_edges == NULL ) destroy_vertex(*pp);
+                vertexT * v = getVertex(graph, sh, *pp, 0);
+                if (v != NULL && v->back_edges == NULL ) destroy_vertex(sh, *pp);
 
                 if (*pp) {
                    mark_ent_as_deleted(*pp, TRUE); //important: this mark the ents as deleted
@@ -320,8 +319,8 @@ void shift_cells_left(int deltarows, int deltacols) {
 
                 /* delete vertex in graph
                    unless vertex is referenced by other */
-                vertexT * v = getVertex(graph, *pp, 0);
-                if (v != NULL && v->back_edges == NULL ) destroy_vertex(*pp);
+                vertexT * v = getVertex(graph, sh, *pp, 0);
+                if (v != NULL && v->back_edges == NULL ) destroy_vertex(sh, *pp);
 
                 if (*pp) {
                    mark_ent_as_deleted(*pp, TRUE); //important: this mark the ents as deleted

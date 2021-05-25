@@ -214,7 +214,7 @@ double eval(struct ent * ent, struct enode * e) {
                 cellerror = CELLERROR;
             }
             // Changed 06/03/2021 for #issue 499
-            if (ent && ent->expr != NULL && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
+            if (ent && ent->expr != NULL && getVertex(graph, sh, ent, 0) == NULL) GraphAddVertex(graph, sh, ent);
             return (e->e.k);
 
     case GETENT:
@@ -234,8 +234,8 @@ double eval(struct ent * ent, struct enode * e) {
                     cellerror = CELLERROR;
                     return (double) 0;
             }
-            if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
-            if (ent && vp) GraphAddEdge(getVertex(graph, lookat(sh, ent->row, ent->col), 1), getVertex(graph, lookat(sh, vp->row, vp->col), 1));
+            if (ent && getVertex(graph, sh, ent, 0) == NULL) GraphAddVertex(graph, sh, ent);
+            if (ent && vp) GraphAddEdge(getVertex(graph, sh, lookat(sh, ent->row, ent->col), 1), getVertex(graph, sh, lookat(sh, vp->row, vp->col), 1));
             if (vp && vp->flags & is_valid) return (vp->v);
             return (double) 0;
 
@@ -251,13 +251,13 @@ double eval(struct ent * ent, struct enode * e) {
                 cellerror = CELLERROR;
 
                 //ent->cellerror = CELLERROR;
-                GraphAddEdge( getVertex(graph, lookat(sh, ent->row, ent->col), 1), getVertex(graph, lookat(sh_vp, vp->row, vp->col), 1) ) ;
+                GraphAddEdge( getVertex(graph, sh, lookat(sh, ent->row, ent->col), 1), getVertex(graph, sh_vp, lookat(sh_vp, vp->row, vp->col), 1) ) ;
                 return (double) 0;
             }
             if (vp && vp->cellerror == CELLERROR && !(vp->flags & is_deleted)) {
                 // here we store the dependences in a graph
-                if (ent && vp) GraphAddEdge( getVertex(graph, lookat(sh, ent->row, ent->col), 1),
-                                             getVertex(graph, lookat(sh_vp, vp->row, vp->col), 1) ) ;
+                if (ent && vp) GraphAddEdge( getVertex(graph, sh, lookat(sh, ent->row, ent->col), 1),
+                                             getVertex(graph, sh_vp, lookat(sh_vp, vp->row, vp->col), 1) ) ;
 
                 //does not change reference to @err in expression
                 //uncomment to do so
@@ -293,8 +293,8 @@ double eval(struct ent * ent, struct enode * e) {
 
             // here we store the dependences in a graph
             if (ent && vp) {
-                vertexT * v_ent = getVertex(graph, lookat(sh, ent->row, ent->col), 0);
-                vertexT * v_vp = getVertex(graph, lookat(sh_vp, vp->row, vp->col), 0);
+                vertexT * v_ent = getVertex(graph, sh, lookat(sh, ent->row, ent->col), 0);
+                vertexT * v_vp = getVertex(graph, sh_vp, lookat(sh_vp, vp->row, vp->col), 0);
                 if (v_ent != NULL && v_vp != NULL && GraphIsReachable(v_ent, v_vp, 1)) {
                     sc_error("Circular reference in eval (cell %s%d)", coltoa(vp->col), vp->row);
                     e->op = ERR_;
@@ -303,7 +303,7 @@ double eval(struct ent * ent, struct enode * e) {
                     cellerror = CELLERROR;
                     return (double) 0;
                 }
-                GraphAddEdge( getVertex(graph, lookat(sh, ent->row, ent->col), 1), getVertex(graph, lookat(sh_vp, vp->row, vp->col), 1) ) ;
+                GraphAddEdge( getVertex(graph, sh, lookat(sh, ent->row, ent->col), 1), getVertex(graph, sh_vp, lookat(sh_vp, vp->row, vp->col), 1) ) ;
             }
 
             if (vp->cellerror) {
@@ -345,7 +345,7 @@ double eval(struct ent * ent, struct enode * e) {
                     cellerror = CELLERROR;
                     return (double) 0;
                 }
-                GraphAddEdge(getVertex(graph, lookat(sh, ent->row, ent->col), 1), getVertex(graph, lookat(sh, row, col), 1));
+                GraphAddEdge(getVertex(graph, sh, lookat(sh, ent->row, ent->col), 1), getVertex(graph, sh, lookat(sh, row, col), 1));
             }
         }
 
@@ -459,7 +459,7 @@ double eval(struct ent * ent, struct enode * e) {
     case YEAR:   return (dotime(YEAR, eval(ent, e->e.o.left)));
 
     case NOW:
-                 if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
+                 if (ent && getVertex(graph, sh, ent, 0) == NULL) GraphAddVertex(graph, sh, ent);
                  return (dotime(NOW, (double) 0.0));
 
     case DTS:    return (dodts((int) eval(ent, e->e.o.left),
@@ -470,11 +470,11 @@ double eval(struct ent * ent, struct enode * e) {
                     (int)eval(ent, e->e.o.right->e.o.right)));
 
     case EVALUATE:
-                 if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
+                 if (ent && getVertex(graph, sh, ent, 0) == NULL) GraphAddVertex(graph, sh, ent);
                  return doevaluate(seval(ent, e->e.o.left));
 
     case STON:
-                 if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
+                 if (ent && getVertex(graph, sh, ent, 0) == NULL) GraphAddVertex(graph, sh, ent);
                  return (doston(seval(ent, e->e.o.left)));
 
     case ASCII:  return (doascii(seval(ent, e->e.o.left)));
@@ -488,7 +488,7 @@ double eval(struct ent * ent, struct enode * e) {
     case LMIN:   return dolmin(ent, e);
 
     case NVAL:
-                 if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
+                 if (ent && getVertex(graph, sh, ent, 0) == NULL) GraphAddVertex(graph, sh, ent);
                  char * s = seval(ent, e->e.o.left);
                  if (! s) { return (double) (0); }
                  char * sf = calloc(strlen(s)+1, sizeof(char));
@@ -496,43 +496,43 @@ double eval(struct ent * ent, struct enode * e) {
                  double n = eval(ent, e->e.o.right);
                  struct ent * ep = getent(sf, n, 1);
                  if (! ep) { free(s); return (double) (0); }
-                 if (ent && ep) GraphAddEdge(getVertex(graph, lookat(sh, ent->row, ent->col), 1), getVertex(graph, ep, 1));
+                 if (ent && ep) GraphAddEdge(getVertex(graph, sh, lookat(sh, ent->row, ent->col), 1), getVertex(graph, sh, ep, 1));
                  return donval(s, n);
 
     case MYROW:
                  // if @myrow is called before EvallJustOneVertex
                  // (this might happen during startup when loading file)
                  // gmyrow does not happen to have valid value. handle that.
-                 if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
+                 if (ent && getVertex(graph, sh, ent, 0) == NULL) GraphAddVertex(graph, sh, ent);
                  return (gmyrow == -1 ? (ent ? ent->row + rowoffset : (double) sh->currow + rowoffset) : (double) (gmyrow + rowoffset));
 
     case MYCOL:
                  // if @mycol is called before EvallJustOneVertex
                  // (this might happen during startup when loading file)
                  // gmycol does not happen to have valid value. handle that.
-                 if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
+                 if (ent && getVertex(graph, sh, ent, 0) == NULL) GraphAddVertex(graph, sh, ent);
                  return (gmycol == -1 ? (ent ? ent->col + coloffset : (double) sh->curcol + coloffset) : (double) (gmycol + coloffset));
 
     case LASTROW:
-                 if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
+                 if (ent && getVertex(graph, sh, ent, 0) == NULL) GraphAddVertex(graph, sh, ent);
                  return ((double) sh->maxrow);
 
     case LASTCOL:
-                 if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
+                 if (ent && getVertex(graph, sh, ent, 0) == NULL) GraphAddVertex(graph, sh, ent);
                  return ((double) sh->maxcol);
 
     case ERR_:
                  cellerror = CELLERROR;
-                 if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
+                 if (ent && getVertex(graph, sh, ent, 0) == NULL) GraphAddVertex(graph, sh, ent);
                  return ((double) 0);
 
     case REF_:
                  cellerror = CELLREF;
-                 if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
+                 if (ent && getVertex(graph, sh, ent, 0) == NULL) GraphAddVertex(graph, sh, ent);
                  return ((double) 0);
 
     case PI_:
-                 if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
+                 if (ent && getVertex(graph, sh, ent, 0) == NULL) GraphAddVertex(graph, sh, ent);
                  return ((double) M_PI);
 
     case BLACK:  return ((double) COLOR_BLACK);
@@ -570,6 +570,7 @@ double eval(struct ent * ent, struct enode * e) {
 char * seval(struct ent * ent, struct enode * se) {
     struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
+    struct sheet * sh_vp = sh;
     if (se == (struct enode *) 0) return (char *) 0;
 
     char * p;
@@ -579,13 +580,15 @@ char * seval(struct ent * ent, struct enode * se) {
             p = scxmalloc( (size_t) (strlen(se->e.s) + 1));
             (void) strcpy(p, se->e.s);
 
-            if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
+            if (ent && getVertex(graph, sh, ent, 0) == NULL) GraphAddVertex(graph, sh, ent);
             return (p);
 
     case O_VAR:
             {
             struct ent * vp = se->e.v.vp;
-            if (vp && ent && vp->row == ent->row && vp->col == ent->col) {
+            sh_vp = se->e.v.sheet;
+
+            if (vp && ent && vp->row == ent->row && vp->col == ent->col && sh_vp == sh) {
                 sc_error("Circular reference in seval");
                 se->op = ERR_;
                 cellerror = CELLERROR;
@@ -606,7 +609,7 @@ char * seval(struct ent * ent, struct enode * se) {
 
             // here we store the cell dependences in a graph
             if (ent && vp) {
-                GraphAddEdge( getVertex(graph, lookat(sh, ent->row, ent->col), 1), getVertex(graph, lookat(sh, vp->row, vp->col), 1) ) ;
+                GraphAddEdge(getVertex(graph, sh, lookat(sh, ent->row, ent->col), 1), getVertex(graph, sh_vp, lookat(sh_vp, vp->row, vp->col), 1) ) ;
             }
             return (p);
     }
@@ -663,7 +666,7 @@ char * seval(struct ent * ent, struct enode * se) {
          ;
          int dg_store = eval(NULL, se->e.o.right);
          // add to depgraph ONLY if second parameter to @lua is 1
-         if (dg_store == 1 && ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
+         if (dg_store == 1 && ent && getVertex(graph, sh, ent, 0) == NULL) GraphAddVertex(graph, sh, ent);
 
          if (ent) {
              ent->label = scxmalloc(sizeof(char)*4);
@@ -687,15 +690,15 @@ char * seval(struct ent * ent, struct enode * se) {
                 (int) eval(NULL, se->e.o.right->e.o.right) - 1));
 
     case COLTOA:
-                 if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
+                 if (ent && getVertex(graph, sh, ent, 0) == NULL) GraphAddVertex(graph, sh, ent);
                  return (strcpy(scxmalloc( (size_t) 10), coltoa((int) eval(ent, se->e.o.left))));
 
     case CHR:
-             if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
+             if (ent && getVertex(graph, sh, ent, 0) == NULL) GraphAddVertex(graph, sh, ent);
              return (strcpy(scxmalloc( (size_t) 10), dochr(eval(NULL, se->e.o.left))));
 
     case SEVALUATE:
-             if (ent && getVertex(graph, ent, 0) == NULL) GraphAddVertex(graph, ent);
+             if (ent && getVertex(graph, sh, ent, 0) == NULL) GraphAddVertex(graph, sh, ent);
              return dosevaluate(seval(ent, se->e.o.left));
 
     case FILENAME: {
@@ -1353,7 +1356,7 @@ void fill(struct ent *v1, struct ent *v2, double start, double inc) {
     else {
         sc_error(" Internal error calc_order");
     }
-    EvalRange(minr, minc, maxr, maxc);
+    EvalRange(sh, minr, minc, maxr, maxc);
 #ifdef UNDO
     copy_to_undostruct(minr, minc, maxr, maxc, UNDO_ADD, IGNORE_DEPS, NULL);
     end_undo_action();
@@ -1459,7 +1462,7 @@ void let(struct ent * v, struct enode * e) {
     if (! roman->loading) {
         create_undo_action();
         // here we save in undostruct, all the ents that depends on the deleted one (before change)
-        ents_that_depends_on_range(v->row, v->col, v->row, v->col);
+        ents_that_depends_on_range(sh, v->row, v->col, v->row, v->col);
         copy_to_undostruct(v->row, v->col, v->row, v->col, UNDO_DEL, HANDLE_DEPS, NULL);
     }
     #endif
@@ -1559,7 +1562,7 @@ void slet(struct ent * v, struct enode * se, int flushdir) {
     extern struct ent_ptr * deps;
     if (! roman->loading) {
         // here we save in undostruct, all the ents that depends on the deleted one (before change)
-        ents_that_depends_on_range(v->row, v->col, v->row, v->col);
+        ents_that_depends_on_range(sh, v->row, v->col, v->row, v->col);
         create_undo_action();
         copy_to_undostruct(v->row, v->col, v->row, v->col, UNDO_DEL, HANDLE_DEPS, NULL);
         add_undo_row_format(v->row, 'R', sh->row_format[v->row]);
@@ -1802,7 +1805,7 @@ void label(struct ent * v, char * s, int flushdir) {
 void decodev(struct ent_ptr v) {
     struct range * r;
     if (v.sheet != NULL) {
-        (void) sprintf(line + linelim, "{%s}!", v.sheet->name);
+        (void) sprintf(line + linelim, "{\"%s\"}!", v.sheet->name);
         linelim += strlen(line + linelim);
     }
     //if ( ! v.vp || v.vp->flags & is_deleted)

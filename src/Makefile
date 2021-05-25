@@ -45,7 +45,7 @@ CFLAGS += -DCONFIG_FILE=\"$(CONFIG_FILE)\" -DCONFIG_DIR=\"$(CONFIG_DIR)\"
 # Input mode history. Same as previous, but for insert mode commands
 CFLAGS += -DINS_HISTORY_FILE=\"sc-iminfo\"
 # Comment out to disable undo/redo support
-CFLAGS += -DUNDO
+#CFLAGS += -DUNDO
 # Maximum number of rows in spreadsheet. Up to 1048576
 CFLAGS += -DMAXROWS=65536
 # Used for date formatting with C-d shortcut using you local d_fmt

@@ -659,7 +659,7 @@ void do_normalmode(struct block * buf) {
                     }
 #ifdef UNDO
                     // added for #244 - 22/03/2018
-                    ents_that_depends_on_range(n->row, n->col, n->row, n->col);
+                    ents_that_depends_on_range(sh, n->row, n->col, n->row, n->col);
                     copy_to_undostruct(sh->currow, c1, sh->currow, c1, UNDO_DEL, HANDLE_DEPS, NULL);
 #endif
                     copyent(n, p, sh->currow - get_mark(buf->pnext->value)->row, c1 - get_mark(buf->pnext->value)->col, 0, 0, sh->maxrow, sh->maxcol, 0);
@@ -1163,7 +1163,7 @@ void do_normalmode(struct block * buf) {
             copy_to_undostruct(tlrow, tlcol, brrow, brcol, UNDO_ADD, IGNORE_DEPS, NULL);
             end_undo_action();
 #endif
-            if (get_conf_int("autocalc")) EvalRange(tlrow, tlcol, brrow, brcol);
+            if (get_conf_int("autocalc")) EvalRange(sh, tlrow, tlcol, brrow, brcol);
             cmd_multiplier = 0;
             ui_update(TRUE);
             }

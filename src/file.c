@@ -347,7 +347,7 @@ int savefile() {
  * \return 0 on success; -1 on error
  */
 int writefile(char * fname, int verbose) {
-    register FILE *f;
+    FILE * f;
     char save[PATHLEN];
     char tfname[PATHLEN];
     int pid;
@@ -401,11 +401,17 @@ void write_fd(FILE * f, struct roman * doc) {
         if (colformat[c])
             (void) fprintf (f, "format %d = \"%s\"\n", c, colformat[c]);
 
-
-    //traverse sheets
+    //create sheets
     struct sheet * sh = doc->first_sh;
     while (sh != NULL) {
         fprintf (f, "newsheet \"%s\"\n", sh->name);
+        sh = sh->next;
+    }
+
+    //traverse sheets
+    sh = doc->first_sh;
+    while (sh != NULL) {
+        fprintf (f, "movetosheet \"%s\"\n", sh->name);
 
         for (c = 0; c <= sh->maxcol; c++)
             if (sh->fwidth[c] != DEFWIDTH || sh->precision[c] != DEFPREC || sh->realfmt[c] != DEFREFMT)

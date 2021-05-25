@@ -71,7 +71,7 @@
 #include "trigger.h"
 
 extern jmp_buf fpe_save;
-extern int cellerror;    /**< is there an error in this cell */
+extern int cellerror;    /* is there an error in this cell - TODO get rid of this */
 
 #define CREATE_NEW(type) (type *) malloc(sizeof(type))
 
@@ -87,7 +87,7 @@ extern int cellerror;    /**< is there an error in this cell */
       tempNode->next = newNode; \
    }
 
-graphADT graph; /**< Creates an empty graph, with no vertices. Allocate memory from the heap */
+graphADT graph; /* Creates an empty graph, with no vertices. Allocate memory from the heap */
 
 // used for saving dependencies of cells:
 struct ent_ptr * deps = NULL;
@@ -98,7 +98,6 @@ extern struct session * session;
 /************************************************************
  * These are the functions used for creating the depgraph
  * **********************************************************/
-
 
 /**
  * \brief GraphCreate()
@@ -112,18 +111,16 @@ graphADT GraphCreate() {
 
 
 /**
- * \brief Undefined function
- *
- * This adds the vertex sorted in the list and not at the end. Given a row and
+ * \brief GraphAddVertex
+ * \details This adds the vertex sorted in the list and not at the end. Given a row and
  * column to insert as a new vertex, this function will create a new vertex
  * with those values and add it in order to the list.
- *
  * \param[in] graph
+ * \param[in] struct sheet *
  * \param[in] ent
- *
  * \return a pointer to the new vertex
  */
-vertexT * GraphAddVertex(graphADT graph , struct ent * ent) {
+vertexT * GraphAddVertex(graphADT graph, struct sheet * sh, struct ent * ent) {
     //if (ent == NULL) {
     //    sc_debug("add vertex-  null ent");
     //    return NULL;
@@ -133,6 +130,7 @@ vertexT * GraphAddVertex(graphADT graph , struct ent * ent) {
     newVertex->visited = 0;
     newVertex->eval_visited = 0;
     newVertex->ent = ent;
+    newVertex->sheet = sh;
     newVertex->edges = NULL;
     newVertex->back_edges = NULL;
     newVertex->next = NULL;
@@ -145,15 +143,22 @@ vertexT * GraphAddVertex(graphADT graph , struct ent * ent) {
         graph->vertices = newVertex;
 
     // append in first position
-    } else if (ent->row < graph->vertices->ent->row || (ent->row == graph->vertices->ent->row && ent->col < graph->vertices->ent->col)) {
+    } else if (
+               (sh->id < graph->vertices->sheet->id) ||
+               (sh->id == graph->vertices->sheet->id && ent->row < graph->vertices->ent->row) ||
+               (sh->id == graph->vertices->sheet->id && ent->row == graph->vertices->ent->row && ent->col < graph->vertices->ent->col)
+              ) {
         newVertex->next = graph->vertices;
         graph->vertices = newVertex;
 
-    // append in second position or after that
+    // append in second position or after that, keeping it ordered
     } else {
         tempNode = graph->vertices;
         temp_ant = tempNode;
-        while (tempNode != NULL && (ent->row > tempNode->ent->row || (ent->row == tempNode->ent->row && ent->col > tempNode->ent->col) ) ) {
+        while (tempNode != NULL && (
+                sh->id > tempNode->sheet->id ||
+               (sh->id == tempNode->sheet->id && ent->row > tempNode->ent->row) ||
+               (sh->id == tempNode->sheet->id && ent->row == tempNode->ent->row && ent->col > tempNode->ent->col))) {
             temp_ant = tempNode;
             tempNode = temp_ant->next;
         }
@@ -166,7 +171,7 @@ vertexT * GraphAddVertex(graphADT graph , struct ent * ent) {
 
 
 /**
- * \brief TODO Write a brief description
+ * \brief getVertex()
  *
  * \details This looks for a vertex representing a specific ent in
  * a sorted list. We search for a vertex in graph and return it if
@@ -179,17 +184,18 @@ vertexT * GraphAddVertex(graphADT graph , struct ent * ent) {
  *
  * \return vertex if found; NULL if not found
  */
-vertexT * getVertex(graphADT graph, struct ent * ent, int create) {
-   if (graph == NULL || ent == NULL || (graph->vertices == NULL && !create)) return NULL;
+vertexT * getVertex(graphADT graph, struct sheet * sh, struct ent * ent, int create) {
+   if (graph == NULL || ent == NULL || sh == NULL || (graph->vertices == NULL && !create)) return NULL;
    vertexT * temp = graph->vertices;
    //sc_debug("getVertex - looking for %d %d, create:%d", ent->row, ent->col, create);
-   //while (temp != NULL && temp->ent != NULL) // temp->ent should not be NULL
    while (temp != NULL
-          //in case it was inserted ordered
-          && (temp->ent->row < ent->row || (temp->ent->row == ent->row && temp->ent->col <= ent->col)))
-                       {
+           &&
+               ((sh->id > temp->sheet->id) ||
+                (sh->id == temp->sheet->id && ent->row > temp->ent->row) ||
+                (sh->id == temp->sheet->id && ent->row == temp->ent->row && ent->col >= temp->ent->col)
+               ) ){
        //sc_debug("this vertex exists: %d %d", temp->ent->row, temp->ent->col);
-       if (temp->ent->row == ent->row && temp->ent->col == ent->col) {
+       if (temp->sheet == sh && temp->ent->row == ent->row && temp->ent->col == ent->col) {
            //sc_debug("found vertex: %d %d", temp->ent->row, temp->ent->col);
            return temp;
        }
@@ -200,9 +206,9 @@ vertexT * getVertex(graphADT graph, struct ent * ent, int create) {
 
    /*
     * if we get to here, there is not vertex representing ent
-    * we add it if create is set to true!
+    * we add it if 'create' flag is set to true!
     */
-   return create ? GraphAddVertex(graph, ent) : NULL;
+   return create ? GraphAddVertex(graph, sh, ent) : NULL;
 }
 
 
@@ -281,7 +287,7 @@ void print_vertexs() {
    strcpy(msg, "Content of graph:\n");
 
    while (temp != NULL) {
-      sprintf(det + strlen(det), "vertex: %d %d vis:%d eval_vis:%d\n", temp->ent->row, temp->ent->col, temp->visited, temp->eval_visited);
+      sprintf(det + strlen(det), "sheet:{%s} vertex: %d %d vis:%d eval_vis:%d\n", temp->sheet->name, temp->ent->row, temp->ent->col, temp->visited, temp->eval_visited);
       etemp = temp->edges;
 
       /* check not overflow msg size. if so, just realloc. */
@@ -294,7 +300,7 @@ void print_vertexs() {
       det[0]='\0';
       /**/
       while (etemp != NULL) {
-          sprintf(det + strlen(det), "    \\-> depends on the following ents: %d %d\n", etemp->connectsTo->ent->row, etemp->connectsTo->ent->col);
+          sprintf(det + strlen(det), "    \\-> depends on the following ents: {%s} %d %d\n", etemp->connectsTo->sheet->name, etemp->connectsTo->ent->row, etemp->connectsTo->ent->col);
           etemp = etemp->next;
 
           /* check not overflow msg size. if so, just realloc. */
@@ -308,7 +314,7 @@ void print_vertexs() {
       }
       etemp = temp->back_edges;
       while (etemp != NULL) {
-          sprintf(det + strlen(det), "(back_edges) edges that depend on that ent: \\-> %d %d\n", etemp->connectsTo->ent->row, etemp->connectsTo->ent->col);
+          sprintf(det + strlen(det), "(back_edges) edges that depend on that ent: \\-> {%s} %d %d\n", etemp->connectsTo->sheet->name, etemp->connectsTo->ent->row, etemp->connectsTo->ent->col);
           etemp = etemp->next;
 
           /* check not overflow msg size. if so, just realloc. */
@@ -339,23 +345,24 @@ void print_vertexs() {
  *
  * \return none
  */
-void destroy_vertex(struct ent * ent) {
+void destroy_vertex(struct sheet * sh, struct ent * ent) {
    if (graph == NULL || ent == NULL) return;
    //sc_debug("destroying vertex %d %d", ent->row, ent->col);
 
    vertexT * v_prev, * v_cur = graph->vertices;
 
    // if is in the middle of the list
-   if (v_cur->ent->row != ent->row || v_cur->ent->col != ent->col) {
+   if (v_cur->ent->row != ent->row || v_cur->ent->col != ent->col || v_cur->sheet != sh) {
        if (v_cur->ent == NULL) sc_error("ERROR destroying vertex");
        v_prev = v_cur;
        v_cur = v_cur->next;
-       while (v_cur != NULL && (v_cur->ent->row < ent->row || (v_cur->ent->row == ent->row && v_cur->ent->col <= ent->col))) {
-           if (v_cur->ent->row == ent->row && v_cur->ent->col == ent->col) break;
+       //while (v_cur != NULL && (v_cur->ent->row < ent->row || (v_cur->ent->row == ent->row && v_cur->ent->col <= ent->col))) {
+       while (v_cur != NULL) {
+           if (v_cur->ent->row == ent->row && v_cur->ent->col == ent->col && v_cur->sheet == sh) break;
            v_prev = v_cur;
            v_cur = v_cur->next;
        }
-       if (v_cur->ent->row != ent->row || v_cur->ent->col != ent->col) {
+       if (v_cur->ent->row != ent->row || v_cur->ent->col != ent->col || v_cur->sheet != sh) {
            sc_error("Error while destroying a vertex. Vertex not found! Please rebuild graph");
            return;
        }
@@ -380,7 +387,7 @@ void destroy_vertex(struct ent * ent) {
 
            // delete vertex only if it end up having no edges, no expression, no value, no label....
            if (e->connectsTo->edges == NULL && e->connectsTo->back_edges == NULL && !e->connectsTo->ent->expr && !(e->connectsTo->ent->flags & is_valid) && ! e->connectsTo->ent->label)
-               destroy_vertex(e->connectsTo->ent);
+               destroy_vertex(e->connectsTo->sheet, e->connectsTo->ent);
            //     WARNING: an orphan vertex now represents an ent that has an enode thats
            //     need to be evaluated, but do not depends on another cell.
            e = e->next;
@@ -393,7 +400,7 @@ void destroy_vertex(struct ent * ent) {
    v_cur->back_edges = NULL;
 
    // if vertex to free was the first one..
-   if (graph->vertices && graph->vertices->ent->row == ent->row && graph->vertices->ent->col == ent->col)
+   if (graph->vertices && graph->vertices->ent->row == ent->row && graph->vertices->ent->col == ent->col && graph->vertices->sheet == sh)
        graph->vertices = v_cur->next;
 
    free(v_cur);
@@ -490,7 +497,6 @@ void destroy_graph(graphADT graph) {
     return;
 }
 
-
 /**
  * \brief All_vertexs_of_edges_visited
  * \details Used in EvalBottomUp and GraphIsReachable
@@ -508,16 +514,18 @@ int All_vertexs_of_edges_visited(struct edgeTag * e, int eval_visited) {
 }
 
 
+/*************************************************************************************************
+ * dependency functions
+ *************************************************************************************************/
 /**
  * \brief ents_that_depends_on()
  * \details get the list of ents that depends on an specific ent
  * \param[in] ent
  * \return none
  */
-void ents_that_depends_on (struct ent * ent) {
-    struct roman * roman = session->cur_doc;
+void ents_that_depends_on(struct sheet * sh, struct ent * ent) {
    if (graph == NULL) return;
-   vertexT * v = getVertex(graph, ent, 0);
+   vertexT * v = getVertex(graph, sh, ent, 0);
    if (v == NULL || v->visited) return;
 
    struct edgeTag * edges = v->back_edges;
@@ -525,8 +533,8 @@ void ents_that_depends_on (struct ent * ent) {
        // TODO only add ent if it does not exists in deps ??
        deps = (struct ent_ptr *) realloc(deps, sizeof(struct ent_ptr) * (++dep_size));
        deps[0].vf = dep_size; // we always keep size of list in the first position !
-       deps[dep_size-1].vp = lookat(roman->cur_sh, edges->connectsTo->ent->row, edges->connectsTo->ent->col);
-       ents_that_depends_on(edges->connectsTo->ent);
+       deps[dep_size-1].vp = lookat(sh, edges->connectsTo->ent->row, edges->connectsTo->ent->col);
+       ents_that_depends_on(edges->connectsTo->sheet, edges->connectsTo->ent);
        edges->connectsTo->visited = 1;
        edges = edges->next;
    }
@@ -555,7 +563,7 @@ int GraphIsReachable(vertexT * src, vertexT * dest, int back_dep) {
        src->visited = 1;
 
        edgeT * tempe;
-       if ( !back_dep )
+       if ( ! back_dep )
            tempe = src->edges;
        else
            tempe = src->back_edges;
@@ -577,6 +585,7 @@ int GraphIsReachable(vertexT * src, vertexT * dest, int back_dep) {
  * \details Checks dependency of a range of ents.
  * Keep the ents references in "deps" lists.
  *
+ * \param[in] struct sheet * sh
  * \param[in] r1
  * \param[in] c1
  * \param[in] r2
@@ -584,9 +593,7 @@ int GraphIsReachable(vertexT * src, vertexT * dest, int back_dep) {
  *
  * \return none
  */
-void ents_that_depends_on_range (int r1, int c1, int r2, int c2) {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
+void ents_that_depends_on_range(struct sheet * sh, int r1, int c1, int r2, int c2) {
     if (graph == NULL) return;
 
     int r, c;
@@ -601,7 +608,7 @@ void ents_that_depends_on_range (int r1, int c1, int r2, int c2) {
             markAllVerticesNotVisited(0);
             p = *ATBL(sh, sh->tbl, r, c);
             if (p == NULL) continue;
-            ents_that_depends_on(p);
+            ents_that_depends_on(sh, p);
         }
     }
     return;
@@ -610,7 +617,6 @@ void ents_that_depends_on_range (int r1, int c1, int r2, int c2) {
 
 /**
  * \brief ents_that_depends_on_list()
- *
  * \details Checks dependency of list of ents.
  *
  * since this is used for pasting yanked ents, on which we may
@@ -623,6 +629,8 @@ void ents_that_depends_on_range (int r1, int c1, int r2, int c2) {
  *
  * \return none
  */
+ /* TODO double check its use (only in yank.c. the origin its always from an only sheet).
+  * SHOULD take ent_ptr rather than struct ent * as parameter ! */
 void ents_that_depends_on_list(struct ent * e_ori, int deltar,  int deltac) {
     struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
@@ -638,7 +646,7 @@ void ents_that_depends_on_list(struct ent * e_ori, int deltar,  int deltac) {
         p = *ATBL(sh, sh->tbl, e->row+deltar, e->col+deltac);
         if (p != NULL) {
             markAllVerticesNotVisited(0);
-            ents_that_depends_on(p);
+            ents_that_depends_on(sh, p);
         }
         e = e->next;
     }
@@ -652,29 +660,26 @@ void ents_that_depends_on_list(struct ent * e_ori, int deltar,  int deltac) {
  */
 void rebuild_graph() {
     struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
+    struct sheet * sh = roman->first_sh;
+    struct ent * p;
+    int first, second, fb, gb;
+
     destroy_graph(graph);
     graph = GraphCreate();
-    int first, second, fb, gb;
-    struct ent * p;
 
-    fb = calc_order == BYROWS ? sh->maxrow : sh->maxcol;
-    gb = calc_order == BYROWS ? sh->maxcol : sh->maxrow;
-
-    for (first = 0; first <= fb; first++)
-        for (second = 0; second <= gb; second++) {
-            p = *ATBL(sh, sh->tbl, calc_order == BYROWS ? first : second, calc_order == BYROWS ? second : first);
-            if (p && p->expr) {
-                EvalJustOneVertex(p, 1);
-                //sc_debug("Expr %d %d", p->row, p->col);
-
-            // just numeric values (no formulas) shouldnt be added to graph
-            // unless other cell references it
-            //} else if (p && p->flags & is_valid && getVertex(graph, p, 0) == NULL) {
-            //    GraphAddVertex(graph, p);
-            //    sc_debug("Val %d %d", p->row, p->col);
+    while (sh != NULL) {
+        fb = calc_order == BYROWS ? sh->maxrow : sh->maxcol;
+        gb = calc_order == BYROWS ? sh->maxcol : sh->maxrow;
+        for (first = 0; first <= fb; first++)
+            for (second = 0; second <= gb; second++) {
+                p = *ATBL(sh, sh->tbl, calc_order == BYROWS ? first : second, calc_order == BYROWS ? second : first);
+                if (p && p->expr) {
+                    EvalJustOneVertex(p, 1);
+                    //sc_debug("Expr %d %d", p->row, p->col);
+                }
             }
-        }
+        sh = sh->next;
+    }
     return;
 }
 
@@ -698,8 +703,6 @@ void EvalAll() {
  * \return none
  */
 void EvalBottomUp() {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
     //print_vertexs();
     vertexT * temp = graph->vertices;
     struct ent * p;
@@ -712,7 +715,7 @@ void EvalBottomUp() {
         if ( ! temp->eval_visited && (temp->edges == NULL || All_vertexs_of_edges_visited(temp->edges, 1))) {
             //sc_debug("visito %d %d", temp->ent->row, temp->ent->col);
 
-            if ((p = *ATBL(sh, sh->tbl, temp->ent->row, temp->ent->col)) && p->expr) {
+            if ((p = *ATBL(temp->sheet, temp->sheet->tbl, temp->ent->row, temp->ent->col)) && p->expr) {
                 EvalJustOneVertex(temp->ent, 0);
             }
             temp->eval_visited = 1;
@@ -736,10 +739,8 @@ void EvalBottomUp() {
  * It also handles the cells that depends on the range and reeval those as well.
  * \return none
  */
-void EvalRange(int tlrow, int tlcol, int brrow, int brcol) {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
-    if (roman->loading) return;
+void EvalRange(struct sheet * sh, int tlrow, int tlcol, int brrow, int brcol) {
+    if (session->cur_doc->loading) return;
     extern struct ent_ptr * deps;
     extern int dep_size;
     int i, fa, fb, ga, gb, first, second;
@@ -762,7 +763,7 @@ void EvalRange(int tlrow, int tlcol, int brrow, int brcol) {
             markAllVerticesNotVisited(0);
             deps = NULL;
             dep_size = 0;
-            ents_that_depends_on(e);
+            ents_that_depends_on(sh, e);
 
            for (i = 0; deps != NULL && i < deps->vf; i++) {
                f = *ATBL(sh, sh->tbl, deps[i].vp->row, deps[i].vp->col);
@@ -785,16 +786,13 @@ void EvalRange(int tlrow, int tlcol, int brrow, int brcol) {
  * \return none
  */
 void EvalAllVertexs() {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
     struct ent * p;
-
     //(void) signal(SIGFPE, eval_fpe);
     vertexT * temp = graph->vertices;
     //int i = 0;
     while (temp != NULL) {
         //sc_debug("Evaluating cell %d %d: %d", temp->ent->row, temp->ent->col, ++i);
-        if ((p = *ATBL(sh, sh->tbl, temp->ent->row, temp->ent->col)) && p->expr)
+        if ((p = *ATBL(temp->sheet, temp->sheet->tbl, temp->ent->row, temp->ent->col)) && p->expr)
             EvalJustOneVertex(p, 0);
         temp = temp->next;
     }
@@ -804,12 +802,10 @@ void EvalAllVertexs() {
 
 /**
  * \brief Evaluate just one vertex
- *
  * \param[in] p
  * \param[in] i
  * \param[in] j
  * \param[in] rebuild_graph
- *
  * \return none
  */
 void EvalJustOneVertex(struct ent * p, int rebuild_graph) {

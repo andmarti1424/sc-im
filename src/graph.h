@@ -45,12 +45,13 @@
 #include "sc.h"
 
 typedef struct vertexTag {
-    struct ent * ent; /**< Add comment here */
-    int visited; /**< Add comment here */
+    struct ent * ent;
+    struct sheet * sheet;
+    int visited;
     int eval_visited; // just to not to collide with previous. its used in EvalBottomUp.
-    struct edgeTag * edges; /**< Add comment here */
-    struct edgeTag * back_edges; /**< Add comment here */
-    struct vertexTag * next; /**< Add comment here */
+    struct edgeTag * edges;
+    struct edgeTag * back_edges;
+    struct vertexTag * next;
 } vertexT;
 
 /* For each edge, we need a link to the vertex it connects to and a link to the next edge w.r.t source vertex */
@@ -67,19 +68,19 @@ typedef struct graphCDT * graphADT;
 
 
 graphADT GraphCreate();
-vertexT * GraphAddVertex(graphADT graph , struct ent * ent);
-vertexT * getVertex(graphADT graph, struct ent * ent, int create);
+vertexT * GraphAddVertex(graphADT graph , struct sheet * sh, struct ent * ent);
+vertexT * getVertex(graphADT graph, struct sheet * sh, struct ent * ent, int create);
 void GraphAddEdge(vertexT * from, vertexT * to);
 void print_vertexs();
 
 void destroy_list_edges(edgeT * e);
 void destroy_graph (graphADT graph);
-void destroy_vertex(struct ent * ent);
+void destroy_vertex(struct sheet * sh, struct ent * ent);
 void delete_reference(vertexT * v_cur, vertexT * vc, int back_reference);
 
 void markAllVerticesNotVisited(int eval_visited);
-void ents_that_depends_on (struct ent * ent);
-void ents_that_depends_on_range (int r1, int c1, int r2, int c2);
+void ents_that_depends_on(struct sheet * sh, struct ent * ent);
+void ents_that_depends_on_range(struct sheet * sh, int r1, int c1, int r2, int c2);
 void ents_that_depends_on_list(struct ent * e_ori, int deltar,  int deltac);
 int GraphIsReachable(vertexT * src, vertexT * dest, int back_dep);
 void rebuild_graph();
@@ -87,5 +88,5 @@ void rebuild_graph();
 void EvalAll();
 void EvalBottomUp();
 void EvalAllVertexs();
-void EvalRange(int tlrow, int tlcol, int brrow, int brcol);
+void EvalRange(struct sheet * sh, int tlrow, int tlcol, int brrow, int brcol);
 void EvalJustOneVertex(struct ent * p, int rebuild_graph);
