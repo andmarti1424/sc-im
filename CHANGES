@@ -25,7 +25,6 @@ For v0.8.3 release
   referencing sheet!A2 from current_sheet!A2) -> would be done doing the previous item.
 + UNDO should save reference to the sheet where the action took place
 
-calc_mobile_cols/rows invalid read with l1.csv and l2.csv examples
 rearrange file loading and saving functions
 
 + Show range detail in inputwin as A0:C3

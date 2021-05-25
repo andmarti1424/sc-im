@@ -82,7 +82,7 @@
 #ifdef UNDO
 #include "undo.h"
 #endif
-#include "dep_graph.h"
+#include "graph.h"
 
 /* g_type can be: */
 #define G_NONE 0          /* Starting value - must be 0 */

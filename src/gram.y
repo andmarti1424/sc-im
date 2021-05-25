@@ -18,7 +18,7 @@
 #include "file.h"
 #include "tui.h"
 #include "undo.h"
-#include "dep_graph.h"
+#include "graph.h"
 #include "utils/dictionary.h"
 #include "trigger.h"
 #include "shift.h"

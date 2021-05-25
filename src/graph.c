@@ -36,7 +36,7 @@
  *******************************************************************************/
 
 /**
- * \file dep_graph.c
+ * \file graph.c
  * \author Andrés Martinelli <andmarti@gmail.com>
  * \date 2021-04-29
  * \brief All the functions used to track cell dependencies
@@ -62,7 +62,7 @@
 #include <setjmp.h>
 #include <math.h>
 
-#include "dep_graph.h"
+#include "graph.h"
 #include "interp.h"
 #include "tui.h"       // for show_text
 #include "sc.h"

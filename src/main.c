@@ -75,7 +75,7 @@
 #include "cmds.h"
 #include "vmtbl.h"   // for growtbl
 #include "filter.h"
-#include "dep_graph.h"
+#include "graph.h"
 #include "sheet.h"
 
 #ifdef UNDO

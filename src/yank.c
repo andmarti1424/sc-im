@@ -54,7 +54,7 @@
 #include "cmds.h"
 #include "conf.h"
 #include "yank.h"
-#include "dep_graph.h"
+#include "graph.h"
 #include "xmalloc.h" // for scxfree
 
 #ifdef UNDO

@@ -59,7 +59,7 @@
 #include "vmtbl.h"   // for growtbl
 #include "utils/string.h" // for add_char
 #include "y.tab.h"   // for yyparse
-#include "dep_graph.h"
+#include "graph.h"
 #include "freeze.h"
 #ifdef UNDO
 #include "undo.h"
@@ -2545,7 +2545,7 @@ int calc_mobile_cols(int *last_p) {
     sh->nb_frozen_cols = 0;
     sh->nb_frozen_screencols = 0;
     for (i = 0; i < sh->maxcols; i++) {
-        if (sh->row_frozen[i])
+        if (sh->col_hidden[i])
             continue;
         if (sh->col_frozen[i]) {
             sh->nb_frozen_cols++;

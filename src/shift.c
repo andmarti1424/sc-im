@@ -48,7 +48,7 @@
 #include "sc.h"
 #include "vmtbl.h"   // for growtbl
 #include "cmds.h"
-#include "dep_graph.h"
+#include "graph.h"
 #include "undo.h"
 #include "marks.h"
 #include "yank.h"

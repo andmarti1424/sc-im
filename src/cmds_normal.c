@@ -63,7 +63,7 @@
 #endif
 
 
-#include "dep_graph.h"
+#include "graph.h"
 extern graphADT graph;
 extern char valores;
 extern int cmd_multiplier;

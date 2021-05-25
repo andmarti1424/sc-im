@@ -149,7 +149,7 @@
 #include "cmds.h"
 #include "marks.h"
 #include "shift.h"
-#include "dep_graph.h"
+#include "graph.h"
 
 extern struct session * session;
 
