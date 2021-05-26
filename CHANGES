@@ -15,7 +15,7 @@ added new colors types SHEET, CURRENT_SHEET and FILENM
 loading xlsx with multiple sheet
 saving xlsx with multiple sheets
 add :renamesheet command
-reference cells from different sheets in formulas: ={Sheet2}!A2
+reference cells from different sheets in formulas: ={"Sheet2"}!A2
 removed --sheet and --filename_with_mode configuration variables
 ** fix in calc_mobile_cols()
 created movetosheet command in gram.y, to be used when saving and loading files

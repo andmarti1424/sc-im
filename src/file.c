@@ -745,7 +745,9 @@ void write_cells(FILE * f, struct roman * doc, struct sheet * sh, int r0, int c0
  * \param[in] fname file name
  * \param[in] eraseflg
  *
- * \return SC_READFILE_SUCCESS if we loaded the file, SC_READFILE_ERROR if we failed,
+ * \return
+ * SC_READFILE_SUCCESS if we could load the file,
+ * SC_READFILE_ERROR if we failed,
  * SC_READFILE_DOESNTEXIST if the file doesn't exist.
  */
 sc_readfile_result readfile(char * fname, int eraseflg) {
@@ -815,7 +817,8 @@ sc_readfile_result readfile(char * fname, int eraseflg) {
         sc_error("XLSX import support not compiled in");
         #else
         open_xlsx(fname, "UTF-8");
-        if (roman->name == NULL) roman->name = malloc(sizeof(char)*PATHLEN);
+        if (roman->name != NULL) free(roman->name);
+        roman->name = malloc(sizeof(char)*PATHLEN);
         strcpy(roman->name, fname);
         roman->modflg = 0;
         #endif
@@ -828,7 +831,8 @@ sc_readfile_result readfile(char * fname, int eraseflg) {
         sc_error("ODS import support not compiled in");
         #else
         open_ods(fname, "UTF-8");
-        if (roman->name == NULL) roman->name = malloc(sizeof(char)*PATHLEN);
+        if (roman->name != NULL) free(roman->name);
+        roman->name = malloc(sizeof(char)*PATHLEN);
         strcpy(roman->name, fname);
         roman->modflg = 0;
         #endif
@@ -842,7 +846,8 @@ sc_readfile_result readfile(char * fname, int eraseflg) {
         #else
         open_xls(fname, "UTF-8");
         roman->modflg = 0;
-        if (roman->name == NULL) roman->name = malloc(sizeof(char)*PATHLEN);
+        if (roman->name != NULL) free(roman->name);
+        roman->name = malloc(sizeof(char)*PATHLEN);
         strcpy(roman->name, fname);
         #endif
         roman->loading = 0;
@@ -854,7 +859,8 @@ sc_readfile_result readfile(char * fname, int eraseflg) {
         ! strcasecmp( & fname[len-4], ".txt") )){
 
         import_csv(fname, get_delim(&fname[len-3])); // csv tsv tab txt delim import
-        if (roman->name == NULL) roman->name = malloc(sizeof(char)*PATHLEN);
+        if (roman->name != NULL) free(roman->name);
+        roman->name = malloc(sizeof(char)*PATHLEN);
         strcpy(roman->name, fname);
         roman->modflg = 0;
         roman->loading = 0;
@@ -865,7 +871,8 @@ sc_readfile_result readfile(char * fname, int eraseflg) {
           ! strcasecmp( & fname[len-4], ".mkd"))){
 
       import_markdown(fname);
-      if (roman->name == NULL) roman->name = malloc(sizeof(char)*PATHLEN);
+      if (roman->name != NULL) free(roman->name);
+      roman->name = malloc(sizeof(char)*PATHLEN);
       strcpy(roman->name, fname);
       roman->modflg = 0;
       roman->loading = 0;
@@ -886,10 +893,13 @@ sc_readfile_result readfile(char * fname, int eraseflg) {
     f = fopen(save, "r");
     if (f == NULL) {
         roman->loading = 0;
-        if (roman->name == NULL) roman->name = malloc(sizeof(char)*PATHLEN);
-        strcpy(roman->name, save);
+        if (strstr(save, "scimrc") == NULL) {
+            if (roman->name != NULL) free(roman->name);
+            roman->name = malloc(sizeof(char)*PATHLEN);
+            strcpy(roman->name, save);
+        }
         return SC_READFILE_DOESNTEXIST;
-    } /* */
+    }
 
     if (eraseflg) erasedb(roman->cur_sh, 0); //TODO handle file
 
@@ -905,6 +915,7 @@ sc_readfile_result readfile(char * fname, int eraseflg) {
         cellassign = 0;
     }
     if (strstr(save, "scimrc") == NULL) {
+        if (roman->name != NULL) free(roman->name);
         roman->name = malloc(sizeof(char)*PATHLEN);
         strcpy(roman->name, save);
     }
