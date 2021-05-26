@@ -59,7 +59,7 @@ void send_to_interpp(char * oper);
 void chg_mode(char strcmd);            // Change mode function
 int modcheck();                        // Verify if open file has been modified
 int savefile();                        // Save open file
-void copyent(struct ent * n, struct ent * p, int dr, int dc, int r1, int c1, int r2, int c2, int special);
+void copyent(struct ent * n, struct sheet * sh_p, struct ent * p, int dr, int dc, int r1, int c1, int r2, int c2, int special);
 void flush_saved();
 void insert_row(struct sheet * sh, int after);
 void insert_col(int after);

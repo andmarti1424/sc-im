@@ -43,7 +43,7 @@
  */
 
 #ifdef XLUA
-char * doLUA(struct enode * se, int type);
+char * doLUA(struct sheet * sh, struct enode * se, int type);
 void doLuainit();
 void doLuaTrigger_cell(struct ent * p, int rw);
 void doLuaclose();

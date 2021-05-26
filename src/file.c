@@ -137,7 +137,7 @@ void erasedb(struct sheet * sheet, int _free) {
  * \brief load rc config file
  * \return none
  */
-void loadrc(void) {
+void load_rc(void) {
     char rcpath[PATHLEN];
     char * home;
 
@@ -823,6 +823,7 @@ sc_readfile_result readfile(char * fname, int eraseflg) {
         roman->modflg = 0;
         #endif
         roman->loading = 0;
+        //TODO we should EvalAll here
         return SC_READFILE_SUCCESS;
 
     // If file is an ODS file, we import it

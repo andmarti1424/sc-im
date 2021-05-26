@@ -382,12 +382,12 @@ void doLuaclose() {
  * \return none
  */
 
-char * doLUA( struct enode * se, int type) {
+char * doLUA(struct sheet * sh, struct enode * se, int type) {
     if ( ! get_conf_int("exec_lua")) return 0;
     char * cmd;
     char buffer[PATHLEN];
     char buffer1[PATHLEN];
-    cmd = seval(NULL, se->e.o.left);
+    cmd = seval(sh, NULL, se->e.o.left);
 
     sprintf(buffer, "lua/%s", cmd);
     if (plugin_exists(buffer, strlen(buffer), buffer1)) {

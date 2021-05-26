@@ -21,12 +21,11 @@ removed --sheet and --filename_with_mode configuration variables
 created movetosheet command in gram.y, to be used when saving and loading files
 reeval in multiple sheets: graph now should keep track of the different sheets
 
+
 Pending to make v0.8.3 release
 -------------------
 + 1. add sheet parameter to:
     any_locked_cells
-    let
-    slet
     yank_area
     shift_range
     look_cell

@@ -296,7 +296,7 @@ struct ent ** ATBL(struct sheet * sh, struct ent ***tbl, int row, int col) {
     struct ent *v= *ent;
 
     if ((v) && (v->trigger) && ((v->trigger->flag & TRG_READ) == TRG_READ)) {
-        sc_debug("row:%d %d", v->row, v->col);
+        //sc_debug("row:%d %d", v->row, v->col);
         do_trigger(v,TRG_READ);
     }
     return ent;

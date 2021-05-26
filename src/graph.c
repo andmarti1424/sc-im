@@ -674,7 +674,7 @@ void rebuild_graph() {
             for (second = 0; second <= gb; second++) {
                 p = *ATBL(sh, sh->tbl, calc_order == BYROWS ? first : second, calc_order == BYROWS ? second : first);
                 if (p && p->expr) {
-                    EvalJustOneVertex(p, 1);
+                    EvalJustOneVertex(sh, p, 1);
                     //sc_debug("Expr %d %d", p->row, p->col);
                 }
             }
@@ -716,7 +716,7 @@ void EvalBottomUp() {
             //sc_debug("visito %d %d", temp->ent->row, temp->ent->col);
 
             if ((p = *ATBL(temp->sheet, temp->sheet->tbl, temp->ent->row, temp->ent->col)) && p->expr) {
-                EvalJustOneVertex(temp->ent, 0);
+                EvalJustOneVertex(temp->sheet, temp->ent, 0);
             }
             temp->eval_visited = 1;
             evalDone = 1;
@@ -757,7 +757,7 @@ void EvalRange(struct sheet * sh, int tlrow, int tlcol, int brrow, int brcol) {
             e = *ATBL(sh, sh->tbl, calc_order == BYROWS ? first : second, calc_order == BYROWS ? second : first);
 
             if (!e) continue;
-            if (e->expr) EvalJustOneVertex(e, 0);
+            if (e->expr) EvalJustOneVertex(sh, e, 0);
 
             // eval the dependencies
             markAllVerticesNotVisited(0);
@@ -768,7 +768,7 @@ void EvalRange(struct sheet * sh, int tlrow, int tlcol, int brrow, int brcol) {
            for (i = 0; deps != NULL && i < deps->vf; i++) {
                f = *ATBL(sh, sh->tbl, deps[i].vp->row, deps[i].vp->col);
                if (f == NULL || ! f->expr) continue;
-               EvalJustOneVertex(f, 0);
+               EvalJustOneVertex(sh, f, 0);
             }
             if (deps != NULL) free(deps);
             deps = NULL;
@@ -793,7 +793,7 @@ void EvalAllVertexs() {
     while (temp != NULL) {
         //sc_debug("Evaluating cell %d %d: %d", temp->ent->row, temp->ent->col, ++i);
         if ((p = *ATBL(temp->sheet, temp->sheet->tbl, temp->ent->row, temp->ent->col)) && p->expr)
-            EvalJustOneVertex(p, 0);
+            EvalJustOneVertex(temp->sheet, p, 0);
         temp = temp->next;
     }
     //(void) signal(SIGFPE, exit_app);
@@ -808,7 +808,7 @@ void EvalAllVertexs() {
  * \param[in] rebuild_graph
  * \return none
  */
-void EvalJustOneVertex(struct ent * p, int rebuild_graph) {
+void EvalJustOneVertex(struct sheet * sh, struct ent * p, int rebuild_graph) {
     int i = p->row;
     int j = p->col;
 
@@ -822,7 +822,7 @@ void EvalJustOneVertex(struct ent * p, int rebuild_graph) {
             v = "";
         } else {
             cellerror = CELLOK;
-            v = rebuild_graph ? seval(p, p->expr) : seval(NULL, p->expr);
+            v = rebuild_graph ? seval(sh, p, p->expr) : seval(sh, NULL, p->expr);
         }
         p->cellerror = cellerror;
         if ( !v && !p->label) /* Everything's fine */
@@ -841,7 +841,7 @@ void EvalJustOneVertex(struct ent * p, int rebuild_graph) {
             v = (double) 0.0;
         } else {
             cellerror = CELLOK;
-            v = rebuild_graph ? eval(p, p->expr) : eval(NULL, p->expr);
+            v = rebuild_graph ? eval(sh, p, p->expr) : eval(sh, NULL, p->expr);
 
             if (cellerror == CELLOK && ! isfinite(v))
                 cellerror = CELLERROR;

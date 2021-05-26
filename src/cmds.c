@@ -360,7 +360,7 @@ void int_deletecol(int col, int mult) {
  * \param[in] special
  * \return none
  */
-void copyent(struct ent * n, struct ent * p, int dr, int dc, int r1, int c1, int r2, int c2, int special) {
+void copyent(struct ent * n, struct sheet * sh_p, struct ent * p, int dr, int dc, int r1, int c1, int r2, int c2, int special) {
     if (!n || !p) {
         sc_error("copyent: internal error");
         return;
@@ -427,7 +427,7 @@ void copyent(struct ent * n, struct ent * p, int dr, int dc, int r1, int c1, int
     n->cellerror = p->cellerror;
 
     if (special == 'c' && n->expr)
-        EvalJustOneVertex(n, 0);
+        EvalJustOneVertex(sh_p, n, 0);
 
     n->flags |= is_changed;
     n->row = p->row;
@@ -2231,7 +2231,7 @@ int fcopy(char * action) {
         pact = *ATBL(sh, sh->tbl, ri, ci);
         for (r=ri+1; r<=rf; r++) {
             pdest = lookat(sh, r, ci);
-            copyent(pdest, pact, r - ri, 0, 0, 0, sh->maxrows, sh->maxcols, 'c');
+            copyent(pdest, sh, pact, r - ri, 0, 0, 0, sh->maxrows, sh->maxcols, 'c');
         }
     } else if (! strcmp(action, "c") || ! strcmp(action, "columns")) {
         // copy all selected columns down
@@ -2239,7 +2239,7 @@ int fcopy(char * action) {
             pact = *ATBL(sh, sh->tbl, ri, c);
             for (r=ri+1; r<=rf; r++) {
                 pdest = lookat(sh, r, c);
-                copyent(pdest, pact, r - ri, 0, 0, 0, sh->maxrows, sh->maxcols, 'c');
+                copyent(pdest, sh, pact, r - ri, 0, 0, 0, sh->maxrows, sh->maxcols, 'c');
             }
         }
     } else if (! strcmp(action, "r") || ! strcmp(action, "rows")) {
@@ -2248,7 +2248,7 @@ int fcopy(char * action) {
             pact = *ATBL(sh, sh->tbl, r, ci);
             for (c=ci+1; c<=cf; c++) {
                 pdest = lookat(sh, r, c);
-                copyent(pdest, pact, 0, c - ci, 0, 0, sh->maxrows, sh->maxcols, 'c');
+                copyent(pdest, sh, pact, 0, c - ci, 0, 0, sh->maxrows, sh->maxcols, 'c');
             }
         }
     } else if (! strcmp(action, "cells")) {
@@ -2257,7 +2257,7 @@ int fcopy(char * action) {
         for (r=ri; r<=rf; r++) {
             for(c=(r==ri?ci+1:ci); c<=cf; c++) {
                 pdest = lookat(sh, r, c);
-                copyent(pdest, pact, r - ri, c - ci, 0, 0, sh->maxrows, sh->maxcols, 'c');
+                copyent(pdest, sh, pact, r - ri, c - ci, 0, 0, sh->maxrows, sh->maxcols, 'c');
             }
         }
     }

@@ -43,10 +43,10 @@
  */
 
 struct ent * getent(char * colstr, double rowdoub, int alloc);
-double eval(struct ent * ent, struct enode * e);
+double eval(struct sheet * sh, struct ent * ent, struct enode * e);
 double fn1_eval(double (* fn)(), double arg);
 double fn2_eval(double (* fn)(), double arg1, double arg2);
-char * seval(struct ent * ent, struct enode * se);
+char * seval(struct sheet * sh, struct ent * ent, struct enode * se);
 void setiterations(int i);
 void EvalAll();
 struct enode * new(int op, struct enode * a1, struct enode * a2);
@@ -68,8 +68,8 @@ void str_search(char * s, int firstrow, int firstcol, int lastrow, int lastcol, 
 void fill(struct ent * v1, struct ent * v2, double start, double inc);
 void lock_cells(struct ent * v1, struct ent * v2);
 void unlock_cells(struct ent * v1, struct ent * v2);
-void let(struct ent * v, struct enode * e);
-void slet(struct ent * v, struct enode * se, int flushdir);
+void let(struct roman * roman, struct sheet * sh, struct ent * v, struct enode * e);
+void slet(struct roman * roman, struct sheet * sh, struct ent * v, struct enode * se, int flushdir);
 void format_cell(struct ent * v1, struct ent * v2, char * s);
 int constant(struct enode * e);
 void efree(struct enode * e);
@@ -91,5 +91,5 @@ void editexp(struct sheet * sh, int row, int col);
 void edits(struct sheet * sh, int row, int col, int saveinfile);
 int dateformat(struct ent * v1, struct ent * v2, char * fmt);
 
-void EvalAllVertexs();
-void EvalJustOneVertex(struct ent * p, int rebuild_graph);
+extern void EvalAllVertexs();
+extern void EvalJustOneVertex(struct sheet * sh, struct ent * p, int rebuild_graph);

@@ -78,7 +78,7 @@ void openfile_under_cursor(int r, int c);
 void load_file(char * loading_file);
 void load_tbl(char * loading_file);
 void erasedb(struct sheet * sheet, int _free);
-void loadrc(void);
+void load_rc(void);
 FILE * openfile(char *fname, int *rpid, int *rfd);
 int import_csv(char * fname, char d);
 int import_markdown(char * fname);

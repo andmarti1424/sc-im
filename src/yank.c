@@ -197,7 +197,7 @@ void yank_area(int tlrow, int tlcol, int brrow, int brcol, char type, int arg) {
             cleanent(y_cells);
 
             // Copy 'e_ori' contents to 'y_cells' ent
-            (void) copyent(y_cells, e_ori, 0, 0, 0, 0, 0, 0, 0);
+            (void) copyent(y_cells, sh, e_ori, 0, 0, 0, 0, 0, 0, 0);
 
             // Important: each 'ent' element keeps the corresponding row and col
             (y_cells)->row = e_ori->row;
@@ -327,13 +327,13 @@ int paste_yanked_ents(int above, int type_paste) {
         struct ent * destino = lookat(sh, yl->row + diffr, yl->col + diffc);
 
         if (type_paste == YANK_RANGE || type_paste == YANK_SORT) {
-            (void) copyent(destino, yl, 0, 0, 0, 0, 0, 0, 0);
+            (void) copyent(destino, sh, yl, 0, 0, 0, 0, 0, 0, 0);
         } else if (type_paste == YANK_FORMAT) {
-            (void) copyent(destino, yl, 0, 0, 0, 0, 0, 0, 'f');
+            (void) copyent(destino, sh, yl, 0, 0, 0, 0, 0, 0, 'f');
         } else if (type_paste == YANK_VALUE) {
-            (void) copyent(destino, yl, 0, 0, 0, 0, 0, 0, 'v');
+            (void) copyent(destino, sh, yl, 0, 0, 0, 0, 0, 0, 'v');
         } else if (type_paste == YANK_REF) {
-            (void) copyent(destino, yl, diffr, diffc, 0, 0, sh->maxrows, sh->maxcols, 'c');
+            (void) copyent(destino, sh, yl, diffr, diffc, 0, 0, sh->maxrows, sh->maxcols, 'c');
         }
         destino->row += diffr;
         destino->col += diffc;
@@ -345,14 +345,14 @@ int paste_yanked_ents(int above, int type_paste) {
 
         if (destino->expr) {
             syncref(destino->expr);
-            if (get_conf_int("autocalc")) EvalJustOneVertex(destino, 1);
+            if (get_conf_int("autocalc")) EvalJustOneVertex(sh, destino, 1);
             //EvalRange(destino->row, destino->col, destino->row, destino->col);
         }
 
         int i;
         for (i = 0; deps != NULL && i < deps->vf; i++) {
             syncref(deps[i].vp->expr);
-            if (get_conf_int("autocalc")) EvalJustOneVertex(deps[i].vp, 0);
+            if (get_conf_int("autocalc")) EvalJustOneVertex(sh, deps[i].vp, 0);
         }
         /*******************/
 

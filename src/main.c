@@ -283,11 +283,11 @@ int main (int argc, char ** argv) {
     if (session->cur_doc == NULL) create_empty_wb();
 
     /*
-     * loadrc. Since we are not sure what people put it their scimrc file,
+     * load_rc. Since we are not sure what people put it their scimrc file,
      * other than configuration variables and mappings,
-     * we call the loadrc() routine after session / roman / sheet are alloc'ed.
+     * we call the load_rc() routine after session / roman / sheet are alloc'ed.
      */
-    loadrc();
+    load_rc();
 
     // check input from stdin (pipeline)
     // and send it to interp

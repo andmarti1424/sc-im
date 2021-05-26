@@ -89,4 +89,4 @@ void EvalAll();
 void EvalBottomUp();
 void EvalAllVertexs();
 void EvalRange(struct sheet * sh, int tlrow, int tlcol, int brrow, int brcol);
-void EvalJustOneVertex(struct ent * p, int rebuild_graph);
+void EvalJustOneVertex(struct sheet * sh, struct ent * p, int rebuild_graph);

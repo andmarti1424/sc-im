@@ -662,13 +662,13 @@ void do_normalmode(struct block * buf) {
                     ents_that_depends_on_range(sh, n->row, n->col, n->row, n->col);
                     copy_to_undostruct(sh->currow, c1, sh->currow, c1, UNDO_DEL, HANDLE_DEPS, NULL);
 #endif
-                    copyent(n, p, sh->currow - get_mark(buf->pnext->value)->row, c1 - get_mark(buf->pnext->value)->col, 0, 0, sh->maxrow, sh->maxcol, 0);
+                    copyent(n, sh, p, sh->currow - get_mark(buf->pnext->value)->row, c1 - get_mark(buf->pnext->value)->col, 0, 0, sh->maxrow, sh->maxcol, 0);
 
                     n->row += sh->currow - get_mark(buf->pnext->value)->row;
                     n->col += c1 - get_mark(buf->pnext->value)->col;
 
                     n->flags |= is_changed;
-                    if (n->expr) EvalJustOneVertex(n, 1);
+                    if (n->expr) EvalJustOneVertex(sh, n, 1);
 
 #ifdef UNDO
                     copy_to_undostruct(sh->currow, c1, sh->currow, c1, UNDO_ADD, HANDLE_DEPS, NULL);

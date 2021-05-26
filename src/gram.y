@@ -411,7 +411,11 @@ token K_COLORERR
 
 %%
 command:
-         S_LET var_or_range '=' e { let($2.left.vp, $4); }
+         S_LET var_or_range '=' e {
+                                  struct roman * roman = session->cur_doc;
+                                  struct sheet * sh = roman->cur_sh;
+                                  let(roman, sh, $2.left.vp, $4);
+                                  }
 
     |    S_LET var_or_range '='
                                   {
@@ -454,9 +458,22 @@ command:
 #endif
                                   }
 
-    |    S_LABEL var_or_range '=' e       { slet($2.left.vp, $4, 0); }
-    |    S_LEFTSTRING var_or_range '=' e  { slet($2.left.vp, $4, -1); }
-    |    S_RIGHTSTRING var_or_range '=' e { slet($2.left.vp, $4, 1); }
+    |    S_LABEL var_or_range '=' e       {
+                                            struct roman * roman = session->cur_doc;
+                                            struct sheet * sh = roman->cur_sh;
+                                            slet(roman, sh, $2.left.vp, $4, 0);
+                                          }
+
+    |    S_LEFTSTRING var_or_range '=' e  {
+                                            struct roman * roman = session->cur_doc;
+                                            struct sheet * sh = roman->cur_sh;
+                                            slet(roman, sh, $2.left.vp, $4, -1);
+                                          }
+    |    S_RIGHTSTRING var_or_range '=' e {
+                                            struct roman * roman = session->cur_doc;
+                                            struct sheet * sh = roman->cur_sh;
+                                            slet(roman, sh, $2.left.vp, $4, 1);
+                                          }
     |    S_LEFTJUSTIFY var_or_range  { ljustify($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col); }
     |    S_RIGHTJUSTIFY var_or_range { rjustify($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col); }
 
@@ -955,7 +972,9 @@ command:
     |    S_UNDEFINE var_or_range   { del_range($2.left.vp, $2.right.vp); }
 
     |    S_EVAL e                  {
-                                     eval_result = eval(NULL, $2);
+                                     struct roman * roman = session->cur_doc;
+                                     struct sheet * sh = roman->cur_sh;
+                                     eval_result = eval(sh, NULL, $2);
                                      efree($2);
                                    }
     |    S_EXECUTE STRING          {
@@ -1036,7 +1055,10 @@ command:
 
     |    S_GETFMT var_or_range     { getfmt($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col, fdoutput); }
 
-    |    S_SEVAL e                 { seval_result = seval(NULL, $2); // always make sure this seval_result is always freed afterwards
+    |    S_SEVAL e                 {
+                                     struct roman * roman = session->cur_doc;
+                                     struct sheet * sh = roman->cur_sh;
+                                     seval_result = seval(sh, NULL, $2); // always make sure this seval_result is always freed afterwards
                                      efree($2);
                                    }
     |    S_ERROR STRING            { sc_error($2);
@@ -1323,7 +1345,8 @@ var:
 
     | '@' K_GETENT '(' e ',' e ')' {
                                     struct roman * roman = session->cur_doc;
-                                    $$.vp = lookat(roman->cur_sh, eval(NULL, $4), eval(NULL, $6));
+                                    struct sheet * sh = roman->cur_sh;
+                                    $$.vp = lookat(sh, eval(sh, NULL, $4), eval(sh, NULL, $6));
                                     $$.vf = GETENT;
                                     if ($$.expr != NULL) efree($$.expr);
                                     $$.expr = new(GETENT, $4, $6);
