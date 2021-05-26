@@ -72,10 +72,9 @@ extern struct session * session;
  * \return none
  */
 
-void shift(int r, int c, int rf, int cf, wchar_t type) {
+void shift(struct sheet * sh, int r, int c, int rf, int cf, wchar_t type) {
     struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
-    if (any_locked_cells(r, c, rf, cf) && (type == L'h' || type == L'k') ) {
+    if (any_locked_cells(sh, r, c, rf, cf) && (type == L'h' || type == L'k') ) {
         sc_error("Locked cells encountered. Nothing changed");
         return;
     }
@@ -91,18 +90,18 @@ void shift(int r, int c, int rf, int cf, wchar_t type) {
 #ifdef UNDO
             save_undo_range_shift(cmd_multiplier, 0, r, c, rf + (rf-r+1) * (cmd_multiplier - 1), cf);
 #endif
-            while (ic--) shift_range(ic, 0, r, c, rf, cf);
+            while (ic--) shift_range(sh, ic, 0, r, c, rf, cf);
             break;
 
         case L'k':
             fix_marks( -(rf - r + 1) * cmd_multiplier, 0, r, sh->maxrow, c, cf);
-            yank_area(r, c, rf + (rf-r+1) * (cmd_multiplier - 1), cf, 'a', cmd_multiplier); // keep ents in yanklist for sk
+            yank_area(sh, r, c, rf + (rf-r+1) * (cmd_multiplier - 1), cf, 'a', cmd_multiplier); // keep ents in yanklist for sk
 #ifdef UNDO
             ents_that_depends_on_range(sh, r, c, rf + (rf-r+1) * (cmd_multiplier - 1), cf);
             copy_to_undostruct(r, c, rf + (rf-r+1) * (cmd_multiplier - 1), cf, UNDO_DEL, HANDLE_DEPS, NULL);
             save_undo_range_shift(-cmd_multiplier, 0, r, c, rf + (rf-r+1) * (cmd_multiplier - 1), cf);
 #endif
-            while (ic--) shift_range(-ic, 0, r, c, rf, cf);
+            while (ic--) shift_range(sh, -ic, 0, r, c, rf, cf);
             if (get_conf_int("autocalc") && ! roman->loading) EvalAll();
 #ifdef UNDO
             copy_to_undostruct(0, 0, -1, -1, UNDO_ADD, HANDLE_DEPS, NULL);
@@ -111,14 +110,14 @@ void shift(int r, int c, int rf, int cf, wchar_t type) {
 
         case L'h':
             fix_marks(0, -(cf - c + 1) * cmd_multiplier, r, rf, c, sh->maxcol);
-            yank_area(r, c, rf, cf + (cf-c+1) * (cmd_multiplier - 1), 'a', cmd_multiplier); // keep ents in yanklist for sk
+            yank_area(sh, r, c, rf, cf + (cf-c+1) * (cmd_multiplier - 1), 'a', cmd_multiplier); // keep ents in yanklist for sk
 #ifdef UNDO
             // here we save in undostruct, all the ents that depends on the deleted one (before change)
             ents_that_depends_on_range(sh, r, c, rf, cf + (cf-c+1) * (cmd_multiplier - 1));
             copy_to_undostruct(r, c, rf, cf + (cf-c+1) * (cmd_multiplier - 1), UNDO_DEL, HANDLE_DEPS, NULL);
             save_undo_range_shift(0, -cmd_multiplier, r, c, rf, cf + (cf-c+1) * (cmd_multiplier - 1));
 #endif
-            while (ic--) shift_range(0, -ic, r, c, rf, cf);
+            while (ic--) shift_range(sh, 0, -ic, r, c, rf, cf);
 
             if (get_conf_int("autocalc") && ! roman->loading) EvalAll();
             //update(TRUE); // this is used just to make debugging easier
@@ -132,7 +131,7 @@ void shift(int r, int c, int rf, int cf, wchar_t type) {
 #ifdef UNDO
             save_undo_range_shift(0, cmd_multiplier, r, c, rf, cf + (cf-c+1) * (cmd_multiplier - 1));
 #endif
-            while (ic--) shift_range(0, ic, r, c, rf, cf);
+            while (ic--) shift_range(sh, 0, ic, r, c, rf, cf);
             break;
     }
 #ifdef UNDO
@@ -141,6 +140,7 @@ void shift(int r, int c, int rf, int cf, wchar_t type) {
     if (deps != NULL) free(deps);
     deps = NULL;
 #endif
+    roman->modflg++;
     /* just for testing
     sync_refs();
     rebuild_graph();
@@ -151,8 +151,9 @@ void shift(int r, int c, int rf, int cf, wchar_t type) {
 }
 
 /**
- * \brief Shift a range to 'ENTS'
- *
+ * \brief shift_range()
+ * \details Shift a range of cells
+ * \param[in] struct sheet * sh
  * \param[in] delta_rows
  * \param[in] delta_cols
  * \param[in] tlrow
@@ -163,17 +164,15 @@ void shift(int r, int c, int rf, int cf, wchar_t type) {
  * \return none
  */
 
-void shift_range(int delta_rows, int delta_cols, int tlrow, int tlcol, int brrow, int brcol) {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
+void shift_range(struct sheet * sh, int delta_rows, int delta_cols, int tlrow, int tlcol, int brrow, int brcol) {
     sh->currow = tlrow;
     sh->curcol = tlcol;
 
-    if (delta_rows > 0)      shift_cells_down (brrow - tlrow + 1, brcol - tlcol + 1);
-    else if (delta_rows < 0) shift_cells_up   (brrow - tlrow + 1, brcol - tlcol + 1);
+    if (delta_rows > 0)      shift_cells_down (sh, brrow - tlrow + 1, brcol - tlcol + 1);
+    else if (delta_rows < 0) shift_cells_up   (sh, brrow - tlrow + 1, brcol - tlcol + 1);
 
-    if (delta_cols > 0)      shift_cells_right(brrow - tlrow + 1, brcol - tlcol + 1);
-    else if (delta_cols < 0) shift_cells_left (brrow - tlrow + 1, brcol - tlcol + 1);
+    if (delta_cols > 0)      shift_cells_right(sh, brrow - tlrow + 1, brcol - tlcol + 1);
+    else if (delta_cols < 0) shift_cells_left (sh, brrow - tlrow + 1, brcol - tlcol + 1);
 
     return;
 }
@@ -187,10 +186,8 @@ void shift_range(int delta_rows, int delta_cols, int tlrow, int tlcol, int brrow
  * \return none
  */
 
-void shift_cells_down(int deltarows, int deltacols) {
-    struct roman * roman = session->cur_doc;
+void shift_cells_down(struct sheet * sh, int deltarows, int deltacols) {
     int r, c;
-    struct sheet * sh = roman->cur_sh;
     struct ent ** pp;
     if (sh->currow > sh->maxrow) sh->maxrow = sh->currow;
     sh->maxrow += deltarows;
@@ -222,9 +219,7 @@ void shift_cells_down(int deltarows, int deltacols) {
  * \return none
  */
 
-void shift_cells_right(int deltarows, int deltacols) {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
+void shift_cells_right(struct sheet * sh, int deltarows, int deltacols) {
     int r, c;
     struct ent ** pp;
 
@@ -257,11 +252,9 @@ void shift_cells_right(int deltarows, int deltacols) {
  * \return none
  */
 
-void shift_cells_up(int deltarows, int deltacols) {
+void shift_cells_up(struct sheet * sh, int deltarows, int deltacols) {
     int r, c;
     struct ent ** pp;
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
 
     for (r = sh->currow; r <= sh->maxrow; r++) {
         for (c = sh->curcol; c < sh->curcol + deltacols; c++) {
@@ -305,9 +298,7 @@ void shift_cells_up(int deltarows, int deltacols) {
  * \return none
  */
 
-void shift_cells_left(int deltarows, int deltacols) {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
+void shift_cells_left(struct sheet * sh, int deltarows, int deltacols) {
     int r, c;
     struct ent ** pp;
 

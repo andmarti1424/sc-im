@@ -89,10 +89,9 @@ extern struct session * session;
  * \return none
  */
 
-void set_trigger(int r, int c, int rf, int cf, char * str) {
+void set_trigger(struct sheet * sh, int r, int c, int rf, int cf, char * str) {
     struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
-    if (any_locked_cells(r, c, rf, cf)) {
+    if (any_locked_cells(sh, r, c, rf, cf)) {
         sc_error("Locked cells encountered. Nothing changed");
         return;
     }
@@ -176,10 +175,8 @@ void set_trigger(int r, int c, int rf, int cf, char * str) {
  * \return none
  */
 
-void del_trigger(int r, int c, int rf, int cf ) {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
-    if (any_locked_cells(r, c, rf, cf)) {
+void del_trigger(struct sheet * sh, int r, int c, int rf, int cf ) {
+    if (any_locked_cells(sh, r, c, rf, cf)) {
         sc_error("Locked cells encountered. Nothing changed");
         return;
     }
@@ -215,7 +212,7 @@ static int in_trigger = 0;
  * \return none
  */
 
-void do_trigger( struct ent *p , int rw) {
+void do_trigger(struct ent *p , int rw) {
     struct trigger * trigger = p->trigger;
     if(in_trigger) return;
     in_trigger = 1;

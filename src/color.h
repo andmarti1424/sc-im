@@ -42,6 +42,7 @@
  * \brief Header file for color.c
  */
 
+#include "sc.h"
 #include "macros.h"
 
 #include <math.h>
@@ -112,8 +113,8 @@ extern struct ucolor ucolors[N_INIT_PAIRS];
 
 struct dictionary * get_d_colors_param();
 void start_default_ucolors();
-void color_cell(int r, int c, int rf, int cf, char * detail);
-void unformat(int r, int c, int rf, int cf);
+void color_cell(struct sheet * sh, int r, int c, int rf, int cf, char * str);
+void unformat(struct sheet * sh, int r, int c, int rf, int cf);
 void set_colors_param_dict();
 void free_colors_param_dict();
 void chg_color(char * str);

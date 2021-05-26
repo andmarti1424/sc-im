@@ -194,7 +194,7 @@ void do_editmode(struct block * sb) {
             add_wchar(content, L'\"', wcslen(content));
         }
 
-        enter_cell_content(sh->currow, sh->curcol, ope, content);
+        enter_cell_content(sh, sh->currow, sh->curcol, ope, content);
 
         inputline[0] = L'\0';
         inputline_pos = 0;
@@ -205,10 +205,10 @@ void do_editmode(struct block * sb) {
         char * opt = get_conf_value("newline_action");
         switch (opt[0]) {
             case 'j':
-                sh->currow = forw_row(1)->row;
+                sh->currow = forw_row(sh, 1)->row;
                 break;
             case 'l':
-                sh->curcol = forw_col(1)->col;
+                sh->curcol = forw_col(sh, 1)->col;
                 break;
         }
         ui_update(TRUE);

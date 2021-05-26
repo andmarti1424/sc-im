@@ -528,8 +528,8 @@ int open_xlsx(char * fname, char * encoding) {
 
             struct roman * roman = session->cur_doc;
             struct sheet * sh = roman->cur_sh;
-            auto_fit(0, sh->maxcols, DEFWIDTH);
-            deleterow(sh->currow, 1);
+            auto_fit(sh, 0, sh->maxcols, DEFWIDTH);
+            deleterow(sh, sh->currow, 1);
 
             cur_node = cur_node->next;
         }

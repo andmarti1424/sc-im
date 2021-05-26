@@ -492,10 +492,10 @@ double eval(struct sheet * sh, struct ent * ent, struct enode * e) {
                  char * sf = calloc(strlen(s)+1, sizeof(char));
                  strcpy(sf, s);
                  double n = eval(sh, ent, e->e.o.right);
-                 struct ent * ep = getent(sf, n, 1);
+                 struct ent * ep = getent(sh, sf, n, 1);
                  if (! ep) { free(s); return (double) (0); }
                  if (ent && ep) GraphAddEdge(getVertex(graph, sh, lookat(sh, ent->row, ent->col), 1), getVertex(graph, sh, ep, 1));
-                 return donval(s, n);
+                 return donval(sh, s, n);
 
     case MYROW:
                  // if @myrow is called before EvallJustOneVertex
@@ -675,7 +675,7 @@ char * seval(struct sheet * sh, struct ent * ent, struct enode * se) {
          return (doLUA(sh, se, dg_store));
 #endif
 
-    case SVAL:   return (dosval(seval(sh, ent, se->e.o.left), eval(sh, NULL, se->e.o.right)));
+    case SVAL:   return (dosval(sh, seval(sh, ent, se->e.o.left), eval(sh, NULL, se->e.o.right)));
 
     case REPLACE: return (doreplace(seval(sh, ent, se->e.o.left),
                           seval(sh, NULL, se->e.o.right->e.o.left),
@@ -724,14 +724,13 @@ char * seval(struct sheet * sh, struct ent * ent, struct enode * se) {
  * Use only the integer part of the column number. Always
  * free the string
  *
+ * \param[in] struct sheet * sh
  * \param[in] colstr
  * \param[in] rwodoub
  *
  * \return struct ent *
  */
-struct ent * getent(char *colstr, double rowdoub, int alloc) {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
+struct ent * getent(struct sheet * sh, char * colstr, double rowdoub, int alloc) {
     int collen;                         /* length of string */
     int row, col;                       /* integer values   */
     struct ent *p = (struct ent *) 0;   /* selected entry   */
@@ -863,8 +862,7 @@ struct enode * new_var(int op, struct ent_ptr a1) {
 
 
 /**
- * \brief TODO Document new_range()
- *
+ * \brief new_range()
  * \param[in] op
  * \param[in] a1
  *
@@ -969,11 +967,11 @@ void go_previous() {
             sc_error("Nothing to repeat");
             break;
         case G_NUM:
-            num_search(gs.g_n, gs.g_row, gs.g_col, gs.g_lastrow, gs.g_lastcol, gs.errsearch, 0);
+            num_search(session->cur_doc->cur_sh, gs.g_n, gs.g_row, gs.g_col, gs.g_lastrow, gs.g_lastcol, gs.errsearch, 0);
             break;
         case G_STR:
             gs.g_type = G_NONE;    /* Don't free the string */
-            str_search(gs.g_s, gs.g_row, gs.g_col, gs.g_lastrow, gs.g_lastcol, num, 0);
+            str_search(session->cur_doc->cur_sh, gs.g_s, gs.g_row, gs.g_col, gs.g_lastrow, gs.g_lastcol, num, 0);
             break;
         default:
             sc_error("go_previous: internal error");
@@ -993,17 +991,17 @@ void go_last() {
         sc_error("Nothing to repeat");
         break;
     case G_NUM:
-        num_search(gs.g_n, gs.g_row, gs.g_col, gs.g_lastrow, gs.g_lastcol, gs.errsearch, 1);
+        num_search(session->cur_doc->cur_sh, gs.g_n, gs.g_row, gs.g_col, gs.g_lastrow, gs.g_lastcol, gs.errsearch, 1);
         break;
     case G_CELL:
-        moveto(gs.g_row, gs.g_col, gs.g_lastrow, gs.g_lastcol, gs.strow, gs.stcol);
+        moveto(session->cur_doc->cur_sh, gs.g_row, gs.g_col, gs.g_lastrow, gs.g_lastcol, gs.strow, gs.stcol);
         break;
     case G_XSTR:
     case G_NSTR:
         num++;
     case G_STR:
         gs.g_type = G_NONE;    /* Don't free the string */
-        str_search(gs.g_s, gs.g_row, gs.g_col, gs.g_lastrow, gs.g_lastcol, num, 1);
+        str_search(session->cur_doc->cur_sh, gs.g_s, gs.g_row, gs.g_col, gs.g_lastrow, gs.g_lastcol, num, 1);
         break;
 
     default:
@@ -1017,6 +1015,7 @@ void go_last() {
  * \details Place the cursor on a given cell. If cornerrow >= 0, place
  * the cell at row cornerrow and column cornercol in the upper corner
  * of the screen possible.
+ * \param[in] struct sheet * sh
  * \param[in] row
  * \param[in] col
  * \param[in] lastrow_
@@ -1025,11 +1024,8 @@ void go_last() {
  * \param[in] cornercol
  * \return none
  */
-void moveto(int row, int col, int lastrow_, int lastcol_, int cornerrow, int cornercol) {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
+void moveto(struct sheet * sh, int row, int col, int lastrow_, int lastcol_, int cornerrow, int cornercol) {
     int i;
-
     sh->lastrow = sh->currow;
     sh->lastcol = sh->curcol;
     sh->currow = row;
@@ -1072,6 +1068,7 @@ void moveto(int row, int col, int lastrow_, int lastcol_, int cornerrow, int cor
  * \details flow = 1, look forward
  * \details flow = 0, look backwards
  *
+ * \param[in] struct sheet * sh
  * \param[in] n
  * \param[in] firstrow
  * \param[in] firstcol
@@ -1082,9 +1079,7 @@ void moveto(int row, int col, int lastrow_, int lastcol_, int cornerrow, int cor
  *
  * \return none
  */
-void num_search(double n, int firstrow, int firstcol, int lastrow_, int lastcol_, int errsearch, int flow) {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
+void num_search(struct sheet * sh, double n, int firstrow, int firstcol, int lastrow_, int lastcol_, int errsearch, int flow) {
     struct ent * p;
     int r, c;
     int endr, endc;
@@ -1163,6 +1158,7 @@ void num_search(double n, int firstrow, int firstcol, int lastrow_, int lastcol_
  * \details 'goto' a cell containing a matching string.
  * \details flow = 1, look forward
  * \details flow = 0, look backwards
+ * \param[in] struct sheet * sh
  * \param[in] s
  * \param[in] firstrow
  * \param[in] firstcol
@@ -1172,9 +1168,7 @@ void num_search(double n, int firstrow, int firstcol, int lastrow_, int lastcol_
  * \param[in] flow
  * \return none
  */
-void str_search(char *s, int firstrow, int firstcol, int lastrow_, int lastcol_, int num, int flow) {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
+void str_search(struct sheet * sh, char * s, int firstrow, int firstcol, int lastrow_, int lastcol_, int num, int flow) {
     struct ent * p;
     int r, c;
     int endr, endc;
@@ -1297,15 +1291,14 @@ void str_search(char *s, int firstrow, int firstcol, int lastrow_, int lastcol_,
 
 /**
  * \brief Fill a range with constants
+ * \param[in] struct sheet * sh
  * \param[in] v1
  * \param[in] v2
  * \param[in] start
  * \param[in] inc
  * \return none
  */
-void fill(struct ent *v1, struct ent *v2, double start, double inc) {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
+void fill(struct sheet * sh, struct ent * v1, struct ent * v2, double start, double inc) {
     int r, c;
     struct ent *n;
     int maxr, maxc;
@@ -1362,13 +1355,12 @@ void fill(struct ent *v1, struct ent *v2, double start, double inc) {
 
 /**
  * \brief Lock a range of cells
+ * \param[in] struct sheet * sh
  * \param[in] v1
  * \param[in] v2
  * \return none
  */
-void lock_cells(struct ent * v1, struct ent * v2) {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
+void lock_cells(struct sheet * sh, struct ent * v1, struct ent * v2) {
     int r, c;
     struct ent * n;
     int maxr, maxc;
@@ -1403,13 +1395,12 @@ void lock_cells(struct ent * v1, struct ent * v2) {
 
 /**
  * \brief Unlock a range of cells
+ * \param[in] struct sheet * sh
  * \param[in] v1
  * \param[in] v2
  * \return none
  */
-void unlock_cells(struct ent * v1, struct ent * v2) {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
+void unlock_cells(struct sheet * sh, struct ent * v1, struct ent * v2) {
     int r, c;
     struct ent * n;
     int maxr, maxc;
@@ -1449,7 +1440,7 @@ void unlock_cells(struct ent * v1, struct ent * v2) {
  * \return none
  */
 void let(struct roman * roman, struct sheet * sh, struct ent * v, struct enode * e) {
-    if (locked_cell(v->row, v->col)) return;
+    if (locked_cell(sh, v->row, v->col)) return;
 
     #ifdef UNDO
     extern struct ent_ptr * deps;
@@ -1548,7 +1539,7 @@ void let(struct roman * roman, struct sheet * sh, struct ent * v, struct enode *
  * \return none
  */
 void slet(struct roman * roman, struct sheet * sh, struct ent * v, struct enode * se, int flushdir) {
-    if (locked_cell(v->row, v->col)) return;
+    if (locked_cell(sh, v->row, v->col)) return;
 
     #ifdef UNDO
     extern struct ent_ptr * deps;
@@ -1646,14 +1637,13 @@ void slet(struct roman * roman, struct sheet * sh, struct ent * v, struct enode 
 
 /**
  * \brief format_cell()
+ * \param[in] struct sheet * sh
  * \param[in] v1
  * \param[in] v2
  * \param[in] s
  * \return none
  */
-void format_cell(struct ent *v1, struct ent *v2, char *s) {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
+void format_cell(struct sheet * sh, struct ent * v1, struct ent * v2, char *s) {
     int r, c;
     struct ent *n;
     int maxr, maxc;
@@ -1669,12 +1659,12 @@ void format_cell(struct ent *v1, struct ent *v2, char *s) {
     if (minr < 0) minr = 0;
     if (minc < 0) minc = 0;
 
-    roman->modflg++;
+    session->cur_doc->modflg++;
 
     for (r = minr; r <= maxr; r++)
         for (c = minc; c <= maxc; c++) {
             n = lookat(sh, r, c);
-            if (locked_cell(n->row, n->col))
+            if (locked_cell(sh, n->row, n->col))
                 continue;
             if (n->format)
                 scxfree(n->format);
@@ -1683,6 +1673,7 @@ void format_cell(struct ent *v1, struct ent *v2, char *s) {
                 n->format = strcpy(scxmalloc( (unsigned) (strlen(s) + 1)), s);
             n->flags |= is_changed;
         }
+    return;
 }
 
 
@@ -2302,14 +2293,13 @@ void edits(struct sheet * sh, int row, int col, int saveinfile) {
 
 /**
  * \brief dateformat()
+ * \param[in] struct sheet * sh
  * \param[in] v1
  * \param[in] v2
  * \param[in] fmt
  * \return none
  */
-int dateformat(struct ent *v1, struct ent *v2, char * fmt) {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
+int dateformat(struct sheet * sh, struct ent *v1, struct ent *v2, char * fmt) {
     if ( ! fmt || *fmt == '\0') return -1;
 
     int r, c;
@@ -2335,7 +2325,7 @@ int dateformat(struct ent *v1, struct ent *v2, char * fmt) {
     for (r = minr; r <= maxr; r++) {
         for (c = minc; c <= maxc; c++) {
             n = lookat(sh, r, c);
-            if ( locked_cell(n->row, n->col) || ! (n)->label ) continue;
+            if (locked_cell(sh, n->row, n->col) || ! (n)->label) continue;
 
             // free all ent content but its label
             n->v = (double) 0;
@@ -2361,6 +2351,6 @@ int dateformat(struct ent *v1, struct ent *v2, char * fmt) {
         copy_to_undostruct(minr, minc, maxr, maxc, UNDO_ADD, IGNORE_DEPS, NULL);
         end_undo_action();
     #endif
-    roman->modflg++; // increase just one time
+    session->cur_doc->modflg++; // increase just one time
     return 0;
 }

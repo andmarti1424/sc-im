@@ -42,7 +42,7 @@
  * \brief Header file for interp.c
  */
 
-struct ent * getent(char * colstr, double rowdoub, int alloc);
+struct ent * getent(struct sheet * sh, char * colstr, double rowdoub, int alloc);
 double eval(struct sheet * sh, struct ent * ent, struct enode * e);
 double fn1_eval(double (* fn)(), double arg);
 double fn2_eval(double (* fn)(), double arg1, double arg2);
@@ -62,15 +62,15 @@ void mover(struct ent * d, struct ent * v1, struct ent * v2);
 void g_free();
 void go_last();
 void go_previous();
-void moveto(int row, int col, int lastrow, int lastcol, int cornerrow, int cornercol);
-void num_search(double n, int firstrow, int firstcol, int lastrow, int lastcol, int errsearch, int flow);
-void str_search(char * s, int firstrow, int firstcol, int lastrow, int lastcol, int num, int flow);
-void fill(struct ent * v1, struct ent * v2, double start, double inc);
-void lock_cells(struct ent * v1, struct ent * v2);
-void unlock_cells(struct ent * v1, struct ent * v2);
+void moveto(struct sheet * sh, int row, int col, int lastrow_, int lastcol_, int cornerrow, int cornercol);
+void num_search(struct sheet * sh, double n, int firstrow, int firstcol, int lastrow, int lastcol, int errsearch, int flow);
+void str_search(struct sheet * sh, char * s, int firstrow, int firstcol, int lastrow, int lastcol, int num, int flow);
+void fill(struct sheet * sh, struct ent * v1, struct ent * v2, double start, double inc);
+void lock_cells(struct sheet * sh, struct ent * v1, struct ent * v2);
+void unlock_cells(struct sheet * sh, struct ent * v1, struct ent * v2);
 void let(struct roman * roman, struct sheet * sh, struct ent * v, struct enode * e);
 void slet(struct roman * roman, struct sheet * sh, struct ent * v, struct enode * se, int flushdir);
-void format_cell(struct ent * v1, struct ent * v2, char * s);
+void format_cell(struct sheet * sh, struct ent * v1, struct ent * v2, char *s);
 int constant(struct enode * e);
 void efree(struct enode * e);
 void label(struct ent * v, char * s, int flushdir);
@@ -89,7 +89,7 @@ void editfmt(struct sheet * sh, int row, int col);
 void editv(struct sheet * sh, int row, int col);
 void editexp(struct sheet * sh, int row, int col);
 void edits(struct sheet * sh, int row, int col, int saveinfile);
-int dateformat(struct ent * v1, struct ent * v2, char * fmt);
+int dateformat(struct sheet * sh, struct ent *v1, struct ent *v2, char * fmt);
 
 extern void EvalAllVertexs();
 extern void EvalJustOneVertex(struct sheet * sh, struct ent * p, int rebuild_graph);

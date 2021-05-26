@@ -44,17 +44,4 @@
 
 #include "sc.h"
 
-extern struct frange * freeze_ranges;
-
-void handle_freeze(struct ent * tl_ent, struct ent * br_ent, char value, char type);
-void add_frange(struct ent * tl_ent, struct ent * br_ent, char type);
-void remove_frange();
-
-// freeze ranges
-struct frange {
-    struct ent * tl;
-    struct ent * br;
-    char type;
-    struct frange * next; /* chained ranges */
-    //struct frange * prev;
-};
+void handle_freeze(struct sheet * sh, struct ent * tl_ent, struct ent * br_ent, char value, char type);

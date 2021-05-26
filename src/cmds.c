@@ -60,20 +60,19 @@
 #include "utils/string.h" // for add_char
 #include "y.tab.h"   // for yyparse
 #include "graph.h"
-#include "freeze.h"
 #ifdef UNDO
 #include "undo.h"
 #endif
 
-void syncref(struct enode *e);
+extern struct session * session;
 extern int shall_quit;
-char insert_edit_submode;
-struct ent * freeents = NULL;    // keep deleted ents around before sync_refs
-wchar_t interp_line[BUFFERSIZE];
 extern graphADT graph;
 extern int yyparse(void);
 
-extern struct session * session;
+char insert_edit_submode;
+wchar_t interp_line[BUFFERSIZE];
+struct ent * freeents = NULL;    // keep deleted ents around before sync_refs
+
 
 /**
  * \brief Maintain ent strucs until they are release for deletion by sync_refs.
@@ -127,24 +126,20 @@ void flush_saved() {
 
 
 /**
- * \brief TODO Write brief description
- *
+ * \brief sync_refs()
  * \details Used to remove references to deleted struct ents.
- *
  * \details Note that the deleted structure must still be hanging
  * around before the call, but not referenced by an entry in tbl.
- *
  * \return none
  */
 // TODO Improve this function such that it does not traverse the whole table
-void sync_refs() {
-    struct roman * roman = session->cur_doc;
+void sync_refs(struct sheet * sh) {
     int i, j;
     struct ent * p;
-    for (i=0; i <= roman->cur_sh->maxrow; i++)
-        for (j=0; j <= roman->cur_sh->maxcol; j++)
-            if ( (p = *ATBL(roman->cur_sh, roman->cur_sh->tbl, i, j)) && p->expr ) {
-                syncref(p->expr);
+    for (i=0; i <= sh->maxrow; i++)
+        for (j=0; j <= sh->maxcol; j++)
+            if ( (p = *ATBL(sh, sh->tbl, i, j)) && p->expr ) {
+                syncref(sh, p->expr);
             }
     return;
 }
@@ -164,10 +159,7 @@ void sync_refs() {
  * @endcode
  * returns: none
  */
-void syncref(struct enode * e) {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
-
+void syncref(struct sheet * sh, struct enode * e) {
     if ( e == NULL ) {
         return;
     } else if ( e->op == ERR_ ) {
@@ -198,8 +190,8 @@ void syncref(struct enode * e) {
         case '$':
             break;
         default:
-            syncref(e->e.o.right);
-            syncref(e->e.o.left);
+            syncref(sh, e->e.o.right);
+            syncref(sh, e->e.o.left);
             break;
         }
     }
@@ -208,18 +200,18 @@ void syncref(struct enode * e) {
 
 
 /**
- * \brief TODO Write brief description
+ * \brief deletecol()
  *
+ * \param[in] struct sheet * sh
  * \param[in] col
  * \param[in] mult
  *
  * \return none
  */
-void deletecol(int col, int mult) {
+void deletecol(struct sheet * sh, int col, int mult) {
     struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
 
-    if (any_locked_cells(0, col, sh->maxrow, col + mult)) {
+    if (any_locked_cells(sh, 0, col, sh->maxrow, col + mult)) {
         sc_error("Locked cells encountered. Nothing changed");
         return;
     }
@@ -240,10 +232,10 @@ void deletecol(int col, int mult) {
 #endif
 
     fix_marks(0, -mult, 0, sh->maxrow,  col + mult -1, sh->maxcol);
-    if (! roman->loading) yank_area(0, col, sh->maxrow, col + mult - 1, 'c', mult);
+    if (! roman->loading) yank_area(sh, 0, col, sh->maxrow, col + mult - 1, 'c', mult);
 
     // do the job
-    int_deletecol(col, mult);
+    int_deletecol(sh, col, mult);
 
     // if (get_conf_int("autocalc")) EvalAll();
 
@@ -264,19 +256,18 @@ void deletecol(int col, int mult) {
 
 
 /**
- * \brief TODO Write a brief description
+ * \brief int_deletecol()
  *
  * \details Delete a column. Parameters col = column to delete
  * multi = cmds multiplier. (commonly 1)
  *
+ * \param[in] struct sheet * sh
  * \param[in] col
  * \param[in] mult
  *
  * \return none
  */
-void int_deletecol(int col, int mult) {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
+void int_deletecol(struct sheet * sh, int col, int mult) {
     struct ent ** pp;
     int r, c, i;
 
@@ -328,7 +319,7 @@ void int_deletecol(int col, int mult) {
         }
 
         sh->maxcol--;
-        sync_refs();
+        sync_refs(sh);
         EvalAll();
         //flush_saved(); // we have to flush_saved only at exit.
         //this is because we have to keep ents in case we want to UNDO
@@ -437,7 +428,7 @@ void copyent(struct ent * n, struct sheet * sh_p, struct ent * p, int dr, int dc
 
 
 /**
- * \brief TODO Write brief description
+ * \brief etype(): return type of an enode
  * \return NUM; STR; etc.
  */
 int etype(struct enode *e) {
@@ -478,6 +469,7 @@ int etype(struct enode *e) {
  * \brief TODO Write a brief function description
  * \details ignorelock is used when sorting so that locked cells
  * can still be sorted
+ * \param[in] struct sheet * sh
  * \param[in] sr
  * \param[in] sc
  * \param[in] er
@@ -668,9 +660,8 @@ struct enode * copye(struct enode *e, int Rdelta, int Cdelta, int r1, int c1, in
  * \param[in] size
  * \return none
  */
-void dorowformat(int r, unsigned char size) {
+void dorowformat(struct sheet * sh, int r, unsigned char size) {
     struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
     if (size < 1 || size > UCHAR_MAX || size > SC_DISPLAY_ROWS) { sc_error("Invalid row format"); return; }
 
     if (r >= sh->maxrows && !growtbl(sh, GROWROW, 0, r)) r = sh->maxrows-1 ;
@@ -682,8 +673,9 @@ void dorowformat(int r, unsigned char size) {
 
 
 /**
- * \brief TODO Write brief function description
+ * \brief doformat()
  * \details Note: Modified 9/17/90 THA to handle more formats.
+ * \param[in] struct sheet * sh
  * \param[in] c1
  * \param[in] c2
  * \param[in] w
@@ -691,9 +683,8 @@ void dorowformat(int r, unsigned char size) {
  * \param[in] r
  * \return none
  */
-void doformat(int c1, int c2, int w, int p, int r) {
+void doformat(struct sheet * sh, int c1, int c2, int w, int p, int r) {
     struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
     int i;
     int crows = 0;
     int ccols = c2;
@@ -732,13 +723,13 @@ void doformat(int c1, int c2, int w, int p, int r) {
 
 
 /**
- * \brief TODO Document formatcol)
+ * \brief formatcol()
+ * \param[in] struct sheet * sh
  * \param[in] c
  * \return none
  */
-void formatcol(int c) {
+void formatcol(struct sheet * sh, int c) {
     struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
     int arg = 1;
     int i;
 
@@ -755,7 +746,7 @@ void formatcol(int c) {
                 if (sh->fwidth[i] <= 1)
                     sh->fwidth[i] = 1;
             }
-             roman->modflg++;
+            roman->modflg++;
             break;
         case '>':
         case 'l':
@@ -765,7 +756,7 @@ void formatcol(int c) {
                 if (sh->fwidth[i] > SC_DISPLAY_COLS - 2)
                     sh->fwidth[i] = SC_DISPLAY_COLS - 2;
             }
-             roman->modflg++;
+            roman->modflg++;
             break;
         case '-':
             for (i = sh->curcol; i < sh->curcol + arg; i++) {
@@ -778,7 +769,7 @@ void formatcol(int c) {
         case '+':
             for (i = sh->curcol; i < sh->curcol + arg; i++)
                 sh->precision[i]++;
-             roman->modflg++;
+            roman->modflg++;
             break;
     }
     sc_info("Current format is %d %d %d", sh->fwidth[sh->curcol], sh->precision[sh->curcol], sh->realfmt[sh->curcol]);
@@ -833,16 +824,16 @@ void insert_row(struct sheet * sh, int after) {
 
 
 /**
- * \brief Insert new column
- * \details Insert a cingle column. The column will be inserted
+ * \brief insert_col()
+ * \details Insert a single column. The column will be inserted
  * BEFORE CURCOL if after is 0;
  * AFTER CURCOL if it is 1.
+ * \param[in] struct sheet * sh
  * \param[in] after
  * \return none
  */
-void insert_col(int after) {
+void insert_col(struct sheet * sh, int after) {
     struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
     int r, c;
     struct ent ** pp, ** qq;
     struct ent * p;
@@ -895,15 +886,16 @@ void insert_col(int after) {
 
 
 /**
- * \brief Delete a row
+ * \brief deleterow()
+ * \details Delete a row
+ * \param[in] struct sheet * sh
  * \param[in] row
  * \param[in] mult
  * \return none
  */
-void deleterow(int row, int mult) {
+void deleterow(struct sheet * sh, int row, int mult) {
     struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
-    if (any_locked_cells(row, 0, row + mult - 1, sh->maxcol)) {
+    if (any_locked_cells(sh, row, 0, row + mult - 1, sh->maxcol)) {
         sc_error("Locked cells encountered. Nothing changed");
         return;
     }
@@ -922,7 +914,7 @@ void deleterow(int row, int mult) {
 #endif
 
     fix_marks(-mult, 0, row + mult - 1, sh->maxrow, 0, sh->maxcol);
-    if (! roman->loading) yank_area(row, 0, row + mult - 1, sh->maxcol, 'r', mult);
+    if (! roman->loading) yank_area(sh, row, 0, row + mult - 1, sh->maxcol, 'r', mult);
 
     // do the job
     int_deleterow(sh, row, mult);
@@ -948,8 +940,9 @@ void deleterow(int row, int mult) {
 /**
  * \brief Delete a row
  * \details Delete a row - internal function
- * \param[in] row - row to delete
- * \param[in] multi - command multiplier (usually 1)
+ * \param[in] struct sheet * sh
+ * \param[in] int row - row to delete
+ * \param[in] int multi - command multiplier (usually 1)
  * \return none
  */
 void int_deleterow(struct sheet * sh, int row, int mult) {
@@ -968,7 +961,7 @@ void int_deleterow(struct sheet * sh, int row, int mult) {
                 if ((q = *ATBL(sh, sh->tbl, row, c)) != NULL && q->row > 0) q->row--;
             }
         }
-        sync_refs();
+        sync_refs(sh);
 
         // and after that the erase_area of the deleted row
         erase_area(sh, row, 0, row, sh->maxcol, 0, 1); //important: this mark the ents as deleted
@@ -989,7 +982,7 @@ void int_deleterow(struct sheet * sh, int row, int mult) {
         }
 
         rebuild_graph(); //TODO CHECK HERE WHY REBUILD IS NEEDED. See NOTE1 in shift.c
-        sync_refs();
+        sync_refs(sh);
         EvalAll();
         sh->maxrow--;
     }
@@ -998,16 +991,16 @@ void int_deleterow(struct sheet * sh, int row, int mult) {
 
 
 /**
- * \brief Document ljustify()
+ * \brief ljustify()
+ * \param[in] struct sheet * sh
  * \param[in] sr
  * \param[in] sc
  * \param[in] er
  * \param[in] ec
  * \return none
  */
-void ljustify(int sr, int sc, int er, int ec) {
+void ljustify(struct sheet * sh, int sr, int sc, int er, int ec) {
     struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
     struct ent *p;
     int i, j;
 
@@ -1036,16 +1029,16 @@ void ljustify(int sr, int sc, int er, int ec) {
 
 
 /**
- * \brief TODO Document rjustify()
+ * \brief rjustify()
+ * \param[in] struct sheet * sh
  * \param[in] sr
  * \param[in] sc
  * \param[in] er
  * \param[in] ec
  * \return none
  */
-void rjustify(int sr, int sc, int er, int ec) {
+void rjustify(struct sheet * sh, int sr, int sc, int er, int ec) {
     struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
     struct ent *p;
     int i, j;
 
@@ -1074,16 +1067,16 @@ void rjustify(int sr, int sc, int er, int ec) {
 
 
 /**
- * \brief TODO Document center()
+ * \brief center()
+ * \param[in] struct sheet * sh
  * \param[in] sr
  * \param[in] sc
  * \param[in] er
  * \param[in] ec
  * \return none
  */
-void center(int sr, int sc, int er, int ec) {
+void center(struct sheet * sh, int sr, int sc, int er, int ec) {
     struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
     struct ent *p;
     int i, j;
 
@@ -1112,7 +1105,7 @@ void center(int sr, int sc, int er, int ec) {
 
 
 /**
- * @brief TODO Document chg_mode
+ * @brief chg_mode()
  * \param[in] strcmd
  * \return none
  */
@@ -1152,13 +1145,13 @@ void chg_mode(char strcmd){
 
 
 /**
- * \brief Delete selected cells
+ * \brief del_selected_cells()
  * \details Delete selected cell or range of cells.
+ * \param[in] struct sheet * sh
  * \return none
  */
-void del_selected_cells() {
+void del_selected_cells(struct sheet * sh) {
     struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
     int tlrow = sh->currow;
     int tlcol = sh->curcol;
     int brrow = sh->currow;
@@ -1173,15 +1166,15 @@ void del_selected_cells() {
         brcol = r->brcol;
     }
 
-    if (any_locked_cells(tlrow, tlcol, brrow, brcol)) {
+    if (any_locked_cells(sh, tlrow, tlcol, brrow, brcol)) {
         sc_error("Locked cells encountered. Nothing changed");
         return;
     }
 
     if (is_range_selected() != -1)
-        yank_area(tlrow, tlcol, brrow, brcol, 'a', 1);
+        yank_area(sh, tlrow, tlcol, brrow, brcol, 'a', 1);
     else
-        yank_area(tlrow, tlcol, brrow, brcol, 'e', 1);
+        yank_area(sh, tlrow, tlcol, brrow, brcol, 'e', 1);
 
 #ifdef UNDO
     create_undo_action();
@@ -1192,7 +1185,7 @@ void del_selected_cells() {
 
     erase_area(sh, tlrow, tlcol, brrow, brcol, 0, 0); //important: this erases the ents, but does NOT mark them as deleted
     roman->modflg++;
-    sync_refs();
+    sync_refs(sh);
     //flush_saved(); DO NOT UNCOMMENT! flush_saved shall not be called other than at exit.
 
     EvalRange(sh, tlrow, tlcol, brrow, brcol);
@@ -1211,20 +1204,20 @@ void del_selected_cells() {
 
 
 /**
- * \brief Enter cell content on a cell
+ * \brief enter_cell_content()
  * \details Enter cell content on a cell.
  * Covers commands LET, LABEL, LEFTSTRING, and RIGHTSTRING
+ * \param[in] struct sheet * sh
  * \param[in] r
  * \param[in] c
  * \param[in] submode
  * \param[in] content
  * \return none
  */
-void enter_cell_content(int r, int c, char * submode,  wchar_t * content) {
-    struct roman * roman = session->cur_doc;
+void enter_cell_content(struct sheet * sh, int r, int c, char * submode,  wchar_t * content) {
     (void) swprintf(interp_line, BUFFERSIZE, L"%s %s = %ls", submode, v_name(r, c), content);
     send_to_interp(interp_line);
-    if (get_conf_int("autocalc") && ! roman->loading) EvalRange(roman->cur_sh, r, c, r, c);
+    if (get_conf_int("autocalc") && ! session->cur_doc->loading) EvalRange(sh, r, c, r, c);
 }
 
 
@@ -1256,8 +1249,9 @@ void send_to_interp(wchar_t * oper) {
 
 
 /**
- * \brief Return a pointer to a cell's [struct ent *]
- * Return a pointer to a cell's [struct ent *], creating if needed
+ * \brief lookat()
+ * \details Return a pointer to a cell's [struct ent *], creating if needed
+ * \param[in] struct sheet * sh
  * \param[in] row
  * \param[in] col
  * \return none
@@ -1289,7 +1283,8 @@ struct ent * lookat(struct sheet * sh, int row, int col) {
 
 
 /**
- * \brief Blank an ent
+ * \brief cleanent()
+ * \details Blank an ent
  * \param[in] p
  * \return none
  */
@@ -1313,7 +1308,8 @@ void cleanent(struct ent * p) {
 
 
 /**
- * \brief Free memory of an ent and its contents
+ * \brief clearent()
+ * \details Free memory of an ent and its contents
  * \param[in] v
  * \return none
  */
@@ -1341,13 +1337,13 @@ void clearent(struct ent * v) {
 
 
 /**
- * \brief Moves curcol back one displayed column
+ * \brief back_col()
+ * \details Moves curcol back one displayed column
+ * \param[in] struct sheet * sh
  * \param[in] arg
  * \return lookat
  */
-struct ent * back_col(int arg) {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
+struct ent * back_col(struct sheet * sh, int arg) {
     int c = sh->curcol;
 
     while (--arg >= 0) {
@@ -1369,13 +1365,13 @@ struct ent * back_col(int arg) {
 
 
 /**
- * \brief Moves curcol forward one displayed column
+ * \brief forw_col()
+ * \details Moves curcol forward one displayed column
+ * \param[in] struct sheet * sh
  * \param[in] arg
  * \return lookat
  */
-struct ent * forw_col(int arg) {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
+struct ent * forw_col(struct sheet * sh, int arg) {
     int c = sh->curcol;
 
     while (--arg >= 0) {
@@ -1399,13 +1395,13 @@ struct ent * forw_col(int arg) {
 
 
 /**
- * \brief Move currow forward one displayed row
+ * \brief forw_row()
+ * \details Move currow forward one displayed row
+ * \param[in] struct sheet * sh
  * \param[in] arg
  * \return lookat
  */
-struct ent * forw_row(int arg) {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
+struct ent * forw_row(struct sheet * sh, int arg) {
     int r = sh->currow;
 
     while (arg--) {
@@ -1425,12 +1421,12 @@ struct ent * forw_row(int arg) {
 
 
 /**
- * \brief Moves currow backward on displayed row
+ * \brief back_row()
+ * \details Moves currow backward on displayed row
+ * \param[in] struct sheet * sh
  * \return lookat
  */
-struct ent * back_row(int arg) {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
+struct ent * back_row(struct sheet * sh, int arg) {
     int r = sh->currow;
 
     while (--arg >= 0) {
@@ -1447,17 +1443,16 @@ struct ent * back_row(int arg) {
 
 
 /**
- * \brief Document scroll_down()
+ * \brief scroll_down()
+ * \param[in] struct sheet * sh
  * \param[in] n
  * \return none
  */
-void scroll_down(int n) {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
+void scroll_down(struct sheet * sh, int n) {
     while (n--) {
         int last, currow_orig = sh->currow;
         /* find last mobile row */
-        calc_mobile_rows(&last);
+        calc_mobile_rows(sh, &last);
         /* move to next non-hidden non-frozen row */
         do {
             lookat(sh, ++last, sh->curcol);
@@ -1466,7 +1461,7 @@ void scroll_down(int n) {
         } while (sh->row_hidden[last] || sh->row_frozen[last]);
         /* this will adjust offscr_sc_rows */
         sh->currow = last;
-        calc_mobile_rows(NULL);
+        calc_mobile_rows(sh, NULL);
         /* restore currow */
         sh->currow = currow_orig;
         if (sh->currow < sh->offscr_sc_rows)
@@ -1477,13 +1472,12 @@ void scroll_down(int n) {
 
 
 /**
- * @brief Document scroll_up()
+ * \brief scroll_up()
+ * \param[in] struct sheet * sh
  * \param[in] n
  * \return none
  */
-void scroll_up(int n) {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
+void scroll_up(struct sheet * sh, int n) {
     while (n--) {
         int first, last, currow_orig = sh->currow;
         /* move to previous non-hidden non-frozen row */
@@ -1495,7 +1489,7 @@ void scroll_up(int n) {
         sh->offscr_sc_rows = first;
         /* find corresponding last mobile row */
         sh->currow = first;
-        calc_mobile_rows(&last);
+        calc_mobile_rows(sh, &last);
         /* restore/adjust currow */
         sh->currow = currow_orig;
         if (sh->currow > last)
@@ -1506,22 +1500,21 @@ void scroll_up(int n) {
 
 
 /**
- * \brief TODO Document go_home()
+ * \brief go_home()
+ * \param[in] struct sheet * sh
  * \return lookat
  */
-struct ent * go_home() {
-    struct roman * roman = session->cur_doc;
-    return lookat(roman->cur_sh, 0, 0);
+struct ent * go_home(struct sheet * sh) {
+    return lookat(sh, 0, 0);
 }
 
 
 /**
  * \brief vert_top() - for command H in normal mode
+ * \param[in] struct sheet * sh
  * \return lookat
  */
-struct ent * vert_top() {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
+struct ent * vert_top(struct sheet * sh) {
     int r = sh->offscr_sc_rows;
     while (sh->row_hidden[r] || sh->row_frozen[r]) r++;
     return lookat(sh, r, sh->curcol);
@@ -1530,26 +1523,25 @@ struct ent * vert_top() {
 
 /**
  * \brief vert_bottom() - for command L in normal mode
+ * \param[in] struct sheet * sh
  * \return lookat
  */
-struct ent * vert_bottom() {
-    struct roman * roman = session->cur_doc;
+struct ent * vert_bottom(struct sheet * sh) {
     int last;
-    calc_mobile_rows(&last);
-    return lookat(roman->cur_sh, last, roman->cur_sh->curcol);
+    calc_mobile_rows(sh, &last);
+    return lookat(sh, last, sh->curcol);
 }
 
 /**
  * \brief vert_middle() - for command M in normal mode
+ * \param[in] struct sheet * sh
  * \return lookat
  */
-struct ent * vert_middle() {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
+struct ent * vert_middle(struct sheet * sh) {
     int i;
     int midscreen_pos = (SC_DISPLAY_ROWS - 1)/2;
     int curr_pos = 0;
-    int mobile_rows = calc_mobile_rows(NULL);
+    int mobile_rows = calc_mobile_rows(sh, NULL);
 
     for (i = 0; i < sh->maxrows; i++) {
         if (sh->row_hidden[i])
@@ -1573,11 +1565,10 @@ struct ent * vert_middle() {
 
 /**
  * \brief go_end(): go to last valid cell of grid
+ * \param[in] struct sheet * sh
  * \return lookat; NULL otherwise
  */
-struct ent * go_end() {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
+struct ent * go_end(struct sheet * sh) {
     int r = 0, c = 0;
     int raux = r, caux = c;
     struct ent *p;
@@ -1630,17 +1621,16 @@ struct ent * tick(char ch) {
 
 
 /**
- * \brief TODO  Document scroll_right()
+ * \brief scroll_right()
+ * \param[in] struct sheet * sh
  * \param[in] n
  * \return none
  */
-void scroll_right(int n) {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
+void scroll_right(struct sheet * sh, int n) {
     while (n--) {
         int last, curcol_orig = sh->curcol;
         /* find last mobile column */
-        calc_mobile_cols(&last);
+        calc_mobile_cols(sh, &last);
         /* move to next non-hidden non-frozen column */
         do {
             lookat(sh, sh->currow, ++last);
@@ -1649,7 +1639,7 @@ void scroll_right(int n) {
         } while (sh->col_hidden[last] || sh->col_frozen[last]);
         /* this will adjust offscr_sc_cols */
         sh->curcol = last;
-        calc_mobile_cols(NULL);
+        calc_mobile_cols(sh, NULL);
         /* restore curcol */
         sh->curcol = curcol_orig;
         if (sh->curcol < sh->offscr_sc_cols)
@@ -1659,13 +1649,12 @@ void scroll_right(int n) {
 }
 
 /**
- * @brief TODO Document scroll_left()
+ * \brief scroll_left()
+ * \param[in] struct sheet * sh
  * \param[in] n
  * \return none
  */
-void scroll_left(int n) {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
+void scroll_left(struct sheet * sh, int n) {
     while (n--) {
         int first, last, curcol_orig = sh->curcol;
         /* move to previous non-hidden non-frozen column */
@@ -1677,7 +1666,7 @@ void scroll_left(int n) {
         sh->offscr_sc_cols = first;
         /* find corresponding last mobile column */
         sh->curcol = first;
-        calc_mobile_cols(&last);
+        calc_mobile_cols(sh, &last);
         /* restore/adjust curcol */
         sh->curcol = curcol_orig;
         if (sh->curcol > last)
@@ -1688,13 +1677,11 @@ void scroll_left(int n) {
 
 
 /**
- * \brief TODO Document left_limit()
- *
+ * \brief left_limit()
+ * \param[in] struct sheet * sh
  * \return lookat
  */
-struct ent * left_limit() {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
+struct ent * left_limit(struct sheet * sh) {
     int c = 0;
     while (sh->col_hidden[c] && c < sh->curcol ) c++;
     return lookat(sh, sh->currow, c);
@@ -1704,12 +1691,11 @@ struct ent * left_limit() {
 /**
  * \brief right_limit()
  * \details get the last valid cell to the right
+ * \param[in] struct sheet * sh
  * \param[in] row where to check
  * \return lookat
  */
-struct ent * right_limit(int row) {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
+struct ent * right_limit(struct sheet * sh, int row) {
     struct ent *p;
     int c = sh->maxcols - 1;
     while ( (! VALID_CELL(sh, p, row, c) && c > 0) || sh->col_hidden[c]) c--;
@@ -1719,11 +1705,10 @@ struct ent * right_limit(int row) {
 
 /**
  * \brief goto_top()
+ * \param[in] struct sheet * sh
  * \return lookat
  */
-struct ent * goto_top() {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
+struct ent * goto_top(struct sheet * sh) {
     int r = 0;
     while (sh->row_hidden[r] && r < sh->currow ) r++;
     return lookat(sh, r, sh->curcol);
@@ -1732,11 +1717,10 @@ struct ent * goto_top() {
 
 /**
  * \brief goto_bottom()
+ * \param[in] struct sheet * sh
  * \return lookat
  */
-struct ent * goto_bottom() {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
+struct ent * goto_bottom(struct sheet * sh) {
     struct ent *p;
     int r = sh->maxrows - 1;
     while ( (! VALID_CELL(sh, p, r, sh->curcol) && r > 0) || sh->row_hidden[r]) r--;
@@ -1746,14 +1730,13 @@ struct ent * goto_bottom() {
 
 /**
  * \brief goto_last_col()
- * traverse the table and see which is the max column that has content
+ * \details traverse the table and see which is the max column that has content
  * this is because maxcol changes when moving cursor.
  * this function is used when exporting files
+ * \param[in] struct sheet * sh
  * \return lookat
  */
-struct ent * goto_last_col() {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
+struct ent * goto_last_col(struct sheet * sh) {
     int r, mr = sh->maxrows;
     int c, mc = 0;
     struct ent *p;
@@ -1769,12 +1752,11 @@ struct ent * goto_last_col() {
 
 
 /**
- * @brief go_forward()
+ * \brief go_forward()
+ * \param[in] struct sheet * sh
  * \return lookat
  */
-struct ent * go_forward() {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
+struct ent * go_forward(struct sheet * sh) {
     int r = sh->currow, c = sh->curcol;
     int r_ori = r, c_ori = c;
     struct ent * p;
@@ -1796,39 +1778,37 @@ struct ent * go_forward() {
 
 
 /**
- * \brief TODO Document go_bol()
- *
+ * \brief go_bol()
+ * \param[in] struct sheet * sh
  * \return lookat
  */
-struct ent * go_bol() {
-    struct roman * roman = session->cur_doc;
-    return lookat(roman->cur_sh, roman->cur_sh->currow, roman->cur_sh->offscr_sc_cols);
+struct ent * go_bol(struct sheet * sh) {
+    return lookat(sh, sh->currow, sh->offscr_sc_cols);
 }
 
 
 /**
- * \brief TODO Document go_eol()
+ * \brief go_eol()
+ * \param[in] struct sheet * sh
  * \return none
  */
-struct ent * go_eol() {
-    struct roman * roman = session->cur_doc;
+struct ent * go_eol(struct sheet * sh) {
     int last_col;
-    calc_mobile_cols(&last_col);
-    return lookat(roman->cur_sh, roman->cur_sh->currow, last_col);
+    calc_mobile_cols(sh, &last_col);
+    return lookat(sh, sh->currow, last_col);
 }
 
 
 /**
  * \brief horiz_middle()
+ * \param[in] struct sheet * sh
  * \return lookat; NULL otherwise
  */
-struct ent * horiz_middle() {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
+struct ent * horiz_middle(struct sheet * sh) {
     int i;
     int midscreen_pos = (SC_DISPLAY_COLS - 1)/2;
     int curr_pos = 0;
-    int mobile_cols = calc_mobile_cols(NULL);
+    int mobile_cols = calc_mobile_cols(sh, NULL);
 
     for (i = 0; i < sh->maxcols; i++) {
         if (sh->col_hidden[i])
@@ -1852,11 +1832,10 @@ struct ent * horiz_middle() {
 
 /**
  * \brief go_backward()
+ * \param[in] struct sheet * sh
  * \return lookat
  */
-struct ent * go_backward() {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
+struct ent * go_backward(struct sheet * sh) {
     int r = sh->currow, c = sh->curcol;
     int r_ori = r, c_ori = c;
     struct ent * p;
@@ -1878,17 +1857,14 @@ struct ent * go_backward() {
 
 
 /**
- * \brief TODO Document auto_fit()
- *
+ * \brief auto_fit()
+ * \param[in] struct sheet * sh
  * \param[in] ci
  * \param[in] cf
  * \param[in] min
- *
  * \return none
  */
-void auto_fit(int ci, int cf, int min) {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
+void auto_fit(struct sheet * sh, int ci, int cf, int min) {
     // column width is not set below the min value
     int r, c, sum = 0;
     char field[1024] = "";
@@ -1941,11 +1917,13 @@ void auto_fit(int ci, int cf, int min) {
 
 
 /**
- * \brief Delete a cell expression and turn into constant
- *
- * \details Deletes the expression associated with a cell and
+ * \brief valueize_area()
+ * \details
+ * Delete a cell expression and turn into constant.
+ * Deletes the expression associated with a cell and
  * turns it into a constant containing whatever was on the screen.
  *
+ * \param[in] struct sheet * sh
  * \param[in] sr
  * \param[in] sc
  * \param[in] er
@@ -1953,9 +1931,7 @@ void auto_fit(int ci, int cf, int min) {
  *
  * \return none
  */
-void valueize_area(int sr, int sc, int er, int ec) {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
+void valueize_area(struct sheet * sh, int sr, int sc, int er, int ec) {
     int r, c;
     struct ent *p;
 
@@ -2026,16 +2002,15 @@ void valueize_area(int sr, int sc, int er, int ec) {
 
 
 /**
- * \brief TODO Document select_inner_range()
+ * \brief select_inner_range()
+ * \param[in] struct sheet * sh
  * \param[in] vir_tlrow
  * \param[in] vir_tlcol
  * \param[in] vir_brrow
  * \param[in] vir_brcol
  * \return none
  */
-void select_inner_range(int * vir_tlrow, int * vir_tlcol, int * vir_brrow, int * vir_brcol) {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
+void select_inner_range(struct sheet * sh, int * vir_tlrow, int * vir_tlcol, int * vir_brrow, int * vir_brcol) {
     struct ent * p;
     int rr, cc, r, c, mf = 1;
 
@@ -2075,13 +2050,15 @@ void select_inner_range(int * vir_tlrow, int * vir_tlcol, int * vir_brrow, int *
 
 
 /**
- * \brief Check if cell is locked
- *
+ * \brief locked_cell()
+ * \details Check if cell is locked
+ * \param[in] struct sheet * sh
+ * \param[in] int r
+ * \param[in] int c
  * \return 1 if cell if locked; 0 otherwise
  */
-int locked_cell(int r, int c) {
-    struct roman * roman = session->cur_doc;
-    struct ent *p = *ATBL(roman->cur_sh, roman->cur_sh->tbl, r, c);
+int locked_cell(struct sheet * sh, int r, int c) {
+    struct ent *p = *ATBL(sh, sh->tbl, r, c);
     if (p && (p->flags & is_locked)) {
         sc_error("Cell %s%d is locked", coltoa(c), r) ;
         return 1;
@@ -2091,23 +2068,22 @@ int locked_cell(int r, int c) {
 
 
 /**
- * \brief Check if area contains locked cells
- *
+ * \brief any_locked_cells()
+ * \details Check if area contains locked cells
+ * \param[in] struct sheet * sh
  * \param[in] r1
  * \param[in] c1
  * \param[in] r2
  * \param[in] c2
- *
  * \return 1 if area contains a locked cell; 0 otherwise
  */
-int any_locked_cells(int r1, int c1, int r2, int c2) {
-    struct roman * roman = session->cur_doc;
+int any_locked_cells(struct sheet * sh, int r1, int c1, int r2, int c2) {
     int r, c;
     struct ent * p ;
 
     for (r = r1; r <= r2; r++)
         for (c = c1; c <= c2; c++) {
-            p = *ATBL(roman->cur_sh, roman->cur_sh->tbl, r, c);
+            p = *ATBL(sh, sh->tbl, r, c);
             if (p && (p->flags & is_locked))
                 return 1;
         }
@@ -2116,12 +2092,12 @@ int any_locked_cells(int r1, int c1, int r2, int c2) {
 
 
 /**
- * \brief sum special command
+ * \brief fsum()
+ * \details sum special command
+ * \param[in] struct sheet * sh
  * \return none
  */
-int fsum() {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
+int fsum(struct sheet * sh) {
     int r = sh->currow, c = sh->curcol;
     struct ent * p;
 
@@ -2157,13 +2133,12 @@ int fsum() {
 
 
 /**
- * \brief fcopy special command
+ * \brief fcopy()
+ * \param[in] struct sheet * sh
  * \param[in] action
  * \return -1 on error; 0 otherwise
  */
-int fcopy(char * action) {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
+int fcopy(struct sheet * sh, char * action) {
     int r, ri, rf, c, ci, cf;
     struct ent * pdest;
     struct ent * pact;
@@ -2216,7 +2191,7 @@ int fcopy(char * action) {
 
     all_formulas_found:
 
-    if (any_locked_cells(ri, ci, rf, cf)) {
+    if (any_locked_cells(sh, ri, ci, rf, cf)) {
         swprintf(interp_line, BUFFERSIZE, L"");
         sc_error("Locked cells encountered. Nothing changed");
         return -1;
@@ -2273,21 +2248,24 @@ int fcopy(char * action) {
 
 
 /**
- * \brief Add padding to cells
- *
+ * \brief pad()
+ * \details Add padding to cells
+ * \param[in] struct sheet * sh
+ * \param[in] int n
+ * \param[in] int r1
+ * \param[in] int c1
+ * \param[in] int r2
+ * \param[in] int c2
  * \details Add padding to cells. This set padding of a range.
- *
  * \return -1 if locked cell is encountered; 1 if padding exceeded
  * column width; 0 otherwise
  */
-int pad(int n, int r1, int c1, int r2, int c2) {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
+int pad(struct sheet * sh, int n, int r1, int c1, int r2, int c2) {
     int r, c;
     struct ent * p ;
     int pad_exceed_width = 0;
 
-    if (any_locked_cells(r1, c1, r2, c2)) {
+    if (any_locked_cells(sh, r1, c1, r2, c2)) {
         sc_info("Locked cells encountered. Nothing changed");
         return -1;
      }
@@ -2304,7 +2282,7 @@ int pad(int n, int r1, int c1, int r2, int c2) {
                 continue;
             }
             if ((p = *ATBL(sh, sh->tbl, r, c)) != NULL) p->pad = n;
-            roman->modflg++;
+            session->cur_doc->modflg++;
         }
     }
 
@@ -2322,13 +2300,15 @@ int pad(int n, int r1, int c1, int r2, int c2) {
 
 
 /**
- * \brief fix_row_hidden
+ * \brief fix_row_hidden()
+ * \param[in] struct sheet * sh
+ * \param[in] int deltar
+ * \param[in] int ri
+ * \param[in] int rf
  * \details fix hidden rows after undoing ir dr etc..
  * \return none
  */
-void fix_row_hidden(int deltar, int ri, int rf) {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
+void fix_row_hidden(struct sheet * sh, int deltar, int ri, int rf) {
     int r;
     int d = deltar;
 
@@ -2348,13 +2328,15 @@ void fix_row_hidden(int deltar, int ri, int rf) {
 
 
 /**
- * \brief fix_col_hidden
+ * \brief fix_col_hidden()
  * \details fix hidden cols after undoing ic dc etc..
+ * \param[in] struct sheet * sh
+ * \param[in] int deltac
+ * \param[in] int ci
+ * \param[in] int cf
  * \return none
  */
-void fix_col_hidden(int deltac, int ci, int cf) {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
+void fix_col_hidden(struct sheet * sh, int deltac, int ci, int cf) {
     int c;
     int d = deltac;
 
@@ -2374,13 +2356,15 @@ void fix_col_hidden(int deltac, int ci, int cf) {
 
 
 /**
- * \brief fix_row_frozen
+ * \brief fix_row_frozen()
  * \details fix frozen rows after undoing ir dr etc..
+ * \param[in] struct sheet * sh
+ * \param[in] int deltar
+ * \param[in] int ri
+ * \param[in] int rf
  * \return none
  */
-void fix_row_frozen(int deltar, int ri, int rf) {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
+void fix_row_frozen(struct sheet * sh, int deltar, int ri, int rf) {
     int r;
     int d = deltar;
 
@@ -2400,13 +2384,15 @@ void fix_row_frozen(int deltar, int ri, int rf) {
 
 
 /**
- * \brief fix_col_frozen
+ * \brief fix_col_frozen()
  * \details fix frozen cols after undoing ic dc etc..
+ * \param[in] struct sheet * sh
+ * \param[in] int deltac
+ * \param[in] int ci
+ * \param[in] int cf
  * \return none
  */
-void fix_col_frozen(int deltac, int ci, int cf) {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
+void fix_col_frozen(struct sheet * sh, int deltac, int ci, int cf) {
     int c;
     int d = deltac;
 
@@ -2436,13 +2422,12 @@ void fix_col_frozen(int deltac, int ci, int cf) {
  * the displayed rows. If currow is found to be outside the displayed set
  * of rows then offscr_sc_rows is adjusted accordingly.
  *
+ * \param[in] struct sheet * sh
  * \param[in] last_p If not NULL then the last mobile row to fit is stored there
  *
  * \return Number of mobile rows displayable on the screen
  */
-int calc_mobile_rows(int *last_p) {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
+int calc_mobile_rows(struct sheet * sh, int *last_p) {
     int i, row_space, mobile_rows, last;
 
     /*
@@ -2526,13 +2511,12 @@ int calc_mobile_rows(int *last_p) {
  * the displayed columns. If curcol is found to be outside the displayed set
  * of columns then offscr_sc_cols is adjusted accordingly.
  *
+ * \param[in] struct sheet * sh
  * \param[in] last_p If not NULL then the last mobile column to fit is stored there
  *
  * \return Number of mobile columns displayable on the screen
  */
-int calc_mobile_cols(int *last_p) {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
+int calc_mobile_cols(struct sheet * sh, int *last_p) {
     int i, col_space, mobile_cols, last;
 
     /*

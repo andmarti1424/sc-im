@@ -317,8 +317,8 @@ void ui_do_welcome() {
     #endif
 
     // show headings
-    int nbcols = calc_mobile_cols(NULL);
-    int nbrows = calc_mobile_rows(NULL);
+    int nbcols = calc_mobile_cols(session->cur_doc->cur_sh, NULL);
+    int nbrows = calc_mobile_rows(session->cur_doc->cur_sh, NULL);
     ui_show_sc_col_headings(main_win, nbcols);
     ui_show_content(main_win, nbrows, nbcols);
     ui_show_sc_row_headings(main_win, nbrows); // show_sc_row_headings must be after show_content
@@ -434,8 +434,8 @@ void ui_update(int header) {
      * the number of visible mobile columns and rows. The more there are
      * frozen rows/cols, the fewer mobile rows/cols.
      */
-    int nb_mobile_cols = calc_mobile_cols(NULL);
-    int nb_mobile_rows = calc_mobile_rows(NULL);
+    int nb_mobile_cols = calc_mobile_cols(sh, NULL);
+    int nb_mobile_rows = calc_mobile_rows(sh, NULL);
 
     // Show sc_col headings: A, B, C, D..
     ui_show_sc_col_headings(main_win, nb_mobile_cols);
@@ -1007,7 +1007,7 @@ void ui_show_content(WINDOW * win, int nb_mobile_rows, int nb_mobile_cols) {
                     wattr_set(win, attr | A_UNDERLINE, color, NULL);
                 }
 #endif
- 
+
                 if (!conf_truncate && !conf_overlap && conf_autowrap) {
                     // auto wrap
                     int newheight = (wcslen(out) + sh->fwidth[col] - 1) / sh->fwidth[col];
@@ -1598,13 +1598,13 @@ void ui_handle_mouse(MEVENT event) {
 #ifdef BUTTON5_PRESSED
     if (curmode == NORMAL_MODE && (event.bstate & BUTTON4_PRESSED || // scroll up
         event.bstate & BUTTON5_PRESSED)) { // scroll down
-            int n = calc_mobile_rows(NULL);
+            int n = calc_mobile_rows(sh, NULL);
             if (get_conf_int("half_page_scroll")) n = n / 2;
             sh->lastcol = sh->curcol;
             sh->lastrow = sh->currow;
-            sh->currow = event.bstate & BUTTON5_PRESSED ? forw_row(n)->row : back_row(n)->row;
-            if (event.bstate & BUTTON5_PRESSED) scroll_down(n);
-            else scroll_up(n);
+            sh->currow = event.bstate & BUTTON5_PRESSED ? forw_row(sh, n)->row : back_row(sh, n)->row;
+            if (event.bstate & BUTTON5_PRESSED) scroll_down(sh, n);
+            else scroll_up(sh, n);
             unselect_ranges();
             ui_update(TRUE);
         return;
@@ -1626,8 +1626,8 @@ void ui_handle_mouse(MEVENT event) {
          r < 0 || r >= SC_DISPLAY_ROWS ) return;
 
     int i, j;
-    int mobile_cols = calc_mobile_cols(NULL);
-    int mobile_rows = calc_mobile_rows(NULL);
+    int mobile_cols = calc_mobile_cols(sh, NULL);
+    int mobile_rows = calc_mobile_rows(sh, NULL);
     int scr_col = 0;
     int scr_row = 0;
 

@@ -41,8 +41,7 @@
  * \date 2017-07-18
  * \brief Header file for file.c
  */
-
-#include "freeze.h"
+#include "sc.h"
 
 int modcheck();
 

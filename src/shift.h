@@ -42,10 +42,11 @@
  * \brief Header file for shift.c
  */
 
-void shift_cells(int type, int arg, int delta);
-void shift_cells_up(int deltarows, int deltacols);
-void shift_cells_down(int deltarows, int deltacols);
-void shift_cells_left(int deltarows, int deltacols);
-void shift_cells_right(int deltarows, int deltacols);
-void shift_range(int delta_rows, int delta_cols, int tlrow, int tlcol, int brrow, int brcol);
-void shift(int r, int c, int rf, int cf, wchar_t type);
+#include "sc.h"
+void shift_cells(struct sheet * sh, int type, int arg, int delta);
+void shift_cells_up(struct sheet * sh, int deltarows, int deltacols);
+void shift_cells_down(struct sheet * sh, int deltarows, int deltacols);
+void shift_cells_left(struct sheet * sh, int deltarows, int deltacols);
+void shift_cells_right(struct sheet * sh, int deltarows, int deltacols);
+void shift_range(struct sheet * sh, int delta_rows, int delta_cols, int tlrow, int tlcol, int brrow, int brcol);
+void shift(struct sheet * sh, int r, int c, int rf, int cf, wchar_t type);

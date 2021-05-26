@@ -752,13 +752,14 @@ double doeqs(char * s1, char * s2) {
  * \brief donval()
  * \details Given a string representing a column name and a value which is a
  * column number, return the selected cell's numeric value, if any.
+ * \param[in] struct sheet * sh
  * \param[in] colstr
  * \param[in] rowdoub
  * \return double
  */
-double donval(char * colstr, double rowdoub) {
+double donval(struct sheet * sh, char * colstr, double rowdoub) {
     struct ent * ep;
-    return (((ep = getent(colstr, rowdoub, 0)) && ((ep->flags) & is_valid)) ? (ep->v) : (double)0);
+    return (((ep = getent(sh, colstr, rowdoub, 0)) && ((ep->flags) & is_valid)) ? (ep->v) : (double)0);
 }
 
 
@@ -984,18 +985,19 @@ char * doext(struct sheet * sh, struct enode *se) {
  * is a column number, return the selected cell's string value, if any.
  * Even if none, still allocate and return a null string, so the cell
  * has a label value, so the expression is saved in a file, etc..
+ * \param[in] struct sheet * sh
  * \param[in] colstr
  * \param[in] rowdoub
  * \return char *
  */
-char * dosval(char * colstr, double rowdoub) {
+char * dosval(struct sheet * sh, char * colstr, double rowdoub) {
     struct ent * ep;
     char * llabel;
 
     //llabel = (ep = getent(colstr, rowdoub, 0)) ? (ep -> label) : "";
 
     // getent don't return NULL for a cell with no string.
-    llabel = ( ep = getent(colstr, rowdoub, 0) ) && ep -> label ? (ep -> label) : "";
+    llabel = ( ep = getent(sh, colstr, rowdoub, 0) ) && ep -> label ? (ep -> label) : "";
 
     return (strcpy(scxmalloc( (size_t) (strlen(llabel) + 1)), llabel));
 }

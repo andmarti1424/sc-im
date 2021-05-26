@@ -53,8 +53,8 @@
 #include "conf.h"
 #include "hide_show.h"
 #include "shift.h"
-#include "freeze.h"
 #include "yank.h"
+#include "freeze.h"
 #include "history.h"
 #include "interp.h"
 #ifdef UNDO
@@ -155,22 +155,22 @@ void do_visualmode(struct block * buf) {
         switch (buf->value) {
             case L'j':
             case OKEY_DOWN:
-                sh->currow = forw_row(1)->row;
+                sh->currow = forw_row(sh, 1)->row;
                 break;
 
             case L'k':
             case OKEY_UP:
-                sh->currow = back_row(1)->row;
+                sh->currow = back_row(sh, 1)->row;
                 break;
 
             case L'h':
             case OKEY_LEFT:
-                sh->curcol = back_col(1)->col;
+                sh->curcol = back_col(sh, 1)->col;
                 break;
 
             case L'l':
             case OKEY_RIGHT:
-                sh->curcol = forw_col(1)->col;
+                sh->curcol = forw_col(sh, 1)->col;
                 break;
 
             case ctl('o'):
@@ -278,12 +278,12 @@ void do_visualmode(struct block * buf) {
     // 0
     } else if (buf->value == L'0') {
         r->brcol = r->tlcol;
-        r->tlcol = left_limit()->col;
+        r->tlcol = left_limit(sh)->col;
         sh->curcol = r->tlcol;
 
     // $
     } else if (buf->value == L'$') {
-        int s = right_limit(sh->currow)->col;
+        int s = right_limit(sh, sh->currow)->col;
         r->tlcol = r->brcol;
         r->brcol = r->brcol > s ? r->brcol : s;
         sh->curcol = r->brcol;
@@ -291,13 +291,13 @@ void do_visualmode(struct block * buf) {
     // ^
     } else if (buf->value == L'^') {
         r->brrow = r->tlrow;
-        r->tlrow = goto_top()->row;
+        r->tlrow = goto_top(sh)->row;
         sh->currow = r->tlrow;
 
     // #
     } else if (buf->value == L'#') {
-        int s = goto_bottom()->row;
-        if (s == r->brrow) s = go_end()->row;
+        int s = goto_bottom(sh)->row;
+        if (s == r->brrow) s = go_end(sh)->row;
         //r->tlrow = r->brrow;
         r->brrow = r->brrow > s ? r->brrow : s;
         //r->brrow = s;
@@ -306,7 +306,7 @@ void do_visualmode(struct block * buf) {
     // ctl(a)
     } else if (buf->value == ctl('a')) {
         if (r->tlrow == 0 && r->tlcol == 0) return;
-        struct ent * e = go_home();
+        struct ent * e = go_home(sh);
         r->tlrow = e->row;
         r->tlcol = e->col;
         r->brrow = r->orig_row;
@@ -316,7 +316,7 @@ void do_visualmode(struct block * buf) {
 
     // G
     } else if (buf->value == L'G') {
-        struct ent * e = go_end();
+        struct ent * e = go_end(sh);
         r->tlrow = r->orig_row;
         r->tlcol = r->orig_col;
         r->brrow = e->row;
@@ -344,7 +344,7 @@ void do_visualmode(struct block * buf) {
 
     // w
     } else if (buf->value == L'w') {
-        struct ent * e = go_forward();
+        struct ent * e = go_forward(sh);
         if (e->col > r->orig_col) {
             r->brcol = e->col;
             r->tlcol = r->orig_col;
@@ -359,7 +359,7 @@ void do_visualmode(struct block * buf) {
 
     // b
     } else if (buf->value == L'b') {
-        struct ent * e = go_backward();
+        struct ent * e = go_backward(sh);
         if (e->col <= r->orig_col) {
             r->tlcol = e->col;
             r->brcol = r->orig_col;
@@ -375,13 +375,13 @@ void do_visualmode(struct block * buf) {
     // H
     } else if (buf->value == L'H') {
         r->brrow = r->tlrow;
-        r->tlrow = vert_top()->row;
+        r->tlrow = vert_top(sh)->row;
         sh->currow = r->tlrow;
 
     // M
     } else if (buf->value == L'M') {
         r->tlrow = r->orig_row;
-        int rm = vert_middle()->row;
+        int rm = vert_middle(sh)->row;
         if (r->orig_row < rm) r->brrow = rm;
         else r->tlrow = rm;
         sh->currow = r->tlrow;
@@ -389,7 +389,7 @@ void do_visualmode(struct block * buf) {
     // L
     } else if (buf->value == L'L') {
         r->tlrow = r->orig_row;
-        r->brrow = vert_bottom()->row;
+        r->brrow = vert_bottom(sh)->row;
         sh->currow = r->brrow;
 
     // mark a range
@@ -403,7 +403,7 @@ void do_visualmode(struct block * buf) {
 
     // auto_fit
     } else if (buf->value == ctl('j')) {
-        auto_fit(r->tlcol, r->brcol, DEFWIDTH);  // auto justify columns
+        auto_fit(sh, r->tlcol, r->brcol, DEFWIDTH);  // auto justify columns
         exit_visualmode();
         chg_mode('.');
         ui_show_header();
@@ -421,11 +421,11 @@ void do_visualmode(struct block * buf) {
             } else {
                 sc_error("No locale set. Nothing changed");
             }
-            if (any_locked_cells(r->tlrow, r->tlcol, r->brrow, r->brcol)) {
+            if (any_locked_cells(sh, r->tlrow, r->tlcol, r->brrow, r->brcol)) {
                 sc_error("Locked cells encountered. Nothing changed");
                 return;
             }
-            dateformat(lookat(sh, r->tlrow, r->tlcol), lookat(sh, r->brrow, r->brcol), f);
+            dateformat(sh, lookat(sh, r->tlrow, r->tlcol), lookat(sh, r->brrow, r->brcol), f);
         exit_visualmode();
         chg_mode('.');
         ui_show_header();
@@ -436,7 +436,7 @@ void do_visualmode(struct block * buf) {
     // EDITION COMMANDS
     // yank
     } else if (buf->value == 'y') {
-        yank_area(r->tlrow, r->tlcol, r->brrow, r->brcol, 'a', 1);
+        yank_area(sh, r->tlrow, r->tlcol, r->brrow, r->brcol, 'a', 1);
 
         exit_visualmode();
         chg_mode('.');
@@ -462,7 +462,7 @@ void do_visualmode(struct block * buf) {
                 for (col = r->tlcol; col <= r->brcol; col += colsize) {
                     sh->currow = row;
                     sh->curcol = col;
-                    paste_yanked_ents(0,type_paste);
+                    paste_yanked_ents(sh, 0, type_paste);
                 }
             }
             exit_visualmode();
@@ -484,7 +484,7 @@ void do_visualmode(struct block * buf) {
 
         // left / right / center align
     } else if (buf->value == L'{' || buf->value == L'}' || buf->value == L'|') {
-        if (any_locked_cells(r->tlrow, r->tlcol, r->brrow, r->brcol)) {
+        if (any_locked_cells(sh, r->tlrow, r->tlcol, r->brrow, r->brcol)) {
             sc_error("Locked cells encountered. Nothing changed");
             return;
         }
@@ -510,10 +510,10 @@ void do_visualmode(struct block * buf) {
 
     // freeze a range
     } else if (buf->value == L'f') {
-        handle_freeze(lookat(sh, r->tlrow, r->tlcol), lookat(sh, r->brrow, r->brcol), 1, 'r');
-        handle_freeze(lookat(sh, r->tlrow, r->tlcol), lookat(sh, r->brrow, r->brcol), 1, 'c');
-        cmd_multiplier = 0;
+        handle_freeze(sh, lookat(sh, r->tlrow, r->tlcol), lookat(sh, r->brrow, r->brcol), 1, 'r');
+        handle_freeze(sh, lookat(sh, r->tlrow, r->tlcol), lookat(sh, r->brrow, r->brcol), 1, 'c');
 
+        cmd_multiplier = 0;
         exit_visualmode();
         chg_mode('.');
         ui_show_header();
@@ -523,11 +523,11 @@ void do_visualmode(struct block * buf) {
     } else if ( buf->value == L'r' && (buf->pnext->value == L'l' || buf->pnext->value == L'u' ||
             buf->pnext->value == L'v' )) {
         if (buf->pnext->value == L'l') {
-            lock_cells(lookat(sh, r->tlrow, r->tlcol), lookat(sh, r->brrow, r->brcol));
+            lock_cells(sh, lookat(sh, r->tlrow, r->tlcol), lookat(sh, r->brrow, r->brcol));
         } else if (buf->pnext->value == L'u') {
-            unlock_cells(lookat(sh, r->tlrow, r->tlcol), lookat(sh, r->brrow, r->brcol));
+            unlock_cells(sh, lookat(sh, r->tlrow, r->tlcol), lookat(sh, r->brrow, r->brcol));
         } else if (buf->pnext->value == L'v') {
-            valueize_area(r->tlrow, r->tlcol, r->brrow, r->brcol);
+            valueize_area(sh, r->tlrow, r->tlcol, r->brrow, r->brcol);
         }
         cmd_multiplier = 0;
 
@@ -555,14 +555,14 @@ void do_visualmode(struct block * buf) {
 
     // delete selected range
     } else if (buf->value == L'x' || (buf->value == L'd' && buf->pnext->value == L'd') ) {
-        del_selected_cells();
+        del_selected_cells(sh);
         exit_visualmode();
         chg_mode('.');
         ui_show_header();
 
     // shift range
     } else if (buf->value == L's') {
-        shift(r->tlrow, r->tlcol, r->brrow, r->brcol, buf->pnext->value);
+        shift(sh, r->tlrow, r->tlcol, r->brrow, r->brcol, buf->pnext->value);
         exit_visualmode();
         chg_mode('.');
         ui_show_header();

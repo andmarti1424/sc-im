@@ -60,7 +60,7 @@
 
 extern struct session * session;
 
-int convert_string_to_number( int r0, int c0, int rn, int cn) {
+int convert_string_to_number(int r0, int c0, int rn, int cn) {
     struct roman * roman = session->cur_doc;
     int row, col;
     register struct ent ** pp;

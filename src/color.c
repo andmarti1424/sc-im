@@ -378,10 +378,9 @@ void chg_color(char * str) {
  * returns: none
  */
 
-void color_cell(int r, int c, int rf, int cf, char * str) {
+void color_cell(struct sheet * sh, int r, int c, int rf, int cf, char * str) {
     struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
-    if (any_locked_cells(r, c, rf, cf)) {
+    if (any_locked_cells(sh, r, c, rf, cf)) {
         sc_error("Locked cells encountered. Nothing changed");
         return;
     }
@@ -495,10 +494,9 @@ void color_cell(int r, int c, int rf, int cf, char * str) {
  * returns: none
  */
 
-void unformat(int r, int c, int rf, int cf) {
+void unformat(struct sheet * sh, int r, int c, int rf, int cf) {
     struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
-    if (any_locked_cells(r, c, rf, cf)) {
+    if (any_locked_cells(sh, r, c, rf, cf)) {
         sc_error("Locked cells encountered. Nothing changed");
         return;
     }

@@ -121,7 +121,7 @@ int subtotal(int r, int c, int rf, int cf, int group_col, char * operation, int 
         }
         if (is_subtotal_row) {
            cmd_multiplier = 1;
-           shift(i, c, i, cf, L'k');
+           shift(sh, i, c, i, cf, L'k');
            i--;
            rf--;
         }
@@ -141,7 +141,7 @@ int subtotal(int r, int c, int rf, int cf, int group_col, char * operation, int 
         if ( (p && q && p->label && q->label && strcmp(q->label, p->label) != 0)
            || i == rf + new_rows + 1) {
            cmd_multiplier = 1;
-           shift(i, c, i, cf, L'j');
+           shift(sh, i, c, i, cf, L'j');
 
            swprintf(cmd, BUFFERSIZE, L"rightstring %s%d = \"+%s(%s)\"", coltoa(group_col), i, operation, p->label);
            send_to_interp(cmd);
@@ -149,7 +149,7 @@ int subtotal(int r, int c, int rf, int cf, int group_col, char * operation, int 
            swprintf(cmd, BUFFERSIZE, L"let %s%d = %s(%s%d:%s%d)", coltoa(ope_col), i, operation,
            coltoa(ope_col), row_start_range, coltoa(ope_col), i-1);
            send_to_interp(cmd);
-           valueize_area(i, ope_col, i, ope_col);
+           valueize_area(sh, i, ope_col, i, ope_col);
 
            new_rows++;
            i++;
@@ -159,4 +159,3 @@ int subtotal(int r, int c, int rf, int cf, int group_col, char * operation, int 
 
     return 0;
 }
-

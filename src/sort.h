@@ -42,4 +42,4 @@
  * \brief Header file for sort.c
  */
 
-void sortrange(struct ent * left, struct ent * right, char * criteria);
+void sortrange(struct sheet * sh, struct ent * left, struct ent * right, char * criteria);

@@ -61,10 +61,10 @@
 #include "undo.h"
 #endif
 
-extern struct ent * forw_row(int arg);
-extern struct ent * back_row(int arg);
-extern struct ent * forw_col(int arg);
-extern struct ent * back_col(int arg);
+extern struct ent * forw_row(struct sheet * sh, int arg);
+extern struct ent * back_row(struct sheet * sh, int arg);
+extern struct ent * forw_col(struct sheet * sh, int arg);
+extern struct ent * back_col(struct sheet * sh, int arg);
 extern struct session * session;
 
 int yank_arg;                 // number of rows and columns yanked. Used for commands like `4yr`
@@ -162,8 +162,8 @@ void add_ent_to_yanklist(struct ent * item) {
 }
 
 /**
- * \brief Yank a range of ents
- *
+ * \brief Yank a range of ents of a given range of a sheet
+ * \param[in] struct sheet * sh
  * \param[in] tlrow
  * \param[in] tlcol
  * \param[in] brrow
@@ -176,9 +176,7 @@ void add_ent_to_yanklist(struct ent * item) {
  * \return none
  */
 
-void yank_area(int tlrow, int tlcol, int brrow, int brcol, char type, int arg) {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
+void yank_area(struct sheet * sh, int tlrow, int tlcol, int brrow, int brcol, char type, int arg) {
     int r,c;
     type_of_yank = type;
     yank_arg = arg;
@@ -212,22 +210,24 @@ void yank_area(int tlrow, int tlcol, int brrow, int brcol, char type, int arg) {
 }
 
 /**
- * \brief Paste yanked ents
+ * \brief paste_yanked_ents()
  *
  * \details This function is used for pasting ents that were yanked
- * with tr, yc, dr, or dc. It is also used for sorting.
- * \details If above == 1, paste is done above current row or the
- * right of the current column. Enst that were yanked using yy or yanked
- * ents of a range, always pasted in currow and curcol positions.
- * \details diffr: difference between current rows and the yanked 'ent'
- * \details diffc: difference between current columns and the yanked 'ent'
- * \details When sorting, rwo and col values can vary from yank to paste
+ * with yr, yc, dr, or dc. It is also used for sorting.
+ * If above == 1, paste is done above current row or the
+ * right of the current column. Ents that were yanked using yy or yanked
+ * ents of a range, are always pasted over currow and curcol positions
+ * of the given sheet.
+ * diffr: difference between current rows and the yanked 'ent'
+ * diffc: difference between current columns and the yanked 'ent'
+ * When sorting, rwo and col values can vary from yank to paste
  * time, so diffr should be zero.
- * \details When implementing column sorting, diffc should be zero as well!
- * \details type indicates if pasting format only, valuue only for the
+ * When implementing column sorting, diffc should be zero as well!
+ * type indicates if pasting format only, valuue only for the
  * whole content.
- * \details yank type: c=col, r=row, a=range, e=cell, '\0'=no yanking.
+ * yank type: c=col, r=row, a=range, e=cell, '\0'=no yanking.
  *
+ * \param[in] struct sheet * sh
  * \param[in] above
  * \param[in] type_paste
  *
@@ -235,9 +235,8 @@ void yank_area(int tlrow, int tlcol, int brrow, int brcol, char type, int arg) {
  * \return 0 otherwise
  */
 
-int paste_yanked_ents(int above, int type_paste) {
+int paste_yanked_ents(struct sheet * sh, int above, int type_paste) {
     struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
     if (yanklist == NULL) return 0;
 
     struct ent * yl = yanklist;
@@ -264,7 +263,7 @@ int paste_yanked_ents(int above, int type_paste) {
         copy_to_undostruct(sh->currow + ! above, 0, sh->currow + ! above - 1 + yank_arg, sh->maxcol, UNDO_DEL, IGNORE_DEPS, NULL);
 #endif
         while (c--) above ? insert_row(sh, 0) : insert_row(sh, 1);
-        if (! above) sh->currow = forw_row(1)->row;                   // paste below
+        if (! above) sh->currow = forw_row(sh, 1)->row;                   // paste below
         diffr = sh->currow - yl->row;
         diffc = yl->col;
         fix_marks(yank_arg, 0, sh->currow, sh->maxrow, 0, sh->maxcol);
@@ -277,7 +276,7 @@ int paste_yanked_ents(int above, int type_paste) {
 #ifdef UNDO
         copy_to_undostruct(0, sh->curcol + above, sh->maxrow, sh->curcol + above - 1 + yank_arg, UNDO_DEL, IGNORE_DEPS, NULL);
 #endif
-        while (c--) above ? insert_col(1) : insert_col(0);        // insert cols to the right if above or to the left
+        while (c--) above ? insert_col(sh, 1) : insert_col(sh, 0);        // insert cols to the right if above or to the left
         diffr = yl->row;
         diffc = sh->curcol - yl->col;
         fix_marks(0, yank_arg, 0, sh->maxrow, sh->curcol, sh->maxcol);
@@ -293,7 +292,7 @@ int paste_yanked_ents(int above, int type_paste) {
             int r = yll->row + diffr;
             int c = yll->col + diffc;
             checkbounds(sh, &r, &c);
-            if (any_locked_cells(yll->row + diffr, yll->col + diffc, yll->row + diffr, yll->col + diffc)) {
+            if (any_locked_cells(sh, yll->row + diffr, yll->col + diffc, yll->row + diffr, yll->col + diffc)) {
 #ifdef UNDO
                 dismiss_undo_item(NULL);
 #endif
@@ -344,14 +343,14 @@ int paste_yanked_ents(int above, int type_paste) {
         // sync_refs();
 
         if (destino->expr) {
-            syncref(destino->expr);
+            syncref(sh, destino->expr);
             if (get_conf_int("autocalc")) EvalJustOneVertex(sh, destino, 1);
             //EvalRange(destino->row, destino->col, destino->row, destino->col);
         }
 
         int i;
         for (i = 0; deps != NULL && i < deps->vf; i++) {
-            syncref(deps[i].vp->expr);
+            syncref(sh, deps[i].vp->expr);
             if (get_conf_int("autocalc")) EvalJustOneVertex(sh, deps[i].vp, 0);
         }
         /*******************/
@@ -365,6 +364,7 @@ int paste_yanked_ents(int above, int type_paste) {
     }
     //rebuild_graph();
     //if (get_conf_int("autocalc")) EvalAll();
+    roman->modflg++;
 
 #ifdef UNDO
     end_undo_action();

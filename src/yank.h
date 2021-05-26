@@ -58,5 +58,5 @@ void init_yanklist();
 struct ent * get_yanklist();
 void free_yanklist ();
 void add_ent_to_yanklist(struct ent * item);
-void yank_area(int tlrow, int tlcol, int brrow, int brcol, char c, int arg);
-int paste_yanked_ents(int above, int type_paste);
+void yank_area(struct sheet * sh, int tlrow, int tlcol, int brrow, int brcol, char type, int arg);
+int paste_yanked_ents(struct sheet * sh, int above, int type_paste);

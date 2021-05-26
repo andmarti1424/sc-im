@@ -481,9 +481,6 @@ void write_fd(FILE * f, struct roman * doc) {
 
         write_marks(f);
 
-        // write freeze ranges
-        write_franges(f);
-
         write_cells(f, doc, sh, 0, 0, sh->maxrow, sh->maxcol, 0, 0);
 
         struct custom_color * cc;
@@ -620,30 +617,6 @@ void write_fd(FILE * f, struct roman * doc) {
         sh = sh->next;
     }
 
-}
-
-
-/**
- * \brief write_franges()
- * \details write freeze ranges to file
- * \param[in] f file pointer
- * \return none
- */
-void write_franges(FILE *f) {
-    if (! freeze_ranges) return;
-    if (freeze_ranges->type == 'a') {
-        fprintf(f, "freeze %s%d", coltoa(freeze_ranges->tl->col), freeze_ranges->tl->row);
-        fprintf(f, ":%s%d\n", coltoa(freeze_ranges->br->col), freeze_ranges->br->row);
-    } else if (freeze_ranges->type == 'c' && freeze_ranges->tl->col == freeze_ranges->br->col) {
-        fprintf(f, "freeze %s\n", coltoa(freeze_ranges->tl->col));
-    } else if (freeze_ranges->type == 'c') {
-        fprintf(f, "freeze %s:", coltoa(freeze_ranges->tl->col));
-        fprintf(f, "%s\n", coltoa(freeze_ranges->br->col));
-    } else if (freeze_ranges->type == 'r' && freeze_ranges->tl->row == freeze_ranges->br->row) {
-        fprintf(f, "freeze %d\n", freeze_ranges->tl->row);
-    } else if (freeze_ranges->type == 'r') {
-        fprintf(f, "freeze %d:%d\n", freeze_ranges->tl->row, freeze_ranges->br->row);
-    }
 }
 
 
@@ -1212,7 +1185,7 @@ int import_csv(char * fname, char d) {
     roman->cur_sh->maxrow = r-1;
     roman->cur_sh->maxcol = cf-1;
 
-    auto_fit(0, roman->cur_sh->maxcols, DEFWIDTH);
+    auto_fit(roman->cur_sh, 0, roman->cur_sh->maxcols, DEFWIDTH);
 
     fclose(f);
 
@@ -1375,7 +1348,7 @@ int import_markdown(char * fname) {
     roman->cur_sh->maxrow = r-1;
     roman->cur_sh->maxcol = cf-1;
 
-    auto_fit(0, roman->cur_sh->maxcols, DEFWIDTH);
+    auto_fit(roman->cur_sh, 0, roman->cur_sh->maxcols, DEFWIDTH);
 
     fclose(f);
 
@@ -1498,9 +1471,9 @@ void export_markdown(char * fname, int r0, int c0, int rn, int cn) {
     }
 
     // to prevent empty lines at the end of the file
-    struct ent * ent = go_end();
+    struct ent * ent = go_end(roman->cur_sh);
     if (rn > ent->row) rn = ent->row;
-    ent = goto_last_col(); // idem with columns
+    ent = goto_last_col(roman->cur_sh); // idem with columns
     if (cn > ent->col) cn = ent->col;
 
     char num [FBUFLEN] = "";
@@ -1650,9 +1623,9 @@ void export_plain(char * fname, int r0, int c0, int rn, int cn) {
     }
 
     // to prevent empty lines at the end of the file
-    struct ent * ent = go_end();
+    struct ent * ent = go_end(roman->cur_sh);
     if (rn > ent->row) rn = ent->row;
-    ent = goto_last_col(); // idem with columns
+    ent = goto_last_col(roman->cur_sh); // idem with columns
     if (cn > ent->col) cn = ent->col;
 
     char num [FBUFLEN] = "";
@@ -1762,9 +1735,9 @@ void export_latex(char * fname, int r0, int c0, int rn, int cn, int verbose) {
     int pid;
 
     // to prevent empty lines at the end of the file
-    struct ent * ent = go_end();
+    struct ent * ent = go_end(roman->cur_sh);
     if (rn > ent->row) rn = ent->row;
-    ent = goto_last_col(); // idem with columns
+    ent = goto_last_col(roman->cur_sh); // idem with columns
     if (cn > ent->col) cn = ent->col;
 
     if (verbose) sc_info("Writing file \"%s\"...", fname);
@@ -1863,15 +1836,16 @@ void unspecial(FILE * f, char * str, int delim) {
  */
 void export_delim(char * fname, char coldelim, int r0, int c0, int rn, int cn, int verbose) {
     struct roman * roman = session->cur_doc;
+    struct sheet * sh = roman->cur_sh;
     FILE * f;
     int row, col;
     struct ent ** pp;
     int pid;
 
     // to prevent empty lines at the end of the file
-    struct ent * ent = go_end();
+    struct ent * ent = go_end(sh);
     if (rn > ent->row) rn = ent->row;
-    ent = goto_last_col(); // idem with columns
+    ent = goto_last_col(sh); // idem with columns
     if (cn > ent->col) cn = ent->col;
 
     if (verbose) sc_info("Writing file \"%s\"...", fname);
@@ -1886,27 +1860,27 @@ void export_delim(char * fname, char coldelim, int r0, int c0, int rn, int cn, i
     }
 
     for (row = r0; row <= rn; row++) {
-        for (pp = ATBL(roman->cur_sh, roman->cur_sh->tbl, row, col = c0); col <= cn; col++, pp++) {
-            int last_valid_col = right_limit(row)->col; // for issue #374
+        for (pp = ATBL(sh, sh->tbl, row, col = c0); col <= cn; col++, pp++) {
+            int last_valid_col = right_limit(sh, row)->col; // for issue #374
             if (col > last_valid_col) continue;
             if (*pp) {
                 char * s;
                 if ((*pp)->flags & is_valid) {
                     if ((*pp)->cellerror) {
-                        (void) fprintf (f, "%*s", roman->cur_sh->fwidth[col], ((*pp)->cellerror == CELLERROR ? "ERROR" : "INVALID"));
+                        (void) fprintf (f, "%*s", sh->fwidth[col], ((*pp)->cellerror == CELLERROR ? "ERROR" : "INVALID"));
                     } else if ((*pp)->format) {
                         char field[FBUFLEN];
                         if (*((*pp)->format) == 'd') {  // Date format
                             time_t v = (time_t) ((*pp)->v);
                             strftime(field, sizeof(field), ((*pp)->format)+1, localtime(&v));
                         } else {                        // Numeric format
-                            format((*pp)->format, roman->cur_sh->precision[col], (*pp)->v, field, sizeof(field));
+                            format((*pp)->format, sh->precision[col], (*pp)->v, field, sizeof(field));
                         }
                         ltrim(field, ' ');
                         unspecial(f, field, coldelim);
                     } else { //eng number format
                         char field[FBUFLEN] = "";
-                        (void) engformat(roman->cur_sh->realfmt[col], roman->cur_sh->fwidth[col], roman->cur_sh->precision[col], (*pp)->v, field, sizeof(field));
+                        (void) engformat(sh->realfmt[col], sh->fwidth[col], sh->precision[col], (*pp)->v, field, sizeof(field));
                         ltrim(field, ' ');
                         unspecial(f, field, coldelim);
                     }
@@ -1978,7 +1952,7 @@ int count_lines(FILE * f) {
 
 
 /**
- * \brief TODO Document plugin_exists()
+ * \brief plugin_exists()
  * \param[in] name
  * \param[in] len
  * \param[in] path

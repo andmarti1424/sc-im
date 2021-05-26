@@ -49,32 +49,7 @@
 #include "tui.h"
 #include "undo.h"
 
-struct frange * freeze_ranges = NULL;
 extern struct session * session;
-
-/**
- * \brief TODO Document add_frange()
- * \details type = 'r' -> freeze a row
- * \details type = 'c' -> freeze a col
- * \details type = 'a' -> freeze an area
- * \param[in] tl_ent
- * \param[in] br_ent
- * \param[in] type
- * \return none
- */
-
-void add_frange(struct ent * tl_ent, struct ent * br_ent, char type) {
-    struct frange * f = (struct frange *) malloc(sizeof(struct frange));
-    f->tl = tl_ent;
-    f->br = br_ent;
-    f->type = type;
-    f->next = freeze_ranges;
-    if (freeze_ranges != NULL) free(freeze_ranges);
-    freeze_ranges = f;
-
-    //sc_debug("freeze range: %d %d %d %d - type:%c", freeze_ranges->tl->row, freeze_ranges->tl->col, freeze_ranges->br->row, freeze_ranges->br->col, type);
-    return;
-}
 
 /**
  * \brief handle_freeze. freeze/unfreeze a row/column
@@ -84,9 +59,7 @@ void add_frange(struct ent * tl_ent, struct ent * br_ent, char type) {
  * \param[in] type: 'r' or 'c'
  * \return none
  */
-void handle_freeze(struct ent * tl_ent, struct ent * br_ent, char value, char type) {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
+void handle_freeze(struct sheet * sh, struct ent * tl_ent, struct ent * br_ent, char value, char type) {
     int i;
 
 #ifdef UNDO
@@ -109,16 +82,5 @@ void handle_freeze(struct ent * tl_ent, struct ent * br_ent, char value, char ty
 #ifdef UNDO
     end_undo_action();
 #endif
-    return;
-}
-
-/**
- * \brief TODO Document remove_frange()
- * \return none
- */
-void remove_frange() {
-    free(freeze_ranges);
-    freeze_ranges = NULL;
-    ui_update(TRUE);
     return;
 }

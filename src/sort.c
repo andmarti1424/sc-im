@@ -77,9 +77,8 @@ extern struct session * session;
  * \return none
  */
 
-void sortrange(struct ent * left, struct ent * right, char * criteria) {
+void sortrange(struct sheet * sh, struct ent * left, struct ent * right, char * criteria) {
     struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
     int minr, minc, maxr, maxc, r, c;
     int * rows, col = 0;
     int cp = 0;
@@ -158,7 +157,7 @@ void sortrange(struct ent * left, struct ent * right, char * criteria) {
     //currow = minr;
     //curcol = minc;
 
-    yank_area(minr, minc, maxr, maxc, 's', 1); // save yanklist in the original range
+    yank_area(sh, minr, minc, maxr, maxc, 's', 1); // save yanklist in the original range
 
 
     // Fix the 'ent' elements in the sorted range
@@ -178,7 +177,8 @@ void sortrange(struct ent * left, struct ent * right, char * criteria) {
     sh->currow = minr;
     sh->curcol = minc;
 
-    paste_yanked_ents(0, 's'); // paste ents over currow and curcol
+    paste_yanked_ents(sh, 0, 's'); // paste ents over currow and curcol
+    roman->modflg++;
 
     scxfree((char *) sort);
     scxfree((char *) rows);

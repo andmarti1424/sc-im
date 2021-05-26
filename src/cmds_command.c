@@ -526,9 +526,9 @@ void do_commandmode(struct block * sb) {
                 rf = sr->brrow;
                 cf = sr->brcol;
             }
-            if ( ! wcsncmp(inputline, L"lock", 4) ) lock_cells(lookat(roman->cur_sh, r, c), lookat(roman->cur_sh, rf, cf));
-            else if ( ! wcsncmp(inputline, L"unlock", 6) ) unlock_cells(lookat(roman->cur_sh, r, c), lookat(roman->cur_sh, rf, cf));
-            else if ( ! wcsncmp(inputline, L"valueize", 8) ) valueize_area(r, c, rf, cf);
+            if ( ! wcsncmp(inputline, L"lock", 4) ) lock_cells(sh, lookat(sh, r, c), lookat(sh, rf, cf));
+            else if ( ! wcsncmp(inputline, L"unlock", 6) ) unlock_cells(sh, lookat(sh, r, c), lookat(sh, rf, cf));
+            else if ( ! wcsncmp(inputline, L"valueize", 8) ) valueize_area(sh, r, c, rf, cf);
 
         } else if ( ! wcsncmp(inputline, L"datefmt", 7)) {
             wcscpy(interp_line, inputline);
@@ -574,7 +574,7 @@ void do_commandmode(struct block * sb) {
                 rf = sr->brrow;
                 cf = sr->brcol;
             }
-            if (any_locked_cells(r, c, rf, cf)) {
+            if (any_locked_cells(sh, r, c, rf, cf)) {
                 sc_error("Locked cells encountered. Nothing changed");
             } else {
                 wchar_t line [BUFFERSIZE];
@@ -719,7 +719,7 @@ void do_commandmode(struct block * sb) {
                 swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L"%s%d ", coltoa(cf), rf);
             }
 
-            if (any_locked_cells(r, c, rf, cf)) {
+            if (any_locked_cells(sh, r, c, rf, cf)) {
                 swprintf(interp_line, BUFFERSIZE, L"");
                 sc_error("Locked cells encountered. Nothing changed");
             } else {
@@ -802,7 +802,7 @@ void do_commandmode(struct block * sb) {
             } else
                 swprintf(interp_line, BUFFERSIZE, L"fmt %s%d", coltoa(c), r);
 
-            if (any_locked_cells(r, c, rf, cf)) {
+            if (any_locked_cells(sh, r, c, rf, cf)) {
                 sc_error("Locked cells encountered. Nothing changed");
             } else {
                 int l = wcslen(interp_line);
@@ -1067,7 +1067,7 @@ void do_commandmode(struct block * sb) {
             if (savefile() == 0) shall_quit = 1;
 
         } else if ( ! wcscmp(inputline, L"fcopy") ) {
-            fcopy("");
+            fcopy(sh, "");
 
         } else if ( ! wcsncmp(inputline, L"fcopy ", 6)) {
             wchar_t line [BUFFERSIZE];
@@ -1075,10 +1075,10 @@ void do_commandmode(struct block * sb) {
             del_range_wchars(line, 0, 5);
             char action[BUFFERSIZE];
             wcstombs(action, line, BUFFERSIZE);
-            fcopy(action);
+            fcopy(sh, action);
 
         } else if ( ! wcscmp(inputline, L"fsum") ) {
-            fsum();
+            fsum(sh);
 
         } else if (
             ! wcsncmp(inputline, L"e csv"  , 5) ||
