@@ -180,6 +180,7 @@ void create_undo_action() {
     undo_item.range_shift = NULL;
     undo_item.cols_format = NULL;
     undo_item.rows_format = NULL;
+    undo_item.sheet = session->cur_doc->cur_sh; // we should keep the current sheet reference
 
     undo_item.row_hidded  = NULL;
     undo_item.row_showed  = NULL;
@@ -205,7 +206,7 @@ void end_undo_action() {
     struct roman * roman = session->cur_doc;
     add_to_undolist(undo_item);
 
-    // in case we need to dismiss this undo_item!
+    // just check if we need to dismiss this undo_item!
     if ((undo_item.added      == NULL && undo_item.allocations == NULL &&
         undo_item.removed     == NULL && undo_item.range_shift == NULL &&
         undo_item.row_hidded  == NULL && undo_item.row_showed  == NULL &&
@@ -243,6 +244,7 @@ void add_to_undolist(struct undo u) {
     // Add 'ent' elements
     ul->added = u.added;
     ul->removed = u.removed;
+    ul->sheet = u.sheet;
     ul->allocations = u.allocations;
     ul->alloc_size = u.alloc_size;
     ul->range_shift = u.range_shift;
@@ -484,7 +486,7 @@ void copy_to_undostruct (int ri, int ci, int rf, int cf, char type, short handle
              */
 
             // Copy cell at 'r, c' contents to 'y_cells' ent
-            copyent(y_cells, lookat(sh, r, c), 0, 0, 0, 0, 0, 0, 'u');
+            copyent(y_cells, sh, lookat(sh, r, c), 0, 0, 0, 0, 0, 0, 'u');
 
             // Append 'ent' element at the beginning
             if (type == UNDO_ADD) {
@@ -510,7 +512,7 @@ void copy_to_undostruct (int ri, int ci, int rf, int cf, char type, short handle
             cleanent(y_cells);
 
             // Copy cell at deps[i].vp->row, deps[i].vp->col contents to 'y_cells' ent
-            copyent(y_cells, lookat(sh, deps[i].vp->row, deps[i].vp->col), 0, 0, 0, 0, 0, 0, 'u');
+            copyent(y_cells, sh, lookat(sh, deps[i].vp->row, deps[i].vp->col), 0, 0, 0, 0, 0, 0, 'u');
 
             // Append 'ent' element at the beginning
             if (type == UNDO_ADD) {
@@ -555,13 +557,13 @@ void save_pointer_after_calloc(struct ent * e) {
  *
  * \return void
  */
-void copy_cell_to_undostruct (struct ent * e, struct ent * ori, char type) {
+void copy_cell_to_undostruct (struct ent * e, struct sheet * sh_ori, struct ent * ori, char type) {
     struct ent * new = e;
     // initialize the 'ent'
     cleanent(new);
 
     // Copy 'ori' cell contents to 'new' ent
-    copyent(new, ori, 0, 0, 0, 0, 0, 0, 'u');
+    copyent(new, sh_ori, ori, 0, 0, 0, 0, 0, 0, 'u');
 
     // Append 'ent' element at the beginning
     if (type == UNDO_ADD) {
@@ -824,11 +826,14 @@ void undo_freeze_unfreeze(int row, int col, char type, int arg) {
  */
 void do_undo() {
     struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
     if (undo_list == NULL || undo_list_pos == 0) {
         sc_error("No UNDO's left.");
         return;
     }
+
+    // move to the according sheet
+    struct sheet * sh = undo_list->sheet;
+    roman->cur_sh = sh;
 
     int ori_currow = sh->currow;
     int ori_curcol = sh->curcol;
@@ -854,7 +859,7 @@ void do_undo() {
             fix_marks( (ul->range_shift->brrow - ul->range_shift->tlrow + 1), 0, ul->range_shift->tlrow, sh->maxrow, ul->range_shift->tlcol, ul->range_shift->brcol);
 
         // handle row_hidden
-        fix_row_hidden(ul->range_shift->delta_rows, ul->range_shift->tlrow, sh->maxrow);
+        fix_row_hidden(sh, ul->range_shift->delta_rows, ul->range_shift->tlrow, sh->maxrow);
 
         // fix marks for cols
         if (ul->range_shift->delta_cols > 0)      // sl
@@ -863,16 +868,16 @@ void do_undo() {
             fix_marks(0,  (ul->range_shift->brcol - ul->range_shift->tlcol + 1), ul->range_shift->tlrow, ul->range_shift->brrow, ul->range_shift->tlcol, sh->maxcol);
 
         // handle col_hidden
-        fix_col_hidden(ul->range_shift->delta_cols, ul->range_shift->tlcol, sh->maxcol);
+        fix_col_hidden(sh, ul->range_shift->delta_cols, ul->range_shift->tlcol, sh->maxcol);
 
         // handle row_frozen
-        fix_row_frozen(ul->range_shift->delta_rows, ul->range_shift->tlrow, sh->maxrow);
+        fix_row_frozen(sh, ul->range_shift->delta_rows, ul->range_shift->tlrow, sh->maxrow);
 
         // handle col_frozen
-        fix_col_frozen(ul->range_shift->delta_cols, ul->range_shift->tlcol, sh->maxcol);
+        fix_col_frozen(sh, ul->range_shift->delta_cols, ul->range_shift->tlcol, sh->maxcol);
 
         // shift range now
-        shift_range(- ul->range_shift->delta_rows, - ul->range_shift->delta_cols,
+        shift_range(sh, - ul->range_shift->delta_rows, - ul->range_shift->delta_cols,
             ul->range_shift->tlrow, ul->range_shift->tlcol, ul->range_shift->brrow, ul->range_shift->brcol);
 
         // shift col_formats here.
@@ -915,7 +920,7 @@ void do_undo() {
         struct ent * h;
         if ((h = *ATBL(sh, sh->tbl, j->row, j->col))) clearent(h);
         struct ent * e_now = lookat(sh, j->row, j->col);
-        (void) copyent(e_now, j, 0, 0, 0, 0, 0, 0, 0);
+        (void) copyent(e_now, sh, j, 0, 0, 0, 0, 0, 0, 0);
         j = j->next;
     }
 
@@ -1014,14 +1019,14 @@ void do_undo() {
     while (ie != NULL) {
         struct ent * p;
         if ((p = *ATBL(sh, sh->tbl, ie->row, ie->col)) && p->expr)
-            EvalJustOneVertex(p, 1);
+            EvalJustOneVertex(sh, p, 1);
         ie = ie->next;
     }
     ie = ul->removed;
     while (ie != NULL) {
         struct ent * p;
         if ((p = *ATBL(sh, sh->tbl, ie->row, ie->col)) && p->expr)
-            EvalJustOneVertex(p, 1);
+            EvalJustOneVertex(sh, p, 1);
         ie = ie->next;
     }
 
@@ -1039,33 +1044,31 @@ void do_undo() {
 
 /**
  * \brief Do REDO
- *
  * Shift a range of an undo shift range to the original position, if any,
  * append 'ent' elements from 'added' and remove those from 'removed'.
- *
  * \return none
  */
 
 void do_redo() {
     struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
-    //FIXME check why undo_list_pos can sometimes be > len_undo_list(). it shouldnt!!
-    //if ( undo_list == NULL || undo_list_pos >= len_undo_list()  ) {
+
     if ( undo_list == NULL || undo_list_pos == len_undo_list()  ) {
         sc_error("No REDO's left.");
         return;
     }
 
-    int ori_currow = sh->currow;
-    int ori_curcol = sh->curcol;
-    int mf = roman->modflg; // save modflag status
-
-    //if (undo_list->p_ant == NULL && undo_list_pos == 0);
-    //else if (undo_list->p_sig != NULL) undo_list = undo_list->p_sig;
     if ((undo_list->p_ant != NULL || undo_list_pos != 0)
     && (undo_list->p_sig != NULL)) undo_list = undo_list->p_sig;
 
     struct undo * ul = undo_list;
+    struct sheet * sh = undo_list->sheet;
+
+    int ori_currow = sh->currow;
+    int ori_curcol = sh->curcol;
+    int mf = roman->modflg; // save modflag status
+
+    // move to the according sheet
+    roman->cur_sh = sh;
 
     // Remove 'ent' elements
     struct ent * i = ul->removed;
@@ -1085,7 +1088,7 @@ void do_redo() {
             fix_marks(-(ul->range_shift->brrow - ul->range_shift->tlrow + 1), 0, ul->range_shift->tlrow, sh->maxrow, ul->range_shift->tlcol, ul->range_shift->brcol);
 
         // handle row_hidden
-        fix_row_hidden(-ul->range_shift->delta_rows, ul->range_shift->tlrow, sh->maxrow);
+        fix_row_hidden(sh, -ul->range_shift->delta_rows, ul->range_shift->tlrow, sh->maxrow);
 
         // fix marks for cols
         if (ul->range_shift->delta_cols > 0)      // sl
@@ -1094,10 +1097,10 @@ void do_redo() {
             fix_marks(0, -(ul->range_shift->brcol - ul->range_shift->tlcol + 1), ul->range_shift->tlrow, ul->range_shift->brrow, ul->range_shift->tlcol, sh->maxcol);
 
         // handle col_hidden
-        fix_col_hidden(-ul->range_shift->delta_cols, ul->range_shift->tlcol, sh->maxcol);
+        fix_col_hidden(sh, -ul->range_shift->delta_cols, ul->range_shift->tlcol, sh->maxcol);
 
         // shift range now
-        shift_range(ul->range_shift->delta_rows, ul->range_shift->delta_cols,
+        shift_range(sh, ul->range_shift->delta_rows, ul->range_shift->delta_cols,
             ul->range_shift->tlrow, ul->range_shift->tlcol, ul->range_shift->brrow, ul->range_shift->brcol);
 
         // shift col_formats here
@@ -1140,7 +1143,7 @@ void do_redo() {
         struct ent * h;
         if ((h = *ATBL(sh, sh->tbl, j->row, j->col))) clearent(h);
         struct ent * e_now = lookat(sh, j->row, j->col);
-        (void) copyent(e_now, j, 0, 0, 0, 0, 0, 0, 0);
+        (void) copyent(e_now, sh, j, 0, 0, 0, 0, 0, 0, 0);
         j = j->next;
     }
 
@@ -1239,14 +1242,14 @@ void do_redo() {
     while (ie != NULL) {
         struct ent * p;
         if ((p = *ATBL(sh, sh->tbl, ie->row, ie->col)) && p->expr)
-            EvalJustOneVertex(p, 1);
+            EvalJustOneVertex(sh, p, 1);
         ie = ie->next;
     }
     ie = ul->removed;
     while (ie != NULL) {
         struct ent * p;
         if ((p = *ATBL(sh, sh->tbl, ie->row, ie->col)) && p->expr)
-            EvalJustOneVertex(p, 1);
+            EvalJustOneVertex(sh, p, 1);
         ie = ie->next;
     }
 
@@ -1258,7 +1261,6 @@ void do_redo() {
     roman->modflg = mf + 1;
 
     sc_info("Change: %d of %d", ++undo_list_pos, len_undo_list());
-
     return;
 }
 #endif

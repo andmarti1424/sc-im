@@ -51,6 +51,7 @@ struct undo {
     struct undo * p_ant;
     struct ent * added;
     struct ent * removed;
+    struct sheet * sheet;
     struct undo_range_shift * range_shift;
     struct undo_cols_format * cols_format;
     struct undo_rows_format * rows_format;
@@ -121,5 +122,5 @@ void clear_from_current_pos();
 int len_undo_list();
 void free_undo_node(struct undo * ul);
 void dismiss_undo_item(struct undo * ul);
-void copy_cell_to_undostruct (struct ent * new, struct ent * ori, char type);
+void copy_cell_to_undostruct (struct ent * e, struct sheet * sh_ori, struct ent * ori, char type);
 void save_pointer_after_calloc(struct ent * e);
