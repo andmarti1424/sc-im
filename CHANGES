@@ -20,20 +20,19 @@ removed --sheet and --filename_with_mode configuration variables
 ** fix in calc_mobile_cols()
 created movetosheet command in gram.y, to be used when saving and loading files
 reeval in multiple sheets: graph now should keep track of the different sheets
+UNDO now saves reference to the sheet where the action took place.
 
 
 Pending to make v0.8.3 release
 -------------------
-+ 1. UNDO should save reference to the sheet where the action took place.
-
-+ 2. ents_that_depends_on_list SHOULD take ent_ptr rather than struct ent * as parameter!
-
++ 1. ents_that_depends_on_list SHOULD take ent_ptr rather than struct ent * as parameter!
 + rearrange file loading and saving functions
 + Show range detail in inputwin as A0:C3
 + Add GETENT in seval
 + Reeval of @lastrow @lastcol: check cells that uses @lastrow / @lastcol gets updated everytime it change
 + mark should consider sheet. We should have mark A in Sheet 1, and mark B on Sheet 2.. modify tick()
 + create @counta, and modify @count to not count strings
+
 
 + customize header -> v0.8.4
 + replace locked_cell() with any_locked_cells()

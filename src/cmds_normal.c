@@ -940,7 +940,7 @@ void do_normalmode(struct block * buf) {
                     return;
                 }
                 wchar_t cline [BUFFERSIZE];
-                swprintf(cline, BUFFERSIZE, L"autojus %s:", coltoa(c));
+                swprintf(cline, BUFFERSIZE, L"autofit %s:", coltoa(c));
                 swprintf(cline + wcslen(cline), BUFFERSIZE, L"%s", coltoa(cf));
                 send_to_interp(cline);
                 ui_update(TRUE);
