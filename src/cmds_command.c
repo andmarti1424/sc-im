@@ -90,7 +90,7 @@ int real_inputline_pos; /**<  Real position in inputline */
 static wchar_t * valid_commands[] = {
 L"!",
 L"addfilter",
-L"autojus",
+L"autofit",
 L"ccopy",
 L"cellcolor",
 L"cmap",
@@ -417,7 +417,7 @@ void do_commandmode(struct block * sb) {
         } else if ( ! wcscmp(inputline, L"q") || ! wcscmp(inputline, L"quit") ) {
             shall_quit = 1;
 
-        } else if ( ! wcsncmp(inputline, L"autojus", 7) ) {
+        } else if ( ! wcsncmp(inputline, L"autofit", 7) ) {
             wchar_t cline [BUFFERSIZE];
             wcscpy(cline, inputline);
             int c = sh->curcol, cf = sh->curcol;
@@ -425,8 +425,8 @@ void do_commandmode(struct block * sb) {
                 c = sr->tlcol;
                 cf = sr->brcol;
             }
-            if ( p != -1 || ! wcscmp(inputline, L"autojus")) {
-                swprintf(cline, BUFFERSIZE, L"autojus %s:", coltoa(c));
+            if ( p != -1 || ! wcscmp(inputline, L"autofit")) {
+                swprintf(cline, BUFFERSIZE, L"autofit %s:", coltoa(c));
                 swprintf(cline + wcslen(cline), BUFFERSIZE, L"%s", coltoa(cf));
             }
             send_to_interp(cline);

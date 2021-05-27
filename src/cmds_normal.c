@@ -922,7 +922,7 @@ void do_normalmode(struct block * buf) {
             }
             break;
 
-        // autojus
+        // autofit
         case L'a':
             if ( bs != 2 ) break;
 

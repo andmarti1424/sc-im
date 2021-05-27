@@ -2841,7 +2841,7 @@ int is_single_command (struct block * buf, long timeout) {
             buf->pnext->value == L'f' ||
             buf->pnext->value == L'c' ) )   result = EDITION_CMD;  // paste yanked cells above or right
 
-        else if (buf->value == L'a' && bs == 2 &&    // autojus
+        else if (buf->value == L'a' && bs == 2 &&    // autofit
                  buf->pnext->value == L'a') result = EDITION_CMD;
 
         else if (buf->value == L'Z' && bs == 2 && timeout >= COMPLETECMDTIMEOUT &&  // Zap (or hide) col or row
