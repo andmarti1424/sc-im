@@ -2,10 +2,10 @@
  * Copyright (c) 2013-2021, Andrés Martinelli <andmarti@gmail.com>             *
  * All rights reserved.                                                        *
  *                                                                             *
- * This file is a part of SC-IM                                                *
+ * This file is a part of sc-im                                                *
  *                                                                             *
- * SC-IM is a spreadsheet program that is based on SC. The original authors    *
- * of SC are James Gosling and Mark Weiser, and mods were later added by       *
+ * sc-im is a spreadsheet program that is based on sc. The original authors    *
+ * of sc are James Gosling and Mark Weiser, and mods were later added by       *
  * Chuck Martin.                                                               *
  *                                                                             *
  * Redistribution and use in source and binary forms, with or without          *
@@ -39,7 +39,7 @@
  * \file buffer.c
  * \author Andrés Martinelli <andmarti@gmail.com>
  * \date 2017-07-18
- * \brief TODO Write a brief file description.
+ * \brief buffer functions used by stdin andm mappings
  */
 
 #include <stdlib.h>
@@ -49,12 +49,11 @@
 #include "macros.h"
 #include "utils/string.h"
 
+
 /**
 * \brief Create buffer as list of blocks
-*
 * \return b
 */
-
 struct block * create_buf() {
     struct block * b = (struct block *) malloc(sizeof(struct block));
     b->value = '\0';
@@ -62,15 +61,13 @@ struct block * create_buf() {
     return b;
 }
 
+
 /**
 * \brief Add a wint_t to a buffer
-*
 * \param[in] buf
 * \param[in] d
-*
 * \return none
 */
-
 void addto_buf(struct block * buf, wint_t d) {
     struct block * aux = buf;
 
@@ -88,15 +85,13 @@ void addto_buf(struct block * buf, wint_t d) {
     return;
 }
 
+
 /**
 * \brief Replace the elements of "origen" buffer to "destino" buffer
-*
 * \param[in] origen
 * \param[in] destino
-*
 * \return none
 */
-
 void copybuffer(struct block * origen, struct block * destino) {
     flush_buf(destino);
     int len = get_bufsize(origen);
@@ -109,13 +104,10 @@ void copybuffer(struct block * origen, struct block * destino) {
 
 /**
 * \brief Replace the element of a buffer at 'pos' with a '\0'
-*
 * \param[in] buf
 * \param[in] pos
-*
 * \return none
 */
-
 // FIXME
 void del_buf (struct block * buf, int pos) {
     int i;
@@ -138,12 +130,9 @@ void del_buf (struct block * buf, int pos) {
 
 /**
 * \brief TODO Document flush_buf()
-*
 * \param[in] buf
-*
 * \return none
 */
-
 void flush_buf (struct block * buf) {
     if (buf == NULL) return;
 
@@ -154,34 +143,28 @@ void flush_buf (struct block * buf) {
     }
     buf->value = '\0';
     buf->pnext = NULL;
-
     return;
 }
 
+
 /**
 * \brief Delete all blocks of a buffer including the initial node
-*
 * \details Delete all blocks of a buffer including the initial node
-*
 * \param buf
-*
 * \return none
 */
-
 void erase_buf (struct block * buf) {
     flush_buf(buf);
     free(buf);
     return;
 }
 
+
 /**
 * \brief Get size of buffer (included special chars)
-*
 * \param[in] buf
-*
 * \return c size of buffer
 */
-
 int get_bufsize(struct block * buf) {
     struct block * b_aux = buf;
     if (b_aux == NULL || b_aux->value == '\0') return 0;
@@ -193,17 +176,14 @@ int get_bufsize(struct block * buf) {
     return c;
 }
 
+
 /**
 * \brief Get printable buffer length (excluded special chars)
-*
 * \details Get printable bufferlength, which excludes special characters
 * as they should never be printed to a screen.
-*
 * \param[in] buf
-*
 * \return c printable buffer length
 */
-
 int get_pbuflen(struct block * buf) {
     struct block * b_aux = buf;
     if (b_aux == NULL || b_aux->value == '\0') return 0;
@@ -215,15 +195,13 @@ int get_pbuflen(struct block * buf) {
     return c;
 }
 
+
 /**
 * \brief Return the int value of n block
-*
 * \param[in] buf
 * \param[in] d
-*
 * \return none
 */
-
 int get_bufval(struct block * buf, int d) {
     int i;
     struct block * b_aux = buf;
@@ -233,14 +211,12 @@ int get_bufval(struct block * buf, int d) {
     return b_aux->value;
 }
 
+
 /**
 * \brief Return an int value if found in a buffer
-*
 * \details Search a buffer for a given integer value.
-*
 * \return 0 if not found, 1 if found
 */
-
 int find_val(struct block * buf, int value) {
     struct block * b_aux = buf;
     while ( b_aux != NULL && b_aux->value != '\0' ) {
@@ -250,14 +226,12 @@ int find_val(struct block * buf, int value) {
     return 0;
 }
 
+
 /**
 * \brief Delete the first element in a buffer
-*
 * \param[in] buf
-*
 * \return none
 */
-
 struct block * dequeue (struct block * buf) {
     if (buf == NULL) return buf;
     struct block * sig;

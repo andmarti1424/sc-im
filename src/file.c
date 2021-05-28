@@ -4,8 +4,8 @@
  *                                                                             *
  * This file is a part of sc-im                                                *
  *                                                                             *
- * sc-im is a spreadsheet program that is based on SC. The original authors    *
- * of SC are James Gosling and Mark Weiser, and mods were later added by       *
+ * sc-im is a spreadsheet program that is based on sc. The original authors    *
+ * of sc are James Gosling and Mark Weiser, and mods were later added by       *
  * Chuck Martin.                                                               *
  *                                                                             *
  * Redistribution and use in source and binary forms, with or without          *

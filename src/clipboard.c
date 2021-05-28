@@ -2,10 +2,10 @@
  * Copyright (c) 2013-2021, Andrés Martinelli <andmarti@gmail.com>             *
  * All rights reserved.                                                        *
  *                                                                             *
- * This file is a part of SC-IM                                                *
+ * This file is a part of sc-im                                                *
  *                                                                             *
- * SC-IM is a spreadsheet program that is based on SC. The original authors    *
- * of SC are James Gosling and Mark Weiser, and mods were later added by       *
+ * sc-im is a spreadsheet program that is based on sc. The original authors    *
+ * of sc are James Gosling and Mark Weiser, and mods were later added by       *
  * Chuck Martin.                                                               *
  *                                                                             *
  * Redistribution and use in source and binary forms, with or without          *
@@ -34,7 +34,6 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE       *
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.           *
  *******************************************************************************/
-
 /**
  * \file clipboard.c
  * \author Andrés Martinelli <andmarti@gmail.com>
@@ -60,43 +59,11 @@
 
 extern struct session * session;
 
-int convert_string_to_number(int r0, int c0, int rn, int cn) {
-    struct roman * roman = session->cur_doc;
-    int row, col;
-    register struct ent ** pp;
-    wchar_t out[FBUFLEN] = L"";
-    for (row = r0; row <= rn; row++) {
-        // ignore hidden rows
-        //if (row_hidden[row]) continue;
-
-        for (pp = ATBL(roman->cur_sh, roman->cur_sh->tbl, row, col = c0); col <= cn; col++, pp++) {
-            // ignore hidden cols
-            //if (col_hidden[col]) continue;
-
-            if (*pp) {
-
-                // If a string exists
-                if ((*pp)->label) {
-                    char * num = str_replace((*pp)->label," ","");
-                    (*pp)->label[0] = '\0';
-                    swprintf(out, BUFFERSIZE, L"let %s%d=%s", coltoa(col), row, num);
-                    send_to_interp(out);
-                    free(num);
-                }
-            }
-        }
-    }
-
-    return 0;
-
-}
 
 /**
-* \brief Pastes from clipboard
-*
+* \brief Paste to sc-im content stored on clipboard
 * \return 0 on success; -1 on error
 */
-
 int paste_from_clipboard() {
     struct roman * roman = session->cur_doc;
     if (! strlen(get_conf_value("default_paste_from_clipboard_cmd"))) return -1;
@@ -159,12 +126,11 @@ int paste_from_clipboard() {
     return 0;
 }
 
-/**
-* @brief Copies to clipboard
-*
-* \return 0 on success; -1 on error
-*/
 
+/**
+ * @brief Copies a range of cells to clipboard
+ * \return 0 on success; -1 on error
+ */
 int copy_to_clipboard(int r0, int c0, int rn, int cn) {
     if (! strlen(get_conf_value("default_copy_to_clipboard_cmd"))) return -1;
 
@@ -200,23 +166,21 @@ int copy_to_clipboard(int r0, int c0, int rn, int cn) {
     return 0;
 }
 
+
 /**
-* @brief TODO Write a brief function description
-*
-* \details Note: The file must already be open.
-*
+* @brief save_plain()
+* \details copy a range of cell to an open file stream
+* Note: The file must already be open.
 * \param[in] fout output file
 * \param[in] r0
 * \param[in] c0
 * \param[in] rn
 * \param[in] cn
-*
 * \return 0 on success
+* \return -1 on error
 */
-
-// TODO Does this check if the file is already open?
-// TODO What are the returns? Does 0 mean success?
 int save_plain(FILE * fout, int r0, int c0, int rn, int cn) {
+    if (fout == NULL) return -1;
     struct roman * roman = session->cur_doc;
     int row, col;
     register struct ent ** pp;

@@ -2,10 +2,10 @@
  * Copyright (c) 2013-2021, Andrés Martinelli <andmarti@gmail.com>             *
  * All rights reserved.                                                        *
  *                                                                             *
- * This file is a part of SC-IM                                                *
+ * This file is a part of sc-im                                                *
  *                                                                             *
- * SC-IM is a spreadsheet program that is based on SC. The original authors    *
- * of SC are James Gosling and Mark Weiser, and mods were later added by       *
+ * sc-im is a spreadsheet program that is based on sc. The original authors    *
+ * of sc are James Gosling and Mark Weiser, and mods were later added by       *
  * Chuck Martin.                                                               *
  *                                                                             *
  * Redistribution and use in source and binary forms, with or without          *
@@ -2417,6 +2417,40 @@ void fix_col_frozen(struct sheet * sh, int deltac, int ci, int cf) {
             for (c = cf; c > ci; c--)
                 sh->col_frozen[c] = sh->col_frozen[c-1];
     return;
+}
+
+
+/**
+* \brief convert_string_to_number
+* \details converts string content of range of cells to numeric value
+* \return 0 on success; -1 on error
+*/
+int convert_string_to_number(int r0, int c0, int rn, int cn) {
+    struct roman * roman = session->cur_doc;
+    int row, col;
+    register struct ent ** pp;
+    wchar_t out[FBUFLEN] = L"";
+    for (row = r0; row <= rn; row++) {
+        // ignore hidden rows
+        //if (row_hidden[row]) continue;
+
+        for (pp = ATBL(roman->cur_sh, roman->cur_sh->tbl, row, col = c0); col <= cn; col++, pp++) {
+            // ignore hidden cols
+            //if (col_hidden[col]) continue;
+
+            if (*pp) {
+                // If a string exists
+                if ((*pp)->label) {
+                    char * num = str_replace((*pp)->label," ","");
+                    (*pp)->label[0] = '\0';
+                    swprintf(out, BUFFERSIZE, L"let %s%d=%s", coltoa(col), row, num);
+                    send_to_interp(out);
+                    free(num);
+                }
+            }
+        }
+    }
+    return 0;
 }
 
 

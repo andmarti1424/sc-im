@@ -2,10 +2,10 @@
  * Copyright (c) 2013-2021, Andrés Martinelli <andmarti@gmail.com>             *
  * All rights reserved.                                                        *
  *                                                                             *
- * This file is a part of SC-IM                                                *
+ * This file is a part of sc-im                                                *
  *                                                                             *
- * SC-IM is a spreadsheet program that is based on SC. The original authors    *
- * of SC are James Gosling and Mark Weiser, and mods were later added by       *
+ * sc-im is a spreadsheet program that is based on sc. The original authors    *
+ * of sc are James Gosling and Mark Weiser, and mods were later added by       *
  * Chuck Martin.                                                               *
  *                                                                             *
  * Redistribution and use in source and binary forms, with or without          *
@@ -303,7 +303,7 @@ void ui_sc_msg(char * s, int type, ...) {
  * \return none
  */
 void ui_do_welcome() {
-    char * msg_title = "SC-IM - SpreadSheet Calculator Improvised";
+    char * msg_title = "sc-im - SpreadSheet Calculator Improvised";
     char * msg_by = "An SC fork by Andrés Martinelli";
     char * msg_version = rev;
     char * msg_help  = "Press  :help<Enter>  to get help         ";

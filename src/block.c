@@ -2,10 +2,10 @@
  * Copyright (c) 2013-2021, Andrés Martinelli <andmarti@gmail.com>             *
  * All rights reserved.                                                        *
  *                                                                             *
- * This file is a part of SC-IM                                                *
+ * This file is a part of sc-im                                                *
  *                                                                             *
- * SC-IM is a spreadsheet program that is based on SC. The original authors    *
- * of SC are James Gosling and Mark Weiser, and mods were later added by       *
+ * sc-im is a spreadsheet program that is based on sc. The original authors    *
+ * of sc are James Gosling and Mark Weiser, and mods were later added by       *
  * Chuck Martin.                                                               *
  *                                                                             *
  * Redistribution and use in source and binary forms, with or without          *
@@ -34,7 +34,6 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE       *
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.           *
  *******************************************************************************/
-
 /**
  * \file block.c
  * \author Andrés Martinelli <andmarti@gmail.com>
@@ -45,6 +44,7 @@
 #include "block.h"
 #include <string.h>
 #include "utils/string.h"
+
 
 /**
  * \brief Function that tells if 'b' buffer is inside 'o' buffer
@@ -99,8 +99,9 @@ int block_in_block (struct block * o, struct block * b) {
     return -1;
 }
 
+
 /**
- * \brief TODO Document replace_block_in_block()
+ * \brief replace_block_in_block()
  *
  * Replace the content of the block list "olist". Replace the nodes of the 'in'
  * list with the nodes of the 'out' list.
@@ -112,7 +113,6 @@ int block_in_block (struct block * o, struct block * b) {
  * \return 0 on success
  * \return -1 on error
  */
-
 int replace_block_in_block (struct block * olist, struct block * in, struct block * out) {
     struct block * ori = olist;
 

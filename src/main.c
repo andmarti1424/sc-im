@@ -2,10 +2,10 @@
  * Copyright (c) 2013-2021, Andrés Martinelli <andmarti@gmail.com>             *
  * All rights reserved.                                                        *
  *                                                                             *
- * This file is a part of SC-IM                                                *
+ * This file is a part of sc-im                                                *
  *                                                                             *
- * SC-IM is a spreadsheet program that is based on SC. The original authors    *
- * of SC are James Gosling and Mark Weiser, and mods were later added by       *
+ * sc-im is a spreadsheet program that is based on sc. The original authors    *
+ * of sc are James Gosling and Mark Weiser, and mods were later added by       *
  * Chuck Martin.                                                               *
  *                                                                             *
  * Redistribution and use in source and binary forms, with or without          *
@@ -164,10 +164,6 @@ extern graphADT graph;
  *
  * \return 0 on success; -1 on errors
  */
-
-// TODO Document the possible errors. Why are some things -1 while others
-// are 1? Look for instances of exit_app(<number>).
-
 int main (int argc, char ** argv) {
     // Define how the file stream should be buffered. Error if unsuccessful.
     if (setvbuf(stderr, stderr_buffer, _IOFBF, STDERRBUF) != 0) {
@@ -228,9 +224,9 @@ int main (int argc, char ** argv) {
     }
 
     /*
-     * If the 'output' parameter is defined, SC-IM saves its output to that file.
+     * If the 'output' parameter is defined, sc-im saves its output to that file.
      * To achieve that, we open the output file and keep it open until exit.
-     * otherwise, SC-IM will output to stdout.
+     * otherwise, sc-im will output to stdout.
      */
     if (get_conf_value("output") != NULL) {
         fdoutput = fopen(get_conf_value("output"), "w+");
@@ -299,7 +295,7 @@ int main (int argc, char ** argv) {
     // initiate ui
     FILE * f;
     if ( ! get_conf_int("nocurses")) {
-        // we show welcome screen if no spreadsheet was passed to SC-IM
+        // we show welcome screen if no spreadsheet was passed to sc-im
         // and no input was sent throw pipeline
         if ( ! session->cur_doc->name && ! wcslen(stdin_buffer)) {
             ui_do_welcome();
@@ -536,7 +532,7 @@ int exit_app(int status) {
 /**
  * \brief Read command line parameters and store them in a dictionary
  *
- * \details Read parameters passed to SC-IM executable and
+ * \details Read parameters passed to sc-im executable and
  * store them in user_conf dictionary.
  *
  * \param[in] argc (argument count) is the number of strings pointed to by
@@ -627,7 +623,6 @@ void sig_nopipe() {
 
 /**
  * \brief Handles the SIGTSTP signal
- *
  * \return none
  */
 void sig_tstp() {
@@ -641,7 +636,6 @@ void sig_tstp() {
 
 /**
  * \brief Handles the SIGCONT signal
- *
  * \return none
  */
 void sig_cont() {
@@ -656,25 +650,26 @@ void sig_cont() {
 
 /**
  * \brief Handles the SIGINT signal
- *
  * \return none
  */
 void sig_int() {
-    if ( ! get_conf_int("debug"))
-        sc_error("Got SIGINT. Press «:q<Enter>» to quit SC-IM");
-    else
+    if ( ! get_conf_int("debug")) {
+        sc_error("Got SIGINT. Press «:q<Enter>» to quit sc-im");
+    } else if (get_bufsize(buffer)) {
+        break_waitcmd_loop(buffer);
+    } else {
         shall_quit = 2;
+    }
     return;
 }
 
 
 /**
  * \brief Handles the SIGABRT signal
- *
  * \return none
  */
 void sig_abrt() {
-    sc_error("Error !!! Quitting SC-IM.");
+    sc_error("Error !!! Quitting sc-im.");
     shall_quit = -1; // error !
     return;
 }
@@ -682,11 +677,10 @@ void sig_abrt() {
 
 /**
  * \brief Handles the SIGABRT signal
- *
  * \return none
  */
 void sig_term() {
-    sc_error("Got SIGTERM signal. Quitting SC-IM.");
+    sc_error("Got SIGTERM signal. Quitting sc-im.");
     shall_quit = 2;
     return;
 }

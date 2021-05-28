@@ -2,10 +2,10 @@
  * Copyright (c) 2013-2021, Andrés Martinelli <andmarti@gmail.com>             *
  * All rights reserved.                                                        *
  *                                                                             *
- * This file is a part of SC-IM                                                *
+ * This file is a part of sc-im                                                *
  *                                                                             *
- * SC-IM is a spreadsheet program that is based on SC. The original authors    *
- * of SC are James Gosling and Mark Weiser, and mods were later added by       *
+ * sc-im is a spreadsheet program that is based on sc. The original authors    *
+ * of sc are James Gosling and Mark Weiser, and mods were later added by       *
  * Chuck Martin.                                                               *
  *                                                                             *
  * Redistribution and use in source and binary forms, with or without          *
@@ -38,8 +38,8 @@
 /**
  * \file freeze.c
  * \author Andrés Martinelli <andmarti@gmail.com>
- * \date 2017-07-18
- * \brief TODO Write a tbrief file description.
+ * \date 28/05/2021
+ * \brief source code for handling the freeze of rows and columns.
  */
 
 #include <stdlib.h>
