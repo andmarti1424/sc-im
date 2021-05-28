@@ -260,7 +260,7 @@ int paste_yanked_ents(struct sheet * sh, int above, int type_paste) {
     } else if (type_of_yank == YANK_ROW) {                        // paste row
         int c = yank_arg;
 #ifdef UNDO
-        copy_to_undostruct(sh->currow + ! above, 0, sh->currow + ! above - 1 + yank_arg, sh->maxcol, UNDO_DEL, IGNORE_DEPS, NULL);
+        copy_to_undostruct(sh, sh->currow + ! above, 0, sh->currow + ! above - 1 + yank_arg, sh->maxcol, UNDO_DEL, IGNORE_DEPS, NULL);
 #endif
         while (c--) above ? insert_row(sh, 0) : insert_row(sh, 1);
         if (! above) sh->currow = forw_row(sh, 1)->row;                   // paste below
@@ -274,7 +274,7 @@ int paste_yanked_ents(struct sheet * sh, int above, int type_paste) {
     } else if (type_of_yank == YANK_COL) {                        // paste col
         int c = yank_arg;
 #ifdef UNDO
-        copy_to_undostruct(0, sh->curcol + above, sh->maxrow, sh->curcol + above - 1 + yank_arg, UNDO_DEL, IGNORE_DEPS, NULL);
+        copy_to_undostruct(sh, 0, sh->curcol + above, sh->maxrow, sh->curcol + above - 1 + yank_arg, UNDO_DEL, IGNORE_DEPS, NULL);
 #endif
         while (c--) above ? insert_col(sh, 1) : insert_col(sh, 0);        // insert cols to the right if above or to the left
         diffr = yl->row;
@@ -316,7 +316,7 @@ int paste_yanked_ents(struct sheet * sh, int above, int type_paste) {
         copy_cell_to_undostruct(y_cells++, sh, lookat(sh, yl->row + diffr, yl->col + diffc), UNDO_DEL);
 
         // Here pass struct ent ** to copy_to_undostruct
-        copy_to_undostruct(0, 0, -1, -1, UNDO_DEL, HANDLE_DEPS, &y_cells);
+        copy_to_undostruct(sh, 0, 0, -1, -1, UNDO_DEL, HANDLE_DEPS, &y_cells);
 #endif
 
         // here we delete current content of "destino" ent.
@@ -358,7 +358,7 @@ int paste_yanked_ents(struct sheet * sh, int above, int type_paste) {
 #ifdef UNDO
         copy_cell_to_undostruct(y_cells++, sh, lookat(sh, yl->row + diffr, yl->col + diffc), UNDO_ADD);
         // store dependencies after the change as well
-        copy_to_undostruct(0, 0, -1, -1, UNDO_ADD, HANDLE_DEPS, &y_cells);
+        copy_to_undostruct(sh, 0, 0, -1, -1, UNDO_ADD, HANDLE_DEPS, &y_cells);
 #endif
         yl = yl->next;
     }

@@ -659,7 +659,7 @@ void do_normalmode(struct block * buf) {
 #ifdef UNDO
                     // added for #244 - 22/03/2018
                     ents_that_depends_on_range(sh, n->row, n->col, n->row, n->col);
-                    copy_to_undostruct(sh->currow, c1, sh->currow, c1, UNDO_DEL, HANDLE_DEPS, NULL);
+                    copy_to_undostruct(sh, sh->currow, c1, sh->currow, c1, UNDO_DEL, HANDLE_DEPS, NULL);
 #endif
                     copyent(n, sh, p, sh->currow - get_mark(buf->pnext->value)->row, c1 - get_mark(buf->pnext->value)->col, 0, 0, sh->maxrow, sh->maxcol, 0);
 
@@ -670,7 +670,7 @@ void do_normalmode(struct block * buf) {
                     if (n->expr) EvalJustOneVertex(sh, n, 1);
 
 #ifdef UNDO
-                    copy_to_undostruct(sh->currow, c1, sh->currow, c1, UNDO_ADD, HANDLE_DEPS, NULL);
+                    copy_to_undostruct(sh, sh->currow, c1, sh->currow, c1, UNDO_ADD, HANDLE_DEPS, NULL);
 #endif
                 }
 #ifdef UNDO
@@ -1099,11 +1099,11 @@ void do_normalmode(struct block * buf) {
             else if (buf->value == L'|') swprintf(interp_line, BUFFERSIZE, L"center %s", v_name(r, c));
             if (p != -1) swprintf(interp_line + wcslen(interp_line), BUFFERSIZE, L":%s", v_name(rf, cf));
 #ifdef UNDO
-            copy_to_undostruct(r, c, rf, cf, UNDO_DEL, IGNORE_DEPS, NULL);
+            copy_to_undostruct(sh, r, c, rf, cf, UNDO_DEL, IGNORE_DEPS, NULL);
 #endif
             send_to_interp(interp_line);
 #ifdef UNDO
-            copy_to_undostruct(r, c, rf, cf, UNDO_ADD, IGNORE_DEPS, NULL);
+            copy_to_undostruct(sh, r, c, rf, cf, UNDO_ADD, IGNORE_DEPS, NULL);
             end_undo_action();
 #endif
             cmd_multiplier = 0;
@@ -1140,7 +1140,7 @@ void do_normalmode(struct block * buf) {
             struct ent * p;
 #ifdef UNDO
             create_undo_action();
-            copy_to_undostruct(tlrow, tlcol, brrow, brcol, UNDO_DEL, IGNORE_DEPS, NULL);
+            copy_to_undostruct(sh, tlrow, tlcol, brrow, brcol, UNDO_DEL, IGNORE_DEPS, NULL);
 #endif
             int arg = cmd_multiplier;
             int mf = roman->modflg; // keep original modflg
@@ -1159,7 +1159,7 @@ void do_normalmode(struct block * buf) {
                 }
             }
 #ifdef UNDO
-            copy_to_undostruct(tlrow, tlcol, brrow, brcol, UNDO_ADD, IGNORE_DEPS, NULL);
+            copy_to_undostruct(sh, tlrow, tlcol, brrow, brcol, UNDO_ADD, IGNORE_DEPS, NULL);
             end_undo_action();
 #endif
             if (get_conf_int("autocalc")) EvalRange(sh, tlrow, tlcol, brrow, brcol);

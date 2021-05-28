@@ -429,7 +429,7 @@ int len_undo_list() {
 /**
  * \brief copy_to_undostruct()
  *
- * \details Take a range of 'ent' elements and create ent copies to keep in undo structs lists
+ * \details Take a range of 'ent' elements of a sheet, and create ent copies to keep in undo structs lists
  * such as the 'added' or 'removed' lists.
  *
  * char type: indicates UNDO_ADD ('a') for added list. or UNDO_DEL ('d') for the 'removed' list.
@@ -441,13 +441,10 @@ int len_undo_list() {
  * returns: none
  */
 
-void copy_to_undostruct (int ri, int ci, int rf, int cf, char type, short handle_deps, struct ent ** destination) {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
+void copy_to_undostruct (struct sheet * sh, int ri, int ci, int rf, int cf, char type, short handle_deps, struct ent ** destination) {
     int i, c, r;
     struct ent * p;
     extern struct ent_ptr * deps;
-
     //int repeated;
 
     // ask for memory to keep struct ent * for the whole range
@@ -486,6 +483,7 @@ void copy_to_undostruct (int ri, int ci, int rf, int cf, char type, short handle
              */
 
             // Copy cell at 'r, c' contents to 'y_cells' ent
+            y_cells->expr = NULL;
             copyent(y_cells, sh, lookat(sh, r, c), 0, 0, 0, 0, 0, 0, 'u');
 
             // Append 'ent' element at the beginning
@@ -505,14 +503,16 @@ void copy_to_undostruct (int ri, int ci, int rf, int cf, char type, short handle
     // do the same for dependencies
     if (handle_deps == HANDLE_DEPS)
         for (i = 0; deps != NULL && i < deps->vf; i++) {
-            p = *ATBL(sh, sh->tbl, deps[i].vp->row, deps[i].vp->col);
+            //p = *ATBL(sh, sh->tbl, deps[i].vp->row, deps[i].vp->col);
+            p = *ATBL(deps[i].sheet, deps[i].sheet->tbl, deps[i].vp->row, deps[i].vp->col);
             if (p == NULL) continue;
 
             // initialize the 'ent'
             cleanent(y_cells);
 
             // Copy cell at deps[i].vp->row, deps[i].vp->col contents to 'y_cells' ent
-            copyent(y_cells, sh, lookat(sh, deps[i].vp->row, deps[i].vp->col), 0, 0, 0, 0, 0, 0, 'u');
+            //copyent(y_cells, sh, lookat(sh, deps[i].vp->row, deps[i].vp->col), 0, 0, 0, 0, 0, 0, 'u');
+            copyent(y_cells, deps[i].sheet, lookat(deps[i].sheet, deps[i].vp->row, deps[i].vp->col), 0, 0, 0, 0, 0, 0, 'u');
 
             // Append 'ent' element at the beginning
             if (type == UNDO_ADD) {

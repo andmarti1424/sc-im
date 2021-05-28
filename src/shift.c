@@ -98,13 +98,13 @@ void shift(struct sheet * sh, int r, int c, int rf, int cf, wchar_t type) {
             yank_area(sh, r, c, rf + (rf-r+1) * (cmd_multiplier - 1), cf, 'a', cmd_multiplier); // keep ents in yanklist for sk
 #ifdef UNDO
             ents_that_depends_on_range(sh, r, c, rf + (rf-r+1) * (cmd_multiplier - 1), cf);
-            copy_to_undostruct(r, c, rf + (rf-r+1) * (cmd_multiplier - 1), cf, UNDO_DEL, HANDLE_DEPS, NULL);
+            copy_to_undostruct(sh, r, c, rf + (rf-r+1) * (cmd_multiplier - 1), cf, UNDO_DEL, HANDLE_DEPS, NULL);
             save_undo_range_shift(-cmd_multiplier, 0, r, c, rf + (rf-r+1) * (cmd_multiplier - 1), cf);
 #endif
             while (ic--) shift_range(sh, -ic, 0, r, c, rf, cf);
             if (get_conf_int("autocalc") && ! roman->loading) EvalAll();
 #ifdef UNDO
-            copy_to_undostruct(0, 0, -1, -1, UNDO_ADD, HANDLE_DEPS, NULL);
+            copy_to_undostruct(sh, 0, 0, -1, -1, UNDO_ADD, HANDLE_DEPS, NULL);
 #endif
             break;
 
@@ -114,7 +114,7 @@ void shift(struct sheet * sh, int r, int c, int rf, int cf, wchar_t type) {
 #ifdef UNDO
             // here we save in undostruct, all the ents that depends on the deleted one (before change)
             ents_that_depends_on_range(sh, r, c, rf, cf + (cf-c+1) * (cmd_multiplier - 1));
-            copy_to_undostruct(r, c, rf, cf + (cf-c+1) * (cmd_multiplier - 1), UNDO_DEL, HANDLE_DEPS, NULL);
+            copy_to_undostruct(sh, r, c, rf, cf + (cf-c+1) * (cmd_multiplier - 1), UNDO_DEL, HANDLE_DEPS, NULL);
             save_undo_range_shift(0, -cmd_multiplier, r, c, rf, cf + (cf-c+1) * (cmd_multiplier - 1));
 #endif
             while (ic--) shift_range(sh, 0, -ic, r, c, rf, cf);
@@ -122,7 +122,7 @@ void shift(struct sheet * sh, int r, int c, int rf, int cf, wchar_t type) {
             if (get_conf_int("autocalc") && ! roman->loading) EvalAll();
             //update(TRUE); // this is used just to make debugging easier
 #ifdef UNDO
-            copy_to_undostruct(0, 0, -1, -1, UNDO_ADD, HANDLE_DEPS, NULL);
+            copy_to_undostruct(sh, 0, 0, -1, -1, UNDO_ADD, HANDLE_DEPS, NULL);
 #endif
             break;
 

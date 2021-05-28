@@ -810,11 +810,11 @@ void do_commandmode(struct block * sb) {
                 del_range_wchars(interp_line, l, l + 5);
                 #ifdef UNDO
                 create_undo_action();
-                copy_to_undostruct(r, c, rf, cf, UNDO_DEL, IGNORE_DEPS, NULL);
+                copy_to_undostruct(sh, r, c, rf, cf, UNDO_DEL, IGNORE_DEPS, NULL);
                 #endif
                 send_to_interp(interp_line);
                 #ifdef UNDO
-                copy_to_undostruct(r, c, rf, cf, UNDO_ADD, IGNORE_DEPS, NULL);
+                copy_to_undostruct(sh, r, c, rf, cf, UNDO_ADD, IGNORE_DEPS, NULL);
                 end_undo_action();
                 #endif
             }
@@ -1057,7 +1057,7 @@ void do_commandmode(struct block * sb) {
 
         } else if ( ! wcscmp(inputline, L"file") ) {
             char * curfile = session->cur_doc->name;
-            if( curfile == NULL || ! curfile ) {
+            if (curfile == NULL || ! curfile) {
                 sc_info("Current file has no name");
             } else {
                 sc_info("Current file: \"%s\"", curfile);

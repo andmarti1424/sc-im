@@ -520,7 +520,9 @@ int All_vertexs_of_edges_visited(struct edgeTag * e, int eval_visited) {
 /**
  * \brief ents_that_depends_on()
  * \details get the list of ents that depends on an specific ent
- * \param[in] ent
+ * it adds the ents in "deps" variable, and reallocs as neccesary
+ * \param[in] struct sheet * sh
+ * \param[in] struct ent * ent
  * \return none
  */
 void ents_that_depends_on(struct sheet * sh, struct ent * ent) {
@@ -530,10 +532,10 @@ void ents_that_depends_on(struct sheet * sh, struct ent * ent) {
 
    struct edgeTag * edges = v->back_edges;
    while (edges != NULL) {
-       // TODO only add ent if it does not exists in deps ??
        deps = (struct ent_ptr *) realloc(deps, sizeof(struct ent_ptr) * (++dep_size));
        deps[0].vf = dep_size; // we always keep size of list in the first position !
-       deps[dep_size-1].vp = lookat(sh, edges->connectsTo->ent->row, edges->connectsTo->ent->col);
+       deps[dep_size-1].vp = lookat(edges->connectsTo->sheet, edges->connectsTo->ent->row, edges->connectsTo->ent->col);
+       deps[dep_size-1].sheet = edges->connectsTo->sheet; // we should save the sheet asociated with the ent as well
        ents_that_depends_on(edges->connectsTo->sheet, edges->connectsTo->ent);
        edges->connectsTo->visited = 1;
        edges = edges->next;
@@ -761,6 +763,7 @@ void EvalRange(struct sheet * sh, int tlrow, int tlcol, int brrow, int brcol) {
 
             // eval the dependencies
             markAllVerticesNotVisited(0);
+            if (deps != NULL) free(deps);
             deps = NULL;
             dep_size = 0;
             ents_that_depends_on(sh, e);

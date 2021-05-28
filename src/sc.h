@@ -459,7 +459,7 @@ extern int rndtoeven;
 extern int tbl_style;
 extern int loading;
 
-extern struct enode * copye(struct enode *e, int Rdelta, int Cdelta, int r1, int c1, int r2, int c2, int transpose);
+extern struct enode * copye(struct enode *e, struct sheet * sh, int Rdelta, int Cdelta, int r1, int c1, int r2, int c2, int special);
 extern char dpoint;   // country-dependent decimal point from locale
 extern char thsep;    // country-dependent thousands separator from locale
 extern char * coltoa(int col);

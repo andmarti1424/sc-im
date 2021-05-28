@@ -105,7 +105,7 @@ struct undo_rows_format {
 
 void create_undo_action();
 void end_undo_action();
-void copy_to_undostruct (int ri, int ci, int rf, int cf, char type, short handle_deps, struct ent ** destination);
+void copy_to_undostruct (struct sheet * sh, int ri, int ci, int rf, int cf, char type, short handle_deps, struct ent ** destination);
 void save_undo_range_shift(int delta_rows, int delta_cols, int tlrow, int tlcol, int brrow, int brcol);
 void undo_hide_show(int row, int col, char type, int arg);
 void undo_freeze_unfreeze(int row, int col, char type, int arg);

@@ -428,7 +428,7 @@ command:
                                   // here we save in undostruct, all the ents that depends on the deleted one (before change)
                                   ents_that_depends_on_range(sh, $2.left.vp->row, $2.left.vp->col, $2.left.vp->row, $2.left.vp->col);
                                   create_undo_action();
-                                  copy_to_undostruct($2.left.vp->row, $2.left.vp->col, $2.left.vp->row, $2.left.vp->col, UNDO_DEL, HANDLE_DEPS, NULL);
+                                  copy_to_undostruct(sh, $2.left.vp->row, $2.left.vp->col, $2.left.vp->row, $2.left.vp->col, UNDO_DEL, HANDLE_DEPS, NULL);
 #endif
 
                                   if (getVertex(graph, sh, lookat(sh, $2.left.vp->row, $2.left.vp->col), 0) != NULL) destroy_vertex(sh, lookat(sh, $2.left.vp->row, $2.left.vp->col));
@@ -449,7 +449,7 @@ command:
 
 #ifdef UNDO
                                   // here we save in undostruct, all the ents that depends on the deleted one (after change)
-                                  copy_to_undostruct($2.left.vp->row, $2.left.vp->col, $2.left.vp->row, $2.left.vp->col, UNDO_ADD, HANDLE_DEPS, NULL);
+                                  copy_to_undostruct(sh, $2.left.vp->row, $2.left.vp->col, $2.left.vp->row, $2.left.vp->col, UNDO_ADD, HANDLE_DEPS, NULL);
                                   extern struct ent_ptr * deps;
                                   if (deps != NULL) {
                                       free(deps);
@@ -1153,6 +1153,8 @@ term:   var                       {
                                     else {
                                        $1.sheet = NULL;
                                        $$ = new_var(O_VAR, $1);
+                                       $$->e.r.left.expr = NULL;
+                                       $$->e.r.right.expr = NULL;
                                        }
                                   }
 
@@ -1165,8 +1167,11 @@ term:   var                       {
                                         ep.vp = lookat(sh, $5.vp->row, $5.vp->col);
                                         ep.sheet = sh;
                                         $$ = new_var(O_VAR, ep);
+                                        $$->e.r.left.expr = NULL;
+                                        $$->e.r.right.expr = NULL;
                                         scxfree($2);
                                     } else {
+                                        //sc_debug("not sheet found");
                                         $$ = NULL;
                                         scxfree($2);
                                     }
@@ -1380,18 +1385,6 @@ range:   var ':' var              {
 
 var:
 
-/*
-    STRING '!' COL NUMBER       {
-                                    sc_debug($1);
-                                    struct roman * roman = session->cur_doc;
-                                    struct sheet * sh;
-                                    if ((sh = search_sheet(roman, $1)) != NULL) {
-                                        $$.vp = lookat(sh, $4, $3);
-                                        $$.vf = 0;
-                                    }
-                                    scxfree($1);
-                                  }
-                                  */
           COL NUMBER               {
                                     struct roman * roman = session->cur_doc;
                                     $$.vp = lookat(roman->cur_sh, $2, $1);
@@ -1422,48 +1415,6 @@ var:
                                     if ($$.expr != NULL) efree($$.expr);
                                     $$.expr = new(GETENT, $4, $6);
                                   }
-
-/*
-    | STRING '!' '$' COL NUMBER           {
-                                    struct roman * roman = session->cur_doc;
-                                    struct sheet * sh;
-                                    if ((sh = search_sheet(roman, $1)) != NULL) {
-                                       $$.vp = lookat(sh, $5, $4);
-                                       $$.vf = FIX_COL;
-                                    }
-                                    scxfree($1);
-                                  }
-    | STRING '!' COL '$' NUMBER   {
-                                    struct roman * roman = session->cur_doc;
-                                    struct sheet * sh;
-                                    if ((sh = search_sheet(roman, $1)) != NULL) {
-                                       $$.vp = lookat(sh, $5, $3);
-                                       $$.vf = FIX_ROW;
-                                    }
-                                    scxfree($1);
-                                  }
-    | STRING '!' '$' COL '$' NUMBER {
-                                    struct roman * roman = session->cur_doc;
-                                    struct sheet * sh;
-                                    if ((sh = search_sheet(roman, $1)) != NULL) {
-                                        $$.vp = lookat(sh, $6, $4);
-                                        $$.vf = FIX_ROW | FIX_COL;
-                                    }
-                                    scxfree($1);
-                                  }
-
-    | STRING '!' '@' K_GETENT '(' e ',' e ')' {
-                                    struct roman * roman = session->cur_doc;
-                                    struct sheet * sh;
-                                    if ((sh = search_sheet(roman, $1)) != NULL) {
-                                       $$.vp = lookat(sh, eval(NULL, $6), eval(NULL, $8));
-                                       $$.vf = GETENT;
-                                       if ($$.expr != NULL) efree($$.expr);
-                                       $$.expr = new(GETENT, $6, $8);
-                                    }
-                                    scxfree($1);
-                                  }
-                                  */
 
     |    VAR                      {
                                     $$ = $1.left;

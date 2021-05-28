@@ -132,7 +132,7 @@ void flush_saved() {
  * around before the call, but not referenced by an entry in tbl.
  * \return none
  */
-// TODO Improve this function such that it does not traverse the whole table
+// TODO Improve this function such that it does not traverse the whole table. Use the graph.
 void sync_refs(struct sheet * sh) {
     int i, j;
     struct ent * p;
@@ -172,8 +172,8 @@ void syncref(struct sheet * sh, struct enode * e) {
         e->e.o.right = NULL;
         return;
     } else if (e->op & REDUCE) {
-        e->e.r.right.vp = lookat(sh, e->e.r.right.vp->row, e->e.r.right.vp->col);
-        e->e.r.left.vp = lookat(sh, e->e.r.left.vp->row, e->e.r.left.vp->col);
+        e->e.r.right.vp = lookat(e->e.r.right.sheet, e->e.r.right.vp->row, e->e.r.right.vp->col);
+        e->e.r.left.vp = lookat(e->e.r.left.sheet, e->e.r.left.vp->row, e->e.r.left.vp->col);
     } else {
         switch (e->op) {
         case 'v':
@@ -183,7 +183,7 @@ void syncref(struct sheet * sh, struct enode * e) {
                 //e->e.o.right = NULL;
                 break;
             } else if (e->e.v.vp->flags & may_sync)
-                e->e.v.vp = lookat(sh, e->e.v.vp->row, e->e.v.vp->col);
+                e->e.v.vp = lookat(e->e.v.sheet == NULL ? sh : e->e.v.sheet, e->e.v.vp->row, e->e.v.vp->col);
             break;
         case 'k':
             break;
@@ -219,7 +219,7 @@ void deletecol(struct sheet * sh, int col, int mult) {
     create_undo_action();
     // here we save in undostruct, all the ents that depends on the deleted one (before change)
     ents_that_depends_on_range(sh, 0, col, sh->maxrow, col - 1 + mult);
-    copy_to_undostruct(0, col, sh->maxrow, col - 1 + mult, UNDO_DEL, HANDLE_DEPS, NULL);
+    copy_to_undostruct(sh, 0, col, sh->maxrow, col - 1 + mult, UNDO_DEL, HANDLE_DEPS, NULL);
     save_undo_range_shift(0, -mult, 0, col, sh->maxrow, col - 1 + mult);
 
     int i;
@@ -243,7 +243,7 @@ void deletecol(struct sheet * sh, int col, int mult) {
 
 #ifdef UNDO
     // here we save in undostruct, just the ents that depends on the deleted one (after change)
-    copy_to_undostruct(0, 0, -1, -1, UNDO_ADD, HANDLE_DEPS, NULL);
+    copy_to_undostruct(sh, 0, 0, -1, -1, UNDO_ADD, HANDLE_DEPS, NULL);
 
     extern struct ent_ptr * deps;
     if (deps != NULL) free(deps);
@@ -356,7 +356,6 @@ void copyent(struct ent * n, struct sheet * sh_p, struct ent * p, int dr, int dc
         sc_error("copyent: internal error");
         return;
     }
-
     n->flags = may_sync;
     if (p->flags & is_deleted)
         n->flags |= is_deleted;
@@ -367,10 +366,11 @@ void copyent(struct ent * n, struct sheet * sh_p, struct ent * p, int dr, int dc
             n->flags |= p->flags & is_valid;
         }
         if (special != 'v' && p->expr && special != 'u') {
-            n->expr = copye(p->expr, dr, dc, r1, c1, r2, c2, special == 't');
+            n->expr = copye(p->expr, sh_p, dr, dc, r1, c1, r2, c2, special == 't');
 #ifdef UNDO
         } else if (special == 'u' && p->expr) { // from spreadsheet to undo
-            n->expr = copye(p->expr, dr, dc, r1, c1, r2, c2, 2);
+            if (p->expr == NULL) sc_debug("is null!");
+            n->expr = copye(p->expr, sh_p, dr, dc, r1, c1, r2, c2, 2);
 #endif
         }
         if (p->expr && p->flags & is_strexpr)
@@ -531,11 +531,9 @@ void erase_area(struct sheet * sh, int sr, int sc, int er, int ec, int ignoreloc
 
 
 /**
- * \brief TODO Write a brief function description
- * \details Function to copy an expression. It returns the copy.
- * special = 1 means transpose
- * special = 2 means copy from spreadsheet to undo struct
- * \param[in] e
+ * \brief copye()
+ * \details Function used to get a copy of an expression.
+ * \param[in] e: expression to be copied
  * \param[in] Rdelta
  * \param[in] Cdelta
  * \param[in] r1
@@ -543,38 +541,46 @@ void erase_area(struct sheet * sh, int sr, int sc, int er, int ec, int ignoreloc
  * \param[in] r2
  * \param[in] c2
  * \param[in] special
- * \return none
+ * special = 1 means transpose
+ * special = 2 means copy from spreadsheet to undo struct
+ * \return struct enode *
  */
-struct enode * copye(struct enode *e, int Rdelta, int Cdelta, int r1, int c1, int r2, int c2, int special) {
+struct enode * copye(struct enode *e, struct sheet * sh, int Rdelta, int Cdelta, int r1, int c1, int r2, int c2, int special) {
     struct enode * ret;
     static struct enode * range = NULL;
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
 
-    if (e == (struct enode *) 0) {
+    if (e == NULL) {
         ret = (struct enode *) 0;
 
     } else if (e->op & REDUCE) {
         int newrow, newcol;
         ret = (struct enode *) scxmalloc((unsigned) sizeof (struct enode));
         ret->op = e->op;
-        ret->e.r.left.expr = e->e.r.left.expr ? copye(e->e.r.left.expr, Rdelta, Cdelta, r1, c1, r2, c2, special) : NULL; // important to initialize
-        ret->e.r.right.expr = e->e.r.right.expr ? copye(e->e.r.right.expr, Rdelta, Cdelta, r1, c1, r2, c2, special) : NULL; // important to initialize
+        //ret->e.r.left.expr = e->e.r.left.expr ? copye(e->e.r.left.expr, sh, Rdelta, Cdelta, r1, c1, r2, c2, special) : NULL; // important to initialize
+        ret->e.r.left.expr = e->e.r.left.expr ? copye(e->e.r.left.expr, e->e.r.left.sheet, Rdelta, Cdelta, r1, c1, r2, c2, special) : NULL; // important to initialize
+        // ret->e.r.right.expr = e->e.r.right.expr ? copye(e->e.r.right.expr, sh, Rdelta, Cdelta, r1, c1, r2, c2, special) : NULL; // important to initialize
+        ret->e.r.right.expr = e->e.r.right.expr ? copye(e->e.r.right.expr, e->e.r.right.sheet, Rdelta, Cdelta, r1, c1, r2, c2, special) : NULL; // important to initialize
         newrow = e->e.r.left.vf & FIX_ROW || e->e.r.left.vp->row < r1 || e->e.r.left.vp->row > r2 || e->e.r.left.vp->col < c1 || e->e.r.left.vp->col > c2 ?  e->e.r.left.vp->row : special == 1 ? r1 + Rdelta + e->e.r.left.vp->col - c1 : e->e.r.left.vp->row + Rdelta;
         newcol = e->e.r.left.vf & FIX_COL || e->e.r.left.vp->row < r1 || e->e.r.left.vp->row > r2 || e->e.r.left.vp->col < c1 || e->e.r.left.vp->col > c2 ?  e->e.r.left.vp->col : special == 1 ? c1 + Cdelta + e->e.r.left.vp->row - r1 : e->e.r.left.vp->col + Cdelta;
-        ret->e.r.left.vp = lookat(sh, newrow, newcol);
+        //ret->e.r.left.vp = lookat(sh, newrow, newcol);
+        ret->e.r.left.vp = lookat(e->e.r.left.sheet, newrow, newcol);
         ret->e.r.left.vf = e->e.r.left.vf;
         ret->e.r.left.sheet = e->e.r.left.sheet;
         newrow = e->e.r.right.vf & FIX_ROW || e->e.r.right.vp->row < r1 || e->e.r.right.vp->row > r2 || e->e.r.right.vp->col < c1 || e->e.r.right.vp->col > c2 ?  e->e.r.right.vp->row : special == 1 ? r1 + Rdelta + e->e.r.right.vp->col - c1 : e->e.r.right.vp->row + Rdelta;
         newcol = e->e.r.right.vf & FIX_COL || e->e.r.right.vp->row < r1 || e->e.r.right.vp->row > r2 || e->e.r.right.vp->col < c1 || e->e.r.right.vp->col > c2 ?  e->e.r.right.vp->col : special == 1 ? c1 + Cdelta + e->e.r.right.vp->row - r1 : e->e.r.right.vp->col + Cdelta;
-        ret->e.r.right.vp = lookat(sh, newrow, newcol);
+        //ret->e.r.right.vp = lookat(sh, newrow, newcol);
+        ret->e.r.right.vp = lookat(e->e.r.right.sheet, newrow, newcol);
         ret->e.r.right.vf = e->e.r.right.vf;
         ret->e.r.right.sheet = e->e.r.right.sheet;
     } else {
         struct enode *temprange=0;
         ret = (struct enode *) scxmalloc((unsigned) sizeof (struct enode));
-        ret->e.r.left.expr = e->e.r.left.expr != NULL ? copye(e->e.r.left.expr, Rdelta, Cdelta, r1, c1, r2, c2, special) : NULL; // important to initialize
-        ret->e.r.right.expr = e->e.r.right.expr != NULL ? copye(e->e.r.right.expr, Rdelta, Cdelta, r1, c1, r2, c2, special) : NULL; // important to initialize
+        //ret->e.r.left.expr  = e->e.r.left.expr  != NULL ? copye(e->e.r.left.expr,  sh, Rdelta, Cdelta, r1, c1, r2, c2, special) : NULL; // important to initialize
+        //ret->e.r.right.expr = e->e.r.right.expr != NULL ? copye(e->e.r.right.expr, sh, Rdelta, Cdelta, r1, c1, r2, c2, special) : NULL; // important to initialize
+        // ret->e.r.left.expr  = e->e.r.left.expr  != NULL ? copye(e->e.r.left.expr,  e->e.r.left.sheet, Rdelta, Cdelta, r1, c1, r2, c2, special) : NULL; // important to initialize
+        // ret->e.r.right.expr = e->e.r.right.expr != NULL ? copye(e->e.r.right.expr, e->e.r.right.sheet, Rdelta, Cdelta, r1, c1, r2, c2, special) : NULL; // important to initialize
+        ret->e.r.left.expr  = copye(e->e.r.left.expr,  e->e.r.left.sheet, Rdelta, Cdelta, r1, c1, r2, c2, special);
+        ret->e.r.right.expr = copye(e->e.r.right.expr, e->e.r.right.sheet, Rdelta, Cdelta, r1, c1, r2, c2, special);
         ret->e.r.left.vp = e->e.r.left.vp;
         ret->e.r.right.vp = e->e.r.right.vp;
         ret->e.r.left.sheet = e->e.r.left.sheet;
@@ -607,6 +613,7 @@ struct enode * copye(struct enode *e, int Rdelta, int Cdelta, int r1, int c1, in
                         newcol = e->e.v.vf & FIX_COL || e->e.v.vp->row < r1 || e->e.v.vp->row > r2 || e->e.v.vp->col < c1 || e->e.v.vp->col > c2 ?  e->e.v.vp->col : special == 1 ? c1 + Cdelta + e->e.v.vp->row - r1 : e->e.v.vp->col + Cdelta;
                     }
                     ret->e.v.vp = lookat(sh, newrow, newcol);
+                    //ret->e.v.vp = lookat(e->e.v.sheet, newrow, newcol);
                     ret->e.v.vf = e->e.v.vf;
                     ret->e.v.sheet = e->e.v.sheet;
                     break;
@@ -618,7 +625,7 @@ struct enode * copye(struct enode *e, int Rdelta, int Cdelta, int r1, int c1, in
             case 'F':
                 if ((range && ret->op == 'F') || (!range && ret->op == 'f'))
                     Rdelta = Cdelta = 0;
-                ret->e.o.left = copye(e->e.o.left, Rdelta, Cdelta, r1, c1, r2, c2, special);
+                ret->e.o.left = copye(e->e.o.left, sh, Rdelta, Cdelta, r1, c1, r2, c2, special);
                 ret->e.o.right = (struct enode *)0;
                 break;
             case '$':
@@ -634,8 +641,8 @@ struct enode * copye(struct enode *e, int Rdelta, int Cdelta, int r1, int c1, in
                     //ret->e.o.right = (struct enode *)0;
                     break; /* fix #108 */
                 }
-                ret->e.o.left = copye(e->e.o.left, Rdelta, Cdelta, r1, c1, r2, c2, special);
-                ret->e.o.right = copye(e->e.o.right, Rdelta, Cdelta, r1, c1, r2, c2, special);
+                ret->e.o.left = copye(e->e.o.left, sh, Rdelta, Cdelta, r1, c1, r2, c2, special);
+                ret->e.o.right = copye(e->e.o.right, sh, Rdelta, Cdelta, r1, c1, r2, c2, special);
                 break;
         }
         switch (ret->op) {
@@ -903,7 +910,7 @@ void deleterow(struct sheet * sh, int row, int mult) {
     create_undo_action();
     // here we save in undostruct, all the ents that depends on the deleted one (before change)
     ents_that_depends_on_range(sh, row, 0, row + mult - 1, sh->maxcol);
-    copy_to_undostruct(row, 0, row + mult - 1, sh->maxcol, UNDO_DEL, HANDLE_DEPS, NULL);
+    copy_to_undostruct(sh, row, 0, row + mult - 1, sh->maxcol, UNDO_DEL, HANDLE_DEPS, NULL);
     save_undo_range_shift(-mult, 0, row, 0, row - 1 + mult, sh->maxcol);
     int i;
     for (i=row; i < row + mult; i++) {
@@ -925,7 +932,7 @@ void deleterow(struct sheet * sh, int row, int mult) {
 
 #ifdef UNDO
     // here we save in undostruct, just the ents that depends on the deleted one (after the change)
-    copy_to_undostruct(0, 0, -1, -1, UNDO_ADD, HANDLE_DEPS, NULL);
+    copy_to_undostruct(sh, 0, 0, -1, -1, UNDO_ADD, HANDLE_DEPS, NULL);
 
     extern struct ent_ptr * deps;
     if (deps != NULL) free(deps);
@@ -1180,7 +1187,7 @@ void del_selected_cells(struct sheet * sh) {
     create_undo_action();
     // here we save in undostruct, all the ents that depends on the deleted one (before change)
     ents_that_depends_on_range(sh, tlrow, tlcol, brrow, brcol);
-    copy_to_undostruct(tlrow, tlcol, brrow, brcol, UNDO_DEL, HANDLE_DEPS, NULL);
+    copy_to_undostruct(sh, tlrow, tlcol, brrow, brcol, UNDO_DEL, HANDLE_DEPS, NULL);
 #endif
 
     erase_area(sh, tlrow, tlcol, brrow, brcol, 0, 0); //important: this erases the ents, but does NOT mark them as deleted
@@ -1188,14 +1195,16 @@ void del_selected_cells(struct sheet * sh) {
     sync_refs(sh);
     //flush_saved(); DO NOT UNCOMMENT! flush_saved shall not be called other than at exit.
 
+    // TODO here in EvalRange it cleans deps so it can eval.
+    // we should keep it so me can copy to undostruct later on
     EvalRange(sh, tlrow, tlcol, brrow, brcol);
 
 #ifdef UNDO
     // here we save in undostruct, all the ents that depends on the deleted one (after the change)
-    copy_to_undostruct(tlrow, tlcol, brrow, brcol, UNDO_ADD, HANDLE_DEPS, NULL);
+    ents_that_depends_on_range(sh, tlrow, tlcol, brrow, brcol);
+    copy_to_undostruct(sh, tlrow, tlcol, brrow, brcol, UNDO_ADD, HANDLE_DEPS, NULL);
     extern struct ent_ptr * deps;
-    if (deps != NULL) free(deps);
-    deps = NULL;
+    if (deps != NULL) { free(deps); deps = NULL; }
     end_undo_action();
 #endif
 
@@ -1951,7 +1960,7 @@ void valueize_area(struct sheet * sh, int sr, int sc, int er, int ec) {
 
     #ifdef UNDO
     create_undo_action();
-    copy_to_undostruct(sr, sc, er, ec, UNDO_DEL, IGNORE_DEPS, NULL);
+    copy_to_undostruct(sh, sr, sc, er, ec, UNDO_DEL, IGNORE_DEPS, NULL);
     #endif
     for (r = sr; r <= er; r++) {
         for (c = sc; c <= ec; c++) {
@@ -1993,7 +2002,7 @@ void valueize_area(struct sheet * sh, int sr, int sc, int er, int ec) {
         }
     }
     #ifdef UNDO
-    copy_to_undostruct(sr, sc, er, ec, UNDO_ADD, IGNORE_DEPS, NULL);
+    copy_to_undostruct(sh, sr, sc, er, ec, UNDO_ADD, IGNORE_DEPS, NULL);
     end_undo_action();
     #endif
     sc_info("Removed formulas from range");
@@ -2198,7 +2207,7 @@ int fcopy(struct sheet * sh, char * action) {
     }
 #ifdef UNDO
     create_undo_action();
-    copy_to_undostruct(ri, ci, rf, cf, UNDO_DEL, IGNORE_DEPS, NULL);
+    copy_to_undostruct(sh, ri, ci, rf, cf, UNDO_DEL, IGNORE_DEPS, NULL);
 #endif
 
     if (! strcmp(action, "")) {
@@ -2239,7 +2248,7 @@ int fcopy(struct sheet * sh, char * action) {
     EvalRange(sh, ri, ci, rf, cf);
 
 #ifdef UNDO
-    copy_to_undostruct(ri, ci, rf, cf, UNDO_ADD, IGNORE_DEPS, NULL);
+    copy_to_undostruct(sh, ri, ci, rf, cf, UNDO_ADD, IGNORE_DEPS, NULL);
     end_undo_action();
 #endif
 
@@ -2272,7 +2281,7 @@ int pad(struct sheet * sh, int n, int r1, int c1, int r2, int c2) {
 
 #ifdef UNDO
     create_undo_action();
-    copy_to_undostruct(r1, c1, r2, c2, UNDO_DEL, IGNORE_DEPS, NULL);
+    copy_to_undostruct(sh, r1, c1, r2, c2, UNDO_DEL, IGNORE_DEPS, NULL);
 #endif
 
     for (r = r1; r <= r2; r++) {
@@ -2287,7 +2296,7 @@ int pad(struct sheet * sh, int n, int r1, int c1, int r2, int c2) {
     }
 
 #ifdef UNDO
-    copy_to_undostruct(r1, c1, r2, c2, UNDO_ADD, IGNORE_DEPS, NULL);
+    copy_to_undostruct(sh, r1, c1, r2, c2, UNDO_ADD, IGNORE_DEPS, NULL);
     end_undo_action();
 #endif
 

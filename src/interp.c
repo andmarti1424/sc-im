@@ -1316,7 +1316,7 @@ void fill(struct sheet * sh, struct ent * v1, struct ent * v2, double start, dou
 
 #ifdef UNDO
     create_undo_action();
-    copy_to_undostruct(minr, minc, maxr, maxc, UNDO_DEL, IGNORE_DEPS, NULL);
+    copy_to_undostruct(sh, minr, minc, maxr, maxc, UNDO_DEL, IGNORE_DEPS, NULL);
 #endif
 
     if (calc_order == BYROWS) {
@@ -1347,7 +1347,7 @@ void fill(struct sheet * sh, struct ent * v1, struct ent * v2, double start, dou
     }
     EvalRange(sh, minr, minc, maxr, maxc);
 #ifdef UNDO
-    copy_to_undostruct(minr, minc, maxr, maxc, UNDO_ADD, IGNORE_DEPS, NULL);
+    copy_to_undostruct(sh, minr, minc, maxr, maxc, UNDO_ADD, IGNORE_DEPS, NULL);
     end_undo_action();
 #endif
 }
@@ -1378,7 +1378,7 @@ void lock_cells(struct sheet * sh, struct ent * v1, struct ent * v2) {
 
 #ifdef UNDO
     create_undo_action();
-    copy_to_undostruct(minr, minc, maxr, maxc, UNDO_DEL, IGNORE_DEPS, NULL);
+    copy_to_undostruct(sh, minr, minc, maxr, maxc, UNDO_DEL, IGNORE_DEPS, NULL);
 #endif
     for (r = minr; r <= maxr; r++)
         for (c = minc; c <= maxc; c++) {
@@ -1386,7 +1386,7 @@ void lock_cells(struct sheet * sh, struct ent * v1, struct ent * v2) {
             n->flags |= is_locked;
         }
 #ifdef UNDO
-    copy_to_undostruct(minr, minc, maxr, maxc, UNDO_ADD, IGNORE_DEPS, NULL);
+    copy_to_undostruct(sh, minr, minc, maxr, maxc, UNDO_ADD, IGNORE_DEPS, NULL);
     end_undo_action();
 #endif
     sc_info("Cells were locked");
@@ -1418,7 +1418,7 @@ void unlock_cells(struct sheet * sh, struct ent * v1, struct ent * v2) {
 
 #ifdef UNDO
     create_undo_action();
-    copy_to_undostruct(minr, minc, maxr, maxc, UNDO_DEL, IGNORE_DEPS, NULL);
+    copy_to_undostruct(sh, minr, minc, maxr, maxc, UNDO_DEL, IGNORE_DEPS, NULL);
 #endif
     for (r = minr; r <= maxr; r++)
         for (c = minc; c <= maxc; c++) {
@@ -1426,7 +1426,7 @@ void unlock_cells(struct sheet * sh, struct ent * v1, struct ent * v2) {
             n->flags &= ~is_locked;
         }
 #ifdef UNDO
-    copy_to_undostruct(minr, minc, maxr, maxc, UNDO_ADD, IGNORE_DEPS, NULL);
+    copy_to_undostruct(sh, minr, minc, maxr, maxc, UNDO_ADD, IGNORE_DEPS, NULL);
     end_undo_action();
 #endif
     sc_info("Cells were unlocked");
@@ -1448,7 +1448,7 @@ void let(struct roman * roman, struct sheet * sh, struct ent * v, struct enode *
         create_undo_action();
         // here we save in undostruct, all the ents that depends on the deleted one (before change)
         ents_that_depends_on_range(sh, v->row, v->col, v->row, v->col);
-        copy_to_undostruct(v->row, v->col, v->row, v->col, UNDO_DEL, HANDLE_DEPS, NULL);
+        copy_to_undostruct(sh, v->row, v->col, v->row, v->col, UNDO_DEL, HANDLE_DEPS, NULL);
     }
     #endif
 
@@ -1518,7 +1518,7 @@ void let(struct roman * roman, struct sheet * sh, struct ent * v, struct enode *
     #ifdef UNDO
     if (! roman->loading) {
         // here we also save in undostruct, all the ents that depends on the deleted ones (after change)
-        copy_to_undostruct(v->row, v->col, v->row, v->col, UNDO_ADD, HANDLE_DEPS, NULL);
+        copy_to_undostruct(sh, v->row, v->col, v->row, v->col, UNDO_ADD, HANDLE_DEPS, NULL);
         if (deps != NULL) {
             free(deps);
             deps = NULL;
@@ -1547,7 +1547,7 @@ void slet(struct roman * roman, struct sheet * sh, struct ent * v, struct enode 
         // here we save in undostruct, all the ents that depends on the deleted one (before change)
         ents_that_depends_on_range(sh, v->row, v->col, v->row, v->col);
         create_undo_action();
-        copy_to_undostruct(v->row, v->col, v->row, v->col, UNDO_DEL, HANDLE_DEPS, NULL);
+        copy_to_undostruct(sh, v->row, v->col, v->row, v->col, UNDO_DEL, HANDLE_DEPS, NULL);
         add_undo_row_format(v->row, 'R', sh->row_format[v->row]);
     }
     #endif
@@ -1623,7 +1623,7 @@ void slet(struct roman * roman, struct sheet * sh, struct ent * v, struct enode 
 #ifdef UNDO
     if (! roman->loading) {
         // here we also save in undostruct, all the ents that depends on the deleted ones (after change)
-        copy_to_undostruct(v->row, v->col, v->row, v->col, UNDO_ADD, HANDLE_DEPS, NULL);
+        copy_to_undostruct(sh, v->row, v->col, v->row, v->col, UNDO_ADD, HANDLE_DEPS, NULL);
         if (deps != NULL) {
             free(deps);
             deps = NULL;
@@ -2320,7 +2320,7 @@ int dateformat(struct sheet * sh, struct ent *v1, struct ent *v2, char * fmt) {
 
     #ifdef UNDO
     create_undo_action();
-    copy_to_undostruct(minr, minc, maxr, maxc, UNDO_DEL, IGNORE_DEPS, NULL);
+    copy_to_undostruct(sh, minr, minc, maxr, maxc, UNDO_DEL, IGNORE_DEPS, NULL);
     #endif
     for (r = minr; r <= maxr; r++) {
         for (c = minc; c <= maxc; c++) {
@@ -2348,7 +2348,7 @@ int dateformat(struct sheet * sh, struct ent *v1, struct ent *v2, char * fmt) {
         }
     }
     #ifdef UNDO
-        copy_to_undostruct(minr, minc, maxr, maxc, UNDO_ADD, IGNORE_DEPS, NULL);
+        copy_to_undostruct(sh, minr, minc, maxr, maxc, UNDO_ADD, IGNORE_DEPS, NULL);
         end_undo_action();
     #endif
     session->cur_doc->modflg++; // increase just one time
