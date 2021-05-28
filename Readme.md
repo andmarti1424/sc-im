@@ -113,7 +113,6 @@ And then follow the instructions as above.
 ### Homebrew for OSX users
 
 ```
-brew tap nickolasburr/pfa
 brew install sc-im
 ```
 
