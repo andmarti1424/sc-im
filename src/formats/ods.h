@@ -34,14 +34,11 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE       *
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.           *
  *******************************************************************************/
-
 /**
- * \file freeze.h
+ * \file ods.h
  * \author Andrés Martinelli <andmarti@gmail.com>
- * \date 2017-07-18
- * \brief Header file for freeze.c
+ * \date 2021-03-27
+ * \brief Header file for ods.c
  */
 
-#include "sc.h"
-
-void handle_freeze(struct sheet * sh, struct ent * tl_ent, struct ent * br_ent, char value, char type);
+int open_ods(char * fname, char * encoding);

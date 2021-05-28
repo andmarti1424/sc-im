@@ -44,15 +44,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "shift.h"
-#include "sc.h"
-#include "vmtbl.h"   // for growtbl
-#include "cmds.h"
-#include "graph.h"
-#include "undo.h"
-#include "marks.h"
-#include "yank.h"
-#include "conf.h"
-#include "tui.h"
+#include "../sc.h"
+#include "../vmtbl.h"   // for growtbl
+#include "../cmds/cmds.h"
+#include "../graph.h"
+#include "../undo.h"
+#include "../marks.h"
+#include "../yank.h"
+#include "../conf.h"
+#include "../tui.h"
 
 extern graphADT graph;
 extern int cmd_multiplier;

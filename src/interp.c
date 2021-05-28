@@ -65,7 +65,7 @@
 
 #include "sc.h"
 #include "macros.h"
-#include "cmds.h"
+#include "cmds/cmds.h"
 #include "format.h"
 #include "conf.h"
 #include "tui.h"

@@ -52,11 +52,11 @@
 #include "main.h"
 #include "tui.h"
 #include "maps.h"
-#include "cmds.h"
+#include "cmds/cmds.h"
 #include "history.h"
 #include "conf.h"
 #include "utils/string.h"
-#include "cmds_visual.h"
+#include "cmds/cmds_visual.h"
 #include "buffer.h"
 #include "digraphs.h"
 

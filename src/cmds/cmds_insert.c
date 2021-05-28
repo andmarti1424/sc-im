@@ -48,13 +48,13 @@
 
 #include "cmds_insert.h"
 #include "cmds.h"
-#include "tui.h"
-#include "buffer.h"
-#include "sc.h"            // for rescol
-#include "utils/string.h"
-#include "marks.h"
 #include "cmds_visual.h"
-#include "conf.h"
+#include "../tui.h"
+#include "../buffer.h"
+#include "../sc.h"            // for rescol
+#include "../utils/string.h"
+#include "../marks.h"
+#include "../conf.h"
 
 #ifdef INS_HISTORY_FILE
 char ori_insert_edit_submode;

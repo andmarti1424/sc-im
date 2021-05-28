@@ -2,16 +2,16 @@
 #include <stdlib.h>
 
 #include "sc.h"
-#include "cmds.h"
+#include "cmds/cmds.h"
 #include "interp.h"
 #include "macros.h"
-#include "sort.h"
-#include "filter.h"
+#include "actions/sort.h"
+#include "actions/filter.h"
 #include "maps.h"
 #include "marks.h"
 #include "xmalloc.h" // for scxfree
-#include "hide_show.h"
-#include "cmds_normal.h"
+#include "actions/hide_show.h"
+#include "cmds/cmds_normal.h"
 #include "conf.h"
 #include "pipe.h"
 #include "main.h"
@@ -21,14 +21,14 @@
 #include "graph.h"
 #include "utils/dictionary.h"
 #include "trigger.h"
-#include "shift.h"
+#include "actions/shift.h"
 #include "clipboard.h"
-#include "plot.h"
-#include "subtotal.h"
-#include "freeze.h"
+#include "actions/plot.h"
+#include "actions/subtotal.h"
+#include "actions/freeze.h"
 #include "sheet.h"
 #include "vmtbl.h"
-#include "cmds_command.h"
+#include "cmds/cmds_command.h"
 
 void yyerror(char *err);               // error routine for yacc (gram.y)
 int yylex();

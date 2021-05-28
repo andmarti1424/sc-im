@@ -51,7 +51,7 @@
 #include "sc.h"
 #include "stdlib.h"
 #include "marks.h"
-#include "cmds.h"
+#include "cmds/cmds.h"
 #include "conf.h"
 #include "yank.h"
 #include "graph.h"

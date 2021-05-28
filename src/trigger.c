@@ -67,7 +67,7 @@
 #include "tui.h"
 #include "undo.h"
 #include "conf.h"
-#include "cmds.h"
+#include "cmds/cmds.h"
 #include "trigger.h"
 #include "file.h"
 

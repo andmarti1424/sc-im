@@ -45,16 +45,17 @@
 #include <string.h>
 #include <wchar.h>
 #include <wctype.h>
-#include "sc.h"    // for rescol
+
 #include "cmds.h"
-#include "tui.h"
-#include "buffer.h"
 #include "cmds_edit.h"
-#include "utils/string.h"
-#include "interp.h"
-#include "marks.h"
-#include "conf.h"
-#include "history.h"
+#include "../sc.h"    // for rescol
+#include "../tui.h"
+#include "../buffer.h"
+#include "../utils/string.h"
+#include "../interp.h"
+#include "../marks.h"
+#include "../conf.h"
+#include "../history.h"
 
 // this macro is used to determinate a word over a WORD
 #define istext(a)    (iswalnum(a) || ((a) == L'_'))

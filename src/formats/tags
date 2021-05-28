@@ -1,0 +1,19 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	2	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_OUTPUT_EXCMD	mixed	/number, pattern, mixed, or combineV2/
+!_TAG_OUTPUT_FILESEP	slash	/slash or backslash/
+!_TAG_OUTPUT_MODE	u-ctags	/u-ctags or e-ctags/
+!_TAG_PATTERN_LENGTH_LIMIT	96	/0 for no limit/
+!_TAG_PROC_CWD	/home/mongo/scim/src/formats/	//
+!_TAG_PROGRAM_AUTHOR	Universal Ctags Team	//
+!_TAG_PROGRAM_NAME	Universal Ctags	/Derived from Exuberant Ctags/
+!_TAG_PROGRAM_URL	https://ctags.io/	/official site/
+!_TAG_PROGRAM_VERSION	5.9.0	/2b88b80ac/
+export_xlsx	xlsx.c	/^int export_xlsx(char * filename) {$/;"	f	typeref:typename:int
+get_sheet_data	xlsx.c	/^void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) {$/;"	f	typeref:typename:void
+get_xlsx_number_format_by_id	xlsx.c	/^char * get_xlsx_number_format_by_id(xmlDocPtr doc_styles, int id) {$/;"	f	typeref:typename:char *
+get_xlsx_string	xlsx.c	/^char * get_xlsx_string(xmlDocPtr doc, int pos) {$/;"	f	typeref:typename:char *
+get_xlsx_styles	xlsx.c	/^char * get_xlsx_styles(xmlDocPtr doc_styles, int pos) {$/;"	f	typeref:typename:char *
+open_ods	ods.c	/^int open_ods(char * fname, char * encoding) {$/;"	f	typeref:typename:int
+open_xls	xls.c	/^int open_xls(char * fname, char * encoding) {$/;"	f	typeref:typename:int
+open_xlsx	xlsx.c	/^int open_xlsx(char * fname, char * encoding) {$/;"	f	typeref:typename:int

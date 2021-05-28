@@ -34,12 +34,14 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE       *
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.           *
  *******************************************************************************/
-
 /**
  * \file marks.c
  * \author Andrés Martinelli <andmarti@gmail.com>
- * \date 2017-07-18
- * \brief TODO Write a tbrief file description.
+ * \date 28/05/2021
+ * \brief source code for handling marks
+ * NOTE: 'a' - 'z' = 26
+ *       '0' - '1' = 10
+ *             'a' = 97.
  */
 
 #include <stdlib.h>
@@ -47,54 +49,47 @@
 #include "macros.h"
 
 #define NUM_MARKS 128
+
 static struct mark * marks;
 
-// 'a' - 'z' = 26
-// '0' - '1' = 10
 /**
- * \brief TODO Document create_mark_array()
- *
+ * \brief create_mark_array()
+ * \details create structure to save the different marks.
  * \return none
  */
-
 void create_mark_array() {
     marks = (struct mark *) calloc(NUM_MARKS, sizeof(struct mark) );
     return;
 }
 
+
 /**
- * \brief TODO Document free_marks_array()
- *
+ * \brief free_marks_array()
  * \return none
  */
-
 void free_marks_array() {
     free(marks);
     return;
 }
 
-/**
- * \brief TODO Document get_mark()
- *
- * \details 'a' = 97
- * \param[in] c
- *
- * \return none
- */
 
+/**
+ * \brief get_mark()
+ * \details get a mark based on the corresponding char.
+ * \param[in] char c
+ * \return struct mark *
+ */
 struct mark * get_mark(char c) {
     return (marks + c);
 }
 
+
 /**
- * \brief TODO Document set_range_mark()
- *
- * \param[in] c
- * \param[in] s
- *
+ * \brief save a range over a mark
+ * \param[in] char c
+ * \param[in] struct srange * s
  * \return none
  */
-
 void set_range_mark(char c, struct srange * s) {
     // Delete marked ranges when recording a new one with same char
     del_ranges_by_mark(c);
@@ -105,12 +100,11 @@ void set_range_mark(char c, struct srange * s) {
     return;
 }
 
+
 /**
- * \brief TODO Document set_cell_mark()
- *
+ * \brief set_cell_mark()
  * \return none
  */
-
 void set_cell_mark(char c, int row, int col) {
     // Delete marked ranges when recording a new one with same char
     del_ranges_by_mark(c);
@@ -121,19 +115,19 @@ void set_cell_mark(char c, int row, int col) {
     return;
 }
 
+
 /**
- * \brief TODO Document fix_marks()
- *
+ * \brief fix_marks()
+ * \details modify marks after some operations that modify the internal row or command.
+ * such as delete a row or column.
  * \param[in] deltar
  * \param[in] deltac
  * \param[in] row_desde
  * \param[in] row_hasta
  * \param[in] coldesde
  * \param[in] col_hasta
- *
  * \return none
  */
-
 void fix_marks(int deltar, int deltac, int row_desde, int row_hasta, int col_desde, int col_hasta) {
     int i;
     for (i = 0; i < NUM_MARKS-1; i++) {
@@ -148,4 +142,3 @@ void fix_marks(int deltar, int deltac, int row_desde, int row_hasta, int col_des
     }
     return;
 }
-

@@ -44,15 +44,15 @@
 
 #include <stdlib.h>
 
-#include "sc.h"
-#include "macros.h"
-#include "tui.h"
+#include "../sc.h"
+#include "../macros.h"
+#include "../tui.h"
 #include "hide_show.h"
-#include "conf.h"
-#include "vmtbl.h"   // for growtbl
+#include "../conf.h"
+#include "../vmtbl.h"   // for growtbl
 
 #ifdef UNDO
-#include "undo.h"
+#include "../undo.h"
 extern struct undo undo_item;
 #endif
 

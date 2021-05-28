@@ -59,7 +59,7 @@
 #endif
 
 #include "main.h"
-#include "shift.h"
+#include "actions/shift.h"
 #include "macros.h"
 #include "tui.h"
 #include "input.h"
@@ -72,9 +72,9 @@
 #include "history.h"
 #include "conf.h"
 #include "buffer.h"
-#include "cmds.h"
+#include "cmds/cmds.h"
 #include "vmtbl.h"   // for growtbl
-#include "filter.h"
+#include "actions/filter.h"
 #include "graph.h"
 #include "sheet.h"
 

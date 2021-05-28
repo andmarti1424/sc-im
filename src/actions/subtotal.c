@@ -43,11 +43,11 @@
  */
 
 #include <wchar.h>
-#include "sc.h"
-#include "macros.h"
-#include "cmds.h"
+#include "../sc.h"
+#include "../macros.h"
+#include "../cmds/cmds.h"
 #include "shift.h"
-#include "tui.h"
+#include "../tui.h"
 
 /*
 #include <sys/types.h>

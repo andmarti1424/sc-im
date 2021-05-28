@@ -42,9 +42,9 @@
  * \brief Header file for cmds.c
  */
 
-#include "sc.h"
-#include "macros.h"
 #include <wchar.h>
+#include "../macros.h"
+#include "../sc.h"
 
 extern char insert_edit_submode;       // insert or edit submode
 extern wchar_t inputline[BUFFERSIZE];

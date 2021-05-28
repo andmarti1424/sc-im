@@ -64,7 +64,7 @@
 #include <wchar.h>
 
 #include "sc.h"
-#include "cmds.h"
+#include "cmds/cmds.h"
 #include "trigger.h"
 #include "utils/string.h"
 #include "main.h"

@@ -49,17 +49,16 @@
 #include <errno.h>
 
 #include "plot.h"
-#include "file.h"
-#include "tui.h"
+#include "../file.h"
+#include "../tui.h"
+
 
 /**
- * \brief TODO Document plotedit()
- *
+ * \brief plotedit()
+ * \details edit a plot instruction
  * \param[in] s
- *
  * \return none
  */
-
 int plotedit(wchar_t * s) {
 #ifdef GNUPLOT
     // edit ~/.scim/plotxxxx (or /usr/local/share/scim/plotxxxx)
@@ -96,18 +95,16 @@ int plotedit(wchar_t * s) {
 #endif
 }
 
+
 /**
- * \brief TODO Document plot()
- *
+ * \brief plot()
  * \param[in] s
  * \param[in] r
  * \param[in] c
  * \param[in] rf
  * \param[in] cf
- *
  * \return none
  */
-
 int plot(char * s, int r, int c, int rf, int cf) {
 #ifdef GNUPLOT
     // create tmp file
@@ -126,7 +123,6 @@ int plot(char * s, int r, int c, int rf, int cf) {
     char buffer[PATHLEN];
     char plug_buffer[PATHLEN];
     sprintf(command, "gnuplot -e \"filename='%s'\"", datafile);
-
     if (! strcmp(s, "line") || ! strcmp(s, "scatter") ||
         ! strcmp(s, "pie")  || ! strcmp(s, "bar")) {
         sprintf(buffer, "plot_%s", s);

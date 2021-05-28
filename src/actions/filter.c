@@ -46,16 +46,16 @@
 #include <stdio.h>
 #include <ctype.h>             // for isalpha toupper
 #include <stdlib.h>
+// #include <math.h>
 
-#include "macros.h"
-#include "tui.h"
-#include "conf.h"
-#include "xmalloc.h"
+#include "../macros.h"
+#include "../tui.h"
+#include "../conf.h"
+#include "../xmalloc.h"
 #include "filter.h"
-#include "math.h"
-#include "utils/string.h"
-#include "sc.h"
-#include "cmds.h"
+#include "../utils/string.h"
+#include "../sc.h"
+#include "../cmds/cmds.h"
 
 static int howmany = 0;      /**< how many filters were definedi */
 static int active = 0;       /**< indicates if those filters are applied or not */
@@ -63,14 +63,12 @@ static int * results = NULL; /**< this keeps the results of the applied filters 
 static struct filter_item * filters = NULL;
 extern struct session * session;
 
+
 /**
  * \brief Add a filter to filters structure
- *
  * \param[in] criteria
- *
  * \return none
  */
-
 void add_filter(char * criteria) {
     int cp = 0;
     char c;
@@ -97,15 +95,13 @@ void add_filter(char * criteria) {
     return;
 }
 
+
 /**
  * \brief Apply filters to a range
- *
  * \param[in] left
  * \param[in] right
- *
  * \return none
  */
-
 void enable_filters(struct ent * left, struct ent * right) {
     struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
@@ -160,12 +156,11 @@ void enable_filters(struct ent * left, struct ent * right) {
     return;
 }
 
+
 /**
  * \brief Disable any applied filters
- *
  * \return none
  */
-
 void disable_filters() {
     struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
@@ -183,13 +178,11 @@ void disable_filters() {
     return;
 }
 
-// Show details of each filter
+
 /**
  * \brief Show details of each filter
- *
  * \return none
  */
-
 void show_filters() {
     if (filters == NULL) {
         sc_error("There are no filters defined");
@@ -215,12 +208,11 @@ void show_filters() {
     return;
 }
 
+
 /**
  * \brief Free memory of entire filters structure
- *
  * \return int: -1 not removed - 0 removed
  */
-
 int free_filters() {
     if (filters == NULL) return -1;
     int i;
@@ -231,14 +223,12 @@ int free_filters() {
     return 0;
 }
 
+
 /**
  * \brief Remove a filter, freeing its memory
- *
  * \param[in] id
- *
  * \return int: -1 not removed - 0 removed
  */
-
 int del_filter(int id) {
     if (filters == NULL || id < 0 || id > howmany) {
         sc_error("Cannot delete the filter");
@@ -251,16 +241,14 @@ int del_filter(int id) {
     return 0;
 }
 
+
 /**
  * \brief Check if a filter was deleted
- *
  * \details This function checks if a filter was deleted, so there would
  * be room in filters structure for a new filter and preventing
  * an unnecessary realloc.
- *
  * \return how many filters exist; -1 otherwise
  */
-
 int exists_freed_filter() {
     if (filters == NULL) return -1;
     int i;

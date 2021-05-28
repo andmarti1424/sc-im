@@ -51,12 +51,12 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#include "macros.h"
-#include "yank.h"
-#include "cmds.h"
-#include "conf.h"
-#include "color.h"
-#include "xmalloc.h" // for scxfree
+#include "../macros.h"
+#include "../yank.h"
+#include "../cmds/cmds.h"
+#include "../conf.h"
+#include "../color.h"
+#include "../xmalloc.h" // for scxfree
 
 int compare(const void * row1, const void * row2);
 

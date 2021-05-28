@@ -168,7 +168,7 @@ else
   LDFLAGS += -lncursesw
 endif
 
-OBJS = $(patsubst %.c, %.o, $(wildcard *.c) $(wildcard utils/*.c)) gram.o
+OBJS = $(patsubst %.c, %.o, $(wildcard *.c) $(wildcard actions/*.c) $(wildcard formats/*.c) $(wildcard cmds/*.c) $(wildcard utils/*.c)) gram.o
 
 .PHONY : all clean install docs man_install man_uninstall
 

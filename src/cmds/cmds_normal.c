@@ -45,25 +45,25 @@
 #include <ctype.h>
 #include <stdlib.h>
 
-#include "yank.h"
-#include "marks.h"
 #include "cmds.h"
-#include "conf.h"
-#include "tui.h"
 #include "cmds_edit.h"
-#include "history.h"
-#include "freeze.h"
-#include "hide_show.h"
-#include "shift.h"
-#include "main.h"    // for sig_winchg
-#include "interp.h"
-#include "utils/extra.h"
+#include "../yank.h"
+#include "../marks.h"
+#include "../conf.h"
+#include "../tui.h"
+#include "../history.h"
+#include "../actions/freeze.h"
+#include "../actions/hide_show.h"
+#include "../actions/shift.h"
+#include "../main.h"    // for sig_winchg
+#include "../interp.h"
+#include "../utils/extra.h"
 #ifdef UNDO
-#include "undo.h"
+#include "../undo.h"
 #endif
 
 
-#include "graph.h"
+#include "../graph.h"
 extern graphADT graph;
 extern char valores;
 extern int cmd_multiplier;
@@ -85,12 +85,9 @@ extern char ori_insert_edit_submode;
 
 /**
  * \brief TODO Document do_normalmode()
- *
  * \param[in] buf
- *
  * \return none
  */
-
 void do_normalmode(struct block * buf) {
     struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;

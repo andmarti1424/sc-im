@@ -46,12 +46,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include "sc.h"
-#include "cmds.h"
-#include "color.h"
-#include "macros.h"
+
 #include "xls.h"
-#include "utils/string.h"
+#include "../sc.h"
+#include "../cmds/cmds.h"
+#include "../color.h"
+#include "../macros.h"
+#include "../utils/string.h"
 
 /*
  * xls.h is part of libxls. make sure its installed and headers are in path.

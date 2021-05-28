@@ -55,17 +55,18 @@
 #include "tui.h"
 
 extern struct session * session;
-// FIXME - pass fd is not neccesary?
+
 /**
- * \brief TODO Document getnum()
- *
+ * \brief getnum()
  * \param[in] r0
  * \param[in] c0
  * \param[in] rn
  * \param[in] cn
  * \param[in[ df
+ * \param[in[ FILE * fd
  *
  * \return none
+// FIXME - pass fd is not needed
  */
 
 void getnum(int r0, int c0, int rn, int cn, FILE * fd) {
@@ -98,14 +99,12 @@ void getnum(int r0, int c0, int rn, int cn, FILE * fd) {
 }
 
 /**
- * \brief TODO Document getformat()
- *
+ * \brief getformat()
  * \param[in] col
  * \param[in] df
- *
  * \return none
  */
-
+// FIXME - pass fd is not needed
 void getformat(int col, FILE * fd) {
     struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
@@ -115,18 +114,17 @@ void getformat(int col, FILE * fd) {
     linelim = -1;
 }
 
+
 /**
- * \brief TODO Document getfmt()
- *
+ * \brief getfmt()
  * \param[in] r0
  * \param[in] c0
  * \param[in] rn
  * \param[in] cn
  * \param[in] fd
- *
  * \return none
  */
-
+// FIXME - pass fd is not needed
 void getfmt(int r0, int c0, int rn, int cn, FILE * fd) {
     struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
@@ -148,17 +146,15 @@ void getfmt(int r0, int c0, int rn, int cn, FILE * fd) {
 }
 
 /**
- * \brief TODO Document getstring()
- *
+ * \brief getstring()
  * \param[in] r0
  * \param[in] c0
  * \param[in] rn
  * \param[in] cn
  * \param[in] fd
- *
  * \return none
  */
-
+// FIXME - pass fd is not needed
 void getstring(int r0, int c0, int rn, int cn, FILE * fd) {
     struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
@@ -180,18 +176,17 @@ void getstring(int r0, int c0, int rn, int cn, FILE * fd) {
     linelim = -1;
 }
 
+
 /**
- * \brief TODO Document getexp()
- *
+ * \brief getexp()
  * \param[in] r0
  * \param[in] c0
  * \param[in] rn
  * \param[in] cn
  * \param[in] fd
- *
  * \return none
  */
-
+// FIXME - pass fd is not needed
 void getexp(int r0, int c0, int rn, int cn, FILE * fd) {
     struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;

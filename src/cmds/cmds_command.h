@@ -36,15 +36,20 @@
  *******************************************************************************/
 
 /**
- * \file cmds_normal.h
+ * \file cmds_command.h
  * \author Andrés Martinelli <andmarti@gmail.com>
  * \date 2017-07-18
- * \brief Header file for cmds_normal.c
+ * \brief Header file for cmds_command.c
  */
 
-#include "input.h"
+#ifdef HISTORY_FILE
+#include "../history.h"
+#endif
+#include "../buffer.h"
+
 extern int shall_quit;
-
-void do_normalmode (struct block * buf);
-
+extern struct dictionary * user_conf_d;
 extern struct history * commandline_history;
+
+void do_commandmode(struct block * sb);
+void ins_in_line(wint_t d);

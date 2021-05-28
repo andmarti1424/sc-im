@@ -121,4 +121,3 @@ wint_t get_digraph(wint_t x, wint_t y) {
     }
     return x;
 }
-

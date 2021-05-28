@@ -36,26 +36,17 @@
  *******************************************************************************/
 
 /**
- * \file cmds_edit.h
+ * \file shift.h
  * \author Andrés Martinelli <andmarti@gmail.com>
  * \date 2017-07-18
- * \brief Header file for cmds_edit.c
+ * \brief Header file for shift.c
  */
 
-#include "input.h"
-
-void do_editmode(struct block * sb);
-int start_edit_mode(struct block * buf, char type);
-
-int for_word(int end_of_word, int delete, int big_word);
-int look_for(wchar_t cb);
-int look_back(wchar_t cb);
-int back_word(int big_word);
-
-void del_back_char();
-void del_for_char();
-
-int first_nonblank_char();
-int last_nonblank_char();
-
-wint_t get_key();
+#include "../sc.h"
+void shift_cells(struct sheet * sh, int type, int arg, int delta);
+void shift_cells_up(struct sheet * sh, int deltarows, int deltacols);
+void shift_cells_down(struct sheet * sh, int deltarows, int deltacols);
+void shift_cells_left(struct sheet * sh, int deltarows, int deltacols);
+void shift_cells_right(struct sheet * sh, int deltarows, int deltacols);
+void shift_range(struct sheet * sh, int delta_rows, int delta_cols, int tlrow, int tlcol, int brrow, int brcol);
+void shift(struct sheet * sh, int r, int c, int rf, int cf, wchar_t type);

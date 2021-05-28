@@ -52,7 +52,7 @@
 #include "macros.h"
 #include "tui.h"
 #include "clipboard.h"
-#include "cmds.h"
+#include "cmds/cmds.h"
 #include "file.h"
 #include "conf.h"
 #include "utils/string.h"

@@ -54,14 +54,15 @@
 #include <errno.h>
 #include <ctype.h>   // for isdigit
 #include <stdlib.h>  // for atoi
-#include "macros.h"
-#include "sc.h"
-#include "cmds.h"
-#include "tui.h"
-#include "conf.h"
-#include "lex.h"
-#include "interp.h"
-#include "utils/string.h"
+
+#include "../macros.h"
+#include "../sc.h"
+#include "../cmds/cmds.h"
+#include "../tui.h"
+#include "../conf.h"
+#include "../lex.h"
+#include "../interp.h"
+#include "../utils/string.h"
 
 #ifdef XLSX
 #include <zip.h>

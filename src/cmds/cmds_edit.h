@@ -36,17 +36,26 @@
  *******************************************************************************/
 
 /**
- * \file cmds_insert.h
+ * \file cmds_edit.h
  * \author Andrés Martinelli <andmarti@gmail.com>
  * \date 2017-07-18
- * \brief Header file for cmds_insert.c
+ * \brief Header file for cmds_edit.c
  */
 
-#include "input.h"
+#include "../input.h"
 
-#ifdef INS_HISTORY_FILE
-#include "history.h"
-extern struct history * insert_history;
-#endif
+void do_editmode(struct block * sb);
+int start_edit_mode(struct block * buf, char type);
 
-void do_insertmode(struct block * sb);
+int for_word(int end_of_word, int delt, int big_word);
+int look_for(wchar_t cb);
+int look_back(wchar_t cb);
+int back_word(int big_word);
+
+void del_back_char();
+void del_for_char();
+
+int first_nonblank_char();
+int last_nonblank_char();
+
+wint_t get_key();

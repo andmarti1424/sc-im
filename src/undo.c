@@ -146,9 +146,9 @@
 #include "curses.h"
 #include "conf.h"
 #include "sc.h"
-#include "cmds.h"
+#include "cmds/cmds.h"
 #include "marks.h"
-#include "shift.h"
+#include "actions/shift.h"
 #include "graph.h"
 
 extern struct session * session;

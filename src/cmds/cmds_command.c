@@ -51,30 +51,30 @@
 #include <wordexp.h>
 #endif
 
-#include "sc.h"            // for rescol
-#include "conf.h"
 #include "cmds_command.h"
+#include "cmds_visual.h"
 #include "cmds_edit.h"
 #include "cmds.h"
-#include "utils/string.h"
-#include "utils/dictionary.h"
-#include "tui.h"
-#include "file.h"
-#include "main.h"
-#include "interp.h"
-#include "hide_show.h"
-#include "exec.h"
-#include "help.h"
-#include "marks.h"
-#include "filter.h"
-#include "maps.h"
-#include "xls.h"
-#include "xlsx.h"
-#include "cmds_visual.h"
-#include "plot.h"
+#include "../sc.h"            // for rescol
+#include "../conf.h"
+#include "../utils/string.h"
+#include "../utils/dictionary.h"
+#include "../tui.h"
+#include "../file.h"
+#include "../main.h"
+#include "../interp.h"
+#include "../actions/hide_show.h"
+#include "../exec.h"
+#include "../help.h"
+#include "../marks.h"
+#include "../actions/filter.h"
+#include "../maps.h"
+#include "../formats/xls.h"
+#include "../formats/xlsx.h"
+#include "../actions/plot.h"
 
 #ifdef UNDO
-#include "undo.h"
+#include "../undo.h"
 #endif
 
 extern char * rev;

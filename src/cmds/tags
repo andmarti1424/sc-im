@@ -1,0 +1,109 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	2	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_OUTPUT_EXCMD	mixed	/number, pattern, mixed, or combineV2/
+!_TAG_OUTPUT_FILESEP	slash	/slash or backslash/
+!_TAG_OUTPUT_MODE	u-ctags	/u-ctags or e-ctags/
+!_TAG_PATTERN_LENGTH_LIMIT	96	/0 for no limit/
+!_TAG_PROC_CWD	/home/mongo/scim/src/cmds/	//
+!_TAG_PROGRAM_AUTHOR	Universal Ctags Team	//
+!_TAG_PROGRAM_NAME	Universal Ctags	/Derived from Exuberant Ctags/
+!_TAG_PROGRAM_URL	https://ctags.io/	/official site/
+!_TAG_PROGRAM_VERSION	5.9.0	/2b88b80ac/
+any_locked_cells	cmds.c	/^int any_locked_cells(struct sheet * sh, int r1, int c1, int r2, int c2) {$/;"	f	typeref:typename:int
+auto_fit	cmds.c	/^void auto_fit(struct sheet * sh, int ci, int cf, int min) {$/;"	f	typeref:typename:void
+back_col	cmds.c	/^struct ent * back_col(struct sheet * sh, int arg) {$/;"	f	typeref:struct:ent *
+back_row	cmds.c	/^struct ent * back_row(struct sheet * sh, int arg) {$/;"	f	typeref:struct:ent *
+back_word	cmds_edit.c	/^int back_word(int big_word) {$/;"	f	typeref:typename:int
+calc_mobile_cols	cmds.c	/^int calc_mobile_cols(struct sheet * sh, int *last_p) {$/;"	f	typeref:typename:int
+calc_mobile_rows	cmds.c	/^int calc_mobile_rows(struct sheet * sh, int *last_p) {$/;"	f	typeref:typename:int
+center	cmds.c	/^void center(struct sheet * sh, int sr, int sc, int er, int ec) {$/;"	f	typeref:typename:void
+chg_mode	cmds.c	/^void chg_mode(char strcmd){$/;"	f	typeref:typename:void
+cleanent	cmds.c	/^void cleanent(struct ent * p) {$/;"	f	typeref:typename:void
+clearent	cmds.c	/^void clearent(struct ent * v) {$/;"	f	typeref:typename:void
+convert_string_to_number	cmds.c	/^int convert_string_to_number(int r0, int c0, int rn, int cn) {$/;"	f	typeref:typename:int
+copye	cmds.c	/^struct enode * copye(struct enode *e, struct sheet * sh, int Rdelta, int Cdelta, int r1, int c1,/;"	f	typeref:struct:enode *
+copyent	cmds.c	/^void copyent(struct ent * n, struct sheet * sh_p, struct ent * p, int dr, int dc, int r1, int c1/;"	f	typeref:typename:void
+deletecol	cmds.c	/^void deletecol(struct sheet * sh, int col, int mult) {$/;"	f	typeref:typename:void
+deleterow	cmds.c	/^void deleterow(struct sheet * sh, int row, int mult) {$/;"	f	typeref:typename:void
+del_back_char	cmds_edit.c	/^void del_back_char() {      \/\/ x   DEL$/;"	f	typeref:typename:void
+del_for_char	cmds_edit.c	/^void del_for_char() {       \/\/ X    BS$/;"	f	typeref:typename:void
+del_selected_cells	cmds.c	/^void del_selected_cells(struct sheet * sh) {$/;"	f	typeref:typename:void
+doformat	cmds.c	/^void doformat(struct sheet * sh, int c1, int c2, int w, int p, int r) {$/;"	f	typeref:typename:void
+dorowformat	cmds.c	/^void dorowformat(struct sheet * sh, int r, unsigned char size) {$/;"	f	typeref:typename:void
+do_commandmode	cmds_command.c	/^void do_commandmode(struct block * sb) {$/;"	f	typeref:typename:void
+do_editmode	cmds_edit.c	/^void do_editmode(struct block * sb) {$/;"	f	typeref:typename:void
+do_insertmode	cmds_insert.c	/^void do_insertmode(struct block * sb) {$/;"	f	typeref:typename:void
+do_normalmode	cmds_normal.c	/^void do_normalmode(struct block * buf) {$/;"	f	typeref:typename:void
+do_visualmode	cmds_visual.c	/^void do_visualmode(struct block * buf) {$/;"	f	typeref:typename:void
+enter_cell_content	cmds.c	/^void enter_cell_content(struct sheet * sh, int r, int c, char * submode,  wchar_t * content) {$/;"	f	typeref:typename:void
+erase_area	cmds.c	/^void erase_area(struct sheet * sh, int sr, int sc, int er, int ec, int ignorelock, int mark_as_d/;"	f	typeref:typename:void
+etype	cmds.c	/^int etype(struct enode *e) {$/;"	f	typeref:typename:int
+exit_visualmode	cmds_visual.c	/^void exit_visualmode() {$/;"	f	typeref:typename:void
+fcopy	cmds.c	/^int fcopy(struct sheet * sh, char * action) {$/;"	f	typeref:typename:int
+first_nonblank_char	cmds_edit.c	/^int first_nonblank_char() {$/;"	f	typeref:typename:int
+fix_col_frozen	cmds.c	/^void fix_col_frozen(struct sheet * sh, int deltac, int ci, int cf) {$/;"	f	typeref:typename:void
+fix_col_hidden	cmds.c	/^void fix_col_hidden(struct sheet * sh, int deltac, int ci, int cf) {$/;"	f	typeref:typename:void
+fix_row_frozen	cmds.c	/^void fix_row_frozen(struct sheet * sh, int deltar, int ri, int rf) {$/;"	f	typeref:typename:void
+fix_row_hidden	cmds.c	/^void fix_row_hidden(struct sheet * sh, int deltar, int ri, int rf) {$/;"	f	typeref:typename:void
+flush_saved	cmds.c	/^void flush_saved() {$/;"	f	typeref:typename:void
+formatcol	cmds.c	/^void formatcol(struct sheet * sh, int c) {$/;"	f	typeref:typename:void
+forw_col	cmds.c	/^struct ent * forw_col(struct sheet * sh, int arg) {$/;"	f	typeref:struct:ent *
+forw_row	cmds.c	/^struct ent * forw_row(struct sheet * sh, int arg) {$/;"	f	typeref:struct:ent *
+for_word	cmds_edit.c	/^int for_word(int end_of_word, int delete, int big_word) {$/;"	f	typeref:typename:int
+freeents	cmds.c	/^struct ent * freeents = NULL;    \/\/ keep deleted ents around before sync_refs$/;"	v	typeref:struct:ent *
+fsum	cmds.c	/^int fsum(struct sheet * sh) {$/;"	f	typeref:typename:int
+goto_bottom	cmds.c	/^struct ent * goto_bottom(struct sheet * sh) {$/;"	f	typeref:struct:ent *
+goto_last_col	cmds.c	/^struct ent * goto_last_col(struct sheet * sh) {$/;"	f	typeref:struct:ent *
+goto_top	cmds.c	/^struct ent * goto_top(struct sheet * sh) {$/;"	f	typeref:struct:ent *
+go_backward	cmds.c	/^struct ent * go_backward(struct sheet * sh) {$/;"	f	typeref:struct:ent *
+go_bol	cmds.c	/^struct ent * go_bol(struct sheet * sh) {$/;"	f	typeref:struct:ent *
+go_end	cmds.c	/^struct ent * go_end(struct sheet * sh) {$/;"	f	typeref:struct:ent *
+go_eol	cmds.c	/^struct ent * go_eol(struct sheet * sh) {$/;"	f	typeref:struct:ent *
+go_forward	cmds.c	/^struct ent * go_forward(struct sheet * sh) {$/;"	f	typeref:struct:ent *
+go_home	cmds.c	/^struct ent * go_home(struct sheet * sh) {$/;"	f	typeref:struct:ent *
+horiz_middle	cmds.c	/^struct ent * horiz_middle(struct sheet * sh) {$/;"	f	typeref:struct:ent *
+inputline	cmds_command.c	/^wchar_t inputline[BUFFERSIZE];$/;"	v	typeref:typename:wchar_t[]
+inputline_pos	cmds_command.c	/^int inputline_pos; \/**< Position in window. Some chars has 2 chars width *\/$/;"	v	typeref:typename:int
+insert_col	cmds.c	/^void insert_col(struct sheet * sh, int after) {$/;"	f	typeref:typename:void
+insert_edit_submode	cmds.c	/^char insert_edit_submode;$/;"	v	typeref:typename:char
+insert_row	cmds.c	/^void insert_row(struct sheet * sh, int after) {$/;"	f	typeref:typename:void
+ins_in_line	cmds_command.c	/^void ins_in_line(wint_t d) {$/;"	f	typeref:typename:void
+interp_line	cmds.c	/^wchar_t interp_line[BUFFERSIZE];$/;"	v	typeref:typename:wchar_t[]
+int_deletecol	cmds.c	/^void int_deletecol(struct sheet * sh, int col, int mult) {$/;"	f	typeref:typename:void
+int_deleterow	cmds.c	/^void int_deleterow(struct sheet * sh, int row, int mult) {$/;"	f	typeref:typename:void
+istext	cmds_edit.c	/^#define istext(/;"	d	file:
+is_single_command	cmds.c	/^int is_single_command (struct block * buf, long timeout) {$/;"	f	typeref:typename:int
+last_nonblank_char	cmds_edit.c	/^int last_nonblank_char() {$/;"	f	typeref:typename:int
+left_limit	cmds.c	/^struct ent * left_limit(struct sheet * sh) {$/;"	f	typeref:struct:ent *
+ljustify	cmds.c	/^void ljustify(struct sheet * sh, int sr, int sc, int er, int ec) {$/;"	f	typeref:typename:void
+locked_cell	cmds.c	/^int locked_cell(struct sheet * sh, int r, int c) {$/;"	f	typeref:typename:int
+lookat	cmds.c	/^struct ent * lookat(struct sheet * sh, int row, int col) {$/;"	f	typeref:struct:ent *
+look_back	cmds_edit.c	/^int look_back(wchar_t cb) {$/;"	f	typeref:typename:int
+look_for	cmds_edit.c	/^int look_for(wchar_t cb) {$/;"	f	typeref:typename:int
+mark_ent_as_deleted	cmds.c	/^void mark_ent_as_deleted(struct ent * p, int delete) {$/;"	f	typeref:typename:void
+moving	cmds_visual.c	/^int moving = FALSE;$/;"	v	typeref:typename:int
+ori_insert_edit_submode	cmds_insert.c	/^char ori_insert_edit_submode;$/;"	v	typeref:typename:char
+pad	cmds.c	/^int pad(struct sheet * sh, int n, int r1, int c1, int r2, int c2) {$/;"	f	typeref:typename:int
+pad_and_align	cmds.c	/^void pad_and_align (char * str_value, char * numeric_value, int col_width, int align, int paddin/;"	f	typeref:typename:void
+r	cmds_visual.c	/^srange * r;                       \/\/ SELECTED RANGE!$/;"	v	typeref:typename:srange *
+real_inputline_pos	cmds_command.c	/^int real_inputline_pos; \/**<  Real position in inputline *\/$/;"	v	typeref:typename:int
+right_limit	cmds.c	/^struct ent * right_limit(struct sheet * sh, int row) {$/;"	f	typeref:struct:ent *
+rjustify	cmds.c	/^void rjustify(struct sheet * sh, int sr, int sc, int er, int ec) {$/;"	f	typeref:typename:void
+scroll_down	cmds.c	/^void scroll_down(struct sheet * sh, int n) {$/;"	f	typeref:typename:void
+scroll_left	cmds.c	/^void scroll_left(struct sheet * sh, int n) {$/;"	f	typeref:typename:void
+scroll_right	cmds.c	/^void scroll_right(struct sheet * sh, int n) {$/;"	f	typeref:typename:void
+scroll_up	cmds.c	/^void scroll_up(struct sheet * sh, int n) {$/;"	f	typeref:typename:void
+select_inner_range	cmds.c	/^void select_inner_range(struct sheet * sh, int * vir_tlrow, int * vir_tlcol, int * vir_brrow, in/;"	f	typeref:typename:void
+send_to_interp	cmds.c	/^void send_to_interp(wchar_t * oper) {$/;"	f	typeref:typename:void
+start_edit_mode	cmds_edit.c	/^int start_edit_mode(struct block * buf, char type) {$/;"	f	typeref:typename:int
+start_visualmode	cmds_visual.c	/^void start_visualmode(int tlrow, int tlcol, int brrow, int brcol) {$/;"	f	typeref:typename:void
+syncref	cmds.c	/^void syncref(struct sheet * sh, struct enode * e) {$/;"	f	typeref:typename:void
+sync_refs	cmds.c	/^void sync_refs(struct sheet * sh) {$/;"	f	typeref:typename:void
+tick	cmds.c	/^struct ent * tick(char ch) {$/;"	f	typeref:struct:ent *
+valid_commands	cmds_command.c	/^static wchar_t * valid_commands[] = {$/;"	v	typeref:typename:wchar_t * []	file:
+valueize_area	cmds.c	/^void valueize_area(struct sheet * sh, int sr, int sc, int er, int ec) {$/;"	f	typeref:typename:void
+vert_bottom	cmds.c	/^struct ent * vert_bottom(struct sheet * sh) {$/;"	f	typeref:struct:ent *
+vert_middle	cmds.c	/^struct ent * vert_middle(struct sheet * sh) {$/;"	f	typeref:struct:ent *
+vert_top	cmds.c	/^struct ent * vert_top(struct sheet * sh) {$/;"	f	typeref:struct:ent *
+visual_submode	cmds_visual.c	/^char visual_submode = '0';$/;"	v	typeref:typename:char
+wi	cmds_edit.c	/^static wint_t wi; \/**< char read from stdin *\/$/;"	v	typeref:typename:wint_t	file:

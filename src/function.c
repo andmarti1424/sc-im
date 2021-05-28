@@ -50,7 +50,7 @@
 
 #include "sc.h"
 #include "macros.h"
-#include "cmds.h"
+#include "cmds/cmds.h"
 #include "function.h"
 #include "tui.h"
 #include "interp.h"

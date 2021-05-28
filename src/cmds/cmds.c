@@ -47,21 +47,21 @@
 #include <wchar.h>
 #include <wctype.h>
 #include <limits.h>
-#include "main.h"
-#include "maps.h"
-#include "yank.h"
-#include "marks.h"
 #include "cmds.h"
-#include "buffer.h"
-#include "tui.h"
-#include "conf.h"    // for conf parameters
-#include "xmalloc.h" // for scxfree
-#include "vmtbl.h"   // for growtbl
-#include "utils/string.h" // for add_char
-#include "y.tab.h"   // for yyparse
-#include "graph.h"
+#include "../main.h"
+#include "../maps.h"
+#include "../yank.h"
+#include "../marks.h"
+#include "../buffer.h"
+#include "../tui.h"
+#include "../conf.h"    // for conf parameters
+#include "../xmalloc.h" // for scxfree
+#include "../vmtbl.h"   // for growtbl
+#include "../utils/string.h" // for add_char
+#include "../y.tab.h"   // for yyparse
+#include "../graph.h"
 #ifdef UNDO
-#include "undo.h"
+#include "../undo.h"
 #endif
 
 extern struct session * session;

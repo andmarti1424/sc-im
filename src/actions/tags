@@ -1,0 +1,48 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	2	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_OUTPUT_EXCMD	mixed	/number, pattern, mixed, or combineV2/
+!_TAG_OUTPUT_FILESEP	slash	/slash or backslash/
+!_TAG_OUTPUT_MODE	u-ctags	/u-ctags or e-ctags/
+!_TAG_PATTERN_LENGTH_LIMIT	96	/0 for no limit/
+!_TAG_PROC_CWD	/home/mongo/scim/src/actions/	//
+!_TAG_PROGRAM_AUTHOR	Universal Ctags Team	//
+!_TAG_PROGRAM_NAME	Universal Ctags	/Derived from Exuberant Ctags/
+!_TAG_PROGRAM_URL	https://ctags.io/	/official site/
+!_TAG_PROGRAM_VERSION	5.9.0	/2b88b80ac/
+active	filter.c	/^static int active = 0;       \/**< indicates if those filters are applied or not *\/$/;"	v	typeref:typename:int	file:
+add_filter	filter.c	/^void add_filter(char * criteria) {$/;"	f	typeref:typename:void
+column	sort.c	/^    int direction, type, column;$/;"	m	struct:sortcrit	typeref:typename:int	file:
+compare	sort.c	/^int compare(const void * row1, const void * row2) {$/;"	f	typeref:typename:int
+del_filter	filter.c	/^int del_filter(int id) {$/;"	f	typeref:typename:int
+direction	sort.c	/^    int direction, type, column;$/;"	m	struct:sortcrit	typeref:typename:int	file:
+disable_filters	filter.c	/^void disable_filters() {$/;"	f	typeref:typename:void
+enable_filters	filter.c	/^void enable_filters(struct ent * left, struct ent * right) {$/;"	f	typeref:typename:void
+eval	filter.h	/^    char * eval;$/;"	m	struct:filter_item	typeref:typename:char *
+exists_freed_filter	filter.c	/^int exists_freed_filter() {$/;"	f	typeref:typename:int
+filters	filter.c	/^static struct filter_item * filters = NULL;$/;"	v	typeref:struct:filter_item *	file:
+filter_item	filter.h	/^struct filter_item {$/;"	s
+free_filters	filter.c	/^int free_filters() {$/;"	f	typeref:typename:int
+handle_freeze	freeze.c	/^void handle_freeze(struct sheet * sh, struct ent * tl_ent, struct ent * br_ent, char value, char/;"	f	typeref:typename:void
+hide_col	hide_show.c	/^void hide_col(int from_col, int arg) {$/;"	f	typeref:typename:void
+hide_row	hide_show.c	/^void hide_row(int from_row, int arg) {$/;"	f	typeref:typename:void
+howmany	filter.c	/^static int howmany = 0;      \/**< how many filters were definedi *\/$/;"	v	typeref:typename:int	file:
+howmany	sort.c	/^int howmany;$/;"	v	typeref:typename:int
+plot	plot.c	/^int plot(char * s, int r, int c, int rf, int cf) {$/;"	f	typeref:typename:int
+plotedit	plot.c	/^int plotedit(wchar_t * s) {$/;"	f	typeref:typename:int
+results	filter.c	/^static int * results = NULL; \/**< this keeps the results of the applied filters *\/$/;"	v	typeref:typename:int *	file:
+shift	shift.c	/^void shift(struct sheet * sh, int r, int c, int rf, int cf, wchar_t type) {$/;"	f	typeref:typename:void
+shift_cells_down	shift.c	/^void shift_cells_down(struct sheet * sh, int deltarows, int deltacols) {$/;"	f	typeref:typename:void
+shift_cells_left	shift.c	/^void shift_cells_left(struct sheet * sh, int deltarows, int deltacols) {$/;"	f	typeref:typename:void
+shift_cells_right	shift.c	/^void shift_cells_right(struct sheet * sh, int deltarows, int deltacols) {$/;"	f	typeref:typename:void
+shift_cells_up	shift.c	/^void shift_cells_up(struct sheet * sh, int deltarows, int deltacols) {$/;"	f	typeref:typename:void
+shift_range	shift.c	/^void shift_range(struct sheet * sh, int delta_rows, int delta_cols, int tlrow, int tlcol, int br/;"	f	typeref:typename:void
+show_col	hide_show.c	/^void show_col(int from_col, int arg) {$/;"	f	typeref:typename:void
+show_filters	filter.c	/^void show_filters() {$/;"	f	typeref:typename:void
+show_hiddencols	hide_show.c	/^void show_hiddencols() {$/;"	f	typeref:typename:void
+show_hiddenrows	hide_show.c	/^void show_hiddenrows() {$/;"	f	typeref:typename:void
+show_row	hide_show.c	/^void show_row(int from_row, int arg) {$/;"	f	typeref:typename:void
+sort	sort.c	/^} * sort;$/;"	v	typeref:struct:sortcrit *
+sortcrit	sort.c	/^struct sortcrit {$/;"	s	file:
+sortrange	sort.c	/^void sortrange(struct sheet * sh, struct ent * left, struct ent * right, char * criteria) {$/;"	f	typeref:typename:void
+subtotal	subtotal.c	/^int subtotal(int r, int c, int rf, int cf, int group_col, char * operation, int ope_col, int rep/;"	f	typeref:typename:int
+type	sort.c	/^    int direction, type, column;$/;"	m	struct:sortcrit	typeref:typename:int	file:

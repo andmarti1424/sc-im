@@ -49,11 +49,12 @@
 #ifdef ODS
 #include <errno.h>
 #include <zip.h>
-#include "tui.h"
-#include "cmds.h"
-#include "sc.h"
-#include "utils/string.h"
 #include <libxml/parser.h>
+
+#include "../tui.h"
+#include "../cmds/cmds.h"
+#include "../sc.h"
+#include "../utils/string.h"
 #endif
 
 extern struct session * session;

@@ -36,10 +36,15 @@
  *******************************************************************************/
 
 /**
- * \file xls.h
+ * \file cmds_normal.h
  * \author Andrés Martinelli <andmarti@gmail.com>
  * \date 2017-07-18
- * \brief Header file for xls.c
+ * \brief Header file for cmds_normal.c
  */
 
-int open_xls(char * fname, char * encoding);
+#include "../input.h"
+extern int shall_quit;
+
+void do_normalmode (struct block * buf);
+
+extern struct history * commandline_history;

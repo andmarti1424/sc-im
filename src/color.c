@@ -57,7 +57,7 @@
 #include "tui.h"
 #include "undo.h"
 #include "conf.h"
-#include "cmds.h"
+#include "cmds/cmds.h"
 
 struct ucolor ucolors[N_INIT_PAIRS] = {};
 

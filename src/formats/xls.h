@@ -34,22 +34,11 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE       *
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.           *
  *******************************************************************************/
-
 /**
- * \file cmds_command.h
+ * \file xls.h
  * \author Andrés Martinelli <andmarti@gmail.com>
  * \date 2017-07-18
- * \brief Header file for cmds_command.c
+ * \brief Header file for xls.c
  */
 
-#ifdef HISTORY_FILE
-#include "history.h"
-#endif
-#include "buffer.h"
-
-extern int shall_quit;
-extern struct dictionary * user_conf_d;
-extern struct history * commandline_history;
-
-void do_commandmode(struct block * sb);
-void ins_in_line(wint_t d);
+int open_xls(char * fname, char * encoding);

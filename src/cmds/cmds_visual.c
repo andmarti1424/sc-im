@@ -44,21 +44,21 @@
 
 #include <stdlib.h>
 
-#include "utils/string.h"
-#include "tui.h"
-#include "buffer.h"
-#include "marks.h"
-#include "macros.h"
 #include "cmds.h"
-#include "conf.h"
-#include "hide_show.h"
-#include "shift.h"
-#include "yank.h"
-#include "freeze.h"
-#include "history.h"
-#include "interp.h"
+#include "../utils/string.h"
+#include "../tui.h"
+#include "../buffer.h"
+#include "../marks.h"
+#include "../macros.h"
+#include "../conf.h"
+#include "../actions/hide_show.h"
+#include "../actions/shift.h"
+#include "../yank.h"
+#include "../actions/freeze.h"
+#include "../history.h"
+#include "../interp.h"
 #ifdef UNDO
-#include "undo.h"
+#include "../undo.h"
 #endif
 
 extern int offscr_sc_rows, offscr_sc_cols;

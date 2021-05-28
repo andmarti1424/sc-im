@@ -36,10 +36,51 @@
  *******************************************************************************/
 
 /**
- * \file ods.h
+ * \file freeze.c
  * \author Andrés Martinelli <andmarti@gmail.com>
- * \date 2021-03-27
- * \brief Header file for ods.c
+ * \date 28/05/2021
+ * \brief source code for handling the freeze of rows and columns.
  */
 
-int open_ods(char * fname, char * encoding);
+#include <stdlib.h>
+
+#include "freeze.h"
+#include "../macros.h"
+#include "../tui.h"
+#include "../undo.h"
+
+extern struct session * session;
+
+/**
+ * \brief handle_freeze. freeze/unfreeze a row/column
+ * \param[in] tl_ent: top ent that defines area
+ * \param[in] br_ent: bottom ent that defines area
+ * \param[in] value: 0 (unfreeze) or 1 (freeze)
+ * \param[in] type: 'r' or 'c'
+ * \return none
+ */
+void handle_freeze(struct sheet * sh, struct ent * tl_ent, struct ent * br_ent, char value, char type) {
+    int i;
+
+#ifdef UNDO
+    create_undo_action();
+#endif
+    if (type == 'r')
+        for (i=tl_ent->row; i<=br_ent->row; i++) {
+            sh->row_frozen[i]=value;
+#ifdef UNDO
+            undo_freeze_unfreeze(i, -1, value == 1 ? 'f' : 'u', 1);
+#endif
+        }
+    else if (type == 'c')
+        for (i=tl_ent->col; i<=br_ent->col; i++) {
+            sh->col_frozen[i]=value;
+#ifdef UNDO
+            undo_freeze_unfreeze(-1, i, value == 1 ? 'f' : 'u', 1);
+#endif
+        }
+#ifdef UNDO
+    end_undo_action();
+#endif
+    return;
+}

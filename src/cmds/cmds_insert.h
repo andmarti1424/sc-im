@@ -36,17 +36,17 @@
  *******************************************************************************/
 
 /**
- * \file shift.h
+ * \file cmds_insert.h
  * \author Andrés Martinelli <andmarti@gmail.com>
  * \date 2017-07-18
- * \brief Header file for shift.c
+ * \brief Header file for cmds_insert.c
  */
 
-#include "sc.h"
-void shift_cells(struct sheet * sh, int type, int arg, int delta);
-void shift_cells_up(struct sheet * sh, int deltarows, int deltacols);
-void shift_cells_down(struct sheet * sh, int deltarows, int deltacols);
-void shift_cells_left(struct sheet * sh, int deltarows, int deltacols);
-void shift_cells_right(struct sheet * sh, int deltarows, int deltacols);
-void shift_range(struct sheet * sh, int delta_rows, int delta_cols, int tlrow, int tlcol, int brrow, int brcol);
-void shift(struct sheet * sh, int r, int c, int rf, int cf, wchar_t type);
+#include "../input.h"
+
+#ifdef INS_HISTORY_FILE
+#include "../history.h"
+extern struct history * insert_history;
+#endif
+
+void do_insertmode(struct block * sb);
