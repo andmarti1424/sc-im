@@ -172,8 +172,10 @@ void syncref(struct sheet * sh, struct enode * e) {
         e->e.o.right = NULL;
         return;
     } else if (e->op & REDUCE) {
-        e->e.r.right.vp = lookat(e->e.r.right.sheet, e->e.r.right.vp->row, e->e.r.right.vp->col);
-        e->e.r.left.vp = lookat(e->e.r.left.sheet, e->e.r.left.vp->row, e->e.r.left.vp->col);
+        //e->e.r.right.vp = lookat(e->e.r.right.sheet, e->e.r.right.vp->row, e->e.r.right.vp->col);
+        e->e.r.right.vp = lookat(sh, e->e.r.right.vp->row, e->e.r.right.vp->col);
+        // e->e.r.left.vp = lookat(e->e.r.left.sheet, e->e.r.left.vp->row, e->e.r.left.vp->col);
+        e->e.r.left.vp = lookat(sh, e->e.r.left.vp->row, e->e.r.left.vp->col);
     } else {
         switch (e->op) {
         case 'v':

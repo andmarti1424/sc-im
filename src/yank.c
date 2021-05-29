@@ -75,11 +75,9 @@ unsigned int yanked_cells = 0;// keeping this helps performance
 
 
 /**
- * \brief TODO Document init_yanklist()
- *
+ * \brief init_yanklist()
  * \return none
  */
-
 void init_yanklist() {
     yanked_cells = 0;
     type_of_yank = YANK_NULL;
@@ -87,22 +85,20 @@ void init_yanklist() {
     yanklist_tail = NULL;
 }
 
+
 /**
  * \brief Return the yanklist
- *
- * \return yanklist
+ * \return struct ent *
  */
-
 struct ent * get_yanklist() {
     return yanklist;
 }
 
+
 /**
- * \brief Remove yank 'ent' elements and free corresponding memory
- *
+ * \brief Remove elements from the yanklist and free its memory
  * \return none
  */
-
 void free_yanklist () {
     if (yanklist == NULL) return;
     int c;
@@ -138,12 +134,10 @@ void free_yanklist () {
 
 /**
  * \brief Add an already alloc'ed 'ent' element to the yanklist
- *
  * yanklist_tail is pointer to the last ent in the list
  * \param[in] item 'ent' element to add to the yanklist
  * \return none
  */
-
 void add_ent_to_yanklist(struct ent * item) {
     yanked_cells++;
 
@@ -154,12 +148,12 @@ void add_ent_to_yanklist(struct ent * item) {
         return;
     }
 
-    // If yanklist is NOT empty, insert at the end
-    // insert at the end
+    // If yanklist is NOT empty, insert it at the end
     yanklist_tail->next = item;
     yanklist_tail = item;
     return;
 }
+
 
 /**
  * \brief Yank a range of ents of a given range of a sheet
@@ -168,14 +162,12 @@ void add_ent_to_yanklist(struct ent * item) {
  * \param[in] tlcol
  * \param[in] brrow
  * \param[in] brcol
- * \param[in] type yank type. c=col, r=row, a=range, e=cell. '\o'=no yanking,
+ * \param[in] type yank type. c=col, r=row, a=range, e=cell. '\0'=no yanking,
  * 's' sort. Used for pasting.
  * \param[in] arg number of rows or columns yanked. Used in commands like
  * '4yr'. Used for pasting.
- *
  * \return none
  */
-
 void yank_area(struct sheet * sh, int tlrow, int tlcol, int brrow, int brcol, char type, int arg) {
     int r,c;
     type_of_yank = type;
@@ -209,6 +201,7 @@ void yank_area(struct sheet * sh, int tlrow, int tlcol, int brrow, int brcol, ch
     return;
 }
 
+
 /**
  * \brief paste_yanked_ents()
  *
@@ -234,7 +227,6 @@ void yank_area(struct sheet * sh, int tlrow, int tlcol, int brrow, int brcol, ch
  * \return -1 if locked cells are found
  * \return 0 otherwise
  */
-
 int paste_yanked_ents(struct sheet * sh, int above, int type_paste) {
     struct roman * roman = session->cur_doc;
     if (yanklist == NULL) return 0;
