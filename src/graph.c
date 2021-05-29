@@ -769,7 +769,7 @@ void EvalRange(struct sheet * sh, int tlrow, int tlcol, int brrow, int brcol) {
             ents_that_depends_on(sh, e);
 
            for (i = 0; deps != NULL && i < deps->vf; i++) {
-               f = *ATBL(sh, sh->tbl, deps[i].vp->row, deps[i].vp->col);
+               f = *ATBL(deps[i].sheet, deps[i].sheet->tbl, deps[i].vp->row, deps[i].vp->col);
                if (f == NULL || ! f->expr) continue;
                EvalJustOneVertex(sh, f, 0);
             }
