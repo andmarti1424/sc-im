@@ -117,9 +117,9 @@ brew tap nickolasburr/pfa
 brew install sc-im
 ```
 
-### Ubuntu with XLSX import & export
+### Linux with XLSX import & export
 
-See [this wiki page](https://github.com/andmarti1424/sc-im/wiki/Ubuntu-with-XLSX-import-&-export).
+See [this wiki page](https://github.com/andmarti1424/sc-im/wiki/) for Ubuntu, Fedora, Debian, Gentoo, FreeBSD and OpenBSD.
 
 ### Configuration
 
