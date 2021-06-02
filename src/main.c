@@ -193,8 +193,9 @@ int main (int argc, char ** argv) {
     // check if version is in argv. if so, show version and quit
     if (get_conf_int("version")) show_version_and_quit();
 
-    // create command line history structure
+    // if starting tui..
     if (! get_conf_int("nocurses")) {
+        // create command line history structure
 #ifdef HISTORY_FILE
         commandline_history = (struct history *) create_history(':');
         load_history(commandline_history, ':'); // load the command history file
@@ -203,10 +204,8 @@ int main (int argc, char ** argv) {
         insert_history = (struct history *) create_history('=');
         load_history(insert_history, '='); // load the insert history file
 #endif
-    }
 
-    // initiate NCURSES if that is what is wanted
-    if (! get_conf_int("nocurses")) {
+        // and initiate NCURSES
         ui_start_screen();
 
 #ifdef USECOLORS
