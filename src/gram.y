@@ -1116,9 +1116,19 @@ command:
                                      //changed = 0;
                                    }
     |    S_GETNUM var_or_range     {
-                                     getnum($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col, fdoutput);
+                                     struct roman * roman = session->cur_doc;
+                                     struct sheet * sh = roman->cur_sh;
+                                     getnum(sh, $2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col, fdoutput);
                                    }
 
+    |    S_GETNUM '{' STRING '}' '!' var_or_range {
+                                     struct roman * roman = session->cur_doc;
+                                     struct sheet * sh;
+                                     if ((sh = search_sheet(roman, $3)) == NULL )
+                                         sh = roman->cur_sh;
+                                     getnum(sh, $6.left.vp->row, $6.left.vp->col, $6.right.vp->row, $6.right.vp->col, fdoutput);
+                                     scxfree($3);
+                                   }
     |    S_GETSTRING var_or_range  { getstring($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col, fdoutput); }
 
     |    S_GETEXP var_or_range     { getexp($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col, fdoutput); }

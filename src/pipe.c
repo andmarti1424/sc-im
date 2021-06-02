@@ -69,9 +69,7 @@ extern struct session * session;
 // FIXME - pass fd is not needed
  */
 
-void getnum(int r0, int c0, int rn, int cn, FILE * fd) {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
+void getnum(struct sheet * sh, int r0, int c0, int rn, int cn, FILE * fd) {
     struct ent ** pp;
     struct ent * p;
     int r, c;

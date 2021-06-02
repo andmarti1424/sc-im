@@ -4,15 +4,15 @@
 #Exit immediately if a command exits with a non-zero status.
 set -e
 
-NAME=test1
+NAME=test3
 
 VALGRIND_CMD='valgrind -v --log-file=${NAME}_vallog --tool=memcheck --track-origins=yes --leak-check=full --show-leak-kinds=all --show-reachable=no'
 . assert.sh
-assert "echo GETNUM C2 | $VALGRIND_CMD ../src/sc-im ${NAME}.sc --nocurses --nodebug --quit_afterload 2>&1 |grep -v '^$\|Interp'" "81"
+assert "echo GETNUM A0 | $VALGRIND_CMD ../src/sc-im ${NAME}.sc --nocurses --nodebug --quit_afterload 2>&1 |grep -v '^$\|Interp\|left'" "3.3"
 
 #TODO: check valgrind log here
 #"in use at exit: 0 bytes in 0 blocks"
 #"All heap blocks were freed -- no leaks are possible"
-rm ${NAME}_vallog
+#rm ${NAME}_vallog
 
 assert_end ${NAME}

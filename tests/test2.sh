@@ -13,6 +13,6 @@ assert "echo GETNUM C2 | $VALGRIND_CMD ../src/sc-im ${NAME}.sc --nocurses --node
 #TODO: check valgrind log here
 #"in use at exit: 0 bytes in 0 blocks"
 #"All heap blocks were freed -- no leaks are possible"
+#rm ${NAME}_vallog
 
-rm ${NAME}_vallog
 assert_end ${NAME}
