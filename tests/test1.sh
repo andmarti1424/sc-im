@@ -9,7 +9,7 @@ NAME=test1
 echo -n $NAME": "
 VALGRIND_CMD='valgrind -v --log-file=${NAME}_vallog --tool=memcheck --track-origins=yes --leak-check=full --show-leak-kinds=all --show-reachable=no'
 . assert.sh
-assert "echo GETNUM C2 | $VALGRIND_CMD ../sc-im ${NAME}.sc --nocurses --nodebug --quit_afterload 2>&1 |grep -v '^$\|Interp'" "81"
+assert "echo GETNUM C2 | $VALGRIND_CMD ../src/sc-im ${NAME}.sc --nocurses --nodebug --quit_afterload 2>&1 |grep -v '^$\|Interp'" "81"
 
 #TODO: check valgrind log here
 #"in use at exit: 0 bytes in 0 blocks"

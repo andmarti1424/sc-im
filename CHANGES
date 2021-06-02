@@ -21,11 +21,10 @@ removed --sheet and --filename_with_mode configuration variables
 created movetosheet command in gram.y, to be used when saving and loading files
 reeval in multiple sheets: graph now should keep track of the different sheets
 UNDO now saves reference to the sheet where the action took place.
-
+* Added some automated tests
 
 Pending to make v0.8.3 release
 -------------------
-+ start creating automatized tests.
 + mark should consider sheet. We should have mark A in Sheet 1, and mark B on Sheet 2.. modify tick()
 input: block buffer maps digraph
 + ents_that_depends_on_list SHOULD take ent_ptr rather than struct ent * as parameter!
