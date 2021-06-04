@@ -114,6 +114,25 @@ assert() {
     _assert_fail "expected $expected${_indent}got $result" "$1" "$3"
 }
 
+assert_iffound() {
+    (( tests_ran++ )) || :
+    [[ -z "$DISCOVERONLY" ]] || return
+    file=$1
+    pattern=$2
+    assert_ne_cond=$3
+    #echo ":$file."
+    #echo ":$pattern."
+    #echo ":$assert_ne_cond."
+    grepres="$(grep "$file" -e "$pattern" | grep -v "$assert_ne_cond")" || true
+    #echo $grepres
+    if [[ -z "$grepres" ]]; then
+        [[ -z "$DEBUG" ]] || echo -n .
+        return
+    fi
+    #echo leak found
+    _assert_fail "$grepres" $file "$1" "$3"
+}
+
 assert_raises() {
     # assert_raises <command> <expected code> [stdin]
     (( tests_ran++ )) || :

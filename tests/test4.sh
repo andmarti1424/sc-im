@@ -12,9 +12,10 @@ VALGRIND_CMD='valgrind -v --log-file=${NAME}_vallog --tool=memcheck --track-orig
 CMD='LET A2 = 1\nUNDO\nGETNUM A0\nGETNUM {"dos"}!B3'
 assert "echo -e '${CMD}' | $VALGRIND_CMD ../src/sc-im ${NAME}.sc --nocurses --nodebug --quit_afterload 2>&1 |grep -v '^$\|Interp\|left\|Change'" "2.3\n0"
 
-#TODO: check valgrind log here
-#"in use at exit: 0 bytes in 0 blocks"
-#"All heap blocks were freed -- no leaks are possible"
-#rm ${NAME}_vallog
+#we check valgrind log
+assert_iffound ${NAME}_vallog "definitely lost.*bytes" "0 bytes"
+assert_iffound ${NAME}_vallog "indirectly lost.*bytes" "0 bytes"
+assert_iffound ${NAME}_vallog "possibly lost.*bytes" "0 bytes"
+rm ${NAME}_vallog
 
 assert_end ${NAME}
