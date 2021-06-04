@@ -114,7 +114,9 @@ assert() {
     _assert_fail "expected $expected${_indent}got $result" "$1" "$3"
 }
 
-assert_iffound() {
+# Check in file ($1) for a pattern ($2)
+# if found, assert if $3 condition is not met
+assert_iffound_notcond() {
     (( tests_ran++ )) || :
     [[ -z "$DISCOVERONLY" ]] || return
     file=$1

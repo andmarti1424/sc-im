@@ -11,9 +11,11 @@ VALGRIND_CMD='valgrind -v --log-file=${NAME}_vallog --tool=memcheck --track-orig
 assert "echo GETNUM C2 | $VALGRIND_CMD ../src/sc-im ${NAME}.sc --nocurses --nodebug --quit_afterload 2>&1 |grep -v '^$\|Interp'" "81"
 
 #we check valgrind log
-assert_iffound ${NAME}_vallog "definitely lost.*bytes" "0 bytes"
-assert_iffound ${NAME}_vallog "indirectly lost.*bytes" "0 bytes"
-assert_iffound ${NAME}_vallog "possibly lost.*bytes" "0 bytes"
-rm ${NAME}_vallog
+assert_iffound_notcond ${NAME}_vallog "definitely lost.*bytes" "0 bytes"
+assert_iffound_notcond ${NAME}_vallog "indirectly lost.*bytes" "0 bytes"
+assert_iffound_notcond ${NAME}_vallog "possibly lost.*bytes" "0 bytes"
+if [ "$1" != "keep-vallog" ];then
+    rm ${NAME}_vallog
+fi
 
 assert_end ${NAME}

@@ -13,9 +13,11 @@ CMD='LET A2 = 1\nUNDO\nGETNUM A0\nGETNUM {"dos"}!B3'
 assert "echo -e '${CMD}' | $VALGRIND_CMD ../src/sc-im ${NAME}.sc --nocurses --nodebug --quit_afterload 2>&1 |grep -v '^$\|Interp\|left\|Change'" "2.3\n0"
 
 #we check valgrind log
-assert_iffound ${NAME}_vallog "definitely lost.*bytes" "0 bytes"
-assert_iffound ${NAME}_vallog "indirectly lost.*bytes" "0 bytes"
-assert_iffound ${NAME}_vallog "possibly lost.*bytes" "0 bytes"
-rm ${NAME}_vallog
+assert_iffound_notcond ${NAME}_vallog "definitely lost.*bytes" "0 bytes"
+assert_iffound_notcond ${NAME}_vallog "indirectly lost.*bytes" "0 bytes"
+assert_iffound_notcond ${NAME}_vallog "possibly lost.*bytes" "0 bytes"
+if [ "$1" != "keep-vallog" ];then
+    rm ${NAME}_vallog
+fi
 
 assert_end ${NAME}
