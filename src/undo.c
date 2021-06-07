@@ -243,7 +243,6 @@ void add_to_undolist(struct undo u) {
     ul->removed = u.removed;
     ul->sheet = u.sheet;
     ul->allocations = u.allocations;
-    //ul->alloc_size = u.alloc_size;
     ul->range_shift = u.range_shift;
     ul->cols_format = u.cols_format;
     ul->rows_format = u.rows_format;
@@ -323,9 +322,13 @@ void dismiss_undo_item(struct undo * ul) {
         *alls = NULL;
         alls++;
     }
-    if (undo_item.allocations != NULL) {
-        free(ul->allocations->items);
+    if (ul->allocations != NULL) {
+        if (ul->allocations->items != NULL) {
+            free(ul->allocations->items);
+            ul->allocations->items = NULL;
+        }
         free(ul->allocations);
+        ul->allocations = NULL;
     }
 
     if (ul->range_shift != NULL) free(ul->range_shift);    // Free undo_range_shift memory
