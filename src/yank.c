@@ -305,8 +305,8 @@ int paste_yanked_ents(struct sheet * sh, int above, int type_paste) {
     while (yl != NULL) {
 
 #ifdef UNDO
-        y_cells++;
         copy_cell_to_undostruct(y_cells, sh, lookat(sh, yl->row + diffr, yl->col + diffc), UNDO_DEL);
+        y_cells++;
 
         // Here pass struct ent ** to copy_to_undostruct
         copy_to_undostruct(sh, 0, 0, -1, -1, UNDO_DEL, HANDLE_DEPS, &y_cells);
@@ -349,8 +349,8 @@ int paste_yanked_ents(struct sheet * sh, int above, int type_paste) {
         /*******************/
 
 #ifdef UNDO
-        y_cells++;
         copy_cell_to_undostruct(y_cells, sh, lookat(sh, yl->row + diffr, yl->col + diffc), UNDO_ADD);
+        y_cells++;
         // store dependencies after the change as well
         copy_to_undostruct(sh, 0, 0, -1, -1, UNDO_ADD, HANDLE_DEPS, &y_cells);
 #endif

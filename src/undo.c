@@ -568,7 +568,7 @@ void save_yl_pointer_after_calloc(struct ent_ptr * e) {
  */
 void copy_cell_to_undostruct (struct ent_ptr * e_ptr, struct sheet * sh_ori, struct ent * ori, char type) {
     struct ent_ptr * new_ptr = e_ptr;
-    struct ent * new = e_ptr->vp;
+    struct ent * new = malloc(sizeof(struct ent));
 
     // initialize the 'ent'
     cleanent(new);
