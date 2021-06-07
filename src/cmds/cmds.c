@@ -420,7 +420,7 @@ void copyent(struct ent * n, struct sheet * sh_p, struct ent * p, int dr, int dc
     n->cellerror = p->cellerror;
 
     if (special == 'c' && n->expr) {
-        sc_debug("reeval in copyent");
+        // sc_debug("reeval in copyent");
         EvalJustOneVertex(sh_p, n, 0);
     }
 
