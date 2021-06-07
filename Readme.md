@@ -113,13 +113,16 @@ And then follow the instructions as above.
 ### Homebrew for OSX users
 
 ```
-brew tap nickolasburr/pfa
 brew install sc-im
 ```
 
 ### Ubuntu with XLSX import & export
 
 See [this wiki page](https://github.com/andmarti1424/sc-im/wiki/Ubuntu-with-XLSX-import-&-export).
+
+### Other distros / OS
+
+Please check [wiki pages](https://github.com/andmarti1424/sc-im/wiki/)
 
 ### Configuration
 
