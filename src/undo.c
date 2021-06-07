@@ -38,7 +38,7 @@
 /**
  * \file undo.c
  * \author Andrés Martinelli <andmarti@gmail.com>
- * \date 04/05/2021
+ * \date 06/06/2021
  * \brief This file contains the main functions to support the undo/redo feature.
  */
 
@@ -48,9 +48,12 @@
  *       p_ant: pointer to 'undo' struct. If NULL, this node is the first change
  *              for the session.
  *
- *       struct ent * added: 'ent' elements added by the change
+ *       struct ent_ptr * added: 'ent' elements added by the change
  *
- *       struct ent * removed: 'ent' elements removed by the change
+ *       struct ent_ptr * removed: 'ent' elements removed by the change
+ *
+ *       struct allocation_list * allocations: since we alloc over added and removed
+ *              list in batches. we need to keep the first position in memory of each calloc.
  *
  *       struct undo_range_shift * range_shift: range shifted by change
  *
@@ -70,11 +73,6 @@
  *       col_frozed: integers list (int *) frozen cols on screen
  *
  *       col_unfrozed: integers list (int *) unfrozen cols on screen
- *
- *       struct ent_ptr * allocations: since we alloc over added and removed
- *              list in batches. we need to keep the first position in memory of each calloc.
- *
- *       int alloc_size: the number of batch allocations.
  *
  *       struct undo_cols_format * cols_format: list of 'undo_col_info' elements used for
  *              undoing / redoing changes in columns format (fwidth, precision y realfmt)
@@ -140,12 +138,12 @@
 #ifdef UNDO
 
 #include <stdlib.h>
+#include "sc.h"
 #include "undo.h"
 #include "macros.h"
 #include "color.h"
 #include "curses.h"
 #include "conf.h"
-#include "sc.h"
 #include "cmds/cmds.h"
 #include "marks.h"
 #include "actions/shift.h"
@@ -165,16 +163,15 @@ static int undo_list_len = 0;
 // Temporal variable
 static struct undo undo_item;
 
+
 /**
  * \brief Init 'undo_item'
- *
  * \return none
  */
 void create_undo_action() {
     undo_item.added       = NULL;
     undo_item.removed     = NULL;
     undo_item.allocations = NULL;
-    undo_item.alloc_size  = 0;
     undo_item.p_ant       = NULL;
     undo_item.p_sig       = NULL;
     undo_item.range_shift = NULL;
@@ -193,6 +190,7 @@ void create_undo_action() {
     return;
 }
 
+
 /**
  * @brief end_undo_action()
  *
@@ -201,7 +199,6 @@ void create_undo_action() {
  *
  * \return none
  */
-
 void end_undo_action() {
     struct roman * roman = session->cur_doc;
     add_to_undolist(undo_item);
@@ -222,8 +219,9 @@ void end_undo_action() {
     return;
 }
 
+
 /**
- * \brief Document add_to_undolist()
+ * \brief add_to_undolist()
  *
  * \details Add an undo node to the undolist. Allocate memory for
  * undo struct. Fill variable with undo_item value and append it
@@ -233,7 +231,6 @@ void end_undo_action() {
  *
  * \return none
  */
-
 void add_to_undolist(struct undo u) {
     // If not at the end of the list, remove from the end
     if (undo_list != NULL && undo_list_pos != len_undo_list()) clear_from_current_pos();
@@ -246,7 +243,7 @@ void add_to_undolist(struct undo u) {
     ul->removed = u.removed;
     ul->sheet = u.sheet;
     ul->allocations = u.allocations;
-    ul->alloc_size = u.alloc_size;
+    //ul->alloc_size = u.alloc_size;
     ul->range_shift = u.range_shift;
     ul->cols_format = u.cols_format;
     ul->rows_format = u.rows_format;
@@ -297,35 +294,39 @@ void dismiss_undo_item(struct undo * ul) {
 
     // first free inside each added and removed ents
     // (their labels, expressions, etc.
-    struct ent * en;
-    struct ent * de;
+    struct ent_ptr * en;
+    struct ent_ptr * de;
     en = ul->added;     // free added
     while (en != NULL) {
         de = en->next;
-        clearent(en);
-        //free(en); // do not free the struct * ent. thats get freed later in batches
+        clearent(en->vp);
+        free(en->vp);
+        en->vp = NULL;
         en = de;
     }
 
     en = ul->removed;   // free removed
     while (en != NULL) {
         de = en->next;
-        clearent(en);
-        //free(en); // do not free the struct * ent. thats get freed below in batches
+        clearent(en->vp);
+        free(en->vp);
+        en->vp = NULL;
         en = de;
     }
 
     // now free added and removed lists
     // in the way they were alloc'ed (as batches)
-    int i, size = ul->allocations != NULL ? ul->allocations[0].vf : 0;
-    struct ent_ptr * alls = ul->allocations;
+    int i, size = ul->allocations != NULL ? ul->allocations->size : 0;
+    struct ent_ptr ** alls = ul->allocations != NULL ? ul->allocations->items : NULL;
     for (i = 0; i < size; i++) {
-        free(alls->vp);
-        alls->vp = NULL;
+        free(*alls); // each ent_ptr
+        *alls = NULL;
         alls++;
     }
-    free(ul->allocations);
-    ul->allocations = NULL;
+    if (undo_item.allocations != NULL) {
+        free(ul->allocations->items);
+        free(ul->allocations);
+    }
 
     if (ul->range_shift != NULL) free(ul->range_shift);    // Free undo_range_shift memory
     if (ul->cols_format != NULL) {                         // Free cols_format memory
@@ -348,6 +349,7 @@ void dismiss_undo_item(struct undo * ul) {
     return;
 }
 
+
 /**
  * \brief Cascade free UNDO node memory
  *
@@ -355,7 +357,6 @@ void dismiss_undo_item(struct undo * ul) {
  *
  * \return none
  */
-
 void free_undo_node(struct undo * ul) {
     struct undo * e;
 
@@ -371,12 +372,11 @@ void free_undo_node(struct undo * ul) {
     return;
 }
 
+
 /**
  * \brief Remove nodes below the current position from the undolist
- *
  * \return none
  */
-
 void clear_from_current_pos() {
     if (undo_list == NULL) return;
 
@@ -392,12 +392,11 @@ void clear_from_current_pos() {
     return;
 }
 
+
 /**
  * \brief Remove undolist content
- *
  * \return none
  */
-
 void clear_undo_list() {
     if (undo_list == NULL) return;
 
@@ -412,19 +411,18 @@ void clear_undo_list() {
 
     undo_list = NULL;
     undo_list_pos = 0;
-
     return;
 }
 
+
 /**
  * \brief Return the length of the undo list
- *
  * \return length of undolist
  */
-
 int len_undo_list() {
     return undo_list_len;
 }
+
 
 /**
  * \brief copy_to_undostruct()
@@ -440,8 +438,7 @@ int len_undo_list() {
  * destination: struct ent * pointer to use in the copy. if none was given, just malloc one.
  * returns: none
  */
-
-void copy_to_undostruct (struct sheet * sh, int ri, int ci, int rf, int cf, char type, short handle_deps, struct ent ** destination) {
+void copy_to_undostruct (struct sheet * sh, int ri, int ci, int rf, int cf, char type, short handle_deps, struct ent_ptr ** destination) {
     int i, c, r;
     struct ent * p;
     extern struct ent_ptr * deps;
@@ -449,23 +446,20 @@ void copy_to_undostruct (struct sheet * sh, int ri, int ci, int rf, int cf, char
 
     // ask for memory to keep struct ent * for the whole range
     // and only if no destination pointer was given
-    struct ent * y_cells = destination == NULL ? NULL : *destination;
+    struct ent_ptr * y_cells = destination == NULL ? NULL : *destination;
     if (y_cells == NULL && handle_deps == HANDLE_DEPS && deps != NULL)
-        y_cells = (struct ent *) calloc((rf-ri+1)*(cf-ci+1)+deps->vf, sizeof(struct ent));
+        y_cells = (struct ent_ptr *) calloc((rf-ri+1)*(cf-ci+1)+deps->vf, sizeof(struct ent_ptr));
     else if (y_cells == NULL)
-        y_cells = (struct ent *) calloc((rf-ri+1)*(cf-ci+1), sizeof(struct ent));
+        y_cells = (struct ent_ptr *) calloc((rf-ri+1)*(cf-ci+1), sizeof(struct ent_ptr));
 
     // if no destination pointer was given
     // we save the pointer for future free
-    if (destination == NULL) save_pointer_after_calloc(y_cells);
+    if (destination == NULL) save_yl_pointer_after_calloc(y_cells);
 
     for (r = ri; r <= rf; r++)
         for (c = ci; c <= cf; c++) {
             p = *ATBL(sh, sh->tbl, r, c);
             if (p == NULL) continue;
-
-            // initialize the 'ent'
-            cleanent(y_cells);
 
             /* here check that ent to add is not already in the list
              * if so, avoid to add a duplicate ent
@@ -482,9 +476,14 @@ void copy_to_undostruct (struct sheet * sh, int ri, int ci, int rf, int cf, char
             if (repeated) continue;
              */
 
+            // initialize the 'ent'
+            y_cells->vp = malloc(sizeof(struct ent));
+            cleanent(y_cells->vp);
+            y_cells->sheet = sh;
+
             // Copy cell at 'r, c' contents to 'y_cells' ent
-            y_cells->expr = NULL;
-            copyent(y_cells, sh, lookat(sh, r, c), 0, 0, 0, 0, 0, 0, 'u');
+            y_cells->vp->expr = NULL;
+            copyent(y_cells->vp, sh, lookat(sh, r, c), 0, 0, 0, 0, 0, 0, 'u');
 
             // Append 'ent' element at the beginning
             if (type == UNDO_ADD) {
@@ -503,16 +502,16 @@ void copy_to_undostruct (struct sheet * sh, int ri, int ci, int rf, int cf, char
     // do the same for dependencies
     if (handle_deps == HANDLE_DEPS)
         for (i = 0; deps != NULL && i < deps->vf; i++) {
-            //p = *ATBL(sh, sh->tbl, deps[i].vp->row, deps[i].vp->col);
             p = *ATBL(deps[i].sheet, deps[i].sheet->tbl, deps[i].vp->row, deps[i].vp->col);
             if (p == NULL) continue;
 
             // initialize the 'ent'
-            cleanent(y_cells);
+            y_cells->vp = malloc(sizeof(struct ent));
+            cleanent(y_cells->vp);
+            y_cells->sheet = deps[i].sheet;
 
             // Copy cell at deps[i].vp->row, deps[i].vp->col contents to 'y_cells' ent
-            //copyent(y_cells, sh, lookat(sh, deps[i].vp->row, deps[i].vp->col), 0, 0, 0, 0, 0, 0, 'u');
-            copyent(y_cells, deps[i].sheet, lookat(deps[i].sheet, deps[i].vp->row, deps[i].vp->col), 0, 0, 0, 0, 0, 0, 'u');
+            copyent(y_cells->vp, deps[i].sheet, lookat(deps[i].sheet, deps[i].vp->row, deps[i].vp->col), 0, 0, 0, 0, 0, 0, 'u');
 
             // Append 'ent' element at the beginning
             if (type == UNDO_ADD) {
@@ -528,8 +527,10 @@ void copy_to_undostruct (struct sheet * sh, int ri, int ci, int rf, int cf, char
     return;
 }
 
+
+
 /**
- * \brief save_pointer_after_calloc()
+ * \brief save_yl_pointer_after_calloc()
  *
  * \details This function keeps in a pointer array every pointer that was returned by calloc
  * so we can free them
@@ -537,11 +538,17 @@ void copy_to_undostruct (struct sheet * sh, int ri, int ci, int rf, int cf, char
  * \param[in] struct ent e
  * \return void
  */
-void save_pointer_after_calloc(struct ent * e) {
-    undo_item.allocations = (struct ent_ptr *) realloc(undo_item.allocations, sizeof(struct ent_ptr) * (++(undo_item.alloc_size)));
-    undo_item.allocations[0].vf = undo_item.alloc_size; // we always keep size of list in the first position !
-    undo_item.allocations[undo_item.alloc_size-1].vp = e; // keep the pointer so later can be freed
+
+void save_yl_pointer_after_calloc(struct ent_ptr * e) {
+    if (undo_item.allocations == NULL) {
+        undo_item.allocations = malloc(sizeof(struct allocation_list));
+        undo_item.allocations->size = 0;
+        undo_item.allocations->items = NULL;
+    }
+    undo_item.allocations->items = (struct ent_ptr **) realloc(undo_item.allocations->items, sizeof(struct ent_ptr *) * (++(undo_item.allocations->size)));
+    undo_item.allocations->items[undo_item.allocations->size-1] = e; // keep the pointer so later can be freed
 }
+
 
 /**
  * \brief copy_cell_to_undostruct()
@@ -549,32 +556,40 @@ void save_pointer_after_calloc(struct ent * e) {
  * \details This function adds an struct ent * (new) to undo struct lists.
  * its contents are based on the struct ent * (ori).
  * could be added list or deleted list depending on the type.
- * \param[in] struct ent e
- * \param[in] struct ent ori
+ * \param[in] struct ent_ptr * e_ptr
+ * \param[in] struct sheet * sh_ori
+ * \param[in] struct ent * ori
  * \param[in] char type: indicates UNDO_ADD ('a') for added list. or UNDO_DEL ('d') for the 'removed' list.
  *
- * the struct ent pointer is already alloc'ed
- *
+ * the struct ent_ptr * e_ptr should be already alloc'ed
  * \return void
+ * NOTE: used on yank.c
+ *
  */
-void copy_cell_to_undostruct (struct ent * e, struct sheet * sh_ori, struct ent * ori, char type) {
-    struct ent * new = e;
+void copy_cell_to_undostruct (struct ent_ptr * e_ptr, struct sheet * sh_ori, struct ent * ori, char type) {
+    struct ent_ptr * new_ptr = e_ptr;
+    struct ent * new = e_ptr->vp;
+
     // initialize the 'ent'
     cleanent(new);
 
     // Copy 'ori' cell contents to 'new' ent
     copyent(new, sh_ori, ori, 0, 0, 0, 0, 0, 0, 'u');
 
+    new_ptr->sheet = sh_ori;
+    new_ptr->vp = new;
+
     // Append 'ent' element at the beginning
     if (type == UNDO_ADD) {
-        new->next = undo_item.added;
-        undo_item.added = new;
+        new_ptr->next = undo_item.added;
+        undo_item.added = new_ptr;
     } else {
-        new->next = undo_item.removed;
-        undo_item.removed = new;
+        new_ptr->next = undo_item.removed;
+        undo_item.removed = new_ptr;
     }
     return;
 }
+
 
 /**
  * \brief add_undo_col_format()
@@ -604,6 +619,7 @@ void add_undo_col_format(int col, int type, int fwidth, int precision, int realf
     return;
 }
 
+
 /**
  * \brief add_undo_row_format()
  *
@@ -628,10 +644,11 @@ void add_undo_row_format(int row, int type, unsigned char format) {
     return;
 }
 
+
 /**
- * \brief TODO Document save_undo_range_shift()
+ * \brief save_undo_range_shift()
  *
- * \detials Take a range, a rows and columns delta and save them into
+ * \details Take a range, a rows and columns delta and save them into
  * they undo struct. Used to shift ranges when UNDO or REDO without
  * duplicating 'ent'elements.
  *
@@ -644,7 +661,6 @@ void add_undo_row_format(int row, int type, unsigned char format) {
  *
  * \return none
  */
-
 void save_undo_range_shift(int delta_rows, int delta_cols, int tlrow, int tlcol, int brrow, int brcol) {
     struct undo_range_shift * urs = (struct undo_range_shift *) malloc( (unsigned) sizeof(struct undo_range_shift ) );
     urs->delta_rows = delta_rows;
@@ -658,6 +674,7 @@ void save_undo_range_shift(int delta_rows, int delta_cols, int tlrow, int tlcol,
 }
 
 /*
+ * \brief undo_hide_show()
  * This function is used for undoing and redoing
  * changes caused by commands that hide/show rows/columns of screen
  * such as Zr Zc Sc Sr commands.
@@ -665,9 +682,6 @@ void save_undo_range_shift(int delta_rows, int delta_cols, int tlrow, int tlcol,
  * that are showed or hidden because of a change.
  * As these lists are dynamically built, in the first position of every list,
  * we always store the number of elements that the list has.
- */
-/**
- * \brief todo document undo_hide_show()
  *
  * \details this function is used for undoint and redoing changes
  * caused by commands that hide/show rows/columns of screen such
@@ -757,7 +771,6 @@ void undo_hide_show(int row, int col, char type, int arg) {
  *
  * \return none
  */
-
 void undo_freeze_unfreeze(int row, int col, char type, int arg) {
     int i;
     if (type == 'f') {
@@ -842,9 +855,9 @@ void do_undo() {
     struct undo * ul = undo_list;
 
     // removed added ents
-    struct ent * i = ul->added;
+    struct ent_ptr * i = ul->added;
     while (i != NULL) {
-        struct ent * pp = *ATBL(sh, sh->tbl, i->row, i->col);
+        struct ent * pp = *ATBL(i->sheet, i->sheet->tbl, i->vp->row, i->vp->col);
         clearent(pp);
         cleanent(pp);
         i = i->next;
@@ -915,12 +928,12 @@ void do_undo() {
     //}
 
     // Append 'ent' elements from the removed ones
-    struct ent * j = ul->removed;
+    struct ent_ptr * j = ul->removed;
     while (j != NULL) {
         struct ent * h;
-        if ((h = *ATBL(sh, sh->tbl, j->row, j->col))) clearent(h);
-        struct ent * e_now = lookat(sh, j->row, j->col);
-        (void) copyent(e_now, sh, j, 0, 0, 0, 0, 0, 0, 0);
+        if ((h = *ATBL(j->sheet, j->sheet->tbl, j->vp->row, j->vp->col))) clearent(h);
+        struct ent * e_now = lookat(j->sheet, j->vp->row, j->vp->col);
+        (void) copyent(e_now, j->sheet, j->vp, 0, 0, 0, 0, 0, 0, 0);
         j = j->next;
     }
 
@@ -1015,18 +1028,18 @@ void do_undo() {
     }
 
     // for every ent in added and removed, we reeval expression to update graph
-    struct ent * ie = ul->added;
+    struct ent_ptr * ie = ul->added;
     while (ie != NULL) {
         struct ent * p;
-        if ((p = *ATBL(sh, sh->tbl, ie->row, ie->col)) && p->expr)
-            EvalJustOneVertex(sh, p, 1);
+        if ((p = *ATBL(ie->sheet, ie->sheet->tbl, ie->vp->row, ie->vp->col)) && p->expr)
+            EvalJustOneVertex(ie->sheet, p, 1);
         ie = ie->next;
     }
     ie = ul->removed;
     while (ie != NULL) {
         struct ent * p;
-        if ((p = *ATBL(sh, sh->tbl, ie->row, ie->col)) && p->expr)
-            EvalJustOneVertex(sh, p, 1);
+        if ((p = *ATBL(ie->sheet, ie->sheet->tbl, ie->vp->row, ie->vp->col)) && p->expr)
+            EvalJustOneVertex(ie->sheet, p, 1);
         ie = ie->next;
     }
 
@@ -1042,13 +1055,13 @@ void do_undo() {
     return;
 }
 
+
 /**
  * \brief Do REDO
  * Shift a range of an undo shift range to the original position, if any,
  * append 'ent' elements from 'added' and remove those from 'removed'.
  * \return none
  */
-
 void do_redo() {
     struct roman * roman = session->cur_doc;
 
@@ -1071,9 +1084,9 @@ void do_redo() {
     roman->cur_sh = sh;
 
     // Remove 'ent' elements
-    struct ent * i = ul->removed;
+    struct ent_ptr * i = ul->removed;
     while (i != NULL) {
-        struct ent * pp = *ATBL(sh, sh->tbl, i->row, i->col);
+        struct ent * pp = *ATBL(i->sheet, i->sheet->tbl, i->vp->row, i->vp->col);
         clearent(pp);
         cleanent(pp);
         i = i->next;
@@ -1138,12 +1151,12 @@ void do_redo() {
     //}
 
     // Append 'ent' elements
-    struct ent * j = ul->added;
+    struct ent_ptr * j = ul->added;
     while (j != NULL) {
         struct ent * h;
-        if ((h = *ATBL(sh, sh->tbl, j->row, j->col))) clearent(h);
-        struct ent * e_now = lookat(sh, j->row, j->col);
-        (void) copyent(e_now, sh, j, 0, 0, 0, 0, 0, 0, 0);
+        if ((h = *ATBL(j->sheet, j->sheet->tbl, j->vp->row, j->vp->col))) clearent(h);
+        struct ent * e_now = lookat(j->sheet, j->vp->row, j->vp->col);
+        (void) copyent(e_now, j->sheet, j->vp, 0, 0, 0, 0, 0, 0, 0);
         j = j->next;
     }
 
@@ -1238,18 +1251,18 @@ void do_redo() {
     }
 
     // for every ent in added and removed, we reeval expression to update graph
-    struct ent * ie = ul->added;
+    struct ent_ptr * ie = ul->added;
     while (ie != NULL) {
         struct ent * p;
-        if ((p = *ATBL(sh, sh->tbl, ie->row, ie->col)) && p->expr)
-            EvalJustOneVertex(sh, p, 1);
+        if ((p = *ATBL(ie->sheet, ie->sheet->tbl, ie->vp->row, ie->vp->col)) && p->expr)
+            EvalJustOneVertex(ie->sheet, p, 1);
         ie = ie->next;
     }
     ie = ul->removed;
     while (ie != NULL) {
         struct ent * p;
-        if ((p = *ATBL(sh, sh->tbl, ie->row, ie->col)) && p->expr)
-            EvalJustOneVertex(sh, p, 1);
+        if ((p = *ATBL(ie->sheet, ie->sheet->tbl, ie->vp->row, ie->vp->col)) && p->expr)
+            EvalJustOneVertex(ie->sheet, p, 1);
         ie = ie->next;
     }
 

@@ -298,14 +298,15 @@ int paste_yanked_ents(struct sheet * sh, int above, int type_paste) {
 
 #ifdef UNDO
     // ask for memory to save the entire yanklist (and its dependencies) in the undo struct
-    struct ent * y_cells = (struct ent *) calloc(2*(yanked_cells + (deps != NULL ? deps->vf : 0)), sizeof(struct ent));
-    save_pointer_after_calloc(y_cells);
+    struct ent_ptr * y_cells = (struct ent_ptr *) calloc(2*(yanked_cells + (deps != NULL ? deps->vf : 0)), sizeof(struct ent_ptr));
+    save_yl_pointer_after_calloc(y_cells);
 #endif
 
     while (yl != NULL) {
 
 #ifdef UNDO
-        copy_cell_to_undostruct(y_cells++, sh, lookat(sh, yl->row + diffr, yl->col + diffc), UNDO_DEL);
+        y_cells++;
+        copy_cell_to_undostruct(y_cells, sh, lookat(sh, yl->row + diffr, yl->col + diffc), UNDO_DEL);
 
         // Here pass struct ent ** to copy_to_undostruct
         copy_to_undostruct(sh, 0, 0, -1, -1, UNDO_DEL, HANDLE_DEPS, &y_cells);
@@ -348,7 +349,8 @@ int paste_yanked_ents(struct sheet * sh, int above, int type_paste) {
         /*******************/
 
 #ifdef UNDO
-        copy_cell_to_undostruct(y_cells++, sh, lookat(sh, yl->row + diffr, yl->col + diffc), UNDO_ADD);
+        y_cells++;
+        copy_cell_to_undostruct(y_cells, sh, lookat(sh, yl->row + diffr, yl->col + diffc), UNDO_ADD);
         // store dependencies after the change as well
         copy_to_undostruct(sh, 0, 0, -1, -1, UNDO_ADD, HANDLE_DEPS, &y_cells);
 #endif

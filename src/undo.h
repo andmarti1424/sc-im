@@ -49,15 +49,14 @@
 
 struct undo {
     struct undo * p_ant;
-    struct ent * added;
-    struct ent * removed;
-    struct sheet * sheet;
+    struct ent_ptr * added;
+    struct ent_ptr * removed;
+    struct allocation_list * allocations;
+    struct sheet * sheet; // the sheet where the action took place
     struct undo_range_shift * range_shift;
     struct undo_cols_format * cols_format;
     struct undo_rows_format * rows_format;
     struct undo * p_sig;
-    struct ent_ptr * allocations;
-    int alloc_size;
     int * row_hidded;
     int * row_showed;
     int * col_hidded;
@@ -105,7 +104,7 @@ struct undo_rows_format {
 
 void create_undo_action();
 void end_undo_action();
-void copy_to_undostruct (struct sheet * sh, int ri, int ci, int rf, int cf, char type, short handle_deps, struct ent ** destination);
+void copy_to_undostruct (struct sheet * sh, int ri, int ci, int rf, int cf, char type, short handle_deps, struct ent_ptr ** destination);
 void save_undo_range_shift(int delta_rows, int delta_cols, int tlrow, int tlcol, int brrow, int brcol);
 void undo_hide_show(int row, int col, char type, int arg);
 void undo_freeze_unfreeze(int row, int col, char type, int arg);
@@ -122,5 +121,5 @@ void clear_from_current_pos();
 int len_undo_list();
 void free_undo_node(struct undo * ul);
 void dismiss_undo_item(struct undo * ul);
-void copy_cell_to_undostruct (struct ent * e, struct sheet * sh_ori, struct ent * ori, char type);
-void save_pointer_after_calloc(struct ent * e);
+void copy_cell_to_undostruct(struct ent_ptr * e_ptr, struct sheet * sh_ori, struct ent * ori, char type);
+void save_yl_pointer_after_calloc(struct ent_ptr * e);

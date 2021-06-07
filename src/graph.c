@@ -534,6 +534,7 @@ void ents_that_depends_on(struct sheet * sh, struct ent * ent) {
    while (edges != NULL) {
        deps = (struct ent_ptr *) realloc(deps, sizeof(struct ent_ptr) * (++dep_size));
        deps[0].vf = dep_size; // we always keep size of list in the first position !
+       //sc_debug("sheet:%s %d %d - dependency on:%s %d %d", sh->name, ent->row, ent->col, edges->connectsTo->sheet->name, edges->connectsTo->ent->row, edges->connectsTo->ent->col);
        deps[dep_size-1].vp = lookat(edges->connectsTo->sheet, edges->connectsTo->ent->row, edges->connectsTo->ent->col);
        deps[dep_size-1].sheet = edges->connectsTo->sheet; // we should save the sheet asociated with the ent as well
        ents_that_depends_on(edges->connectsTo->sheet, edges->connectsTo->ent);

@@ -371,7 +371,7 @@ void copyent(struct ent * n, struct sheet * sh_p, struct ent * p, int dr, int dc
             n->expr = copye(p->expr, sh_p, dr, dc, r1, c1, r2, c2, special == 't');
 #ifdef UNDO
         } else if (special == 'u' && p->expr) { // from spreadsheet to undo
-            if (p->expr == NULL) sc_debug("is null!");
+            if (p->expr == NULL) sc_debug("copyent is null!");
             n->expr = copye(p->expr, sh_p, dr, dc, r1, c1, r2, c2, 2);
 #endif
         }
@@ -419,8 +419,10 @@ void copyent(struct ent * n, struct sheet * sh_p, struct ent * p, int dr, int dc
     // used for undoing / redoing cells that has errors
     n->cellerror = p->cellerror;
 
-    if (special == 'c' && n->expr)
+    if (special == 'c' && n->expr) {
+        sc_debug("reeval in copyent");
         EvalJustOneVertex(sh_p, n, 0);
+    }
 
     n->flags |= is_changed;
     n->row = p->row;
@@ -558,9 +560,7 @@ struct enode * copye(struct enode *e, struct sheet * sh, int Rdelta, int Cdelta,
         int newrow, newcol;
         ret = (struct enode *) scxmalloc((unsigned) sizeof (struct enode));
         ret->op = e->op;
-        //ret->e.r.left.expr = e->e.r.left.expr ? copye(e->e.r.left.expr, sh, Rdelta, Cdelta, r1, c1, r2, c2, special) : NULL; // important to initialize
         ret->e.r.left.expr = e->e.r.left.expr ? copye(e->e.r.left.expr, e->e.r.left.sheet, Rdelta, Cdelta, r1, c1, r2, c2, special) : NULL; // important to initialize
-        // ret->e.r.right.expr = e->e.r.right.expr ? copye(e->e.r.right.expr, sh, Rdelta, Cdelta, r1, c1, r2, c2, special) : NULL; // important to initialize
         ret->e.r.right.expr = e->e.r.right.expr ? copye(e->e.r.right.expr, e->e.r.right.sheet, Rdelta, Cdelta, r1, c1, r2, c2, special) : NULL; // important to initialize
         newrow = e->e.r.left.vf & FIX_ROW || e->e.r.left.vp->row < r1 || e->e.r.left.vp->row > r2 || e->e.r.left.vp->col < c1 || e->e.r.left.vp->col > c2 ?  e->e.r.left.vp->row : special == 1 ? r1 + Rdelta + e->e.r.left.vp->col - c1 : e->e.r.left.vp->row + Rdelta;
         newcol = e->e.r.left.vf & FIX_COL || e->e.r.left.vp->row < r1 || e->e.r.left.vp->row > r2 || e->e.r.left.vp->col < c1 || e->e.r.left.vp->col > c2 ?  e->e.r.left.vp->col : special == 1 ? c1 + Cdelta + e->e.r.left.vp->row - r1 : e->e.r.left.vp->col + Cdelta;
@@ -575,10 +575,6 @@ struct enode * copye(struct enode *e, struct sheet * sh, int Rdelta, int Cdelta,
     } else {
         struct enode *temprange=0;
         ret = (struct enode *) scxmalloc((unsigned) sizeof (struct enode));
-        //ret->e.r.left.expr  = e->e.r.left.expr  != NULL ? copye(e->e.r.left.expr,  sh, Rdelta, Cdelta, r1, c1, r2, c2, special) : NULL; // important to initialize
-        //ret->e.r.right.expr = e->e.r.right.expr != NULL ? copye(e->e.r.right.expr, sh, Rdelta, Cdelta, r1, c1, r2, c2, special) : NULL; // important to initialize
-        // ret->e.r.left.expr  = e->e.r.left.expr  != NULL ? copye(e->e.r.left.expr,  e->e.r.left.sheet, Rdelta, Cdelta, r1, c1, r2, c2, special) : NULL; // important to initialize
-        // ret->e.r.right.expr = e->e.r.right.expr != NULL ? copye(e->e.r.right.expr, e->e.r.right.sheet, Rdelta, Cdelta, r1, c1, r2, c2, special) : NULL; // important to initialize
         ret->e.r.left.expr  = copye(e->e.r.left.expr,  e->e.r.left.sheet, Rdelta, Cdelta, r1, c1, r2, c2, special);
         ret->e.r.right.expr = copye(e->e.r.right.expr, e->e.r.right.sheet, Rdelta, Cdelta, r1, c1, r2, c2, special);
         ret->e.r.left.vp = e->e.r.left.vp;
@@ -612,8 +608,7 @@ struct enode * copye(struct enode *e, struct sheet * sh, int Rdelta, int Cdelta,
                         newrow = e->e.v.vf & FIX_ROW || e->e.v.vp->row < r1 || e->e.v.vp->row > r2 || e->e.v.vp->col < c1 || e->e.v.vp->col > c2 ?  e->e.v.vp->row : special == 1 ? r1 + Rdelta + e->e.v.vp->col - c1 : e->e.v.vp->row + Rdelta;
                         newcol = e->e.v.vf & FIX_COL || e->e.v.vp->row < r1 || e->e.v.vp->row > r2 || e->e.v.vp->col < c1 || e->e.v.vp->col > c2 ?  e->e.v.vp->col : special == 1 ? c1 + Cdelta + e->e.v.vp->row - r1 : e->e.v.vp->col + Cdelta;
                     }
-                    ret->e.v.vp = lookat(sh, newrow, newcol);
-                    //ret->e.v.vp = lookat(e->e.v.sheet, newrow, newcol);
+                    ret->e.v.vp = lookat(e->e.v.sheet != NULL ? e->e.v.sheet : sh, newrow, newcol);
                     ret->e.v.vf = e->e.v.vf;
                     ret->e.v.sheet = e->e.v.sheet;
                     break;
@@ -641,8 +636,8 @@ struct enode * copye(struct enode *e, struct sheet * sh, int Rdelta, int Cdelta,
                     //ret->e.o.right = (struct enode *)0;
                     break; /* fix #108 */
                 }
-                ret->e.o.left = copye(e->e.o.left, sh, Rdelta, Cdelta, r1, c1, r2, c2, special);
-                ret->e.o.right = copye(e->e.o.right, sh, Rdelta, Cdelta, r1, c1, r2, c2, special);
+                ret->e.o.left = copye(e->e.o.left, e->e.v.sheet != NULL ? e->e.v.sheet : sh, Rdelta, Cdelta, r1, c1, r2, c2, special);
+                ret->e.o.right = copye(e->e.o.right, e->e.v.sheet != NULL ? e->e.v.sheet : sh, Rdelta, Cdelta, r1, c1, r2, c2, special);
                 break;
         }
         switch (ret->op) {

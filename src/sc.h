@@ -205,6 +205,15 @@ struct ent_ptr {
     struct ent * vp;
     struct enode * expr;  /* for getent */
     struct sheet * sheet;
+#ifdef UNDO
+    struct ent_ptr * next; /* for use in added/removed lists in undo */
+#endif
+};
+
+// used for yank list
+struct allocation_list {
+    struct ent_ptr ** items;
+    int size;
 };
 
 // stores a range (left, right)
