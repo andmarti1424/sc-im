@@ -116,22 +116,24 @@ assert() {
 
 # Check in file ($1) for a pattern ($2)
 # if found, assert if $3 condition is not met
+# or if $3 condition is empty
 assert_iffound_notcond() {
     (( tests_ran++ )) || :
     [[ -z "$DISCOVERONLY" ]] || return
     file=$1
     pattern=$2
     assert_ne_cond=$3
-    #echo ":$file."
-    #echo ":$pattern."
-    #echo ":$assert_ne_cond."
-    grepres="$(grep "$file" -e "$pattern" | grep -v "$assert_ne_cond")" || true
-    #echo $grepres
+
+    if [[ -z "$assert_ne_cond" ]]; then
+        grepres="$(grep "$file" -e "$pattern")" || true
+    else
+        grepres="$(grep "$file" -e "$pattern" | grep -v "$assert_ne_cond")" || true
+    fi
+
     if [[ -z "$grepres" ]]; then
         [[ -z "$DEBUG" ]] || echo -n .
         return
     fi
-    #echo leak found
     _assert_fail "$grepres" $file "$1" "$3"
 }
 

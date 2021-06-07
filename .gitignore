@@ -11,3 +11,7 @@ doc/grammar_yacc_tools/setitems.txt
 doc/grammar_yacc_tools/term_list.txt
 doc/grammar_yacc_tools/yacc-format-stage1
 src/html
+src/debug.sh
+src/debuga.sh
+src/a.sc
+src/lua
