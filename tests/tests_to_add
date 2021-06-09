@@ -1,2 +1,11 @@
-yanking and pasting ents with reference: test5
-memory usage  (mem and mem2.sc)
+DONE:
+test1: multiple sheets that have formula dependency from one to another
+test2: multiple sheets that have formula dependency from one to another (with undo/redo)
+test3: multiple sheets that have formulas dependencies from one to another
+test4: multiple sheets that have formulas dependencies from one to another (with undo/redo)
+test5: yanking and pasting ents keeping references (Pc) - timing and memory usage
+test6: yanking and pasting ents keeping references (Pc) - with undo
+
+TODO:
+test7: yanking and pasting ents keeping references (Pc) (with undo and redo)
+fails to restore some ents formulas.

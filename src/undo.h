@@ -123,3 +123,4 @@ void free_undo_node(struct undo * ul);
 void dismiss_undo_item(struct undo * ul);
 void copy_cell_to_undostruct(struct ent_ptr * e_ptr, struct sheet * sh_ori, struct ent * ori, char type);
 void save_yl_pointer_after_calloc(struct ent_ptr * e);
+int ent_ptr_exists_on_list(struct ent_ptr * list, struct ent_ptr * ep);

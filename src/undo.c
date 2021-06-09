@@ -426,6 +426,24 @@ int len_undo_list() {
     return undo_list_len;
 }
 
+/*
+ * \brief ent_ptr_exists_on_list
+ * \details check if an ent exists on ent_ptr list
+ * (used for added / removed lists of undo struct)
+ * return 0 if not exists or 1 if exists.
+ */
+int ent_ptr_exists_on_list(struct ent_ptr * list, struct ent_ptr * ep) {
+    int repeated = 0;
+    if (ep == NULL) return repeated;
+    while (list != NULL && list->vp != NULL) {
+        if (list->sheet == ep->sheet && list->vp->row == ep->vp->row && list->vp->col == ep->vp->col) {
+            repeated = 1;
+            break;
+        }
+        list = list->next;
+    }
+    return repeated;
+}
 
 /**
  * \brief copy_to_undostruct()
@@ -438,14 +456,14 @@ int len_undo_list() {
  * handle_deps: if set to HANDLE_DEPS it will store the dependencies of the specified range as well.
  * remember deps is a global variable.
  *
- * destination: struct ent * pointer to use in the copy. if none was given, just malloc one.
+ * destination: struct ent_ptr ** to use in the copy. if none was given, just malloc one.
+ * Note that if destination is not null, the struct ent * vp inside the struct ent_ptr is already malloc'ed
  * returns: none
  */
 void copy_to_undostruct (struct sheet * sh, int ri, int ci, int rf, int cf, char type, short handle_deps, struct ent_ptr ** destination) {
     int i, c, r;
     struct ent * p;
     extern struct ent_ptr * deps;
-    //int repeated;
 
     // ask for memory to keep struct ent * for the whole range
     // and only if no destination pointer was given
@@ -466,21 +484,15 @@ void copy_to_undostruct (struct sheet * sh, int ri, int ci, int rf, int cf, char
 
             /* here check that ent to add is not already in the list
              * if so, avoid to add a duplicate ent
-             * commented cause its resource consuming and harmless to duplicate
-            struct ent * lista = type == 'a' ? undo_item.added : undo_item.removed;
-            repeated = 0;
-            while (lista != NULL) {
-                if (lista->row == r && lista->col == c) {
-                    repeated = 1;
-                    break;
-                }
-                lista = lista->next;
-            }
-            if (repeated) continue;
              */
+            struct ent_ptr * lista = type == 'a' ? undo_item.added : undo_item.removed;
+            struct ent_ptr e;
+            e.sheet = sh;
+            e.vp = p;
+            if (ent_ptr_exists_on_list(lista, &e)) continue;
 
             // initialize the 'ent'
-            y_cells->vp = malloc(sizeof(struct ent));
+            if (destination == NULL) y_cells->vp = malloc(sizeof(struct ent));
             cleanent(y_cells->vp);
             y_cells->sheet = sh;
 
@@ -489,6 +501,7 @@ void copy_to_undostruct (struct sheet * sh, int ri, int ci, int rf, int cf, char
             copyent(y_cells->vp, sh, lookat(sh, r, c), 0, 0, 0, 0, 0, 0, 'u');
 
             // Append 'ent' element at the beginning
+            //TODO: add it ordered?
             if (type == UNDO_ADD) {
                 y_cells->next = undo_item.added;
                 undo_item.added = y_cells;
@@ -509,14 +522,16 @@ void copy_to_undostruct (struct sheet * sh, int ri, int ci, int rf, int cf, char
             if (p == NULL) continue;
 
             // initialize the 'ent'
-            y_cells->vp = malloc(sizeof(struct ent));
+            if (destination == NULL) y_cells->vp = malloc(sizeof(struct ent));
             cleanent(y_cells->vp);
             y_cells->sheet = deps[i].sheet;
 
             // Copy cell at deps[i].vp->row, deps[i].vp->col contents to 'y_cells' ent
             copyent(y_cells->vp, deps[i].sheet, lookat(deps[i].sheet, deps[i].vp->row, deps[i].vp->col), 0, 0, 0, 0, 0, 0, 'u');
 
+            //sc_debug("copy_to_undostruct a undo %d %d", deps[i].vp->row, deps[i].vp->col);
             // Append 'ent' element at the beginning
+            //TODO: add it ordered?
             if (type == UNDO_ADD) {
                 y_cells->next = undo_item.added;
                 undo_item.added = y_cells;
@@ -553,7 +568,7 @@ void save_yl_pointer_after_calloc(struct ent_ptr * e) {
 }
 
 
-/**
+/*
  * \brief copy_cell_to_undostruct()
  *
  * \details This function adds an struct ent * (new) to undo struct lists.
@@ -570,6 +585,17 @@ void save_yl_pointer_after_calloc(struct ent_ptr * e) {
  *
  */
 void copy_cell_to_undostruct (struct ent_ptr * e_ptr, struct sheet * sh_ori, struct ent * ori, char type) {
+    /* here check that ent to add is not already in the list
+     * if so, avoid to add a duplicate ent
+     */
+    struct ent_ptr * lista = type == 'a' ? undo_item.added : undo_item.removed;
+    struct ent_ptr e;
+    e.sheet = sh_ori;
+    e.vp = ori;
+    if (ent_ptr_exists_on_list(lista, &e)) return;
+    // in case of returning because ent exists on list, make sure struct ent_ptr gets freed later.
+
+    // if reached here, malloc and add to undolist
     struct ent_ptr * new_ptr = e_ptr;
     struct ent * new = malloc(sizeof(struct ent));
 
@@ -583,6 +609,7 @@ void copy_cell_to_undostruct (struct ent_ptr * e_ptr, struct sheet * sh_ori, str
     new_ptr->vp = new;
 
     // Append 'ent' element at the beginning
+    //TODO: add it ordered?
     if (type == UNDO_ADD) {
         new_ptr->next = undo_item.added;
         undo_item.added = new_ptr;
@@ -860,9 +887,7 @@ void do_undo() {
     // removed added ents
     struct ent_ptr * i = ul->added;
     while (i != NULL) {
-        struct ent * pp = *ATBL(i->sheet, i->sheet->tbl, i->vp->row, i->vp->col);
-        clearent(pp);
-        cleanent(pp);
+        erase_area(i->sheet, i->vp->row, i->vp->col, i->vp->row, i->vp->col, 1, 0);
         i = i->next;
     }
 
@@ -1089,9 +1114,7 @@ void do_redo() {
     // Remove 'ent' elements
     struct ent_ptr * i = ul->removed;
     while (i != NULL) {
-        struct ent * pp = *ATBL(i->sheet, i->sheet->tbl, i->vp->row, i->vp->col);
-        clearent(pp);
-        cleanent(pp);
+        erase_area(i->sheet, i->vp->row, i->vp->col, i->vp->row, i->vp->col, 1, 0);
         i = i->next;
     }
 

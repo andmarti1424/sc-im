@@ -24,10 +24,13 @@ UNDO now saves reference to the sheet where the action took place.
 ** Added some automated tests
 + copy_to_undostruct() now keep in added/removed list struct ent_ptr *
   (that knows of sheets), rather than struct ent *.
-
+** Fix not updating graph correctly after yanking cells with references -> Pc -> undo.
+   It could also segfault on ocassions as well. Added test5 and test6 for this.
 
 Pending to make v0.8.3 release
 -------------------
+undo.c: add ent_ptr to added / deleted lists ordered.
+ents_that_depends_on_list: change to receive entr_ptr parameter
 + arv should have priority over scimrc.
 + mark should consider sheet. We should have mark A in Sheet 1, and mark B on Sheet 2.. modify tick()
 input: block buffer maps digraph
@@ -41,7 +44,7 @@ input: block buffer maps digraph
 
 
 Ideas for v0.8.4
-----------
+----------------
 + user customizable UI header (bar)
 + yank.c functions should receive yanklist pointer as parameter. this would
 allow future use of registers to copy to and paste from.
