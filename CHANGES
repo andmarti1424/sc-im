@@ -26,6 +26,9 @@ UNDO now saves reference to the sheet where the action took place.
   (that knows of sheets), rather than struct ent *.
 ** Fix not updating graph correctly after yanking cells with references -> Pc -> undo.
    It could also segfault on ocassions as well. Added test5 and test6 for this.
+Issue #568: handle '>' and '<' on mappings.
+
+
 
 Pending to make v0.8.3 release
 -------------------
