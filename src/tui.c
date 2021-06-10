@@ -540,7 +540,9 @@ void ui_print_mult_pend() {
 
     // Return cursor to previous position
     wmove(input_pad, row_orig, col_orig);
-    ui_refresh_pad(0);
+    int scroll = 0;
+    if (inputline_pos > COLS - 14) scroll = inputline_pos - COLS + 14;
+    ui_refresh_pad(scroll);
 
     if (status_line_empty && curmode != EDIT_MODE && get_conf_int("show_cursor")) {
         // Leave cursor on selected cell when no status message
@@ -1012,7 +1014,9 @@ void ui_show_content(WINDOW * win, int nb_mobile_rows, int nb_mobile_cols) {
                     // auto wrap
                     int newheight = (wcslen(out) + sh->fwidth[col] - 1) / sh->fwidth[col];
                     if (sh->row_format[row] < newheight) sh->row_format[row] = newheight;
+                }
 
+                if (!conf_overlap || sh->row_format[row] != 1) {
                     int k;
                     wchar_t *p_out = out;
                     for (k = 0; k < sh->row_format[row]; k++) {
@@ -1161,7 +1165,7 @@ void ui_show_celldetails() {
         ui_set_ucolor(input_win, &ucolors[CELL_FORMAT], DEFAULT_COLOR);
 #endif
 
-    register struct ent *p1 = *ATBL(sh, sh->tbl, sh->currow, sh->curcol);
+    struct ent *p1 = *ATBL(sh, sh->tbl, sh->currow, sh->curcol);
 
     // show padding
     if (p1 != NULL && p1->pad)
@@ -1195,10 +1199,10 @@ void ui_show_celldetails() {
 
     // cut string if its too large!
     if (strlen(head) > COLS - il_pos - 1) {
-        head[COLS - il_pos - 1 - 15]='>';
-        head[COLS - il_pos - 1 - 14]='>';
-        head[COLS - il_pos - 1 - 13]='>';
-        head[COLS - il_pos - 1 - 12]='\0';
+        head[COLS - il_pos - 1 - 19]='>';
+        head[COLS - il_pos - 1 - 18]='>';
+        head[COLS - il_pos - 1 - 17]='>';
+        head[COLS - il_pos - 1 - 16]='\0';
     }
 
     mvwprintw(input_win, 0, il_pos, "%s", head);
