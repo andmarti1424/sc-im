@@ -274,7 +274,7 @@ void int_deletecol(struct sheet * sh, int col, int mult) {
     int r, c, i;
 
     while (mult--) {
-        // mark ent of column to erase with is_deleted flag
+        /* mark ent of column to erase with is_deleted flag
         for (r = 0; r <= sh->maxrow; r++) {
             pp = ATBL(sh, sh->tbl, r, col);
             if ( *pp != NULL ) {
@@ -283,7 +283,8 @@ void int_deletecol(struct sheet * sh, int col, int mult) {
                 //free(*pp);
                 *pp = NULL;
             }
-        }
+        }*/
+        erase_area(sh, 0, col, sh->maxrow, col, 0, 1); //important: this mark the ents as deleted
 
         rebuild_graph(); // Rebuild of graph is needed.
         //But shouldnt! TODO
@@ -294,8 +295,8 @@ void int_deletecol(struct sheet * sh, int col, int mult) {
                 pp = ATBL(sh, sh->tbl, r, c);
 
                 // nota: pp[1] = ATBL(sh, sh->tbl, r, c+1);
-                if ( pp[1] != NULL ) pp[1]->col--;
                 pp[0] = pp[1];
+                if ( pp[0] != NULL ) pp[0]->col--;
             }
 
             // Free last column memory (Could also initialize 'ent' to zero with `cleanent`).
@@ -304,7 +305,7 @@ void int_deletecol(struct sheet * sh, int col, int mult) {
         }
 
         // Fix columns precision and width
-        for (i = col; i < sh->maxcols - 2; i++) {
+        for (i = col; i < sh->maxcols - 1; i++) {
             sh->fwidth[i] = sh->fwidth[i+1];
             sh->precision[i] = sh->precision[i+1];
             sh->realfmt[i] = sh->realfmt[i+1];
