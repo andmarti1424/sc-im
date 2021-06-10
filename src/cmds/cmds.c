@@ -213,7 +213,10 @@ void syncref(struct sheet * sh, struct enode * e) {
 void deletecol(struct sheet * sh, int col, int mult) {
     struct roman * roman = session->cur_doc;
 
-    if (any_locked_cells(sh, 0, col, sh->maxrow, col + mult)) {
+    if (col + mult > sh->maxcols) {
+        sc_error("current column + multiplier exceeds max column. Nothing changed");
+        return;
+    } else if (any_locked_cells(sh, 0, col, sh->maxrow, col + mult)) {
         sc_error("Locked cells encountered. Nothing changed");
         return;
     }
@@ -898,7 +901,10 @@ void insert_col(struct sheet * sh, int after) {
  */
 void deleterow(struct sheet * sh, int row, int mult) {
     struct roman * roman = session->cur_doc;
-    if (any_locked_cells(sh, row, 0, row + mult - 1, sh->maxcol)) {
+    if (row + mult - 1 > sh->maxrows) {
+        sc_error("current row + multiplier exceeds max row. Nothing changed");
+        return;
+    } else if (any_locked_cells(sh, row, 0, row + mult - 1, sh->maxcol)) {
         sc_error("Locked cells encountered. Nothing changed");
         return;
     }
