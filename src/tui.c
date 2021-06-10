@@ -1024,7 +1024,7 @@ void ui_show_content(WINDOW * win, int nb_mobile_rows, int nb_mobile_cols) {
                         p_out += eol;
                     }
                 } else {
-                    sh->row_format[row] = 1;
+                    //sh->row_format[row] = 1;
                     mvwprintw(win, winrow, wincol, "%*ls", -fieldlen, out);
                 }
             }
