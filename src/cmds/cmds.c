@@ -213,10 +213,10 @@ void syncref(struct sheet * sh, struct enode * e) {
 void deletecol(struct sheet * sh, int col, int mult) {
     struct roman * roman = session->cur_doc;
 
-    if (col + mult > sh->maxcols) {
+    if (col - 1 + mult > sh->maxcols) {
         sc_error("current column + multiplier exceeds max column. Nothing changed");
         return;
-    } else if (any_locked_cells(sh, 0, col, sh->maxrow, col + mult)) {
+    } else if (any_locked_cells(sh, 0, col, sh->maxrow, col -1 + mult)) {
         sc_error("Locked cells encountered. Nothing changed");
         return;
     }
@@ -2872,7 +2872,7 @@ int is_single_command (struct block * buf, long timeout) {
                  buf->pnext->value == L'$'))
                  result = MOVEMENT_CMD;
 
-        else if (buf->value == L'g' && bs > 3 && buf->pnext->value == L't' && timeout >= COMPLETECMDTIMEOUT)
+        else if (buf->value == L'g' && bs > 3 && buf->pnext->value == L'o' && timeout >= COMPLETECMDTIMEOUT)
                  result = MOVEMENT_CMD; // goto cell
                  // TODO add validation: buf->pnext->pnext->value must be a letter
 

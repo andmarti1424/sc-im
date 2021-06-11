@@ -893,59 +893,66 @@ void do_undo() {
 
     // Make undo shift, if any
     if (ul->range_shift != NULL) {
+        int deltarows = ul->range_shift->delta_rows;
+        int deltacols = ul->range_shift->delta_cols;
+        int brrow = ul->range_shift->brrow;
+        int tlrow = ul->range_shift->tlrow;
+        int brcol = ul->range_shift->brcol;
+        int tlcol = ul->range_shift->tlcol;
         // fix marks for rows
-        if (ul->range_shift->delta_rows > 0)      // sj
-            fix_marks(-(ul->range_shift->brrow - ul->range_shift->tlrow + 1), 0, ul->range_shift->tlrow, sh->maxrow, ul->range_shift->tlcol, ul->range_shift->brcol);
-        else if (ul->range_shift->delta_rows < 0) // sk
-            fix_marks( (ul->range_shift->brrow - ul->range_shift->tlrow + 1), 0, ul->range_shift->tlrow, sh->maxrow, ul->range_shift->tlcol, ul->range_shift->brcol);
+        if (deltarows > 0)      // sj
+            fix_marks(-(brrow - tlrow + 1), 0, tlrow, sh->maxrow, tlcol, brcol);
+        else if (deltarows < 0) // sk
+            fix_marks( (brrow - tlrow + 1), 0, tlrow, sh->maxrow, tlcol, brcol);
 
         // handle row_hidden
-        fix_row_hidden(sh, ul->range_shift->delta_rows, ul->range_shift->tlrow, sh->maxrow);
+        fix_row_hidden(sh, deltarows, tlrow, sh->maxrow);
 
         // fix marks for cols
-        if (ul->range_shift->delta_cols > 0)      // sl
-            fix_marks(0, -(ul->range_shift->brcol - ul->range_shift->tlcol + 1), ul->range_shift->tlrow, ul->range_shift->brrow, ul->range_shift->tlcol, sh->maxcol);
-        else if (ul->range_shift->delta_cols < 0) // sh
-            fix_marks(0,  (ul->range_shift->brcol - ul->range_shift->tlcol + 1), ul->range_shift->tlrow, ul->range_shift->brrow, ul->range_shift->tlcol, sh->maxcol);
+        if (deltacols > 0)      // sl
+            fix_marks(0, -(brcol - tlcol + 1), tlrow, brrow, tlcol, sh->maxcol);
+        else if (deltacols < 0) // sh
+            fix_marks(0,  (brcol - tlcol + 1), tlrow, brrow, tlcol, sh->maxcol);
 
         // handle col_hidden
-        fix_col_hidden(sh, ul->range_shift->delta_cols, ul->range_shift->tlcol, sh->maxcol);
+        fix_col_hidden(sh, deltacols, tlcol, sh->maxcol);
 
         // handle row_frozen
-        fix_row_frozen(sh, ul->range_shift->delta_rows, ul->range_shift->tlrow, sh->maxrow);
+        fix_row_frozen(sh, deltarows, tlrow, sh->maxrow);
 
         // handle col_frozen
-        fix_col_frozen(sh, ul->range_shift->delta_cols, ul->range_shift->tlcol, sh->maxcol);
+        fix_col_frozen(sh, deltacols, tlcol, sh->maxcol);
 
         // shift range now
-        shift_range(sh, - ul->range_shift->delta_rows, - ul->range_shift->delta_cols,
-            ul->range_shift->tlrow, ul->range_shift->tlcol, ul->range_shift->brrow, ul->range_shift->brcol);
+        shift_range(sh, - deltarows, - deltacols, tlrow, tlcol, brrow, brcol);
 
         // shift col_formats here.
-        if (ul->range_shift->tlcol >= 0 && ul->range_shift->tlrow == 0 && ul->range_shift->brrow == sh->maxrow) { // && ul->range_shift->delta_cols > 0) {
+        if (tlcol >= 0 && tlrow == 0 && brrow == sh->maxrows) {
+            //sh->maxcols -= deltacols;
             int i;
-            if (ul->range_shift->delta_cols > 0)
-            for (i = ul->range_shift->brcol + ul->range_shift->delta_cols; i <= sh->maxcol; i++) {
-                sh->fwidth[i - ul->range_shift->delta_cols] = sh->fwidth[i];
-                sh->precision[i - ul->range_shift->delta_cols] = sh->precision[i];
-                sh->realfmt[i - ul->range_shift->delta_cols] = sh->realfmt[i];
+            if (deltacols > 0)
+            for (i = brcol + deltacols; i <= sh->maxcols; i++) {
+                sh->fwidth[i - deltacols] = sh->fwidth[i];
+                sh->precision[i - deltacols] = sh->precision[i];
+                sh->realfmt[i - deltacols] = sh->realfmt[i];
             }
             else
-            for (i = sh->maxcol; i >= ul->range_shift->tlcol - ul->range_shift->delta_cols; i--) {
-                 sh->fwidth[i] = sh->fwidth[i + ul->range_shift->delta_cols];
-                 sh->precision[i] = sh->precision[i + ul->range_shift->delta_cols];
-                 sh->realfmt[i] = sh->realfmt[i + ul->range_shift->delta_cols];
+            for (i = sh->maxcols; i >= tlcol - deltacols; i--) {
+                 sh->fwidth[i] = sh->fwidth[i + deltacols];
+                 sh->precision[i] = sh->precision[i + deltacols];
+                 sh->realfmt[i] = sh->realfmt[i + deltacols];
             }
         }
         // do the same for rows here.
-        if (ul->range_shift->tlrow >= 0 && ul->range_shift->tlcol == 0 && ul->range_shift->brcol == sh->maxcol) { // && ul->range_shift->delta_rows > 0) {
+        if (tlrow >= 0 && tlcol == 0 && brcol == sh->maxcols) {
+            //sh->maxrows -= deltarows;
             int i;
-            if (ul->range_shift->delta_rows > 0)
-                for (i = ul->range_shift->brrow + ul->range_shift->delta_rows; i <= sh->maxrow; i++)
-                    sh->row_format[i - ul->range_shift->delta_rows] = sh->row_format[i];
+            if (deltarows > 0)
+                for (i = brrow + deltarows; i <= sh->maxrows; i++)
+                    sh->row_format[i - deltarows] = sh->row_format[i];
             else
-                for (i = sh->maxrow; i >= ul->range_shift->tlrow - ul->range_shift->delta_rows; i--)
-                    sh->row_format[i] = sh->row_format[i + ul->range_shift->delta_rows];
+                for (i = sh->maxrow; i >= tlrow - deltarows; i--)
+                    sh->row_format[i] = sh->row_format[i + deltarows];
         }
     }
 
@@ -1120,53 +1127,66 @@ void do_redo() {
 
     // Make undo shift, if any
     if (ul->range_shift != NULL) {
+        int deltarows = ul->range_shift->delta_rows;
+        int deltacols = ul->range_shift->delta_cols;
+        int brrow = ul->range_shift->brrow;
+        int tlrow = ul->range_shift->tlrow;
+        int brcol = ul->range_shift->brcol;
+        int tlcol = ul->range_shift->tlcol;
         // fix marks for rows
-        if (ul->range_shift->delta_rows > 0)      // sj
-            fix_marks( (ul->range_shift->brrow - ul->range_shift->tlrow + 1), 0, ul->range_shift->tlrow, sh->maxrow, ul->range_shift->tlcol, ul->range_shift->brcol);
-        else if (ul->range_shift->delta_rows < 0) // sk
-            fix_marks(-(ul->range_shift->brrow - ul->range_shift->tlrow + 1), 0, ul->range_shift->tlrow, sh->maxrow, ul->range_shift->tlcol, ul->range_shift->brcol);
+        if (deltarows > 0)      // sj
+            fix_marks( (brrow - tlrow + 1), 0, tlrow, sh->maxrow, tlcol, brcol);
+        else if (deltarows < 0) // sk
+            fix_marks(-(brrow - tlrow + 1), 0, tlrow, sh->maxrow, tlcol, brcol);
 
         // handle row_hidden
-        fix_row_hidden(sh, -ul->range_shift->delta_rows, ul->range_shift->tlrow, sh->maxrow);
+        fix_row_hidden(sh, -deltarows, tlrow, sh->maxrow);
 
         // fix marks for cols
-        if (ul->range_shift->delta_cols > 0)      // sl
-            fix_marks(0,  (ul->range_shift->brcol - ul->range_shift->tlcol + 1), ul->range_shift->tlrow, ul->range_shift->brrow, ul->range_shift->tlcol, sh->maxcol);
-        else if (ul->range_shift->delta_cols < 0) // sh
-            fix_marks(0, -(ul->range_shift->brcol - ul->range_shift->tlcol + 1), ul->range_shift->tlrow, ul->range_shift->brrow, ul->range_shift->tlcol, sh->maxcol);
+        if (deltacols > 0)      // sl
+            fix_marks(0,  (brcol - tlcol + 1), tlrow, brrow, tlcol, sh->maxcol);
+        else if (deltacols < 0) // sh
+            fix_marks(0, -(brcol - tlcol + 1), tlrow, brrow, tlcol, sh->maxcol);
 
         // handle col_hidden
-        fix_col_hidden(sh, -ul->range_shift->delta_cols, ul->range_shift->tlcol, sh->maxcol);
+        fix_col_hidden(sh, -deltacols, tlcol, sh->maxcol);
+
+        // handle row_frozen
+        fix_row_frozen(sh, -deltarows, tlrow, sh->maxrow);
+
+        // handle col_frozen
+        fix_col_frozen(sh, -deltacols, tlcol, sh->maxcol);
 
         // shift range now
-        shift_range(sh, ul->range_shift->delta_rows, ul->range_shift->delta_cols,
-            ul->range_shift->tlrow, ul->range_shift->tlcol, ul->range_shift->brrow, ul->range_shift->brcol);
+        shift_range(sh, deltarows, deltacols, tlrow, tlcol, brrow, brcol);
 
         // shift col_formats here
-        if (ul->range_shift->tlcol >= 0 && ul->range_shift->tlrow == 0 && ul->range_shift->brrow == sh->maxrow) {
+        if (tlcol >= 0 && tlrow == 0 && brrow == sh->maxrow) {
+            //sh->maxcols += deltacols;
             int i;
-            if (ul->range_shift->delta_cols > 0)
-            for (i = sh->maxcol; i >= ul->range_shift->tlcol + ul->range_shift->delta_cols; i--) {
-                sh->fwidth[i] = sh->fwidth[i - ul->range_shift->delta_cols];
-                sh->precision[i] = sh->precision[i - ul->range_shift->delta_cols];
-                sh->realfmt[i] = sh->realfmt[i - ul->range_shift->delta_cols];
+            if (deltacols > 0)
+            for (i = sh->maxcols; i >= tlcol + deltacols; i--) {
+                sh->fwidth[i] = sh->fwidth[i - deltacols];
+                sh->precision[i] = sh->precision[i - deltacols];
+                sh->realfmt[i] = sh->realfmt[i - deltacols];
             }
             else
-            for (i = ul->range_shift->tlcol; i - ul->range_shift->delta_cols <= sh->maxcol; i++) {
-                sh->fwidth[i] = sh->fwidth[i - ul->range_shift->delta_cols];
-                sh->precision[i] = sh->precision[i - ul->range_shift->delta_cols];
-                sh->realfmt[i] = sh->realfmt[i - ul->range_shift->delta_cols];
+            for (i = tlcol; i - deltacols <= sh->maxcols; i++) {
+                sh->fwidth[i] = sh->fwidth[i - deltacols];
+                sh->precision[i] = sh->precision[i - deltacols];
+                sh->realfmt[i] = sh->realfmt[i - deltacols];
             }
         }
         // do the same for rows here
-        if (ul->range_shift->tlrow >= 0 && ul->range_shift->tlcol == 0 && ul->range_shift->brcol == sh->maxcol) {
+        if (tlrow >= 0 && tlcol == 0 && brcol == sh->maxcols) {
+            //sh->maxrows += deltarows;
             int i;
-            if (ul->range_shift->delta_rows > 0)
-                for (i = sh->maxrow; i >= ul->range_shift->tlrow + ul->range_shift->delta_rows; i--)
-                    sh->row_format[i] = sh->row_format[i - ul->range_shift->delta_rows];
+            if (deltarows > 0)
+                for (i = sh->maxrows; i >= tlrow + deltarows; i--)
+                    sh->row_format[i] = sh->row_format[i - deltarows];
             else
-                for (i = ul->range_shift->tlrow; i - ul->range_shift->delta_rows <= sh->maxrow; i++)
-                    sh->row_format[i] = sh->row_format[i - ul->range_shift->delta_rows];
+                for (i = tlrow; i - deltarows <= sh->maxrows; i++)
+                    sh->row_format[i] = sh->row_format[i - deltarows];
         }
     }
 

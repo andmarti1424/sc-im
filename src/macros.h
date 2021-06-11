@@ -39,7 +39,7 @@
  * \file macros.h
  * \author Andrés Martinelli <andmarti@gmail.com>
  * \date 2017-07-18
- * \brief Header file for cros.c
+ * \brief Header file for macros.c
  */
 
 #define BUFFERSIZE      1024   // must be higher than MAX_IB_LEN
