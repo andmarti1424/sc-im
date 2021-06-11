@@ -211,12 +211,13 @@ void syncref(struct sheet * sh, struct enode * e) {
  * \return none
  */
 void deletecol(struct sheet * sh, int col, int mult) {
+
     struct roman * roman = session->cur_doc;
 
-    if (col - 1 + mult > sh->maxcols) {
+    if (col - 1 + mult >= sh->maxcols) {
         sc_error("current column + multiplier exceeds max column. Nothing changed");
         return;
-    } else if (any_locked_cells(sh, 0, col, sh->maxrow, col -1 + mult)) {
+    } else if (any_locked_cells(sh, 0, col, sh->maxrow, col - 1 + mult)) {
         sc_error("Locked cells encountered. Nothing changed");
         return;
     }
@@ -801,7 +802,10 @@ void insert_row(struct sheet * sh, int after) {
     if (sh->currow > sh->maxrow) sh->maxrow = sh->currow;
     sh->maxrow++;
     lim = sh->maxrow - lim + after;
-    if (sh->maxrow >= sh->maxrows && ! growtbl(sh, GROWROW, sh->maxrow, 0)) return;
+    if (sh->maxrow >= sh->maxrows && ! growtbl(sh, GROWROW, sh->maxrow, 0)) {
+        sc_error("cannot grow sheet larger");
+        return;
+    }
 
     tmprow = sh->tbl[sh->maxrow];
     for (r = sh->maxrow; r > lim; r--) {
@@ -849,8 +853,10 @@ void insert_col(struct sheet * sh, int after) {
         sh->maxcol = sh->curcol + after;
     sh->maxcol++;
 
-    if ((sh->maxcol >= sh->maxcols) && !growtbl(sh, GROWCOL, 0, sh->maxcol))
+    if ((sh->maxcol >= sh->maxcols) && !growtbl(sh, GROWCOL, 0, sh->maxcol)) {
+        sc_error("cannot grow sheet wider");
         return;
+    }
 
     for (c = sh->maxcol; c >= sh->curcol + after + 1; c--) {
         sh->fwidth[c] = sh->fwidth[c-1];
@@ -1390,7 +1396,7 @@ struct ent * forw_col(struct sheet * sh, int arg) {
             c++;
         } else {
             if (! growtbl(sh, GROWCOL, 0, arg)) {    /* get as much as needed */
-                sc_error("cannot grow");
+                sc_error("cannot grow sheet wider");
                 return lookat(sh, sh->currow, sh->curcol);
             } else {
                 c++;
@@ -1420,7 +1426,7 @@ struct ent * forw_row(struct sheet * sh, int arg) {
             r++;
         else {
             if (! growtbl(sh, GROWROW, arg, 0)) {
-                sc_error("cannot grow");
+                sc_error("cannot grow sheet larger");
                 return lookat(sh, sh->currow, sh->curcol);
             } else
                 r++;
