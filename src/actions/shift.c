@@ -74,7 +74,13 @@ extern struct session * session;
 
 void shift(struct sheet * sh, int r, int c, int rf, int cf, wchar_t type) {
     struct roman * roman = session->cur_doc;
-    if (any_locked_cells(sh, r, c, rf, cf) && (type == L'h' || type == L'k') ) {
+    if (cf - 1 + cmd_multiplier >= sh->maxcols && type == L'h') {
+        sc_error("current column + multiplier exceeds max column. Nothing changed");
+        return;
+    } else if (rf - 1 + cmd_multiplier >= sh->maxrows && type == L'k') {
+        sc_error("current row + multiplier exceeds max row. Nothing changed");
+        return;
+    } else if (any_locked_cells(sh, r, c, rf, cf) && (type == L'h' || type == L'k') ) {
         sc_error("Locked cells encountered. Nothing changed");
         return;
     }
