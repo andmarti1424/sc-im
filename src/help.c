@@ -594,4 +594,4 @@ void show_usage_and_quit(){
     put(user_conf_d, "quit_afterload", "1");
 }
 
-char * rev = "version 0.8.3-dev";
+char * rev = "version 0.8.3-main";
