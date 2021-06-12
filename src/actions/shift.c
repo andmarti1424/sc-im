@@ -195,7 +195,9 @@ void shift_range(struct sheet * sh, int delta_rows, int delta_cols, int tlrow, i
 void shift_cells_down(struct sheet * sh, int deltarows, int deltacols) {
     int r, c;
     struct ent ** pp;
-    if (sh->currow > sh->maxrow) sh->maxrow = sh->currow;
+    //if (sh->currow + deltarows > sh->maxrow) sh->maxrow = sh->currow + deltarows;
+    //commented for #569
+    //if (sh->currow > sh->maxrow) sh->maxrow = sh->currow;
     sh->maxrow += deltarows;
     if ((sh->maxrow >= sh->maxrows) && !growtbl(sh, GROWROW, sh->maxrow, 0)) {
         sh->maxrow = sh->maxrows - 1;
@@ -231,8 +233,8 @@ void shift_cells_right(struct sheet * sh, int deltarows, int deltacols) {
     int r, c;
     struct ent ** pp;
 
-    if (sh->curcol + deltacols > sh->maxcol)
-        sh->maxcol = sh->curcol + deltacols;
+    //commented for #569
+    //if (sh->curcol + deltacols > sh->maxcol) sh->maxcol = sh->curcol + deltacols;
     sh->maxcol += deltacols;
 
     if ((sh->maxcol >= sh->maxcols) && !growtbl(sh, GROWCOL, 0, sh->maxcol)) {
