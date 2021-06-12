@@ -106,8 +106,8 @@ int replace_maps (struct block * b) {
     while (m != NULL) {
         // Check if a mapping already exists in 'b' buffer
         int pos = block_in_block(b, m->in);
-        if (pos != -1 && m->mode == curmode) {
 
+        if (pos != -1 && m->mode == curmode) {
             // Replace m->in with m->out in 'b' list
             if (replace_block_in_block(b, m->in, m->out) == -1) {
                 sc_error("error replacing maps");
@@ -143,12 +143,17 @@ struct block * get_mapbuf_str (char * str) {
     unsigned short l = wcslen(wc);
 
     for (i=0; i<l; i++) {
+        // handle simple < and > mappings
+        if (str[i] == '\\' && i+1 < l && i+2 < l && str[i+1] == '\\' &&
+        (str[i+2] == '<' || str[i+2] == '>')) {
+           addto_buf(buffer, (wint_t) wc[i+2]);
+           i += 2;
 
         // Add special keys
-        if (str[i] == '<') {
+        } else if (str[i] == '<' && !(i>0 && str[i-1] == '\\')) {
            is_specialkey = 1;
 
-        } else if (str[i] == '>') {
+        } else if (str[i] == '>' && !(i>0 && str[i-1] == '\\')) {
            is_specialkey = 0;
            if (! strcasecmp(sk, "CR"))                                  // CR - ENTER key
                addto_buf(buffer, OKEY_ENTER);

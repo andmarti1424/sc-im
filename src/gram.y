@@ -18,6 +18,7 @@
 #include "file.h"
 #include "tui.h"
 #include "undo.h"
+#include "yank.h"
 #include "graph.h"
 #include "utils/dictionary.h"
 #include "trigger.h"
@@ -194,6 +195,8 @@ token S_YANKCOL
 %token S_VALUEIZEALL
 %token S_SHIFT
 %token S_GETNUM
+%token S_YANKAREA
+%token S_PASTEYANKED
 %token S_GETSTRING
 %token S_GETEXP
 %token S_GETFMT
@@ -1136,6 +1139,24 @@ command:
 
     |    S_GETFMT var_or_range     { getfmt($2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col, fdoutput); }
 
+    |    S_YANKAREA '{' STRING '}' '!' var_or_range STRING {
+                                     struct roman * roman = session->cur_doc;
+                                     struct sheet * sh;
+                                     if ((sh = search_sheet(roman, $3)) == NULL )
+                                         sh = roman->cur_sh;
+                                     yank_area(sh, $6.left.vp->row, $6.left.vp->col, $6.right.vp->row, $6.right.vp->col, $7[0], 1);
+                                     scxfree($3);
+                                     scxfree($7);
+                                   }
+    |    S_PASTEYANKED '{' STRING '}' NUMBER STRING {
+                                     struct roman * roman = session->cur_doc;
+                                     struct sheet * sh;
+                                     if ((sh = search_sheet(roman, $3)) == NULL )
+                                         sh = roman->cur_sh;
+                                     paste_yanked_ents(sh, $5, $6[0]);
+                                     scxfree($3);
+                                     scxfree($6);
+                                   }
     |    S_SEVAL e                 {
                                      struct roman * roman = session->cur_doc;
                                      struct sheet * sh = roman->cur_sh;

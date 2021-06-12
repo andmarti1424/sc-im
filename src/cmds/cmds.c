@@ -211,9 +211,13 @@ void syncref(struct sheet * sh, struct enode * e) {
  * \return none
  */
 void deletecol(struct sheet * sh, int col, int mult) {
+
     struct roman * roman = session->cur_doc;
 
-    if (any_locked_cells(sh, 0, col, sh->maxrow, col + mult)) {
+    if (col - 1 + mult >= sh->maxcols) {
+        sc_error("current column + multiplier exceeds max column. Nothing changed");
+        return;
+    } else if (any_locked_cells(sh, 0, col, sh->maxrow, col - 1 + mult)) {
         sc_error("Locked cells encountered. Nothing changed");
         return;
     }
@@ -274,7 +278,7 @@ void int_deletecol(struct sheet * sh, int col, int mult) {
     int r, c, i;
 
     while (mult--) {
-        // mark ent of column to erase with is_deleted flag
+        /* mark ent of column to erase with is_deleted flag
         for (r = 0; r <= sh->maxrow; r++) {
             pp = ATBL(sh, sh->tbl, r, col);
             if ( *pp != NULL ) {
@@ -283,7 +287,8 @@ void int_deletecol(struct sheet * sh, int col, int mult) {
                 //free(*pp);
                 *pp = NULL;
             }
-        }
+        }*/
+        erase_area(sh, 0, col, sh->maxrow, col, 0, 1); //important: this mark the ents as deleted
 
         rebuild_graph(); // Rebuild of graph is needed.
         //But shouldnt! TODO
@@ -294,8 +299,8 @@ void int_deletecol(struct sheet * sh, int col, int mult) {
                 pp = ATBL(sh, sh->tbl, r, c);
 
                 // nota: pp[1] = ATBL(sh, sh->tbl, r, c+1);
-                if ( pp[1] != NULL ) pp[1]->col--;
                 pp[0] = pp[1];
+                if ( pp[0] != NULL ) pp[0]->col--;
             }
 
             // Free last column memory (Could also initialize 'ent' to zero with `cleanent`).
@@ -304,7 +309,7 @@ void int_deletecol(struct sheet * sh, int col, int mult) {
         }
 
         // Fix columns precision and width
-        for (i = col; i < sh->maxcols - 2; i++) {
+        for (i = col; i < sh->maxcols - 1; i++) {
             sh->fwidth[i] = sh->fwidth[i+1];
             sh->precision[i] = sh->precision[i+1];
             sh->realfmt[i] = sh->realfmt[i+1];
@@ -420,7 +425,7 @@ void copyent(struct ent * n, struct sheet * sh_p, struct ent * p, int dr, int dc
     n->cellerror = p->cellerror;
 
     if (special == 'c' && n->expr) {
-        sc_debug("reeval in copyent");
+        // sc_debug("reeval in copyent");
         EvalJustOneVertex(sh_p, n, 0);
     }
 
@@ -797,7 +802,10 @@ void insert_row(struct sheet * sh, int after) {
     if (sh->currow > sh->maxrow) sh->maxrow = sh->currow;
     sh->maxrow++;
     lim = sh->maxrow - lim + after;
-    if (sh->maxrow >= sh->maxrows && ! growtbl(sh, GROWROW, sh->maxrow, 0)) return;
+    if (sh->maxrow >= sh->maxrows && ! growtbl(sh, GROWROW, sh->maxrow, 0)) {
+        sc_error("cannot grow sheet larger");
+        return;
+    }
 
     tmprow = sh->tbl[sh->maxrow];
     for (r = sh->maxrow; r > lim; r--) {
@@ -845,8 +853,10 @@ void insert_col(struct sheet * sh, int after) {
         sh->maxcol = sh->curcol + after;
     sh->maxcol++;
 
-    if ((sh->maxcol >= sh->maxcols) && !growtbl(sh, GROWCOL, 0, sh->maxcol))
+    if ((sh->maxcol >= sh->maxcols) && !growtbl(sh, GROWCOL, 0, sh->maxcol)) {
+        sc_error("cannot grow sheet wider");
         return;
+    }
 
     for (c = sh->maxcol; c >= sh->curcol + after + 1; c--) {
         sh->fwidth[c] = sh->fwidth[c-1];
@@ -897,7 +907,10 @@ void insert_col(struct sheet * sh, int after) {
  */
 void deleterow(struct sheet * sh, int row, int mult) {
     struct roman * roman = session->cur_doc;
-    if (any_locked_cells(sh, row, 0, row + mult - 1, sh->maxcol)) {
+    if (row + mult - 1 > sh->maxrows) {
+        sc_error("current row + multiplier exceeds max row. Nothing changed");
+        return;
+    } else if (any_locked_cells(sh, row, 0, row + mult - 1, sh->maxcol)) {
         sc_error("Locked cells encountered. Nothing changed");
         return;
     }
@@ -1383,7 +1396,7 @@ struct ent * forw_col(struct sheet * sh, int arg) {
             c++;
         } else {
             if (! growtbl(sh, GROWCOL, 0, arg)) {    /* get as much as needed */
-                sc_error("cannot grow");
+                sc_error("cannot grow sheet wider");
                 return lookat(sh, sh->currow, sh->curcol);
             } else {
                 c++;
@@ -1413,7 +1426,7 @@ struct ent * forw_row(struct sheet * sh, int arg) {
             r++;
         else {
             if (! growtbl(sh, GROWROW, arg, 0)) {
-                sc_error("cannot grow");
+                sc_error("cannot grow sheet larger");
                 return lookat(sh, sh->currow, sh->curcol);
             } else
                 r++;
@@ -2865,7 +2878,7 @@ int is_single_command (struct block * buf, long timeout) {
                  buf->pnext->value == L'$'))
                  result = MOVEMENT_CMD;
 
-        else if (buf->value == L'g' && bs > 3 && buf->pnext->value == L't' && timeout >= COMPLETECMDTIMEOUT)
+        else if (buf->value == L'g' && bs > 3 && buf->pnext->value == L'o' && timeout >= COMPLETECMDTIMEOUT)
                  result = MOVEMENT_CMD; // goto cell
                  // TODO add validation: buf->pnext->pnext->value must be a letter
 

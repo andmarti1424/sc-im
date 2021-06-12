@@ -4,11 +4,13 @@
 #Exit immediately if a command exits with a non-zero status.
 set -e
 
-NAME=test2
+NAME=test6
 
 VALGRIND_CMD='valgrind -v --log-file=${NAME}_vallog --tool=memcheck --track-origins=yes --leak-check=full --show-leak-kinds=all --show-reachable=no'
 . assert.sh
-assert "echo GETNUM C2 | $VALGRIND_CMD ../src/sc-im ${NAME}.sc --nocurses --nodebug --quit_afterload 2>&1 |grep -v '^$\|Interp\|left'" "81"
+
+CMD='YANKAREA {"Sheet1"}!B1:B2 "a"\nPASTEYANKED {"Sheet1"} 0 "c"\nGETNUM C1\nUNDO\nPASTEYANKED {"Sheet1"} 0 "c"\nGETNUM C2'
+assert "echo -e '${CMD}' | $VALGRIND_CMD ../src/sc-im ${NAME}.sc --nocurses --nodebug --quit_afterload 2>&1 |grep -v '^$\|Interp\|Change'" "16\n23"
 
 #we check valgrind log
 assert_iffound_notcond ${NAME}_vallog "definitely lost.*bytes" "0 bytes"

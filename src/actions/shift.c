@@ -74,7 +74,13 @@ extern struct session * session;
 
 void shift(struct sheet * sh, int r, int c, int rf, int cf, wchar_t type) {
     struct roman * roman = session->cur_doc;
-    if (any_locked_cells(sh, r, c, rf, cf) && (type == L'h' || type == L'k') ) {
+    if (cf - 1 + cmd_multiplier >= sh->maxcols && type == L'h') {
+        sc_error("current column + multiplier exceeds max column. Nothing changed");
+        return;
+    } else if (rf - 1 + cmd_multiplier >= sh->maxrows && type == L'k') {
+        sc_error("current row + multiplier exceeds max row. Nothing changed");
+        return;
+    } else if (any_locked_cells(sh, r, c, rf, cf) && (type == L'h' || type == L'k') ) {
         sc_error("Locked cells encountered. Nothing changed");
         return;
     }
@@ -189,10 +195,14 @@ void shift_range(struct sheet * sh, int delta_rows, int delta_cols, int tlrow, i
 void shift_cells_down(struct sheet * sh, int deltarows, int deltacols) {
     int r, c;
     struct ent ** pp;
-    if (sh->currow > sh->maxrow) sh->maxrow = sh->currow;
+    //if (sh->currow + deltarows > sh->maxrow) sh->maxrow = sh->currow + deltarows;
+    //commented for #569
+    //if (sh->currow > sh->maxrow) sh->maxrow = sh->currow;
     sh->maxrow += deltarows;
-    if ((sh->maxrow >= sh->maxrows) && !growtbl(sh, GROWROW, sh->maxrow, 0))
+    if ((sh->maxrow >= sh->maxrows) && !growtbl(sh, GROWROW, sh->maxrow, 0)) {
+        sh->maxrow = sh->maxrows - 1;
         return;
+    }
 
     for (r = sh->maxrow; r > sh->currow + deltarows - 1; r--) {
         for (c = sh->curcol; c < sh->curcol + deltacols; c++) {
@@ -223,12 +233,14 @@ void shift_cells_right(struct sheet * sh, int deltarows, int deltacols) {
     int r, c;
     struct ent ** pp;
 
-    if (sh->curcol + deltacols > sh->maxcol)
-        sh->maxcol = sh->curcol + deltacols;
+    //commented for #569
+    //if (sh->curcol + deltacols > sh->maxcol) sh->maxcol = sh->curcol + deltacols;
     sh->maxcol += deltacols;
 
-    if ((sh->maxcol >= sh->maxcols) && !growtbl(sh, GROWCOL, 0, sh->maxcol))
+    if ((sh->maxcol >= sh->maxcols) && !growtbl(sh, GROWCOL, 0, sh->maxcol)) {
+        sh->maxcol = sh->maxcols - 1;
         return;
+    }
 
     int lim = sh->maxcol - sh->curcol - deltacols;
     for (r=sh->currow; r < sh->currow + deltarows; r++) {

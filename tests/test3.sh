@@ -14,7 +14,7 @@ assert "echo GETNUM A0 | $VALGRIND_CMD ../src/sc-im ${NAME}.sc --nocurses --node
 assert_iffound_notcond ${NAME}_vallog "definitely lost.*bytes" "0 bytes"
 assert_iffound_notcond ${NAME}_vallog "indirectly lost.*bytes" "0 bytes"
 assert_iffound_notcond ${NAME}_vallog "possibly lost.*bytes" "0 bytes"
-assert_iffound_notcond ${NAME}_vallog "Uninitialised value was created by a heap allocation" "!"
+assert_iffound_notcond ${NAME}_vallog "Uninitialised value was created by a heap allocation"
 assert_iffound_notcond ${NAME}_vallog "Conditional jump or move depends on uninitialised value"
 assert_iffound_notcond ${NAME}_vallog "Invalid read of size"
 assert_iffound_notcond ${NAME}_vallog "Invalid write of size"

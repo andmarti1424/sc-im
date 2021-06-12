@@ -102,16 +102,16 @@ extern struct session * session;
 void erasedb(struct sheet * sheet, int _free) {
     int  r, c;
 
-    for (c = 0; c <= sheet->maxcol; c++) {
+    for (c = 0; c < sheet->maxcols; c++) {
         sheet->fwidth[c] = DEFWIDTH;
         sheet->precision[c] = DEFPREC;
         sheet->realfmt[c] = DEFREFMT;
     }
 
-    for (r = 0; r <= sheet->maxrow; r++) {
+    for (r = 0; r < sheet->maxrows; r++) {
         sheet->row_format[r] = 1;
         struct ent ** pp = ATBL(sheet, sheet->tbl, r, 0);
-        for (c = 0; c++ <= sheet->maxcol; pp++)
+        for (c = 0; c++ < sheet->maxcols; pp++)
             if (*pp != NULL) {
                 //(*pp)->next = freeents;    /* save [struct ent] for reuse */
                 //freeents = *pp;

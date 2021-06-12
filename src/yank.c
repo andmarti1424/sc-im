@@ -51,6 +51,8 @@
 #include "sc.h"
 #include "stdlib.h"
 #include "marks.h"
+#include "macros.h"
+#include "color.h"
 #include "cmds/cmds.h"
 #include "conf.h"
 #include "yank.h"
@@ -277,9 +279,10 @@ int paste_yanked_ents(struct sheet * sh, int above, int type_paste) {
 #endif
     }
 
-    // first check if there are any locked cells over destination
-    // if so, just return
+    // paste cell or range
     if (type_of_yank == YANK_RANGE || type_of_yank == YANK_CELL) {
+        // first check if there are any locked cells over destination
+        // if so, just return
         while (yll != NULL) {
             int r = yll->row + diffr;
             int c = yll->col + diffc;
@@ -293,7 +296,6 @@ int paste_yanked_ents(struct sheet * sh, int above, int type_paste) {
             yll = yll->next;
         }
     }
-
     ents_that_depends_on_list(yl, diffr, diffc);
 
 #ifdef UNDO
@@ -305,10 +307,9 @@ int paste_yanked_ents(struct sheet * sh, int above, int type_paste) {
     while (yl != NULL) {
 
 #ifdef UNDO
-        copy_cell_to_undostruct(y_cells, sh, lookat(sh, yl->row + diffr, yl->col + diffc), UNDO_DEL);
-        y_cells++;
+        copy_cell_to_undostruct(y_cells++, sh, lookat(sh, yl->row + diffr, yl->col + diffc), UNDO_DEL);
 
-        // Here pass struct ent ** to copy_to_undostruct
+        // also keep the deps in undo struct
         copy_to_undostruct(sh, 0, 0, -1, -1, UNDO_DEL, HANDLE_DEPS, &y_cells);
 #endif
 
@@ -333,7 +334,7 @@ int paste_yanked_ents(struct sheet * sh, int above, int type_paste) {
         /******************** this might be put outside the loop  */
         // if so, use EvalRange
         // sync and then eval.
-        // sync_refs();
+        //sync_refs(sh);
 
         if (destino->expr) {
             syncref(sh, destino->expr);
@@ -349,8 +350,7 @@ int paste_yanked_ents(struct sheet * sh, int above, int type_paste) {
         /*******************/
 
 #ifdef UNDO
-        copy_cell_to_undostruct(y_cells, sh, lookat(sh, yl->row + diffr, yl->col + diffc), UNDO_ADD);
-        y_cells++;
+        copy_cell_to_undostruct(y_cells++, sh, lookat(sh, yl->row + diffr, yl->col + diffc), UNDO_ADD);
         // store dependencies after the change as well
         copy_to_undostruct(sh, 0, 0, -1, -1, UNDO_ADD, HANDLE_DEPS, &y_cells);
 #endif

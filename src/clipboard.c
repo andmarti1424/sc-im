@@ -104,11 +104,17 @@ int paste_from_clipboard() {
             char * st = token;
             if (strlen(num) && isnumeric(num))
                 swprintf(line_interp, BUFFERSIZE, L"let %s%d=%s", coltoa(c), r, num);
-            else
+            else {
+                if (strlen(st) > MAX_IB_LEN) {
+                    sc_debug("Content from clipboard exceeds maximum width for a label. Cutting it to %d chars", MAX_IB_LEN);
+                    st[MAX_IB_LEN-1]='\0';
+                }
                 swprintf(line_interp, BUFFERSIZE, L"label %s%d=\"%s\"", coltoa(c), r, st);
+            }
             if (strlen(st)) send_to_interp(line_interp);
             c++;
             token = xstrtok(NULL, delim);
+            free(num);
             //free(st);
             if (c > roman->cur_sh->maxcol) roman->cur_sh->maxcol = c;
         }

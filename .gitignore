@@ -4,6 +4,10 @@ src/experres.h
 src/gram.c
 src/sc-im
 src/tags
+src/log
+tests/tags
+tests/log
+tests/*_vallog
 src/scim
 src/statres.h
 doc/grammar_yacc_tools/commands.txt

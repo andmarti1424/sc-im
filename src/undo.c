@@ -426,6 +426,24 @@ int len_undo_list() {
     return undo_list_len;
 }
 
+/*
+ * \brief ent_ptr_exists_on_list
+ * \details check if an ent exists on ent_ptr list
+ * (used for added / removed lists of undo struct)
+ * return 0 if not exists or 1 if exists.
+ */
+int ent_ptr_exists_on_list(struct ent_ptr * list, struct ent_ptr * ep) {
+    int repeated = 0;
+    if (ep == NULL) return repeated;
+    while (list != NULL && list->vp != NULL) {
+        if (list->sheet == ep->sheet && list->vp->row == ep->vp->row && list->vp->col == ep->vp->col) {
+            repeated = 1;
+            break;
+        }
+        list = list->next;
+    }
+    return repeated;
+}
 
 /**
  * \brief copy_to_undostruct()
@@ -438,14 +456,14 @@ int len_undo_list() {
  * handle_deps: if set to HANDLE_DEPS it will store the dependencies of the specified range as well.
  * remember deps is a global variable.
  *
- * destination: struct ent * pointer to use in the copy. if none was given, just malloc one.
+ * destination: struct ent_ptr ** to use in the copy. if none was given, just malloc one.
+ * Note that if destination is not null, the struct ent * vp inside the struct ent_ptr is already malloc'ed
  * returns: none
  */
 void copy_to_undostruct (struct sheet * sh, int ri, int ci, int rf, int cf, char type, short handle_deps, struct ent_ptr ** destination) {
     int i, c, r;
     struct ent * p;
     extern struct ent_ptr * deps;
-    //int repeated;
 
     // ask for memory to keep struct ent * for the whole range
     // and only if no destination pointer was given
@@ -466,21 +484,15 @@ void copy_to_undostruct (struct sheet * sh, int ri, int ci, int rf, int cf, char
 
             /* here check that ent to add is not already in the list
              * if so, avoid to add a duplicate ent
-             * commented cause its resource consuming and harmless to duplicate
-            struct ent * lista = type == 'a' ? undo_item.added : undo_item.removed;
-            repeated = 0;
-            while (lista != NULL) {
-                if (lista->row == r && lista->col == c) {
-                    repeated = 1;
-                    break;
-                }
-                lista = lista->next;
-            }
-            if (repeated) continue;
              */
+            struct ent_ptr * lista = type == 'a' ? undo_item.added : undo_item.removed;
+            struct ent_ptr e;
+            e.sheet = sh;
+            e.vp = p;
+            if (ent_ptr_exists_on_list(lista, &e)) continue;
 
             // initialize the 'ent'
-            y_cells->vp = malloc(sizeof(struct ent));
+            if (destination == NULL) y_cells->vp = malloc(sizeof(struct ent));
             cleanent(y_cells->vp);
             y_cells->sheet = sh;
 
@@ -489,6 +501,7 @@ void copy_to_undostruct (struct sheet * sh, int ri, int ci, int rf, int cf, char
             copyent(y_cells->vp, sh, lookat(sh, r, c), 0, 0, 0, 0, 0, 0, 'u');
 
             // Append 'ent' element at the beginning
+            //TODO: add it ordered?
             if (type == UNDO_ADD) {
                 y_cells->next = undo_item.added;
                 undo_item.added = y_cells;
@@ -509,14 +522,16 @@ void copy_to_undostruct (struct sheet * sh, int ri, int ci, int rf, int cf, char
             if (p == NULL) continue;
 
             // initialize the 'ent'
-            y_cells->vp = malloc(sizeof(struct ent));
+            if (destination == NULL) y_cells->vp = malloc(sizeof(struct ent));
             cleanent(y_cells->vp);
             y_cells->sheet = deps[i].sheet;
 
             // Copy cell at deps[i].vp->row, deps[i].vp->col contents to 'y_cells' ent
             copyent(y_cells->vp, deps[i].sheet, lookat(deps[i].sheet, deps[i].vp->row, deps[i].vp->col), 0, 0, 0, 0, 0, 0, 'u');
 
+            //sc_debug("copy_to_undostruct a undo %d %d", deps[i].vp->row, deps[i].vp->col);
             // Append 'ent' element at the beginning
+            //TODO: add it ordered?
             if (type == UNDO_ADD) {
                 y_cells->next = undo_item.added;
                 undo_item.added = y_cells;
@@ -553,7 +568,7 @@ void save_yl_pointer_after_calloc(struct ent_ptr * e) {
 }
 
 
-/**
+/*
  * \brief copy_cell_to_undostruct()
  *
  * \details This function adds an struct ent * (new) to undo struct lists.
@@ -570,6 +585,17 @@ void save_yl_pointer_after_calloc(struct ent_ptr * e) {
  *
  */
 void copy_cell_to_undostruct (struct ent_ptr * e_ptr, struct sheet * sh_ori, struct ent * ori, char type) {
+    /* here check that ent to add is not already in the list
+     * if so, avoid to add a duplicate ent
+     */
+    struct ent_ptr * lista = type == 'a' ? undo_item.added : undo_item.removed;
+    struct ent_ptr e;
+    e.sheet = sh_ori;
+    e.vp = ori;
+    if (ent_ptr_exists_on_list(lista, &e)) return;
+    // in case of returning because ent exists on list, make sure struct ent_ptr gets freed later.
+
+    // if reached here, malloc and add to undolist
     struct ent_ptr * new_ptr = e_ptr;
     struct ent * new = malloc(sizeof(struct ent));
 
@@ -583,6 +609,7 @@ void copy_cell_to_undostruct (struct ent_ptr * e_ptr, struct sheet * sh_ori, str
     new_ptr->vp = new;
 
     // Append 'ent' element at the beginning
+    //TODO: add it ordered?
     if (type == UNDO_ADD) {
         new_ptr->next = undo_item.added;
         undo_item.added = new_ptr;
@@ -860,67 +887,72 @@ void do_undo() {
     // removed added ents
     struct ent_ptr * i = ul->added;
     while (i != NULL) {
-        struct ent * pp = *ATBL(i->sheet, i->sheet->tbl, i->vp->row, i->vp->col);
-        clearent(pp);
-        cleanent(pp);
+        erase_area(i->sheet, i->vp->row, i->vp->col, i->vp->row, i->vp->col, 1, 0);
         i = i->next;
     }
 
     // Make undo shift, if any
     if (ul->range_shift != NULL) {
+        int deltarows = ul->range_shift->delta_rows;
+        int deltacols = ul->range_shift->delta_cols;
+        int brrow = ul->range_shift->brrow;
+        int tlrow = ul->range_shift->tlrow;
+        int brcol = ul->range_shift->brcol;
+        int tlcol = ul->range_shift->tlcol;
         // fix marks for rows
-        if (ul->range_shift->delta_rows > 0)      // sj
-            fix_marks(-(ul->range_shift->brrow - ul->range_shift->tlrow + 1), 0, ul->range_shift->tlrow, sh->maxrow, ul->range_shift->tlcol, ul->range_shift->brcol);
-        else if (ul->range_shift->delta_rows < 0) // sk
-            fix_marks( (ul->range_shift->brrow - ul->range_shift->tlrow + 1), 0, ul->range_shift->tlrow, sh->maxrow, ul->range_shift->tlcol, ul->range_shift->brcol);
+        if (deltarows > 0)      // sj
+            fix_marks(-(brrow - tlrow + 1), 0, tlrow, sh->maxrow, tlcol, brcol);
+        else if (deltarows < 0) // sk
+            fix_marks( (brrow - tlrow + 1), 0, tlrow, sh->maxrow, tlcol, brcol);
 
         // handle row_hidden
-        fix_row_hidden(sh, ul->range_shift->delta_rows, ul->range_shift->tlrow, sh->maxrow);
+        fix_row_hidden(sh, deltarows, tlrow, sh->maxrow);
 
         // fix marks for cols
-        if (ul->range_shift->delta_cols > 0)      // sl
-            fix_marks(0, -(ul->range_shift->brcol - ul->range_shift->tlcol + 1), ul->range_shift->tlrow, ul->range_shift->brrow, ul->range_shift->tlcol, sh->maxcol);
-        else if (ul->range_shift->delta_cols < 0) // sh
-            fix_marks(0,  (ul->range_shift->brcol - ul->range_shift->tlcol + 1), ul->range_shift->tlrow, ul->range_shift->brrow, ul->range_shift->tlcol, sh->maxcol);
+        if (deltacols > 0)      // sl
+            fix_marks(0, -(brcol - tlcol + 1), tlrow, brrow, tlcol, sh->maxcol);
+        else if (deltacols < 0) // sh
+            fix_marks(0,  (brcol - tlcol + 1), tlrow, brrow, tlcol, sh->maxcol);
 
         // handle col_hidden
-        fix_col_hidden(sh, ul->range_shift->delta_cols, ul->range_shift->tlcol, sh->maxcol);
+        fix_col_hidden(sh, deltacols, tlcol, sh->maxcol);
 
         // handle row_frozen
-        fix_row_frozen(sh, ul->range_shift->delta_rows, ul->range_shift->tlrow, sh->maxrow);
+        fix_row_frozen(sh, deltarows, tlrow, sh->maxrow);
 
         // handle col_frozen
-        fix_col_frozen(sh, ul->range_shift->delta_cols, ul->range_shift->tlcol, sh->maxcol);
+        fix_col_frozen(sh, deltacols, tlcol, sh->maxcol);
 
         // shift range now
-        shift_range(sh, - ul->range_shift->delta_rows, - ul->range_shift->delta_cols,
-            ul->range_shift->tlrow, ul->range_shift->tlcol, ul->range_shift->brrow, ul->range_shift->brcol);
+        shift_range(sh, - deltarows, - deltacols, tlrow, tlcol, brrow, brcol);
 
         // shift col_formats here.
-        if (ul->range_shift->tlcol >= 0 && ul->range_shift->tlrow == 0 && ul->range_shift->brrow == sh->maxrow) { // && ul->range_shift->delta_cols > 0) {
+        if (tlcol >= 0 && tlrow == 0 && brrow == sh->maxrows) {
+            //sh->maxcols -= deltacols;
             int i;
-            if (ul->range_shift->delta_cols > 0)
-            for (i = ul->range_shift->brcol + ul->range_shift->delta_cols; i <= sh->maxcol; i++) {
-                sh->fwidth[i - ul->range_shift->delta_cols] = sh->fwidth[i];
-                sh->precision[i - ul->range_shift->delta_cols] = sh->precision[i];
-                sh->realfmt[i - ul->range_shift->delta_cols] = sh->realfmt[i];
+            if (deltacols > 0)
+            for (i = brcol + deltacols; i <= sh->maxcols; i++) {
+                sh->fwidth[i - deltacols] = sh->fwidth[i];
+                sh->precision[i - deltacols] = sh->precision[i];
+                sh->realfmt[i - deltacols] = sh->realfmt[i];
             }
             else
-            for (i = sh->maxcol; i >= ul->range_shift->tlcol - ul->range_shift->delta_cols; i--) {
-                 sh->fwidth[i] = sh->fwidth[i + ul->range_shift->delta_cols];
-                 sh->precision[i] = sh->precision[i + ul->range_shift->delta_cols];
-                 sh->realfmt[i] = sh->realfmt[i + ul->range_shift->delta_cols];
+            for (i = sh->maxcols; i >= tlcol - deltacols; i--) {
+                 sh->fwidth[i] = sh->fwidth[i + deltacols];
+                 sh->precision[i] = sh->precision[i + deltacols];
+                 sh->realfmt[i] = sh->realfmt[i + deltacols];
             }
         }
         // do the same for rows here.
-        if (ul->range_shift->tlrow >= 0 && ul->range_shift->tlcol == 0 && ul->range_shift->brcol == sh->maxcol) { // && ul->range_shift->delta_rows > 0) {
+        if (tlrow >= 0 && tlcol == 0 && brcol == sh->maxcols) {
+            //sh->maxrows -= deltarows;
             int i;
-            if (ul->range_shift->delta_rows > 0)
-                for (i = ul->range_shift->brrow + ul->range_shift->delta_rows; i <= sh->maxrow; i++)
-                    sh->row_format[i - ul->range_shift->delta_rows] = sh->row_format[i];
+            if (deltarows > 0)
+                for (i = brrow + deltarows; i <= sh->maxrows; i++)
+                    sh->row_format[i - deltarows] = sh->row_format[i];
             else
-                for (i = sh->maxrow; i >= ul->range_shift->tlrow - ul->range_shift->delta_rows; i--)
-                    sh->row_format[i] = sh->row_format[i + ul->range_shift->delta_rows];
+                for (i = sh->maxrow; i >= tlrow - deltarows; i--)
+                    sh->row_format[i] = sh->row_format[i + deltarows];
         }
     }
 
@@ -1089,61 +1121,72 @@ void do_redo() {
     // Remove 'ent' elements
     struct ent_ptr * i = ul->removed;
     while (i != NULL) {
-        struct ent * pp = *ATBL(i->sheet, i->sheet->tbl, i->vp->row, i->vp->col);
-        clearent(pp);
-        cleanent(pp);
+        erase_area(i->sheet, i->vp->row, i->vp->col, i->vp->row, i->vp->col, 1, 0);
         i = i->next;
     }
 
     // Make undo shift, if any
     if (ul->range_shift != NULL) {
+        int deltarows = ul->range_shift->delta_rows;
+        int deltacols = ul->range_shift->delta_cols;
+        int brrow = ul->range_shift->brrow;
+        int tlrow = ul->range_shift->tlrow;
+        int brcol = ul->range_shift->brcol;
+        int tlcol = ul->range_shift->tlcol;
         // fix marks for rows
-        if (ul->range_shift->delta_rows > 0)      // sj
-            fix_marks( (ul->range_shift->brrow - ul->range_shift->tlrow + 1), 0, ul->range_shift->tlrow, sh->maxrow, ul->range_shift->tlcol, ul->range_shift->brcol);
-        else if (ul->range_shift->delta_rows < 0) // sk
-            fix_marks(-(ul->range_shift->brrow - ul->range_shift->tlrow + 1), 0, ul->range_shift->tlrow, sh->maxrow, ul->range_shift->tlcol, ul->range_shift->brcol);
+        if (deltarows > 0)      // sj
+            fix_marks( (brrow - tlrow + 1), 0, tlrow, sh->maxrow, tlcol, brcol);
+        else if (deltarows < 0) // sk
+            fix_marks(-(brrow - tlrow + 1), 0, tlrow, sh->maxrow, tlcol, brcol);
 
         // handle row_hidden
-        fix_row_hidden(sh, -ul->range_shift->delta_rows, ul->range_shift->tlrow, sh->maxrow);
+        fix_row_hidden(sh, -deltarows, tlrow, sh->maxrow);
 
         // fix marks for cols
-        if (ul->range_shift->delta_cols > 0)      // sl
-            fix_marks(0,  (ul->range_shift->brcol - ul->range_shift->tlcol + 1), ul->range_shift->tlrow, ul->range_shift->brrow, ul->range_shift->tlcol, sh->maxcol);
-        else if (ul->range_shift->delta_cols < 0) // sh
-            fix_marks(0, -(ul->range_shift->brcol - ul->range_shift->tlcol + 1), ul->range_shift->tlrow, ul->range_shift->brrow, ul->range_shift->tlcol, sh->maxcol);
+        if (deltacols > 0)      // sl
+            fix_marks(0,  (brcol - tlcol + 1), tlrow, brrow, tlcol, sh->maxcol);
+        else if (deltacols < 0) // sh
+            fix_marks(0, -(brcol - tlcol + 1), tlrow, brrow, tlcol, sh->maxcol);
 
         // handle col_hidden
-        fix_col_hidden(sh, -ul->range_shift->delta_cols, ul->range_shift->tlcol, sh->maxcol);
+        fix_col_hidden(sh, -deltacols, tlcol, sh->maxcol);
+
+        // handle row_frozen
+        fix_row_frozen(sh, -deltarows, tlrow, sh->maxrow);
+
+        // handle col_frozen
+        fix_col_frozen(sh, -deltacols, tlcol, sh->maxcol);
 
         // shift range now
-        shift_range(sh, ul->range_shift->delta_rows, ul->range_shift->delta_cols,
-            ul->range_shift->tlrow, ul->range_shift->tlcol, ul->range_shift->brrow, ul->range_shift->brcol);
+        shift_range(sh, deltarows, deltacols, tlrow, tlcol, brrow, brcol);
 
         // shift col_formats here
-        if (ul->range_shift->tlcol >= 0 && ul->range_shift->tlrow == 0 && ul->range_shift->brrow == sh->maxrow) {
+        if (tlcol >= 0 && tlrow == 0 && brrow == sh->maxrow) {
+            //sh->maxcols += deltacols;
             int i;
-            if (ul->range_shift->delta_cols > 0)
-            for (i = sh->maxcol; i >= ul->range_shift->tlcol + ul->range_shift->delta_cols; i--) {
-                sh->fwidth[i] = sh->fwidth[i - ul->range_shift->delta_cols];
-                sh->precision[i] = sh->precision[i - ul->range_shift->delta_cols];
-                sh->realfmt[i] = sh->realfmt[i - ul->range_shift->delta_cols];
+            if (deltacols > 0)
+            for (i = sh->maxcols; i >= tlcol + deltacols; i--) {
+                sh->fwidth[i] = sh->fwidth[i - deltacols];
+                sh->precision[i] = sh->precision[i - deltacols];
+                sh->realfmt[i] = sh->realfmt[i - deltacols];
             }
             else
-            for (i = ul->range_shift->tlcol; i - ul->range_shift->delta_cols <= sh->maxcol; i++) {
-                sh->fwidth[i] = sh->fwidth[i - ul->range_shift->delta_cols];
-                sh->precision[i] = sh->precision[i - ul->range_shift->delta_cols];
-                sh->realfmt[i] = sh->realfmt[i - ul->range_shift->delta_cols];
+            for (i = tlcol; i - deltacols <= sh->maxcols; i++) {
+                sh->fwidth[i] = sh->fwidth[i - deltacols];
+                sh->precision[i] = sh->precision[i - deltacols];
+                sh->realfmt[i] = sh->realfmt[i - deltacols];
             }
         }
         // do the same for rows here
-        if (ul->range_shift->tlrow >= 0 && ul->range_shift->tlcol == 0 && ul->range_shift->brcol == sh->maxcol) {
+        if (tlrow >= 0 && tlcol == 0 && brcol == sh->maxcols) {
+            //sh->maxrows += deltarows;
             int i;
-            if (ul->range_shift->delta_rows > 0)
-                for (i = sh->maxrow; i >= ul->range_shift->tlrow + ul->range_shift->delta_rows; i--)
-                    sh->row_format[i] = sh->row_format[i - ul->range_shift->delta_rows];
+            if (deltarows > 0)
+                for (i = sh->maxrows; i >= tlrow + deltarows; i--)
+                    sh->row_format[i] = sh->row_format[i - deltarows];
             else
-                for (i = ul->range_shift->tlrow; i - ul->range_shift->delta_rows <= sh->maxrow; i++)
-                    sh->row_format[i] = sh->row_format[i - ul->range_shift->delta_rows];
+                for (i = tlrow; i - deltarows <= sh->maxrows; i++)
+                    sh->row_format[i] = sh->row_format[i - deltarows];
         }
     }
 
