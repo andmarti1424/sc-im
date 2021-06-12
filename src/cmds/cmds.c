@@ -357,9 +357,11 @@ void int_deletecol(struct sheet * sh, int col, int mult) {
  * \param[in] c2
  * \param[in] special
  * \return none
+ *
+ * struct ent * n should be already alloc'ed
  */
 void copyent(struct ent * n, struct sheet * sh_p, struct ent * p, int dr, int dc, int r1, int c1, int r2, int c2, int special) {
-    if (!n || !p) {
+    if (!p) {
         sc_error("copyent: internal error");
         return;
     }
@@ -376,7 +378,6 @@ void copyent(struct ent * n, struct sheet * sh_p, struct ent * p, int dr, int dc
             n->expr = copye(p->expr, sh_p, dr, dc, r1, c1, r2, c2, special == 't');
 #ifdef UNDO
         } else if (special == 'u' && p->expr) { // from spreadsheet to undo
-            if (p->expr == NULL) sc_debug("copyent is null!");
             n->expr = copye(p->expr, sh_p, dr, dc, r1, c1, r2, c2, 2);
 #endif
         }

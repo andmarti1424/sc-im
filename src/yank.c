@@ -300,17 +300,19 @@ int paste_yanked_ents(struct sheet * sh, int above, int type_paste) {
 
 #ifdef UNDO
     // ask for memory to save the entire yanklist (and its dependencies) in the undo struct
+    // note that the yanked ents could share dependencies.
     struct ent_ptr * y_cells = (struct ent_ptr *) calloc(2*(yanked_cells + (deps != NULL ? deps->vf : 0)), sizeof(struct ent_ptr));
     save_yl_pointer_after_calloc(y_cells);
+
+    // save in undo the dependent ents before the paste
+    copy_to_undostruct(sh, 0, 0, -1, -1, UNDO_DEL, HANDLE_DEPS, &y_cells);
 #endif
 
+    // paste each ent in yank list
     while (yl != NULL) {
 
 #ifdef UNDO
         copy_cell_to_undostruct(y_cells++, sh, lookat(sh, yl->row + diffr, yl->col + diffc), UNDO_DEL);
-
-        // also keep the deps in undo struct
-        copy_to_undostruct(sh, 0, 0, -1, -1, UNDO_DEL, HANDLE_DEPS, &y_cells);
 #endif
 
         // here we delete current content of "destino" ent.
@@ -325,6 +327,12 @@ int paste_yanked_ents(struct sheet * sh, int above, int type_paste) {
             (void) copyent(destino, sh, yl, 0, 0, 0, 0, 0, 0, 'f');
         } else if (type_paste == YANK_VALUE) {
             (void) copyent(destino, sh, yl, 0, 0, 0, 0, 0, 0, 'v');
+            // TODO: we should compare the sheet as well, once yanklist happens to be
+            // struct ent_ptr list.
+            if (yl->row == destino->row && yl->col == destino->col) {
+                efree(destino->expr);
+                destino->expr = NULL;
+            }
         } else if (type_paste == YANK_REF) {
             (void) copyent(destino, sh, yl, diffr, diffc, 0, 0, sh->maxrows, sh->maxcols, 'c');
         }
@@ -345,17 +353,20 @@ int paste_yanked_ents(struct sheet * sh, int above, int type_paste) {
         int i;
         for (i = 0; deps != NULL && i < deps->vf; i++) {
             syncref(sh, deps[i].vp->expr);
-            if (get_conf_int("autocalc")) EvalJustOneVertex(sh, deps[i].vp, 0);
+            if (get_conf_int("autocalc") && deps[i].vp->expr) EvalJustOneVertex(sh, deps[i].vp, 0);
         }
         /*******************/
-
 #ifdef UNDO
         copy_cell_to_undostruct(y_cells++, sh, lookat(sh, yl->row + diffr, yl->col + diffc), UNDO_ADD);
-        // store dependencies after the change as well
-        copy_to_undostruct(sh, 0, 0, -1, -1, UNDO_ADD, HANDLE_DEPS, &y_cells);
 #endif
         yl = yl->next;
     }
+
+#ifdef UNDO
+    // save in undo the dependent ents after the paste
+    copy_to_undostruct(sh, 0, 0, -1, -1, UNDO_ADD, HANDLE_DEPS, &y_cells);
+#endif
+
     //rebuild_graph();
     //if (get_conf_int("autocalc")) EvalAll();
     roman->modflg++;

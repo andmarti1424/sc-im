@@ -1,44 +1,57 @@
-working on v0.8.3
+CHANGES FILE
 
-Changes
--------
-Renamed auto_justify to auto_fit
-Save triggers in files
-ui optimizations
-`gt` command of normal mode renamed to `go`
+Currently working on v0.8.3
+---------------------------
 
+New stuff
+---------
 **Added MultiSheet support
-added :newsheet, :nextsheet, :prevsheet :delsheet commands
-`gt` and `gT` commands in normal mode are now used for moving between sheets
+added :newsheet, :nextsheet, :prevsheet :delsheet COMMAND_MODE commands
+`gt` and `gT` commands in NORMAL_MODE are now used for moving between sheets
 added new colors types SHEET, CURRENT_SHEET and FILENM
 .sc file saving with multiple sheets
 loading xlsx with multiple sheet
 saving xlsx with multiple sheets
-add :renamesheet command
-reference cells from different sheets in formulas: ={"Sheet2"}!A2
-removed --sheet and --filename_with_mode configuration variables
-** fix in calc_mobile_cols()
-created movetosheet command in gram.y, to be used when saving and loading files
+add :renamesheet COMMAND_MODE command
+created movetosheet command in gram.y, to be used internally or in scripts when saving
+and loading files.
 reeval in multiple sheets: graph now should keep track of the different sheets
+             reference cells from different sheets in formulas: ={"Sheet2"}!A2
+Save triggers in files
+** Added automated tests
+
+Changes:
+--------
+Renamed auto_justify to auto_fit
+ui optimizations
+`gt` command of NORMAL_MODE renamed to `go`
+removed --sheet and --filename_with_mode configuration variables
 UNDO now saves reference to the sheet where the action took place.
-** Added some automated tests
 + copy_to_undostruct() now keep in added/removed list struct ent_ptr *
   (that knows of sheets), rather than struct ent *.
-** Fix not updating graph correctly after yanking cells with references -> Pc -> undo.
+
+Fixes
+-----
+** fix in calc_mobile_cols()
+** fix not updating graph correctly after yanking cells with references -> Pc -> undo.
    It could also segfault on ocassions as well. Added test5 and test6 for this.
+
 Issue #568: handle '>' and '<' on mappings.
 Issue #569: fix invalid read/write/segfault when deleting column.
             Added test8 and test9 for this.
-Fix: scroll correctly when editing cells with long strings (wider than screen)
-Fix 'go' command of normal mode. Was missing as a valid command in cmds.c after rename.
+
+fix: scroll correctly when editing cells with long strings (wider than screen)
 Avoid reading passed maxcols maxrows when shifting left or up over last sheet column/row.
+fix in Pv when pasting over same place where data was yanked.
+fix in paste_yanked_ents: calloc didnt count that yanked cells could share dependencies.
 
 
 Pending to make v0.8.3 release
 -------------------
-Pv
+yanklist should be struct ent_ptr list, rather thant struct ent list.
 todo: undo.c: add ent_ptr to added / deleted lists ordered.
 todo: ents_that_depends_on_list SHOULD take ent_ptr rather than struct ent * as parameter!
+
 + mark should consider sheet. We could have mark A in Sheet 1, and mark B on Sheet 2.. modify tick()
 input: block buffer maps digraph
 + rearrange file loading and saving functions
@@ -58,7 +71,9 @@ Ideas for v0.8.4
 allow future use of registers to copy to and paste from.
 + registers for yanking
 + use yanklist for added/removed in undo?
+
 --
+Thanks to all that notify issues and help testing.
 Thanks to all that helped and created PR.
 Thanks to all who support and use this program.
 

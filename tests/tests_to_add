@@ -5,7 +5,12 @@ test3: multiple sheets that have formulas dependencies from one to another
 test4: multiple sheets that have formulas dependencies from one to another (with undo/redo)
 test5: yanking and pasting ents keeping references (Pc) - timing and memory usage
 test6: yanking and pasting ents keeping references (Pc) - with undo
+test8: delete columns and rows repeatedly with undo.
+test9: delete last alloc'ed column (ZZ) with undo.
 
 TODO:
-test7: yanking and pasting ents keeping references (Pc) (with undo and redo)
++ test7: yanking and pasting ents keeping references (Pc) (with undo and redo)
 fails to restore some ents formulas.
+
++ test10: copiar un rango de 10filas x 1 columna con
+referencias y pegar en la misma ubicación con Pv daba segfault. crear prueba.

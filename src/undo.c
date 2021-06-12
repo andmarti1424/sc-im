@@ -469,7 +469,7 @@ void copy_to_undostruct (struct sheet * sh, int ri, int ci, int rf, int cf, char
     // and only if no destination pointer was given
     struct ent_ptr * y_cells = destination == NULL ? NULL : *destination;
     if (y_cells == NULL && handle_deps == HANDLE_DEPS && deps != NULL)
-        y_cells = (struct ent_ptr *) calloc((rf-ri+1)*(cf-ci+1)+deps->vf, sizeof(struct ent_ptr));
+        y_cells = (struct ent_ptr *) calloc((rf-ri+1)*(cf-ci+1) + deps->vf, sizeof(struct ent_ptr));
     else if (y_cells == NULL)
         y_cells = (struct ent_ptr *) calloc((rf-ri+1)*(cf-ci+1), sizeof(struct ent_ptr));
 
@@ -492,7 +492,8 @@ void copy_to_undostruct (struct sheet * sh, int ri, int ci, int rf, int cf, char
             if (ent_ptr_exists_on_list(lista, &e)) continue;
 
             // initialize the 'ent'
-            if (destination == NULL) y_cells->vp = malloc(sizeof(struct ent));
+            //if (destination == NULL) y_cells->vp = malloc(sizeof(struct ent));
+            y_cells->vp = malloc(sizeof(struct ent));
             cleanent(y_cells->vp);
             y_cells->sheet = sh;
 
@@ -522,7 +523,8 @@ void copy_to_undostruct (struct sheet * sh, int ri, int ci, int rf, int cf, char
             if (p == NULL) continue;
 
             // initialize the 'ent'
-            if (destination == NULL) y_cells->vp = malloc(sizeof(struct ent));
+            //if (destination == NULL) y_cells->vp = malloc(sizeof(struct ent));
+            y_cells->vp = malloc(sizeof(struct ent));
             cleanent(y_cells->vp);
             y_cells->sheet = deps[i].sheet;
 
