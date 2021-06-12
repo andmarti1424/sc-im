@@ -395,6 +395,11 @@ void copyent(struct ent * n, struct sheet * sh_p, struct ent * p, int dr, int dc
         }
         n->flags |= p->flags & is_locked;
     }
+    if (p->label && special == 'f' && n->label) {
+        n->flags &= ~is_leftflush;
+        n->flags |= ((p->flags & is_label) | (p->flags & is_leftflush));
+    }
+
     if (p->format && special != 'v') {
         if (n->format) scxfree(n->format);
             n->format = scxmalloc((unsigned) (strlen(p->format) + 1));
