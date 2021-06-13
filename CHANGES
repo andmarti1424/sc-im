@@ -19,6 +19,7 @@ reeval in multiple sheets: graph now should keep track of the different sheets
              reference cells from different sheets in formulas: ={"Sheet2"}!A2
 Save triggers in files
 ** Added automated tests
+Addapt string and number search for multisheet
 
 Changes:
 --------
@@ -29,6 +30,7 @@ removed --sheet and --filename_with_mode configuration variables
 UNDO now saves reference to the sheet where the action took place.
 + copy_to_undostruct() now keep in added/removed list struct ent_ptr *
   (that knows of sheets), rather than struct ent *.
+Copy alignment of strings when doing `Pf`.
 
 Fixes
 -----

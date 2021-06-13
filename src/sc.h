@@ -257,11 +257,13 @@ struct enode {
 
 /* Use this structure to save the last 'g' command */
 struct go_save {
+    struct sheet * g_sheet;
     int g_type;
     double g_n;
     char * g_s;
     int g_row;
     int g_col;
+    int g_flow;
     int g_lastrow;
     int g_lastcol;
     int strow;

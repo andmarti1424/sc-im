@@ -84,14 +84,6 @@
 #endif
 #include "graph.h"
 
-/* g_type can be: */
-#define G_NONE 0          /* Starting value - must be 0 */
-#define G_NUM  1
-#define G_STR  2
-#define G_NSTR 3
-#define G_XSTR 4
-#define G_CELL 5
-
 extern int find_range(char * name, int len, struct ent * lmatch, struct ent * rmatch, struct range ** rng);
 extern bool decimal;      /* Set if there was a decimal point in the number */
 extern struct session * session;
@@ -1086,14 +1078,15 @@ void num_search(struct sheet * sh, double n, int firstrow, int firstcol, int las
 
     //if (!loading) remember(0);
     g_free();
+    gs.g_sheet = sh;
     gs.g_type = G_NUM;
     gs.g_n = n;
     gs.g_row = firstrow;
-
     gs.g_col = firstcol;
     gs.g_lastrow = lastrow_;
     gs.g_lastcol = lastcol_;
     gs.errsearch = errsearch;
+    gs.g_flow = flow;
     if (sh->currow >= firstrow && sh->currow <= lastrow_ && sh->curcol >= firstcol && sh->curcol <= lastcol_) {
         endr = sh->currow;
         endc = sh->curcol;
@@ -1191,12 +1184,14 @@ void str_search(struct sheet * sh, char * s, int firstrow, int firstcol, int las
     }
 
     g_free();
+    gs.g_sheet = sh;
     gs.g_type = G_STR + num;
     gs.g_s = s;
     gs.g_row = firstrow;
     gs.g_col = firstcol;
     gs.g_lastrow = lastrow_;
     gs.g_lastcol = lastcol_;
+    gs.g_flow = flow;
 
     if (sh->currow >= firstrow && sh->currow <= lastrow_ && sh->curcol >= firstcol && sh->curcol <= lastcol_) {
         endr = sh->currow;

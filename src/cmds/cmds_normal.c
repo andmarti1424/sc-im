@@ -411,14 +411,34 @@ void do_normalmode(struct block * buf) {
 
         // repeat last goto command - backwards
         case L'N':
-            go_previous();
+            {
+            struct roman * roman = session->cur_doc;
+            struct sheet * sh = roman->cur_sh;
+            extern struct go_save gs;
+            if (gs.g_sheet == sh)
+                go_previous();
+            else if (gs.g_type == G_NUM)
+                num_search(sh, gs.g_n, 0, 0, sh->maxrow, sh->maxcol, 0, gs.g_flow);
+            else if (gs.g_type == G_STR)
+                str_search(sh, gs.g_s, 0, 0, sh->maxrow, sh->maxcol, 0, gs.g_flow);
             ui_update(TRUE);
+            }
             break;
 
         // repeat last goto command
         case L'n':
-            go_last();
+            {
+            struct roman * roman = session->cur_doc;
+            struct sheet * sh = roman->cur_sh;
+            extern struct go_save gs;
+            if (gs.g_sheet == sh)
+                go_last();
+            else if (gs.g_type == G_NUM)
+                num_search(sh, gs.g_n, 0, 0, sh->maxrow, sh->maxcol, 0, gs.g_flow);
+            else if (gs.g_type == G_STR)
+                str_search(sh, gs.g_s, 0, 0, sh->maxrow, sh->maxcol, 0, gs.g_flow);
             ui_update(TRUE);
+            }
             break;
 
         // END OF MOVEMENT COMMANDS

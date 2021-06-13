@@ -93,3 +93,11 @@ int dateformat(struct sheet * sh, struct ent *v1, struct ent *v2, char * fmt);
 
 extern void EvalAllVertexs();
 extern void EvalJustOneVertex(struct sheet * sh, struct ent * p, int rebuild_graph);
+
+/* g_type can be: */
+#define G_NONE 0          /* Starting value - must be 0 */
+#define G_NUM  1
+#define G_STR  2
+#define G_NSTR 3
+#define G_XSTR 4
+#define G_CELL 5
