@@ -415,12 +415,14 @@ void do_normalmode(struct block * buf) {
             struct roman * roman = session->cur_doc;
             struct sheet * sh = roman->cur_sh;
             extern struct go_save gs;
-            if (gs.g_sheet == sh)
+            if (gs.g_sheet == sh) {
                 go_previous();
-            else if (gs.g_type == G_NUM)
+            } else if (gs.g_type == G_NUM) {
                 num_search(sh, gs.g_n, 0, 0, sh->maxrow, sh->maxcol, 0, gs.g_flow);
-            else if (gs.g_type == G_STR)
+            } else if (gs.g_type == G_STR) {
+                gs.g_type = G_NONE;    /* Don't free the string */
                 str_search(sh, gs.g_s, 0, 0, sh->maxrow, sh->maxcol, 0, gs.g_flow);
+            }
             ui_update(TRUE);
             }
             break;
@@ -431,12 +433,14 @@ void do_normalmode(struct block * buf) {
             struct roman * roman = session->cur_doc;
             struct sheet * sh = roman->cur_sh;
             extern struct go_save gs;
-            if (gs.g_sheet == sh)
+            if (gs.g_sheet == sh) {
                 go_last();
-            else if (gs.g_type == G_NUM)
+            } else if (gs.g_type == G_NUM) {
                 num_search(sh, gs.g_n, 0, 0, sh->maxrow, sh->maxcol, 0, gs.g_flow);
-            else if (gs.g_type == G_STR)
+            } else if (gs.g_type == G_STR) {
+                gs.g_type = G_NONE;    /* Don't free the string */
                 str_search(sh, gs.g_s, 0, 0, sh->maxrow, sh->maxcol, 0, gs.g_flow);
+            }
             ui_update(TRUE);
             }
             break;

@@ -1170,7 +1170,8 @@ void str_search(struct sheet * sh, char * s, int firstrow, int firstcol, int las
     regex_t preg;
     int errcode;
 
-    if ( get_conf_int("ignorecase"))
+    sc_info("");
+    if (get_conf_int("ignorecase"))
         errcode = regcomp(&preg, s, REG_EXTENDED | REG_ICASE);
     else
         errcode = regcomp(&preg, s, REG_EXTENDED);
