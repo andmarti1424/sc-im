@@ -959,11 +959,11 @@ void go_previous() {
             sc_error("Nothing to repeat");
             break;
         case G_NUM:
-            num_search(session->cur_doc->cur_sh, gs.g_n, gs.g_row, gs.g_col, gs.g_lastrow, gs.g_lastcol, gs.errsearch, 0);
+            num_search(gs.g_sheet, gs.g_n, gs.g_row, gs.g_col, gs.g_lastrow, gs.g_lastcol, gs.errsearch, 0);
             break;
         case G_STR:
             gs.g_type = G_NONE;    /* Don't free the string */
-            str_search(session->cur_doc->cur_sh, gs.g_s, gs.g_row, gs.g_col, gs.g_lastrow, gs.g_lastcol, num, 0);
+            str_search(gs.g_sheet, gs.g_s, gs.g_row, gs.g_col, gs.g_lastrow, gs.g_lastcol, num, 0);
             break;
         default:
             sc_error("go_previous: internal error");
@@ -983,17 +983,17 @@ void go_last() {
         sc_error("Nothing to repeat");
         break;
     case G_NUM:
-        num_search(session->cur_doc->cur_sh, gs.g_n, gs.g_row, gs.g_col, gs.g_lastrow, gs.g_lastcol, gs.errsearch, 1);
+        num_search(gs.g_sheet, gs.g_n, gs.g_row, gs.g_col, gs.g_lastrow, gs.g_lastcol, gs.errsearch, 1);
         break;
     case G_CELL:
-        moveto(session->cur_doc->cur_sh, gs.g_row, gs.g_col, gs.g_lastrow, gs.g_lastcol, gs.strow, gs.stcol);
+        moveto(gs.g_sheet, gs.g_row, gs.g_col, gs.g_lastrow, gs.g_lastcol, gs.strow, gs.stcol);
         break;
     case G_XSTR:
     case G_NSTR:
         num++;
     case G_STR:
         gs.g_type = G_NONE;    /* Don't free the string */
-        str_search(session->cur_doc->cur_sh, gs.g_s, gs.g_row, gs.g_col, gs.g_lastrow, gs.g_lastcol, num, 1);
+        str_search(gs.g_sheet, gs.g_s, gs.g_row, gs.g_col, gs.g_lastrow, gs.g_lastcol, num, 1);
         break;
 
     default:
@@ -1023,6 +1023,7 @@ void moveto(struct sheet * sh, int row, int col, int lastrow_, int lastcol_, int
     sh->currow = row;
     sh->curcol = col;
     g_free();
+    gs.g_sheet = sh;
     gs.g_type = G_CELL;
     gs.g_row = sh->currow;
     gs.g_col = sh->curcol;
