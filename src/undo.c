@@ -187,6 +187,9 @@ void create_undo_action() {
     undo_item.col_showed  = NULL;
     undo_item.col_frozed  = NULL;
     undo_item.col_unfrozed  = NULL;
+    undo_item.modflg_bef = session->cur_doc->modflg;
+    undo_item.maxrow_bef = undo_item.sheet->maxrow;
+    undo_item.maxcol_bef = undo_item.sheet->maxcol;
     return;
 }
 
@@ -201,6 +204,9 @@ void create_undo_action() {
  */
 void end_undo_action() {
     struct roman * roman = session->cur_doc;
+    undo_item.modflg_aft = roman->modflg;
+    undo_item.maxrow_aft = undo_item.sheet->maxrow;
+    undo_item.maxcol_aft = undo_item.sheet->maxcol;
     add_to_undolist(undo_item);
 
     // just check if we need to dismiss this undo_item!
@@ -882,7 +888,7 @@ void do_undo() {
 
     int ori_currow = sh->currow;
     int ori_curcol = sh->curcol;
-    int mf = roman->modflg; // save modflag status
+    //int mf = roman->modflg; // save modflag status
 
     struct undo * ul = undo_list;
 
@@ -1085,7 +1091,12 @@ void do_undo() {
     sh->curcol = ori_curcol;
 
     // decrease modflg
-    roman->modflg = mf - 1;
+    //roman->modflg = mf - 1;
+
+    // restore maxrow, maxcol and modflg status before the action
+    roman->modflg = undo_item.modflg_bef;
+    sh->maxrow = undo_item.maxrow_bef;
+    sh->maxcol = undo_item.maxcol_bef;
 
     if (undo_list->p_ant != NULL) undo_list = undo_list->p_ant;
     sc_info("Change: %d of %d", --undo_list_pos, len_undo_list());
@@ -1115,7 +1126,7 @@ void do_redo() {
 
     int ori_currow = sh->currow;
     int ori_curcol = sh->curcol;
-    int mf = roman->modflg; // save modflag status
+    //int mf = roman->modflg; // save modflag status
 
     // move to the according sheet
     roman->cur_sh = sh;
@@ -1319,7 +1330,12 @@ void do_redo() {
     sh->curcol = ori_curcol;
 
     // increase modflg
-    roman->modflg = mf + 1;
+    //roman->modflg = mf + 1;
+
+    // restore maxrow, maxcol and modflg status before the action
+    roman->modflg = undo_item.modflg_aft;
+    sh->maxrow = undo_item.maxrow_aft;
+    sh->maxcol = undo_item.maxcol_aft;
 
     sc_info("Change: %d of %d", ++undo_list_pos, len_undo_list());
     return;

@@ -65,6 +65,13 @@ struct undo {
     int * row_unfrozed;
     int * col_frozed;
     int * col_unfrozed;
+    /* keep modflg, maxrow and maxcol status before and after changes */
+    int modflg_bef;
+    int modflg_aft;
+    int maxrow_bef;
+    int maxrow_aft;
+    int maxcol_bef;
+    int maxcol_aft;
 };
 
 struct undo_range_shift {

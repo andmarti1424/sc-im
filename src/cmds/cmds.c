@@ -214,7 +214,8 @@ void deletecol(struct sheet * sh, int col, int mult) {
 
     struct roman * roman = session->cur_doc;
 
-    if (col - 1 + mult >= sh->maxcols) {
+    //if (col - 1 + mult >= sh->maxcols) {
+    if (col - 1 + mult > sh->maxcol) {
         sc_error("current column + multiplier exceeds max column. Nothing changed");
         return;
     } else if (any_locked_cells(sh, 0, col, sh->maxrow, col - 1 + mult)) {
@@ -325,7 +326,7 @@ void int_deletecol(struct sheet * sh, int col, int mult) {
             sh->col_frozen[i] = FALSE;
         }
 
-        sh->maxcol--;
+        if (sh->maxcol) sh->maxcol--;
         sync_refs(sh);
         EvalAll();
         //flush_saved(); // we have to flush_saved only at exit.
@@ -913,7 +914,8 @@ void insert_col(struct sheet * sh, int after) {
  */
 void deleterow(struct sheet * sh, int row, int mult) {
     struct roman * roman = session->cur_doc;
-    if (row + mult - 1 > sh->maxrows) {
+    //if (row + mult - 1 >= sh->maxrows) {
+    if (row + mult - 1 > sh->maxrow) {
         sc_error("current row + multiplier exceeds max row. Nothing changed");
         return;
     } else if (any_locked_cells(sh, row, 0, row + mult - 1, sh->maxcol)) {
@@ -1005,7 +1007,7 @@ void int_deleterow(struct sheet * sh, int row, int mult) {
         rebuild_graph(); //TODO CHECK HERE WHY REBUILD IS NEEDED. See NOTE1 in shift.c
         sync_refs(sh);
         EvalAll();
-        sh->maxrow--;
+        if (sh->maxrow) sh->maxrow--;
     }
     return;
 }
