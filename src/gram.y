@@ -587,14 +587,39 @@ command:
                                        scxfree($3);
                                      }
 
-    |    S_MARK COL var_or_range     { set_cell_mark($2 + 97, $3.left.vp->row, $3.left.vp->col); }
-
-    |    S_MARK COL var_or_range var_or_range { ;
-                                          srange * sr = create_range('\0', '\0', $3.left.vp, $4.left.vp);
-                                          unselect_ranges();
-                                          set_range_mark($2 + 97, sr);
+    |    S_MARK COL var_or_range     {
+                                       struct roman * roman = session->cur_doc;
+                                       struct sheet * sh = roman->cur_sh;
+                                       set_cell_mark($2 + 97, sh, $3.left.vp->row, $3.left.vp->col);
                                      }
 
+    |    S_MARK COL var_or_range var_or_range {
+                                          struct roman * roman = session->cur_doc;
+                                          struct sheet * sh = roman->cur_sh;
+                                          srange * sr = create_range('\0', '\0', $3.left.vp, $4.left.vp);
+                                          unselect_ranges();
+                                          set_range_mark($2 + 97, sh, sr);
+                                     }
+
+    |    S_MARK COL STRING var_or_range     {
+                                       struct roman * roman = session->cur_doc;
+                                       struct sheet * sh;
+                                       if ((sh = search_sheet(roman, $3)) != NULL ) {
+                                           set_cell_mark($2 + 97, sh, $4.left.vp->row, $4.left.vp->col);
+                                       }
+                                       scxfree($3);
+                                     }
+
+    |    S_MARK COL STRING var_or_range var_or_range {
+                                          struct roman * roman = session->cur_doc;
+                                          struct sheet * sh;
+                                          if ((sh = search_sheet(roman, $3)) != NULL ) {
+                                              srange * sr = create_range('\0', '\0', $4.left.vp, $5.left.vp);
+                                              unselect_ranges();
+                                              set_range_mark($2 + 97, sh, sr);
+                                          }
+                                          scxfree($3);
+                                     }
     |    S_FILL var_or_range num num {
                                        struct roman * roman = session->cur_doc;
                                        struct sheet * sh = roman->cur_sh;

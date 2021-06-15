@@ -47,6 +47,7 @@
 #include "sheet.h"
 #include "file.h"
 #include "yank.h"
+#include "marks.h"
 
 int id_sheet = 0;
 
@@ -190,6 +191,9 @@ void delete_sheet(struct roman * roman, struct sheet * sh, int flg_free) {
         if (yl->sheet == sh) yl->sheet = NULL;
         yl = yl->next;
     }
+
+    // reset marks that links to the sheet we are deleting
+    clean_marks_by_sheet(sh);
 
     // free sheet
     erasedb(sh, flg_free); // clear sh and also free

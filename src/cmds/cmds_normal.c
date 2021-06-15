@@ -184,19 +184,23 @@ void do_normalmode(struct block * buf) {
         case L'\'':
             if (bs != 2) break;
             unselect_ranges();
-            e = tick(buf->pnext->value);
-            if (sh->row_hidden[e->row]) {
+            struct ent_ptr * ep = tick(buf->pnext->value);
+            if (sh->row_hidden[ep->vp->row]) {
                 sc_error("Cell row is hidden");
+                if (ep != NULL) free(ep);
                 break;
             }
-            if (sh->col_hidden[e->col]) {
+            if (sh->col_hidden[ep->vp->col]) {
                 sc_error("Cell column is hidden");
+                if (ep != NULL) free(ep);
                 break;
             }
-            sh->lastrow = sh->currow;
-            sh->lastcol = sh->curcol;
-            sh->currow = e->row;
-            sh->curcol = e->col;
+            if (ep->sheet != NULL) roman->cur_sh = ep->sheet;
+            roman->cur_sh->lastrow = roman->cur_sh->currow;
+            roman->cur_sh->lastcol = roman->cur_sh->curcol;
+            roman->cur_sh->currow = ep->vp->row;
+            roman->cur_sh->curcol = ep->vp->col;
+            if (ep != NULL) free(ep);
             ui_update(TRUE);
             break;
 
@@ -632,9 +636,9 @@ void do_normalmode(struct block * buf) {
             int p = is_range_selected();
             if (p != -1) { // mark range
                 struct srange * sr = get_range_by_pos(p);
-                set_range_mark(buf->pnext->value, sr);
+                set_range_mark(buf->pnext->value, sh, sr);
             } else         // mark cell
-                set_cell_mark(buf->pnext->value, sh->currow, sh->curcol);
+                set_cell_mark(buf->pnext->value, sh, sh->currow, sh->curcol);
             roman->modflg++;
             break;
 
@@ -816,7 +820,7 @@ void do_normalmode(struct block * buf) {
 #ifdef UNDO
                 save_undo_range_shift(1, 0, sh->currow, 0, sh->currow, sh->maxcol);
 #endif
-                fix_marks(1, 0, sh->currow, sh->maxrow, 0, sh->maxcol);
+                fix_marks(sh, 1, 0, sh->currow, sh->maxrow, 0, sh->maxcol);
                 insert_row(sh, 0);
 #ifdef UNDO
                 add_undo_row_format(sh->currow, 'A', sh->row_format[sh->currow]);
@@ -826,7 +830,7 @@ void do_normalmode(struct block * buf) {
 #ifdef UNDO
                 save_undo_range_shift(0, 1, 0, sh->curcol, sh->maxrow, sh->curcol);
 #endif
-                fix_marks(0, 1, 0, sh->maxrow, sh->curcol, sh->maxcol);
+                fix_marks(sh, 0, 1, 0, sh->maxrow, sh->curcol, sh->maxcol);
                 insert_col(sh, 0);
 #ifdef UNDO
                 add_undo_col_format(sh->curcol, 'A', sh->fwidth[sh->curcol], sh->precision[sh->curcol], sh->realfmt[sh->curcol]);
@@ -850,7 +854,7 @@ void do_normalmode(struct block * buf) {
 #ifdef UNDO
                 save_undo_range_shift(1, 0, sh->currow+1, 0, sh->currow+1, sh->maxcol);
 #endif
-                fix_marks(1, 0, sh->currow+1, sh->maxrow, 0, sh->maxcol);
+                fix_marks(sh, 1, 0, sh->currow+1, sh->maxrow, 0, sh->maxcol);
                 insert_row(sh, 1);
 #ifdef UNDO
                 add_undo_row_format(sh->currow, 'A', sh->row_format[sh->currow]);
@@ -860,7 +864,7 @@ void do_normalmode(struct block * buf) {
 #ifdef UNDO
                 save_undo_range_shift(0, 1, 0, sh->curcol+1, sh->maxrow, sh->curcol+1);
 #endif
-                fix_marks(0, 1, 0, sh->maxrow, sh->curcol+1, sh->maxcol);
+                fix_marks(sh, 0, 1, 0, sh->maxrow, sh->curcol+1, sh->maxcol);
                 insert_col(sh, 1);
 #ifdef UNDO
                 add_undo_col_format(sh->curcol, 'A', sh->fwidth[sh->curcol], sh->precision[sh->curcol], sh->realfmt[sh->curcol]);

@@ -327,20 +327,35 @@ void do_visualmode(struct block * buf) {
     // '
     } else if (buf->value == L'\'') {
         // if we receive a mark of a range, just return.
-        if (get_mark(buf->pnext->value)->row == -1) return;
-
-        struct ent * e = tick(buf->pnext->value);
-        if (sh->row_hidden[e->row]) {
-            sc_error("Cell row is hidden");
-            return;
-        } else if (sh->col_hidden[e->col]) {
-            sc_error("Cell column is hidden");
+        if (get_mark(buf->pnext->value)->row == -1) {
+            sc_error("That is a mark of a range. Returning.");
             return;
         }
-        r->tlrow = r->tlrow < e->row ? r->tlrow : e->row;
-        r->tlcol = r->tlcol < e->col ? r->tlcol : e->col;
-        r->brrow = r->brrow > e->row ? r->brrow : e->row;
-        r->brcol = r->brcol > e->col ? r->brcol : e->col;
+
+        struct ent_ptr * ep = tick(buf->pnext->value);
+        if (ep == NULL) {
+            sc_error("No mark. Returning.");
+            return;
+        } else if (ep->sheet != NULL && ep->sheet != roman->cur_sh) {
+            sc_error("Cell marked is on other sheet. Dismissing.");
+            if (ep != NULL) free(ep);
+            return;
+        }
+
+        if (sh->row_hidden[ep->vp->row]) {
+            sc_error("Cell row is hidden");
+            if (ep != NULL) free(ep);
+            return;
+        } else if (sh->col_hidden[ep->vp->col]) {
+            sc_error("Cell column is hidden");
+            if (ep != NULL) free(ep);
+            return;
+        }
+        r->tlrow = r->tlrow < ep->vp->row ? r->tlrow : ep->vp->row;
+        r->tlcol = r->tlcol < ep->vp->col ? r->tlcol : ep->vp->col;
+        r->brrow = r->brrow > ep->vp->row ? r->brrow : ep->vp->row;
+        r->brcol = r->brcol > ep->vp->col ? r->brcol : ep->vp->col;
+        if (ep != NULL) free(ep);
 
     // w
     } else if (buf->value == L'w') {
@@ -396,7 +411,7 @@ void do_visualmode(struct block * buf) {
     } else if (buf->value == L'm' && get_bufsize(buf) == 2) {
         del_ranges_by_mark(buf->pnext->value);
         srange * rn = create_range('\0', '\0', lookat(sh, r->tlrow, r->tlcol), lookat(sh, r->brrow, r->brcol));
-        set_range_mark(buf->pnext->value, rn);
+        set_range_mark(buf->pnext->value, sh, rn);
         exit_visualmode();
         chg_mode('.');
         ui_show_header();

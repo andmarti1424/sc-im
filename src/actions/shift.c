@@ -92,7 +92,7 @@ void shift(struct sheet * sh, int r, int c, int rf, int cf, wchar_t type) {
     switch (type) {
 
         case L'j':
-            fix_marks(  (rf - r + 1) * cmd_multiplier, 0, r, sh->maxrow, c, cf);
+            fix_marks(sh,  (rf - r + 1) * cmd_multiplier, 0, r, sh->maxrow, c, cf);
 #ifdef UNDO
             save_undo_range_shift(cmd_multiplier, 0, r, c, rf + (rf-r+1) * (cmd_multiplier - 1), cf);
 #endif
@@ -100,7 +100,7 @@ void shift(struct sheet * sh, int r, int c, int rf, int cf, wchar_t type) {
             break;
 
         case L'k':
-            fix_marks( -(rf - r + 1) * cmd_multiplier, 0, r, sh->maxrow, c, cf);
+            fix_marks(sh, -(rf - r + 1) * cmd_multiplier, 0, r, sh->maxrow, c, cf);
             yank_area(sh, r, c, rf + (rf-r+1) * (cmd_multiplier - 1), cf, 'a', cmd_multiplier); // keep ents in yanklist for sk
 #ifdef UNDO
             ents_that_depends_on_range(sh, r, c, rf + (rf-r+1) * (cmd_multiplier - 1), cf);
@@ -115,7 +115,7 @@ void shift(struct sheet * sh, int r, int c, int rf, int cf, wchar_t type) {
             break;
 
         case L'h':
-            fix_marks(0, -(cf - c + 1) * cmd_multiplier, r, rf, c, sh->maxcol);
+            fix_marks(sh, 0, -(cf - c + 1) * cmd_multiplier, r, rf, c, sh->maxcol);
             yank_area(sh, r, c, rf, cf + (cf-c+1) * (cmd_multiplier - 1), 'a', cmd_multiplier); // keep ents in yanklist for sk
 #ifdef UNDO
             // here we save in undostruct, all the ents that depends on the deleted one (before change)
@@ -133,7 +133,7 @@ void shift(struct sheet * sh, int r, int c, int rf, int cf, wchar_t type) {
             break;
 
         case L'l':
-            fix_marks(0,  (cf - c + 1) * cmd_multiplier, r, rf, c, sh->maxcol);
+            fix_marks(sh, 0,  (cf - c + 1) * cmd_multiplier, r, rf, c, sh->maxcol);
 #ifdef UNDO
             save_undo_range_shift(0, cmd_multiplier, r, c, rf, cf + (cf-c+1) * (cmd_multiplier - 1));
 #endif

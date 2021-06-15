@@ -238,7 +238,7 @@ void deletecol(struct sheet * sh, int col, int mult) {
     }
 #endif
 
-    fix_marks(0, -mult, 0, sh->maxrow,  col + mult -1, sh->maxcol);
+    fix_marks(sh, 0, -mult, 0, sh->maxrow,  col + mult -1, sh->maxcol);
     if (! roman->loading) yank_area(sh, 0, col, sh->maxrow, col + mult - 1, 'c', mult);
 
     // do the job
@@ -936,7 +936,7 @@ void deleterow(struct sheet * sh, int row, int mult) {
     }
 #endif
 
-    fix_marks(-mult, 0, row + mult - 1, sh->maxrow, 0, sh->maxcol);
+    fix_marks(sh, -mult, 0, row + mult - 1, sh->maxrow, 0, sh->maxcol);
     if (! roman->loading) yank_area(sh, row, 0, row + mult - 1, sh->maxcol, 'r', mult);
 
     // do the job
@@ -1615,22 +1615,27 @@ struct ent * go_end(struct sheet * sh) {
 
 
 /**
- * \brief TODO Document tick()
- * \details if ticks a cell, returns struct ent *
- * if ticks a range, return struct ent * to top left cell
- * \return lookat; NULL otherwise
+ * \brief tick(): return an ent_ptr to an ent (or range) previously marked with the 'm' command.
+ * \details
+ * if ticks a cell, malloc's and returns an ent_ptr with struct ent * in ->vp.
+ * if ticks a range, malloc's and returns struct ent * to top left cell in ->vp.
+ * \return ent_ptr (should be free later on).
  */
-struct ent * tick(char ch) {
+struct ent_ptr * tick(char ch) {
     struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
     int r, c;
     struct mark * m = get_mark(ch);
+    if (m->sheet != NULL) sh = m->sheet;
+    struct ent_ptr * ep_result = calloc(1, sizeof(struct ent_ptr));
+
     //tick cell
     r = m->row;
-
     if (r != -1) {
         checkbounds(sh, &r, &(sh->curcol));
-        return lookat(sh, r, m->col);
+        ep_result->sheet = sh;
+        ep_result->vp = lookat(sh, r, m->col);
+        return ep_result;
     }
 
     // tick range
@@ -1639,8 +1644,11 @@ struct ent * tick(char ch) {
         c = m->rng->tlcol;
         m->rng->selected = 1;
         checkbounds(sh, &r, &c);
-        return lookat(sh, r, c);
+        ep_result->sheet = sh;
+        ep_result->vp = lookat(sh, r, c);
+        return ep_result;
     }
+    free(ep_result);
     return NULL;
 }
 

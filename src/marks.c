@@ -69,6 +69,7 @@ void create_mark_array() {
  */
 void free_marks_array() {
     free(marks);
+    marks = NULL;
     return;
 }
 
@@ -87,13 +88,15 @@ struct mark * get_mark(char c) {
 /**
  * \brief save a range over a mark
  * \param[in] char c
+ * \param[in] struct sheet * sh
  * \param[in] struct srange * s
  * \return none
  */
-void set_range_mark(char c, struct srange * s) {
+void set_range_mark(char c, struct sheet * sh, struct srange * s) {
     // Delete marked ranges when recording a new one with same char
     del_ranges_by_mark(c);
 
+    (marks + c)->sheet = sh;
     (marks + c)->rng = s;
     (marks + c)->row = -1;
     (marks + c)->col = -1;
@@ -103,12 +106,17 @@ void set_range_mark(char c, struct srange * s) {
 
 /**
  * \brief set_cell_mark()
+ * \param[in] char c
+ * \param[in] struct sheet * sh
+ * \param[in] int row
+ * \param[in] int col
  * \return none
  */
-void set_cell_mark(char c, int row, int col) {
+void set_cell_mark(char c, struct sheet * sh, int row, int col) {
     // Delete marked ranges when recording a new one with same char
     del_ranges_by_mark(c);
 
+    (marks + c)->sheet = sh;
     (marks + c)->rng = NULL;
     (marks + c)->row = row;
     (marks + c)->col = col;
@@ -120,6 +128,7 @@ void set_cell_mark(char c, int row, int col) {
  * \brief fix_marks()
  * \details modify marks after some operations that modify the internal row or command.
  * such as delete a row or column.
+ * \param[in] sheet
  * \param[in] deltar
  * \param[in] deltac
  * \param[in] row_desde
@@ -128,16 +137,37 @@ void set_cell_mark(char c, int row, int col) {
  * \param[in] col_hasta
  * \return none
  */
-void fix_marks(int deltar, int deltac, int row_desde, int row_hasta, int col_desde, int col_hasta) {
+void fix_marks(struct sheet * sh, int deltar, int deltac, int row_desde, int row_hasta, int col_desde, int col_hasta) {
     int i;
     for (i = 0; i < NUM_MARKS-1; i++) {
         struct mark * m = marks + i;
         if (m->row >= row_desde && m->row <= row_hasta &&
-            m->col >= col_desde && m->col <= col_hasta ) {
+            m->col >= col_desde && m->col <= col_hasta &&
+            m->sheet == sh) {
                 m->row += deltar;
                 m->col += deltac;
                 if (m->row < 0) m->row = 0;
                 if (m->col < 0) m->col = 0;
+        }
+    }
+    return;
+}
+
+/**
+ * \brief clean_marks_by_sheet()
+ * \details clean the marks links to a sheet
+ * \param[in] struct sheet * sh
+ * \return none
+ */
+void clean_marks_by_sheet(struct sheet * sh) {
+    int i;
+    if (marks == NULL) return;
+    for (i = 0; i < NUM_MARKS-1; i++) {
+        struct mark * m = marks + i;
+        if (m->sheet == sh) {
+            m->sheet = NULL;
+            m->row = 0;
+            m->col = 0;
         }
     }
     return;

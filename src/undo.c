@@ -916,18 +916,18 @@ void do_undo() {
         int tlcol = ul->range_shift->tlcol;
         // fix marks for rows
         if (deltarows > 0)      // sj
-            fix_marks(-(brrow - tlrow + 1), 0, tlrow, sh->maxrow, tlcol, brcol);
+            fix_marks(sh, -(brrow - tlrow + 1), 0, tlrow, sh->maxrow, tlcol, brcol);
         else if (deltarows < 0) // sk
-            fix_marks( (brrow - tlrow + 1), 0, tlrow, sh->maxrow, tlcol, brcol);
+            fix_marks(sh,  (brrow - tlrow + 1), 0, tlrow, sh->maxrow, tlcol, brcol);
 
         // handle row_hidden
         fix_row_hidden(sh, deltarows, tlrow, sh->maxrow);
 
         // fix marks for cols
         if (deltacols > 0)      // sl
-            fix_marks(0, -(brcol - tlcol + 1), tlrow, brrow, tlcol, sh->maxcol);
+            fix_marks(sh, 0, -(brcol - tlcol + 1), tlrow, brrow, tlcol, sh->maxcol);
         else if (deltacols < 0) // sh
-            fix_marks(0,  (brcol - tlcol + 1), tlrow, brrow, tlcol, sh->maxcol);
+            fix_marks(sh, 0,  (brcol - tlcol + 1), tlrow, brrow, tlcol, sh->maxcol);
 
         // handle col_hidden
         fix_col_hidden(sh, deltacols, tlcol, sh->maxcol);
@@ -1155,18 +1155,18 @@ void do_redo() {
         int tlcol = ul->range_shift->tlcol;
         // fix marks for rows
         if (deltarows > 0)      // sj
-            fix_marks( (brrow - tlrow + 1), 0, tlrow, sh->maxrow, tlcol, brcol);
+            fix_marks(sh,  (brrow - tlrow + 1), 0, tlrow, sh->maxrow, tlcol, brcol);
         else if (deltarows < 0) // sk
-            fix_marks(-(brrow - tlrow + 1), 0, tlrow, sh->maxrow, tlcol, brcol);
+            fix_marks(sh, -(brrow - tlrow + 1), 0, tlrow, sh->maxrow, tlcol, brcol);
 
         // handle row_hidden
         fix_row_hidden(sh, -deltarows, tlrow, sh->maxrow);
 
         // fix marks for cols
         if (deltacols > 0)      // sl
-            fix_marks(0,  (brcol - tlcol + 1), tlrow, brrow, tlcol, sh->maxcol);
+            fix_marks(sh, 0,  (brcol - tlcol + 1), tlrow, brrow, tlcol, sh->maxcol);
         else if (deltacols < 0) // sh
-            fix_marks(0, -(brcol - tlcol + 1), tlrow, brrow, tlcol, sh->maxcol);
+            fix_marks(sh, 0, -(brcol - tlcol + 1), tlrow, brrow, tlcol, sh->maxcol);
 
         // handle col_hidden
         fix_col_hidden(sh, -deltacols, tlcol, sh->maxcol);

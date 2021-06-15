@@ -77,7 +77,7 @@ void scroll_left (struct sheet * sh, int n);
 void scroll_right (struct sheet * sh, int n);
 void scroll_down(struct sheet * sh, int n);
 void scroll_up(struct sheet * sh, int n);
-struct ent * tick(char c);             // 'tick' ( ' ) command
+struct ent_ptr * tick(char ch);        // 'tick' ( ' ) command
 struct ent * left_limit(struct sheet * sh);
 struct ent * right_limit(struct sheet * sh, int row);
 struct ent * goto_top(struct sheet * sh);

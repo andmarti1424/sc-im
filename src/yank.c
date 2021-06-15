@@ -258,7 +258,7 @@ int paste_yanked_ents(struct sheet * sh, int above, int type_paste) {
         if (! above) sh->currow = forw_row(sh, 1)->row;                   // paste below
         diffr = sh->currow - yl->vp->row;
         diffc = yl->vp->col;
-        fix_marks(yank_arg, 0, sh->currow, sh->maxrow, 0, sh->maxcol);
+        fix_marks(sh, yank_arg, 0, sh->currow, sh->maxrow, 0, sh->maxcol);
 #ifdef UNDO
         save_undo_range_shift(yank_arg, 0, sh->currow, 0, sh->currow - 1 + yank_arg, sh->maxcol);
 #endif
@@ -271,7 +271,7 @@ int paste_yanked_ents(struct sheet * sh, int above, int type_paste) {
         while (c--) above ? insert_col(sh, 1) : insert_col(sh, 0);        // insert cols to the right if above or to the left
         diffr = yl->vp->row;
         diffc = sh->curcol - yl->vp->col;
-        fix_marks(0, yank_arg, 0, sh->maxrow, sh->curcol, sh->maxcol);
+        fix_marks(sh, 0, yank_arg, 0, sh->maxrow, sh->curcol, sh->maxcol);
 #ifdef UNDO
         save_undo_range_shift(0, yank_arg, 0, sh->curcol, sh->maxrow, sh->curcol - 1 + yank_arg);
 #endif

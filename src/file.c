@@ -476,8 +476,6 @@ void write_fd(FILE * f, struct roman * doc) {
             }
         }
 
-        write_marks(f);
-
         write_cells(f, doc, sh, 0, 0, sh->maxrow, sh->maxcol, 0, 0);
 
         struct custom_color * cc;
@@ -613,6 +611,8 @@ void write_fd(FILE * f, struct roman * doc) {
 
         sh = sh->next;
     }
+    // write marks of document
+    write_marks(f);
 
 }
 
@@ -622,7 +622,7 @@ void write_fd(FILE * f, struct roman * doc) {
  * \param[in] f file pointer
  * \return none
  */
-void write_marks(register FILE *f) {
+void write_marks(FILE * f) {
     int i;
     struct mark * m;
 
@@ -630,11 +630,11 @@ void write_marks(register FILE *f) {
         m = get_mark((char) i);
 
         // m->rng should never be NULL if both m->col and m->row are -1 !!
-        if ( m->row == -1 && m->col == -1) { // && m->rng != NULL ) {
-            fprintf(f, "mark %c %s%d ", i, coltoa(m->rng->tlcol), m->rng->tlrow);
+        if ( m->row == -1 && m->col == -1) {
+            fprintf(f, "mark %c \"%s\" %s%d ", i, m->sheet->name, coltoa(m->rng->tlcol), m->rng->tlrow);
             fprintf(f, "%s%d\n", coltoa(m->rng->brcol), m->rng->brrow);
-        } else if ( m->row != 0 && m->row != 0) { // && m->rng == NULL) {
-            fprintf(f, "mark %c %s%d\n", i, coltoa(m->col), m->row);
+        } else if ( m->row != 0 && m->row != 0) {
+            fprintf(f, "mark %c \"%s\" %s%d\n", i, m->sheet->name, coltoa(m->col), m->row);
         }
     }
     return;
