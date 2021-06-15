@@ -632,12 +632,8 @@ void ents_that_depends_on_range(struct sheet * sh, int r1, int c1, int r2, int c
  *
  * \return none
  */
- /* TODO double check its use (only in yank.c. the origin its always from an only sheet).
-  * SHOULD take ent_ptr rather than struct ent * as parameter ! */
-void ents_that_depends_on_list(struct ent * e_ori, int deltar,  int deltac) {
-    struct roman * roman = session->cur_doc;
-    struct sheet * sh = roman->cur_sh;
-    struct ent * e = e_ori;
+void ents_that_depends_on_list(struct ent_ptr * e_ori, int deltar,  int deltac) {
+    struct ent_ptr * e = e_ori;
     struct ent * p;
     if (graph == NULL || e == NULL) return;
 
@@ -646,7 +642,10 @@ void ents_that_depends_on_list(struct ent * e_ori, int deltar,  int deltac) {
     dep_size = 0;
 
     while (e != NULL) {
-        p = *ATBL(sh, sh->tbl, e->row+deltar, e->col+deltac);
+        struct sheet * sh = e->sheet;
+        // update sheet to current sheet if is null (a sheet was deleted)
+        if (sh == NULL) sh = session->cur_doc->cur_sh;
+        p = *ATBL(sh, sh->tbl, e->vp->row+deltar, e->vp->col+deltac);
         if (p != NULL) {
             markAllVerticesNotVisited(0);
             ents_that_depends_on(sh, p);

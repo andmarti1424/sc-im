@@ -109,7 +109,9 @@ int paste_from_clipboard() {
                     sc_debug("Content from clipboard exceeds maximum width for a label. Cutting it to %d chars", MAX_IB_LEN);
                     st[MAX_IB_LEN-1]='\0';
                 }
-                swprintf(line_interp, BUFFERSIZE, L"label %s%d=\"%s\"", coltoa(c), r, st);
+                char * std = str_replace(st, "\"", "\\\""); // backspace double quotes
+                swprintf(line_interp, BUFFERSIZE, L"label %s%d=\"%s\"", coltoa(c), r, std);
+                free(std);
             }
             if (strlen(st)) send_to_interp(line_interp);
             c++;

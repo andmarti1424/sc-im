@@ -83,6 +83,13 @@
  *       p_sig: pointer to 'undo' struct, If NULL, this node is the last change in
  *              the session.
  *
+ *       modflg_bef: document modflg before the change
+ *       maxrow_bef: sheet maxrow before the change
+ *       maxcol_bef: sheet maxcol before the change
+ *       modflg_aft: document modflg after the change
+ *       maxrow_aft: sheet maxrow after the change
+ *       maxcol_aft: sheet maxcol after the change
+ *
  * Follows one level UNDO/REDO scheme. A change (C1) is made, then an UNDO operation, and
  * another change (C2). From there later changes are removed.
  * Scheme:

@@ -113,16 +113,13 @@ void erasedb(struct sheet * sheet, int _free) {
         struct ent ** pp = ATBL(sheet, sheet->tbl, r, 0);
         for (c = 0; c++ < sheet->maxcols; pp++)
             if (*pp != NULL) {
-                //(*pp)->next = freeents;    /* save [struct ent] for reuse */
-                //freeents = *pp;
                 clearent(*pp);
                 if (_free) free(*pp);
+                else {
+                  (*pp)->next = freeents;    /* save [struct ent] for reuse */
+                  freeents = *pp;
+                }
             }
-    }
-
-    for (c = 0; c < COLFORMATS; c++) {
-        if (colformat[c] != NULL) scxfree(colformat[c]);
-        colformat[c] = NULL;
     }
 
     sheet->maxrow = 0;

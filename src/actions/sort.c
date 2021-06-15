@@ -161,17 +161,17 @@ void sortrange(struct sheet * sh, struct ent * left, struct ent * right, char * 
 
 
     // Fix the 'ent' elements in the sorted range
-    struct ent * p_aux, * yl = get_yanklist();
+    struct ent_ptr * p_aux, * yl = get_yanklist();
 
     for (c = 0, p_aux = yl; p_aux; p_aux = p_aux->next) {
-        if (rows[c] != p_aux->row) {
-            for (c = 0; c <= maxr - minr && rows[c] != p_aux->row; c++) ;
+        if (rows[c] != p_aux->vp->row) {
+            for (c = 0; c <= maxr - minr && rows[c] != p_aux->vp->row; c++) ;
             if (c > maxr - minr) {
                 sc_error("sort error");
                 return;
             }
         }
-        p_aux->row = minr + c;
+        p_aux->vp->row = minr + c;
     }
 
     sh->currow = minr;

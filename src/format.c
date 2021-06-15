@@ -129,6 +129,7 @@
 #include <sys/types.h>
 #include <time.h>
 #include "sc.h"
+#include "xmalloc.h"
 
 #define EOS      '\0'
 #define MAXBUF   256
@@ -634,4 +635,18 @@ int engformat(int fmt, int width, int lprecision, double val, char *buf, int buf
         }
     }
     return (TRUE);
+}
+
+/**
+ * \brief free_formats()
+ * \return none
+ */
+void free_formats() {
+    int c;
+    for (c = 0; c < COLFORMATS; c++) {
+        if (colformat[c] != NULL)
+            scxfree(colformat[c]);
+        colformat[c] = NULL;
+    }
+    return;
 }

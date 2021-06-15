@@ -803,7 +803,8 @@ command:
                                            roman->cur_sh = sh->next;
                                        else if (roman->cur_sh == sh)
                                            roman->cur_sh = sh->prev;
-                                       delete_sheet(roman, sh);
+                                       delete_sheet(roman, sh, 0);
+                                       sh = NULL;
                                        roman->modflg++;
                                        scxfree($2);
                                        chg_mode('.');
@@ -820,7 +821,8 @@ command:
                                            roman->cur_sh = sh->next;
                                        else if (roman->cur_sh == sh)
                                            roman->cur_sh = sh->prev;
-                                       delete_sheet(roman, sh);
+                                       delete_sheet(roman, sh, 0);
+                                       rebuild_graph();
                                        roman->modflg++;
                                        chg_mode('.');
                                        ui_update(TRUE);

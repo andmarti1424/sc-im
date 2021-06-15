@@ -81,7 +81,7 @@ void delete_reference(vertexT * v_cur, vertexT * vc, int back_reference);
 void markAllVerticesNotVisited(int eval_visited);
 void ents_that_depends_on(struct sheet * sh, struct ent * ent);
 void ents_that_depends_on_range(struct sheet * sh, int r1, int c1, int r2, int c2);
-void ents_that_depends_on_list(struct ent * e_ori, int deltar,  int deltac);
+void ents_that_depends_on_list(struct ent_ptr * e_ori, int deltar,  int deltac);
 int GraphIsReachable(vertexT * src, vertexT * dest, int back_dep);
 void rebuild_graph();
 

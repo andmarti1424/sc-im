@@ -46,6 +46,7 @@
 #include <stdlib.h>
 #include "sheet.h"
 #include "file.h"
+#include "yank.h"
 
 int id_sheet = 0;
 
@@ -161,7 +162,7 @@ void delete_doc(struct session * session, struct roman * doc) {
     struct sheet * s_aux, * sh = doc->first_sh;
     while (sh != NULL) {
         s_aux = sh->next;
-        delete_sheet(doc, sh);
+        delete_sheet(doc, sh, 1);
         sh = s_aux;
     }
     if (doc->name != NULL) {
@@ -177,13 +178,21 @@ void delete_doc(struct session * session, struct roman * doc) {
  * \details delete content of a sheet and free its memory
  * \param[doc] struct roman *
  * \param[sh] struct sheet *
+ * \param[flg_free] int
  * \return void
  */
-void delete_sheet(struct roman * roman, struct sheet * sh) {
+void delete_sheet(struct roman * roman, struct sheet * sh, int flg_free) {
     REMOVE(sh, (roman->first_sh), (roman->last_sh), next, prev);
 
+    // mark to NULL all ents on yanklist that refers to this sheet
+    struct ent_ptr * yl = get_yanklist();
+    while (yl != NULL) {
+        if (yl->sheet == sh) yl->sheet = NULL;
+        yl = yl->next;
+    }
+
     // free sheet
-    erasedb(sh, 1); // clear sh and also free
+    erasedb(sh, flg_free); // clear sh and also free
 
     for (int row = 0; sh->tbl != NULL && row < sh->maxrows; row++) {
         if (sh->tbl[row] != NULL) {

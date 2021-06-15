@@ -445,15 +445,15 @@ void do_visualmode(struct block * buf) {
    // 'p' normal paste
    // 'P' Works like 'p' except that all cell references are adjusted.
     } else if (buf->value == 'P' || buf->value == 'p') {
-        struct ent * yl = get_yanklist();
+        struct ent_ptr * yl = get_yanklist();
         int type_paste = (buf->value == 'P') ? 'c' : 'a' ;
         int row, col;
         if( yl != NULL) {
-            int colsize = -(yl->col); //calculate colsize for correct repeating if paste area is bigger than yank area  
-            int rowsize = -(yl->row); //calculate rowsize
+            int colsize = -(yl->vp->col); //calculate colsize for correct repeating if paste area is bigger than yank area
+            int rowsize = -(yl->vp->row); //calculate rowsize
             while (yl->next != NULL) { yl = yl->next; } //get the last one to calculated size of yank_area
-            colsize += (yl->col +1); //calculate size
-            rowsize += (yl->row +1); //calculate size
+            colsize += (yl->vp->col +1); //calculate size
+            rowsize += (yl->vp->row +1); //calculate size
 #ifdef DEBUG
             char str[20];
             sprintf(str, "RowSize:%d ColSize:%d Type Paste:%d", rowsize, colsize, type_paste);

@@ -64,6 +64,7 @@
 #include "tui.h"
 #include "input.h"
 #include "marks.h"
+#include "format.h"
 #include "maps.h"
 #include "yank.h"
 #include "file.h"
@@ -433,6 +434,9 @@ void delete_structures() {
 
     // Free yanklist
     free_yanklist();
+
+    // free custom col formats
+    free_formats();
 
     // Erase last_command buffer
     erase_buf(lastcmd_buffer);
