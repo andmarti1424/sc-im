@@ -48,6 +48,7 @@
 #include "file.h"
 #include "yank.h"
 #include "marks.h"
+#include "graph.h"
 
 int id_sheet = 0;
 
@@ -185,7 +186,7 @@ void delete_doc(struct session * session, struct roman * doc) {
 void delete_sheet(struct roman * roman, struct sheet * sh, int flg_free) {
     REMOVE(sh, (roman->first_sh), (roman->last_sh), next, prev);
 
-    // mark to NULL all ents on yanklist that refers to this sheet
+    // mark '->sheet to NULL' in all ents on yanklist that refers to this sheet
     struct ent_ptr * yl = get_yanklist();
     while (yl != NULL) {
         if (yl->sheet == sh) yl->sheet = NULL;
@@ -196,7 +197,12 @@ void delete_sheet(struct roman * roman, struct sheet * sh, int flg_free) {
     clean_marks_by_sheet(sh);
 
     // free sheet
-    erasedb(sh, flg_free); // clear sh and also free
+    erasedb(sh, flg_free); // clear sh and free on if flg_free is true
+
+    // if we are deleting a sheet not at exit
+    // we need to update references of ents of other sheets
+    // that could refer to this one by rebuilding the graph.
+    if (! flg_free) rebuild_graph();
 
     for (int row = 0; sh->tbl != NULL && row < sh->maxrows; row++) {
         if (sh->tbl[row] != NULL) {
@@ -220,6 +226,7 @@ void delete_sheet(struct roman * roman, struct sheet * sh, int flg_free) {
         sh->name = NULL;
     }
     free(sh);
+    sh = NULL;
     return;
 }
 

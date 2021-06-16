@@ -847,7 +847,7 @@ command:
                                        else if (roman->cur_sh == sh)
                                            roman->cur_sh = sh->prev;
                                        delete_sheet(roman, sh, 0);
-                                       rebuild_graph();
+                                       sh = NULL;
                                        roman->modflg++;
                                        chg_mode('.');
                                        ui_update(TRUE);
