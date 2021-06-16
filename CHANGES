@@ -1,11 +1,12 @@
 CHANGES FILE
 
-Currently working on v0.8.3
----------------------------
+Preparing v0.8.3
+----------------
+Here are the details of this release:
 
 New stuff
 ---------
-**Added MultiSheet support
+**Added Multi Sheet support
 added :newsheet, :nextsheet, :prevsheet :delsheet COMMAND_MODE commands
 `gt` and `gT` commands in NORMAL_MODE are now used for moving between sheets
 added new colors types SHEET, CURRENT_SHEET and FILENM
@@ -19,18 +20,25 @@ reeval in multiple sheets: graph now should keep track of the different sheets
              reference cells from different sheets in formulas: ={"Sheet2"}!A2
 Save triggers in files
 ** Added automated tests
-Addapt string and number search for multisheet
 
 Changes:
 --------
++ Adapt string and number search for multisheet
++ marks now considers sheet. We could have mark A in Sheet 1, and mark B on Sheet 2..
+  modified tick() and fix_marks()
 Renamed auto_justify to auto_fit
-ui optimizations
+UI optimizations
 `gt` command of NORMAL_MODE renamed to `go`
-removed --sheet and --filename_with_mode configuration variables
+Removed --sheet and --filename_with_mode configuration variables
 UNDO now saves reference to the sheet where the action took place.
 + copy_to_undostruct() now keep in added/removed list struct ent_ptr *
   (that knows of sheets), rather than struct ent *.
 Copy alignment of strings when doing `Pf`.
+ undo: save maxrow, maxcol, modflg values before and after changes, so they can be restored after undo/redo actions
+Modified yanklist to be struct ent_ptr list, rather thant struct ent list.
+Ents_that_depends_on_list now takes ent_ptr rather than struct ent * as parameter
+Backslash double quotes in cpaste. Issue 574.
+Do not free ents of sheets when deleting a sheet manually (only at exit).  just mark them as deleted.
 
 Fixes
 -----
@@ -42,26 +50,18 @@ Issue #568: handle '>' and '<' on mappings.
 Issue #569: fix invalid read/write/segfault when deleting column.
             Added test8 and test9 for this.
 
-fix: scroll correctly when editing cells with long strings (wider than screen)
+fix horizontal scroll when editing cells with long strings (wider than screen)
 Avoid reading passed maxcols maxrows when shifting left or up over last sheet column/row.
 fix in Pv when pasting over same place where data was yanked.
 fix in paste_yanked_ents: calloc didnt count that yanked cells could share dependencies.
+fix a bug when refreshing grid when autowrap operates. Issue 578.
 
 
 Pending to make v0.8.3 release
 -------------------
-yanklist should be struct ent_ptr list, rather thant struct ent list.
-todo: undo.c: add ent_ptr to added / deleted lists ordered.
-todo: ents_that_depends_on_list SHOULD take ent_ptr rather than struct ent * as parameter!
+Add is_deleted flag on sheets that are deleted. So ents have a chance to update its references to that sheet.
+Then rebuild graph.
 
-+ mark should consider sheet. We could have mark A in Sheet 1, and mark B on Sheet 2.. modify tick()
-input: block buffer maps digraph
-+ rearrange file loading and saving functions
-+ Show range detail in inputwin as A0:C3
-+ Add GETENT in seval
-+ Reeval of @lastrow @lastcol: check cells that uses @lastrow / @lastcol gets updated everytime it change
-+ create @counta, and modify @count to not count strings
-+ replace locked_cell() with any_locked_cells()
 
 
 Ideas for v0.8.4
@@ -69,18 +69,13 @@ Ideas for v0.8.4
 + arv should have priority over scimrc.
 + rethink overlap. it shows incorrectly if text does not fit in the current LINE
 + user customizable UI header (bar)
-+ yank.c functions should receive yanklist pointer as parameter. this would
-allow future use of registers to copy to and paste from.
++ modify search procedure. highlight matches
++ yank.c functions should receive yanklist pointer as parameter, rather than use yanklist global variable.
+this could allow future use of registers to copy to and paste from.
 + registers for yanking
 + use yanklist for added/removed in undo?
 
---
-Thanks to all that notify issues and help testing.
-Thanks to all that helped and created PR.
-Thanks to all who support and use this program.
-
-Andrés Martinelli
-andmarti1424
+Please open a discussion on GitHub to comment on these and other feature requests.
 
 ***********
 v0.8.2
