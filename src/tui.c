@@ -435,14 +435,19 @@ void ui_update(int header) {
      * frozen rows/cols, the fewer mobile rows/cols.
      */
     int nb_mobile_cols = calc_mobile_cols(sh, NULL);
-    int nb_mobile_rows = calc_mobile_rows(sh, NULL);
 
     // Show sc_col headings: A, B, C, D..
     ui_show_sc_col_headings(main_win, nb_mobile_cols);
 
-    // Show the content of the cells
-    // Numeric values, strings.
-    ui_show_content(main_win, nb_mobile_rows, nb_mobile_cols);
+    int nb_mobile_rows;
+    int redraw_needed;
+    do {
+        nb_mobile_rows = calc_mobile_rows(sh, NULL);
+
+        // Show the content of the cells
+        // Numeric values, strings.
+        redraw_needed = ui_show_content(main_win, nb_mobile_rows, nb_mobile_cols);
+    } while (redraw_needed);
 
     // Show sc_row headings: 0, 1, 2, 3..
     ui_show_sc_row_headings(main_win, nb_mobile_rows); // schow_sc_row_headings must be after show_content
@@ -809,10 +814,11 @@ void ui_show_sc_col_headings(WINDOW * win, int nb_mobile_cols) {
  *
  * \return none
  */
-void ui_show_content(WINDOW * win, int nb_mobile_rows, int nb_mobile_cols) {
+int ui_show_content(WINDOW * win, int nb_mobile_rows, int nb_mobile_cols) {
     struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
     int row, col;
+    int redraw_needed = FALSE;
 
     srange * s = get_selected_range();
     int conf_underline_grid = get_conf_int("underline_grid");
@@ -1013,7 +1019,11 @@ void ui_show_content(WINDOW * win, int nb_mobile_rows, int nb_mobile_cols) {
                 if (!conf_truncate && !conf_overlap && conf_autowrap) {
                     // auto wrap
                     int newheight = (wcslen(out) + sh->fwidth[col] - 1) / sh->fwidth[col];
-                    if (sh->row_format[row] < newheight) sh->row_format[row] = newheight;
+                    if (sh->row_format[row] < newheight) {
+                        sh->row_format[row] = newheight;
+                        /* calc_mobile_rows() didn't know about this */
+                        redraw_needed = TRUE;
+                    }
                 }
 
                 if (!conf_overlap || sh->row_format[row] != 1) {
@@ -1056,6 +1066,8 @@ void ui_show_content(WINDOW * win, int nb_mobile_rows, int nb_mobile_cols) {
         }
         winrow += sh->row_format[row];
     }
+
+    return redraw_needed;
 }
 
 
