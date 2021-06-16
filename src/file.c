@@ -2011,10 +2011,10 @@ int plugin_exists(char * name, int len, char * path) {
 void * do_autobackup() {
     struct sheet  * sh = session->cur_doc->cur_sh;
     char * curfile = session->cur_doc->name;
-    int len = strlen(curfile);
+    int len;
+    if (curfile == NULL || ! (len = strlen(curfile))) return (void *) -1;
     //if (session->cur_doc->loading || ! len) return (void *) -1;
     //if (! len || ! session->cur_doc->modflg) return (void *) -1;
-    if (! len) return (void *) -1;
 
     char * pstr = strrchr(curfile, '/');
     int pos = pstr == NULL ? -1 : pstr - curfile;
