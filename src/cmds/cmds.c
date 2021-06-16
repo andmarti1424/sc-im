@@ -2529,6 +2529,7 @@ int calc_mobile_rows(struct sheet * sh, int *last_p) {
     mobile_rows = 0;
     last = sh->offscr_sc_rows;
     for (i = sh->offscr_sc_rows; i < sh->maxrows; i++) {
+        count_rows_downward:
         if (sh->row_hidden[i])
             continue;
         if (sh->row_frozen[i])
@@ -2560,6 +2561,16 @@ int calc_mobile_rows(struct sheet * sh, int *last_p) {
             last = i;
         }
         sh->offscr_sc_rows = last;
+        last = sh->currow;
+        
+        /*
+         * Yet if the rows to follow have a smaller height than those we just
+         * counted then maybe they could fill the remaining space at the
+         * bottom edge of the screen.
+         */
+        i = last + 1;
+        if (row_space > 0 && i < sh->maxrows)
+            goto count_rows_downward;
     }
 
     if (last_p)
@@ -2618,6 +2629,7 @@ int calc_mobile_cols(struct sheet * sh, int *last_p) {
     mobile_cols = 0;
     last = sh->offscr_sc_cols;
     for (i = sh->offscr_sc_cols; i < sh->maxcols; i++) {
+        count_cols_rightward:
         if (sh->col_hidden[i])
             continue;
         if (sh->col_frozen[i])
@@ -2649,6 +2661,16 @@ int calc_mobile_cols(struct sheet * sh, int *last_p) {
             last = i;
         }
         sh->offscr_sc_cols = last;
+        last = sh->curcol;
+
+        /*
+         * Yet if the columns to follow have a smaller height than those we
+         * just counted then maybe they could fill the remaining space at the
+         * right edge of the screen.
+         */
+        i = last + 1;
+        if (col_space > 0 && i < sh->maxcols)
+            goto count_cols_rightward;
     }
 
     if (last_p)
