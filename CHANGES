@@ -39,6 +39,7 @@ Modified yanklist to be struct ent_ptr list, rather thant struct ent list.
 Ents_that_depends_on_list now takes ent_ptr rather than struct ent * as parameter
 Backslash double quotes in cpaste. Issue 574.
 Do not free ents of sheets when deleting a sheet manually (only at exit).  just mark them as deleted.
+Inform old value and new value when changing configuration variable
 
 Fixes
 -----
@@ -55,6 +56,7 @@ Avoid reading passed maxcols maxrows when shifting left or up over last sheet co
 fix in Pv when pasting over same place where data was yanked.
 fix in paste_yanked_ents: calloc didnt count that yanked cells could share dependencies.
 fix a bug when refreshing grid when autowrap operates. Issue 578.
+Avoid segfault in autobackup when no current file is set.
 
 
 Pending to make v0.8.3 release

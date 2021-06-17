@@ -47,4 +47,5 @@ extern struct dictionary * user_conf_d;
 void store_default_config_values();
 char * get_conf_value(const char * key);
 int get_conf_int(const char * key);
+int change_config_parameter(wchar_t * inputline);
 char * get_conf_values(char * salida);

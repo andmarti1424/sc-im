@@ -50,6 +50,7 @@
 #include <string.h>
 #include <time.h>
 #include "conf.h"
+#include "sc.h"
 #include "utils/dictionary.h"
 
 
@@ -194,4 +195,85 @@ char * get_conf_value(const char * key) {
 
 int get_conf_int(const char * key) {
    return get_int(user_conf_d, key);
+}
+
+
+/* \brief change_config_parameter
+ * parameter[in] char * cmd
+ * return int:
+ * 0 if config parameter changed
+ * 1 if config parameter was valid but previous and new values are the same
+ * -1 on error
+ */
+#include <wchar.h>
+#include <string.h>
+#include "macros.h"
+#include "cmds/cmds.h"
+#include "utils/string.h"
+#include "tui.h"
+int change_config_parameter(wchar_t * inputline) {
+    extern wchar_t interp_line[BUFFERSIZE];
+
+    // remove "set "
+    wchar_t line [BUFFERSIZE];
+    wcscpy(line, inputline);
+    del_range_wchars(line, 0, 3);
+
+    // parse value
+    wchar_t * l;
+    if ((l = wcschr(line, L' ')) != NULL) l[0] = L'\0';
+    if ((l = wcschr(line, L'=')) != NULL) l[0] = L'\0';
+
+    // check a proper config parameter exists
+    char oper[BUFFERSIZE];
+    wcstombs(oper, line, BUFFERSIZE);
+    // sent garbage after "set "..
+    if (! strlen(oper)) {
+        sc_error("Invalid command: \'%ls\'", inputline);
+        return -1;
+    }
+    char * value_bef = malloc(sizeof(char)*90);
+    value_bef[0] = '\0';
+    char * key = malloc(sizeof(char)*90);
+    key[0] = '\0';
+    char * value_aft = malloc(sizeof(char)*90);
+    value_aft[0] = '\0';
+
+    strcpy(key, oper);
+    char * s_aux = get_conf_value(key);
+    if (s_aux != NULL) strcpy(value_bef, get_conf_value(key));
+    if ((! value_bef || ! strlen(value_bef)) && strlen(oper) > 2 && ! wcsncmp(inputline, L"set no", 6)) {
+        s_aux = get_conf_value(&oper[2]);
+        if (s_aux != NULL) {
+            strcpy(value_bef, s_aux);
+            strcpy(key, &oper[2]);
+        }
+    }
+
+    if (! value_bef || ! strlen(value_bef)) {
+        sc_error("Invalid config variable: \'%s\'", oper);
+        free(value_aft);
+        free(value_bef);
+        free(key);
+        return -1;
+    }
+
+    // we try to change config value
+    wcscpy(interp_line, inputline);
+    send_to_interp(interp_line);
+    s_aux = get_conf_value(key);
+    if (s_aux != NULL) strcpy(value_aft, s_aux);
+    // check it was changed
+    if (! strcmp(value_bef, value_aft)) { sc_info("Config variable \'%s\' unchanged. Current value is \'%s\'", key, value_aft);
+        free(value_aft);
+        free(value_bef);
+        free(key);
+        return 1;
+    }
+    // inform so
+    sc_info("Config variable \'%s\' changed. Value \'%s\' to \'%s\'", key, value_bef, value_aft);
+    free(value_aft);
+    free(value_bef);
+    free(key);
+    return 0;
 }
