@@ -2562,7 +2562,7 @@ int calc_mobile_rows(struct sheet * sh, int *last_p) {
         }
         sh->offscr_sc_rows = last;
         last = sh->currow;
-        
+
         /*
          * Yet if the rows to follow have a smaller height than those we just
          * counted then maybe they could fill the remaining space at the
@@ -2664,7 +2664,7 @@ int calc_mobile_cols(struct sheet * sh, int *last_p) {
         last = sh->curcol;
 
         /*
-         * Yet if the columns to follow have a smaller height than those we
+         * Yet if the columns to follow have a smaller width than those we
          * just counted then maybe they could fill the remaining space at the
          * right edge of the screen.
          */
