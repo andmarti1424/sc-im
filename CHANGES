@@ -27,7 +27,6 @@ Changes:
 + marks now considers sheet. We could have mark A in Sheet 1, and mark B on Sheet 2..
   modified tick() and fix_marks()
 Renamed auto_justify to auto_fit
-UI optimizations
 `gt` command of NORMAL_MODE renamed to `go`
 Removed --sheet and --filename_with_mode configuration variables
 UNDO now saves reference to the sheet where the action took place.
@@ -40,6 +39,8 @@ Ents_that_depends_on_list now takes ent_ptr rather than struct ent * as paramete
 Backslash double quotes in cpaste. Issue 574.
 Do not free ents of sheets when deleting a sheet manually (only at exit).  just mark them as deleted.
 Inform old value and new value when changing configuration variable
+UI optimizations
+Simplify clipboard code
 
 Fixes
 -----

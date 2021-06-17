@@ -42,6 +42,7 @@
  * @brief Header file for conf.c
  */
 
+#include <wchar.h>
 extern struct dictionary * user_conf_d;
 
 void store_default_config_values();
