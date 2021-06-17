@@ -66,7 +66,8 @@ extern struct session * session;
 */
 int paste_from_clipboard() {
     struct roman * roman = session->cur_doc;
-    if (! strlen(get_conf_value("default_paste_from_clipboard_cmd"))) return -1;
+    char *clipboard_cmd = get_conf_value("default_paste_from_clipboard_cmd");
+    if (!clipboard_cmd || !*clipboard_cmd) return -1;
 
     // create tmp file
     char template[] = "/tmp/sc-im-clipboardXXXXXX";
@@ -80,9 +81,14 @@ int paste_from_clipboard() {
     //FILE * fpori = fdopen(fd, "w");
 
     // copy content from clipboard to temp file
-    char syscmd[PATHLEN + strlen(get_conf_value("default_paste_from_clipboard_cmd")) + 1];
-    sprintf(syscmd, "%s", get_conf_value("default_paste_from_clipboard_cmd"));
-    sprintf(syscmd + strlen(syscmd), " >> %s", template);
+    char syscmd[PATHLEN];
+    int ret = snprintf(syscmd, PATHLEN, "%s >> %s", clipboard_cmd, template);
+    if (ret < 0 || ret >= PATHLEN) {
+        sc_error("Error while pasting from clipboard");
+        ret = -1;
+        goto out;
+    }
+    ret = 0;
     system(syscmd);
 
     // traverse the temp file
@@ -126,12 +132,13 @@ int paste_from_clipboard() {
     }
     sc_info("Content pasted from clipboard");
 
+out:
     // close file descriptor
     close(fd);
 
     // remove temp file
     unlink(template);
-    return 0;
+    return ret;
 }
 
 
@@ -140,7 +147,8 @@ int paste_from_clipboard() {
  * \return 0 on success; -1 on error
  */
 int copy_to_clipboard(int r0, int c0, int rn, int cn) {
-    if (! strlen(get_conf_value("default_copy_to_clipboard_cmd"))) return -1;
+    char *clipboard_cmd = get_conf_value("default_copy_to_clipboard_cmd");
+    if (!clipboard_cmd || !*clipboard_cmd) return -1;
 
     // create tmp file
     char template[] = "/tmp/sc-im-clipboardXXXXXX";
@@ -158,12 +166,16 @@ int copy_to_clipboard(int r0, int c0, int rn, int cn) {
     fclose(fp);
 
     // copy to clipboard
-    char syscmd[PATHLEN + strlen(get_conf_value("default_copy_to_clipboard_cmd")) + 1];
-    sprintf(syscmd, "%s", get_conf_value("default_copy_to_clipboard_cmd"));
-    sprintf(syscmd + strlen(syscmd), " %s", template);
-    system(syscmd);
-
-    sc_info("Content copied to clipboard");
+    char syscmd[PATHLEN];
+    int ret = snprintf(syscmd, PATHLEN, "%s %s", clipboard_cmd, template);
+    if (ret < 0 || ret >= PATHLEN) {
+        sc_error("Error while copying to clipboard");
+        ret = -1;
+    } else {
+        system(syscmd);
+        sc_info("Content copied to clipboard");
+        ret = 0;
+    }
 
     // close file descriptor
     close(fd);
@@ -171,7 +183,7 @@ int copy_to_clipboard(int r0, int c0, int rn, int cn) {
     // remove temp file
     unlink(template);
 
-    return 0;
+    return ret;
 }
 
 
@@ -190,6 +202,7 @@ int copy_to_clipboard(int r0, int c0, int rn, int cn) {
 int save_plain(FILE * fout, int r0, int c0, int rn, int cn) {
     if (fout == NULL) return -1;
     struct roman * roman = session->cur_doc;
+    int conf_clipboard_delimited_tab = get_conf_int("copy_to_clipboard_delimited_tab");
     int row, col;
     register struct ent ** pp;
     wchar_t out[FBUFLEN] = L"";
@@ -250,7 +263,7 @@ int save_plain(FILE * fout, int r0, int c0, int rn, int cn) {
                 if(emptyfield){
                    fwprintf(fout, L"\t");
                 }
-                if (! get_conf_int("copy_to_clipboard_delimited_tab")) {
+                if (! conf_clipboard_delimited_tab) {
                     pad_and_align(text, num, roman->cur_sh->fwidth[col], align, 0, out, roman->cur_sh->row_format[row]);
                     fwprintf(fout, L"%ls", out);
                 } else if ( (*pp)->flags & is_valid) {
@@ -258,7 +271,7 @@ int save_plain(FILE * fout, int r0, int c0, int rn, int cn) {
                 } else if ( (*pp)->label) {
                     fwprintf(fout, L"%s\t", text);
                 }
-            } else if (! get_conf_int("copy_to_clipboard_delimited_tab")) {
+            } else if (! conf_clipboard_delimited_tab) {
                 fwprintf(fout, L"%*s", roman->cur_sh->fwidth[col], " ");
             } else {
                 fwprintf(fout, L"\t");
