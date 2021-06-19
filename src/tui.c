@@ -403,13 +403,6 @@ void ui_update(int header) {
     #endif
 
     if (header) {
-        // Clean from top to bottom
-        wmove(main_win, 0, 0);
-        wclrtobot(main_win);
-
-        // comment this to prevent info message to be erased
-        //wmove(input_win, 0, 0);
-        //wclrtobot(input_win);
         ui_show_celldetails(); // always before ui_print_mode
         ui_print_mode();
         wrefresh(input_win);
@@ -829,6 +822,9 @@ int ui_show_content(WINDOW * win, int nb_mobile_rows, int nb_mobile_cols) {
     int winrow = RESCOLHEADER;
     int mobile_rows = nb_mobile_rows;
     int total_rows = nb_mobile_rows + sh->nb_frozen_rows;
+
+    wmove(win, winrow, 0);
+    wclrtobot(win);
 
     for (row = 0; row < sh->maxrows && total_rows > 0; row++) {
         if (sh->row_hidden[row])
