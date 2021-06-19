@@ -217,10 +217,12 @@ void do_trigger(struct ent *p , int rw) {
     if(in_trigger) return;
     in_trigger = 1;
 
+#ifdef XLUA
     if ((trigger->flag & TRG_LUA ) == TRG_LUA) {
         sc_info("%d %d", p->row, p->col);
         doLuaTrigger_cell(p,rw);
     }
+#endif
 
     if ((trigger->flag & TRG_C ) == TRG_C) {
         do_C_Trigger_cell(p,rw);
