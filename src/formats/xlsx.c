@@ -727,6 +727,7 @@ int export_xlsx(char * filename) {
 
                         add_char(formula, '=', 0);
                         worksheet_write_formula(worksheet, row-1, col, formula, NULL);
+                        worksheet_write_formula_num(worksheet, row-1, col, formula, NULL, (*pp)->v);
 
                         // If a numeric value exists
                     } else if ( (*pp)->flags & is_valid) {
