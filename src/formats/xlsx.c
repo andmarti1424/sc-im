@@ -312,9 +312,10 @@ void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) 
                     ) {
                         char * formula = (char *) child_node->xmlChildrenNode->xmlChildrenNode->content;
                         char * strf;
+                        uppercase(formula);
 
                         // we take some excel common function and adds a @ to them
-                        // we replace count sum avg with @count, @sum, @prod, @avg, @min, @max 
+                        // we replace count sum avg with @count, @sum, @prod, @avg, @min, @max
                         strf = str_replace (formula, "COUNT","@COUNT");
                         strcpy(formula, strf);
                         free(strf);
