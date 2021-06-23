@@ -147,16 +147,13 @@ char * get_xlsx_styles(xmlDocPtr doc_styles, int pos) {
 }
 
 /**
- * \brief TODO Document get_xlsx_number_format_by_id()
- *
+ * \brief get_xlsx_number_format_by_id()
  * \param[in] doc_styles
  * \param[in] id
- *
  * \return none
  */
-
 char * get_xlsx_number_format_by_id(xmlDocPtr doc_styles, int id) {
-    if (doc_styles == NULL || !((id >= 165 && id <= 180) || id == 100))
+    if (doc_styles == NULL)
         return NULL;
 
     // we go forward up to numFmts section
@@ -221,8 +218,20 @@ void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) 
             char * fmtId = style == NULL ? NULL : get_xlsx_styles(doc_styles, atoi(style)); // numfmtId by style number
             char * numberFmt = NULL;
             char * shared = NULL;
-            if (fmtId != NULL && atoi(fmtId) != 0) {
-                numberFmt = get_xlsx_number_format_by_id(doc_styles, atoi(fmtId));
+            int i_fmtid = -1;
+            if (fmtId != NULL) {
+                i_fmtid = atoi(fmtId);
+                if (i_fmtid != 0) numberFmt = get_xlsx_number_format_by_id(doc_styles, i_fmtid);
+            }
+
+            // try to handle custom formats
+            if (i_fmtid == 278 || i_fmtid == 185 ||
+                i_fmtid == 196 || i_fmtid == 217 || i_fmtid == 326 ||
+                i_fmtid == 100 || (i_fmtid > 163 && i_fmtid < 181)) {
+                char * strFormatCode = NULL;
+                strFormatCode = get_xlsx_number_format_by_id(doc_styles, i_fmtid);
+                if (strFormatCode != NULL && ! strcmp(strFormatCode, "General")) i_fmtid = 0;
+                else if (strFormatCode != NULL && str_in_str(strFormatCode, "/") != -1) i_fmtid = 14;
             }
 
             // string
@@ -254,17 +263,9 @@ void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) 
             // numbers (can be dates, results from formulas or simple numbers)
             } else {
                 // date value in v
-                if (fmtId != NULL && child_node->xmlChildrenNode != NULL &&
-                ! strcmp((char *) child_node->xmlChildrenNode->name, "v")
-                && (
-                (atoi(fmtId) >= 14 && atoi(fmtId) <= 17) ||
-                atoi(fmtId) == 278 || atoi(fmtId) == 185 ||
-                atoi(fmtId) == 196 || atoi(fmtId) == 164 ||
-                atoi(fmtId) == 217 || atoi(fmtId) == 326 ||
-                (((atoi(fmtId) >= 165 && atoi(fmtId) <= 180) ||
-                atoi(fmtId) == 100) && numberFmt != NULL // 100,165-180 are user defined formats!!
-                && str_in_str(numberFmt, "/") != -1)
-                )) {
+                if (i_fmtid != -1 && child_node->xmlChildrenNode != NULL &&
+                ! strcmp((char *) child_node->xmlChildrenNode->name, "v") &&
+                (i_fmtid > 13 && i_fmtid < 18)) {
                     long l = strtol((char *) child_node->xmlChildrenNode->xmlChildrenNode->content, (char **) NULL, 10);
 
                     swprintf(line_interp, FBUFLEN, L"let %s%d=%.15ld", coltoa(c), r, (l - 25568) * 86400 - get_conf_int("tm_gmtoff"));
@@ -277,11 +278,10 @@ void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) 
                     n->format = stringFormat;
 
                 // time value in v
-                } else if (fmtId != NULL && child_node->xmlChildrenNode != NULL &&
+                } else if (i_fmtid != -1 && child_node->xmlChildrenNode != NULL &&
                 ! strcmp((char *) child_node->xmlChildrenNode->name, "v")
-                && (
-                (atoi(fmtId) >= 18 && atoi(fmtId) <= 21)
-                )) {
+                && (i_fmtid > 17 && i_fmtid < 22)
+                ) {
                     double l = atof((char *) child_node->xmlChildrenNode->xmlChildrenNode->content);
                     swprintf(line_interp, FBUFLEN, L"let %s%d=%.15f", coltoa(c), r, (l - get_conf_int("tm_gmtoff") * 1.0 / 60 / 60 / 24) * 86400);
                     send_to_interp(line_interp);
@@ -293,7 +293,7 @@ void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) 
                     n->format = stringFormat;
 
                 // v - straight int value
-                } else if (//fmtId != NULL &&
+                } else if (
                 child_node->xmlChildrenNode != NULL &&
                 ! strcmp((char *) child_node->xmlChildrenNode->name, "v") ){
                     double l = atof((char *) child_node->xmlChildrenNode->xmlChildrenNode->content);
@@ -301,7 +301,7 @@ void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) 
                     send_to_interp(line_interp);
 
                 // f - numeric value that is a result from formula
-                } else if (//fmtId != NULL &&
+                } else if (
                 child_node->xmlChildrenNode != NULL && ! strcmp((char *) child_node->xmlChildrenNode->name, "f")) {
 
                     // handle the formula if that is whats desidered!!
