@@ -41,6 +41,7 @@ Do not free ents of sheets when deleting a sheet manually (only at exit).  just 
 Inform old value and new value when changing configuration variable
 UI optimizations
 Simplify clipboard code
+xlsx.c: Convert to uppercase before replacing functions
 
 Fixes
 -----

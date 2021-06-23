@@ -205,8 +205,8 @@ void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) 
 
     cur_node = cur_node->xmlChildrenNode;       // this is sheetdata
     while (cur_node != NULL) {
-        child_node = cur_node->xmlChildrenNode; // this are rows
-        while (child_node != NULL) {            // this are cols
+        child_node = cur_node->xmlChildrenNode; // these are rows
+        while (child_node != NULL) {            // these are cols
 
             // We get r y c
             char * row = (char *) xmlGetProp(cur_node, (xmlChar *) "r");
