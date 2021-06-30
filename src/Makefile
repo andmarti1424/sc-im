@@ -82,6 +82,10 @@ ifneq ($(shell uname -s),Darwin)
   LDLIBS += -pthread
 endif
 
+# Find the name of the Lua package
+LUA_PKG_NAME := $(shell pkg-config --list-all | \
+	grep '^lua[0-9]*[\t ]' | awk '{print $$1}' | sort | tail -1)
+
 # Check for gnuplot existance
 ifneq (, $(shell which gnuplot))
   CFLAGS += -DGNUPLOT
@@ -134,12 +138,12 @@ ifneq (, $(shell which pkg-config))
   endif
 
   # NOTE: lua support
-  ifneq ($(shell pkg-config --exists lua || echo 'no'),no) # Check for user's default lua
-    CFLAGS += -DXLUA $(shell pkg-config --cflags lua)
+  ifneq ($(LUA_PKG_NAME),)
+    CFLAGS += -DXLUA $(shell pkg-config --cflags $(LUA_PKG_NAME))
     ifneq ($(shell uname -s),Darwin)
-      LDLIBS += $(shell pkg-config --libs lua) -Wl,--export-dynamic
+      LDLIBS += $(shell pkg-config --libs $(LUA_PKG_NAME)) -Wl,--export-dynamic
     else
-      LDLIBS += $(shell pkg-config --libs lua) -rdynamic
+      LDLIBS += $(shell pkg-config --libs $(LUA_PKG_NAME)) -rdynamic
     endif
   else ifneq ($(shell pkg-config --exists luajit || echo 'no'),no) # If not found, check for luajit
     CFLAGS += -DXLUA $(shell pkg-config --cflags luajit)
