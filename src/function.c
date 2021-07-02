@@ -963,7 +963,7 @@ char * doext(struct sheet * sh, struct enode *se) {
                         *cp = '\0';            /* end string there */
 
                     if (!se->e.o.s || strlen(buff) != strlen(se->e.o.s))
-                        se->e.o.s = scxrealloc(se->e.o.s, strlen(buff));
+                        se->e.o.s = scxrealloc(se->e.o.s, strlen(buff)+1);
                     (void) strcpy (se->e.o.s, buff);
                 /* save alloc'd copy */
                 }

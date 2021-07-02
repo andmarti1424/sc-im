@@ -587,13 +587,13 @@ struct enode * copye(struct enode *e, struct sheet * sh, int Rdelta, int Cdelta,
     } else {
         struct enode *temprange=0;
         ret = (struct enode *) scxmalloc((unsigned) sizeof (struct enode));
+        ret->op = e->op;
         ret->e.r.left.expr  = copye(e->e.r.left.expr,  e->e.r.left.sheet, Rdelta, Cdelta, r1, c1, r2, c2, special);
         ret->e.r.right.expr = copye(e->e.r.right.expr, e->e.r.right.sheet, Rdelta, Cdelta, r1, c1, r2, c2, special);
         ret->e.r.left.vp = e->e.r.left.vp;
         ret->e.r.right.vp = e->e.r.right.vp;
         ret->e.r.left.sheet = e->e.r.left.sheet;
         ret->e.r.right.sheet = e->e.r.right.sheet;
-        ret->op = e->op;
         switch (ret->op) {
             case SUM:
             case PROD:
