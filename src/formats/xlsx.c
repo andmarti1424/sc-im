@@ -164,13 +164,13 @@ char * get_xlsx_number_format_by_id(xmlDocPtr doc_styles, int id) {
     cur_node = cur_node->xmlChildrenNode;
     // we go forward up to desidered format
     char * idFile = (char *) xmlGetProp(cur_node, (xmlChar *) "numFmtId");
-    while (atoi(idFile) != id) {
+    while (idFile && atoi(idFile) != id) {
         cur_node = cur_node->next;
         free(idFile);
         idFile = (char *) xmlGetProp(cur_node, (xmlChar *) "numFmtId");
     }
 
-    if (atoi(idFile) == id) {
+    if (idFile && atoi(idFile) == id) {
         free(idFile);
         return (char *) xmlGetProp(cur_node, (xmlChar *) "formatCode");
     } else {
