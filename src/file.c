@@ -323,7 +323,7 @@ int savefile() {
 #endif
     // prevent saving files with ".ods" in its name
     } else if (strlen(curfile) > 4 && (! strcasecmp( & curfile[strlen(curfile)-4], ".ods"))) {
-        sc_error("Cannot save an %s file. ODS file saving is still not supported.", curfile);
+        sc_error("Cannot save \'%s\' file. ODS file saving is not yet supported.", curfile);
         return -1;
     }
 
