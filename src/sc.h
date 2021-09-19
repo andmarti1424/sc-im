@@ -191,6 +191,7 @@ struct ent {
 
 #define FIX_ROW 1
 #define FIX_COL 2
+#define GET_ENT 4
 
 /*
  * ent_ptr holds the row/col # and address type of a cell
