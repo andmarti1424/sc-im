@@ -138,6 +138,10 @@ Here is an example `~/.config/sc-im/scimrc` :
 
 Other configuration variables are listed in the [help file](https://raw.githubusercontent.com/andmarti1424/sc-im/freeze/src/doc).
 
+### Tutorial
+
+[sc-im tutorial](https://github.com/jonnieey/Sc-im-Tutorial)
+
 ### Helping us
 
 Want to help?  You can help us with one or more of the following:

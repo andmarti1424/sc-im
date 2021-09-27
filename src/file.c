@@ -114,8 +114,10 @@ void erasedb(struct sheet * sheet, int _free) {
         for (c = 0; c++ < sheet->maxcols; pp++)
             if (*pp != NULL) {
                 clearent(*pp);
-                if (_free) free(*pp);
-                else {
+                if (_free) {
+                    free(*pp);
+                    *pp = NULL;
+                } else {
                   (*pp)->next = freeents;    /* save [struct ent] for reuse */
                   freeents = *pp;
                 }
@@ -319,6 +321,10 @@ int savefile() {
             sc_error("File could not be saved");
         return 0;
 #endif
+    // prevent saving files with ".ods" in its name
+    } else if (strlen(curfile) > 4 && (! strcasecmp( & curfile[strlen(curfile)-4], ".ods"))) {
+        sc_error("Cannot save \'%s\' file. ODS file saving is not yet supported.", curfile);
+        return -1;
     }
 
     // save in sc format

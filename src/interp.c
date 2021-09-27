@@ -575,6 +575,7 @@ char * seval(struct sheet * sh, struct ent * ent, struct enode * se) {
             {
             struct ent * vp = se->e.v.vp;
             sh_vp = se->e.v.sheet;
+            if (sh_vp == NULL) sh_vp = sh;
 
             if (vp && ent && vp->row == ent->row && vp->col == ent->col && sh_vp == sh) {
                 sc_error("Circular reference in seval");
@@ -1714,11 +1715,11 @@ int constant(struct enode *e) {
 void efree(struct enode * e) {
     if (e) {
         /* for get ent ---> */
-        if (e->e.r.left.vp && e->e.r.left.vf & GETENT) {
+        if (e->e.r.left.vp && e->e.r.left.vf & GET_ENT) {
             efree(e->e.r.left.expr);
             e->e.r.left.expr = NULL;
         }
-        if (e->e.r.right.vp && e->e.r.right.vf & GETENT) {
+        if (e->e.r.right.vp && e->e.r.right.vf & GET_ENT) {
             efree(e->e.r.right.expr);
             e->e.r.right.expr = NULL;
         } /* <-- for get ent */
@@ -1794,7 +1795,7 @@ void decodev(struct ent_ptr v) {
     if ( !find_range( (char *) 0, 0, v.vp, v.vp, &r) && !r->r_is_range) {
         (void) sprintf(line+linelim, "%s", r->r_name);
         linelim += strlen(line + linelim);
-    } else if (v.vf == GETENT) {
+    } else if (v.vf == GET_ENT) {
         sprintf(line + linelim, "@getent(");
         linelim += strlen(line + linelim);
         if (v.expr && v.expr->e.o.left) decompile(v.expr->e.o.left, 0);

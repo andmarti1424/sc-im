@@ -1206,14 +1206,14 @@ command:
                  };
 
 term:   var                       {
-                                    if ($1.vf & GETENT)
+                                    if ($1.vf & GET_ENT)
                                         $$ = $1.expr;
                                     else {
                                        $1.sheet = NULL;
                                        $$ = new_var(O_VAR, $1);
                                        $$->e.r.left.expr = NULL;
                                        $$->e.r.right.expr = NULL;
-                                       }
+                                    }
                                   }
 
         | '{' STRING '}' '!' var  {
@@ -1469,7 +1469,7 @@ var:
                                     struct roman * roman = session->cur_doc;
                                     struct sheet * sh = roman->cur_sh;
                                     $$.vp = lookat(sh, eval(sh, NULL, $4), eval(sh, NULL, $6));
-                                    $$.vf = GETENT;
+                                    $$.vf = GET_ENT;
                                     if ($$.expr != NULL) efree($$.expr);
                                     $$.expr = new(GETENT, $4, $6);
                                   }
