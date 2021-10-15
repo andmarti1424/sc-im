@@ -243,6 +243,17 @@ void do_editmode(struct block * sb) {
         ui_show_header();
         return;
 
+    } else if (sb->value == L'C') {         // C
+        inputline[real_inputline_pos] = L'\0';
+        inputline_pos = wcswidth(inputline, real_inputline_pos);
+#ifdef INS_HISTORY_FILE
+        ori_insert_edit_submode = insert_edit_submode;
+        add(insert_history, L"");
+#endif
+        chg_mode(insert_edit_submode);
+        ui_show_header();
+        return;
+
     } else if (sb->value == L's') {         // s
         del_back_char();
 #ifdef INS_HISTORY_FILE

@@ -360,6 +360,7 @@ Commands for handling cell content:
      A           Append at the end of the line.
      I           Append at the beginning of the line.
      D           Delete from the current cursor position to end of line.
+     C           Same as D, but then enter Insert mode.
      <SPACE>     Add a space under the cursor.
      <ENTER>     Confirm changes.
      <ESC>       Go back to NORMAL MODE. If you were in INSERT MODE before,
