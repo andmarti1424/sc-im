@@ -362,8 +362,8 @@ void do_editmode(struct block * sb) {
             case L'$':
                 pos = wcswidth(inputline, wcslen(inputline)) - 1;
                 del_range_wchars(inputline, real_inputline_pos, pos);
-                if (real_inputline_pos == wcslen(inputline) && real_inputline_pos) real_inputline_pos--;
-                inputline_pos = wcswidth(inputline, real_inputline_pos);
+                //if (real_inputline_pos == wcslen(inputline) && real_inputline_pos) real_inputline_pos--;
+                //inputline_pos = wcswidth(inputline, real_inputline_pos);
                 break;
 
             case L'f':
@@ -410,6 +410,7 @@ void do_editmode(struct block * sb) {
                 break;
 
             case L'e':                     // de or ce
+                //OK
                 del_range_wchars(inputline, real_inputline_pos, for_word(1, 0, 0));
                 break;
 
@@ -419,14 +420,14 @@ void do_editmode(struct block * sb) {
 
             case L'w':                     // dw or cw
                 del_range_wchars(inputline, real_inputline_pos, for_word(0, 1, 0) - 1);
-                inputline_pos = wcswidth(inputline, real_inputline_pos);
-                if (real_inputline_pos == wcslen(inputline) && real_inputline_pos) real_inputline_pos--;
+                //inputline_pos = wcswidth(inputline, real_inputline_pos);
+                //if (real_inputline_pos == wcslen(inputline) && real_inputline_pos) real_inputline_pos--;
                 break;
 
             case L'W':                     // dW or cW
                 del_range_wchars(inputline, real_inputline_pos, for_word(0, 1, 1) - 1);
-                inputline_pos = wcswidth(inputline, real_inputline_pos);
-                if (real_inputline_pos == wcslen(inputline) && real_inputline_pos) real_inputline_pos--;
+                //inputline_pos = wcswidth(inputline, real_inputline_pos);
+                //if (real_inputline_pos == wcslen(inputline) && real_inputline_pos) real_inputline_pos--;
                 break;
 
             case L'b':                     // db or cb
