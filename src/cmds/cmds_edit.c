@@ -239,6 +239,7 @@ void do_editmode(struct block * sb) {
 
     } else if (sb->value == L'D') {         // D
         inputline[real_inputline_pos] = L'\0';
+        if (real_inputline_pos == wcslen(inputline) && real_inputline_pos && sb->value == L'D') real_inputline_pos--;
         inputline_pos = wcswidth(inputline, real_inputline_pos);
         ui_show_header();
         return;
