@@ -572,6 +572,8 @@ struct enode * copye(struct enode *e, struct sheet * sh, int Rdelta, int Cdelta,
         int newrow, newcol;
         ret = (struct enode *) scxmalloc((unsigned) sizeof (struct enode));
         ret->op = e->op;
+        //ret->e.s = NULL;
+        //ret->e.o.s = NULL;
         ret->e.r.left.expr = e->e.r.left.expr ? copye(e->e.r.left.expr, e->e.r.left.sheet, Rdelta, Cdelta, r1, c1, r2, c2, special) : NULL; // important to initialize
         ret->e.r.right.expr = e->e.r.right.expr ? copye(e->e.r.right.expr, e->e.r.right.sheet, Rdelta, Cdelta, r1, c1, r2, c2, special) : NULL; // important to initialize
         newrow = e->e.r.left.vf & FIX_ROW || e->e.r.left.vp->row < r1 || e->e.r.left.vp->row > r2 || e->e.r.left.vp->col < c1 || e->e.r.left.vp->col > c2 ?  e->e.r.left.vp->row : special == 1 ? r1 + Rdelta + e->e.r.left.vp->col - c1 : e->e.r.left.vp->row + Rdelta;
@@ -588,8 +590,12 @@ struct enode * copye(struct enode *e, struct sheet * sh, int Rdelta, int Cdelta,
         struct enode *temprange=0;
         ret = (struct enode *) scxmalloc((unsigned) sizeof (struct enode));
         ret->op = e->op;
-        ret->e.r.left.expr  = copye(e->e.r.left.expr,  e->e.r.left.sheet, Rdelta, Cdelta, r1, c1, r2, c2, special);
-        ret->e.r.right.expr = copye(e->e.r.right.expr, e->e.r.right.sheet, Rdelta, Cdelta, r1, c1, r2, c2, special);
+        //ret->e.s = NULL;
+        //ret->e.o.s = NULL;
+        //ret->e.r.left.expr  = copye(e->e.r.left.expr,  e->e.r.left.sheet, Rdelta, Cdelta, r1, c1, r2, c2, special);
+        //ret->e.r.right.expr = copye(e->e.r.right.expr, e->e.r.right.sheet, Rdelta, Cdelta, r1, c1, r2, c2, special);
+        //ret->e.r.left.expr  = NULL;
+        //ret->e.r.right.expr = NULL;
         ret->e.r.left.vp = e->e.r.left.vp;
         ret->e.r.right.vp = e->e.r.right.vp;
         ret->e.r.left.sheet = e->e.r.left.sheet;
@@ -1179,6 +1185,7 @@ void del_selected_cells(struct sheet * sh) {
     int tlcol = sh->curcol;
     int brrow = sh->currow;
     int brcol = sh->curcol;
+    extern struct ent_ptr * deps;
 
     // is we delete a range
     if (is_range_selected() != -1) {
@@ -1204,6 +1211,7 @@ void del_selected_cells(struct sheet * sh) {
     // here we save in undostruct, all the ents that depends on the deleted one (before change)
     ents_that_depends_on_range(sh, tlrow, tlcol, brrow, brcol);
     copy_to_undostruct(sh, tlrow, tlcol, brrow, brcol, UNDO_DEL, HANDLE_DEPS, NULL);
+    if (deps != NULL) { free(deps); deps = NULL; }
 #endif
 
     erase_area(sh, tlrow, tlcol, brrow, brcol, 0, 0); //important: this erases the ents, but does NOT mark them as deleted
@@ -1211,15 +1219,18 @@ void del_selected_cells(struct sheet * sh) {
     sync_refs(sh);
     //flush_saved(); DO NOT UNCOMMENT! flush_saved shall not be called other than at exit.
 
-    // TODO here in EvalRange it cleans deps so it can eval.
-    // we should keep it so me can copy to undostruct later on
-    EvalRange(sh, tlrow, tlcol, brrow, brcol);
+    /* TODO
+     * EvalRange() cleans deps so it can eval.
+     * we should keep it so me can copy to undostruct later on
+     * Here, we might want to make that free of deps inside EvalRange optional as a parameter
+     */
+    //EvalRange(sh, tlrow, tlcol, brrow, brcol);
+    EvalAll();
 
 #ifdef UNDO
     // here we save in undostruct, all the ents that depends on the deleted one (after the change)
     ents_that_depends_on_range(sh, tlrow, tlcol, brrow, brcol);
     copy_to_undostruct(sh, tlrow, tlcol, brrow, brcol, UNDO_ADD, HANDLE_DEPS, NULL);
-    extern struct ent_ptr * deps;
     if (deps != NULL) { free(deps); deps = NULL; }
     end_undo_action();
 #endif
