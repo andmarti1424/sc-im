@@ -168,7 +168,7 @@ void do_editmode(struct block * sb) {
         ui_show_header();
         return;
 
-    } else if (find_val(sb, OKEY_ENTER)) {  // ENTER
+    } else if (find_val(sb, OKEY_ENTER) || sb->value == OKEY_ESC) {  // ENTER or ESC
         char ope[BUFFERSIZE] = "";
         wchar_t content[BUFFERSIZE] = L"";
         wcscpy(content, inputline);

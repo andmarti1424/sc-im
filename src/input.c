@@ -124,7 +124,7 @@ void handle_input(struct block * buffer) {
         }
 #endif
 
-        if ( d == OKEY_ESC || d == ctl('g')) {
+        if ( (d == OKEY_ESC || d == ctl('g')) && curmode != EDIT_MODE) {
             break_waitcmd_loop(buffer);
             ui_clr_header(1);
             ui_show_header();
@@ -197,7 +197,7 @@ void handle_input(struct block * buffer) {
         fix_timeout(&start_tv);
 
         // to handle map of ESC
-        if ( buffer->value == OKEY_ESC || buffer->value == ctl('g')) {
+        if ( (buffer->value == OKEY_ESC || buffer->value == ctl('g')) && curmode != EDIT_MODE) {
             break_waitcmd_loop(buffer);
             ui_print_mult_pend();
             ui_refresh_pad(0);
