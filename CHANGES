@@ -20,6 +20,7 @@ reeval in multiple sheets: graph now should keep track of the different sheets
              reference cells from different sheets in formulas: ={"Sheet2"}!A2
 Save triggers in files
 ** Added automated tests
+C command in EDIT MODE
 
 Changes:
 --------
@@ -42,6 +43,8 @@ Inform old value and new value when changing configuration variable
 UI optimizations
 Simplify clipboard code
 xlsx.c: Convert to uppercase before replacing functions
+Added D command on EDIT mode.
+ESC in EDIT_MODE also confirm changes.
 
 Fixes
 -----
@@ -59,6 +62,8 @@ fix in Pv when pasting over same place where data was yanked.
 fix in paste_yanked_ents: calloc didnt count that yanked cells could share dependencies.
 fix a bug when refreshing grid when autowrap operates. Issue 578.
 Avoid segfault in autobackup when no current file is set.
+fix in cw dw c$ d$ commands of EDIT_MODE
+fix leak in del_selected_cells
 
 
 Pending to make v0.8.3 release
