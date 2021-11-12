@@ -284,8 +284,8 @@ void do_insertmode(struct block * sb) {
         for(i = 0; i < wcslen(cline); i++) ins_in_line(cline[i]);
 
 #ifdef INS_HISTORY_FILE
-        if (commandline_history->pos == 0) {          // Only if editing the new command
-            wchar_t * sl = get_line_from_history(commandline_history, 0);
+        if (insert_history->pos == 0) {          // Only if editing the new command
+            wchar_t * sl = get_line_from_history(insert_history, 0);
             wcscat(sl, cline);                        // Insert into history
         }
 #endif
