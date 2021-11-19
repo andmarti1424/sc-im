@@ -130,6 +130,7 @@ int paste_from_clipboard() {
         if (r > roman->cur_sh->maxrow) roman->cur_sh->maxrow = r;
         if (r > MAXROWS - GROWAMT - 1 || c > ABSMAXCOLS - 1) break;
     }
+    if (get_conf_int("autocalc")) EvalAll();
     sc_info("Content pasted from clipboard");
 
 out:
