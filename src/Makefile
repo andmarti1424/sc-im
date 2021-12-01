@@ -55,29 +55,20 @@ CFLAGS += -DMOUSE
 
 # Clipboard support is OS dependent.
 #
-# You can change this at runtime.
-# copy to macos macOS clipboard use:  "pbcopy <"
-# copy to tmux clipboard use: "tmux load-buffer"
-# copy to X clipboard use: "xclip -i -selection clipboard <"
-ifeq ($(shell uname -s),Darwin)
-  # copy to OSX clipboard:
-  CFLAGS += -DDEFAULT_COPY_TO_CLIPBOARD_CMD=\""pbcopy <"\"
-else
-  # copy to X clipboard:
-  CFLAGS += -DDEFAULT_COPY_TO_CLIPBOARD_CMD=\""xclip -i -selection clipboard <"\"
-endif
-
-# For pasting you can later change it at runtime.
-# paste from macOS clipboard use: "pbpaste"
-# paste from tmux clipboard use: "tmux show-buffer"
-# paste from X clipboard use: "xclip -o -selection clipboard"
-ifeq ($(shell uname -s),Darwin)
-  # paste from OSX clipboard
-  CFLAGS += -DDEFAULT_PASTE_FROM_CLIPBOARD_CMD=\""pbpaste"\"
-else
-  # paste from X clipboard
-  CFLAGS += -DDEFAULT_PASTE_FROM_CLIPBOARD_CMD=\""xclip -o -selection clipboard"\"
-endif
+# Choose one of the following commands for copying to different clipboards:
+# You can later change it at runtime.
+#to copy to tmux clipboard:
+#CFLAGS += -DDEFAULT_COPY_TO_CLIPBOARD_CMD=\""tmux load-buffer"\"
+#to copy to X clipboard:
+CFLAGS += -DDEFAULT_COPY_TO_CLIPBOARD_CMD=\""xclip -i -selection clipboard <"\"
+#to copy to OSX clipboard:
+#CFLAGS += -DDEFAULT_COPY_TO_CLIPBOARD_CMD=\""pbcopy <"\"
+#
+# Choose one of the proposed commands for pasting from different clipboards:
+# You can later change it at runtime.
+#CFLAGS += -DDEFAULT_PASTE_FROM_CLIPBOARD_CMD=\""tmux show-buffer"\"
+CFLAGS += -DDEFAULT_PASTE_FROM_CLIPBOARD_CMD=\""xclip -o -selection clipboard"\"
+#CFLAGS += -DDEFAULT_PASTE_FROM_CLIPBOARD_CMD=\""pbpaste"\"
 
 # Command to open file or link under cursor
 CFLAGS += -DDEFAULT_OPEN_FILE_UNDER_CURSOR_CMD=\""scopen"\"
