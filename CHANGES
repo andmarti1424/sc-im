@@ -45,6 +45,9 @@ Simplify clipboard code
 xlsx.c: Convert to uppercase before replacing functions
 Added D command on EDIT mode.
 ESC in EDIT_MODE also confirm changes.
+Reeval when pasting from clipboard and autocalc is set
+Adjust Makefile to have logic for clipboard commands on MacOS
+
 
 Fixes
 -----
@@ -64,6 +67,8 @@ fix a bug when refreshing grid when autowrap operates. Issue 578.
 Avoid segfault in autobackup when no current file is set.
 fix in cw dw c$ d$ commands of EDIT_MODE
 fix leak in del_selected_cells
+fix when using C-r in INSERT_MODE
+fix arguments reversed on sc.colrow2a
 
 
 Pending to make v0.8.3 release
