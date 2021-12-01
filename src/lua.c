@@ -241,8 +241,8 @@ static int l_colrow2a(lua_State *L) {
     int c, r;
     char buf[16];
 
-    r = lua_tointeger(L, 1);  /* get argument */
-    c = lua_tointeger(L, 2);
+    r = lua_tointeger(L, 2);  /* get argument */
+    c = lua_tointeger(L, 1);
     sprintf(buf,"%s%d", coltoa(c),r);
     lua_pushstring(L,buf);
     return 1;
