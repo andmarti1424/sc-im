@@ -144,6 +144,7 @@ void start_default_ucolors() {
     ucolors[ CELL_CONTENT    ].bold = 1;
     ucolors[ INPUT           ].fg = WHITE;
     ucolors[ INPUT           ].bg = DEFAULT_COLOR;
+    ucolors[ NORMAL          ].bold = 1;
     ucolors[ NORMAL          ].fg = WHITE;
     ucolors[ NORMAL          ].bg = DEFAULT_COLOR;
     ucolors[ CELL_ERROR      ].fg = RED;
