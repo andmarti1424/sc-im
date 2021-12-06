@@ -216,8 +216,14 @@ void show_filters() {
 int free_filters() {
     if (filters == NULL) return -1;
     int i;
-    for (i=0; i < howmany; i++)
-        if (filters[i].eval != NULL) scxfree((char *) filters[i].eval);
+    disable_filters();
+    for (i=0; i < howmany; i++) {
+        if (filters[i].eval != NULL) {
+            scxfree((char *) filters[i].eval);
+            filters[i].eval = NULL;
+            howmany--;
+        }
+    }
     scxfree((char *) filters);
     filters = NULL;
     return 0;
@@ -230,7 +236,7 @@ int free_filters() {
  * \return int: -1 not removed - 0 removed
  */
 int del_filter(int id) {
-    if (filters == NULL || id < 0 || id > howmany) {
+    if (filters == NULL || id < 0) {
         sc_error("Cannot delete the filter");
         return -1;
     }
@@ -238,6 +244,7 @@ int del_filter(int id) {
         scxfree((char *) filters[id].eval);
         filters[id].eval = NULL;
     }
+    howmany--;
     return 0;
 }
 
