@@ -416,6 +416,14 @@ void write_fd(FILE * f, struct roman * doc) {
     while (sh != NULL) {
         fprintf (f, "movetosheet \"%s\"\n", sh->name);
 
+        // save off screen values
+        fprintf (f, "offscr_sc_cols %d\n", sh->offscr_sc_cols);
+        fprintf (f, "offscr_sc_rows %d\n", sh->offscr_sc_rows);
+        fprintf (f, "nb_frozen_rows %d\n", sh->nb_frozen_rows);
+        fprintf (f, "nb_frozen_cols %d\n", sh->nb_frozen_cols);
+        fprintf (f, "nb_frozen_screenrows %d\n", sh->nb_frozen_screenrows);
+        fprintf (f, "nb_frozen_screencols %d\n", sh->nb_frozen_screencols);
+
         for (c = 0; c <= sh->maxcol; c++)
             if (sh->fwidth[c] != DEFWIDTH || sh->precision[c] != DEFPREC || sh->realfmt[c] != DEFREFMT)
                 (void) fprintf (f, "format %s %d %d %d\n", coltoa(c), sh->fwidth[c], sh->precision[c], sh->realfmt[c]);
