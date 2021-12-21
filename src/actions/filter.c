@@ -57,7 +57,7 @@
 #include "../sc.h"
 #include "../cmds/cmds.h"
 
-static int howmany = 0;      /**< how many filters were definedi */
+static int howmany = 0;      /**< how many filters were defined */
 static int active = 0;       /**< indicates if those filters are applied or not */
 static int * results = NULL; /**< this keeps the results of the applied filters */
 static struct filter_item * filters = NULL;
@@ -76,7 +76,7 @@ void add_filter(char * criteria) {
     while (criteria[cp]) {
         int pos = exists_freed_filter(); // we check if there exists a freed filter
         if (pos == -1) {            // if not we alloc a new one
-            filters = (struct filter_item *) scxrealloc((char *) filters, (howmany++ + 1) * (sizeof(struct filter_item)));
+            filters = (struct filter_item *) scxrealloc((char *) filters, (++howmany) * (sizeof(struct filter_item)));
             pos = howmany-1;
         }
 
@@ -221,9 +221,9 @@ int free_filters() {
         if (filters[i].eval != NULL) {
             scxfree((char *) filters[i].eval);
             filters[i].eval = NULL;
-            howmany--;
         }
     }
+    howmany = 0;
     scxfree((char *) filters);
     filters = NULL;
     return 0;
