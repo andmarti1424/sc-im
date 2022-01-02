@@ -1797,32 +1797,40 @@ void export_latex(char * fname, int r0, int c0, int rn, int cn, int verbose) {
 
 
 /**
- * \brief unspecial()
+ * \brief escape special characters and output cell to file
  *
- * \details Unspecial (backquotes - > ") things that are special
- * chars in a table
+ * \details For the export formats delimiter-separated value
+ * and LaTex. Escapes the special characters in one cell value
+ * and appends the cell to the file.
  *
  * \param[in] f file pointer
- * \param[in] srt string pointer
+ * \param[in] str string pointer
  * \param[in] delim
  *
  * \return none
  */
 void unspecial(FILE * f, char * str, int delim) {
     int backquote = 0;
+    if (strchr(str, delim) != NULL) backquote = 1;
 
-    if (str_in_str(str, ",") != -1) backquote = 1;
-    if (backquote) putc('\"', f);
     if (*str == '\\') str++; // delete wheeling string operator, OK?
-    while (*str) {
-        // for LATEX export
-        if (delim == '&' && ( (*str == '&') || (*str == '$') ||
-           (*str == '#') || (*str == '%') || (*str == '{') || (*str == '}') || (*str == '&')))
-           putc('\\', f);
-        putc(*str, f);
-        str++;
+
+    if (delim == '&') { // the export format is LaTex
+        while (*str) {
+            if ( (*str == '&') || (*str == '$') || (*str == '#') ||
+                    (*str == '%') || (*str == '{') || (*str == '}') )
+                putc('\\', f);
+            putc(*str, f);
+            str++;
+	}
+    } else {
+        if (backquote) putc('\"', f);
+        while (*str) {
+            putc(*str, f);
+            str++;
+        }
+        if (backquote) putc('\"', f);
     }
-    if (backquote) putc('\"', f);
 }
 
 
