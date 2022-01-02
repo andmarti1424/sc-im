@@ -1089,10 +1089,8 @@ int import_csv(char * fname, char d) {
     int r = 0, c = 0, cf = 0;
     wchar_t line_interp[FBUFLEN] = L"";
     char * token;
-
-    int quote = 0; // if value has '"'. ex: 12,"1234,450.00",56
-    char delim[2] = ""; //strtok receives a char *, not a char
-    add_char(delim, d, 0);
+    char * next;
+    int eol = 0;
 
     if ((f = fopen(fname , "r")) == NULL) {
         sc_error("Can't read file \"%s\"", fname);
@@ -1114,14 +1112,10 @@ int import_csv(char * fname, char d) {
 
     int i=0;
 
-    // handle ","
-    char lookf[4], repls[2], replb[2];
-    sprintf(lookf, "\"%c\"", d);
-    sprintf(repls, "%c", 6);
-    sprintf(replb, "%c", d);
-
     // CSV file traversing
     while ( ! feof(f) && (fgets(line_in, sizeof(line_in), f) != NULL) ) {
+        eol = 0;
+
         // show file loading progress
         if (++i % 10 == 0 ) sc_info("loading line %d of %d", i, max_lines);
 
@@ -1133,53 +1127,46 @@ int import_csv(char * fname, char d) {
                 break;
             }
 
-        char * str_rep = str_replace(line_in, lookf, repls); // handle "," case
-        strcpy(line_in, str_rep);
-        free(str_rep);
+        next = line_in;
 
-        // Split string using the delimiter
-        token = xstrtok(line_in, delim);
         c = 0;
 
-        while( token != NULL ) {
+        while( !eol ) {
             if (r > MAXROWS - GROWAMT - 1 || c > ABSMAXCOLS - 1) break;
+
+            // Split string using the delimiter
+            token = next;
+            next += next_unquot_delim(token, d);
+            if (*next == '\0')
+                eol = 1;
+            else {
+                *next = '\0';
+                next++;
+            }
+
             clean_carrier(token);
+
+            // remove quotes
             if ( token[0] == '\"' && token[strlen(token)-1] == '\"') {
-                quote = 1;
-            } else if ( (token[0] == '\"' || quote) && strlen(token) && (token[strlen(token)-1] != '\"' || strlen(token) == 1) ) {
-                quote = 1;
-                char * next = xstrtok(NULL, delim);
-
-                if (next != NULL) {
-                    sprintf(token + strlen(token), "%c%s", d, next);
-                    continue;
-                }
+                token[strlen(token)-1] = '\0';
+                token++;
             }
-            if (quote) { // Remove quotes
-                del_char(token, 0);
-                del_char(token, strlen(token)-1);
-            }
-
-            char * st = str_replace (token, repls, replb); // handle "," case
 
             // number import
-            if (strlen(st) && isnumeric(st) && ! get_conf_int("import_delimited_as_text")
+            if (strlen(token) && isnumeric(token) && ! get_conf_int("import_delimited_as_text")
             ) {
                 //wide char
-                swprintf(line_interp, BUFFERSIZE, L"let %s%d=%s", coltoa(c), r, st);
+                swprintf(line_interp, BUFFERSIZE, L"let %s%d=%s", coltoa(c), r, token);
 
             // text import
-            } else if (strlen(st)){
+            } else if (strlen(token)){
                 //wide char
-                swprintf(line_interp, BUFFERSIZE, L"label %s%d=\"%s\"", coltoa(c), r, st);
+                swprintf(line_interp, BUFFERSIZE, L"label %s%d=\"%s\"", coltoa(c), r, token);
             }
             //wide char
-            if (strlen(st)) send_to_interp(line_interp);
+            if (strlen(token)) send_to_interp(line_interp);
 
             if (++c > cf) cf = c;
-            quote = 0;
-            token = xstrtok(NULL, delim);
-            free(st);
         }
 
         r++;
@@ -1194,6 +1181,34 @@ int import_csv(char * fname, char d) {
 
     EvalAll();
     return 0;
+}
+
+
+/**
+ * \brief find next unquoted delimiter
+ * \details Helper function to import_csv(). Returns the
+ * relative position of the next delimiter character that
+ * is not quoted with double-quotes (").
+ * \param[in] start  where we are in the line
+ * \param[in] d  the delimiter character
+ * \return  number of characters to move from start to next
+ * delimiter or EOL
+ */
+int next_unquot_delim(char *start, char d) {
+    int quote = 0;
+    char *p = start;
+    int count = 0;
+
+    while(1) {
+        if (*p == '\0')
+            return count;
+        if (*p == d && !quote)
+            return count;
+        if (*p == '\"')
+            quote = !quote;
+	count++;
+	p++;
+    }
 }
 
 
