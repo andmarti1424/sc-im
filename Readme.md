@@ -154,7 +154,7 @@ Want to help?  You can help us with one or more of the following:
 ### Donations
 
 If you like sc-im please support its development by making a DONATION with PayPal.
-It would really help a lot. 2 kids, 2 cats, 1 wife and only one salary..
+It would really help a lot.
 
 <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=U537V8SNQQ45J" target="_blank">
 <img src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" />
@@ -163,4 +163,4 @@ It would really help a lot. 2 kids, 2 cats, 1 wife and only one salary..
 If you wish to make a donation, please click the above button or just send money to scim.spreadsheet@gmail.com via PayPal, choosing "Goods and Services".
 Paypal is preferred over Patreon.
 
-Thanks!
+Thank you!
