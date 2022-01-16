@@ -57,7 +57,7 @@
 #include "../sc.h"
 #include "../cmds/cmds.h"
 
-static int howmany = 0;      /**< how many filters were definedi */
+static int howmany = 0;      /**< how many filters were defined */
 static int active = 0;       /**< indicates if those filters are applied or not */
 static int * results = NULL; /**< this keeps the results of the applied filters */
 static struct filter_item * filters = NULL;
@@ -76,7 +76,7 @@ void add_filter(char * criteria) {
     while (criteria[cp]) {
         int pos = exists_freed_filter(); // we check if there exists a freed filter
         if (pos == -1) {            // if not we alloc a new one
-            filters = (struct filter_item *) scxrealloc((char *) filters, (howmany++ + 1) * (sizeof(struct filter_item)));
+            filters = (struct filter_item *) scxrealloc((char *) filters, (++howmany) * (sizeof(struct filter_item)));
             pos = howmany-1;
         }
 
@@ -213,11 +213,22 @@ void show_filters() {
  * \brief Free memory of entire filters structure
  * \return int: -1 not removed - 0 removed
  */
+/*
+ * FIXME: howmany in the forloop should be the max id, cause:
+ * you could for instance create 12 filters and remove the filters, 2 to 11.
+ * howmany would be two there, but filter12 would be allocated.
+ */
 int free_filters() {
     if (filters == NULL) return -1;
     int i;
-    for (i=0; i < howmany; i++)
-        if (filters[i].eval != NULL) scxfree((char *) filters[i].eval);
+    disable_filters();
+    for (i=0; i < howmany; i++) {
+        if (filters[i].eval != NULL) {
+            scxfree((char *) filters[i].eval);
+            filters[i].eval = NULL;
+        }
+    }
+    howmany = 0;
     scxfree((char *) filters);
     filters = NULL;
     return 0;
@@ -230,7 +241,7 @@ int free_filters() {
  * \return int: -1 not removed - 0 removed
  */
 int del_filter(int id) {
-    if (filters == NULL || id < 0 || id > howmany) {
+    if (filters == NULL || id < 0) {
         sc_error("Cannot delete the filter");
         return -1;
     }
@@ -238,6 +249,7 @@ int del_filter(int id) {
         scxfree((char *) filters[id].eval);
         filters[id].eval = NULL;
     }
+    howmany--;
     return 0;
 }
 

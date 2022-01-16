@@ -144,6 +144,7 @@ void start_default_ucolors() {
     ucolors[ CELL_CONTENT    ].bold = 1;
     ucolors[ INPUT           ].fg = WHITE;
     ucolors[ INPUT           ].bg = DEFAULT_COLOR;
+    ucolors[ NORMAL          ].bold = 1;
     ucolors[ NORMAL          ].fg = WHITE;
     ucolors[ NORMAL          ].bg = DEFAULT_COLOR;
     ucolors[ CELL_ERROR      ].fg = RED;
@@ -506,7 +507,7 @@ void unformat(struct sheet * sh, int r, int c, int rf, int cf) {
         roman->modflg++;
         #ifdef UNDO
         create_undo_action();
-        copy_to_undostruct(sh, r, rf, c, cf, UNDO_DEL, IGNORE_DEPS, NULL);
+        copy_to_undostruct(sh, r, c, rf, cf, UNDO_DEL, IGNORE_DEPS, NULL);
         #endif
     }
 
@@ -526,7 +527,7 @@ void unformat(struct sheet * sh, int r, int c, int rf, int cf) {
     }
     if (! roman->loading) {
         #ifdef UNDO
-        copy_to_undostruct(sh, r, rf, c, cf, UNDO_ADD, IGNORE_DEPS, NULL);
+        copy_to_undostruct(sh, r, c, rf, cf, UNDO_ADD, IGNORE_DEPS, NULL);
         end_undo_action();
         #endif
         ui_update(TRUE);

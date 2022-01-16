@@ -780,6 +780,7 @@ void do_normalmode(struct block * buf) {
             }
             shift(sh, r, c, rf, cf, buf->pnext->value);
             unselect_ranges();
+            rebuild_graph();
             ui_update(TRUE);
             break;
             }
@@ -804,6 +805,7 @@ void do_normalmode(struct block * buf) {
                 del_selected_cells(sh);
             }
 
+            rebuild_graph();
             ui_update(TRUE);
             break;
             }
@@ -839,6 +841,7 @@ void do_normalmode(struct block * buf) {
 #ifdef UNDO
             end_undo_action();
 #endif
+            rebuild_graph();
             ui_update(TRUE);
             break;
             }
@@ -873,6 +876,7 @@ void do_normalmode(struct block * buf) {
 #ifdef UNDO
             end_undo_action();
 #endif
+            rebuild_graph();
             ui_update(TRUE);
             break;
             }

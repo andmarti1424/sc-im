@@ -239,6 +239,13 @@ token S_YANKCOL
 %token S_TRIGGER
 %token S_UNTRIGGER
 
+%token S_OFFSCR_SC_COLS
+%token S_OFFSCR_SC_ROWS
+%token S_NB_FROZEN_ROWS
+%token S_NB_FROZEN_COLS
+%token S_NB_FROZEN_SCREENROWS
+%token S_NB_FROZEN_SCREENCOLS
+
 %token K_AUTOBACKUP
 %token K_NOAUTOBACKUP
 %token K_AUTOCALC
@@ -402,6 +409,7 @@ token K_COLORERR
 %token K_ASCII
 %token K_CHR
 %token K_FACT
+
 
 %right ';'
 %left '?' ':'
@@ -1000,6 +1008,37 @@ command:
                                           set_trigger(session->cur_doc->cur_sh, $2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col, $3);
                                           scxfree($3);
                                         }
+
+    |    S_OFFSCR_SC_COLS NUMBER {
+                                   struct roman * roman = session->cur_doc;
+                                   struct sheet * sh = roman->cur_sh;
+                                   sh->offscr_sc_cols = $2;
+                                 }
+    |    S_OFFSCR_SC_ROWS NUMBER {
+                                   struct roman * roman = session->cur_doc;
+                                   struct sheet * sh = roman->cur_sh;
+                                   sh->offscr_sc_rows = $2;
+                                 }
+    |    S_NB_FROZEN_ROWS NUMBER {
+                                   struct roman * roman = session->cur_doc;
+                                   struct sheet * sh = roman->cur_sh;
+                                   sh->nb_frozen_rows = $2;
+                                 }
+    |    S_NB_FROZEN_COLS NUMBER {
+                                   struct roman * roman = session->cur_doc;
+                                   struct sheet * sh = roman->cur_sh;
+                                   sh->nb_frozen_cols = $2;
+                                 }
+    |    S_NB_FROZEN_SCREENROWS NUMBER {
+                                   struct roman * roman = session->cur_doc;
+                                   struct sheet * sh = roman->cur_sh;
+                                   sh->nb_frozen_screenrows = $2;
+                                 }
+    |    S_NB_FROZEN_SCREENCOLS NUMBER {
+                                   struct roman * roman = session->cur_doc;
+                                   struct sheet * sh = roman->cur_sh;
+                                   sh->nb_frozen_screencols = $2;
+                                 }
 
     |    S_UNTRIGGER var_or_range  {
                                    del_trigger(session->cur_doc->cur_sh, $2.left.vp->row, $2.left.vp->col, $2.right.vp->row, $2.right.vp->col);

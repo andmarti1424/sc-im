@@ -41,6 +41,7 @@ Backslash double quotes in cpaste. Issue 574.
 Do not free ents of sheets when deleting a sheet manually (only at exit).  just mark them as deleted.
 Inform old value and new value when changing configuration variable
 UI optimizations
+Store offscr_sc values when saving sc files. Restore them when loading sc files
 Simplify clipboard code
 xlsx.c: Convert to uppercase before replacing functions
 Added D command on EDIT mode.
@@ -69,6 +70,8 @@ fix in cw dw c$ d$ commands of EDIT_MODE
 fix leak in del_selected_cells
 fix when using C-r in INSERT_MODE
 fix arguments reversed on sc.colrow2a
+fix in delete_filters that caused SEGFAULT. Issue 637.
+fix in unformat. call to copy_to_undostruct with wrong parameters.
 
 
 Pending to make v0.8.3 release
