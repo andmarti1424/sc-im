@@ -213,6 +213,11 @@ void show_filters() {
  * \brief Free memory of entire filters structure
  * \return int: -1 not removed - 0 removed
  */
+/*
+ * FIXME: howmany in the forloop should be the max id, cause:
+ * you could for instance create 12 filters and remove the filters, 2 to 11.
+ * howmany would be two there, but filter12 would be allocated.
+ */
 int free_filters() {
     if (filters == NULL) return -1;
     int i;
