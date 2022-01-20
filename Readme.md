@@ -41,7 +41,7 @@ sc-im is based on [sc](https://en.wikipedia.org/wiki/Sc_(spreadsheet_calculator)
 |         k        | Move up                                 |
 |         h        | Move left                               |
 |         l        | Move right                              |
-|      gtab12      | go to cell AB12                         |
+|      goab12      | go to cell AB12                         |
 |         u        | undo last change                        |
 |        C-r       | redo last change undone                 |
 |        yy        | Copy current cell                       |
