@@ -163,6 +163,7 @@ void help() {
     wclrtoeol(input_pad);
     ui_refresh_pad(0);
 
+
     wbkgd(main_win, COLOR_PAIR((ucolors[DEFAULT].fg+1) * (COLORS) + ucolors[DEFAULT].bg + 2));
     ui_set_ucolor(main_win, &ucolors[NORMAL], DEFAULT_COLOR);
     ui_set_ucolor(input_win, &ucolors[NORMAL], DEFAULT_COLOR);
@@ -173,6 +174,7 @@ void help() {
 
     int option;
 
+    keypad(input_win, 1);
     while( ! quit_help_now ) {
         option = show_lines();
 
