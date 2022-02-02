@@ -206,8 +206,8 @@ static int l_setform (lua_State *L) {
     int r, c;
     char * val;
     wchar_t buf[BUFFERSIZE];
-    r = lua_tointeger(L, 1);  /* get argument */
-    c = lua_tointeger(L, 2);
+    r = lua_tointeger(L, 2);  /* get argument */
+    c = lua_tointeger(L, 1);
     val = (char *) lua_tostring(L,3);
     swprintf(buf, FBUFLEN, L"LET %s%d=%s", coltoa(c), r, val);
     send_to_interp(buf);
