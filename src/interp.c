@@ -1604,8 +1604,8 @@ void slet(struct roman * roman, struct sheet * sh, struct ent * v, struct enode 
         efree(v->expr);
         v->expr = se;
 
-        //p = seval(v, se);                 // ADDED - here we store the cell dependences in a graph
-        //if (p) scxfree(p);                // ADDED
+        p = seval(sh, v, se);                 /* ADDED for #652 - here we store the cell dependences in a graph */
+        if (p) scxfree(p);                    /***/
 
         v->flags |= (is_changed | is_strexpr);
         if (flushdir < 0) v->flags |= is_leftflush;
@@ -1736,6 +1736,10 @@ void efree(struct enode * e) {
         } else if (e->op == EXT && e->e.o.s) {
             scxfree(e->e.o.s);
             e->e.o.s = NULL;
+            if (e->e.o.left) efree(e->e.o.left);
+            e->e.o.left = NULL;
+            if (e->e.o.right) efree(e->e.o.right);
+            e->e.o.right = NULL;
         }
         scxfree((char *) e);
         e = (struct enode *) 0;
