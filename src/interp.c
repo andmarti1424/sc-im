@@ -634,7 +634,9 @@ char * seval(struct sheet * sh, struct ent * ent, struct enode * se) {
 
     case SET8BIT:  return (docase(SET8BIT, seval(sh, ent, se->e.o.left)));
 
-    case CAPITAL:return (docapital(seval(sh, ent, se->e.o.left)));
+    case CAPITAL:
+                 if (ent && getVertex(graph, sh, ent, 0) == NULL) GraphAddVertex(graph, sh, ent);
+                 return (docapital(seval(sh, ent, se->e.o.left)));
 
     case STINDEX: {
         int r, c;
@@ -648,7 +650,9 @@ char * seval(struct sheet * sh, struct ent * ent, struct enode * se) {
         if (minc>maxc) c = maxc, maxc = minc, minc = c;
         return dostindex(sh, minr, minc, maxr, maxc, se->e.o.right);
     }
-    case EXT:    return (doext(sh, se));
+    case EXT:
+             if (ent && getVertex(graph, sh, ent, 0) == NULL) GraphAddVertex(graph, sh, ent);
+             return (doext(sh, se));
 
 #ifdef XLUA
     case LUA:
@@ -670,7 +674,9 @@ char * seval(struct sheet * sh, struct ent * ent, struct enode * se) {
 
     case SVAL:   return (dosval(sh, seval(sh, ent, se->e.o.left), eval(sh, NULL, se->e.o.right)));
 
-    case REPLACE: return (doreplace(seval(sh, ent, se->e.o.left),
+    case REPLACE:
+                 if (ent && getVertex(graph, sh, ent, 0) == NULL) GraphAddVertex(graph, sh, ent);
+                 return (doreplace(seval(sh, ent, se->e.o.left),
                           seval(sh, NULL, se->e.o.right->e.o.left),
                           seval(sh, NULL, se->e.o.right->e.o.right)));
 
