@@ -271,6 +271,8 @@ token S_YANKCOL
 %token K_OVERLAP
 %token K_NOOVERLAP
 %token K_INPUT_BAR_BOTTOM
+%token K_IGNORE_HIDDEN
+%token K_NOIGNORE_HIDDEN
 %token K_UNDERLINE_GRID
 %token K_TRUNCATE
 %token K_NOTRUNCATE
@@ -1607,6 +1609,13 @@ setitem :
                                   {  if ($3 == 0) parse_str(user_conf_d, "half_page_scroll=0", TRUE);
                                      else         parse_str(user_conf_d, "half_page_scroll=1", TRUE); }
     |    K_NOHALF_PAGE_SCROLL     {               parse_str(user_conf_d, "half_page_scroll=0", TRUE); }
+
+    |    K_IGNORE_HIDDEN          {               parse_str(user_conf_d, "ignore_hidden=1", TRUE); }
+    |    K_IGNORE_HIDDEN    '=' NUMBER
+                                  {  if ($3 == 0) parse_str(user_conf_d, "ignore_hidden=0", TRUE);
+                                     else         parse_str(user_conf_d, "ignore_hidden=1", TRUE); }
+    |    K_NOIGNORE_HIDDEN        {               parse_str(user_conf_d, "ignore_hidden=0", TRUE); }
+
     |    K_QUIET '=' NUMBER       {
                                      if ($3 == 0) parse_str(user_conf_d, "quiet=0", TRUE);
                                      else         parse_str(user_conf_d, "quiet=1", TRUE); }

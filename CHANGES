@@ -22,6 +22,12 @@ Save triggers in files
 ** Added automated tests
 C command in EDIT MODE
 
++ Added ignore_hidden configuration variable to address
+  #674 #653
+  With this hidden rows can be ignored when exporting spreasheets.
+  Useful when exporting the result of a filter.
+  This will also be honored when copy/pasting a range that have hidden rows in it.
+
 Changes:
 --------
 + Adapt string and number search for multisheet
@@ -72,6 +78,9 @@ fix when using C-r in INSERT_MODE
 fix arguments reversed on sc.colrow2a
 fix in delete_filters that caused SEGFAULT. Issue 637.
 fix in unformat. call to copy_to_undostruct with wrong parameters.
+fix swapped arguments on lsetform
+added string functions to dep graph
+
 
 
 Pending to make v0.8.3 release

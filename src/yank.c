@@ -164,15 +164,23 @@ void yank_area(struct sheet * sh, int tlrow, int tlcol, int brrow, int brcol, ch
     type_of_yank = type;
     yank_arg = arg;
     free_yanklist();
+    int ignore_hidden = get_conf_int("ignore_hidden");
 
     struct ent * e_ori;
     // ask for memory to keep struct ent_ptr * and struct ent * for the whole range
     struct ent_ptr * y_cells = (struct ent_ptr *) calloc((brrow-tlrow+1)*(brcol-tlcol+1), sizeof(struct ent_ptr));
     struct ent * y_cells_vp = (struct ent *) calloc((brrow-tlrow+1)*(brcol-tlcol+1), sizeof(struct ent));
 
-    for (r = tlrow; r <= brrow; r++)
+
+    // work on issue 674
+    // if ignore_hidden is set we need to keep the number of hidden rows in case
+    long hid = 0;
+
+    for (r = tlrow; r <= brrow; r++) {
+        if (sh->row_hidden[r]) { hid++; continue; }
         for (c = tlcol; c <= brcol; c++) {
             e_ori = *ATBL(sh, sh->tbl, r, c);
+
             if (e_ori == NULL) continue;
 
             // initialize the 'ent'
@@ -187,8 +195,15 @@ void yank_area(struct sheet * sh, int tlrow, int tlcol, int brrow, int brcol, ch
             (y_cells)->vp->row = e_ori->row;
             (y_cells)->vp->col = e_ori->col;
 
+            // work on issue 674
+            // if ignore_hidden is set we substract that number to the internal row so all the pasted rows are
+            // adjacent. this is a special case when we're pulling hidden rows and we want to ignore those hidden ranges
+            // (example if yanking a result of a filter)
+            if (ignore_hidden) (y_cells)->vp->row -= hid;
+
             add_ent_to_yanklist(y_cells++);
         }
+    }
     // this takes care of a potential memory leak if no ent was added to yanklist
     // for instance when deleting empty row
     if (! yanked_cells) {

@@ -25,7 +25,7 @@ free_filters	filter.c	/^int free_filters() {$/;"	f	typeref:typename:int
 handle_freeze	freeze.c	/^void handle_freeze(struct sheet * sh, struct ent * tl_ent, struct ent * br_ent, char value, char/;"	f	typeref:typename:void
 hide_col	hide_show.c	/^void hide_col(int from_col, int arg) {$/;"	f	typeref:typename:void
 hide_row	hide_show.c	/^void hide_row(int from_row, int arg) {$/;"	f	typeref:typename:void
-howmany	filter.c	/^static int howmany = 0;      \/**< how many filters were definedi *\/$/;"	v	typeref:typename:int	file:
+howmany	filter.c	/^static int howmany = 0;      \/**< how many filters were defined *\/$/;"	v	typeref:typename:int	file:
 howmany	sort.c	/^int howmany;$/;"	v	typeref:typename:int
 plot	plot.c	/^int plot(char * s, int r, int c, int rf, int cf) {$/;"	f	typeref:typename:int
 plotedit	plot.c	/^int plotedit(wchar_t * s) {$/;"	f	typeref:typename:int

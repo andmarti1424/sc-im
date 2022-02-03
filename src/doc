@@ -436,6 +436,8 @@ Commands for handling cell content:
                  NOTE: If you do an export with the :e command, current file
                  name stays unchaged.
                  See :file command for more details.
+                 See 'ignore_hidden' configuration variable below to avoid exporting
+                 hidden rows.
 
      :e tab {file}
                  Export the current spreadsheet to tab-separated file {file}.
@@ -1397,6 +1399,12 @@ Commands for handling cell content:
     'show_cursor' [default off]
     Make the screen cursor follow the active cell. Useful for people
     using sc-im with a braille display.
+
+    'ignore_hidden' [default off]
+    set this if you want the hidden rows of a spreadsheet to be ignored when exporting them
+    to another format.
+    this will also be used in case you also want to copy/paste a range that have hidden rows in
+    it (for instance, the result of an applied filter).
 
 ==============================================================================
 &Built-in Range Functions&

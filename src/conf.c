@@ -64,6 +64,7 @@ const char default_config[] =
     "exec_lua=1\n"
     "xlsx_readformulas=0\n"
     "import_delimited_as_text=0\n"
+    "ignore_hidden=0\n"
     "quit_afterload=0\n"
     "quiet=0\n"
     "numeric_zero=1\n"

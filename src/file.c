@@ -1496,11 +1496,13 @@ void export_markdown(char * fname, int r0, int c0, int rn, int cn) {
     int dash_num;
     int rowfmt;
 
+    int ignore_hidden = get_conf_int("ignore_hidden");
+
     for (row = r0; row <= rn; row++) {
         for (rowfmt=0; rowfmt < roman->cur_sh->row_format[row]; rowfmt++) {
 
             // ignore hidden rows
-            //if (row_hidden[row]) continue;
+            if (ignore_hidden && roman->cur_sh->row_hidden[row]) continue;
 
             for (pp = ATBL(roman->cur_sh, roman->cur_sh->tbl, row, col = c0); col <= cn; col++, pp++) {
                 // ignore hidden cols
@@ -1646,11 +1648,13 @@ void export_plain(char * fname, int r0, int c0, int rn, int cn) {
     int align = 1;
     int rowfmt;
 
+    int ignore_hidden = get_conf_int("ignore_hidden");
+
     for (row = r0; row <= rn; row++) {
         for (rowfmt = 0; rowfmt < roman->cur_sh->row_format[row]; rowfmt++) {
 
             // ignore hidden rows
-            //if (row_hidden[row]) continue;
+            if (ignore_hidden && roman->cur_sh->row_hidden[row]) continue;
 
             for (pp = ATBL(roman->cur_sh, roman->cur_sh->tbl, row, col = c0); col <= cn; col++, pp++) {
                 // ignore hidden cols
@@ -1870,7 +1874,9 @@ void export_delim(char * fname, char coldelim, int r0, int c0, int rn, int cn, i
         }
     }
 
+    int ignore_hidden = get_conf_int("ignore_hidden");
     for (row = r0; row <= rn; row++) {
+        if (ignore_hidden && sh->row_hidden[row]) continue;
         for (pp = ATBL(sh, sh->tbl, row, col = c0); col <= cn; col++, pp++) {
             int last_valid_col = right_limit(sh, row)->col; // for issue #374
             if (col > last_valid_col) continue;

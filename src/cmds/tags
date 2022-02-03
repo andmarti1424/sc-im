@@ -99,7 +99,7 @@ start_edit_mode	cmds_edit.c	/^int start_edit_mode(struct block * buf, char type)
 start_visualmode	cmds_visual.c	/^void start_visualmode(int tlrow, int tlcol, int brrow, int brcol) {$/;"	f	typeref:typename:void
 syncref	cmds.c	/^void syncref(struct sheet * sh, struct enode * e) {$/;"	f	typeref:typename:void
 sync_refs	cmds.c	/^void sync_refs(struct sheet * sh) {$/;"	f	typeref:typename:void
-tick	cmds.c	/^struct ent * tick(char ch) {$/;"	f	typeref:struct:ent *
+tick	cmds.c	/^struct ent_ptr * tick(char ch) {$/;"	f	typeref:struct:ent_ptr *
 valid_commands	cmds_command.c	/^static wchar_t * valid_commands[] = {$/;"	v	typeref:typename:wchar_t * []	file:
 valueize_area	cmds.c	/^void valueize_area(struct sheet * sh, int sr, int sc, int er, int ec) {$/;"	f	typeref:typename:void
 vert_bottom	cmds.c	/^struct ent * vert_bottom(struct sheet * sh) {$/;"	f	typeref:struct:ent *

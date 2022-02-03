@@ -569,6 +569,7 @@ int export_xlsx(char * filename) {
     struct roman * roman = session->cur_doc;
     lxw_workbook  * workbook  = workbook_new(filename);
 
+    int ignore_hidden = get_conf_int("ignore_hidden");
     struct sheet * sh = roman->first_sh;
     while (sh != NULL) {
 
@@ -578,7 +579,10 @@ int export_xlsx(char * filename) {
         insert_row(sh, 0); //add a row so that scim formulas apply to excel
 
         for (row = 0; row <= sh->maxrow+1; row++)
-            for (pp = ATBL(sh, sh->tbl, row, col = 0); col <= sh->maxcol; col++, pp++)
+            for (pp = ATBL(sh, sh->tbl, row, col = 0); col <= sh->maxcol; col++, pp++) {
+                // ignore hidden rows
+                if (ignore_hidden && sh->row_hidden[row]) continue;
+
                 if (*pp) {
                     // Check format here
                     lxw_format * format = workbook_add_format(workbook);
@@ -739,6 +743,7 @@ int export_xlsx(char * filename) {
                     }
                     /* TODO: handle hidden rows and columns? */
                 }
+            }
         sh->currow = 0;
         int_deleterow(sh, 0, 1); /* delete the added row */
         sh->currow = bkp_currow;
