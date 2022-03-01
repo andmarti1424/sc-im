@@ -10,6 +10,7 @@
 # install -m 644 plot_pie plot_bar plot_line plot_scatter /usr/local/share/sc-im/
 # install -d /usr/local/share/man/man1/
 # install -m 644 sc-im.1 /usr/local/share/man/man1/sc-im.1
+make
 
 chmod 644 doc
 chmod 644 plot_pie plot_bar plot_line plot_scatter 
