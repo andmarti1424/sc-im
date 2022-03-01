@@ -17,7 +17,7 @@ chmod 644 plot_pie plot_bar plot_line plot_scatter
 chmod 644 sc-im.1 
 
 name=sc-im
-ver=0.8.3
+ver=0.8.2
 arch=any
 pkg_file_name="$name-$ver-$arch.deb"
 
@@ -30,7 +30,7 @@ fpm \
   --license bsd4-clause \
   --version $ver \
   --architecture all \
-  --description "Terminal spreadsheet application" \
+  --description "Spreadsheet Calculator Improvised -- An ncurses spreadsheet program for terminal" \
   --url "https://github.com/akbarnes/sc-im" \
   --maintainer "Art Barnes <art@pin2.io>" \
   sc-im=/usr/local/bin/sc-im \
