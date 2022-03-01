@@ -1,4 +1,6 @@
 *.o
+*.deb
+*.tgz
 src/y.tab.h
 src/experres.h
 src/gram.c
