@@ -1,7 +1,7 @@
 #!/bin/sh
 
-# Install
-# ----------------------------- 
+# Install Steps
+# --------------------------------
 # install -d /usr/local/bin
 # install sc-im /usr/local/bin/sc-im
 # install scopen /usr/local/bin/scopen
