@@ -16,37 +16,10 @@ chmod 644 doc
 chmod 644 plot_pie plot_bar plot_line plot_scatter 
 chmod 644 sc-im.1 
 
-name=sc-im
-ver=0.8.2
-arch=any
-pkg_file_name="$name-$ver-$arch.deb"
-
 fpm \
   --force \
-  --deb-use-file-permissions \
-  -s dir -t deb \
-  -p $pkg_file_name \
-  --name $name \
-  --license bsd4-clause \
-  --version $ver \
-  --architecture all \
-  --description "Spreadsheet Calculator Improvised -- An ncurses spreadsheet program for terminal" \
-  --url "https://github.com/akbarnes/sc-im" \
-  --maintainer "Art Barnes <art@pin2.io>" \
-  sc-im=/usr/local/bin/sc-im \
-  scopen=/usr/local/bin/scopen \
-  doc=/usr/local/share/sc-im/sc-im_help \
-  plot_pie=/usr/local/share/sc-im/plot_pie \
-  plot_bar=/usr/local/share/sc-im/plot_bar \
-  plot_line=/usr/local/share/sc-im/plot_line \
-  plot_scatter=/usr/local/share/sc-im/plot_scatter \
-  sc-im.1=/usr/share/man/man1/sc-im.1
-
-pkg_file_name="$name-$ver-$arch.snap"
-
-fpm \
-  --force \
-  -s dir -t snap \
+  --rpm-use-file-permissions \
+  -s dir -t rpm \
   -p $pkg_file_name \
   --name $name \
   --license bsd4-clause \
