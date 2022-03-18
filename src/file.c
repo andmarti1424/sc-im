@@ -1206,8 +1206,8 @@ int next_unquot_delim(char *start, char d) {
             return count;
         if (*p == '\"')
             quote = !quote;
-	count++;
-	p++;
+        count++;
+        p++;
     }
 }
 
@@ -1833,11 +1833,11 @@ void unspecial(FILE * f, char * str, int delim) {
     if (delim == '&') { // the export format is LaTex
         while (*str) {
             if ( (*str == '&') || (*str == '$') || (*str == '#') ||
-                    (*str == '%') || (*str == '{') || (*str == '}') )
+                    (*str == '%') || (*str == '{') || (*str == '}') || (*str == '_') )
                 putc('\\', f);
             putc(*str, f);
             str++;
-	}
+        }
     } else {
         if (backquote) putc('\"', f);
         while (*str) {
