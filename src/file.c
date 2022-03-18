@@ -1813,17 +1813,24 @@ void unspecial(FILE * f, char * str, int delim) {
     int backquote = 0;
     if (strchr(str, delim) != NULL) backquote = 1;
 
-    if (backquote) putc('\"', f);
     if (*str == '\\') str++; // delete wheeling string operator, OK?
-    while (*str) {
-        // for LATEX export
-        if (delim == '&' && ( (*str == '&') || (*str == '$') ||
-           (*str == '#') || (*str == '%') || (*str == '{') || (*str == '}') || (*str == '&')))
-           putc('\\', f);
-        putc(*str, f);
-        str++;
+
+    if (delim == '&') { // the export format is LaTex
+        while (*str) {
+            if ( (*str == '&') || (*str == '$') || (*str == '#') ||
+                    (*str == '%') || (*str == '{') || (*str == '}') || (*str == '_') )
+                putc('\\', f);
+            putc(*str, f);
+            str++;
+	}
+    } else {
+        if (backquote) putc('\"', f);
+        while (*str) {
+            putc(*str, f);
+            str++;
+        }
+        if (backquote) putc('\"', f);
     }
-    if (backquote) putc('\"', f);
 }
 
 
