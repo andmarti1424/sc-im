@@ -1631,10 +1631,12 @@ setitem :
                                   {  if ($3 == 0) parse_str(user_conf_d, "xlsx_readformulas=0", TRUE);
                                      else         parse_str(user_conf_d, "xlsx_readformulas=1", TRUE); }
     |    K_NOXLSX_READFORMULAS    {               parse_str(user_conf_d, "xlsx_readformulas=0", TRUE); }
-    |    K_NOCURSES               {               parse_str(user_conf_d, "nocurses=1", TRUE); }
-    |    K_NOCURSES '=' NUMBER    {  if ($3 == 0) parse_str(user_conf_d, "nocurses=0", TRUE);
-                                     else         parse_str(user_conf_d, "nocurses=1", TRUE); }
-    |    K_CURSES                 {               parse_str(user_conf_d, "nocurses=0", TRUE); }
+    |    K_NOCURSES               {  if (! session->cur_doc->loading) parse_str(user_conf_d, "nocurses=1", TRUE); }
+    |    K_NOCURSES '=' NUMBER    {  if (! session->cur_doc->loading) {
+                                         if ($3 == 0) parse_str(user_conf_d, "nocurses=0", TRUE);
+                                         else         parse_str(user_conf_d, "nocurses=1", TRUE); }
+                                     }
+    |    K_CURSES                 {  if (! session->cur_doc->loading) parse_str(user_conf_d, "nocurses=0", TRUE); }
     |    K_NUMERIC                {               parse_str(user_conf_d, "numeric=1", TRUE); }
     |    K_NUMERIC '=' NUMBER     {  if ($3 == 0) parse_str(user_conf_d, "numeric=0", TRUE);
                                      else         parse_str(user_conf_d, "numeric=1", TRUE); }
