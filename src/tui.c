@@ -186,8 +186,12 @@ void ui_stop_screen() {
 
     set_term(sstdout);
     endwin();
+    // ncurses memory leak?
+    // delscreen(sstdout);
     set_term(sstderr);
     endwin();
+    // ncurses memory leak?
+    // delscreen(sstderr);
     return;
 }
 
@@ -267,10 +271,11 @@ void ui_sc_msg(char * s, int type, ...) {
         wmove(input_pad, 0, 0);
         status_line_empty = 0;
 
-        ui_refresh_pad(0);
 #ifdef USECOLORS
         ui_set_ucolor(input_win, &ucolors[INPUT], DEFAULT_COLOR);
+        ui_set_ucolor(input_pad, &ucolors[NORMAL], DEFAULT_COLOR);
 #endif
+        ui_refresh_pad(0);
         if (type == DEBUG_MSG || (session != NULL && session->cur_doc != NULL && session->cur_doc->loading && type == ERROR_MSG)) {
             wtimeout(input_pad, -1);
             wgetch(input_pad);
