@@ -80,6 +80,7 @@ void erasedb(struct sheet * sheet, int _free);
 void load_rc(void);
 FILE * openfile(char *fname, int *rpid, int *rfd);
 int import_csv(char * fname, char d);
+int next_unquot_delim(char *start, char d);
 int import_markdown(char * fname);
 int create_empty_wb();
 //void readfile_argv(int argc, char ** argv);
