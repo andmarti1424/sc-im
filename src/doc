@@ -1868,8 +1868,8 @@ Commands for handling cell content:
     There are a couple of themes you can use with sc-im.
     They are "dracula", "old.sc", "papercolor-dark" and "prince.persia", and
     they are located in the "/themes" folder.
-    You can add the corresponding lines of those in your .scimrc or you can
-    load them at runtime with `:load path_to_theme_file`
+    You can add the corresponding lines of those to $HOME/.config/sc-im/scimrc
+    or you can load them at runtime with `:load path_to_theme_file`
 
 ==============================================================================
 &External scripts&
