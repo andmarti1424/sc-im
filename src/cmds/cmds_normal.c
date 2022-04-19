@@ -1135,7 +1135,6 @@ void do_normalmode(struct block * buf) {
             copy_to_undostruct(sh, r, c, rf, cf, UNDO_ADD, IGNORE_DEPS, NULL);
             end_undo_action();
 #endif
-            cmd_multiplier = 0;
             ui_update(TRUE);
             break;
             }
