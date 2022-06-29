@@ -59,7 +59,10 @@ Navigation commands:
      g$          Go to the rightmost column visible on screen.
      gM          Go to the middle column on the screen.
      gf          Open filename or URL in current cell.
-                 Uses helper script 'scopen'.
+                 Uses helper script 'scopen' by default.
+                 A different executable may be used by changing the
+                 'default_open_file_under_cursor_cmd' configuration variable
+                 at runtime, using the :set command.
      H           Go to the top row visible on screen.
      L           Go to the lowest row visible on screen.
      M           Go to the middle row on the screen.
@@ -2162,6 +2165,7 @@ Commands for handling cell content:
     COPY_TO_CLIPBOARD_DELIMITED_TAB
     COPY_TO_CLIPBOARD_DELIMITED_TAB = {NUMBER}
     NOCOPY_TO_CLIPBOARD_DELIMITED_TAB
+    DEFAULT_OPEN_FILE_UNDER_CURSOR_CMD = {strarg}
     NEWLINE_ACTION = {NUMBER}
     TM_GMTOFF
     TM_GMTOFF = {num}
