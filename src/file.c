@@ -2172,10 +2172,13 @@ int backup_exists(char * file) {
 void openfile_nested(char * file) {
     char * cmd = get_conf_value("default_open_file_under_cursor_cmd");
     if (cmd == NULL || ! strlen(cmd)) return;
-    char syscmd[PATHLEN + strlen(cmd)];
-    sprintf(syscmd, "%s", cmd);
-    sprintf(syscmd + strlen(syscmd), " %s", file);
-    system(syscmd);
+    pid_t pid = fork();
+    if (pid == 0) {
+        execlp(cmd, cmd, file, NULL);
+        exit(EXIT_FAILURE);
+    } else if (pid > 0) {
+        waitpid(pid, NULL, 0);
+    }
 }
 
 
