@@ -28,6 +28,8 @@ C command in EDIT MODE
   Useful when exporting the result of a filter.
   This will also be honored when copy/pasting a range that have hidden rows in it.
 
+PR 725: added 'default_open_file_under_cursor_cmd' configuration value that can be set at runtime
+
 Changes:
 --------
 + Adapt string and number search for multisheet
@@ -80,7 +82,9 @@ fix in delete_filters that caused SEGFAULT. Issue 637.
 fix in unformat. call to copy_to_undostruct with wrong parameters.
 fix swapped arguments on lsetform
 added string functions to dep graph
-
+Issue #697: do not allow to override nocurses config variable
+fix #694: csv import and export / LaTex export
+fix #700: '{' '}' normal mode commands reset cmd_multiplier
 
 
 Pending to make v0.8.3 release
