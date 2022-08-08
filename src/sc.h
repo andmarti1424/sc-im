@@ -78,7 +78,7 @@
 #define PATHLEN     1024     /* maximum path length */
 
 #define MAXCMD       160     /* for ! command and commands that use the pager */
-#define STDERRBUF   8192     /* stderr buffer size */
+#define STDERRBUF   1024     /* stderr buffer size */
 
 #ifndef DFLT_PAGER
 #define    DFLT_PAGER "more" /* more is probably more widespread than less */
