@@ -682,7 +682,7 @@ struct enode * copye(struct enode *e, struct sheet * sh, int Rdelta, int Cdelta,
  */
 void dorowformat(struct sheet * sh, int r, unsigned char size) {
     struct roman * roman = session->cur_doc;
-    if (size < 1 || size > UCHAR_MAX || size > SC_DISPLAY_ROWS) { sc_error("Invalid row format"); return; }
+    if (size < 1 || size > UCHAR_MAX || (! get_conf_int("nocurses") && size > SC_DISPLAY_ROWS)) { sc_error("Invalid row format"); return; }
 
     if (r >= sh->maxrows && !growtbl(sh, GROWROW, 0, r)) r = sh->maxrows-1 ;
     checkbounds(sh, &r, &(sh->curcol));
