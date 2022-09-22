@@ -625,6 +625,8 @@ void write_fd(FILE * f, struct roman * doc) {
 
         sh = sh->next;
     }
+    if (doc->cur_sh != NULL)
+        fprintf (f, "movetosheet \"%s\"\n", doc->cur_sh->name);
     // write marks of document
     write_marks(f);
 
