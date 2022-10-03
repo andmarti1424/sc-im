@@ -582,6 +582,7 @@ void ui_show_header() {
         case EDIT_MODE:
             mvwprintw(input_pad, 0, 1, "%ls", inputline);
             wmove(input_pad, 0, inputline_pos + 1);
+            break;
     }
     int scroll = 0;
     if (inputline_pos > COLS - 14) scroll += inputline_pos - COLS + 14;
@@ -670,8 +671,8 @@ void ui_print_mode() {
         ui_set_ucolor(input_win, &ucolors[INPUT], DEFAULT_COLOR);
         #endif
         // show ':'
-        mvwprintw(input_pad, 0, 0, ":");
-        wmove(input_pad, 0, 1);
+        //mvwprintw(input_pad, 0, 0, ":");
+        //wmove(input_pad, 0, 1);
     }
 
     return;
