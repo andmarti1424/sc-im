@@ -1,3 +1,7 @@
+<h1 align="center">
+  <img src="https://raw.githubusercontent.com/andmarti1424/sc-im/dev/logo.png" alt="sc-im">
+</h1>
+
 # sc-im
 Spreadsheet Calculator Improvised, aka sc-im, is an ncurses based, vim-like spreadsheet calculator.
 
