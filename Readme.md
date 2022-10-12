@@ -1,5 +1,5 @@
-<h1 align="center">
-  <img src="https://raw.githubusercontent.com/andmarti1424/sc-im/dev/logo.png" alt="sc-im" height="25%">
+<h1 align="left">
+  <img src="https://raw.githubusercontent.com/andmarti1424/sc-im/dev/logo.png" alt="sc-im" height="25%" width="25%">
 </h1>
 
 # sc-im
