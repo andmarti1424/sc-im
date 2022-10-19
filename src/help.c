@@ -296,7 +296,7 @@ void help() {
             if (d == OKEY_ENTER && strlen(word_looked)) {
                 find_word(word_looked, 'f');
             }
-            mvwprintw(input_win, 0, 0, "");
+            wmove(input_win, 0,0);
             wclrtoeol(input_win);
             wrefresh(input_win);
             curs_set(0);
