@@ -1933,7 +1933,7 @@ Commands for handling cell content:
        'LET A0=1' is the same as 'let A0=1'
 
     Almost every interactive sc-im command is available for non-interactive
-    scripting. Search the equivelent interactive commands for usage
+    scripting. Search the equivalent interactive commands for usage
     information.
 
     sc-im has these commands for available for external scripts.
