@@ -32,6 +32,7 @@ PR 725: added 'default_open_file_under_cursor_cmd' configuration value that can 
 
 Changes:
 --------
++ added more detailed error in gram.y:yyerror
 + Adapt string and number search for multisheet
 + marks now considers sheet. We could have mark A in Sheet 1, and mark B on Sheet 2..
   modified tick() and fix_marks()
@@ -60,6 +61,7 @@ Adjust Makefile to have logic for clipboard commands on MacOS
 
 Fixes
 -----
+** fixed building warnings
 ** fix in calc_mobile_cols()
 ** fix not updating graph correctly after yanking cells with references -> Pc -> undo.
    It could also segfault on ocassions as well. Added test5 and test6 for this.
