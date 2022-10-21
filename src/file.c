@@ -526,7 +526,7 @@ void write_fd(FILE * f, struct roman * doc) {
                                 decompile(e, 0);
                                 uppercase(line);
                                 del_char(line, 0);
-                                snprintf(strcolor + strlen(strcolor), strlen(line)-4, " bg=%s", &line[0]);
+                                snprintf(strcolor + strlen(strcolor), strlen(line)+5, " bg=%s", &line[0]);
                                 free(e);
                             } else if ((cc = get_custom_color_by_number((*pp)->ucolor->bg - 7)) != NULL) {
                                 sprintf(strcolor + strlen(strcolor), " bg=%.*s", BUFFERSIZE-5, cc->name);
