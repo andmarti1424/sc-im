@@ -238,7 +238,10 @@ void break_waitcmd_loop(struct block * buffer) {
     } else if (curmode == VISUAL_MODE) {
         exit_visualmode();
     }
-    if (curmode == INSERT_MODE && lastmode == EDIT_MODE)     {
+    if (
+         curmode == INSERT_MODE &&
+         ( lastmode == EDIT_MODE || get_conf_int("input_edit_mode") )
+       ) {
         if (inputline_pos && wcslen(inputline) >= inputline_pos) {
             real_inputline_pos--;
             int l = wcwidth(inputline[real_inputline_pos]);

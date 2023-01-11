@@ -79,6 +79,7 @@ const char default_config[] =
     "version=0\n"
     "help=0\n"
     "input_bar_bottom=0\n"
+    "input_edit_mode=0\n"
     "underline_grid=0\n"
 
 #ifdef AUTOBACKUP
