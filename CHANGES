@@ -1,4 +1,22 @@
 CHANGES FILE
+------------
+
+Ideas for v0.8.4
+----------------
++ Add is_deleted flag on sheets that are deleted. So ents have a chance to update its references to that sheet.
+Then rebuild graph.
++ arv should have priority over scimrc.
++ rethink overlap. it shows incorrectly if text does not fit in the current LINE
++ user customizable UI header (bar)
++ modify search procedure. highlight matches
++ yank.c functions should receive yanklist pointer as parameter, rather than use yanklist global variable.
+this could allow future use of registers to copy to and paste from.
++ registers for yanking
++ use yanklist for added/removed in undo?
++ restore transpose
+
+Please open a discussion on GitHub to comment on these and other feature requests.
+
 
 ***********
 v0.8.3
@@ -85,26 +103,6 @@ added string functions to dep graph
 Issue #697: do not allow to override nocurses config variable
 fix #694: csv import and export / LaTex export
 fix #700: '{' '}' normal mode commands reset cmd_multiplier
-
-
-
-Ideas for v0.8.4
-----------------
-+ Add is_deleted flag on sheets that are deleted. So ents have a chance to update its references to that sheet.
-Then rebuild graph.
-+ arv should have priority over scimrc.
-+ rethink overlap. it shows incorrectly if text does not fit in the current LINE
-+ user customizable UI header (bar)
-+ modify search procedure. highlight matches
-+ yank.c functions should receive yanklist pointer as parameter, rather than use yanklist global variable.
-this could allow future use of registers to copy to and paste from.
-+ registers for yanking
-+ use yanklist for added/removed in undo?
-+ restore transpose
-
-Please open a discussion on GitHub to comment on these and other feature requests.
-
-
 
 
 ***********
