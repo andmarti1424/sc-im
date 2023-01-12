@@ -1,8 +1,7 @@
 CHANGES FILE
 
-Preparing v0.8.3
-----------------
-Here are the details of this release:
+***********
+v0.8.3
 
 New stuff
 ---------
@@ -30,8 +29,8 @@ C command in EDIT MODE
 
 PR 725: added 'default_open_file_under_cursor_cmd' configuration value that can be set at runtime
 
-Changes:
---------
+Changes
+-------
 + added more detailed error in gram.y:yyerror
 + Adapt string and number search for multisheet
 + marks now considers sheet. We could have mark A in Sheet 1, and mark B on Sheet 2..
@@ -57,7 +56,6 @@ Added D command on EDIT mode.
 ESC in EDIT_MODE also confirm changes.
 Reeval when pasting from clipboard and autocalc is set
 Adjust Makefile to have logic for clipboard commands on MacOS
-
 
 Fixes
 -----
@@ -89,15 +87,11 @@ fix #694: csv import and export / LaTex export
 fix #700: '{' '}' normal mode commands reset cmd_multiplier
 
 
-Pending to make v0.8.3 release
--------------------
-Add is_deleted flag on sheets that are deleted. So ents have a chance to update its references to that sheet.
-Then rebuild graph.
-
-
 
 Ideas for v0.8.4
 ----------------
++ Add is_deleted flag on sheets that are deleted. So ents have a chance to update its references to that sheet.
+Then rebuild graph.
 + arv should have priority over scimrc.
 + rethink overlap. it shows incorrectly if text does not fit in the current LINE
 + user customizable UI header (bar)
@@ -106,8 +100,12 @@ Ideas for v0.8.4
 this could allow future use of registers to copy to and paste from.
 + registers for yanking
 + use yanklist for added/removed in undo?
++ restore transpose
 
 Please open a discussion on GitHub to comment on these and other feature requests.
+
+
+
 
 ***********
 v0.8.2
