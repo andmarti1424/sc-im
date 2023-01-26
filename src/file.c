@@ -1532,24 +1532,6 @@ void export_markdown(char * fname, int r0, int c0, int rn, int cn) {
                     (void) fprintf (f, " | ");
                 }
 
-                //make header border of dashes with alignment characters
-                if (row == 0) {
-                    if (col == c0) strcat (dashline, "|");
-                    if (align == 0) {
-                        strcat (dashline, ":");
-                    } else {
-                        strcat (dashline, "-");
-                    }
-                    for (dash_num = 0; dash_num < roman->cur_sh->fwidth[col]; dash_num++) {
-                        strcat (dashline, "-");
-                    }
-                    if(align >= 0) {
-                        strcat (dashline, ":");
-                    } else {
-                        strcat (dashline, "-");
-                    }
-                    strcat (dashline, "|");
-                }
 
                 if (*pp) {
                     num [0] = '\0';
@@ -1584,7 +1566,6 @@ void export_markdown(char * fname, int r0, int c0, int rn, int cn) {
                         }
                     }
 
-
                     pad_and_align (text, num, roman->cur_sh->fwidth[col], align, 0, out, roman->cur_sh->row_format[row]);
 
                     wchar_t new[wcslen(out)+1];
@@ -1610,6 +1591,27 @@ void export_markdown(char * fname, int r0, int c0, int rn, int cn) {
                 } else {
                     fprintf (f, "%*s", roman->cur_sh->fwidth[col], " ");
                 }
+
+                // Make header border of dashes with alignment characters
+                // Column alignment is bases on cell alignments of first row
+                if (row == 0) {
+                    if (col == c0) strcat (dashline, "|");
+                    if (align == 0) {
+                        strcat (dashline, ":");
+                    } else {
+                        strcat (dashline, "-");
+                    }
+                    for (dash_num = 0; dash_num < roman->cur_sh->fwidth[col]; dash_num++) {
+                        strcat (dashline, "-");
+                    }
+                    if(align >= 0) {
+                        strcat (dashline, ":");
+                    } else {
+                        strcat (dashline, "-");
+                    }
+                    strcat (dashline, "|");
+                }
+
             }
             fprintf(f," |\n");
         }
