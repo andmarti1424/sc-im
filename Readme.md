@@ -146,6 +146,10 @@ Other configuration variables are listed in the [help file](https://raw.githubus
 
 [sc-im tutorial](https://github.com/jonnieey/Sc-im-Tutorial)
 
+### Related projects
+
+- [vim-scimark](https://github.com/mipmip/vim-scimark) - Vim plugin, edit embedded markdown tables with sc-im in vim terminal.
+
 ### Helping us
 
 Want to help?  You can help us with one or more of the following:
