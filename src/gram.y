@@ -289,6 +289,7 @@ token S_YANKCOL
 %token K_COPY_TO_CLIPBOARD_DELIMITED_TAB
 %token K_NOCOPY_TO_CLIPBOARD_DELIMITED_TAB
 %token K_DEFAULT_OPEN_FILE_UNDER_CURSOR_CMD
+%token K_IMPORT_DELIMITED_TO_TEXT
 %token K_IGNORECASE
 %token K_NOIGNORECASE
 %token K_TM_GMTOFF
@@ -1677,6 +1678,12 @@ setitem :
                                   parse_str(user_conf_d, cmd, FALSE);
                                   scxfree(s);
                                   }
+
+    |    K_IMPORT_DELIMITED_TO_TEXT {      parse_str(user_conf_d, "import_delimited_to_text=1", TRUE); }
+
+    |    K_IMPORT_DELIMITED_TO_TEXT '=' NUMBER
+                                  {  if ($3 == 0) parse_str(user_conf_d, "import_delimited_to_text=0", TRUE);
+                                     else         parse_str(user_conf_d, "import_delimited_to_text=1", TRUE); }
 
     |    K_COPY_TO_CLIPBOARD_DELIMITED_TAB {      parse_str(user_conf_d, "copy_to_clipboard_delimited_tab=1", TRUE); }
 

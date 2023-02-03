@@ -414,7 +414,7 @@ Commands for handling cell content:
                  file (.md, mkd, .markdown), an xlsx or xls file.
 
                  If loading a csv, tab or tsv file and
-                 'import_delimited_as_text' configuration variable is set
+                 'import_delimited_to_text' configuration variable is set
                  Sc-im will import numbers as text.
 
                  If loading an xlsx file and 'xlsx_readformulas' is set, Sc-im

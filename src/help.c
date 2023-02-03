@@ -575,7 +575,7 @@ void show_usage_and_quit(){
 \n  --external_functions        Set variable 'external_functions'\
 \n  --half_page_scroll          Set variable 'half_page_scroll'\
 \n  --ignorecase                Set variable 'ignorecase'\
-\n  --import_delimited_as_text Import text as\
+\n  --import_delimited_to_text Import text as\
 \n  --newline_action={j or l}   Set variable 'newline_action'\
 \n  --nocurses                  Run interactive but without ncurses interface.\
 \n  --numeric                   Set variable 'numeric'\
