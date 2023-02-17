@@ -267,16 +267,7 @@ int main (int argc, char ** argv) {
      * readfile_argv(argc, argv);
      */
 
-    /* load file passed as argv to sc-im.
-     * if more than one file is passed, consider the last one.
-     */
-    load_file(strlen(loadingfile) ? loadingfile : NULL);
-
-    /*
-     * check if session->cur_doc is NULL (no file passed as argv).
-     * if so, create an empty doc with just one sheet
-     */
-    if (session->cur_doc == NULL) create_empty_wb();
+    create_empty_wb();
 
     /*
      * load_rc. Since we are not sure what people put it their scimrc file,
@@ -284,6 +275,13 @@ int main (int argc, char ** argv) {
      * we call the load_rc() routine after session / roman / sheet are alloc'ed.
      */
     load_rc();
+
+    /* load file passed as argv to sc-im.
+     * if more than one file is passed, consider the last one.
+     */
+    if (strlen(loadingfile))
+        load_file(loadingfile);
+
 
     // check input from stdin (pipeline)
     // and send it to interp
