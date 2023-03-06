@@ -160,9 +160,9 @@ int yylex() {
                 for (tblp = linelim ? experres : statres; tblp->key; tblp++) {
                     if (((tblp->key[0]^tokenst[0])&0137)==0) {
                         int i = 1;
-                        while (i<tokenl && ((tokenst[i]^tblp->key[i])&0137)==0)
+                        while (tblp->key[i] && i<tokenl && ((tokenst[i]^tblp->key[i])&0137)==0)
                             i++;
-                        if (i >= tokenl) {
+                        if (i >= tokenl && tblp->key[i] == '\0') {
                             ret = tblp->val;
                             colstate = (ret <= S_FORMAT);
                             if (isgoto) {
