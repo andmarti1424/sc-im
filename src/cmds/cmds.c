@@ -2488,7 +2488,39 @@ int convert_string_to_number(int r0, int c0, int rn, int cn) {
     return 0;
 }
 
+int convert_uppercase(int r0, int c0) {
+    struct roman * roman = session->cur_doc;
+    register struct ent ** pp;
+    wchar_t out[FBUFLEN] = L"";
+	pp = ATBL(roman->cur_sh, roman->cur_sh->tbl, r0, c0);
+	if (*pp) {
+		if ((*pp)->label) {
+   			for (int i = 0; (*pp)->label[i]!='\0'; i++) {
+   			   if ((*pp)->label[i] >= 'a' && (*pp)->label[i] <= 'z') {
+   			      (*pp)->label[i] = (*pp)->label[i] - 32;
+   			   }
+   			}
+		}
+	}
+    return 0;
+}
 
+int convert_lowercase(int r0, int c0) {
+    struct roman * roman = session->cur_doc;
+    register struct ent ** pp;
+    wchar_t out[FBUFLEN] = L"";
+	pp = ATBL(roman->cur_sh, roman->cur_sh->tbl, r0, c0);
+	if (*pp) {
+		if ((*pp)->label) {
+   			for (int i = 0; (*pp)->label[i]!='\0'; i++) {
+   			   if((*pp)->label[i] >= 'A' && (*pp)->label[i] <= 'Z') {
+   			      (*pp)->label[i] = (*pp)->label[i] + 32;
+   			   }
+   			}
+		}
+	}
+    return 0;
+}
 /**
  * \brief Compute number of mobile (unfrozen) rows to fit on screen
  *
