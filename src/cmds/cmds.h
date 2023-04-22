@@ -113,8 +113,8 @@ int fcopy(struct sheet * sh, char * action);
 int fsum(struct sheet * sh);
 int pad(struct sheet * sh, int n, int r1, int c1, int r2, int c2);
 int convert_string_to_number(int r0, int c0, int rn, int cn);
-int convert_uppercase(int r0, int c0)
-int convert_lowercase(int r0, int c0)
+int convert_uppercase(int r0, int c0);
+int convert_lowercase(int r0, int c0);
 
 void fix_row_hidden(struct sheet * sh, int deltar, int ri, int rf);
 void fix_col_hidden(struct sheet * sh, int deltac, int ci, int cf);
