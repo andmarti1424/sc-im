@@ -1118,7 +1118,7 @@ command:
     |    S_EVAL e                  {
                                      struct roman * roman = session->cur_doc;
                                      struct sheet * sh = roman->cur_sh;
-                                     eval_result = eval(sh, NULL, $2);
+                                     eval_result = eval(sh, NULL, $2, 0);
                                      efree($2);
                                    }
     |    S_EXECUTE STRING          {
@@ -1230,7 +1230,7 @@ command:
     |    S_SEVAL e                 {
                                      struct roman * roman = session->cur_doc;
                                      struct sheet * sh = roman->cur_sh;
-                                     seval_result = seval(sh, NULL, $2); // always make sure this seval_result is always freed afterwards
+                                     seval_result = seval(sh, NULL, $2, 0); // always make sure this seval_result is always freed afterwards
                                      efree($2);
                                    }
     |    S_ERROR STRING            { sc_error($2);
@@ -1511,7 +1511,7 @@ var:
     | '@' K_GETENT '(' e ',' e ')' {
                                     struct roman * roman = session->cur_doc;
                                     struct sheet * sh = roman->cur_sh;
-                                    $$.vp = lookat(sh, eval(sh, NULL, $4), eval(sh, NULL, $6));
+                                    $$.vp = lookat(sh, eval(sh, NULL, $4, 0), eval(sh, NULL, $6, 0));
                                     $$.vf = GET_ENT;
                                     if ($$.expr != NULL) efree($$.expr);
                                     $$.expr = new(GETENT, $4, $6);
