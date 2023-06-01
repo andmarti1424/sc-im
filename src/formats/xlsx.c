@@ -158,7 +158,10 @@ char * get_xlsx_number_format_by_id(xmlDocPtr doc_styles, int id) {
 
     // we go forward up to numFmts section
     xmlNode * cur_node = xmlDocGetRootElement(doc_styles)->xmlChildrenNode;
-    while (cur_node != NULL && !(cur_node->type == XML_ELEMENT_NODE && !strcmp((char *) cur_node->name, "numFmts")))
+    //while (cur_node != NULL && !(cur_node->type == XML_ELEMENT_NODE && !strcmp((char *) cur_node->name, "numFmts")))
+    while ((cur_node != NULL) && !(cur_node->type == XML_ELEMENT_NODE &&
+            (!strcmp((char *) cur_node->name, "numFmts") || !strcmp((char *) cur_node->name, "cellStyleXfs") ||
+            !strcmp((char *) cur_node->name, "cellXfs"))))
         cur_node = cur_node->next;
 
     cur_node = cur_node->xmlChildrenNode;
