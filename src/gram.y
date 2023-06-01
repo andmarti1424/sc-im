@@ -273,6 +273,7 @@ token S_YANKCOL
 %token K_INPUT_BAR_BOTTOM
 %token K_IGNORE_HIDDEN
 %token K_NOIGNORE_HIDDEN
+%token K_INPUT_EDIT_MODE
 %token K_UNDERLINE_GRID
 %token K_TRUNCATE
 %token K_NOTRUNCATE
@@ -1562,6 +1563,13 @@ setitem :
                                      else         parse_str(user_conf_d, "input_bar_bottom=1", TRUE);
                                                   ui_mv_bottom_bar(); }
     |    K_INPUT_BAR_BOTTOM       {               parse_str(user_conf_d, "input_bar_bottom=1", TRUE);
+                                                  ui_mv_bottom_bar();
+                                  }
+
+    |    K_INPUT_EDIT_MODE '=' NUMBER   {  if ($3 == 0) parse_str(user_conf_d, "input_edit_mode=0", TRUE);
+                                     else         parse_str(user_conf_d, "input_edit_mode=1", TRUE);
+                                                  ui_mv_bottom_bar(); }
+    |    K_INPUT_EDIT_MODE        {               parse_str(user_conf_d, "input_edit_mode=1", TRUE);
                                                   ui_mv_bottom_bar();
                                   }
 
