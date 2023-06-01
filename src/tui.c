@@ -1138,7 +1138,8 @@ void ui_show_celldetails() {
     int il_pos = 0;
 
     // show filenames
-    for (struct roman * rom = session->first_doc; rom != NULL; rom = rom->next) {
+    struct roman * rom;
+    for (rom = session->first_doc; rom != NULL; rom = rom->next) {
 #ifdef USECOLORS
         ui_set_ucolor(input_win, &ucolors[FILENM], DEFAULT_COLOR);
 #endif
@@ -1147,7 +1148,8 @@ void ui_show_celldetails() {
         il_pos += strlen(file_name) + 1;
 
         // show sheets
-        for (struct sheet * sh = rom->first_sh; sh != NULL; sh = sh->next) {
+        struct sheet * sh;
+        for (sh = rom->first_sh; sh != NULL; sh = sh->next) {
             if (sh == session->cur_doc->cur_sh) {
 #ifdef USECOLORS
                 ui_set_ucolor(input_win, &ucolors[CURRENT_SHEET], DEFAULT_COLOR);

@@ -204,7 +204,8 @@ void delete_sheet(struct roman * roman, struct sheet * sh, int flg_free) {
     // that could refer to this one by rebuilding the graph.
     if (! flg_free) rebuild_graph();
 
-    for (int row = 0; sh->tbl != NULL && row < sh->maxrows; row++) {
+    int row;
+    for (row = 0; sh->tbl != NULL && row < sh->maxrows; row++) {
         if (sh->tbl[row] != NULL) {
             free(sh->tbl[row]);
             sh->tbl[row] = NULL;
