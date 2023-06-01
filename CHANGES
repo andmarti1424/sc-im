@@ -1,5 +1,6 @@
 CHANGES FILE
 ------------
+01/06/23: fix issue in csv import - 816
 
 Ideas for v0.8.4
 ----------------
