@@ -382,26 +382,55 @@ void doLuaclose() {
  * \return none
  */
 
-char * doLUA(struct sheet * sh, struct enode * se, int type) {
+char * doLUA(struct sheet * sh, struct ent * ent, struct enode * se, int dg_store) {
     if ( ! get_conf_int("exec_lua")) return 0;
     char * cmd;
+    int return_type;
+    int row,col;
     char buffer[PATHLEN];
     char buffer1[PATHLEN];
-    cmd = seval(sh, NULL, se->e.o.left);
+    cmd = seval(sh, NULL, se->e.o.left, 0);
+
+    row = ent->row;
+    col = ent->col;
 
     sprintf(buffer, "lua/%s", cmd);
     if (plugin_exists(buffer, strlen(buffer), buffer1)) {
-        if (luaL_loadfile(L, buffer1))              /* Load but don't run the Lua script */
+        if (luaL_loadfile(L, buffer1)) {              /* Load but don't run the Lua script */
             ui_bail(L, "luaL_loadfile() failed");   /* Error out if file can't be read */
+            return (NULL);
+        }
 
-        if (lua_pcall(L, 0, 0, 0))                  /* PRIMING RUN. FORGET THIS AND YOU'RE TOAST */
+        // TODO: A better idea would be to call a function like trigger below
+        // (in which @lua should take 3 arguments) for now, we're just keeping
+        // it as close as possible to the current API
+        // https://stackoverflow.com/questions/19553060/how-to-pass-a-global-value-from-c-to-lua
+        lua_pushinteger(L,row);
+        lua_setglobal(L, "r");
+        lua_pushinteger(L,col);
+        lua_setglobal(L, "c");
+
+        if (lua_pcall(L, 0, 1, 0)) {                  /* PRIMING RUN. FORGET THIS AND YOU'RE TOAST */
             ui_bail(L, "lua_pcall() failed");       /* Error out if Lua file has an error */
+            return (NULL);
+        }
 
        /* Tell what function to run */
        //    lua_getglobal(L, "tellme");
     }
     if (cmd != NULL) free(cmd);
-    return 0;
+
+    return_type = lua_type(L, -1);
+    switch (return_type) {
+        case LUA_TSTRING:
+            ;
+            const char *s = lua_tostring(L, -1);
+            char *ptr = scxmalloc((size_t) s);
+            strcpy(ptr, s);
+            return (ptr);
+        default:
+            return (NULL);
+    }
 }
 
 /**

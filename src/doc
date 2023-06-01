@@ -1679,13 +1679,19 @@ Commands for handling cell content:
         Executes a "luascript". Using Lua script, sc-im can be extend with lot
         new functionality, such as complex programming, accessing databases
         etc.
+
+        Two global variables {r} and {c} are injected in the "luascript". The
+        variables denote the row and column of the calling cell respectively.
+
         The second parameter {i} is 0 or 1 indicating if the reference to this
-        cell should be added to the formula evaluation graph.
-        Setting it to 0 may be a good idea if you call sc.lquery to often in
-        your scripts.
+        cell should be added to the formula evaluation graph. Setting it to 0
+        may be a good idea if you call sc.lquery to often in your scripts.
         However, in the cases were its not added to the dependency graph, it
         will nevertheless be executed when the cell that calls the script
         executions is referenced by another cell.
+
+        The return of value of the "luascript" is inserted in the calling
+        cell if it is a string.
 
         The search patch for LUA scripts files is $PWD/lua/
         $HOME/.sc-im/lua/ or /usr/local/share/sc-im/lua (in that order)
