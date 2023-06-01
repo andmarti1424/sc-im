@@ -1,11 +1,9 @@
 CHANGES FILE
 ------------
-01/06/23: fix issue in csv import - 816
-01/06/23: merged PR 789
-01/06/23: merged PR 776
 
-Ideas for v0.8.4
+Ideas for v0.8.5
 ----------------
++ restore transpose
 + Add is_deleted flag on sheets that are deleted. So ents have a chance to update its references to that sheet.
 Then rebuild graph.
 + arv should have priority over scimrc.
@@ -16,9 +14,17 @@ Then rebuild graph.
 this could allow future use of registers to copy to and paste from.
 + registers for yanking
 + use yanklist for added/removed in undo?
-+ restore transpose
+
+
 
 Please open a discussion on GitHub to comment on these and other feature requests.
+
+***********
+v0.8.4
+
+06/01/2023: fix issue in csv import - 816
+06/01/2023: merged PR 789
+06/01/2023: merged PR 776
 
 
 ***********
