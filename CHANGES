@@ -25,6 +25,7 @@ v0.8.4
 06/01/2023: fix issue in csv import - 816
 06/01/2023: merged PR 789
 06/01/2023: merged PR 776
+06/01/2023: merged PR 783 that gets rid of issue 778 - changed load_rc load_file order.
 
 
 ***********
