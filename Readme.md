@@ -153,6 +153,10 @@ Thank you!
 
 [sc-im tutorial](https://github.com/jonnieey/Sc-im-Tutorial)
 
+### Related projects
+
+- [vim-scimark](https://github.com/mipmip/vim-scimark) - Vim plugin, edit embedded markdown tables with sc-im in vim terminal.
+
 ### Helping us
 
 Want to help?  You can help us with one or more of the following:
