@@ -26,6 +26,7 @@ v0.8.4
 06/01/2023: merged PR 789
 06/01/2023: merged PR 776
 06/01/2023: merged PR 783 that gets rid of issue 778 - changed load_rc load_file order.
+06/01/2023: Fix issue 784: get row number and column or cell that calls a LUA script with PR 814.
 
 
 ***********
