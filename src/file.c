@@ -515,7 +515,7 @@ void write_fd(FILE * f, struct roman * doc) {
                                 sprintf(strcolor, " fg=%.*s", BUFFERSIZE-5, &line[0]);
                                 free(e);
                             } else if ((cc = get_custom_color_by_number((*pp)->ucolor->fg - 7)) != NULL) {
-                                sprintf(strcolor, " fg=%.*s", BUFFERSIZE-5, cc->name);
+                                sprintf(strcolor, " fg=%.*s", BUFFERSIZE, cc->name);
                             }
                         }
 
@@ -526,10 +526,10 @@ void write_fd(FILE * f, struct roman * doc) {
                                 decompile(e, 0);
                                 uppercase(line);
                                 del_char(line, 0);
-                                snprintf(strcolor + strlen(strcolor), strlen(line)+5, " bg=%s", &line[0]);
+                                sprintf(strcolor + strlen(strcolor), " bg=%s", &line[0]);
                                 free(e);
                             } else if ((cc = get_custom_color_by_number((*pp)->ucolor->bg - 7)) != NULL) {
-                                sprintf(strcolor + strlen(strcolor), " bg=%.*s", BUFFERSIZE-5, cc->name);
+                                sprintf(strcolor + strlen(strcolor), " bg=%.*s", BUFFERSIZE, cc->name);
                             }
                         }
 
@@ -625,9 +625,6 @@ void write_fd(FILE * f, struct roman * doc) {
 
         sh = sh->next;
     }
-    // save movetosheet in sc file
-    if (doc->cur_sh != NULL) fprintf (f, "movetosheet \"%s\"\n", doc->cur_sh->name);
-
     // write marks of document
     write_marks(f);
 
@@ -1100,8 +1097,10 @@ int import_csv(char * fname, char d) {
     int r = 0, c = 0, cf = 0;
     wchar_t line_interp[FBUFLEN] = L"";
     char * token;
-    char * next;
-    int eol = 0;
+
+    int quote = 0; // if value has '"'. ex: 12,"1234,450.00",56
+    char delim[2] = ""; //strtok receives a char *, not a char
+    add_char(delim, d, 0);
 
     if ((f = fopen(fname , "r")) == NULL) {
         sc_error("Can't read file \"%s\"", fname);
@@ -1123,10 +1122,14 @@ int import_csv(char * fname, char d) {
 
     int i=0;
 
+    // handle ","
+    char lookf[4], repls[2], replb[2];
+    sprintf(lookf, "\"%c\"", d);
+    sprintf(repls, "%c", 6);
+    sprintf(replb, "%c", d);
+
     // CSV file traversing
     while ( ! feof(f) && (fgets(line_in, sizeof(line_in), f) != NULL) ) {
-        eol = 0;
-
         // show file loading progress
         if (++i % 10 == 0 ) sc_info("loading line %d of %d", i, max_lines);
 
@@ -1138,46 +1141,59 @@ int import_csv(char * fname, char d) {
                 break;
             }
 
-        next = line_in;
+        //char * str_rep = str_replace(line_in, lookf, repls); // handle "," case
+        //strcpy(line_in, str_rep);
+        //free(str_rep);
 
+        // Split string using the delimiter
+        token = xstrtok(line_in, delim);
         c = 0;
 
-        while( !eol ) {
+        while( token != NULL ) {
             if (r > MAXROWS - GROWAMT - 1 || c > ABSMAXCOLS - 1) break;
-
-            // Split string using the delimiter
-            token = next;
-            next += next_unquot_delim(token, d);
-            if (*next == '\0')
-                eol = 1;
-            else {
-                *next = '\0';
-                next++;
-            }
-
             clean_carrier(token);
-
-            // remove quotes
             if ( token[0] == '\"' && token[strlen(token)-1] == '\"') {
-                token[strlen(token)-1] = '\0';
-                token++;
+                quote = 1;
+
+            // to handle # 816
+            } else if (( token[0] == '\"' || (token[0] == ' ' && token[1] == '\"')) && token[strlen(token)-1] == '\"') {
+                quote = 1;
+
+            } else if ( (token[0] == '\"' || quote) && strlen(token) && (token[strlen(token)-1] != '\"' || strlen(token) == 1) ) {
+                quote = 1;
+                char * next = xstrtok(NULL, delim);
+
+                if (next != NULL) {
+                    sprintf(token + strlen(token), "%c%s", d, next);
+                    continue;
+                }
             }
+            if (quote) { // Remove quotes
+                del_char(token, 0);
+                del_char(token, strlen(token)-1);
+                if (token[0]=='\"') del_char(token, 0); // to handle # 816
+            }
+
+            char * st = str_replace (token, repls, replb); // handle "," case
 
             // number import
-            if (strlen(token) && isnumeric(token) && ! get_conf_int("import_delimited_to_text")
+            if (strlen(st) && isnumeric(st) && ! get_conf_int("import_delimited_as_text")
             ) {
                 //wide char
-                swprintf(line_interp, BUFFERSIZE, L"let %s%d=%s", coltoa(c), r, token);
+                swprintf(line_interp, BUFFERSIZE, L"let %s%d=%s", coltoa(c), r, st);
 
             // text import
-            } else if (strlen(token)){
+            } else if (strlen(st)){
                 //wide char
-                swprintf(line_interp, BUFFERSIZE, L"label %s%d=\"%s\"", coltoa(c), r, token);
+                swprintf(line_interp, BUFFERSIZE, L"label %s%d=\"%s\"", coltoa(c), r, st);
             }
             //wide char
-            if (strlen(token)) send_to_interp(line_interp);
+            if (strlen(st)) send_to_interp(line_interp);
 
             if (++c > cf) cf = c;
+            quote = 0;
+            token = xstrtok(NULL, delim);
+            free(st);
         }
 
         r++;
@@ -1192,34 +1208,6 @@ int import_csv(char * fname, char d) {
 
     EvalAll();
     return 0;
-}
-
-
-/**
- * \brief find next unquoted delimiter
- * \details Helper function to import_csv(). Returns the
- * relative position of the next delimiter character that
- * is not quoted with double-quotes (").
- * \param[in] start  where we are in the line
- * \param[in] d  the delimiter character
- * \return  number of characters to move from start to next
- * delimiter or EOL
- */
-int next_unquot_delim(char *start, char d) {
-    int quote = 0;
-    char *p = start;
-    int count = 0;
-
-    while(1) {
-        if (*p == '\0')
-            return count;
-        if (*p == d && !quote)
-            return count;
-        if (*p == '\"')
-            quote = !quote;
-        count++;
-        p++;
-    }
 }
 
 
@@ -1336,7 +1324,7 @@ int import_markdown(char * fname) {
                 char * st = str_replace(token, "\"", "''"); //replace double quotes inside string
 
                 // number import
-                if (isnumeric(st) && strlen(st) && ! atoi(get_conf_value("import_delimited_to_text"))) {
+                if (isnumeric(st) && strlen(st) && ! atoi(get_conf_value("import_delimited_as_text"))) {
                     //wide char
                     swprintf(line_interp, BUFFERSIZE, L"let %s%d=%s", coltoa(c), rownr, st);
 
@@ -1514,13 +1502,11 @@ void export_markdown(char * fname, int r0, int c0, int rn, int cn) {
     int dash_num;
     int rowfmt;
 
-    int ignore_hidden = get_conf_int("ignore_hidden");
-
     for (row = r0; row <= rn; row++) {
         for (rowfmt=0; rowfmt < roman->cur_sh->row_format[row]; rowfmt++) {
 
             // ignore hidden rows
-            if (ignore_hidden && roman->cur_sh->row_hidden[row]) continue;
+            //if (row_hidden[row]) continue;
 
             for (pp = ATBL(roman->cur_sh, roman->cur_sh->tbl, row, col = c0); col <= cn; col++, pp++) {
                 // ignore hidden cols
@@ -1666,13 +1652,11 @@ void export_plain(char * fname, int r0, int c0, int rn, int cn) {
     int align = 1;
     int rowfmt;
 
-    int ignore_hidden = get_conf_int("ignore_hidden");
-
     for (row = r0; row <= rn; row++) {
         for (rowfmt = 0; rowfmt < roman->cur_sh->row_format[row]; rowfmt++) {
 
             // ignore hidden rows
-            if (ignore_hidden && roman->cur_sh->row_hidden[row]) continue;
+            //if (row_hidden[row]) continue;
 
             for (pp = ATBL(roman->cur_sh, roman->cur_sh->tbl, row, col = c0); col <= cn; col++, pp++) {
                 // ignore hidden cols
@@ -1827,40 +1811,32 @@ void export_latex(char * fname, int r0, int c0, int rn, int cn, int verbose) {
 
 
 /**
- * \brief escape special characters and output cell to file
+ * \brief unspecial()
  *
- * \details For the export formats delimiter-separated value
- * and LaTex. Escapes the special characters in one cell value
- * and appends the cell to the file.
+ * \details Unspecial (backquotes - > ") things that are special
+ * chars in a table
  *
  * \param[in] f file pointer
- * \param[in] str string pointer
+ * \param[in] srt string pointer
  * \param[in] delim
  *
  * \return none
  */
 void unspecial(FILE * f, char * str, int delim) {
     int backquote = 0;
-    if (strchr(str, delim) != NULL) backquote = 1;
 
+    if (str_in_str(str, ",") != -1) backquote = 1;
+    if (backquote) putc('\"', f);
     if (*str == '\\') str++; // delete wheeling string operator, OK?
-
-    if (delim == '&') { // the export format is LaTex
-        while (*str) {
-            if ( (*str == '&') || (*str == '$') || (*str == '#') ||
-                    (*str == '%') || (*str == '{') || (*str == '}') || (*str == '_') )
-                putc('\\', f);
-            putc(*str, f);
-            str++;
-        }
-    } else {
-        if (backquote) putc('\"', f);
-        while (*str) {
-            putc(*str, f);
-            str++;
-        }
-        if (backquote) putc('\"', f);
+    while (*str) {
+        // for LATEX export
+        if (delim == '&' && ( (*str == '&') || (*str == '$') ||
+           (*str == '#') || (*str == '%') || (*str == '{') || (*str == '}') || (*str == '&')))
+           putc('\\', f);
+        putc(*str, f);
+        str++;
     }
+    if (backquote) putc('\"', f);
 }
 
 
@@ -1900,9 +1876,7 @@ void export_delim(char * fname, char coldelim, int r0, int c0, int rn, int cn, i
         }
     }
 
-    int ignore_hidden = get_conf_int("ignore_hidden");
     for (row = r0; row <= rn; row++) {
-        if (ignore_hidden && sh->row_hidden[row]) continue;
         for (pp = ATBL(sh, sh->tbl, row, col = c0); col <= cn; col++, pp++) {
             int last_valid_col = right_limit(sh, row)->col; // for issue #374
             if (col > last_valid_col) continue;
@@ -2175,13 +2149,10 @@ int backup_exists(char * file) {
 void openfile_nested(char * file) {
     char * cmd = get_conf_value("default_open_file_under_cursor_cmd");
     if (cmd == NULL || ! strlen(cmd)) return;
-    pid_t pid = fork();
-    if (pid == 0) {
-        execlp(cmd, cmd, file, NULL);
-        exit(EXIT_FAILURE);
-    } else if (pid > 0) {
-        waitpid(pid, NULL, 0);
-    }
+    char syscmd[PATHLEN + strlen(cmd)];
+    sprintf(syscmd, "%s", cmd);
+    sprintf(syscmd + strlen(syscmd), " %s", file);
+    system(syscmd);
 }
 
 
