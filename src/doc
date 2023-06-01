@@ -1356,7 +1356,7 @@ Commands for handling cell content:
     Place the input bar at the bottom of the screen.
 
     'input_edit_mode' [default off]
-    Always go from input to edit mode when pressing ESC.
+    Always go from INSERT_MODE to EDIT_MODE when pressing ESC in the former.
 
     'underline_grid' [default off]
     Underline cells to make a nicer grid
