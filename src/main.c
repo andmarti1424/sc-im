@@ -270,9 +270,10 @@ int main (int argc, char ** argv) {
     create_empty_wb();
 
     /*
-     * load_rc. Since we are not sure what people put it their scimrc file,
+     * load_rc. Since we are not sure what people put in their scimrc file,
      * other than configuration variables and mappings,
      * we call the load_rc() routine after session / roman / sheet are alloc'ed.
+     * See entire 778 issue and 783 PR for details on why this order is set.
      */
     load_rc();
 
