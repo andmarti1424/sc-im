@@ -2214,14 +2214,19 @@ void readfile_argv(int argc, char ** argv) {
  */
 void load_file(char * file) {
     if (file == NULL || file[0] == '\0') return;
-    struct roman * roman = calloc(1, sizeof(struct roman));
+    // Do not calloc a new roman struct everytime. See 783 PR discussion.
+    // use the one allocated when loading rc file.
+    struct roman * roman = session->cur_doc;
+    if (roman == NULL) {
+        roman = calloc(1, sizeof(struct roman));
+        // save roman inside session
+        INSERT(roman, (session->first_doc), (session->last_doc), next, prev);
+        session->cur_doc = roman; // important: set cur_doc!
+    }
+
     roman->name = ! strlen(file) ? NULL : strdup(file);
     roman->first_sh = NULL;
     roman->cur_sh = NULL;
-
-    // save roman inside session
-    INSERT(roman, (session->first_doc), (session->last_doc), next, prev);
-    session->cur_doc = roman; // important: set cur_doc!
 
     // malloc a clean sheet
     // to make old sc file loading backwards compatible, mark it as is_allocated
