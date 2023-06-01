@@ -1789,6 +1789,12 @@ Commands for handling cell content:
 
 ==============================================================================
 &Other functions&
+    @myrow
+        references current row
+
+    @mycol
+        references current column
+
     @if({expr}, {expr}, {expr})
         Conditional:   If the  first  expression  is  true  then  the  value  of
         the  second  is  returned,  otherwise the  value  of  the  third.
