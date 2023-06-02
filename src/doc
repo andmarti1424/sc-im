@@ -150,6 +150,7 @@ Commands for handling cell content:
                  leaving cell formatting intact.
      Pc          Works like 'p' except that all cell references are adjusted
                  in the same way that they are for the copy command.
+     Pt          Paste a range of cells but transposed.
 
      t           Same as 'p' but if yr was used to yank a row, create a new
                  row above and paste content there.

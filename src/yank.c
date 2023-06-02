@@ -230,7 +230,7 @@ void yank_area(struct sheet * sh, int tlrow, int tlcol, int brrow, int brcol, ch
  * When implementing column sorting, diffc should be zero as well!
  * type indicates if pasting format only, valuue only for the
  * whole content.
- * yank type: c=col, r=row, a=range, e=cell, '\0'=no yanking.
+ * type_paste: c=col, r=row, a=range, e=cell, '\0'=no yanking, t=transpose
  *
  * \param[in] struct sheet * sh
  * \param[in] above
@@ -248,7 +248,6 @@ int paste_yanked_ents(struct sheet * sh, int above, int type_paste) {
     int diffr = 0, diffc = 0 , ignorelock = 0;
 
     extern struct ent_ptr * deps;
-    //FIXME:
     if (yl->sheet == NULL) yl->sheet = roman->cur_sh;
 
 #ifdef UNDO
@@ -296,11 +295,18 @@ int paste_yanked_ents(struct sheet * sh, int above, int type_paste) {
     if (type_of_yank == YANK_RANGE || type_of_yank == YANK_CELL) {
         // first check if there are any locked cells over destination
         // if so, just return
+        int r, c;
         while (yll != NULL) {
-            int r = yll->vp->row + diffr;
-            int c = yll->vp->col + diffc;
+            if (type_paste == YANK_TRANSPOSE) {
+                r = yll->vp->col + diffr;
+                c = yll->vp->row + diffc;
+            } else {
+                r = yll->vp->row + diffr;
+                c = yll->vp->col + diffc;
+            }
             checkbounds(sh, &r, &c);
-            if (any_locked_cells(sh, yll->vp->row + diffr, yll->vp->col + diffc, yll->vp->row + diffr, yll->vp->col + diffc)) {
+            if ((type_paste == YANK_TRANSPOSE && any_locked_cells(sh, yll->vp->col + diffr, yll->vp->row + diffc, yll->vp->col + diffr, yll->vp->row + diffc)) 
+            || any_locked_cells(sh, yll->vp->row + diffr, yll->vp->col + diffc, yll->vp->row + diffr, yll->vp->col + diffc)) {
 #ifdef UNDO
                 dismiss_undo_item(NULL);
 #endif
@@ -324,18 +330,28 @@ int paste_yanked_ents(struct sheet * sh, int above, int type_paste) {
 
     // paste each ent in yank list
     while (yl != NULL) {
-        //FIXME:
         if (yl->sheet == NULL) yl->sheet = roman->cur_sh;
 
 #ifdef UNDO
-        copy_cell_to_undostruct(y_cells++, sh, lookat(sh, yl->vp->row + diffr, yl->vp->col + diffc), UNDO_DEL);
+        if (type_paste == YANK_TRANSPOSE)
+            copy_cell_to_undostruct(y_cells++, sh, lookat(sh, yl->vp->col + diffr, yl->vp->row + diffc), UNDO_DEL);
+        else
+            copy_cell_to_undostruct(y_cells++, sh, lookat(sh, yl->vp->row + diffr, yl->vp->col + diffc), UNDO_DEL);
 #endif
 
         // here we delete current content of "destino" ent.
-        if (type_paste == YANK_RANGE || type_paste == YANK_SORT)
+        if (type_paste == YANK_RANGE || type_paste == YANK_SORT) {
             erase_area(sh, yl->vp->row + diffr, yl->vp->col + diffc, yl->vp->row + diffr, yl->vp->col + diffc, ignorelock, 0);
+        } else if (type_paste == YANK_TRANSPOSE) {
+            erase_area(sh, yl->vp->col + diffc, yl->vp->row + diffr, yl->vp->col + diffc, yl->vp->row + diffr, ignorelock, 0);
+        }
 
-        struct ent * destino = lookat(sh, yl->vp->row + diffr, yl->vp->col + diffc);
+        struct ent * destino;
+        if (type_paste == YANK_TRANSPOSE) {
+            destino = lookat(sh, yl->vp->col + diffr, yl->vp->row + diffc);
+        } else {
+            destino = lookat(sh, yl->vp->row + diffr, yl->vp->col + diffc);
+        }
 
         if (type_paste == YANK_RANGE || type_paste == YANK_SORT) {
             (void) copyent(destino, sh, yl->vp, 0, 0, 0, 0, 0, 0, 0);
@@ -349,9 +365,16 @@ int paste_yanked_ents(struct sheet * sh, int above, int type_paste) {
             }
         } else if (type_paste == YANK_REF) {
             (void) copyent(destino, sh, yl->vp, diffr, diffc, 0, 0, sh->maxrows, sh->maxcols, 'c');
+        } else if (type_paste == YANK_TRANSPOSE) {
+            (void) copyent(destino, sh, yl->vp, 0, 0, 0, 0, 0, 0, 0);
         }
-        destino->row += diffr;
-        destino->col += diffc;
+        if (type_paste == YANK_TRANSPOSE) {
+            destino->row = yl->vp->col + diffr;
+            destino->col = yl->vp->row + diffc;
+        } else {
+            destino->row += diffr;
+            destino->col += diffc;
+        }
 
         /******************** this might be put outside the loop  */
         // if so, use EvalRange
@@ -371,7 +394,10 @@ int paste_yanked_ents(struct sheet * sh, int above, int type_paste) {
         }
         /*******************/
 #ifdef UNDO
-        copy_cell_to_undostruct(y_cells++, sh, lookat(sh, yl->vp->row + diffr, yl->vp->col + diffc), UNDO_ADD);
+        if (type_paste == YANK_TRANSPOSE)
+            copy_cell_to_undostruct(y_cells++, sh, lookat(sh, yl->vp->col + diffr, yl->vp->row + diffc), UNDO_ADD);
+        else
+            copy_cell_to_undostruct(y_cells++, sh, lookat(sh, yl->vp->row + diffr, yl->vp->col + diffc), UNDO_ADD);
 #endif
         yl = yl->next;
     }

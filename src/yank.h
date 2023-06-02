@@ -53,6 +53,7 @@
 #define YANK_FORMAT 'f'
 #define YANK_VALUE  'v'
 #define YANK_REF    'c'
+#define YANK_TRANSPOSE 't'
 
 void init_yanklist();
 struct ent_ptr * get_yanklist();

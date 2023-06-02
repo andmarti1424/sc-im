@@ -2934,11 +2934,13 @@ int is_single_command (struct block * buf, long timeout) {
         else if (buf->value == L'P' && bs == 2 && (
             buf->pnext->value == L'v' ||
             buf->pnext->value == L'f' ||
++            buf->pnext->value == L't' ||
             buf->pnext->value == L'c' ) )   result = EDITION_CMD;  // paste yanked cells below or left
 
         else if (buf->value == L'T' && bs == 2 && (
             buf->pnext->value == L'v' ||
             buf->pnext->value == L'f' ||
++            buf->pnext->value == L't' ||
             buf->pnext->value == L'c' ) )   result = EDITION_CMD;  // paste yanked cells above or right
 
         else if (buf->value == L'a' && bs == 2 &&    // autofit

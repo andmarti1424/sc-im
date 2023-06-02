@@ -915,7 +915,7 @@ void do_normalmode(struct block * buf) {
         case L'P':
         case L'T':
             if (bs != 2) break;
-            if (buf->pnext->value == L'v' || buf->pnext->value == L'f' || buf->pnext->value == L'c') {
+            if (buf->pnext->value == L'v' || buf->pnext->value == L'f' || buf->pnext->value == L'c' || buf->pnext->value == L't') {
                 int res = buf->value == L'P' ? paste_yanked_ents(sh, 0, buf->pnext->value) : paste_yanked_ents(sh, 1, buf->pnext->value); // paste cell above or right
                 if (res == -1) {
                     sc_error("Locked cells encountered. Nothing changed");

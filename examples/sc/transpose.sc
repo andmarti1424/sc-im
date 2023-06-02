@@ -17,11 +17,9 @@ let F0 = 7
 let H0 = 8
 let A1 = 2
 let B1 = 5
-let D1 = 6
-let E1 = 5
-let F1 = 4
+rightstring D1 = "a"
+rightstring E1 = "b"
+rightstring F1 = "c"
 let A2 = 3
 let B2 = 6
-label B4 = "algo"
-goto B4
-movetosheet "Sheet1"
+goto A0
