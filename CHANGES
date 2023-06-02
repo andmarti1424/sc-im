@@ -22,15 +22,14 @@ Please open a discussion on GitHub to comment on these and other feature request
 ***********
 v0.8.4
 
-06/01/2023: fix issue in csv import - 816
-06/01/2023: merged PR 789
-06/01/2023: merged PR 776
-06/01/2023: merged PR 783 that gets rid of issue 778 - changed load_rc load_file order.
-06/01/2023: Fix issue 784: get row number and column or cell that calls a LUA script with PR 814.
-06/01/2023: work on issue 708: xlsx file import
+06/02/2023: fix configuration variable name in file.c: import_delimited_to_text
 06/01/2023: added input_edit_mode setting PR 626
-
-
+06/01/2023: work on issue 708: xlsx file import
+06/01/2023: Fix issue 784: get row number and column or cell that calls a LUA script with PR 814.
+06/01/2023: merged PR 783 that gets rid of issue 778 - changed load_rc load_file order.
+06/01/2023: merged PR 776
+06/01/2023: merged PR 789
+06/01/2023: fix issue in csv import - 816
 
 
 ***********
