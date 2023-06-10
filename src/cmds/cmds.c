@@ -366,11 +366,11 @@ void copyent(struct ent * n, struct sheet * sh_p, struct ent * p, int dr, int dc
         sc_error("copyent: internal error");
         return;
     }
-    n->flags = may_sync;
     if (p->flags & is_deleted)
         n->flags |= is_deleted;
 
     if (special != 'f') {
+        n->flags = may_sync;
         if (p->flags & is_valid) {
             n->v = p->v;
             n->flags |= p->flags & is_valid;
