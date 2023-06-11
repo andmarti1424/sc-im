@@ -1,9 +1,31 @@
 CHANGES FILE
 ------------
 
+
+
+Please open a discussion on GitHub to comment on these and other feature requests.
+
+***********
+v0.8.4
+06/12/2023: :datefmt does not remove text content anymore allowing future edition - work on item 3 of issue 769
+06/11/2023: avoid changing cell's color after :format - issue 819
+06/11/2023: avoid blanking cell's text content after :datefmt - issue 769
+06/10/2023: fix number 2 of issue 769
+06/02/2023: fix configuration variable name in file.c: import_delimited_to_text
+06/01/2023: restore transpose
+06/01/2023: added input_edit_mode setting PR 626
+06/01/2023: work on issue 708: xlsx file import
+06/01/2023: Fix issue 784: get row number and column or cell that calls a LUA script with PR 814.
+06/01/2023: merged PR 783 that gets rid of issue 778 - changed load_rc load_file order.
+06/01/2023: merged PR 776
+06/01/2023: merged PR 789
+06/01/2023: fix issue in csv import - 816
+
+
+
 Ideas for v0.8.5
 ----------------
-+ restore transpose
+
 + Add is_deleted flag on sheets that are deleted. So ents have a chance to update its references to that sheet.
 Then rebuild graph.
 + arv should have priority over scimrc.
@@ -17,19 +39,9 @@ this could allow future use of registers to copy to and paste from.
 
 
 
-Please open a discussion on GitHub to comment on these and other feature requests.
 
-***********
-v0.8.4
 
-06/02/2023: fix configuration variable name in file.c: import_delimited_to_text
-06/01/2023: added input_edit_mode setting PR 626
-06/01/2023: work on issue 708: xlsx file import
-06/01/2023: Fix issue 784: get row number and column or cell that calls a LUA script with PR 814.
-06/01/2023: merged PR 783 that gets rid of issue 778 - changed load_rc load_file order.
-06/01/2023: merged PR 776
-06/01/2023: merged PR 789
-06/01/2023: fix issue in csv import - 816
+
 
 
 ***********

@@ -1007,6 +1007,10 @@ int ui_show_content(WINDOW * win, int nb_mobile_rows, int nb_mobile_cols) {
                 //    else if get_conf_int("hide_number_from_combined"))
                 //        num[0]='\0';
                 // }
+                //
+                // AVOID showing text content and date formated numeric value both at the same time - number 3 of issue 769
+                if ((*p) && (*p)->format && (*p)->format[0] == 'd') text[0]='\0';
+
                 pad_and_align(text, num, fieldlen, align, (*p)->pad, out, sh->row_format[row]);
 
 #ifdef USECOLORS
@@ -1087,6 +1091,17 @@ int ui_show_content(WINDOW * win, int nb_mobile_rows, int nb_mobile_cols) {
 void ui_add_cell_detail(char * d, struct ent * p1) {
     if ( ! p1 ) return;
 
+    /* show date if date value
+    if (p1->format && p1->format[0] == 'd') {    // date format
+        strcat(d, "[");
+        time_t v = (time_t) p1->v;
+        char dvalue[FBUFLEN] = "";
+        strftime(dvalue, sizeof(char) * FBUFLEN, p1->format+1, localtime(&v));
+        strcat(d, dvalue);
+        strcat(d, "] ");
+    }
+    */
+
     /* string expressions
     if (p1->expr && (p1->flags & is_strexpr)) {
         if (p1->flags & is_label)
@@ -1095,7 +1110,7 @@ void ui_add_cell_detail(char * d, struct ent * p1) {
             strcat(d, (p1->flags & is_leftflush) ? "<{" : ">{");
         strcat(d, "??? } ");        // and this '}' is for vi %
 
-    } else*/
+    } else */
 
     if (p1->label) {
         /* has constant label only */
@@ -1251,7 +1266,7 @@ void yyerror(char * err) {
  * \param[in] err
 
  * \return 0 datetime format - number in p->v represents a date - format "d"
- * \return 1 if format of number - (numbers with format) - puede harber label.
+ * \return 1 if format of number - (numbers with format) - (label can exists)
  * \return -1 if there is no format in the cell
  */
 int ui_get_formated_value(struct ent ** p, int col, char * value) {

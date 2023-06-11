@@ -1233,22 +1233,47 @@ Commands for handling cell content:
 
     Dates are internally stored in sc-im as numeric values, and they are
     displayed as dates if a date format is applied to the cells that store
-    them. You have 3 options for entering them:
+    them. You have 3 options for entering dates:
 
     1. Dates can be entered as text and then converted to a numeric
-    value with the :datefmt command.
+    value with <C-d> or with the :datefmt command.
 
-    The :datefmt command takes the cell's text content that represents a date,
-    and uses a given format to set the numeric value of the cell.
-    Its format is ':datefmt "{strftime_format}"', taking a strftime-compatible
-    format string. The format is applied to the cell (as could be done with
-    the :format function) so that the value is displayed as a date.
+        a. With <C-d> keybinding:
+            The <C-d> command works on NORMAL and VISUAL modes, and converts
+            cell's text content that represents a date, and sets the numeric
+            value of the cell using using locale's D_FMT format.
+            After convertion, the same format is applied automatically to the
+            cell so that the value is displayed as a date.
+            You can then change the date format with :format command or
+            just leave it as it is with the current locale D_FMT format.
 
-    Example:            \12/03/2020
-                        :datefmt "%d/%m/%Y"
+            Example:
+                \03/04/1984
+                <C-d>
+                :format "d %b %Y"
+                will output 'Mar 1984' with my current locale.
 
-    NOTE: The <C-d> command, used in NORMAL and VISUAL modes, acts as the
-    `:datefmt` described above, but uses the locale's D_FMT format.
+            NOTES: + You can edit the date value by changing the text content
+                     of the cell with 'E' command.
+                   + To get current locale's D_FMT format, you might want to
+                   issue ``locale -k d_fmt`` on your current shell.
+
+
+        b. With :datefmt command:
+            This command works like <C-d> but instead of using locale's D_FMT
+            format for convertion, it takes a strftime-compatible format string as
+            a parameter. Its syntax is ':datefmt "{strftime_format}"'
+            After convertion, the same format is applied automatically to the cell
+            so that the value is displayed as a date.
+
+            Example:            \12/03/2020
+                                :datefmt "%d/%m/%Y"
+
+            NOTE: Take note here that if you edit the date with the 'E' command,
+            sc-im will nevertheless convert the date using locale's D_FMT format
+            and not the one you used with datefmt.
+            You will need to reapply :datefmt "%d/%m/%Y" or whatever format
+            you used earlier to reapply the format after the modification.
 
     2. You can also enter dates using the @date and @dts functions.
     Example:            \"@date(@dts(2015, 23, 2), "%d/%m/%Y")

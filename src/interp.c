@@ -1604,10 +1604,24 @@ void slet(struct roman * roman, struct sheet * sh, struct ent * v, struct enode 
         if (v->format && v->format[0] == 'd') {
             struct tm tm;
             memset(&tm, 0, sizeof(struct tm));
-            strptime(v->label, &v->format[1], &tm);
+
+        // change for number 3 of issue 769:
+        // reconvert numeric value based on locale's D_FMT format instead of current format
+        char * f = &v->format[1];
+        #ifdef USELOCALE
+            #include <locale.h>
+            #include <langinfo.h>
+            char * loc = NULL;
+            f = NULL;
+            loc = setlocale(LC_TIME, "");
+            if (loc != NULL) f = nl_langinfo(D_FMT);
+        #endif
+        // reconvert numeric value based on locale's D_FMT format instead of current format
+            strptime(v->label, f, &tm);
             v->v = (double) mktime(&tm);
             v->flags |= ( is_changed | is_valid );
-            label(v, "", -1); // free label
+            //commented for number 3 of issue 769
+            //label(v, "", -1); // free label
         }
     } else {
         if (p) free(p);                     // This prevents leaks in string formulas - missing in old sc
@@ -2351,7 +2365,8 @@ int dateformat(struct sheet * sh, struct ent *v1, struct ent *v2, char * fmt) {
             strptime((n)->label, fmt, &tm);
             n->v = (double) mktime(&tm);
             n->flags |= ( is_changed | is_valid );
-            label(n, "", -1); // free label
+            //commented for number 3 of issue 769
+            //label(n, "", -1); // free label
 
             // agrego formato de fecha
             n->format = 0;
