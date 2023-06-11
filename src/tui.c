@@ -871,7 +871,7 @@ int ui_show_content(WINDOW * win, int nb_mobile_rows, int nb_mobile_cols) {
                 ui_set_ucolor(win, &ucolors[EXPRESSION], ucolors[EXPRESSION].bg != DEFAULT_COLOR ? DEFAULT_COLOR : col % 2 == 0 ? ucolors[GRID_EVEN].bg : ucolors[GRID_ODD].bg);
             } else if ((*p) && (*p)->label) {                               // string
                 ui_set_ucolor(win, &ucolors[STRG], ucolors[STRG].bg != DEFAULT_COLOR ? DEFAULT_COLOR : col % 2 == 0 ? ucolors[GRID_EVEN].bg : ucolors[GRID_ODD].bg);
-            } else if ((*p) && (*p)->flags & is_valid && ! (*p)->format) {  // numeric value
+            } else if ((*p) && (*p)->flags & is_valid) {  // numeric value
                 ui_set_ucolor(win, &ucolors[NUMB], ucolors[NUMB].bg != DEFAULT_COLOR ? DEFAULT_COLOR : col % 2 == 0 ? ucolors[GRID_EVEN].bg : ucolors[GRID_ODD].bg);
             } else if ((*p) && (*p)->format && (*p)->format[0] == 'd') {    // date format
                 ui_set_ucolor(win, &ucolors[DATEF], ucolors[DATEF].bg != DEFAULT_COLOR ? DEFAULT_COLOR : col % 2 == 0 ? ucolors[GRID_EVEN].bg : ucolors[GRID_ODD].bg);
