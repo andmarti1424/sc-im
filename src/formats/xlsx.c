@@ -573,7 +573,7 @@ int export_xlsx(char * filename) {
     struct sheet * sh = roman->first_sh;
     while (sh != NULL) {
 
-        lxw_worksheet * worksheet = workbook_add_worksheet(workbook, NULL);
+        lxw_worksheet * worksheet = workbook_add_worksheet(workbook, sh->name);
         int bkp_currow = sh->currow;
         sh->currow = 0;
         insert_row(sh, 0); //add a row so that scim formulas apply to excel
