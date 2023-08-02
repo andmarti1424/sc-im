@@ -870,7 +870,7 @@ Commands for handling cell content:
                        Some terminal dont support some attributes, such as italic.
 
                 The value of type shall be one of the following:
-                     HEADINGS, HEADINGD_ODD, MODE, NUMB, STRG, DATEF,
+                     HEADINGS, HEADINGS_ODD, MODE, NUMB, STRG, DATEF,
                      EXPRESSION, GRID_EVEN, GRID_ODD,
                      CELL_ERROR, CELL_NEGATIVE, CELL_SELECTION,
                      CELL_SELECTION_SC, INFO_MSG, ERROR_MSG, CELL_ID,
