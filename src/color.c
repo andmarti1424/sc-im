@@ -186,6 +186,8 @@ void set_colors_param_dict() {
 
     sprintf(str, "%d", DEFAULT_COLOR);
     put(d_colors_param, "DEFAULT_COLOR", str);
+    sprintf(str, "%d", NONE_COLOR);
+    put(d_colors_param, "NONE_COLOR", str);
     sprintf(str, "%d", BLACK);
     put(d_colors_param, "BLACK", str);
     sprintf(str, "%d", RED);
@@ -333,13 +335,17 @@ void chg_color(char * str) {
     // Change the color
     int type = get_int(d_colors_param, get(d, "type"));
     struct custom_color * cc;
-    if ((cc = get_custom_color(get(d, "bg"))) != NULL) { // bg is custom color
+    if (get_int(d_colors_param, get(d, "bg")) == NONE_COLOR) {
+        // Don't change anything
+    } else if ((cc = get_custom_color(get(d, "bg"))) != NULL) { // bg is custom color
         ucolors[ type ].bg = 7 + cc->number;
     } else { // bg is stock ncurses color
         ucolors[ type ].bg = get_int(d_colors_param, get(d, "bg"));
     }
 
-    if ((cc = get_custom_color(get(d, "fg"))) != NULL) { // fg is custom color
+    if (get_int(d_colors_param, get(d, "fg")) == NONE_COLOR) {
+        // Don't change anything
+    } else if ((cc = get_custom_color(get(d, "fg"))) != NULL) { // fg is custom color
         ucolors[ type ].fg = 7 + cc->number;
     } else { // fg is stock ncurses color
         ucolors[ type ].fg = get_int(d_colors_param, get(d, "fg"));
