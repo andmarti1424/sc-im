@@ -63,6 +63,7 @@
 #include "macros.h"
 #include "tui.h"
 #include "input.h"
+#include "cmds/cmds_visual.h"
 #include "marks.h"
 #include "format.h"
 #include "maps.h"
@@ -655,6 +656,14 @@ void sig_cont() {
  * \return none
  */
 void sig_int() {
+    sc_info("Got SIGINT.%s" , curmode != NORMAL_MODE ? " Back to NORMAL_MODE" : " Press «:q<Enter>» to quit sc-im");
+    if (get_bufsize(buffer)) break_waitcmd_loop(buffer);
+    if (curmode == VISUAL_MODE) exit_visualmode();
+    chg_mode('.');
+    inputline[0] = L'\0';  // clean inputline
+    flush_buf(buffer);
+    ui_update(TRUE);
+    /*
     if ( ! get_conf_int("debug")) {
         sc_error("Got SIGINT. Press «:q<Enter>» to quit sc-im");
     } else if (get_bufsize(buffer)) {
@@ -662,6 +671,7 @@ void sig_int() {
     } else {
         shall_quit = 2;
     }
+    */
     return;
 }
 
