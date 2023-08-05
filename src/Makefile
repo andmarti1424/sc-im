@@ -134,12 +134,13 @@ ifneq (, $(shell which pkg-config))
   endif
 
   # NOTE: lua support
-  ifneq ($(shell pkg-config --exists lua || echo 'no'),no) # Check for user's default lua
-    CFLAGS += -DXLUA $(shell pkg-config --cflags lua)
+  LUA_PKGNAME ?= $(shell pkg-config --list-all | awk '/^lua-?[0-9.]+[[:space:]]/ { p=$$1; gsub("[^[0-9]", "", p); print p " " $$1; }' | LC_ALL=C sort -nrk1 | uniq | head -n 1 | awk '{print $$2}')
+  ifneq ($(LUA_PKGNAME),)
+    CFLAGS += -DXLUA $(shell pkg-config --cflags $(LUA_PKGNAME))
     ifneq ($(shell uname -s),Darwin)
-      LDLIBS += $(shell pkg-config --libs lua) -Wl,--export-dynamic
+      LDLIBS += $(shell pkg-config --libs $(LUA_PKGNAME)) -Wl,--export-dynamic
     else
-      LDLIBS += $(shell pkg-config --libs lua) -rdynamic
+      LDLIBS += $(shell pkg-config --libs $(LUA_PKGNAME)) -rdynamic
     endif
   else ifneq ($(shell pkg-config --exists luajit || echo 'no'),no) # If not found, check for luajit
     CFLAGS += -DXLUA $(shell pkg-config --cflags luajit)
