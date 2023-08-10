@@ -267,11 +267,11 @@ int yylex() {
                 } else if (*p == 'e' || *p == 'E') {
                     while (isdigit(*++p))
                         ;
-                        if (isalpha(*p) || *p == '_') {
-                            linelim = p - line;
-                            return (yylex());
-                        } else
-                            ret = FNUMBER;
+                    if (isalpha(*p) || *p == '_') {
+                        linelim = p - line;
+                        return (yylex());
+                    } else
+                        ret = FNUMBER;
                 } else if (isalpha(*p) || *p == '_') {
                     linelim = p - line;
                     return (yylex());
