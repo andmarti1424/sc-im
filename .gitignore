@@ -1,4 +1,10 @@
 *.o
+*.deb
+*.rpm
+*.snap
+*.tgz
+*.zip
+*.tar
 src/y.tab.h
 src/experres.h
 src/gram.c
