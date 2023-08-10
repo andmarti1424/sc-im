@@ -47,6 +47,7 @@
  */
 
 #ifdef ODS
+#include <string.h>
 #include <errno.h>
 #include <zip.h>
 #include <libxml/parser.h>

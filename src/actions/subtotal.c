@@ -43,6 +43,7 @@
  */
 
 #include <wchar.h>
+#include <string.h>
 #include "../sc.h"
 #include "../macros.h"
 #include "../cmds/cmds.h"
@@ -51,7 +52,6 @@
 
 /*
 #include <sys/types.h>
-#include <string.h>
 #include <stdio.h>
 #include <ctype.h>
 #include <stdlib.h>

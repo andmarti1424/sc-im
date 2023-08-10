@@ -44,6 +44,7 @@
 
 #include <ctype.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "cmds.h"
 #include "cmds_edit.h"
