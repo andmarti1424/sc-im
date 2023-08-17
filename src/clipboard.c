@@ -261,12 +261,15 @@ int save_plain(FILE * fout, int r0, int c0, int rn, int cn) {
                 else {
                      emptyfield++;
                }
-                if(emptyfield){
-                   fwprintf(fout, L"\t");
-                }
                 if (! conf_clipboard_delimited_tab) {
-                    pad_and_align(text, num, roman->cur_sh->fwidth[col], align, 0, out, roman->cur_sh->row_format[row]);
-                    fwprintf(fout, L"%ls", out);
+                    if (emptyfield) {
+                        fwprintf(fout, L"%*s", roman->cur_sh->fwidth[col], " ");
+                    } else {
+                        pad_and_align(text, num, roman->cur_sh->fwidth[col], align, 0, out, roman->cur_sh->row_format[row]);
+                        fwprintf(fout, L"%ls", out);
+                    }
+                } else if (emptyfield){
+                   fwprintf(fout, L"\t");
                 } else if ( (*pp)->flags & is_valid) {
                     fwprintf(fout, L"%s\t", num);
                 } else if ( (*pp)->label) {
