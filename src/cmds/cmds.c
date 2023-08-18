@@ -2729,18 +2729,21 @@ void pad_and_align (char * str_value, char * numeric_value, int col_width, int a
         str_len = wcswidth(wcs_value, wcslen(wcs_value));
 
     if (str_len == 2 && str_in[0] == '\\') {
-        wmemset(str_out + wcslen(str_out), str_in[1], col_width);
+        wmemset(str_out, str_in[1], col_width);
+        str_out[col_width] = L'\0';
         free(str_in);
         return;
     } else if (str_len == 3 && str_in[0] == '\\' && str_in[1] == '\\') {
-        wmemset(str_out + wcslen(str_out), str_in[2], col_width);
+        wmemset(str_out, str_in[2], col_width);
+        str_out[col_width] = L'\0';
         free(str_in);
         return;
     }
 
     // If padding exceedes column width, returns n number of '-' needed to fill column width
     if (padding >= col_width ) {
-        wmemset(str_out + wcslen(str_out), L' ', col_width);
+        wmemset(str_out, L' ', col_width);
+        str_out[col_width] = L'\0';
         free(str_in);
         return;
     }
@@ -2748,8 +2751,9 @@ void pad_and_align (char * str_value, char * numeric_value, int col_width, int a
     // If content exceedes column width, outputs n number of '*' needed to fill column width
     if (str_len + num_len + padding > col_width * rowfmt && ! get_conf_int("truncate") &&
         ! get_conf_int("overlap") && ! get_conf_int("autowrap")) {
-        if (padding) wmemset(str_out + wcslen(str_out), L' ', padding);
-        wmemset(str_out + wcslen(str_out), L'*', col_width - padding);
+        if (padding) wmemset(str_out, L' ', padding);
+        wmemset(str_out + padding, L'*', col_width - padding);
+        str_out[col_width] = L'\0';
         free(str_in);
         return;
     }
