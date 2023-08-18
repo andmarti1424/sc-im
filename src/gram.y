@@ -289,6 +289,8 @@ token S_YANKCOL
 %token K_DEFAULT_PASTE_FROM_CLIPBOARD_CMD
 %token K_COPY_TO_CLIPBOARD_DELIMITED_TAB
 %token K_NOCOPY_TO_CLIPBOARD_DELIMITED_TAB
+%token K_COPY_TO_CLIPBOARD_WYSIWYG
+%token K_NOCOPY_TO_CLIPBOARD_WYSIWYG
 %token K_DEFAULT_OPEN_FILE_UNDER_CURSOR_CMD
 %token K_IMPORT_DELIMITED_TO_TEXT
 %token K_IGNORECASE
@@ -1702,7 +1704,11 @@ setitem :
                                   {  if ($3 == 0) parse_str(user_conf_d, "copy_to_clipboard_delimited_tab=0", TRUE);
                                      else         parse_str(user_conf_d, "copy_to_clipboard_delimited_tab=1", TRUE); }
     |    K_NOCOPY_TO_CLIPBOARD_DELIMITED_TAB {    parse_str(user_conf_d, "copy_to_clipboard_delimited_tab=0", TRUE); }
-
+    |    K_COPY_TO_CLIPBOARD_WYSIWYG {            parse_str(user_conf_d, "copy_to_clipboard_wysiwyg=1", TRUE); }
+    |    K_COPY_TO_CLIPBOARD_WYSIWYG '=' NUMBER
+                                  {  if ($3 == 0) parse_str(user_conf_d, "copy_to_clipboard_wysiwyg=0", TRUE);
+                                     else         parse_str(user_conf_d, "copy_to_clipboard_wysiwyg=1", TRUE); }
+    |    K_NOCOPY_TO_CLIPBOARD_WYSIWYG {          parse_str(user_conf_d, "copy_to_clipboard_wysiwyg=0", TRUE); }
     |    K_DEFAULT_OPEN_FILE_UNDER_CURSOR_CMD '=' strarg {
                                   char cmd[MAXCMD];
                                   char * s = (char *) $3;

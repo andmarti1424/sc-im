@@ -512,6 +512,9 @@ Commands for handling cell content:
                  If you wish to delimit columns with tabs, to paste content
                  directly to other spreadsheet programs, rather than an
                  editor, set "copy_to_clipboard_delimited_tab" variable to "1".
+                 If you wish to copy a full string representation of the range
+                 instead of how its currently displayed in Sc-im, set
+                 "copy_to_clipboard_wysiwyg" to "0".
 
      :cpaste     Paste clipboard content to Sc-im.
                  When 'cpaste' command is executed, the default value of macro
@@ -2206,6 +2209,9 @@ Commands for handling cell content:
     COPY_TO_CLIPBOARD_DELIMITED_TAB
     COPY_TO_CLIPBOARD_DELIMITED_TAB = {NUMBER}
     NOCOPY_TO_CLIPBOARD_DELIMITED_TAB
+    COPY_TO_CLIPBOARD_WYSIWYG
+    COPY_TO_CLIPBOARD_WYSIWYG = {NUMBER}
+    NOCOPY_TO_CLIPBOARD_WYSIWYG
     DEFAULT_OPEN_FILE_UNDER_CURSOR_CMD = {strarg}
     NEWLINE_ACTION = {NUMBER}
     TM_GMTOFF
