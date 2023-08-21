@@ -204,16 +204,74 @@ int save_plain(FILE * fout, int r0, int c0, int rn, int cn) {
     if (fout == NULL) return -1;
     struct roman * roman = session->cur_doc;
     int conf_clipboard_delimited_tab = get_conf_int("copy_to_clipboard_delimited_tab");
-    int row, col;
+    int conf_clipboard_wysiwyg = get_conf_int("copy_to_clipboard_wysiwyg");
+    int row, col, test_width;
+    struct ent * p;
     register struct ent ** pp;
+    mbstate_t state;
     wchar_t out[FBUFLEN] = L"";
+    const char *label = NULL;
     char num [FBUFLEN] = "";
     char text[FBUFLEN] = "";
     char formated_s[FBUFLEN] = "";
     int res = -1;
     int align = 1;
     int emptyfield=-1;
+    int out_widths[cn - c0 + 1];
 
+    // Calculates the column widths necessary to output.
+    // If copy_to_clipboard_delimited_tab != 0 then we don't need any of this.
+    // If copy_to_clipboard_wysiwyg != 0
+    //   then just use roman->cur_sh->fwidths[col].
+    // Otherwise, if the data already fits inside roman->cur_sh->fwidths[col]
+    //   then that is the width used.
+    // If it doesn't
+    //   then we use the largest data width found in the column and add 1.
+    if (!conf_clipboard_delimited_tab) {
+        for (col = c0; col <= cn; ++col) {
+            out_widths[col-c0] = roman->cur_sh->fwidth[col];
+            if (!conf_clipboard_wysiwyg) {
+                for (row = r0; row <= rn; ++row) {
+                    p = *ATBL(roman->cur_sh, roman->cur_sh->tbl, row, col);
+                    if (!p || p->flags & is_deleted) continue;
+                    if (p->flags & is_valid) {
+                        num[0] = '\0';
+                        formated_s[0] = '\0';
+                        res = ui_get_formated_value(&p, col, formated_s);
+                        // res = 0, indicates that in num we store a date
+                        // res = 1, indicates a format is applied in num
+                        if (res == 0 || res == 1) {
+                            strcpy(num, formated_s);
+                        } else if (res == -1) {
+                            sprintf(num, "%.*f", roman->cur_sh->precision[col], p->v);
+                        }
+                        test_width = strlen(num);
+                    }
+                    else if (p->label) {
+                        // Calculate the display width of p->label.
+                        memset(&state, '\0', sizeof state);
+                        label = p->label;
+                        res = mbsrtowcs(out, &label, FBUFLEN, &state);
+                        if (res != (size_t)-1)
+                            test_width = wcswidth(out, wcslen(out));
+                        else {
+                            test_width = 0;
+                            sc_error("Failed to convert cell label to wide string");
+                        }
+                    }
+                    else {
+                        test_width = 0;
+                    }
+
+                    if (test_width >= out_widths[col-c0]) {
+                        out_widths[col-c0] = test_width + 1;
+                    }
+                }
+            }
+        }
+    }
+
+    res = -1;
     for (row = r0; row <= rn; row++) {
         // ignore hidden rows
         //if (row_hidden[row]) continue;
@@ -261,19 +319,23 @@ int save_plain(FILE * fout, int r0, int c0, int rn, int cn) {
                 else {
                      emptyfield++;
                }
-                if(emptyfield){
-                   fwprintf(fout, L"\t");
-                }
+
                 if (! conf_clipboard_delimited_tab) {
-                    pad_and_align(text, num, roman->cur_sh->fwidth[col], align, 0, out, roman->cur_sh->row_format[row]);
-                    fwprintf(fout, L"%ls", out);
+                    if (emptyfield) {
+                        fwprintf(fout, L"%*s", out_widths[col-c0], " ");
+                    } else {
+                        pad_and_align(text, num, out_widths[col-c0], align, 0, out, roman->cur_sh->row_format[row]);
+                        fwprintf(fout, L"%ls", out);
+                    }
+                } else if (emptyfield){
+                   fwprintf(fout, L"\t");
                 } else if ( (*pp)->flags & is_valid) {
                     fwprintf(fout, L"%s\t", num);
                 } else if ( (*pp)->label) {
                     fwprintf(fout, L"%s\t", text);
                 }
             } else if (! conf_clipboard_delimited_tab) {
-                fwprintf(fout, L"%*s", roman->cur_sh->fwidth[col], " ");
+                fwprintf(fout, L"%*s", out_widths[col-c0], " ");
             } else {
                 fwprintf(fout, L"\t");
             }

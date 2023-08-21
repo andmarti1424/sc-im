@@ -93,6 +93,7 @@ const char default_config[] =
 #endif
 
     "copy_to_clipboard_delimited_tab=0\n"
+    "copy_to_clipboard_wysiwyg=1\n"
 
 #ifdef DEFAULT_PASTE_FROM_CLIPBOARD_CMD
     "default_paste_from_clipboard_cmd=" DEFAULT_PASTE_FROM_CLIPBOARD_CMD "\n"
