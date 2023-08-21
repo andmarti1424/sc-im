@@ -227,7 +227,7 @@ int save_plain(FILE * fout, int r0, int c0, int rn, int cn) {
     //   then that is the width used.
     // If it doesn't
     //   then we use the largest data width found in the column and add 1.
-    if (!conf_clipboard_delimted_tab) {
+    if (!conf_clipboard_delimited_tab) {
         for (col = c0; col <= cn; ++col) {
             out_widths[col-c0] = roman->cur_sh->fwidth[col];
             if (!conf_clipboard_wysiwyg) {
