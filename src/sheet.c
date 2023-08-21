@@ -44,6 +44,7 @@
  */
 
 #include <stdlib.h>
+#include <string.h>
 #include "sheet.h"
 #include "file.h"
 #include "yank.h"
