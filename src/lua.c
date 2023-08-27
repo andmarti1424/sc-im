@@ -491,13 +491,13 @@ void doLuaTriger2(int row, int col, int flags) {
 
 /*
  * Lua trigger on a particular cell
- * we assume file and function ist correct other lua throught an error
+ * we assume file and function is correct other lua through an error
  */
 /**
  * \brief TODO Document doLuaTrigger_cell()
  *
  * \details Lua trigger on a particular cell. We assume file and
- * function ist correct. Otherwise, Lua throes an error
+ * function is correct. Otherwise, Lua throes an error
  *
  * \return: none
  */

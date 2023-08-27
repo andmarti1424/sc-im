@@ -54,7 +54,7 @@
  * track of all the vertex's that depends on the first vertex.
  *
  * \details NOTE: an orphan vertex represents an ent that has an enode
- * thats need to be evaluated, but do not depend in another cell.
+ * that's need to be evaluated, but do not depend in another cell.
  */
 
 #include <stdio.h>
@@ -249,9 +249,9 @@ void GraphAddEdge(vertexT * from, vertexT * to) {
 
 
 /**
- * \brief Iterate through all verticies and set visited to false
+ * \brief Iterate through all vertices and set visited to false
  *
- * Iterate through all verticies and set visited to false
+ * Iterate through all vertices and set visited to false
  * evalvisited
  *
  * \return none
@@ -268,7 +268,7 @@ void markAllVerticesNotVisited (int eval_visited) {
 
 
 /**
- * \brief Prints vertexes
+ * \brief Prints vertices
  * \return none
  */
 void print_vertexs() {
@@ -388,7 +388,7 @@ void destroy_vertex(struct sheet * sh, struct ent * ent) {
            // delete vertex only if it end up having no edges, no expression, no value, no label....
            if (e->connectsTo->edges == NULL && e->connectsTo->back_edges == NULL && !e->connectsTo->ent->expr && !(e->connectsTo->ent->flags & is_valid) && ! e->connectsTo->ent->label)
                destroy_vertex(e->connectsTo->sheet, e->connectsTo->ent);
-           //     WARNING: an orphan vertex now represents an ent that has an enode thats
+           //     WARNING: an orphan vertex now represents an ent that has an enode that's
            //     need to be evaluated, but do not depends on another cell.
            e = e->next;
        }
@@ -520,7 +520,7 @@ int All_vertexs_of_edges_visited(struct edgeTag * e, int eval_visited) {
 /**
  * \brief ents_that_depends_on()
  * \details get the list of ents that depends on an specific ent
- * it adds the ents in "deps" variable, and reallocs as neccesary
+ * it adds the ents in "deps" variable, and reallocs as necessary
  * \param[in] struct sheet * sh
  * \param[in] struct ent * ent
  * \return none
@@ -536,7 +536,7 @@ void ents_that_depends_on(struct sheet * sh, struct ent * ent) {
        deps[0].vf = dep_size; // we always keep size of list in the first position !
        //sc_debug("sheet:%s %d %d - dependency on:%s %d %d", sh->name, ent->row, ent->col, edges->connectsTo->sheet->name, edges->connectsTo->ent->row, edges->connectsTo->ent->col);
        deps[dep_size-1].vp = lookat(edges->connectsTo->sheet, edges->connectsTo->ent->row, edges->connectsTo->ent->col);
-       deps[dep_size-1].sheet = edges->connectsTo->sheet; // we should save the sheet asociated with the ent as well
+       deps[dep_size-1].sheet = edges->connectsTo->sheet; // we should save the sheet associated with the ent as well
        ents_that_depends_on(edges->connectsTo->sheet, edges->connectsTo->ent);
        edges->connectsTo->visited = 1;
        edges = edges->next;

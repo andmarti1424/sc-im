@@ -1008,7 +1008,7 @@ int ui_show_content(WINDOW * win, int nb_mobile_rows, int nb_mobile_cols) {
                 //        num[0]='\0';
                 // }
                 //
-                // AVOID showing text content and date formated numeric value both at the same time - number 3 of issue 769
+                // AVOID showing text content and date formatted numeric value both at the same time - number 3 of issue 769
                 if ((*p) && (*p)->format && (*p)->format[0] == 'd') text[0]='\0';
 
                 pad_and_align(text, num, fieldlen, align, (*p)->pad, out, sh->row_format[row]);
@@ -1332,7 +1332,7 @@ void ui_show_text(char * val) {
 
 /**
  * \brief
- * UI function thats called after SIGWINCH signal.
+ * UI function that's called after SIGWINCH signal.
  * \return none
  */
 void sig_winchg() {
@@ -1566,7 +1566,7 @@ void ui_start_colors() {
 
 /**
  * \brief
- * UI function thats called after SIGTSTP signal.
+ * UI function that's called after SIGTSTP signal.
  * \return none
  */
 void ui_pause() {
@@ -1579,7 +1579,7 @@ void ui_pause() {
 
 /**
  * \brief
- * UI function thats called after SIGCONT signal.
+ * UI function that's called after SIGCONT signal.
  * \return none
  */
 void ui_resume() {
@@ -1594,7 +1594,7 @@ void ui_resume() {
 
 /**
  * \brief
- * UI function thats moves input bar to bottom or back to the top
+ * UI function that's moves input bar to bottom or back to the top
  * \return none
  */
 void ui_mv_bottom_bar() {
@@ -1606,7 +1606,7 @@ void ui_mv_bottom_bar() {
 
 /**
  * \brief
- * UI function thats refresh input_pad
+ * UI function that's refresh input_pad
  * \return none
  */
 void ui_refresh_pad(int scroll) {
@@ -1617,7 +1617,7 @@ void ui_refresh_pad(int scroll) {
 
 /**
  * \brief
- * function thats handles mouse movements
+ * function that's handles mouse movements
  * \return none
  */
 #ifdef MOUSE

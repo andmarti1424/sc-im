@@ -267,7 +267,7 @@ int exists_map(char * in, int mode) {
 }
 
 /**
- * \brief Ammend a mapping to the current session
+ * \brief Amend a mapping to the current session
  *
  * \param[in] in
  * \param[in] out

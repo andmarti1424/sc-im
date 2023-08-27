@@ -533,7 +533,7 @@ static void reverse(register char *buf) {
  * When a number is formatted as engineering and is outside of the range,
  * the format reverts to scientific.
  *
- * To preserve compatability with old spreadsheet files, the third value
+ * To preserve compatibility with old spreadsheet files, the third value
  * may be missing, and the default will be fixed point (format 0).
  *
  * When an old style sheet is saved, the third value will be stored.

@@ -82,7 +82,7 @@ ifneq ($(shell uname -s),Darwin)
   LDLIBS += -pthread
 endif
 
-# Check for gnuplot existance
+# Check for gnuplot existence
 ifneq (, $(shell which gnuplot))
   CFLAGS += -DGNUPLOT
 endif

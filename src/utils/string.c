@@ -447,7 +447,7 @@ char * xstrtok(char * line, char * delims) {
 }
 
 /**
- * \brief Change the number of occurences of a word in s. Not used.
+ * \brief Change the number of occurrences of a word in s. Not used.
  *
  * \param[in] s
  * \param[in] word
@@ -468,7 +468,7 @@ int count_word_occurrences(char * s, char * word, int overlap) {
 }
 
 /**
- * \brief Search substr word inside string and replace all its occurances with replacement
+ * \brief Search substr word inside string and replace all its occurrences with replacement
  *
  * \param[in] string
  * \param[in] substr

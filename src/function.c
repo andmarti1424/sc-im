@@ -914,7 +914,7 @@ char * dofmt(char * fmtstr, double v) {
  * \brief doext()
  * \details Given a command name and a value, run the command with the given
  * value and read and return its first output line (only) as an allocated
- * string, always a copy of se->e.o.s, whic is set appropriately first
+ * string, always a copy of se->e.o.s, which is set appropriately first
  * unless external functions are disabled, in which case the previous value
  * is used. The handling of se->e.o.s. and freezing of command is tricky.
  * Returning an allocated string in all cases, even if null, insures cell
