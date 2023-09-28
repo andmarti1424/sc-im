@@ -165,7 +165,7 @@ char * get_conf_values(char * salida) {
 }
 
 /**
- * \brief Retreive the string value of a given key in user_conf_d
+ * \brief Retrieve the string value of a given key in user_conf_d
  *
  * \details This function will look for a given key in the user_conf_d
  * dictionary. If the key is found it will return the value of that
@@ -183,7 +183,7 @@ char * get_conf_value(const char * key) {
 }
 
 /**
- * \brief Retreive the integer value of a given key in user_conf_d
+ * \brief Retrieve the integer value of a given key in user_conf_d
  *
  * \details This function will look for a given key in the user_conf_d
  * dictionary. If the key is found it will return the value of that

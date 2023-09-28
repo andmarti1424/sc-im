@@ -42,7 +42,7 @@
  * \brief TODO Write a tbrief file description.
  *
  * \details Yanklist doesn't keep references to 'ent' elements, it
- * creates new nodes.Tthe yanklist is constantly cleaned out. Example: When
+ * creates new nodes.The yanklist is constantly cleaned out. Example: When
  * removing 'ent' elements with `dc`, the original ones are removed
  * and new elements are created in the yanklist. Important: each 'ent'
  * element should keep a row and col.
@@ -196,7 +196,7 @@ void yank_area(struct sheet * sh, int tlrow, int tlcol, int brrow, int brcol, ch
             (y_cells)->vp->col = e_ori->col;
 
             // work on issue 674
-            // if ignore_hidden is set we substract that number to the internal row so all the pasted rows are
+            // if ignore_hidden is set we subtract that number to the internal row so all the pasted rows are
             // adjacent. this is a special case when we're pulling hidden rows and we want to ignore those hidden ranges
             // (example if yanking a result of a filter)
             if (ignore_hidden) (y_cells)->vp->row -= hid;

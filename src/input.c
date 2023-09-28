@@ -99,7 +99,7 @@ void handle_input(struct block * buffer) {
     /* add char to buffer until valid command found.
      * important: buffer may contain a valid command (for instance,
      * just a letter in insert mode) but that buffer start may also
-     * be a possible mapping! (for instace kj in insert mode to exit the mode).
+     * be a possible mapping! (for instance kj in insert mode to exit the mode).
      * if so, wait a mapping_timeout (1500ms), before triggering has_cmd..
      */
     while (

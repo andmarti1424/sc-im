@@ -119,7 +119,7 @@
  * 1. Remove content from cell or range
  * 2. Input content into a cell
  * 3. Edit a cell
- * 4. Change alginment of range or cell
+ * 4. Change alignment of range or cell
  * 5. Paste range or cell
  * 6. Shift range or cell with sh, sj, sk, sl
  * 7. Insert row or column

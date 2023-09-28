@@ -293,7 +293,7 @@ void int_deletecol(struct sheet * sh, int col, int mult) {
         erase_area(sh, 0, col, sh->maxrow, col, 0, 1); //important: this mark the ents as deleted
 
         rebuild_graph(); // Rebuild of graph is needed.
-        //But shouldnt! TODO
+        //But shouldn't! TODO
 
         // Copy references from right column cells to left column (which gets removed)
         for (r = 0; r <= sh->maxrow; r++) {
@@ -1278,7 +1278,7 @@ void send_to_interp(wchar_t * oper) {
     yyparse();
     linelim = -1;
     line[0]='\0';
-    // commented on 28/04/2021. EvalAll should be used only on certain ocasions.
+    // commented on 28/04/2021. EvalAll should be used only on certain occasions.
     // Use EvalRange instead when possible, and certainly not here everytime sending to interp.
     //if (get_conf_int("autocalc") && ! roman->loading) EvalAll();
     return;
@@ -2022,7 +2022,7 @@ void valueize_area(struct sheet * sh, int sr, int sc, int er, int ec) {
                         // delete vertex only if it end up having no edges, no expression, no value, no label....
                         if (e->connectsTo->edges == NULL && e->connectsTo->back_edges == NULL && !e->connectsTo->ent->expr && !(e->connectsTo->ent->flags & is_valid) && ! e->connectsTo->ent->label)
                             destroy_vertex(sh, e->connectsTo->ent);
-                        //     WARNING: an orphan vertex now represents an ent that has an enode thats
+                        //     WARNING: an orphan vertex now represents an ent that has an enode that's
                         //     need to be evaluated, but do not depend in another cell.
                         e = e->next;
                     }
@@ -2596,7 +2596,7 @@ int calc_mobile_rows(struct sheet * sh, int *last_p) {
  * \details This function finds the number of mobile columns that can fit on
  * the screen. This number excludes frozen columns as they never leave the
  * screen, hence their total height is subtracted from the available screen
- * area. This number also excludes hidden columns. Displayed mobile columnss
+ * area. This number also excludes hidden columns. Displayed mobile columns
  * are considered starting from offscr_sc_cols, however curcol must be within
  * the displayed columns. If curcol is found to be outside the displayed set
  * of columns then offscr_sc_cols is adjusted accordingly.

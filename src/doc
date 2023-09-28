@@ -237,7 +237,7 @@ Commands for handling cell content:
                  ordinary strings, since all numbers must be formatted or
                  expressions decompiled on the fly during the search.
 
-     ?           Same as / but searchs backwards.
+     ?           Same as / but searches backwards.
      n           Move to next search match.
      N           Move to previous search match.
 
@@ -329,8 +329,8 @@ Commands for handling cell content:
      d<RIGHT>    Delete the character under the cursor.
      dh          Delete the character before the cursor.
      d<LEFT>     Delete the character before the cursor.
-     df{char}    Delete until the first occurence of {char} to the right.
-     dF{char}    Delete until the previous occurence of {char} to the left.
+     df{char}    Delete until the first occurrence of {char} to the right.
+     dF{char}    Delete until the previous occurrence of {char} to the left.
      dt{char}    Delete until the next occurrence of {char} to the right.
      dT{char}    Delete until the previous occurrence of {char} to the left.
 
@@ -438,7 +438,7 @@ Commands for handling cell content:
                  spreadsheet, with ".tab" appended.
                  If a range is selected, only that range is exported.
                  NOTE: If you do an export with the :e command, current file
-                 name stays unchaged.
+                 name stays unchanged.
                  See :file command for more details.
                  See 'ignore_hidden' configuration variable below to avoid exporting
                  hidden rows.
@@ -629,7 +629,7 @@ Commands for handling cell content:
                  the status line.
                  Take note that current file name is set during loading of
                  Sc-im or with this command. If you do an export with the :e
-                 command, current file name stays unchaged.
+                 command, current file name stays unchanged.
 
      :fill {range} {initial_number} {increment_number}
                  Fill range {range} with values. The first cell of the range
@@ -746,7 +746,7 @@ Commands for handling cell content:
     :subtotal {col_range} {operation} {col_operation}
                 Apply subtotals over the data in a selected range.
                 {col_range} is the column to group by.
-                {operation} can be one of the followings:
+                {operation} can be one of the following:
                     @sum, @prod, @avg, @count, @stddev, @max, @min
                 {col_operation} is the column whose values will be used
                 to do the {operation}.
@@ -842,7 +842,7 @@ Commands for handling cell content:
                 (the rest of the screen scrolls but the column/s stays fixed
                 on the screen).
     :freezecol {range}
-                Freeze the columns determinated by the selected range.
+                Freeze the columns determined by the selected range.
 
     :freezerow {row}
     :freezerow {row:row}
@@ -850,7 +850,7 @@ Commands for handling cell content:
                 (the rest of the screen scrolls but the row/s stays fixed on
                 the screen).
     :freezerow {range}
-                Freeze the rows determinated by the selected range.
+                Freeze the rows determined by the selected range.
 
     :unfreezecol {column}
     :unfreezecol {column:column}
@@ -918,7 +918,7 @@ Commands for handling cell content:
                           numbers (That are positive)
                         - STRG The cell styling used for cells formatted as
                           strings.
-                        - DATEF The cell styling used for cells formated as
+                        - DATEF The cell styling used for cells formatted as
                           dates.
                         - CELL_SELECTION - The row and column selection styling
                           used on the HEADINGS to indicate the coordinates of the
@@ -1041,7 +1041,7 @@ Commands for handling cell content:
                 :trigger b10 "mode=W type=C file=trg.so function=wr2mysql"
 
                 Function "wr2mysql" in trg.so is called when to
-                cell b10 is writen a new value.
+                cell b10 is written a new value.
                 See "examples/Module/module.c" for more Infos.
                 Adding "-Wl,--export-dynamic" in Makefile for linking
                 sc-im, will export all symbols from sc-im, making it
@@ -1245,7 +1245,7 @@ Commands for handling cell content:
             The <C-d> command works on NORMAL and VISUAL modes, and converts
             cell's text content that represents a date, and sets the numeric
             value of the cell using using locale's D_FMT format.
-            After convertion, the same format is applied automatically to the
+            After conversion, the same format is applied automatically to the
             cell so that the value is displayed as a date.
             You can then change the date format with :format command or
             just leave it as it is with the current locale D_FMT format.
@@ -1264,9 +1264,9 @@ Commands for handling cell content:
 
         b. With :datefmt command:
             This command works like <C-d> but instead of using locale's D_FMT
-            format for convertion, it takes a strftime-compatible format string as
+            format for conversion, it takes a strftime-compatible format string as
             a parameter. Its syntax is ':datefmt "{strftime_format}"'
-            After convertion, the same format is applied automatically to the cell
+            After conversion, the same format is applied automatically to the cell
             so that the value is displayed as a date.
 
             Example:            \12/03/2020
@@ -1429,7 +1429,7 @@ Commands for handling cell content:
     AUTOBACKUP must be set during sc-im build for this feature to be
     available.
     If you set this to 0 but AUTOBACKUP was set during build, it still will
-    check for existance of backups before loading a file.
+    check for existence of backups before loading a file.
 
     'show_cursor' [default off]
     Make the screen cursor follow the active cell. Useful for people

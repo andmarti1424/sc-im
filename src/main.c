@@ -154,7 +154,7 @@ extern graphADT graph;
  * \brief The main() function
  *
  * \details The main() function of sc-im. It is the first function called when
- * the applicaiton is executed.
+ * the application is executed.
  *
  * \param[in] argc (argument count) is the number of strings pointed to by argv. This
  * is passed to main() by the system.
@@ -587,7 +587,7 @@ void handle_argv_exports() {
 
 
 /**
- * \brief Set up signals catched by sc-im
+ * \brief Set up signals caught by sc-im
  * \return none
  */
 void signals() {

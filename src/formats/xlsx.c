@@ -307,7 +307,7 @@ void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) 
                 } else if (
                 child_node->xmlChildrenNode != NULL && ! strcmp((char *) child_node->xmlChildrenNode->name, "f")) {
 
-                    // handle the formula if that is whats desidered!!
+                    // handle the formula if that is what's desidered!!
                     if (get_conf_int("xlsx_readformulas") &&
                         // dont handle shared formulas right now
                         ! (xmlHasProp(child_node->xmlChildrenNode, (xmlChar *) "t") &&

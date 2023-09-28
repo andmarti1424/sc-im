@@ -215,7 +215,7 @@ double eval(struct sheet * sh, struct ent * ent, struct enode * e, int rebuild_g
             int r = eval(sh, ent, e->e.o.left, rebuild_graph);
             int c = eval(sh, ent, e->e.o.right, rebuild_graph);
             if (r < 0 || c < 0) {
-                sc_debug("@getent shouldnt be called with negative parameters %d %d", r, c);
+                sc_debug("@getent shouldn't be called with negative parameters %d %d", r, c);
                 return (double) 0;
             }
             struct ent * vp = *ATBL(sh, sh->tbl, r, c);

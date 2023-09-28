@@ -104,7 +104,7 @@ void checkbounds(struct sheet * sh, int * rowp, int * colp) {
     sc_error(msg); \
     return (FALSE); \
     } \
-    oldptr = newptr /* wait incase we can't alloc */
+    oldptr = newptr /* wait in case we can't alloc */
 
 #ifndef PSC
 static char nolonger[] = "The table can't be any longer";
@@ -115,7 +115,7 @@ static char nowider[] = "The table can't be any wider";
 /**
  * \brief TODO Document growtbl()
  *
- * \details Grow the main && auxillary tables (reset maxrows/mascols
+ * \details Grow the main && auxiliary tables (reset maxrows/mascols
  * as needed). toprow &&/|| topcol tells us a better guess of how big
  * to become. We return TRUE if we could grow, FALSE if not.
  * \param[in] rowcol

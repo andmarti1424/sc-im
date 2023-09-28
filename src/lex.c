@@ -342,7 +342,7 @@ int yylex() {
  * \brief TODO Document atocol()
  *
  * \details Given a token string starting with a symbolid column name and
- * its valid length, convert column namd ("A"-"Z" or "AA"-"ZZ") to a
+ * its valid length, convert column name ("A"-"Z" or "AA"-"ZZ") to a
  * column number (0-N). Never mind if the column number is illegal
  * (too high). The procedure's name and function are the inverse of coltoa().
  *
