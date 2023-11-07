@@ -4,8 +4,8 @@ name = sc-im
 # Specify some Options
 
 ## Build in cygwin environment with previously compiled libxlsxwriter
-O_CYGWIN := 0 		
-O_LIBXLSXWRITER_ROOT := "../../libxlsxwriter"
+O_CYGWIN ::= 0 		
+O_LIBXLSXWRITER_ROOT ::= "../../libxlsxwriter"
 
 # The base directory where everything should be installed.
 prefix  = /usr/local
