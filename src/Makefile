@@ -1,6 +1,12 @@
 # Specify the name of the resulting executable file
 name = sc-im
 
+# Specify some Options
+
+## Build in cygwin environment with previously compiled libxlsxwriter
+O_CYGWIN := 0 		
+O_LIBXLSXWRITER_ROOT := "../../libxlsxwriter"
+
 # The base directory where everything should be installed.
 prefix  = /usr/local
 
@@ -132,6 +138,13 @@ ifneq (, $(shell which pkg-config))
     CFLAGS += -DXLSX_EXPORT $(shell pkg-config --cflags xlsxwriter)
     LDLIBS += $(shell pkg-config --libs xlsxwriter)
   endif
+
+  # NOTE: compile with required libxlsxwriter for export support on Cygwin
+  ifeq ($(O_CYGWIN), 1) 
+    CFLAGS += -DXLSX_EXPORT -I$(prefix)/include 
+    LDLIBS += -I $(prefix)/include -L $(O_LIBXLSXWRITER_ROOT)/lib 
+    LDLIBS += -lxlsxwriter -lz 
+  endif 
 
   # NOTE: lua support
   LUA_PKGNAME ?= $(shell pkg-config --list-all | awk '/^lua-?[0-9.]+[[:space:]]/ { p=$$1; gsub("[^[0-9]", "", p); print p " " $$1; }' | LC_ALL=C sort -nrk1 | uniq | head -n 1 | awk '{print $$2}')
