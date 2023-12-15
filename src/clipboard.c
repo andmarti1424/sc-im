@@ -65,9 +65,12 @@ extern struct session * session;
 * \return 0 on success; -1 on error
 */
 int paste_from_clipboard() {
-    struct roman * roman = session->cur_doc;
     char *clipboard_cmd = get_conf_value("default_paste_from_clipboard_cmd");
-    if (!clipboard_cmd || !*clipboard_cmd) return -1;
+    if (!clipboard_cmd || !*clipboard_cmd)
+        return -1;
+
+    struct roman * roman = session->cur_doc;
+
 
     // create tmp file
     char template[] = "/tmp/sc-im-clipboardXXXXXX";
@@ -103,6 +106,7 @@ int paste_from_clipboard() {
         // Split string using the delimiter
         token = xstrtok(line_in, delim);
         c = roman->cur_sh->curcol;
+        
         while( token != NULL ) {
             if (r > MAXROWS - GROWAMT - 1 || c > ABSMAXCOLS - 1) break;
             clean_carrier(token);
@@ -119,26 +123,28 @@ int paste_from_clipboard() {
                 swprintf(line_interp, BUFFERSIZE, L"label %s%d=\"%s\"", coltoa(c), r, std);
                 free(std);
             }
-            if (strlen(st)) send_to_interp(line_interp);
+            
+            if (strlen(st))
+                send_to_interp(line_interp);
             c++;
             token = xstrtok(NULL, delim);
             free(num);
             //free(st);
-            if (c > roman->cur_sh->maxcol) roman->cur_sh->maxcol = c;
+            if (c > roman->cur_sh->maxcol)
+                roman->cur_sh->maxcol = c;
         }
         r++;
-        if (r > roman->cur_sh->maxrow) roman->cur_sh->maxrow = r;
-        if (r > MAXROWS - GROWAMT - 1 || c > ABSMAXCOLS - 1) break;
+        if (r > roman->cur_sh->maxrow)
+            roman->cur_sh->maxrow = r;
+        if (r > MAXROWS - GROWAMT - 1 || c > ABSMAXCOLS - 1)
+            break;
     }
     if (get_conf_int("autocalc")) EvalAll();
     sc_info("Content pasted from clipboard");
 
 out:
-    // close file descriptor
-    close(fd);
-
-    // remove temp file
-    unlink(template);
+    close(fd); // close file descriptor
+    unlink(template); // remove temp file
     return ret;
 }
 
@@ -154,10 +160,9 @@ int copy_to_clipboard(int r0, int c0, int rn, int cn) {
     // create tmp file
     char template[] = "/tmp/sc-im-clipboardXXXXXX";
     int fd = mkstemp(template);
-    if (fd == -1) {
-        sc_error("Error while copying to clipboard");
-        return -1;
-    }
+    if (fd == -1)
+        return sc_error("Error while copying to clipboard"), -1;
+    
 
     // get temp file pointer based on temp file descriptor
     FILE * fp = fdopen(fd, "w");
@@ -169,21 +174,12 @@ int copy_to_clipboard(int r0, int c0, int rn, int cn) {
     // copy to clipboard
     char syscmd[PATHLEN];
     int ret = snprintf(syscmd, PATHLEN, "%s %s", clipboard_cmd, template);
-    if (ret < 0 || ret >= PATHLEN) {
-        sc_error("Error while copying to clipboard");
-        ret = -1;
-    } else {
-        system(syscmd);
-        sc_info("Content copied to clipboard");
-        ret = 0;
-    }
-
-    // close file descriptor
-    close(fd);
-
-    // remove temp file
-    unlink(template);
-
+    ret = (ret < 0 || ret >= PATHLEN)
+       ? sc_error("Error while copying to clipboard"), -1
+       : system(syscmd), sc_info("Content copied to clipboard"), 0;
+    
+    close(fd); // close file descriptor
+    unlink(template); // remove temp file
     return ret;
 }
 
@@ -234,49 +230,43 @@ int save_plain(FILE * fout, int r0, int c0, int rn, int cn) {
                 // If a numeric value exists
                 if ( (*pp)->flags & is_valid) {
                     res = ui_get_formated_value(pp, col, formated_s);
-                    // res = 0, indicates that in num we store a date
-                    // res = 1, indicates a format is applied in num
-                    if (res == 0 || res == 1) {
+                    // In res: 0 indicates that num stores a date; 1, indicates a format is applied in num
+                    if (res == 0 || res == 1)
                         strcpy(num, formated_s);
-                    } else if (res == -1) {
+                    else if (res == -1) 
                         sprintf(num, "%.*f", roman->cur_sh->precision[col], (*pp)->v);
-                    }
-                }
-                else {
-                     emptyfield++;
-               }
+                } else
+                    emptyfield++;
+               
 
                 // If a string exists
                 if ((*pp)->label) {
                     strcpy(text, (*pp)->label);
-                    align = 1;                                // right alignment
-                    if ((*pp)->flags & is_label) {            // center alignment
+                    align = 1;                            // right alignment
+                    if ((*pp)->flags & is_label)          // center alignment
                         align = 0;
-                    } else if ((*pp)->flags & is_leftflush) { // left alignment
+                    else if ((*pp)->flags & is_leftflush) // left alignment
                         align = -1;
-                    } else if (res == 0) {                    // res must ¿NOT? be zero for label to be printed
+                    else if (res == 0)                    // res must ¿NOT? be zero for label to be printed
                         text[0] = '\0';
-                    }
-                }
-                else {
-                     emptyfield++;
-               }
-                if(emptyfield){
+                } else
+                    emptyfield++;
+               
+                if (emptyfield)
                    fwprintf(fout, L"\t");
-                }
-                if (! conf_clipboard_delimited_tab) {
+                
+                if (! conf_clipboard_delimited_tab)
                     pad_and_align(text, num, roman->cur_sh->fwidth[col], align, 0, out, roman->cur_sh->row_format[row]);
                     fwprintf(fout, L"%ls", out);
-                } else if ( (*pp)->flags & is_valid) {
+                else if ( (*pp)->flags & is_valid)
                     fwprintf(fout, L"%s\t", num);
-                } else if ( (*pp)->label) {
+                else if ( (*pp)->label)
                     fwprintf(fout, L"%s\t", text);
-                }
-            } else if (! conf_clipboard_delimited_tab) {
+            } else if (! conf_clipboard_delimited_tab)
                 fwprintf(fout, L"%*s", roman->cur_sh->fwidth[col], " ");
-            } else {
+            else
                 fwprintf(fout, L"\t");
-            }
+            
         }
         if (row != rn) fwprintf(fout, L"\n");
     }
