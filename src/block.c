@@ -69,32 +69,22 @@ int block_in_block (struct block * o, struct block * b) {
     int bus[lbus];
 
     struct block * aux = o;
-    int i = 0;
-    while (aux != NULL) {
+    for (int i = 0; aux != NULL; aux = aux->pnext)
         ori[i++] = aux->value;
-        aux = aux->pnext;
-    }
-
+    
     aux = b;
-    i=0;
-    while (aux != NULL) {
+    for (i = 0; aux != NULL; aux = aux->pnext)
         bus[i++] = aux->value;
-        aux = aux->pnext;
-    }
 
-    int encontrado;
-    int k;
-    i = 0;
-    while (i <= lori-lbus) {
-        encontrado = 0;
-        for (k = 0; k < lbus; k++) {
+    for (int i = 0; i <= lori-lbus; i++) {
+        int encontrado = 0;
+        for (int k = 0; k < lbus; k++)
             if ( ori[i + k] != bus[k] ) {
                 encontrado = -1;
                 break;
             }
-        }
-        if (encontrado != -1) return i;
-        i++;
+        if (encontrado == 0)
+            return i;
     }
     return -1;
 }
@@ -120,7 +110,8 @@ int replace_block_in_block (struct block * olist, struct block * in, struct bloc
     int lin = get_bufsize(in);
     int lout = get_bufsize(out);
 
-    if ( ! lin || ! lori || ! lout ) return -1;
+    if ( ! lin || ! lori || ! lout )
+        return -1;
 
     //info("%d %d %d", lori, lin, lout); get_key();
 
@@ -131,12 +122,9 @@ int replace_block_in_block (struct block * olist, struct block * in, struct bloc
     while (lin--) del_buf(ori, lin+pos);
 
     // Then add the nodes of the 'out' list to "olist"
-    while (out != NULL) {
-        int e = out->value;
-        if (e != '\\' || out->pnext == NULL || out->pnext->value != '"')
-            addto_buf(olist, e);
-        out = out->pnext;
-    }
+    for (;out != NULL; out = out->pnext;)
+        if (out->value != '\\' || out->pnext == NULL || out->pnext->value != '"')
+            addto_buf(olist, out->value);
 
     return 0;
 }
