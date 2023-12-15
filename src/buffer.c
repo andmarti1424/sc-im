@@ -69,20 +69,16 @@ struct block * create_buf() {
 * \return none
 */
 void addto_buf(struct block * buf, wint_t d) {
-    struct block * aux = buf;
-
     if (buf->value == '\0') {
         buf->value = d;
-    } else {
-        struct block * b = (struct block *) malloc(sizeof(struct block));
-        b->value = d;
-        b->pnext = NULL;
-
-        while (aux->pnext != NULL)
-            aux = aux->pnext;
-        aux->pnext = b;
+        return;
     }
-    return;
+    struct block * b = (struct block *) malloc(sizeof(struct block));
+    b->value = d;
+    b->pnext = NULL;
+
+    for(struct block * aux = buf; aux->pnext != NULL; aux = aux->pnext);
+    aux->pnext = b;   
 }
 
 
@@ -95,10 +91,8 @@ void addto_buf(struct block * buf, wint_t d) {
 void copybuffer(struct block * origen, struct block * destino) {
     flush_buf(destino);
     int len = get_bufsize(origen);
-    int i;
-    for (i=0; i < len; i++)
+    for (int i=0; i < len; i++)
         addto_buf(destino, get_bufval(origen, i));
-    return;
 }
 
 
@@ -110,10 +104,9 @@ void copybuffer(struct block * origen, struct block * destino) {
 */
 // FIXME
 void del_buf (struct block * buf, int pos) {
-    int i;
     struct block * ant = buf;
     struct block * cur = buf;
-    for (i = 0; i < pos; i++) {
+    for (int i = 0; i < pos; i++) {
         ant = cur;
         cur = cur->pnext;
     }
@@ -121,11 +114,10 @@ void del_buf (struct block * buf, int pos) {
         cur->value = '\0';
         //buf = cur->pnext; //FIXME
         //free(cur);
-    } else {
-        ant->pnext = cur->pnext;
-        free(cur);
+        return;
     }
-    return;
+    ant->pnext = cur->pnext;
+    free(cur);
 }
 
 /**
@@ -134,7 +126,8 @@ void del_buf (struct block * buf, int pos) {
 * \return none
 */
 void flush_buf (struct block * buf) {
-    if (buf == NULL) return;
+    if (buf == NULL)
+        return;
 
     struct block * aux, * np;
     for (aux = buf->pnext; aux != NULL; aux = np) {
@@ -143,7 +136,6 @@ void flush_buf (struct block * buf) {
     }
     buf->value = '\0';
     buf->pnext = NULL;
-    return;
 }
 
 
@@ -156,7 +148,6 @@ void flush_buf (struct block * buf) {
 void erase_buf (struct block * buf) {
     flush_buf(buf);
     free(buf);
-    return;
 }
 
 
@@ -166,13 +157,13 @@ void erase_buf (struct block * buf) {
 * \return c size of buffer
 */
 int get_bufsize(struct block * buf) {
+    if (buf == NULL || buf->value == '\0')
+        return 0;
+    
     struct block * b_aux = buf;
-    if (b_aux == NULL || b_aux->value == '\0') return 0;
-    int c = 0;
-    while (b_aux != NULL) {
-        c++;
+    for (int c = 0; b_aux != NULL; c++)
         b_aux = b_aux->pnext;
-    }
+
     return c;
 }
 
@@ -185,13 +176,13 @@ int get_bufsize(struct block * buf) {
 * \return c printable buffer length
 */
 int get_pbuflen(struct block * buf) {
+    if (buf == NULL || buf->value == '\0')
+        return 0;
+    
     struct block * b_aux = buf;
-    if (b_aux == NULL || b_aux->value == '\0') return 0;
-    int c = 0;
-    while (b_aux != NULL) {
-        if ( !is_idchar(b_aux->value) ) c++;
-        b_aux = b_aux->pnext;
-    }
+    for (int c = 0; b_aux != NULL; b_aux = b_aux->pnext)
+        if ( !is_idchar(b_aux->value) )
+            c++;
     return c;
 }
 
@@ -203,9 +194,8 @@ int get_pbuflen(struct block * buf) {
 * \return none
 */
 int get_bufval(struct block * buf, int d) {
-    int i;
     struct block * b_aux = buf;
-    for (i = 0; i < d; i++) {
+    for (int i = 0; i < d; i++) {
         b_aux = b_aux->pnext;
     }
     return b_aux->value;
@@ -218,11 +208,12 @@ int get_bufval(struct block * buf, int d) {
 * \return 0 if not found, 1 if found
 */
 int find_val(struct block * buf, int value) {
-    struct block * b_aux = buf;
-    while ( b_aux != NULL && b_aux->value != '\0' ) {
-        if (b_aux->value == value) return 1;
-        b_aux = b_aux->pnext;
-    }
+    for ( struct block * b_aux = buf;
+          b_aux != NULL && b_aux->value != '\0';
+          b_aux = b_aux->pnext;
+        )
+        if (b_aux->value == value)
+            return 1;
     return 0;
 }
 
@@ -233,16 +224,14 @@ int find_val(struct block * buf, int value) {
 * \return none
 */
 struct block * dequeue (struct block * buf) {
-    if (buf == NULL) return buf;
-    struct block * sig;
-    if (buf->value == '\0') return buf;
+    if (buf == NULL || buf->value == '\0')
+        return buf;
 
     if (buf->pnext == NULL) {
        buf->value = '\0';
-    } else {
-        sig = buf->pnext;
-        //free(buf);
-        buf = sig;
+       return buf;
     }
-    return buf;
+    //free(buf);
+
+    return buf->pnext;
 }
