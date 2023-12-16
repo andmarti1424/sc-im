@@ -112,23 +112,17 @@ void erasedb(struct sheet * sheet, int _free) {
         sheet->row_format[r] = 1;
         struct ent ** pp = ATBL(sheet, sheet->tbl, r, 0);
         for (c = 0; c++ < sheet->maxcols; pp++)
-            if (*pp != NULL) {
-                clearent(*pp);
-                if (_free) {
-                    free(*pp);
-                    *pp = NULL;
+            if (*pp != NULL)
+                if (clearent(*pp), _free) {
+                    *pp = free(*pp), NULL;
                 } else {
                   (*pp)->next = freeents;    /* save [struct ent] for reuse */
                   freeents = *pp;
                 }
-            }
     }
-
     sheet->maxrow = 0;
     sheet->maxcol = 0;
-
     clean_range();
-
     sheet->currow = sheet->curcol = 0;
 }
 
@@ -140,7 +134,7 @@ void load_rc(void) {
     char rcpath[PATHLEN];
     char * home;
 
-    if ((home = getenv("XDG_CONFIG_HOME"))) {
+    if (home = getenv("XDG_CONFIG_HOME")) {
         char config_dir[PATHLEN-(sizeof CONFIG_FILE)];
         snprintf(config_dir, PATHLEN-(sizeof CONFIG_FILE), "%s/sc-im", home);
         mkdir(config_dir,0777);
@@ -148,7 +142,7 @@ void load_rc(void) {
         (void) readfile(rcpath, 0);
     }
     /* Default to compile time if XDG_CONFIG_HOME not found */
-    else if ((home = getenv("HOME"))) {
+    else if (home = getenv("HOME")) {
         char config_dir[PATHLEN];
         sprintf(config_dir, "%s/%s", home, CONFIG_DIR);
         mkdir(config_dir,0777);
@@ -164,13 +158,8 @@ void load_rc(void) {
  * \param[in] fname file name
  * \return 1 if file exists; 0 otherwise
  */
-int file_exists(const char * fname) {
-    FILE * file;
-    if ((file = fopen(fname, "r"))) {
-        fclose(file);
-        return 1;
-    }
-    return 0;
+int file_exists(const char * fname) {    
+    return ( FILE * file = fopen(fname, "r")) ) ? fclose(file), 1 : 0;
 }
 
 
@@ -180,12 +169,9 @@ int file_exists(const char * fname) {
  * \return 0 if not modified; 1 if modified
  */
 int modcheck() {
-    struct roman * roman = session->cur_doc;
-    if (roman->modflg && ! get_conf_int("nocurses")) {
-        sc_error("File not saved since last change. Add '!' to force");
-        return(1);
-    }
-    return 0;
+    return (ession->cur_doc->modflg && ! get_conf_int("nocurses"))
+        ? sc_error("File not saved since last change. Add '!' to force"), 1;
+        : 0;
 }
 
 
@@ -195,21 +181,15 @@ int modcheck() {
  * \return one of , ; \t |
  */
 char get_delim(char *type) {
-    char delim = ',';
-    if (!strcasecmp(type, "tsv") || !strcasecmp(type, "tab"))
-        delim = '\t';
+    char delim = (strcasecmp(type, "tsv") && strcasecmp(type, "tab")) ? ',' : '\t';
 
-    if (get_conf_value("txtdelim") != NULL) {
-        if (!strcasecmp(get_conf_value("txtdelim"), "\\t")) {
-            delim = '\t';
-        } else if (!strcasecmp(get_conf_value("txtdelim"), ",")) {
-            delim = ',';
-        } else if (!strcasecmp(get_conf_value("txtdelim"), ";")) {
-            delim = ';';
-        } else if (!strcasecmp(get_conf_value("txtdelim"), "|")) {
-            delim = '|';
-        }
-    }
+    if (get_conf_value("txtdelim") != NULL)
+        delim = (!strcasecmp(get_conf_value("txtdelim"), "\\t")) ? '\t'
+              : (!strcasecmp(get_conf_value("txtdelim"), ","))   ? ','
+              : (!strcasecmp(get_conf_value("txtdelim"), ";"))   ? ';'
+              : (!strcasecmp(get_conf_value("txtdelim"), "|"))   ? '|'
+              : delim;
+        
     return delim;
 }
 
@@ -230,10 +210,8 @@ int savefile() {
     wordexp_t p;
 #endif
 
-    if ((curfile == NULL || ! curfile[0]) && wcslen(inputline) < 3) { // casos ":w" ":w!" ":x" ":x!"
-        sc_error("There is no filename");
-        return -1;
-    }
+    if ((curfile == NULL || ! curfile[0]) && wcslen(inputline) < 3) // casos ":w" ":w!" ":x" ":x!"
+        return sc_error("There is no filename"), -1;
 
     if (inputline[1] == L'!') force_rewrite = 1;
 
@@ -242,97 +220,76 @@ int savefile() {
 
 #ifndef NO_WORDEXP
     wordexp(name, &p, 0);
-    if (p.we_wordc < 1) {
-        sc_error("Failed expanding filepath");
-        return -1;
-    }
-    if ((len = strlen(p.we_wordv[0])) >= sizeof(name)) {
-        sc_error("File path too long");
-        wordfree(&p);
-        return -1;
-    }
+    if (p.we_wordc < 1)
+        return sc_error("Failed expanding filepath"), -1;
+    
+    if ((len = strlen(p.we_wordv[0])) >= sizeof(name))
+        return sc_error("File path too long"), wordfree(&p); -1;
+
     memcpy(name, p.we_wordv[0], len+1);
     wordfree(&p);
 #endif
 
-    if (! force_rewrite && file_exists(name)) {
-        sc_error("File already exists. Use \"!\" to force rewrite.");
-        return -1;
-    }
+    if (! force_rewrite && file_exists(name))
+        return sc_error("File already exists. Use \"!\" to force rewrite."), -1;
 
 #ifdef AUTOBACKUP
     // check if backup of curfile exists.
     // if it exists, remove it.
-    if (curfile != NULL && strlen(curfile) && backup_exists(curfile)) remove_backup(curfile);
+    if (curfile != NULL && strlen(curfile) && backup_exists(curfile))
+        remove_backup(curfile);
 
     // check if backup of newfilename exists.
     // if it exists and '!' is set, remove it.
     // if it exists and no '!' is set, return.
     if ((curfile == NULL || ! strlen(curfile)) && backup_exists(name)) {
         if (!force_rewrite) {
-            sc_error("Backup file of %s exists. Use \"!\" to force the write process.", name);
-            return -1;
+            return sc_error("Backup file of %s exists. Use \"!\" to force the write process.", name), -1;
         } else remove_backup(name);
     }
 #endif
 
-    if (doc->name == NULL) doc->name = malloc(sizeof(char)*PATHLEN);
+    if (doc->name == NULL)
+        doc->name = malloc(sizeof(char)*PATHLEN);
     curfile = doc->name;
     // copy newfilename to curfile
-    if (wcslen(inputline) > 2) {
+    if (wcslen(inputline) > 2)
         strcpy(doc->name, name);
-    }
 
-    // add sc extension if not present
-    if (wcslen(inputline) > 2 && str_in_str(curfile, ".") == -1) {
+    if (wcslen(inputline) > 2 && str_in_str(curfile, ".") == -1) // add sc extension if not present
         sprintf(curfile + strlen(curfile), ".sc");
-
-    // treat csv
-    } else if (strlen(curfile) > 4 && (! strcasecmp( & curfile[strlen(curfile)-4], ".csv"))) {
+    else if (strlen(curfile) > 4 && (! strcasecmp( & curfile[strlen(curfile)-4], ".csv"))) { // treat csv
         export_delim(curfile, get_delim("csv"), 0, 0, doc->cur_sh->maxrow, doc->cur_sh->maxcol, 1);
-        doc->modflg = 0;
-        return 0;
-
-    // treat tab
+        goto ok;
     } else if (strlen(curfile) > 4 && (! strcasecmp( & curfile[strlen(curfile)-4], ".tsv") ||
-        ! strcasecmp( & curfile[strlen(curfile)-4], ".tab"))){
+        ! strcasecmp( & curfile[strlen(curfile)-4], ".tab"))){ // treat tab
         export_delim(curfile, '\t', 0, 0, doc->cur_sh->maxrow, doc->cur_sh->maxcol, 1);
-        doc->modflg = 0;
-        return 0;
-
-    // treat markdown format
+        goto ok;
     } else if (strlen(curfile) > 3 && ( ! strcasecmp( & curfile[strlen(curfile)-3], ".md") ||
-          ! strcasecmp( & curfile[strlen(curfile)-4], ".mkd"))){
-      export_markdown(curfile, 0, 0, doc->cur_sh->maxrow, doc->cur_sh->maxcol);
-      doc->modflg = 0;
-      return 0;
-
-    // treat xlsx format
+          ! strcasecmp( & curfile[strlen(curfile)-4], ".mkd"))){ // treat markdown format
+        export_markdown(curfile, 0, 0, doc->cur_sh->maxrow, doc->cur_sh->maxcol);
+        goto ok;
     } else if (strlen(curfile) > 5 && ( ! strcasecmp( & curfile[strlen(curfile)-5], ".xlsx") ||
-            ! strcasecmp( & curfile[strlen(curfile)-5], ".xlsx"))){
+            ! strcasecmp( & curfile[strlen(curfile)-5], ".xlsx"))){     // treat xlsx format
 #ifndef XLSX_EXPORT
-        sc_error("XLSX export support not compiled in. Please save file in other extension.");
-        return -1;
+        
+        return sc_error("XLSX export support not compiled in. Please save file in other extension."), -1;
 #else
-        if (export_xlsx(curfile) == 0) {
-            sc_info("File \"%s\" written", curfile);
-            doc->modflg = 0;
-        } else
+        if (export_xlsx(curfile) == 0)
+            doc->modflg = sc_info("File \"%s\" written", curfile), 0;
+        else
             sc_error("File could not be saved");
         return 0;
 #endif
     // prevent saving files with ".ods" in its name
-    } else if (strlen(curfile) > 4 && (! strcasecmp( & curfile[strlen(curfile)-4], ".ods"))) {
-        sc_error("Cannot save \'%s\' file. ODS file saving is not yet supported.", curfile);
-        return -1;
-    }
+    } else if (strlen(curfile) > 4 && (! strcasecmp( & curfile[strlen(curfile)-4], ".ods")))
+        return sc_error("Cannot save \'%s\' file. ODS file saving is not yet supported.", curfile), -1;
 
     // save in sc format
-    if (writefile(curfile, 1) < 0) {
-        sc_error("File could not be saved");
-        return -1;
-    }
-    doc->modflg = 0;
+    if (writefile(curfile, 1) < 0)
+        return sc_error("File could not be saved"), -1;
+
+ok: doc->modflg = 0;
     return 0;
 }
 
@@ -368,9 +325,8 @@ int writefile(char * fname, int verbose) {
 
     // traverse sheets of the current doc and save the data to file
     write_fd(f, session->cur_doc);
-
     closefile(f, pid, 0);
-
+    
     if (! pid) {
         (void) strcpy(session->cur_doc->name, save);
         session->cur_doc->modflg = 0;
@@ -514,9 +470,8 @@ void write_fd(FILE * f, struct roman * doc) {
                                 del_char(line, 0);
                                 sprintf(strcolor, " fg=%.*s", BUFFERSIZE-5, &line[0]);
                                 free(e);
-                            } else if ((cc = get_custom_color_by_number((*pp)->ucolor->fg - 7)) != NULL) {
+                            } else if ((cc = get_custom_color_by_number((*pp)->ucolor->fg - 7)) != NULL)
                                 sprintf(strcolor, " fg=%.*s", BUFFERSIZE-5, cc->name);
-                            }
                         }
 
                         if ((*pp)->ucolor->bg != NONE_COLOR) {
@@ -528,9 +483,8 @@ void write_fd(FILE * f, struct roman * doc) {
                                 del_char(line, 0);
                                 sprintf(strcolor + strlen(strcolor), " bg=%.*s", BUFFERSIZE-5, &line[0]);
                                 free(e);
-                            } else if ((cc = get_custom_color_by_number((*pp)->ucolor->bg - 7)) != NULL) {
+                            } else if ((cc = get_custom_color_by_number((*pp)->ucolor->bg - 7)) != NULL)
                                 sprintf(strcolor + strlen(strcolor), " bg=%.*s", BUFFERSIZE-5, cc->name);
-                            }
                         }
 
                         if ((*pp)->ucolor->bold)      sprintf(strcolor + strlen(strcolor), " bold=1");
@@ -564,7 +518,6 @@ void write_fd(FILE * f, struct roman * doc) {
                             else
                                 fprintf(f, " \"%s\"\n", strcolor);
                         }
-
                     }
 
                     /* if ((*pp)->nrow >= 0) {
@@ -637,21 +590,15 @@ void write_fd(FILE * f, struct roman * doc) {
  * \return none
  */
 void write_marks(FILE * f) {
-    int i;
-    struct mark * m;
-
-    for ( i='a'; i<='z'; i++ ) {
-        m = get_mark((char) i);
-
+    for (int i='a'; i<='z'; i++) {
+        struct mark * m = get_mark((char) i);
         // m->rng should never be NULL if both m->col and m->row are -1 !!
         if ( m->row == -1 && m->col == -1) {
             fprintf(f, "mark %c \"%s\" %s%d ", i, m->sheet->name, coltoa(m->rng->tlcol), m->rng->tlrow);
             fprintf(f, "%s%d\n", coltoa(m->rng->brcol), m->rng->brrow);
-        } else if ( m->row != 0 && m->row != 0) {
+        } else if ( m->row != 0 && m->row != 0)
             fprintf(f, "mark %c \"%s\" %s%d\n", i, m->sheet->name, coltoa(m->col), m->row);
-        }
     }
-    return;
 }
 
 
@@ -766,14 +713,12 @@ sc_readfile_result readfile(char * fname, int eraseflg) {
                 extern int shall_quit;
                 shall_quit = 1;
                 return SC_READFILE_ERROR;
-                break;
             case L'e':
             case L'E':
                 remove_backup(fname);
                 break;
             case L'r':
             case L'R':
-                ;
                 int len = strlen(fname);
                 if (!len) return 0;
                 char * pstr = strrchr(fname, '/');
