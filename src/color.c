@@ -289,68 +289,61 @@ void free_colors_param_dict() {
  */
 
 void chg_color(char * str) {
-    if (get_conf_int("nocurses")) return;
+    if (get_conf_int("nocurses"))
+        return;
 
-    // Create key-value dictionary for the content of the string
-    struct dictionary * d = create_dictionary();
+    struct dictionary * d = create_dictionary(); // Create key-value dictionary for the content of the string
 
     // Remove quotes
-    if (str[0]=='"') del_char(str, 0);
-    if (str[strlen(str)-1]=='"') del_char(str, strlen(str)-1);
+    if (str[0]=='"')
+        del_char(str, 0);
+    if (str[strlen(str)-1]=='"')
+        del_char(str, strlen(str)-1);
 
     parse_str(d, str, TRUE);
-    char * cl;
 
     // Validate we got enough keys to change a color
-    if (
-        (get(d, "fg") == NULL) ||
-        (get(d, "type") == NULL) ||
-        (get(d, "bg") == NULL)) {
-        sc_error("Color definition incomplete");
-        destroy_dictionary(d);
-        return;
-    }
+    if ((get(d, "fg") == NULL)
+        || (get(d, "type") == NULL)
+        || (get(d, "bg") == NULL)) 
+        return
+            sc_error("Color definition incomplete"),
+            destroy_dictionary(d);
 
     // Validate the values for those keys are correct
     // bg, fg should have valid values BLACK(0) to WHITE(7) for ncurses stock colors
     // or a custom color name, or -1, indicating default TERMINAL color
-    if (get(d_colors_param, get(d, "type")) == NULL) {
-        sc_error("Error setting color. Invalid type value: %s", get(d, "type"));
-        destroy_dictionary(d);
-        return;
-    }
+    if (get(d_colors_param, get(d, "type")) == NULL)
+        return
+            sc_error("Error setting color. Invalid type value: %s", get(d, "type")),
+            destroy_dictionary(d);
 
-    if (get(d_colors_param, get(d, "fg")) == NULL && get_custom_color(get(d, "fg")) == NULL) {
-        sc_error("Error setting color. Invalid fg value: %s. It is not and ncurses color nor user defined color.", get(d, "fg"));
-        destroy_dictionary(d);
-        return;
-    }
+    if (get(d_colors_param, get(d, "fg")) == NULL && get_custom_color(get(d, "fg")) == NULL)
+        return
+            sc_error("Error setting color. Invalid fg value: %s. It is not and ncurses color nor user defined color.", get(d, "fg")),
+            destroy_dictionary(d);
 
-    if (get(d_colors_param, get(d, "bg")) == NULL && get_custom_color(get(d, "bg")) == NULL) {
-        sc_error("Error setting color. Invalid bg value: %s. It is not and ncurses color nor user defined color.", get(d, "bg"));
-        destroy_dictionary(d);
-        return;
-    }
+    if (get(d_colors_param, get(d, "bg")) == NULL && get_custom_color(get(d, "bg")) == NULL)
+        return
+            sc_error("Error setting color. Invalid bg value: %s. It is not and ncurses color nor user defined color.", get(d, "bg")),
+            destroy_dictionary(d);
 
     // Change the color
     int type = get_int(d_colors_param, get(d, "type"));
     struct custom_color * cc;
-    if (get_int(d_colors_param, get(d, "bg")) == NONE_COLOR) {
-        // Don't change anything
-    } else if ((cc = get_custom_color(get(d, "bg"))) != NULL) { // bg is custom color
-        ucolors[ type ].bg = 7 + cc->number;
-    } else { // bg is stock ncurses color
-        ucolors[ type ].bg = get_int(d_colors_param, get(d, "bg"));
-    }
+    if (get_int(d_colors_param, get(d, "bg")) != NONE_COLOR)
+        colors[ type ].bg =
+          ((cc = get_custom_color(get(d, "bg"))) != NULL)
+            ? 7 + cc->number; // bg is custom color
+            : get_int(d_colors_param, get(d, "bg")); // bg is stock ncurses color
 
-    if (get_int(d_colors_param, get(d, "fg")) == NONE_COLOR) {
-        // Don't change anything
-    } else if ((cc = get_custom_color(get(d, "fg"))) != NULL) { // fg is custom color
-        ucolors[ type ].fg = 7 + cc->number;
-    } else { // fg is stock ncurses color
-        ucolors[ type ].fg = get_int(d_colors_param, get(d, "fg"));
-    }
+    if (get_int(d_colors_param, get(d, "fg")) != NONE_COLOR) {
+        ucolors[ type ].fg = 
+          ((cc = get_custom_color(get(d, "fg"))) != NULL)
+            ? 7 + cc->number;
+            : get_int(d_colors_param, get(d, "fg"));
 
+    char * cl;
     if (((cl = get(d, "bold")) != NULL)      && cl[0] != '\0')     ucolors[ type ].bold      = get_int(d, "bold");
     if (((cl = get(d, "italic")) != NULL)    && cl[0] != '\0')     ucolors[ type ].italic    = get_int(d, "italic");
     if (((cl = get(d, "dim")) != NULL)       && cl[0] != '\0')     ucolors[ type ].dim       = get_int(d, "dim");
@@ -359,9 +352,7 @@ void chg_color(char * str) {
     if (((cl = get(d, "blink")) != NULL)     && cl[0] != '\0')     ucolors[ type ].blink     = get_int(d, "blink");
     if (((cl = get(d, "underline")) != NULL) && cl[0] != '\0')     ucolors[ type ].underline = get_int(d, "underline");
 
-    // clean temp variable
-    destroy_dictionary(d);
-    return;
+    destroy_dictionary(d); // clean temp variable
 }
 
 /*
@@ -387,10 +378,8 @@ void chg_color(char * str) {
 
 void color_cell(struct sheet * sh, int r, int c, int rf, int cf, char * str) {
     struct roman * roman = session->cur_doc;
-    if (any_locked_cells(sh, r, c, rf, cf)) {
-        sc_error("Locked cells encountered. Nothing changed");
-        return;
-    }
+    if (any_locked_cells(sh, r, c, rf, cf))
+        return sc_error("Locked cells encountered. Nothing changed");
 
     // parse detail
     // Create key-value dictionary for the content of the string
@@ -404,15 +393,14 @@ void color_cell(struct sheet * sh, int r, int c, int rf, int cf, char * str) {
     char * cl;
 
     // Validations
-    if (((cl = get(d, "fg")) != NULL && cl[0] != '\0' && get(d_colors_param, get(d, "fg")) == NULL && get_custom_color(cl) == NULL)) {
-            sc_error("One of the values specified is wrong: %s. Please check the values of type, fg and bg.", cl);
+    if (((cl = get(d, "fg")) != NULL && cl[0] != '\0' && get(d_colors_param, get(d, "fg")) == NULL && get_custom_color(cl) == NULL))
+        return
+            sc_error("One of the values specified is wrong: %s. Please check the values of type, fg and bg.", cl),
             destroy_dictionary(d);
-            return;
-    } else if ((cl = get(d, "bg")) != NULL && cl[0] != '\0' && get(d_colors_param, get(d, "bg")) == NULL && get_custom_color(cl) == NULL) {
-            sc_error("One of the values specified is wrong: %s. Please check the values of type, fg and bg.", cl);
+    if ((cl = get(d, "bg")) != NULL && cl[0] != '\0' && get(d_colors_param, get(d, "bg")) == NULL && get_custom_color(cl) == NULL)
+        return
+            sc_error("One of the values specified is wrong: %s. Please check the values of type, fg and bg.", cl),
             destroy_dictionary(d);
-            return;
-    }
 
     // we apply format in the range
     struct ent * n;
@@ -446,34 +434,32 @@ void color_cell(struct sheet * sh, int r, int c, int rf, int cf, char * str) {
             }
 
             struct custom_color * cc;
-            if ((cl = get(d, "bg")) != NULL && cl[0] != '\0') {
-                if (get(d_colors_param, get(d, "bg")) != NULL) {
-                    n->ucolor->bg = get_int(d_colors_param, get(d, "bg"));
-                } else if ((cc = get_custom_color(get(d, "bg"))) != NULL) {
-                    n->ucolor->bg = 7 + cc->number;
-                } else {
-                    sc_error("error setting bg color. we should not be here.");
-                    n->ucolor->bg = DEFAULT_COLOR;
-                }
-            }
-            if ((cl = get(d, "fg")) != NULL && cl[0] != '\0') {
-                if (get(d_colors_param, get(d, "fg")) != NULL) {
-                    n->ucolor->fg = get_int(d_colors_param, get(d, "fg"));
-                } else if ((cc = get_custom_color(get(d, "fg"))) != NULL) {
-                    n->ucolor->fg = 7 + cc->number;
-                } else {
-                    sc_error("error setting fg color. we should not be here.");
-                    n->ucolor->fg = DEFAULT_COLOR;
-                }
-            }
+            if ((cl = get(d, "bg")) != NULL && cl[0] != '\0')
+                n->ucolor->bg =
+                    (get(d_colors_param, get(d, "bg")) != NULL)
+                        ?  get_int(d_colors_param, get(d, "bg"))
+                        : ((cc = get_custom_color(get(d, "bg"))) != NULL) 
+                            ? 7 + cc->number;
+                            : sc_error("error setting bg color. we should not be here."),
+                              DEFAULT_COLOR;
 
-            if ((cl = get(d, "bold"))      != NULL && cl[0] != '\0')   n->ucolor->bold      = get_int(d, "bold");
-            if ((cl = get(d, "italic"))    != NULL && cl[0] != '\0')   n->ucolor->italic    = get_int(d, "italic");
-            if ((cl = get(d, "dim") )      != NULL && cl[0] != '\0')   n->ucolor->dim       = get_int(d, "dim");
-            if ((cl = get(d, "reverse"))   != NULL && cl[0] != '\0')   n->ucolor->reverse   = get_int(d, "reverse");
-            if ((cl = get(d, "standout"))  != NULL && cl[0] != '\0')   n->ucolor->standout  = get_int(d, "standout");
-            if ((cl = get(d, "blink"))     != NULL && cl[0] != '\0')   n->ucolor->blink     = get_int(d, "blink");
-            if ((cl = get(d, "underline")) != NULL && cl[0] != '\0')   n->ucolor->underline = get_int(d, "underline");
+            if ((cl = get(d, "fg")) != NULL && cl[0] != '\0') {
+                
+                n->ucolor->fg = 
+                    (get(d_colors_param, get(d, "fg")) != NULL)
+                    ? get_int(d_colors_param, get(d, "fg"));
+                    : ((cc = get_custom_color(get(d, "fg"))) != NULL) 
+                        ? 7 + cc->number;
+                        : sc_error("error setting fg color. we should not be here."),
+                          n->ucolor->fg = DEFAULT_COLOR;
+
+            if ((cl = get(d, "bold"))      != NULL && cl[0] != '\0') n->ucolor->bold      = get_int(d, "bold");
+            if ((cl = get(d, "italic"))    != NULL && cl[0] != '\0') n->ucolor->italic    = get_int(d, "italic");
+            if ((cl = get(d, "dim") )      != NULL && cl[0] != '\0') n->ucolor->dim       = get_int(d, "dim");
+            if ((cl = get(d, "reverse"))   != NULL && cl[0] != '\0') n->ucolor->reverse   = get_int(d, "reverse");
+            if ((cl = get(d, "standout"))  != NULL && cl[0] != '\0') n->ucolor->standout  = get_int(d, "standout");
+            if ((cl = get(d, "blink"))     != NULL && cl[0] != '\0') n->ucolor->blink     = get_int(d, "blink");
+            if ((cl = get(d, "underline")) != NULL && cl[0] != '\0') n->ucolor->underline = get_int(d, "underline");
 
             if (! roman->loading) {
                 #ifdef UNDO
@@ -503,10 +489,8 @@ void color_cell(struct sheet * sh, int r, int c, int rf, int cf, char * str) {
 
 void unformat(struct sheet * sh, int r, int c, int rf, int cf) {
     struct roman * roman = session->cur_doc;
-    if (any_locked_cells(sh, r, c, rf, cf)) {
-        sc_error("Locked cells encountered. Nothing changed");
-        return;
-    }
+    if (any_locked_cells(sh, r, c, rf, cf))
+        return sc_error("Locked cells encountered. Nothing changed");
 
     // if we are not loading the file
     if (! roman->loading) {
@@ -518,19 +502,11 @@ void unformat(struct sheet * sh, int r, int c, int rf, int cf) {
     }
 
     // we remove format in the range
-    struct ent * n;
-    int i, j;
-    for (i=r; i<=rf; i++) {
-        for (j=c; j<=cf; j++) {
+    for (int i=r; i<=rf; i++)
+      for (int j=c; j<=cf; j++)
+        if ( (struct ent * n = *ATBL(sh, sh->tbl, i, j)) && n->ucolor != NULL)
+          n->ucolor = free(n->ucolor), NULL;       
 
-            // action
-            if ( (n = *ATBL(sh, sh->tbl, i, j)) && n->ucolor != NULL) {
-                free(n->ucolor);
-                n->ucolor = NULL;
-            }
-
-       }
-    }
     if (! roman->loading) {
         #ifdef UNDO
         copy_to_undostruct(sh, r, c, rf, cf, UNDO_ADD, IGNORE_DEPS, NULL);
@@ -538,7 +514,6 @@ void unformat(struct sheet * sh, int r, int c, int rf, int cf) {
         #endif
         ui_update(TRUE);
     }
-    return;
 }
 
 /**
@@ -555,18 +530,17 @@ void unformat(struct sheet * sh, int r, int c, int rf, int cf) {
  */
 
 int same_ucolor(struct ucolor * u, struct ucolor * v) {
-    if (u == NULL || v == NULL)       return 0;
-
-    if (u->fg != v->fg)               return 0;
-    if (u->bg != v->bg)               return 0;
-    if (u->bold != v->bold)           return 0;
-    if (u->italic != v->italic)       return 0;
-    if (u->dim != v->dim)             return 0;
-    if (u->reverse != v->reverse)     return 0;
-    if (u->standout != v->standout)   return 0;
-    if (u->underline != v->underline) return 0;
-    if (u->blink != v->blink)         return 0;
-
+    if ((u == NULL || v == NULL)       
+        || (u->fg != v->fg)
+        || (u->bg != v->bg)
+        || (u->bold != v->bold)
+        || (u->italic != v->italic)
+        || (u->dim != v->dim)
+        || (u->reverse != v->reverse)
+        || (u->standout != v->standout)
+        || (u->underline != v->underline)
+        || (u->blink != v->blink))
+        return 0;
     return 1;
 }
 
@@ -587,26 +561,23 @@ int redefine_color(char * color, int r, int g, int b) {
     struct roman * roman = session->cur_doc;
     #if defined(NCURSES) && defined(USECOLORS)
     extern void sig_winchg();
-    if (
-        ! get_conf_int("nocurses")
-        && has_colors() && can_change_color()
-       ) {
-           char * s = get(d_colors_param, color);
-           if (s == NULL) {
-               sc_error("Color not found");
-               return -1;
-           }
-#if defined(NCURSES_VERSION_MAJOR) && (( NCURSES_VERSION_MAJOR > 5 && defined(NCURSES_VERSION_MINOR) && NCURSES_VERSION_MINOR > 0) || NCURSES_VERSION_MAJOR > 6)
-           if (init_extended_color(atoi(s), RGB(r, g, b)) == 0) {
-#else
-           if (init_color(atoi(s), RGB(r, g, b)) == 0) {
-#endif
-               sig_winchg();
-               if (! roman->loading) sc_info("Color %s redefined to %d %d %d.", color, r, g, b);
+    if (! get_conf_int("nocurses") && has_colors() && can_change_color()) 
+    {
+       char * s = get(d_colors_param, color);
+       if (s == NULL)
+           return sc_error("Color not found"), -1;
+       #if defined(NCURSES_VERSION_MAJOR) && (( NCURSES_VERSION_MAJOR > 5 && defined(NCURSES_VERSION_MINOR) && NCURSES_VERSION_MINOR > 0) || NCURSES_VERSION_MAJOR > 6)
+       if (init_extended_color(atoi(s), RGB(r, g, b)) == 0) {
+       #else
+       if (init_color(atoi(s), RGB(r, g, b)) == 0) {
+       #endif
+           sig_winchg();
+           if (! roman->loading) sc_info("Color %s redefined to %d %d %d.", color, r, g, b);
                return 0;
-           }
        }
-       if (! roman->loading) sc_error("Could not redefine color");
+    }
+    if (! roman->loading)
+        sc_error("Could not redefine color");
     #endif
     return -1;
 }
@@ -630,29 +601,22 @@ int define_color(char * color, int r, int g, int b) {
         // this should not be alerted.
         //sc_error("Could not define color %s. Not using NCURSES.", color);
         return -1;
-    } else if (! has_colors () || ! can_change_color() || COLORS < 9) {
-        sc_error("Could not define color %s. Not supported by terminal.", color);
-        return -1;
-
-    } else if (get(d_colors_param, color) != NULL) {
-        sc_error("Could not define custom color %s. That is an ncurses color. Use :redefine for that purpose.", color);
-        return -1;
-
-    } else if (r < 0 || r > 255 || g < 0 || g > 255 || b < 0 || b > 255) {
-        sc_error("Could not define color %s. One of the RGB values is invalid.", color);
-        return -1;
-    }
+    } else if (! has_colors () || ! can_change_color() || COLORS < 9)  
+        return sc_error("Could not define color %s. Not supported by terminal.", color), -1;
+    else if (get(d_colors_param, color) != NULL)  
+        return sc_error("Could not define custom color %s. That is an ncurses color. Use :redefine for that purpose.", color), -1;
+    else if (r < 0 || r > 255 || g < 0 || g > 255 || b < 0 || b > 255)
+        return sc_error("Could not define color %s. One of the RGB values is invalid.", color), -1;
 
     int number_defined_colors;
     struct custom_color * cc;
 
     // update color value if it already exists
-    if ((cc = get_custom_color(color)) != NULL) {
+    if ((cc = get_custom_color(color)) != NULL)
         sc_debug("Color '%s' already defined. Updating its RGB values.", color);
-    } else if ((number_defined_colors = count_custom_colors()) == 24) {
-        sc_error("Could not define color %s. There are already 24 custom colors defined.", color);
-        return -1;
-    } else { // we create a new custom color
+    else if ((number_defined_colors = count_custom_colors()) == 24) 
+        return sc_error("Could not define color %s. There are already 24 custom colors defined.", color), -1;
+    else { // we create a new custom color
         cc = malloc (sizeof(struct custom_color));
         cc->number = number_defined_colors+1;
         cc->name =  (char *) malloc (sizeof(char) * (strlen(color) + 1));
@@ -669,11 +633,11 @@ int define_color(char * color, int r, int g, int b) {
     init_color(7 + cc->number, RGB(r, g, b));
 #endif
 
-    if (! roman->loading) sc_info("Defined custom color #%d with name '%s' and RGB values %d %d %d", cc->number, cc->name, cc->r, cc->g, cc->b);
+    if (! roman->loading) 
+        sc_info("Defined custom color #%d with name '%s' and RGB values %d %d %d", cc->number, cc->name, cc->r, cc->g, cc->b);
     return 0;
 #endif
-    sc_error("Could not define color %s", color);
-    return -1;
+    return sc_error("Could not define color %s", color), -1;
 }
 
 /**
@@ -688,13 +652,8 @@ int define_color(char * color, int r, int g, int b) {
  * returns 0
  */
 int free_custom_colors() {
-    struct custom_color * aux;
-    while (custom_colors != NULL) {
-        aux = custom_colors->p_next;
-        free(custom_colors->name);
-        free(custom_colors);
-        custom_colors = aux;
-    }
+    for (struct custom_color * aux = custom_colors; aux != NULL; aux = aux->p_next)
+        free(aux->name), free(aux);
     return 0;
 }
 
@@ -711,11 +670,9 @@ int free_custom_colors() {
  * returns NULL otherwise
  */
 struct custom_color * get_custom_color(char * name) {
-    struct custom_color * aux = custom_colors;
-    while (aux != NULL) {
-        if (! strcasecmp(name, aux->name)) return aux;
-        aux=aux->p_next;
-    }
+    for (struct custom_color * aux = custom_colors; aux != NULL; aux=aux->p_next;)
+        if (! strcasecmp(name, aux->name)) 
+            return aux;
     return NULL;
 }
 
@@ -731,12 +688,9 @@ struct custom_color * get_custom_color(char * name) {
  * returns int
  */
 int count_custom_colors() {
-    int c = 0;
-    struct custom_color * aux = custom_colors;
-    while (aux != NULL) {
-        aux=aux->p_next;
+    int c = 0; 
+    for (struct custom_color * aux = custom_colors; aux != NULL; aux=aux->p_next;)
         c++;
-    }
     return c;
 }
 
