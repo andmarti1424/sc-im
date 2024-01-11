@@ -575,6 +575,11 @@ Commands for handling cell content:
                  only in INSERT_MODE.
                  Example:  :imap "<C-f>" "format"
 
+     :emap {lhs} {rhs}
+                 Map the key sequence {lhs} to {rhs} This mapping takes effect
+                 only in EDIT_MODE.
+                 Example:  :emap "<C-k>" "D"
+
      :vmap {lhs} {rhs}
                  Map the key sequence {lhs} to {rhs} This mapping takes effect
                  only in VISUAL_MODE.
@@ -594,6 +599,10 @@ Commands for handling cell content:
                  This is the non-recursive version of ":imap". See NOTES on
                  MAPPING below
 
+     :enoremap {lhs} {rhs}
+                 This is the non-recursive version of ":emap". See NOTES on
+                 MAPPING below
+
      :vnoremap {lhs} {rhs}
                  This is the non-recursive version of ":vmap". See NOTES on
                  MAPPING below
@@ -609,6 +618,10 @@ Commands for handling cell content:
      :iunmap {lhs}
                  Remove the map sequence {lhs} that takes effect in
                  INSERT_MODE.
+
+     :eunmap {lhs}
+                 Remove the map sequence {lhs} that takes effect in
+                 EDIT_MODE.
 
      :vunmap {lhs}
                  Remove the map sequence {lhs} that takes effect in
@@ -1191,13 +1204,13 @@ Commands for handling cell content:
 
     Mapping can be done in any sc-im file or in CONFIG_DIR/scimrc file.
 
-    Maps can be added with the :nmap, :imap, :cmap and :vmap commands and removed
-    with the :nunmap, :iunmap, :cunmap and :vunmap commands.
+    Maps can be added with the :nmap, :imap, :emap, :cmap and :vmap commands and
+    removed with the :nunmap, :iunmap, :cunmap and :vunmap commands.
     Example:
         :nmap "d" ":h<cr>"  ->   Maps d to ':help<cr>' in Normal mode.
         :imap "f" "foo"     ->   Maps f to the string 'foo' in Insert mode.
-        :imap "f" "foo"     ->   Maps f to the string 'foo' in Insert mode.
         :imap "kj" "<ESC>"  ->   Maps kj sequence to the ESC key in Insert mode.
+        :emap "<C-k>" "D"   ->   Maps C-k to D in Edit mode.
         :cmap "kj" "<ESC>"  ->   Maps kj sequence to the ESC key in Command mode.
         :vmap "e" "y"       ->   Maps e to y in Visual mode.
 
@@ -1210,7 +1223,8 @@ Commands for handling cell content:
 
     If an existing map sequence is remapped, it is replaced with the new one.
     Mapping is recursive by default. The non-recursive versions of :nmap,
-    :imap, :cmap and :vmap are :nnoremap, :inoremap, :cnoremap and :vnoremap.
+    :imap, :emap, :cmap and :vmap are :nnoremap, :inoremap, :enoremap,
+    :cnoremap and :vnoremap.
     Example:
         nmap "a" "b",
         nnoremap "b" "j"
@@ -2069,10 +2083,13 @@ Commands for handling cell content:
     UNLOCK {var_or_range}
     NMAP {STRING} {STRING}
     IMAP {STRING} {STRING}
+    EMAP {STRING} {STRING}
     NNOREMAP {STRING} {STRING}
     INOREMAP {STRING} {STRING}
+    ENOREMAP {STRING} {STRING}
     NUNMAP {STRING}
     IUNMAP {STRING}
+    EUNMAP {STRING}
     COLOR {STRING}
     CELLCOLOR {var_or_range} {STRING}
     TRIGGER {var_or_range} {STRING}
