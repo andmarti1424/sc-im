@@ -361,12 +361,12 @@ void do_normalmode(struct block * buf) {
 
             } else if (buf->pnext->value == L'f') {                        // gf
                 unselect_ranges();
-                ui_update(TRUE);
-                ui_stop_screen();
+                def_prog_mode();
+                endwin();
                 openfile_under_cursor(sh->currow, sh->curcol);
-                ui_start_screen();
-                start_default_ucolors();
-                set_colors_param_dict();
+                reset_prog_mode();
+                refresh();
+                ui_update(TRUE);
 
             } else if (buf->pnext->value == L'g') {                        // gg
                 e = go_home(sh);
