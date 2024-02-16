@@ -2224,6 +2224,10 @@ void load_file(char * file) {
         INSERT(roman, (session->first_doc), (session->last_doc), next, prev);
         session->cur_doc = roman; // important: set cur_doc!
     }
+    // prevent memory leak 16/02/24
+    if (roman->cur_sh != NULL) {
+        delete_sheet(roman, roman->cur_sh, 0);
+    }
 
     roman->name = ! strlen(file) ? NULL : strdup(file);
     roman->first_sh = NULL;
