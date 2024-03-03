@@ -630,7 +630,7 @@ char * seval(struct sheet * sh, struct ent * ent, struct enode * se, int rebuild
 
     case '?':    return (eval(sh, NULL, se->e.o.left, rebuild_graph) ? seval(sh, ent, se->e.o.right->e.o.left, rebuild_graph) : seval(sh, ent, se->e.o.right->e.o.right, rebuild_graph));
 
-    case DATE:   return (dodate( (time_t) (eval(sh, NULL, se->e.o.left, rebuild_graph)), seval(sh, ent, se->e.o.right, rebuild_graph)));
+    case DATE:   return (dodate( (time_t) (eval(sh, ent, se->e.o.left, rebuild_graph)), seval(sh, ent, se->e.o.right, rebuild_graph)));
 
     case FMT:    return (dofmt(seval(sh, ent, se->e.o.left, rebuild_graph), eval(sh, NULL, se->e.o.right, 0)));
 
