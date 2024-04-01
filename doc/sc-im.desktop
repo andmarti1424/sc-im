@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=sc-im
+Terminal=true
+Icon=accessories-calculator-symbolic
+GenericName=Spreadsheet Calculator
+Comment=spreadsheets improved
+Categories=Utility;Spreadsheet;
+Exec=sc-im
