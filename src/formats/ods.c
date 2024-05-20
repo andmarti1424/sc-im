@@ -51,6 +51,7 @@
 #include <errno.h>
 #include <zip.h>
 #include <libxml/parser.h>
+#include <stdlib.h>
 
 #include "../tui.h"
 #include "../cmds/cmds.h"
