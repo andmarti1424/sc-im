@@ -101,10 +101,7 @@ ifneq (, $(shell which pkg-config))
   # Any system with pkg-config
 
   # NOTE: ncursesw (required)
-  ifeq ($(shell uname -s),Darwin)
-    # macOS' ncurses is built with wide-char support
-    LDFLAGS += -lncurses
-  else ifneq ($(shell pkg-config --exists ncursesw || echo 'no'),no)
+  ifneq ($(shell pkg-config --exists ncursesw || echo 'no'),no)
     CFLAGS += $(shell pkg-config --cflags ncursesw)
     LDLIBS += $(shell pkg-config --libs ncursesw)
   else ifneq ($(shell pkg-config --exists ncurses || echo 'no'),no)
@@ -150,11 +147,6 @@ ifneq (, $(shell which pkg-config))
       LDLIBS += $(shell pkg-config --libs luajit) -rdynamic
     endif
   endif
-else ifeq ($(shell uname -s),Darwin)
-  # macOS without pkg-config
-
-  # macOS' ncurses is built with wide-char support
-  LDFLAGS += -lncurses
 else ifeq ($(shell uname -s),NetBSD)
   # NetBSD without pkg-config
 
