@@ -115,6 +115,9 @@ L"e txt",
 L"e! txt",
 L"e xlsx",
 L"e! xlsx",
+L"emap",
+L"enoremap",
+L"eunmap",
 L"fcopy",
 L"file",
 L"fill",
@@ -973,13 +976,16 @@ void do_commandmode(struct block * sb) {
 
         } else if ( ! wcsncmp(inputline, L"nmap", 4) ||
                     ! wcsncmp(inputline, L"imap", 4) ||
+                    ! wcsncmp(inputline, L"emap", 4) ||
                     ! wcsncmp(inputline, L"vmap", 4) ||
                     ! wcsncmp(inputline, L"cmap", 4) ||
                     ! wcsncmp(inputline, L"inoremap", 8) ||
+                    ! wcsncmp(inputline, L"enoremap", 8) ||
                     ! wcsncmp(inputline, L"nnoremap", 8) ||
                     ! wcsncmp(inputline, L"vnoremap", 8) ||
                     ! wcsncmp(inputline, L"cnoremap", 8) ||
                     ! wcsncmp(inputline, L"iunmap", 6) ||
+                    ! wcsncmp(inputline, L"eunmap", 6) ||
                     ! wcsncmp(inputline, L"vunmap", 6) ||
                     ! wcsncmp(inputline, L"cunmap", 6) ||
                     ! wcsncmp(inputline, L"nunmap", 6) ) {

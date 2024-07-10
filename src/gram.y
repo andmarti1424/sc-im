@@ -212,6 +212,7 @@ token S_YANKCOL
 %token S_REDO
 %token S_UNDO
 %token S_IMAP
+%token S_EMAP
 %token S_CMAP
 %token S_NEWSHEET
 %token S_NEXTSHEET
@@ -222,11 +223,13 @@ token S_YANKCOL
 %token S_NMAP
 %token S_VMAP
 %token S_INOREMAP
+%token S_ENOREMAP
 %token S_CNOREMAP
 %token S_NNOREMAP
 %token S_VNOREMAP
 %token S_NUNMAP
 %token S_IUNMAP
+%token S_EUNMAP
 %token S_CUNMAP
 %token S_VUNMAP
 %token S_COLOR
@@ -924,6 +927,11 @@ command:
                                    scxfree($2);
                                    scxfree($3);
                                  }
+    |    S_EMAP STRING STRING    {
+                                   add_map($2, $3, EDIT_MODE, 1);
+                                   scxfree($2);
+                                   scxfree($3);
+                                 }
     |    S_VMAP STRING STRING    {
                                    add_map($2, $3, VISUAL_MODE, 1);
                                    scxfree($2);
@@ -945,6 +953,11 @@ command:
                                    scxfree($2);
                                    scxfree($3);
                                    }
+    |    S_ENOREMAP STRING STRING  {
+                                   add_map($2, $3, EDIT_MODE, 0);
+                                   scxfree($2);
+                                   scxfree($3);
+                                   }
     |    S_VNOREMAP STRING STRING  {
                                    add_map($2, $3, VISUAL_MODE, 0);
                                    scxfree($2);
@@ -963,6 +976,10 @@ command:
 
     |    S_IUNMAP STRING           {
                                    del_map($2, INSERT_MODE);
+                                   scxfree($2);
+                                   }
+    |    S_EUNMAP STRING           {
+                                   del_map($2, EDIT_MODE);
                                    scxfree($2);
                                    }
     |    S_VUNMAP STRING           {
