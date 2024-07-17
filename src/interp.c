@@ -1601,22 +1601,24 @@ void slet(struct roman * roman, struct sheet * sh, struct ent * v, struct enode 
             v->flags &= ~is_strexpr;
         }
         // entering new label for changing a datetime value
-        if (v->format && v->format[0] == 'd') {
+        if (v->format && v->format[0] == 'd' && v->label) {
             struct tm tm;
             memset(&tm, 0, sizeof(struct tm));
 
-        // change for number 3 of issue 769:
-        // reconvert numeric value based on locale's D_FMT format instead of current format
-        char * f = &v->format[1];
-        #ifdef USELOCALE
+            // change for number 3 of issue 769:
+            // reconvert numeric value based on locale's D_FMT format instead of current format
+            char * f = &v->format[1];
+            #ifdef USELOCALE
             #include <locale.h>
             #include <langinfo.h>
             char * loc = NULL;
             f = NULL;
             loc = setlocale(LC_TIME, "");
             if (loc != NULL) f = nl_langinfo(D_FMT);
-        #endif
-        // reconvert numeric value based on locale's D_FMT format instead of current format
+            #endif
+            // reconvert numeric value based on locale's D_FMT format instead of current format
+            //if ( ! v->label) label(v, "", -1);
+
             strptime(v->label, f, &tm);
             v->v = (double) mktime(&tm);
             v->flags |= ( is_changed | is_valid );
