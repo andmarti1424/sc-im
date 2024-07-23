@@ -21,6 +21,12 @@ v0.8.4
 06/01/2023: merged PR 789
 06/01/2023: fix issue in csv import - 816
 02/03/2024: fix issue 868
+17/05/2024: fix missing include
+20/05/2024: PR 871
+02/07/2024: Modify Makefile to work with brew's ncurses
+10/07/2024: PR 880 / 861
+16/07/2024: work on issue 878
+23/07/2024: work on issue 875 / 879
 
 
 
