@@ -1541,7 +1541,7 @@ void export_markdown(char * fname, int r0, int c0, int rn, int cn) {
                     }
 
                     // If a string exists
-                    if ((*pp)->label) {
+                    if ((*pp)->v == '\0' && (*pp)->label) {
                         strcpy(text, (*pp)->label);
                         align = 1;                                // right alignment
                         if ((*pp)->flags & is_label) {            // center alignment
@@ -1884,12 +1884,12 @@ void export_delim(char * fname, char coldelim, int r0, int c0, int rn, int cn, i
             int last_valid_col = right_limit(sh, row)->col; // for issue #374
             if (col > last_valid_col) continue;
             if (*pp) {
+                char field[FBUFLEN] = "";
                 char * s;
                 if ((*pp)->flags & is_valid) {
                     if ((*pp)->cellerror) {
                         (void) fprintf (f, "%*s", sh->fwidth[col], ((*pp)->cellerror == CELLERROR ? "ERROR" : "INVALID"));
                     } else if ((*pp)->format) {
-                        char field[FBUFLEN];
                         if (*((*pp)->format) == 'd') {  // Date format
                             time_t v = (time_t) ((*pp)->v);
                             strftime(field, sizeof(field), ((*pp)->format)+1, localtime(&v));
@@ -1899,13 +1899,12 @@ void export_delim(char * fname, char coldelim, int r0, int c0, int rn, int cn, i
                         ltrim(field, ' ');
                         unspecial(f, field, coldelim);
                     } else { //eng number format
-                        char field[FBUFLEN] = "";
                         (void) engformat(sh->realfmt[col], sh->fwidth[col], sh->precision[col], (*pp)->v, field, sizeof(field));
                         ltrim(field, ' ');
                         unspecial(f, field, coldelim);
                     }
                 }
-                if ((s = (*pp)->label)) {
+                if (field[0] == '\0' && (s = (*pp)->label)) {
                     ltrim(s, ' ');
                     unspecial(f, s, coldelim);
                 }
