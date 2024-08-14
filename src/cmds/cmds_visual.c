@@ -418,7 +418,7 @@ void do_visualmode(struct block * buf) {
 
     // auto_fit
     } else if (buf->value == ctl('j')) {
-        auto_fit(sh, r->tlcol, r->brcol, DEFWIDTH);  // auto justify columns
+        auto_fit(sh, r->tlcol, r->brcol, get_conf_int("column_width"));  // auto justify columns
         exit_visualmode();
         chg_mode('.');
         ui_show_header();

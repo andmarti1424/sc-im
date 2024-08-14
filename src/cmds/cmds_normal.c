@@ -214,7 +214,7 @@ void do_normalmode(struct block * buf) {
                 c = sr->tlcol;
                 cf = sr->brcol;
             }
-            auto_fit(sh, c, cf, DEFWIDTH);  // auto justify columns
+            auto_fit(sh, c, cf, get_conf_int("column_width"));  // auto justify columns
             ui_update(TRUE);
             break;
             }

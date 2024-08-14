@@ -1379,6 +1379,13 @@ Commands for handling cell content:
     When these are set, the zero digit or decimal point will correspondingly
     initiate numeric entry, but only when 'numeric' is also set.
 
+    'column_width' [default 10]
+    Sets the default column width. Defaults to 10 characters.
+
+    'decimal_precision' [default 2]
+    Sets the default decimal precision for columns. 
+    Defaults to 2 decimals, showing 1 as 1.00
+
     'newline_action' [default 0]
     Set it to 'j' to move the cursor down after an entry.
     Set it to 'l' to move right, or set it to '0' to take no action.
