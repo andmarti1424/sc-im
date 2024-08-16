@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env -S bash
 ## SEE https://github.com/lehmannro/assert.sh for usage
 
 #Exit immediately if a command exits with a non-zero status.

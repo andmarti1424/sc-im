@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env -S bash
 # assert.sh 1.1 - bash unit testing framework
 # Copyright (C) 2009-2015 Robert Lehmann
 #
