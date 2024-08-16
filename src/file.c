@@ -1583,7 +1583,7 @@ void export_markdown(char * fname, int r0, int c0, int rn, int cn) {
                 // Column alignment is bases on cell alignments of first row
                 if (row == 0) {
                     if (col == c0) strcat (dashline, "|");
-                    if (align == 0) {
+                    if (align == 0 || align == -1) {
                         strcat (dashline, ":");
                     } else {
                         strcat (dashline, "-");
