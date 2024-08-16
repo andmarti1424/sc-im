@@ -9,6 +9,7 @@ Please open a discussion on GitHub to comment on these and other feature request
 ***********
 v0.8.5
 16/08/2024: PR 888 - replace all /bin/bash with a unix agnostic /usr/bin/env bash
+16/08/2024: PR 887 - explicit left markdown alignment
 
 
 Ideas for v0.8.6
