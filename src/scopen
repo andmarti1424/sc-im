@@ -1,4 +1,4 @@
-#!/bin/bash -a
+#!/usr/bin/env -S bash -a
 
 exec_bg () {
     exec $1 "$2" &

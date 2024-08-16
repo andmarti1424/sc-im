@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
 for i in test*.sh
 do
     echo "Testing $i"
-    /bin/bash $i keep-vallog
+    /usr/bin/env -S bash $i keep-vallog
 done
