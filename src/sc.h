@@ -68,8 +68,6 @@
 #define REFMTENG       2
 #define REFMTDATE      3
 #define REFMTLDATE     4
-#define DEFWIDTH      10     /* Default column width and precision */
-#define DEFPREC        2
 #define DEFREFMT      REFMTFIX /* Make default format fixed point  THA 10/14/90 */
 #define FKEYS         24     /* Number of function keys available */
 

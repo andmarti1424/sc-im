@@ -300,6 +300,8 @@ token S_YANKCOL
 %token K_IGNORECASE
 %token K_NOIGNORECASE
 %token K_TM_GMTOFF
+%token K_COLUMN_WIDTH
+%token K_DECIMAL_PRECISION
 %token K_COMMAND_TIMEOUT
 %token K_MAPPING_TIMEOUT
 %token K_NEWLINE_ACTION
@@ -703,8 +705,8 @@ command:
                     scxfree(tmp);
                 }
 */
-    |    S_AUTOFIT COL ':' COL       { auto_fit(session->cur_doc->cur_sh, $2, $4, DEFWIDTH); }  // auto justificado de columnas
-    |    S_AUTOFIT COL               { auto_fit(session->cur_doc->cur_sh, $2, $2, DEFWIDTH); }  // auto justificado de columna
+    |    S_AUTOFIT COL ':' COL       { auto_fit(session->cur_doc->cur_sh, $2, $4, get_conf_int("column_width")); }  // auto justificado de columnas
+    |    S_AUTOFIT COL               { auto_fit(session->cur_doc->cur_sh, $2, $2, get_conf_int("column_width")); }  // auto justificado de columna
 
     |    S_PAD NUMBER COL ':' COL  {
                                        pad(session->cur_doc->cur_sh, $2, 0, $3, session->cur_doc->cur_sh->maxrow, $5); }
@@ -1737,6 +1739,25 @@ setitem :
 
     |    K_NEWLINE_ACTION '=' NUMBER {
                                      if ($3 == 0) parse_str(user_conf_d, "newline_action=0", TRUE); }
+
+    |    K_COLUMN_WIDTH            {             parse_str(user_conf_d, "column_width=10", TRUE); }
+    |    K_COLUMN_WIDTH '=' num   {
+                                     char * s = scxmalloc((unsigned) BUFFERSIZE);
+
+                                     sprintf(s, "column_width=%d", (int) $3);
+                                     parse_str(user_conf_d, s, TRUE);
+                                     scxfree(s);
+                                     }
+
+    |    K_DECIMAL_PRECISION       {             parse_str(user_conf_d, "decimal_precision=2", TRUE); }
+    |    K_DECIMAL_PRECISION '=' num   {
+                                     char * s = scxmalloc((unsigned) BUFFERSIZE);
+
+                                     sprintf(s, "decimal_precision=%d", (int) $3);
+                                     parse_str(user_conf_d, s, TRUE);
+                                     scxfree(s);
+                                     }
+
     |    K_COMMAND_TIMEOUT        {               parse_str(user_conf_d, "command_timeout=3000", TRUE); }
     |    K_COMMAND_TIMEOUT '=' num   {
                                      char * s = scxmalloc((unsigned) BUFFERSIZE);

@@ -174,7 +174,7 @@ int open_xls(char * fname, char * encoding) {
     }
     xls_close_WS(pWS);
     xls_close_WB(pWB);
-    auto_fit(sh, 0, sh->maxcols, DEFWIDTH);
+    auto_fit(sh, 0, sh->maxcols, get_conf_int("column_width"));
     return 0;
 #else
     return -1;
