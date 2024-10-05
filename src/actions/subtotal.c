@@ -49,6 +49,7 @@
 #include "../cmds/cmds.h"
 #include "shift.h"
 #include "../tui.h"
+#include "../graph.h"
 
 /*
 #include <sys/types.h>
@@ -149,8 +150,8 @@ int subtotal(int r, int c, int rf, int cf, int group_col, char * operation, int 
            swprintf(cmd, BUFFERSIZE, L"let %s%d = %s(%s%d:%s%d)", coltoa(ope_col), i, operation,
            coltoa(ope_col), row_start_range, coltoa(ope_col), i-1);
            send_to_interp(cmd);
+           EvalRange(sh,i,ope_col,i,ope_col);
            valueize_area(sh, i, ope_col, i, ope_col);
-
            new_rows++;
            i++;
            row_start_range = i;
