@@ -585,7 +585,10 @@ double dodts(int e1, int e2, int e3) {
     t.tm_isdst = -1;
 
     if (mo < 0 || mo > 11 || day < 1 || day > mdays[mo] || (secs = mktime(&t)) == -1) {
-        sc_error("@dts: invalid argument or date out of range");
+        if(day==0)
+            sc_info("@dts: day = 0, possible error");
+        else
+            sc_error("@dts: invalid argument or date out of range");
         cellerror = CELLERROR;
         return (0.0);
     }
