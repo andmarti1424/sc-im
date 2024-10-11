@@ -386,6 +386,8 @@ void doLuaclose() {
 char * doLUA(struct sheet * sh, struct ent * ent, struct enode * se, int dg_store) {
     if ( ! get_conf_int("exec_lua")) return 0;
     char * cmd;
+    struct roman * roman = session->cur_doc;
+    int reallyloading=roman->loading;   /* cache the file loading status */
     int return_type;
     int row,col;
     char buffer[PATHLEN];
@@ -410,9 +412,11 @@ char * doLUA(struct sheet * sh, struct ent * ent, struct enode * se, int dg_stor
         lua_setglobal(L, "r");
         lua_pushinteger(L,col);
         lua_setglobal(L, "c");
+        roman->loading=1;         /* treat as loading to prevent entry to undo_list */
 
         if (lua_pcall(L, 0, 1, 0)) {                  /* PRIMING RUN. FORGET THIS AND YOU'RE TOAST */
             ui_bail(L, "lua_pcall() failed");       /* Error out if Lua file has an error */
+            roman->loading=reallyloading;
             return (NULL);
         }
 
@@ -422,6 +426,7 @@ char * doLUA(struct sheet * sh, struct ent * ent, struct enode * se, int dg_stor
     if (cmd != NULL) free(cmd);
 
     return_type = lua_type(L, -1);
+    roman->loading=reallyloading;
     switch (return_type) {
         case LUA_TSTRING:
             ;
