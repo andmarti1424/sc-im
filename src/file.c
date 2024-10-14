@@ -620,10 +620,17 @@ void write_fd(FILE * f, struct roman * doc) {
          * a single buffer that is overwritten on each call, so the first part
          * needs to be written to the file before making the second call.
          */
+
+        if((sh->next == NULL) && strcmp(sh->name,doc->cur_sh->name) != 0){
+            fprintf(f, "movetosheet \"%s\"\n", doc->cur_sh->name);
+            fprintf(f, "goto %s", v_name(doc->cur_sh->currow, doc->cur_sh->curcol));
+        fprintf(f, "\n");
+        } else {
+        //fprintf(f, " %s\n", v_name(strow, stcol));
         fprintf(f, "goto %s", v_name(sh->currow, sh->curcol));
         //fprintf(f, " %s\n", v_name(strow, stcol));
         fprintf(f, "\n");
-
+        }
         sh = sh->next;
     }
     // write marks of document
