@@ -772,7 +772,7 @@ void EvalRange(struct sheet * sh, int tlrow, int tlcol, int brrow, int brcol) {
             for (i = 0; deps != NULL && i < deps->vf; i++) {
                 f = *ATBL(deps[i].sheet, deps[i].sheet->tbl, deps[i].vp->row, deps[i].vp->col);
                 if (f == NULL || ! f->expr) continue;
-                EvalJustOneVertex(sh, f, 0);
+                EvalJustOneVertex(deps[i].sheet, f, 0);
             }
             if (deps != NULL) free(deps);
             deps = NULL;
