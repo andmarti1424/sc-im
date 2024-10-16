@@ -1454,7 +1454,7 @@ void let(struct roman * roman, struct sheet * sh, struct ent * v, struct enode *
 
     #ifdef UNDO
     extern struct ent_ptr * deps;
-    if (! roman->loading) {
+    if (! roman->loading) {   /*also skipped during lua script execution */
         create_undo_action();
         // here we save in undostruct, all the ents that depends on the deleted one (before change)
         ents_that_depends_on_range(sh, v->row, v->col, v->row, v->col);
@@ -1553,7 +1553,7 @@ void slet(struct roman * roman, struct sheet * sh, struct ent * v, struct enode 
 
     #ifdef UNDO
     extern struct ent_ptr * deps;
-    if (! roman->loading) {
+    if (! roman->loading) {  /*also skipped during lua script execution */
         // here we save in undostruct, all the ents that depends on the deleted one (before change)
         ents_that_depends_on_range(sh, v->row, v->col, v->row, v->col);
         create_undo_action();
