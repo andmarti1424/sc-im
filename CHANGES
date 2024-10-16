@@ -12,6 +12,7 @@ v0.8.5
 16/08/2024: PR 887 - explicit left markdown alignment
 16/10/2024: PR 896 - work on issue 813 - fix in subtottal
 16/10/2024: PR 898 - work on issue 897 - fix in lua evaluation
+16/10/2024: PR 900 - work on issue 899 - minor modification in @dts validation
 
 
 Ideas for v0.8.6
