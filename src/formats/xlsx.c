@@ -348,8 +348,13 @@ void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) 
                         swprintf(line_interp, FBUFLEN, L"let %s%d=%s", coltoa(c), r, formula);
 
                     } else {
-                        double l = atof((char *) child_node->last->xmlChildrenNode->content);
-                        swprintf(line_interp, FBUFLEN, L"let %s%d=%.15f", coltoa(c), r, l);
+						double l;
+						if(child_node->last->xmlChildrenNode != NULL) {
+							l = atof((char *) child_node->last->xmlChildrenNode->content);
+						} else {
+							l = 0;
+						}
+						swprintf(line_interp, FBUFLEN, L"let %s%d=%.15f", coltoa(c), r, l);
                     }
                     send_to_interp(line_interp);
                 }
