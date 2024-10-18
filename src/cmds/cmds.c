@@ -1255,6 +1255,7 @@ void enter_cell_content(struct sheet * sh, int r, int c, char * submode,  wchar_
     (void) swprintf(interp_line, BUFFERSIZE, L"%s %s = %ls", submode, v_name(r, c), content);
     send_to_interp(interp_line);
     if (get_conf_int("autocalc") && ! session->cur_doc->loading) EvalRange(sh, r, c, r, c);
+    rebuild_graph();
 }
 
 

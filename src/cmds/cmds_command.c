@@ -151,10 +151,12 @@ L"pad",
 L"plot",
 L"plotedit",
 L"prevsheet",
+L"print_graph",
 L"q!",
 L"q",
 L"quit!",
 L"quit",
+L"rebuild_graph",
 L"redefine_color",
 L"refresh",
 L"renamesheet",
@@ -971,6 +973,8 @@ void do_commandmode(struct block * sb) {
                     ! wcsncmp(inputline, L"delsheet", 8) ||
                     ! wcsncmp(inputline, L"nextsheet", 9) ||
                     ! wcsncmp(inputline, L"renamesheet", 11) ||
+                    ! wcsncmp(inputline, L"print_graph", 11) ||
+                    ! wcsncmp(inputline, L"rebuild_graph", 13) ||
                     ! wcsncmp(inputline, L"prevsheet", 9)) {
             send_to_interp(inputline);
 
