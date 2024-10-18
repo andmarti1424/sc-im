@@ -1107,6 +1107,7 @@ void do_undo() {
 
     if (undo_list->p_ant != NULL) undo_list = undo_list->p_ant;
     sc_info("Change: %d of %d", --undo_list_pos, len_undo_list());
+    EvalAll();
     return;
 }
 
