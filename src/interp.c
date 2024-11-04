@@ -585,6 +585,8 @@ char * seval(struct sheet * sh, struct ent * ent, struct enode * se, int rebuild
 
             if (rebuild_graph && vp && vp->row == ent->row && vp->col == ent->col && sh_vp == sh) {
                 sc_error("Circular reference in seval");
+                se->e.o.left = NULL;
+                se->e.o.right = NULL;
                 se->op = ERR_;
                 cellerror = CELLERROR;
                 return (NULL);
