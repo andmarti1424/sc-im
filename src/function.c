@@ -1014,7 +1014,20 @@ char * dosval(struct sheet * sh, char * colstr, double rowdoub) {
  * \return char *
  */
 char * doreplace(char * source, char * old, char * newstr) {
-    return str_replace(source, old, newstr);
+    char *ret;
+    if(source == NULL || strlen(old)==0){
+        scxfree(old);
+        scxfree(newstr);
+        if(source)
+            scxfree(source);
+        return NULL;
+    }else{
+        ret = str_replace(source, old, newstr);
+        scxfree(old);
+        scxfree(newstr);
+        scxfree(source);
+    }
+    return ret;
 }
 
 
