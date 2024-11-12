@@ -1509,6 +1509,7 @@ void let(struct roman * roman, struct sheet * sh, struct ent * v, struct enode *
             efree(v->expr);
             v->expr = (struct enode *) 0;
         }
+        if (! roman->loading) EvalAll();
         efree(e);
     } else if (! exprerr) {
         efree(v->expr);
