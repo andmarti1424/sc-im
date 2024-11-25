@@ -24,7 +24,19 @@ getstring a1\n
 getstring a2\n
 getstring a3\n
 getstring a4\n
-getstring a5
+getstring a5\n
+'
+CMD2='
+let C1 = 3\n
+let D1 = 4\n
+let E1 = 1\n
+let F1 = 2\n
+let B54 = 5\n
+rightstring B55 = @coltoa(B54)#"1"\n
+rightstring B56 = @replace("@sum(d1:0)","0",B55)\n
+let B57 = @evaluate(B56)\n
+recalc\n
+getnum b57
 '
 export IFS=$'\n'
 EXP="\
@@ -49,6 +61,7 @@ assert_iffound_notcond ${NAME}_vallog "Conditional jump or move depends on unini
 assert_iffound_notcond ${NAME}_vallog "Invalid read of size"
 assert_iffound_notcond ${NAME}_vallog "Invalid write of size"
 assert_iffound_notcond ${NAME}_vallog "Invalid free() / delete"
+assert "echo -e '${CMD2}' |../src/sc-im --nocurses --nodebug --quit_afterload 2>&1" 7
 if [ "$1" != "keep-vallog" ];then
    rm ${NAME}_vallog
 fi

@@ -1024,7 +1024,8 @@ char * doreplace(char * source, char * old, char * newstr) {
     }else{
         ret = str_replace(source, old, newstr);
         scxfree(old);
-        scxfree(newstr);
+        if(newstr != NULL)
+            scxfree(newstr);
         scxfree(source);
     }
     return ret;
@@ -1070,16 +1071,17 @@ char * dosubstr(char * s, int v1, int v2) {
  */
 char * dosevaluate(char * s) {
     if ( !s ) return ((char *) 0);
-    char * p;
+    char * p=NULL;
 
     wchar_t cline [BUFFERSIZE];
     swprintf(cline, BUFFERSIZE, L"seval %s", s);
     send_to_interp(cline);
 
-    p = scxmalloc(sizeof(char) * strlen(seval_result)+1);
-    strcpy(p, seval_result);
-    free(seval_result);
-
+    if(seval_result != NULL){
+        p = scxmalloc(sizeof(char) * strlen(seval_result)+1);
+        strcpy(p, seval_result);
+        free(seval_result);
+    }
     scxfree(s);
     return p;
 }
