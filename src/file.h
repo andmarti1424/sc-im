@@ -72,6 +72,7 @@ void remove_backup(char * file);
 int backup_exists(char * file);
 void openfile_nested(char * file);
 void openfile_under_cursor(int r, int c);
+static const char *worderror(int errnum);
 
 // load functions
 void load_file(char * loading_file);

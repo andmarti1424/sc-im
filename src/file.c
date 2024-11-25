@@ -242,9 +242,9 @@ int savefile() {
     del_range_chars(name, 0, 1 + force_rewrite);
 
 #ifndef NO_WORDEXP
-    wordexp(name, &p, 0);
-    if (p.we_wordc < 1) {
-        sc_error("Failed expanding filepath");
+    int rc;
+    if((rc=wordexp(name, &p, 0))==0){;
+        sc_error("Failed expanding filepath: %s",worderror(rc));
         return -1;
     }
     if ((len = strlen(p.we_wordv[0])) >= sizeof(name)) {
@@ -2262,6 +2262,8 @@ void load_file(char * file) {
  * \brief Attempt to load a tbl into a sheet
  * \return none
  */
+
+
 void load_tbl(char * loading_file) {
     char name[PATHLEN];
     strcpy(name, ""); //force name to be empty
@@ -2279,12 +2281,18 @@ void load_tbl(char * loading_file) {
     }
     memcpy(name, loading_file, len+1);
     #else
-    wordexp(loading_file, &p, 0);
-    for (c=0; c < p.we_wordc; c++) {
-        if (c) sprintf(name + strlen(name), " ");
-        sprintf(name + strlen(name), "%s", p.we_wordv[c]);
+    int rc;
+    if((rc = wordexp(loading_file, &p, 0))== 0){
+        for (c=0; c < p.we_wordc; c++) {
+            if (c) sprintf(name + strlen(name), " ");
+            sprintf(name + strlen(name), "%s", p.we_wordv[c]);
+        }
+        wordfree(&p);
+    } else{
+        sc_error("%s", worderror(rc));
+        return;
     }
-    wordfree(&p);
+
     #endif
 
     if (strlen(name) != 0) {
@@ -2300,6 +2308,23 @@ void load_tbl(char * loading_file) {
     }
 }
 
+static const char *worderror(int errnum) {
+    switch (errnum)
+    {
+    case WRDE_BADCHAR:
+        return "File name with <newline>, '|', '&', ';', '<', '>', '(', ')', '{', '}' not supported";
+    case WRDE_BADVAL:
+        return "Reference to undefined shell variable when WRDE_UNDEF was set in flags to wordexp()";
+    case WRDE_CMDSUB:
+        return "Command substitution requested when WRDE_NOCMD was set in flags to wordexp()";
+    case WRDE_NOSPACE:
+        return "Attempt to allocate memory in wordexp() failed";
+    case WRDE_SYNTAX:
+        return "Shell syntax error, such as unbalanced parentheses or unterminated string";
+    default:
+        return "Unknown error from wordexp() function";
+    }
+}
 
 /**
  * \brief create an empty workbook and attach it to session
