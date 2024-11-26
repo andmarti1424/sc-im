@@ -17,6 +17,7 @@ v0.8.5
 11/11/2024: PR 909 - fix spurious error message with @IF command (issue #910)
 11/11/2024: PR 911 - fix memory leak and segfault in @replace (issue #912)
 26/11/2024: PR 920 - fix in replace and sevaluate (issue #919)
+26/11/2024: PR 917 - fix range not updating with getent (issue #918)
 
 
 Ideas for v0.8.6
