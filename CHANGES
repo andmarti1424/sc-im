@@ -16,6 +16,7 @@ v0.8.5
 16/10/2024: PR 902 - work on issue 901 - keep sheet/cursor position when saving file
 11/11/2024: PR 909 - fix spurious error message with @IF command (issue #910)
 11/11/2024: PR 911 - fix memory leak and segfault in @replace (issue #912)
+26/11/2024: PR 920 - fix in replace and sevaluate (issue #919)
 
 
 Ideas for v0.8.6
