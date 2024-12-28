@@ -254,7 +254,9 @@ void get_sheet_data(xmlDocPtr doc, xmlDocPtr doc_strings, xmlDocPtr doc_styles) 
             // inlinestring
             } else if ( s != NULL && ! strcmp(s, "inlineStr") ) {
                 char * st = NULL;
-                char * strvalue = (char *) child_node->xmlChildrenNode->xmlChildrenNode->xmlChildrenNode->content;
+                char * strvalue = NULL;
+                if (child_node->xmlChildrenNode != NULL)
+                    strvalue = (char *) child_node->xmlChildrenNode->xmlChildrenNode->xmlChildrenNode->content;
                 if (strvalue != NULL && strvalue[0] != '\0') {
                     st = str_replace (strvalue, "\"", "''");
                     clean_carrier(st); // we handle padding
