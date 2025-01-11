@@ -48,7 +48,7 @@
 #include <math.h>
 #define RGB(r, g, b)    r*999/255, g*999/255, b*999/255
 
-#define N_INIT_PAIRS      28
+#define N_INIT_PAIRS      29
 
 #define HEADINGS          0
 #define WELCOME           1
@@ -78,6 +78,7 @@
 #define SHEET             25
 #define CURRENT_SHEET     26
 #define FILENM            27
+#define HELP_TEXT         28
 
 struct ucolor {
     int fg;

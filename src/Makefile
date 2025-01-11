@@ -2,7 +2,7 @@
 name = sc-im
 
 # The base directory where everything should be installed.
-prefix  = /usr/local
+prefix  = /home/rako/.local
 
 EXDIR   = $(prefix)/bin
 HELPDIR = $(prefix)/share/$(name)

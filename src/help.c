@@ -385,7 +385,7 @@ int show_lines() {
             #ifdef USECOLORS
             bold && ! key?
             ui_set_ucolor(main_win, &ucolors[HELP_HIGHLIGHT], DEFAULT_COLOR) :
-            ui_set_ucolor(main_win, &ucolors[NORMAL], DEFAULT_COLOR);
+            ui_set_ucolor(main_win, &ucolors[HELP_TEXT], DEFAULT_COLOR);
             #endif
 
             if (long_help[lineno + delta][i] == '<' || long_help[lineno + delta][i] == '{') {
