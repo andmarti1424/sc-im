@@ -1,8 +1,17 @@
 # Specify the name of the resulting executable file
 name = sc-im
 
-# The base directory where everything should be installed.
-prefix  = /home/rako/.local
+# The base directory of the installation can be defined in 
+# the file local.mk  The variable prefix has to be set in that file.
+# Otherwise the default value is /usr/local
+
+-include local.mk 
+
+ifndef prefix
+prefix = /usr/local
+endif
+
+$(info Installation prefix directory is $(prefix))
 
 EXDIR   = $(prefix)/bin
 HELPDIR = $(prefix)/share/$(name)

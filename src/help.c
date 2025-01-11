@@ -411,7 +411,7 @@ int show_lines() {
                 #endif
             } else if (key) {
                 #ifdef USECOLORS
-                ui_set_ucolor(main_win, &ucolors[NUMB], DEFAULT_COLOR);
+                ui_set_ucolor(main_win, &ucolors[HELP_KEYDEF], DEFAULT_COLOR);
                 #endif
             }
 
