@@ -66,7 +66,7 @@ void unspecial(FILE * f, char * str, int delim);
 int max_length(FILE * f);
 int count_lines(FILE * f);
 int plugin_exists(char * name, int len, char * path);
-void * do_autobackup();
+void * do_autobackup(void *arg);
 void handle_backup();
 void remove_backup(char * file);
 int backup_exists(char * file);

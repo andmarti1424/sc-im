@@ -46,6 +46,7 @@
 #include <wchar.h>
 #include <stdlib.h>
 #include <ctype.h>         // for isprint()
+#include <signal.h>
 
 #ifndef NO_WORDEXP
 #include <wordexp.h>
@@ -409,7 +410,7 @@ void do_commandmode(struct block * sb) {
     } else if (find_val(sb, OKEY_ENTER)) {
 
         if ( ! wcscmp(inputline, L"refresh")) {
-            sig_winchg();
+            sig_winchg(SIGWINCH);
 
         } else if ( ! wcscmp(inputline, L"help") || ! wcscmp(inputline, L"h") ) {
             help();

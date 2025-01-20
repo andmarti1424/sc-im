@@ -54,7 +54,6 @@
 
 #define MAGIC    ((double) 1234567890.12344)
 
-extern void free();
 extern int shall_quit;
 
 /**
