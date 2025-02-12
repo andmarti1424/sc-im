@@ -6,6 +6,7 @@ prefix  = /usr/local
 
 EXDIR   = $(prefix)/bin
 HELPDIR = $(prefix)/share/$(name)
+THEMEDIR = $(prefix)/share/themes
 LIBDIR  = $(prefix)/share/doc/$(name)
 
 # This is where the man page goes.
@@ -176,12 +177,14 @@ install :
 	install -m 644 $(wildcard plot_*) $(DESTDIR)$(HELPDIR)/
 	install -d $(DESTDIR)$(MANDIR)/
 	install -m 644 sc-im.1 $(DESTDIR)$(MANDIR)/$(name).1
+	install -d $(DESTDIR)$(THEMEDIR)
+	install -m 644 ../themes/* $(DESTDIR)$(THEMEDIR)
 
 uninstall :
 	-rm $(DESTDIR)$(prefix)/bin/$(name)
 	-rm $(DESTDIR)$(HELPDIR)/$(name)_help
-	-rm $(DESTDIR)$(HELPDIR)/plot*
 	-rm $(DESTDIR)$(MANDIR)/$(name).1
+	-rm -r $(DESTDIR)$(HELPDIR)
 
 $(name) : $(OBJS)
 	$(CC) $(LDFLAGS) $^ -o $@ $(LDLIBS)
