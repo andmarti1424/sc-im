@@ -186,6 +186,7 @@ int open_ods(char * fname, char * encoding) {
 
             while (child_node != NULL) {
                c++;
+	       if ((value_type = (char *) xmlGetProp(child_node, (xmlChar *) "number-columns-repeated")) != NULL) { c+=atoi(value_type)-1 ; };
                if ((value_type = (char *) xmlGetProp(child_node, (xmlChar *) "value-type")) == NULL) { child_node = child_node->next; continue; };
                // each of these is table-cell (a column)
 
@@ -198,6 +199,7 @@ int open_ods(char * fname, char * encoding) {
                if (!strcmp(strtype, "float")) {
                    char * formula = (char *) xmlGetProp(child_node, (xmlChar *) "formula");
                    if (formula != NULL) {
+                       // Formula string conversions
                        for(int i=0; i<replacements_count; i++){
                            struct replacement_pair const * const current_pair = &replacements[i];
                            strf = str_replace (formula, current_pair->original, current_pair->destination);
