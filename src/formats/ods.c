@@ -70,6 +70,38 @@ extern struct session * session;
  * \return none
  */
 
+struct replacement_pair {
+    char const * const original;
+    char const * const destination;
+};
+
+const struct replacement_pair replacements[] = {
+    {"of:=",""},
+    {"[.",""},
+    {";",","},
+    {":.",":"},
+    {"]",""},
+    {"COUNT","@COUNT"},
+    {"SUM","@SUM"},
+    {"PRODUCT","@PROD"},
+    {"AVERAGE","@AVG"},
+    {"MIN","@MIN"},
+    {"MAX","@MAX"},
+    {"ABS","@ABS"},
+    {"STDEV","@STDDEV"},
+    {"POWER","@POW"},
+    {"POWER","@POW"},
+    {"CEILING","@CEIL"},
+    {"FLOOR","@FLOOR"},
+    {"ROUND","@ROUND"},
+    {"EXP","@EXP"},
+    {"LN","@LN"},
+    {"LOG","@LOG"},
+    {"PI","@PI"},
+    {"ROW","@FROW"},
+    {"COLUMN","@FCOL"},
+};
+
 int open_ods(char * fname, char * encoding) {
 #ifdef ODS
     struct roman * roman = session->cur_doc;
@@ -141,6 +173,7 @@ int open_ods(char * fname, char * encoding) {
     char * value = NULL;
     char * strf;
     char * value_type = NULL;
+    const int replacements_count = sizeof(replacements)/sizeof(replacements[0]);
 
     // here traverse table content
     while (cur_node != NULL) {
@@ -165,46 +198,12 @@ int open_ods(char * fname, char * encoding) {
                if (!strcmp(strtype, "float")) {
                    char * formula = (char *) xmlGetProp(child_node, (xmlChar *) "formula");
                    if (formula != NULL) {
-                       strf = str_replace (formula, "of:=","");
-                       strcpy(formula, strf);
-                       free(strf);
-                       strf = str_replace (formula, "[.","");
-                       strcpy(formula, strf);
-                       free(strf);
-                       strf = str_replace (formula, ";",",");
-                       strcpy(formula, strf);
-                       free(strf);
-                       strf = str_replace (formula, ":.",":");
-                       strcpy(formula, strf);
-                       free(strf);
-                       strf = str_replace (formula, "]","");
-                       strcpy(formula, strf);
-                       free(strf);
-                       // we take some common function and adds a @ to them
-                       strf = str_replace (formula, "COUNT","@COUNT");
-                       strcpy(formula, strf);
-                       free(strf);
-                       strf = str_replace (formula, "SUM","@SUM");
-                       strcpy(formula, strf);
-                       free(strf);
-                       strf = str_replace (formula, "PRODUCT","@PROD");
-                       strcpy(formula, strf);
-                       free(strf);
-                       strf = str_replace (formula, "AVERAGE","@AVG");
-                       strcpy(formula, strf);
-                       free(strf);
-                       strf = str_replace (formula, "MIN","@MIN");
-                       strcpy(formula, strf);
-                       free(strf);
-                       strf = str_replace (formula, "MAX","@MAX");
-                       strcpy(formula, strf);
-                       free(strf);
-                       strf = str_replace (formula, "ABS","@ABS");
-                       strcpy(formula, strf);
-                       free(strf);
-                       strf = str_replace (formula, "STDEV","@STDDEV");
-                       strcpy(formula, strf);
-                       free(strf);
+                       for(int i=0; i<replacements_count; i++){
+                           struct replacement_pair const * const current_pair = &replacements[i];
+                           strf = str_replace (formula, current_pair->original, current_pair->destination);
+                           strcpy(formula, strf);
+                           free(strf);
+                       }
                        swprintf(line_interp, FBUFLEN, L"let %s%d=%s", coltoa(c), r, formula);
                        xmlFree(formula);
                        formula = NULL;
