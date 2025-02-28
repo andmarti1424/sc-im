@@ -97,7 +97,7 @@ const struct replacement_pair replacements[] = {
     {"EXP","@EXP"},
     {"LN","@LN"},
     {"LOG","@LOG"},
-    {"PI","@PI"},
+    {"PI()","@PI"},
     {"ROW","@FROW"},
     {"COLUMN","@FCOL"},
 };
