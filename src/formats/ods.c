@@ -180,13 +180,20 @@ int open_ods(char * fname, char * encoding) {
         if (! strcmp((char *) cur_node->name, "table-row")) {
             // we are inside a table-row
             // each of these is a row
+
+            // Handle repeated empy rows
+            if ((value_type = (char *) xmlGetProp(cur_node, (xmlChar *) "number-rows-repeated")) != NULL) { r+=atoi(value_type)-1 ; };
+
             child_node = cur_node->xmlChildrenNode;
             r++;
             c=-1;
 
             while (child_node != NULL) {
                c++;
-	       if ((value_type = (char *) xmlGetProp(child_node, (xmlChar *) "number-columns-repeated")) != NULL) { c+=atoi(value_type)-1 ; };
+
+               // Handle repeated empty columns
+               if ((value_type = (char *) xmlGetProp(child_node, (xmlChar *) "number-columns-repeated")) != NULL) { c+=atoi(value_type)-1 ; };
+
                if ((value_type = (char *) xmlGetProp(child_node, (xmlChar *) "value-type")) == NULL) { child_node = child_node->next; continue; };
                // each of these is table-cell (a column)
 
