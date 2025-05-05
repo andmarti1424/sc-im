@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013-2021, Andrés Martinelli <andmarti@gmail.com>             *
+ * Copyright (c) 2013-2021, Andrés G. Martinelli <andmarti@gmail.com>          *
  * All rights reserved.                                                        *
  *                                                                             *
  * This file is a part of sc-im                                                *
@@ -17,9 +17,9 @@
  *    documentation and/or other materials provided with the distribution.     *
  * 3. All advertising materials mentioning features or use of this software    *
  *    must display the following acknowledgement:                              *
- *    This product includes software developed by Andrés Martinelli            *
+ *    This product includes software developed by Andrés G. Martinelli         *
  *    <andmarti@gmail.com>.                                                    *
- * 4. Neither the name of the Andrés Martinelli nor the                        *
+ * 4. Neither the name of the Andrés G. Martinelli nor the                     *
  *   names of other contributors may be used to endorse or promote products    *
  *   derived from this software without specific prior written permission.     *
  *                                                                             *
@@ -37,8 +37,8 @@
 
 /**
  * \file yank.c
- * \author Andrés Martinelli <andmarti@gmail.com>
- * \date 2017-07-18
+ * \author Andrés G. Martinelli <andmarti@gmail.com>
+ * \date 2025-05-05
  * \brief TODO Write a tbrief file description.
  *
  * \details Yanklist doesn't keep references to 'ent' elements, it
@@ -298,6 +298,8 @@ int paste_yanked_ents(struct sheet * sh, int above, int type_paste) {
         int r, c;
         while (yll != NULL) {
             if (type_paste == YANK_TRANSPOSE) {
+                diffr = sh->currow - yl->vp->col;
+                diffc = sh->curcol - yl->vp->row;
                 r = yll->vp->col + diffr;
                 c = yll->vp->row + diffc;
             } else {
@@ -369,8 +371,8 @@ int paste_yanked_ents(struct sheet * sh, int above, int type_paste) {
             (void) copyent(destino, sh, yl->vp, 0, 0, 0, 0, 0, 0, 0);
         }
         if (type_paste == YANK_TRANSPOSE) {
-            destino->row = yl->vp->col + diffr;
-            destino->col = yl->vp->row + diffc;
+            destino->row += diffc;
+            destino->col += diffr;
         } else {
             destino->row += diffr;
             destino->col += diffc;

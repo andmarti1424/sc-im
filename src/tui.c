@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013-2021, Andrés Martinelli <andmarti@gmail.com>             *
+ * Copyright (c) 2013-2021, Andrés G. Martinelli <andmarti@gmail.com>          *
  * All rights reserved.                                                        *
  *                                                                             *
  * This file is a part of sc-im                                                *
@@ -17,9 +17,9 @@
  *    documentation and/or other materials provided with the distribution.     *
  * 3. All advertising materials mentioning features or use of this software    *
  *    must display the following acknowledgement:                              *
- *    This product includes software developed by Andrés Martinelli            *
+ *    This product includes software developed by Andrés G. Martinelli         *
  *    <andmarti@gmail.com>.                                                    *
- * 4. Neither the name of the Andrés Martinelli nor the                        *
+ * 4. Neither the name of the Andrés G. Martinelli nor the                     *
  *   names of other contributors may be used to endorse or promote products    *
  *   derived from this software without specific prior written permission.     *
  *                                                                             *
@@ -37,7 +37,7 @@
 
 /**
  * \file tui.c
- * \author Andrés Martinelli <andmarti@gmail.com>
+ * \author Andrés G. Martinelli <andmarti@gmail.com>
  * \date 2017-07-18
  * \brief  This is the ncurses implementation of sc-im user interface,
  *
@@ -309,7 +309,7 @@ void ui_sc_msg(char * s, int type, ...) {
  */
 void ui_do_welcome() {
     char * msg_title = "sc-im - SpreadSheet Calculator Improvised";
-    char * msg_by = "An SC fork by Andrés Martinelli";
+    char * msg_by = "An SC fork by Andrés G. Martinelli";
     char * msg_version = rev;
     char * msg_help  = "Press  :help<Enter>  to get help         ";
     char * msg_help2 = "Press  <Enter>       to enter NORMAL mode";
