@@ -11,6 +11,7 @@ v0.8.5
 05/05/2025: fixed ‘zip_error_to_str’ deprecated message
             changed do_autobackup definition
             FIX in paste of cells transposed. Destination position was calculated wrong.
+            fix spurious circular deps across sheets (issue #903) thanks to DHMike57
 12/02/2025: Add theme files into Makefile #930
             PR 921 - fix invalid chars in file name cause segfault (issue #922)
             PR 931 - fix issue #928 - Reproducible segfault reading python-written xlsx
