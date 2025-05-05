@@ -242,9 +242,9 @@ int savefile() {
     del_range_chars(name, 0, 1 + force_rewrite);
 
 #ifndef NO_WORDEXP
-    int rc;
-    if((rc=wordexp(name, &p, 0))==0){;
-        sc_error("Failed expanding filepath: %s",worderror(rc));
+    wordexp(name, &p, 0);
+    if (p.we_wordc < 1) {
+        sc_error("Failed expanding filepath");
         return -1;
     }
     if ((len = strlen(p.we_wordv[0])) >= sizeof(name)) {
@@ -2037,7 +2037,7 @@ int plugin_exists(char * name, int len, char * path) {
  * \brief TODO Document do_autobackup()
  * \return none
  */
-void * do_autobackup() {
+void * do_autobackup(void* vp) {
     struct sheet  * sh = session->cur_doc->cur_sh;
     char * curfile = session->cur_doc->name;
     int len;
@@ -2262,8 +2262,6 @@ void load_file(char * file) {
  * \brief Attempt to load a tbl into a sheet
  * \return none
  */
-
-
 void load_tbl(char * loading_file) {
     char name[PATHLEN];
     strcpy(name, ""); //force name to be empty
@@ -2281,18 +2279,12 @@ void load_tbl(char * loading_file) {
     }
     memcpy(name, loading_file, len+1);
     #else
-    int rc;
-    if((rc = wordexp(loading_file, &p, 0))== 0){
-        for (c=0; c < p.we_wordc; c++) {
-            if (c) sprintf(name + strlen(name), " ");
-            sprintf(name + strlen(name), "%s", p.we_wordv[c]);
-        }
-        wordfree(&p);
-    } else{
-        sc_error("%s", worderror(rc));
-        return;
+    wordexp(loading_file, &p, 0);
+    for (c=0; c < p.we_wordc; c++) {
+        if (c) sprintf(name + strlen(name), " ");
+        sprintf(name + strlen(name), "%s", p.we_wordv[c]);
     }
-
+    wordfree(&p);
     #endif
 
     if (strlen(name) != 0) {
@@ -2308,25 +2300,6 @@ void load_tbl(char * loading_file) {
     }
 }
 
-const char *worderror(int errnum) {
-    switch (errnum)
-    {
-#ifndef NO_WORDEXP
-    case WRDE_BADCHAR:
-        return "File name with <newline>, '|', '&', ';', '<', '>', '(', ')', '{', '}' not supported";
-    case WRDE_BADVAL:
-        return "Reference to undefined shell variable when WRDE_UNDEF was set in flags to wordexp()";
-    case WRDE_CMDSUB:
-        return "Command substitution requested when WRDE_NOCMD was set in flags to wordexp()";
-    case WRDE_NOSPACE:
-        return "Attempt to allocate memory in wordexp() failed";
-    case WRDE_SYNTAX:
-        return "Shell syntax error, such as unbalanced parentheses or unterminated string";
-#endif
-    default:
-        return "Unknown error from wordexp() function";
-    }
-}
 
 /**
  * \brief create an empty workbook and attach it to session
