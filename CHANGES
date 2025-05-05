@@ -8,6 +8,9 @@ Please open a discussion on GitHub to comment on these and other feature request
 
 ***********
 v0.8.5
+05/05/2025: fixed ‘zip_error_to_str’ deprecated message
+            changed do_autobackup definition
+            FIX in paste of cells transposed. Destination position was calculated wrong.
 12/02/2025: Add theme files into Makefile #930
             PR 921 - fix invalid chars in file name cause segfault (issue #922)
             PR 931 - fix issue #928 - Reproducible segfault reading python-written xlsx
