@@ -393,10 +393,15 @@ int open_xlsx(char * fname, char * encoding) {
 
     // open zip file
     if ((za = zip_open(fname, 0, &err)) == NULL) {
-        zip_error_to_str(buf, sizeof(buf), err, errno);
+        // zip_error_to_str(buf, sizeof(buf), err, errno);
+        // sc_error("can't open zip archive `%s': %s", fname, buf);
+        zip_error_t error;
+        zip_error_init_with_code(&error, err);
         sc_error("can't open zip archive `%s': %s", fname, buf);
+        zip_error_fini(&error);
         return -1;
     }
+
 
     // open xl/sharedStrings.xml
     char * name = "xl/sharedStrings.xml";
