@@ -90,9 +90,9 @@ extern struct session * session;
 extern graphADT graph;
 extern WINDOW * input_win;
 
-void exit_app();
-double fn1_eval      (double (* fn)(), double arg);
-double fn2_eval      (double (* fn)(), double arg1, double arg2);
+void exit_app(int signum);
+double fn1_eval(double (*fn)(double), double arg);
+double fn2_eval(double (*fn)(double, double), double arg1, double arg2);
 int    constant      (struct enode * e);
 void   copydbuf      (int deltar, int deltac);
 void   decompile     (struct enode * e, int priority);
@@ -801,7 +801,7 @@ struct ent * getent(struct sheet * sh, char * colstr, double rowdoub, int alloc)
  * \brief eval_fpe()
  * \return none
  */
-void eval_fpe() { /* Trap for FPE errors in eval */
+void eval_fpe(int signum) { /* Trap for FPE errors in eval */
 #if defined(i386)
     sc_debug("eval_fpe i386");
     asm("    fnclex");
@@ -822,7 +822,7 @@ void eval_fpe() { /* Trap for FPE errors in eval */
  * \param[in] arg
  * \return double
  */
-double fn1_eval(double (*fn)(), double arg) {
+double fn1_eval(double (*fn)(double), double arg) {
     double res;
     errno = 0;
     res = (*fn) (arg);
@@ -839,7 +839,7 @@ double fn1_eval(double (*fn)(), double arg) {
  * \param[in] arg2
  * \return double
  */
-double fn2_eval(double (*fn)(), double arg1, double arg2) {
+double fn2_eval(double (*fn)(double, double), double arg1, double arg2) {
     double res;
     errno = 0;
     res = (*fn) (arg1, arg2);

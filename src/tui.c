@@ -81,6 +81,7 @@
 #include <locale.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <signal.h>  
 
 #include "main.h"
 #include "macros.h"
@@ -1335,7 +1336,7 @@ void ui_show_text(char * val) {
  * UI function that's called after SIGWINCH signal.
  * \return none
  */
-void sig_winchg() {
+void sig_winchg(int signum) {
     if (isendwin()) return;
     endwin();
     refresh();
@@ -1586,7 +1587,7 @@ void ui_resume() {
     set_term(sstdout);
     reset_prog_mode();
     clearok(stdscr, TRUE);
-    sig_winchg();
+    sig_winchg(SIGWINCH);
 
     return;
 }

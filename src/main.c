@@ -591,13 +591,13 @@ void handle_argv_exports() {
  * \return none
  */
 void signals() {
-    void sig_int();
-    void sig_abrt();
-    void sig_term();
-    void sig_nopipe();
-    void sig_winchg();
-    void sig_tstp();
-    void sig_cont();
+    void sig_int(int signum);
+    void sig_abrt(int signum);
+    void sig_term(int signum);
+    void sig_nopipe(int signum);
+    void sig_winchg(int signum);
+    void sig_tstp(int signum);
+    void sig_cont(int signum);
 
     signal(SIGINT, sig_int);
     signal(SIGABRT, sig_abrt);
@@ -617,7 +617,7 @@ void signals() {
  * \brief Handles the SIGPIPE signal
  * \return none
  */
-void sig_nopipe() {
+void sig_nopipe(int signum) {
     sc_error("brokenpipe!");
     brokenpipe = TRUE;
     return;
@@ -628,7 +628,7 @@ void sig_nopipe() {
  * \brief Handles the SIGTSTP signal
  * \return none
  */
-void sig_tstp() {
+void sig_tstp(int signum) {
     //sc_info("Got SIGTSTP.");
     def_prog_mode();
     endwin();
@@ -641,9 +641,9 @@ void sig_tstp() {
  * \brief Handles the SIGCONT signal
  * \return none
  */
-void sig_cont() {
+void sig_cont(int signum) {
     signal(SIGTSTP, sig_tstp); /* set handler back to this */
-    sig_winchg();
+    sig_winchg(signum);
     reset_prog_mode();
     refresh();
     ui_update(TRUE);
@@ -655,7 +655,7 @@ void sig_cont() {
  * \brief Handles the SIGINT signal
  * \return none
  */
-void sig_int() {
+void sig_int(int signum) {
     sc_info("Got SIGINT.%s" , curmode != NORMAL_MODE ? " Back to NORMAL_MODE" : " Press «:q<Enter>» to quit sc-im");
     if (get_bufsize(buffer)) break_waitcmd_loop(buffer);
     if (curmode == VISUAL_MODE) exit_visualmode();
@@ -680,7 +680,7 @@ void sig_int() {
  * \brief Handles the SIGABRT signal
  * \return none
  */
-void sig_abrt() {
+void sig_abrt(int signum) {
     sc_error("Error !!! Quitting sc-im.");
     shall_quit = -1; // error !
     return;
@@ -691,7 +691,7 @@ void sig_abrt() {
  * \brief Handles the SIGABRT signal
  * \return none
  */
-void sig_term() {
+void sig_term(int signum) {
     sc_error("Got SIGTERM signal. Quitting sc-im.");
     shall_quit = 2;
     return;

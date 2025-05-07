@@ -45,6 +45,7 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
+#include <signal.h>
 
 #include "cmds.h"
 #include "cmds_edit.h"
@@ -1141,7 +1142,7 @@ void do_normalmode(struct block * buf) {
             }
 
         case ctl('l'):
-            sig_winchg();
+            sig_winchg(SIGWINCH);
             break;
 
         case L'@':

@@ -2033,11 +2033,7 @@ int plugin_exists(char * name, int len, char * path) {
 }
 
 
-/**
- * \brief TODO Document do_autobackup()
- * \return none
- */
-void * do_autobackup(void* vp) {
+void * do_autobackup(void *arg) {
     struct sheet  * sh = session->cur_doc->cur_sh;
     char * curfile = session->cur_doc->name;
     int len;

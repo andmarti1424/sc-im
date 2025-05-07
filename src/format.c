@@ -128,6 +128,7 @@
 #include <string.h>
 #include <sys/types.h>
 #include <time.h>
+#include <math.h>
 #include "sc.h"
 #include "xmalloc.h"
 
@@ -568,7 +569,7 @@ int engformat(int fmt, int width, int lprecision, double val, char *buf, int buf
     "+03", "+06", "+09", "+12", "+15", "+18"
     };
     int engind = 0;
-    double engmant, pow(), engabs, engexp;
+    double engmant, engabs, engexp;
 
     if (buflen < width) return (FALSE);
     if (fmt >= 0 && fmt < COLFORMATS && colformat[fmt])

@@ -52,14 +52,13 @@
 #include <unistd.h>
 #include <math.h>
 #include <limits.h>
+#include <stdbool.h>
 
 #include "lex.h"
 #include "sc.h"
 #include "conf.h"
 #include "utils/string.h"
 
-typedef int bool;
-enum { false, true };
 
 #include "y.tab.h"
 
@@ -224,7 +223,7 @@ int yylex() {
             }
         } // 117
     } else if ((*p == '.') || isdigit(*p)) { // 89
-        void (*sig_save)();
+        void (*sig_save)(int);
         double v = 0.0;
         int temp;
         char *nstart = p;
