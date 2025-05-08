@@ -1610,6 +1610,7 @@ setitem :
     |    K_AUTOWRAP               {               parse_str(user_conf_d, "autowrap=1", TRUE); }
     |    K_NOAUTOWRAP             {               parse_str(user_conf_d, "autowrap=0", TRUE); }
 
+    |    K_AUTOBACKUP             {               parse_str(user_conf_d, "autobackup=1", TRUE); }
     |    K_AUTOBACKUP '=' NUMBER  {
                                                   char cmd[MAXCMD];
                                                   sprintf(cmd, "autobackup=%d", $3);
