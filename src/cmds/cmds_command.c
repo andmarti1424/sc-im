@@ -1088,6 +1088,10 @@ void do_commandmode(struct block * sb) {
         } else if (
             ! wcsncmp(inputline, L"e xlsx"  , 6) ||
             ! wcsncmp(inputline, L"e! xlsx" , 7)) {
+                #if defined(AUTOBACKUP) && defined(XLSX_EXPORT)
+                char * curfile = session->cur_doc->name;
+                #endif
+
                 #ifndef XLSX_EXPORT
                 sc_error("XLSX export support not compiled in");
                 #else
