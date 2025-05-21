@@ -17,7 +17,7 @@ jobs:
         cc: [gcc]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - run: sudo apt update && sudo apt install -y valgrind bison
       - run: make -C src
         env:
