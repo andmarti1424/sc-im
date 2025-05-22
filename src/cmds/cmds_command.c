@@ -1008,7 +1008,9 @@ void do_commandmode(struct block * sb) {
           savefile();
 
         } else if ( ! wcsncmp(inputline, L"file ", 5) ) {
+            #ifdef AUTOBACKUP
             char * curfile = session->cur_doc->name;
+            #endif
             char name [BUFFERSIZE];
             int name_ok = 0;
             #ifndef NO_WORDEXP
