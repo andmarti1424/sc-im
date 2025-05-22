@@ -161,6 +161,10 @@ void start_default_ucolors() {
     ucolors[ SHEET           ].bg = DEFAULT_COLOR;
     ucolors[ FILENM          ].fg = GREEN;
     ucolors[ FILENM          ].bg = DEFAULT_COLOR;
+    ucolors[ HELP_TEXT       ].fg = WHITE;
+    ucolors[ HELP_TEXT       ].fg = WHITE;
+    ucolors[ HELP_KEYDEF     ].fg = WHITE;
+    ucolors[ HELP_KEYDEF     ].bg = BLACK;
 
     ui_start_colors(); // call specific ui startup routine
 }
@@ -256,6 +260,10 @@ void set_colors_param_dict() {
     put(d_colors_param, "SHEET", str);
     sprintf(str, "%d", FILENM);
     put(d_colors_param, "FILENM", str);
+    sprintf(str, "%d", HELP_TEXT);
+    put(d_colors_param, "HELP_TEXT", str);
+    sprintf(str, "%d", HELP_KEYDEF);
+    put(d_colors_param, "HELP_KEYDEF", str);
 }
 
 /**

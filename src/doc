@@ -892,7 +892,7 @@ Commands for handling cell content:
                      CELL_ERROR, CELL_NEGATIVE, CELL_SELECTION,
                      CELL_SELECTION_SC, INFO_MSG, ERROR_MSG, CELL_ID,
                      CELL_FORMAT, CELL_CONTENT, WELCOME, NORMAL, INPUT,
-                     HELP_HIGHLIGHT.
+                     HELP_HIGHLIGHT, HELP_TEXT, HELP_KEYDEF.
 
                 The value of fg and bg shall be one of the following:
                      WHITE, BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN,
@@ -966,6 +966,9 @@ Commands for handling cell content:
                           input bar at the top left of the screen.
                         - HELP_HIGHLIGHT Color used for highlighting search results
                           and titles of help page.
+                        - HELP_TEXT Color used for the text of the help page.
+                        - HELP_KEYDEF Color used for the key definitions in the
+                          help page.
 
     :cellcolor "{key}={arg} .."
                 Change the color of the current cell or range.
