@@ -1947,10 +1947,11 @@ Commands for handling cell content:
     You can set the --quiet parameter to avoid printing messages of all kinds
     (info, error or debug).
 
-    Export to csv, tab, markdown or plain text formats without interaction:
+    Export to csv, tab, markdown, xlsx or plain text formats without interaction:
         ./sc-im --quit_afterload --nocurses --export_csv
         ./sc-im --quit_afterload --nocurses --export_tab
         ./sc-im --quit_afterload --nocurses --export_mkd
+        ./sc-im --quit_afterload --nocurses --export_xlsx
         ./sc-im --quit_afterload --nocurses --export_txt # (or just --export)
 
     If you set the --quit_afterload flag, sc-im will quit after loading all
