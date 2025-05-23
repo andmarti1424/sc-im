@@ -221,6 +221,7 @@ double eval(struct sheet * sh, struct ent * ent, struct enode * e, int rebuild_g
             struct ent * vp = *ATBL(sh, sh->tbl, r, c);
             if (ent && vp && ent->row == vp->row && ent->col == vp->col) {
                     sc_error("Circular reference in eval (cell %s%d)", coltoa(vp->col), vp->row);
+                    // FIXME when referencing range of other sheet
                     e->op = ERR_;
                     e->e.o.left = NULL;
                     e->e.o.right = NULL;
@@ -236,9 +237,9 @@ double eval(struct sheet * sh, struct ent * ent, struct enode * e, int rebuild_g
             struct ent * vp = e->e.v.vp;
             struct sheet * sh_vp = e->e.v.sheet;
             if (sh_vp == NULL) sh_vp = sh;
-            //sc_debug("var %d %d", vp->row, vp->col);
             //if (vp && ent && vp->row == ent->row && vp->col == ent->col && !(vp->flags & is_deleted) ) {
             if (vp && ent && vp == ent && !(vp->flags & is_deleted) ) {
+                // FIXME when referencing range of other sheet
                 sc_error("Circular reference in eval (cell %s%d)", coltoa(vp->col), vp->row);
                 //ERR propagates. comment to make it not to.
                 cellerror = CELLERROR;
@@ -337,9 +338,11 @@ double eval(struct sheet * sh, struct ent * ent, struct enode * e, int rebuild_g
                 GraphAddEdge(getVertex(graph, sh, lookat(sh, ent->row, ent->col), 1),
                         // digging deep to get the row/col of the cell we depend on
                         getVertex(graph, sh, lookat(sh, e->e.o.left->e.r.right.expr->e.o.left->e.v.vp->row, e->e.o.left->e.r.right.expr->e.o.left->e.v.vp->row), 1));
+                        //new getVertex(graph, sh_vp, lookat(sh_vp, e->e.o.left->e.r.right.expr->e.o.left->e.v.vp->row, e->e.o.left->e.r.right.expr->e.o.left->e.v.vp->row), 1));
             if(e->e.o.left->e.r.right.expr->e.o.right->e.v.vp != NULL)
                 GraphAddEdge(getVertex(graph, sh, lookat(sh, ent->row, ent->col), 1),
                         getVertex(graph, sh, lookat(sh, e->e.o.left->e.r.right.expr->e.o.left->e.v.vp->row, e->e.o.left->e.r.right.expr->e.o.right->e.v.vp->row), 1));
+                        // new getVertex(graph, sh_vp, lookat(sh_vp, e->e.o.left->e.r.right.expr->e.o.left->e.v.vp->row, e->e.o.left->e.r.right.expr->e.o.right->e.v.vp->row), 2));
         }
         if(e->e.o.left->e.r.left.expr == NULL){
             minr = e->e.o.left->e.r.left.vp->row;
@@ -350,9 +353,11 @@ double eval(struct sheet * sh, struct ent * ent, struct enode * e, int rebuild_g
             if(e->e.o.left->e.r.left.expr->e.o.left->e.v.vp != NULL)
                 GraphAddEdge(getVertex(graph, sh, lookat(sh, ent->row, ent->col), 1),
                         getVertex(graph, sh, lookat(sh, e->e.o.left->e.r.left.expr->e.o.left->e.v.vp->row, e->e.o.left->e.r.left.expr->e.o.left->e.v.vp->row), 1));
+                        // new getVertex(graph, sh_vp, lookat(sh_vp, e->e.o.left->e.r.left.expr->e.o.left->e.v.vp->row, e->e.o.left->e.r.left.expr->e.o.left->e.v.vp->row), 1));
             if(e->e.o.left->e.r.left.expr->e.o.right->e.v.vp != NULL)
                 GraphAddEdge(getVertex(graph, sh, lookat(sh, ent->row, ent->col), 1),
                         getVertex(graph, sh, lookat(sh, e->e.o.left->e.r.left.expr->e.o.right->e.v.vp->row, e->e.o.left->e.r.left.expr->e.o.right->e.v.vp->row), 1));
+                        // new getVertex(graph, sh_vp, lookat(sh_vp, e->e.o.left->e.r.left.expr->e.o.right->e.v.vp->row, e->e.o.left->e.r.left.expr->e.o.right->e.v.vp->row), 1));
         }
         //  same as above but rebuilds the whole graph every time
         //maxr = e->e.o.left->e.r.right.expr == NULL ? e->e.o.left->e.r.right.vp->row : eval(sh,ent,e->e.o.left->e.r.right.expr->e.o.left,1);
@@ -371,9 +376,13 @@ double eval(struct sheet * sh, struct ent * ent, struct enode * e, int rebuild_g
                     cellerror = CELLERROR;
                     return (double) 0;
                 }
-                GraphAddEdge(getVertex(graph, sh, lookat(sh, ent->row, ent->col), 1), getVertex(graph, sh, lookat(sh, row, col), 1));
+                GraphAddEdge(getVertex(graph, sh, lookat(sh, ent->row, ent->col), 1),
+                    getVertex(graph, sh, lookat(sh, row, col), 1));
+                        // new getVertex(graph, sh_vp, lookat(sh_vp, row, col), 1));
             }
         }
+
+        sh = e->e.v.sheet == NULL ? sh : e->e.v.sheet;
 
         switch (e->op) {
             case LOOKUP:
@@ -872,6 +881,7 @@ struct enode * new(int op, struct enode * a1, struct enode * a2) {
     p->e.o.left = a1;
     p->e.o.right = a2;
     p->e.o.s = NULL;
+    p->e.v.sheet = a1->e.v.sheet;
     return p;
 }
 
@@ -897,6 +907,7 @@ struct enode * new_var(int op, struct ent_ptr a1) {
     p->e.r.right.sheet = NULL;// important to initialize
     p->op = op;
     p->e.v = a1; // ref to cell needed for this expr
+    p->e.v.sheet = a1.sheet;
     return p;
 }
 
@@ -924,6 +935,7 @@ struct enode * new_range(int op, struct range_s a1) {
     p->e.r.right.sheet = NULL;// important to initialize
     p->op = op;
     p->e.r = a1;
+    p->e.v.sheet = a1.left.sheet;
     return p;
 }
 
@@ -1958,6 +1970,7 @@ void decompile(struct enode *e, int priority) {
             line[linelim++] = '!';
             decompile(e->e.o.left, 30);
             break;
+
     case O_VAR:
             decodev(e->e.v);
             break;
