@@ -56,6 +56,7 @@
 #include "../cmds/cmds.h"
 #include "../conf.h"
 #include "../color.h"
+#include "../graph.h"
 #include "../xmalloc.h" // for scxfree
 
 int compare(const void * row1, const void * row2);
@@ -182,6 +183,7 @@ void sortrange(struct sheet * sh, struct ent * left, struct ent * right, char * 
 
     scxfree((char *) sort);
     scxfree((char *) rows);
+    rebuild_graph();
 
     if (criteria) scxfree(criteria);
 }
