@@ -108,6 +108,8 @@ L"e csv",
 L"e! csv",
 L"e mkd",
 L"e! mkd",
+L"e pipe",
+L"e! pipe",
 L"e tab",
 L"e! tab",
 L"e tex",
@@ -1078,6 +1080,8 @@ void do_commandmode(struct block * sb) {
             ! wcsncmp(inputline, L"e! tex" , 6) ||
             ! wcsncmp(inputline, L"e tab"  , 5) ||
             ! wcsncmp(inputline, L"e! tab" , 6) ||
+            ! wcsncmp(inputline, L"e pipe" , 5) ||
+            ! wcsncmp(inputline, L"e! pipe", 6) ||
             ! wcsncmp(inputline, L"e mkd"  , 4) ||
             ! wcsncmp(inputline, L"e! mkd" , 5) ||
             ! wcsncmp(inputline, L"e txt" , 5) ||
