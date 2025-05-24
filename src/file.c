@@ -1403,7 +1403,7 @@ int import_markdown(char * fname) {
 void do_export(int r0, int c0, int rn, int cn) {
     char * curfile = session->cur_doc->name;
     int force_rewrite = 0;
-    char type_export[4] = "";
+    char type_export[5] = "";
     char ruta[PATHLEN];
     char linea[BUFFERSIZE];
 
@@ -1416,8 +1416,8 @@ void do_export(int r0, int c0, int rn, int cn) {
         strcpy(type_export, "csv");
     } else if (str_in_str(linea, "tab") == 0) {
         strcpy(type_export, "tab");
-    } else if (str_in_str(linea, "psv") == 0) {
-        strcpy(type_export, "psv");
+    } else if (str_in_str(linea, "pipe") == 0) {
+        strcpy(type_export, "pipe");
     } else if (str_in_str(linea, "tex") == 0) {
         strcpy(type_export, "tex");
     } else if (str_in_str(linea, "txt") == 0) {
