@@ -195,6 +195,7 @@ int main (int argc, char ** argv) {
     // check if version is in argv. if so, show version and quit
     if (get_conf_int("version")) show_version_and_quit();
 
+    sc_info("-DEBUGCICRASH1");
     // if starting tui..
     if (! get_conf_int("nocurses")) {
         // create command line history structure
@@ -224,6 +225,7 @@ int main (int argc, char ** argv) {
 #endif
     }
 
+    sc_info("-DEBUGCICRASH2");
     /*
      * If the 'output' parameter is defined, sc-im saves its output to that file.
      * To achieve that, we open the output file and keep it open until exit.
@@ -243,11 +245,13 @@ int main (int argc, char ** argv) {
             put(user_conf_d, "nocurses", "1");
         }
     }
+    sc_info("-DEBUGCICRASH3");
 
 #ifdef XLUA
     doLuainit();
 #endif
 
+    sc_info("-DEBUGCICRASH4");
     wchar_t stdin_buffer[BUFFERSIZE] = { L'\0' };
 
     // take this out of here -->
@@ -255,12 +259,15 @@ int main (int argc, char ** argv) {
     prescale = 1.0;
     optimize = 0; // <----
 
+    sc_info("-DEBUGCICRASH5");
     // create basic structures that will depend on the loaded file
     create_structures();
 
+    sc_info("-DEBUGCICRASH6");
     // create main session
     session = (struct session *) calloc(1, sizeof(struct session));
 
+    sc_info("-DEBUGCICRASH7");
     /*
      * create a new roman struct for each file passed as argv
      * and attach it to main session
@@ -270,6 +277,7 @@ int main (int argc, char ** argv) {
 
     create_empty_wb();
 
+    sc_info("-DEBUGCICRASH8");
     /*
      * load_rc. Since we are not sure what people put in their scimrc file,
      * other than configuration variables and mappings,
@@ -278,43 +286,56 @@ int main (int argc, char ** argv) {
      */
     load_rc();
 
+    sc_info("-DEBUGCICRASH8");
     /* load file passed as argv to sc-im.
      * if more than one file is passed, consider the last one.
      */
     if (strlen(loadingfile))
         load_file(loadingfile);
 
+    sc_info("-DEBUGCICRASH9");
 
     // check input from stdin (pipeline)
     // and send it to interp
     read_stdin();
 
+    sc_info("-DEBUGCICRASH10");
     // change curmode to NORMAL_MODE
     chg_mode('.');
+    sc_info("-DEBUGCICRASH11");
 
     // initiate ui
     FILE * f;
     if ( ! get_conf_int("nocurses")) {
         // we show welcome screen if no spreadsheet was passed to sc-im
         // and no input was sent throw pipeline
+
+        sc_info("-DEBUGCICRASH11a");
         if ( ! session->cur_doc->name && ! wcslen(stdin_buffer)) {
+
+            sc_info("-DEBUGCICRASH11b");
             ui_do_welcome();
             // show mode and cell's details in status bar
             ui_print_mode();
             ui_show_celldetails();
         } else {
+            sc_info("-DEBUGCICRASH11c");
             ui_show_header();
             ui_update(TRUE);
         }
     } else {
+        sc_info("-DEBUGCICRASH11d");
         f = fopen("/dev/tty", "rw");
         if (f == NULL) sc_error("fatal error loading stdin");
     }
+
+    sc_info("-DEBUGCICRASH12");
 
     // handle input from keyboard
     // this should only take place if curses ui
     if (! get_conf_int("nocurses")) buffer = (struct block *) create_buf();
 
+    sc_info("-DEBUGCICRASH13");
     wchar_t nocurses_buffer[BUFFERSIZE];
 
     // runtime timer
@@ -325,16 +346,21 @@ int main (int argc, char ** argv) {
     lastbackup_tv = (struct timeval) {0};
     #endif
 
+    sc_info("-DEBUGCICRASH14");
     // handle --exports passed as argv
     handle_argv_exports();
 
+    sc_info("-DEBUGCICRASH15");
+
     while ( ! shall_quit && ! get_conf_int("quit_afterload")) {
         // save current time for runtime timer
+        sc_info("-DEBUGCICRASH16");
         gettimeofday(&current_tv, NULL);
 
         // autobackup if it is time to do so
         handle_backup();
 
+        sc_info("-DEBUGCICRASH17");
         // if we are in ncurses
         if (! get_conf_int("nocurses")) {
             handle_input(buffer);
@@ -345,6 +371,7 @@ int main (int argc, char ** argv) {
             send_to_interp(nocurses_buffer);
         }
 
+        sc_info("-DEBUGCICRASH18");
         /*
          * shall_quit=0 means normal operation of app
          * shall_quit=1 means :q
@@ -354,6 +381,7 @@ int main (int argc, char ** argv) {
         if (shall_quit == 1 && modcheck()) shall_quit = 0;
     }
     if (get_conf_int("nocurses") && f != NULL) fclose(f);
+    sc_info("-DEBUGCICRASH19");
 
     return shall_quit == -1 ? exit_app(-1) : exit_app(0);
 }
@@ -391,32 +419,50 @@ void create_structures() {
  */
 void read_stdin() {
     //sc_debug("reading stdin from pipeline");
+    sc_info("-DEBUGCICRASH9.1");
     fd_set readfds;
+    sc_info("-DEBUGCICRASH9.2");
     FD_ZERO(&readfds);
+    sc_info("-DEBUGCICRASH9.3");
     FD_SET(STDIN_FILENO, &readfds);
+    sc_info("-DEBUGCICRASH9.4");
     fd_set savefds = readfds;
+    sc_info("-DEBUGCICRASH9.5");
     struct timeval timeout;
+    sc_info("-DEBUGCICRASH9.6");
     timeout.tv_sec = 0;
     timeout.tv_usec = 0;
     FILE * f = stdin;
+    sc_info("-DEBUGCICRASH9.7");
     //FILE * f = fopen("/dev/tty", "rw");
     wchar_t stdin_buffer[BUFFERSIZE] = { L'\0' };
 
     if (select(1, &readfds, NULL, NULL, &timeout)) {
+        sc_info("-DEBUGCICRASH9.8");
         //sc_debug("there is data");
         while (f != NULL && fgetws(stdin_buffer, BUFFERSIZE, f) != NULL) {
+            sc_info("-DEBUGCICRASH9.9");
             sc_debug("Interp will receive: %ls", stdin_buffer);
+            sc_info("-DEBUGCICRASH9.10");
             send_to_interp(stdin_buffer);
+            sc_info("-DEBUGCICRASH9.11");
         }
         fflush(f);
+        sc_info("-DEBUGCICRASH9.12");
     } else {
+        sc_info("-DEBUGCICRASH9.13");
         //sc_debug("there is NO data");
     }
+    sc_info("-DEBUGCICRASH9.14");
     readfds = savefds;
+    sc_info("-DEBUGCICRASH9.15");
     if (f != NULL) fclose(f);
+    sc_info("-DEBUGCICRASH9.16");
 
     if ( ! freopen("/dev/tty", "rw", stdin)) {
+        sc_info("-DEBUGCICRASH9.17");
         perror(NULL);
+        sc_info("-DEBUGCICRASH9.18");
         exit(-1);
     }
     //sc_debug("finish reading");
