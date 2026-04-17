@@ -1,23 +1,23 @@
 # Specify the name of the resulting executable file
-name = sc-im
+name ?= sc-im
 
 # The base directory where everything should be installed.
-prefix  = /usr/local
+prefix  ?= /usr/local
 
-EXDIR   = $(prefix)/bin
-HELPDIR = $(prefix)/share/$(name)
-THEMEDIR = $(prefix)/share/themes
-LIBDIR  = $(prefix)/share/doc/$(name)
+EXDIR   ?= $(prefix)/bin
+HELPDIR ?= $(prefix)/share/$(name)
+THEMEDIR ?= $(prefix)/share/themes
+LIBDIR  ?= $(prefix)/share/doc/$(name)
 
 # This is where the man page goes.
-MANDIR  = $(prefix)/share/man/man1
+MANDIR  ?= $(prefix)/share/man/man1
 
 # History directory, relative to $HOME
-HISTORY_DIR= .cache
-HISTORY_FILE=sc-iminfo
+HISTORY_DIR ?= .cache
+HISTORY_FILE ?=sc-iminfo
 # Configuration directory, relative to $HOME
-CONFIG_DIR= .config/sc-im
-CONFIG_FILE=scimrc
+CONFIG_DIR ?= .config/sc-im
+CONFIG_FILE ?=scimrc
 
 # Change these to your liking or use `make CC=gcc` etc
 #CC   = cc
