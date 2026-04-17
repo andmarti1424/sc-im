@@ -929,7 +929,7 @@ Commands for handling cell content:
                 The different types and its details:
                         - HEADINGS Topmost (header) row that lists column names
                           (only for even columns), and leftmost (header) column
-                          that lists row numbers.                          
+                          that lists row numbers.
                         - HEADINGS_ODD The same that above but shown for odd columns.
                         - MODE The text in the top right that indicates which
                           mode sc-im is currently in.
@@ -1264,7 +1264,7 @@ Commands for handling cell content:
         a. With <C-d> keybinding:
             The <C-d> command works on NORMAL and VISUAL modes, and converts
             cell's text content that represents a date, and sets the numeric
-            value of the cell using using locale's D_FMT format.
+            value of the cell using locale's D_FMT format.
             After conversion, the same format is applied automatically to the
             cell so that the value is displayed as a date.
             You can then change the date format with :format command or
@@ -1373,7 +1373,7 @@ Commands for handling cell content:
 &Other configuration variables&
 
     'autocalc'
-    Set it to recalculate values automatically, or to '0' to do it manually
+    Set it to '1' recalculate values automatically, or to '0' to do it manually
     upon execution of a '@' command.
 
     'numeric'
@@ -1877,12 +1877,12 @@ Commands for handling cell content:
 
         The second parameter {i} is 0 or 1 indicating if the reference to this
         cell should be added to the formula evaluation graph. Setting it to 0
-        may be a good idea if you call sc.lquery to often in your scripts.
-        However, in the cases were its not added to the dependency graph, it
+        may be a good idea if you call sc.lquery too often in your scripts.
+        However, in the cases where it's not added to the dependency graph, it
         will nevertheless be executed when the cell that calls the script
         executions is referenced by another cell.
 
-        The return of value of the "luascript" is inserted in the calling
+        The return value of the "luascript" is inserted in the calling
         cell if it is a string.
 
         The search patch for LUA scripts files is $PWD/lua/
@@ -2081,7 +2081,7 @@ Commands for handling cell content:
 ==============================================================================
 &External scripts&
 
-    sc-im can read data from a external script, either through a pipeline or
+    sc-im can read data from an external script, either through a pipeline or
     redirection.
     This enables sc-im to be used as a non-interactive calculator.
 
@@ -2140,7 +2140,7 @@ Commands for handling cell content:
     scripting. Search the equivalent interactive commands for usage
     information.
 
-    sc-im has these commands for available for external scripts.
+    sc-im has these commands available for external scripts.
 
     LET {[COL][ROW]}={expr}
         Sets the contents of a cell with a value or an expression. E.g.
@@ -2159,7 +2159,7 @@ Commands for handling cell content:
         echo 'export "mkd" "/dev/stdout"' | ./sc-im --nocurses --quiet --quit_afterload foo.csv | text2pdf -L > fighters.pdf
 
     RECALC
-        Recalculates a formulas in all cells
+        Recalculates formulas in all cells
 
     GETNUM {[COL][ROW]}
         Get numeric value from cell and print to STDOUT
@@ -2181,6 +2181,7 @@ Commands for handling cell content:
 
     Other available commands for scripting are:
 
+    MOVETOSHEET {name}
     DETAIL {var}
     LEFTSTRING {var_or_range}
     RIGHTSTRING {var_or_range}
