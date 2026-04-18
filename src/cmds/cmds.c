@@ -320,8 +320,8 @@ void int_deletecol(struct sheet * sh, int col, int mult) {
         }
 
         for (; i < sh->maxcols - 1; i++) {
-            sh->fwidth[i] = DEFWIDTH;
-            sh->precision[i] = DEFPREC;
+            sh->fwidth[i] = get_conf_int("column_width");
+            sh->precision[i] = get_conf_int("decimal_precision");
             sh->realfmt[i] = DEFREFMT;
             sh->col_hidden[i] = FALSE;
             sh->col_frozen[i] = FALSE;
@@ -880,8 +880,8 @@ void insert_col(struct sheet * sh, int after) {
         sh->col_frozen[c] = sh->col_frozen[c-1];
     }
     for (c = sh->curcol + after; c - sh->curcol - after < 1; c++) {
-        sh->fwidth[c] = DEFWIDTH;
-        sh->precision[c] =  DEFPREC;
+        sh->fwidth[c] = get_conf_int("column_width");
+        sh->precision[c] = get_conf_int("decimal_precision");
         sh->realfmt[c] = DEFREFMT;
         sh->col_hidden[c] = FALSE;
         sh->col_frozen[c] = FALSE;

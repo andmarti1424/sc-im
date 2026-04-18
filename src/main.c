@@ -109,7 +109,7 @@ int brokenpipe = FALSE; /* Set to true if SIGPIPE is received */
 int optimize  = 0; /* Causes numeric expressions to be optimizedv */
 int rndtoeven = 0;
 int rowsinrange = 1;
-int colsinrange = DEFWIDTH;
+int colsinrange = 10;
 FILE * fdoutput;  /* Output file descriptor (stdout or file) */
 
 // used by interp
@@ -268,6 +268,11 @@ int main (int argc, char ** argv) {
      * readfile_argv(argc, argv);
      */
 
+    /*
+     * first call off create_empty_wb(): Initial setup of empty workbook with
+     * application default config values. This is run before load_rc() because
+     * load_rc() can change data in the initial workbook.
+    */
     create_empty_wb();
 
     /*
@@ -277,6 +282,15 @@ int main (int argc, char ** argv) {
      * See entire 778 issue and 783 PR for details on why this order is set.
      */
     load_rc();
+
+    /*
+     * second call of create_empty_wb() this time the empty workbook is created
+     * with config values possibly overwritten by user and loaded with
+     * load_rc().
+     *
+     * example in scimrc: decimal_precision=3
+    */
+    create_empty_wb();
 
     /* load file passed as argv to sc-im.
      * if more than one file is passed, consider the last one.

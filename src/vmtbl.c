@@ -154,7 +154,7 @@ int growtbl(struct sheet * sh, int rowcol, int toprow, int topcol) {
         int startval;
         startval = SC_DISPLAY_ROWS;
         newrows = startval > MINROWS ? startval : MINROWS;
-        startval = SC_DISPLAY_COLS / DEFWIDTH;
+        startval = SC_DISPLAY_COLS / get_conf_int("column_width");
         newcols = startval > MINCOLS ? startval : MINCOLS;
         }
 #else
@@ -233,8 +233,8 @@ int growtbl(struct sheet * sh, int rowcol, int toprow, int topcol) {
         GROWALLOC(col_hidden2, sh->col_hidden, newcols, unsigned char, nowider);
         memset(sh->col_hidden + sh->maxcols, 0, (newcols - sh->maxcols) * sizeof(unsigned char));
         for (i = sh->maxcols; i < newcols; i++) {
-            sh->fwidth[i] = DEFWIDTH;
-            sh->precision[i] = DEFPREC;
+            sh->fwidth[i] = get_conf_int("column_width");
+            sh->precision[i] = get_conf_int("decimal_precision");
             sh->realfmt[i] = DEFREFMT;
         }
 
