@@ -579,6 +579,21 @@ void handle_argv_exports() {
         export_markdown(NULL, 0, 0, session->cur_doc->cur_sh->maxrow, session->cur_doc->cur_sh->maxcol);
     }
 
+    if (get_conf_value("export_xlsx") && session->cur_doc != NULL) {
+#ifndef XLSX_EXPORT
+        sc_error("XLSX export support not compiled in. Please save file in other extension.");
+        return -1;
+#else
+        char * curfile = session->cur_doc->name;
+        char name[BUFFERSIZE];
+        strcpy(name, curfile);
+        if (!strcasecmp(&name[strlen(name)-3], ".sc") && strlen(name)+5 < BUFFERSIZE) {
+            strcpy(&name[strlen(name)-3], ".xlsx");
+            export_xlsx(name);
+        }
+#endif
+    }
+
     if ((get_conf_value("export") || get_conf_value("export_txt")) && session->cur_doc != NULL) {
         export_plain(NULL, 0, 0, session->cur_doc->cur_sh->maxrow, session->cur_doc->cur_sh->maxcol);
     }

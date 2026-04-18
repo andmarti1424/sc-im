@@ -572,6 +572,7 @@ void show_usage_and_quit(){
 \n  --export_tab                Export to tab without interaction\
 \n  --export_txt                Export to txt without interaction\
 \n  --export_mkd                Export to markdown without interaction\
+\n  --export_xlsx               Export to xlsx without interaction\
 \n  --external_functions        Set variable 'external_functions'\
 \n  --half_page_scroll          Set variable 'half_page_scroll'\
 \n  --ignorecase                Set variable 'ignorecase'\
