@@ -199,6 +199,8 @@ char get_delim(char *type) {
     char delim = ',';
     if (!strcasecmp(type, "tsv") || !strcasecmp(type, "tab"))
         delim = '\t';
+    if (!strcasecmp(type, "psv") || !strcasecmp(type, "pipe"))
+        delim = '|';
 
     if (get_conf_value("txtdelim") != NULL) {
         if (!strcasecmp(get_conf_value("txtdelim"), "\\t")) {
@@ -298,6 +300,13 @@ int savefile() {
     } else if (strlen(curfile) > 4 && (! strcasecmp( & curfile[strlen(curfile)-4], ".tsv") ||
         ! strcasecmp( & curfile[strlen(curfile)-4], ".tab"))){
         export_delim(curfile, '\t', 0, 0, doc->cur_sh->maxrow, doc->cur_sh->maxcol, 1);
+        doc->modflg = 0;
+        return 0;
+
+    // treat pipes
+    } else if (strlen(curfile) > 4 && (! strcasecmp( & curfile[strlen(curfile)-4], ".psv") ||
+        ! strcasecmp( & curfile[strlen(curfile)-5], ".pipe"))){
+        export_delim(curfile, '|', 0, 0, doc->cur_sh->maxrow, doc->cur_sh->maxcol, 1);
         doc->modflg = 0;
         return 0;
 
@@ -849,9 +858,10 @@ sc_readfile_result readfile(char * fname, int eraseflg) {
     // If file is a delimited text file, we import it
     } else if (len > 4 && ( ! strcasecmp( & fname[len-4], ".csv") ||
         ! strcasecmp( & fname[len-4], ".tsv") || ! strcasecmp( & fname[len-4], ".tab") ||
+        ! strcasecmp( & fname[len-4], ".psv") || ! strcasecmp( & fname[len-5], ".pipe") ||
         ! strcasecmp( & fname[len-4], ".txt") )){
 
-        import_csv(fname, get_delim(&fname[len-3])); // csv tsv tab txt delim import
+        import_csv(fname, get_delim(&fname[len-3])); // csv tsv tab psv pipe txt delim import
         if (roman->name != NULL) free(roman->name);
         roman->name = malloc(sizeof(char)*PATHLEN);
         strcpy(roman->name, fname);
@@ -1393,7 +1403,7 @@ int import_markdown(char * fname) {
 void do_export(int r0, int c0, int rn, int cn) {
     char * curfile = session->cur_doc->name;
     int force_rewrite = 0;
-    char type_export[4] = "";
+    char type_export[5] = "";
     char ruta[PATHLEN];
     char linea[BUFFERSIZE];
 
@@ -1406,6 +1416,8 @@ void do_export(int r0, int c0, int rn, int cn) {
         strcpy(type_export, "csv");
     } else if (str_in_str(linea, "tab") == 0) {
         strcpy(type_export, "tab");
+    } else if (str_in_str(linea, "pipe") == 0) {
+        strcpy(type_export, "pipe");
     } else if (str_in_str(linea, "tex") == 0) {
         strcpy(type_export, "tex");
     } else if (str_in_str(linea, "txt") == 0) {
@@ -1443,7 +1455,7 @@ void do_export(int r0, int c0, int rn, int cn) {
     // if it exists and '!' is set, remove it.
     // if it exists and curfile = fname, remove it.
     // else return.
-    if (( !strcmp(type_export, "csv") || !strcmp(type_export, "tab")) && (strlen(ruta) && backup_exists(ruta))) {
+    if (( !strcmp(type_export, "csv") || !strcmp(type_export, "tab") || !strcmp(type_export, "pipe")) && (strlen(ruta) && backup_exists(ruta))) {
         if (force_rewrite || (strlen(curfile) && !strcmp(curfile, ruta))) {
             remove_backup(ruta);
         } else {
@@ -1458,6 +1470,8 @@ void do_export(int r0, int c0, int rn, int cn) {
         export_delim(ruta, get_delim("csv"), r0, c0, rn, cn, 1);
     } else if (strcmp(type_export, "tab") == 0) {
         export_delim(ruta, '\t', r0, c0, rn, cn, 1);
+    } else if (strcmp(type_export, "pipe") == 0) {
+        export_delim(ruta, '|', r0, c0, rn, cn, 1);
     } else if (strcmp(type_export, "tex") == 0) {
         export_latex(ruta, r0, c0, rn, cn, 1);
     } else if (strcmp(type_export, "txt") == 0) {
@@ -2065,6 +2079,8 @@ void * do_autobackup(void *arg) {
         export_xlsx(namenew);
 #endif
     } else if (! strcmp(&name[strlen(name)-8], ".tab.bak") || ! strcmp(&name[strlen(name)-8], ".tsv.bak")) {
+        export_delim(namenew, '\t', 0, 0, sh->maxrow, sh->maxcol, 0);
+    } else if (! strcmp(&name[strlen(name)-9], ".pipe.bak") || ! strcmp(&name[strlen(name)-8], ".psv.bak")) {
         export_delim(namenew, '\t', 0, 0, sh->maxrow, sh->maxcol, 0);
     }
 
