@@ -19,3 +19,5 @@ src/debug.sh
 src/debuga.sh
 src/a.sc
 src/lua
+src/local.mk
+
