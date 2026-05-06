@@ -292,6 +292,13 @@ int main (int argc, char ** argv) {
     // change curmode to NORMAL_MODE
     chg_mode('.');
 
+    // change position to sheet specified in --sheet
+    char * s_sheet = get_conf_value("sheet");
+    struct sheet * sh;
+    if (s_sheet != NULL && (sh = search_sheet(session->cur_doc, s_sheet)) != NULL ) {
+        session->cur_doc->cur_sh = sh;
+    }
+
     // initiate ui
     FILE * f;
     if ( ! get_conf_int("nocurses")) {
@@ -324,13 +331,6 @@ int main (int argc, char ** argv) {
     //gettimeofday(&lastbackup_tv, NULL);
     lastbackup_tv = (struct timeval) {0};
     #endif
-
-	// change position to sheet specified in --sheet
-    char * s_sheet = get_conf_value("sheet");
-    if (s_sheet != NULL) {
-		struct sheet * sh;
-        if ((sh = search_sheet(session->cur_doc, s_sheet)) != NULL ) session->cur_doc->cur_sh = sh;
-	}
 
     // handle --exports passed as argv
     handle_argv_exports();
