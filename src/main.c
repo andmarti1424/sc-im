@@ -325,6 +325,14 @@ int main (int argc, char ** argv) {
     lastbackup_tv = (struct timeval) {0};
     #endif
 
+	// change position to sheet specified in --sheet
+    char * s_sheet = get_conf_value("sheet");
+    if (s_sheet != NULL) {
+	    sc_info(s_sheet);
+		struct sheet * sh;
+        if ((sh = search_sheet(session->cur_doc, s_sheet)) != NULL ) session->cur_doc->cur_sh = sh;
+	}
+
     // handle --exports passed as argv
     handle_argv_exports();
 

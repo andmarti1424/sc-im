@@ -588,7 +588,7 @@ void show_usage_and_quit(){
 \n  --txtdelim={\",\" or \";\" or \"\\t\" or \"|\"}  Sets delimiter when opening a .tab of .csv file");
 #ifdef XLSX
   printf("\n\
-\n  --sheet=SHEET               Open SHEET when loading xlsx file. Default is 1.\
+\n  --sheet=SHEET               Move focus to SHEET after loading file.\
 \n  --xlsx_readformulas         Set variable 'xlsx_readformulas'");
 #endif
   printf("\n\
