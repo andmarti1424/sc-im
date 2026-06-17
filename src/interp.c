@@ -375,31 +375,33 @@ double eval(struct sheet * sh, struct ent * ent, struct enode * e, int rebuild_g
             }
         }
 
+        struct sheet * range_sh = e->e.o.left->e.r.left.sheet ? e->e.o.left->e.r.left.sheet : sh;
         switch (e->op) {
+
             case LOOKUP:
-                return dolookup(sh, e->e.o.right, minr, minc, maxr, maxc, 1, minc==maxc);
+                return dolookup(range_sh, e->e.o.right, minr, minc, maxr, maxc, 1, minc==maxc);
             case HLOOKUP:
-                return dolookup(sh, e->e.o.right->e.o.left, minr,minc,maxr,maxc,
-                        (int) eval(sh, ent, e->e.o.right->e.o.right, rebuild_graph), 0);
+                return dolookup(range_sh, e->e.o.right->e.o.left, minr,minc,maxr,maxc,
+                         (int) eval(sh, ent, e->e.o.right->e.o.right, rebuild_graph), 0);
             case VLOOKUP:
-                return dolookup(sh, e->e.o.right->e.o.left, minr,minc,maxr,maxc,
-                        (int) eval(sh, ent, e->e.o.right->e.o.right, rebuild_graph), 1);
+                return dolookup(range_sh, e->e.o.right->e.o.left, minr,minc,maxr,maxc,
+                         (int) eval(sh, ent, e->e.o.right->e.o.right, rebuild_graph), 1);
             case INDEX:
-                return doindex(sh, minr, minc, maxr, maxc, e->e.o.right);
+                return doindex(range_sh, minr, minc, maxr, maxc, e->e.o.right);
             case SUM:
-                return dosum(sh, minr, minc, maxr, maxc, e->e.o.right);
+                return dosum(range_sh, minr, minc, maxr, maxc, e->e.o.right);
             case PROD:
-                return doprod(sh, minr, minc, maxr, maxc, e->e.o.right);
+                return doprod(range_sh, minr, minc, maxr, maxc, e->e.o.right);
             case AVG:
-                return doavg(sh, minr, minc, maxr, maxc, e->e.o.right);
+                return doavg(range_sh, minr, minc, maxr, maxc, e->e.o.right);
             case COUNT:
-                return docount(sh, minr, minc, maxr, maxc, e->e.o.right);
+                return docount(range_sh, minr, minc, maxr, maxc, e->e.o.right);
             case STDDEV:
-                return dostddev(sh, minr, minc, maxr, maxc, e->e.o.right);
+                return dostddev(range_sh, minr, minc, maxr, maxc, e->e.o.right);
             case MAX:
-                return domax(sh, minr, minc, maxr, maxc, e->e.o.right);
+                return domax(range_sh, minr, minc, maxr, maxc, e->e.o.right);
             case MIN:
-                return domin(sh, minr, minc, maxr, maxc, e->e.o.right);
+                return domin(range_sh, minr, minc, maxr, maxc, e->e.o.right);
         }
     }
     case REDUCE | 'R':
