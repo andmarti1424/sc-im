@@ -1165,7 +1165,9 @@ void ui_show_celldetails() {
 
         // show sheets
         struct sheet * sh;
+        int sheet_num = 0;
         for (sh = rom->first_sh; sh != NULL; sh = sh->next) {
+            sheet_num++;
             if (sh == session->cur_doc->cur_sh) {
 #ifdef USECOLORS
                 ui_set_ucolor(input_win, &ucolors[CURRENT_SHEET], DEFAULT_COLOR);
@@ -1177,8 +1179,13 @@ void ui_show_celldetails() {
 #endif
                 if (get_conf_int("show_cursor")) mvwprintw(input_win, 0, il_pos++, " ");
             }
-            mvwprintw(input_win, 0, il_pos, "{%s}", sh->name);
-            il_pos += strlen(sh->name) + 2;
+            char sheet_lbl[FBUFLEN];
+            if (get_conf_int("show_sheet_numbers"))
+                snprintf(sheet_lbl, FBUFLEN, "{%d:%s}", sheet_num, sh->name);
+            else
+                snprintf(sheet_lbl, FBUFLEN, "{%s}", sh->name);
+            mvwprintw(input_win, 0, il_pos, "%s", sheet_lbl);
+            il_pos += strlen(sheet_lbl);
         }
         mvwprintw(input_win, 0, il_pos, "  ");
         il_pos += 2;

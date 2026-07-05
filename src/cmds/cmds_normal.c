@@ -407,6 +407,10 @@ void do_normalmode(struct block * buf) {
                 (void) swprintf(interp_line, BUFFERSIZE, L"prevsheet");
                 send_to_interp(interp_line);
 
+            } else if (buf->pnext->value == L's') {                        // gs (goto sheet by 1-based number; bare gs -> sheet 1)
+                (void) swprintf(interp_line, BUFFERSIZE, L"movetosheet %d", cmd_multiplier ? cmd_multiplier : 1);
+                send_to_interp(interp_line);
+
             } else if (buf->pnext->value == L'o') {                        // goA4 (goto cell A4)
                 (void) swprintf(interp_line, BUFFERSIZE, L"goto %s", parse_cell_name(2, buf));
                 send_to_interp(interp_line);

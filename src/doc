@@ -71,6 +71,8 @@ Navigation commands:
      gl          Go to the last (previously occupied) cell position.
      gt          Move to next sheet in file.
      gT          Move to previous sheet in file.
+     gs          Move to sheet number {count} (1-based); a bare gs moves to
+                 the first sheet. E.g. 3gs jumps to the third sheet.
      c-f   c-b   Scrolls down and up full screen.
                  :set half_page_scroll=1 to scroll by half a page instead.
                  half_page_scroll=0 (default) scrolls by a full page.
@@ -571,6 +573,11 @@ Commands for handling cell content:
 
      :movetosheet "{name}"
                  Switches to the sheet with the given name.
+
+     :movetosheet {number}
+                 Switches to the sheet at the given 1-based position in the
+                 current file. Out-of-range numbers are ignored. To reach a
+                 sheet whose name is a number, quote it: :movetosheet "3".
 
      :showmaps   Show all key mappings.
 
@@ -1454,6 +1461,11 @@ Commands for handling cell content:
     'show_cursor' [default off]
     Make the screen cursor follow the active cell. Useful for people
     using sc-im with a braille display.
+
+    'show_sheet_numbers' [default on]
+    Show a 1-based index in front of each sheet name in the header, as
+    {1:name}. The index is the number to use with the gs command or
+    :movetosheet to jump to that sheet. Set to 0 to hide the numbers.
 
     'ignore_hidden' [default off]
     set this if you want the hidden rows of a spreadsheet to be ignored when exporting them
