@@ -306,6 +306,8 @@ token S_YANKCOL
 %token K_NEWLINE_ACTION
 %token K_SHOW_CURSOR
 %token K_NOSHOW_CURSOR
+%token K_SHOW_SHEET_NUMBERS
+%token K_NOSHOW_SHEET_NUMBERS
 %token K_ERROR
 %token K_INVALID
 %token K_FIXED
@@ -907,6 +909,15 @@ command:
                                     if ((sh = search_sheet(session->cur_doc, $2)) != NULL )
                                         session->cur_doc->cur_sh = sh;
                                     scxfree($2);
+                                  }
+     |    S_MOVETOSHEET NUMBER    {
+                                    // jump to a sheet by its 1-based position in the current doc
+                                    struct sheet * sh = session->cur_doc->first_sh;
+                                    int n = $2;
+                                    while (n > 1 && sh != NULL) { sh = sh->next; n--; }
+                                    if (n == 1 && sh != NULL) session->cur_doc->cur_sh = sh;
+                                    chg_mode('.');
+                                    ui_update(TRUE);
                                   }
      |    S_MOVESHEET NUMBER       {
                                     struct roman * roman = session->cur_doc;
@@ -1822,5 +1833,10 @@ setitem :
                                      else         parse_str(user_conf_d, "show_cursor=1", TRUE); }
     |    K_SHOW_CURSOR            {               parse_str(user_conf_d, "show_cursor=1", TRUE); }
     |    K_NOSHOW_CURSOR          {               parse_str(user_conf_d, "show_cursor=0", TRUE); }
+
+    |    K_SHOW_SHEET_NUMBERS '=' NUMBER {  if ($3 == 0) parse_str(user_conf_d, "show_sheet_numbers=0", TRUE);
+                                     else         parse_str(user_conf_d, "show_sheet_numbers=1", TRUE); }
+    |    K_SHOW_SHEET_NUMBERS      {               parse_str(user_conf_d, "show_sheet_numbers=1", TRUE); }
+    |    K_NOSHOW_SHEET_NUMBERS    {               parse_str(user_conf_d, "show_sheet_numbers=0", TRUE); }
 
     ;

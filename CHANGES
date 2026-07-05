@@ -21,6 +21,9 @@ this could allow future use of registers to copy to and paste from.
 
 *********
 v0.8.6
+07/05/2026: Show 1-based sheet numbers in the header ({n:name}), toggled by
+            the new 'show_sheet_numbers' conf (default on). Jump to a sheet by
+            number with :movetosheet {n} or the gs command ({count}gs).
 01/28/2026: Added movesheet and movetosheet commands
 11/12/2025: fix in graph when using @SUBSTR
             fix wordexp return value

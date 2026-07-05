@@ -75,6 +75,7 @@ const char default_config[] =
     "debug=0\n"
     "ignorecase=0\n"
     "show_cursor=0\n"
+    "show_sheet_numbers=1\n"
     "trigger=1\n"
     "version=0\n"
     "help=0\n"
