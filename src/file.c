@@ -507,7 +507,10 @@ void write_fd(FILE * f, struct roman * doc) {
 
                         // decompile int value of color to its string description
                         if ((*pp)->ucolor->fg != NONE_COLOR) {
-                            if ((*pp)->ucolor->fg <= 8) {
+                            /* stock ncurses colors are 0..WHITE(7); custom color N
+                             * is stored as 7+N, so the first custom color is 8 and
+                             * must not fall into the stock-color decompile path */
+                            if ((*pp)->ucolor->fg <= WHITE) {
                                 linelim=0;
                                 struct enode * e = new((*pp)->ucolor->fg, (struct enode *)0, (struct enode *)0);
                                 decompile(e, 0);
