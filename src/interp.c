@@ -695,7 +695,7 @@ char * seval(struct sheet * sh, struct ent * ent, struct enode * se, int rebuild
     }
     case EXT:
              if (rebuild_graph && getVertex(graph, sh, ent, 0) == NULL) GraphAddVertex(graph, sh, ent);
-             return (doext(sh, se));
+             return (doext(sh, ent, se));
 
 #ifdef XLUA
     case LUA:

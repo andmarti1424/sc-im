@@ -925,13 +925,16 @@ char * dofmt(char * fmtstr, double v) {
  * \param[in] se
  * \return char *
  */
-char * doext(struct sheet * sh, struct enode *se) {
+char * doext(struct sheet * sh, struct ent * ent, struct enode *se) {
     char buff[FBUFLEN];        /* command line/return, not permanently alloc */
     char * command;
     double value;
 
-    command = seval(sh, NULL, se->e.o.left, 0);
-    value = eval(sh, NULL, se->e.o.right, 0);
+    /* pass the cell's ent down so cell references inside the @ext arguments
+     * are recorded as dependency edges in the graph; otherwise EvalBottomUp
+     * may evaluate this cell before its inputs (stale values on load) */
+    command = seval(sh, ent, se->e.o.left, 0);
+    value = eval(sh, ent, se->e.o.right, 0);
     if ( ! get_conf_int("external_functions") ) {
         sc_error("Warning: external functions disabled; using %s value",
         (se->e.o.s && *se->e.o.s) ? "previous" : "null");
