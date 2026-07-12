@@ -161,6 +161,12 @@ void ui_start_screen() {
     #ifdef MOUSE
     mmask_t old;
     mousemask (ALL_MOUSE_EVENTS, &old);
+    /* Act on button press rather than composed clicks: with a nonzero
+     * mouseinterval, ncurses holds each press for up to that interval
+     * waiting for the release to merge them into BUTTON1_CLICKED, which
+     * adds latency and drops events whose press/release timing falls
+     * outside the window (e.g. libinput tap-to-click or slow clicks). */
+    mouseinterval(0);
     #endif
 
     #ifndef NETBSD
@@ -1650,8 +1656,9 @@ void ui_handle_mouse(MEVENT event) {
     return;
 #endif
 
-    // return if not a single click
-    if (! (event.bstate & BUTTON1_CLICKED)) return;
+    // return if not a button1 press or click (BUTTON1_CLICKED can still
+    // arrive from drivers that compose clicks themselves, e.g. GPM)
+    if (! (event.bstate & (BUTTON1_PRESSED | BUTTON1_CLICKED))) return;
 
     // get coordinates corresponding to the grid area
     int c = event.x - sh->rescol;
