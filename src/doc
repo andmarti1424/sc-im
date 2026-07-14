@@ -2000,6 +2000,12 @@ Commands for handling cell content:
         number.
         Example of use: =@sum(A0:@getent(@lastrow-1,0))
 
+    @colorize({var or range}, {color type})
+        Colorize a cell or group of cells. This allows using conditional
+        formating.
+        Examples of use: =@if(B2>100, @COLORIZE(B2, "STRG"), @COLORIZE(B2, "NUMB"))
+                         =@if(B2>100, @COLORIZE(B2:B4, "STRG"), @COLORIZE(B2:B4, "NUMB"))
+        Please note that the type of colors (NUMB, STRG, etc.) cannot be custom colors.
 
 ==============================================================================
 &LUA Scripts and Triggers&

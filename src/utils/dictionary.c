@@ -43,6 +43,7 @@
  */
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include "dictionary.h"
 
@@ -186,17 +187,29 @@ int get_int(struct dictionary * d, const char * key) {
    return 0;
 }
 
-/* Get the key name from a value
-char * get_key_name(struct dictionary * d, const char * value) {
-   struct nlist * nl;
+// Get the key name from a value
+char * get_key_name(struct dictionary * d, const int value) {
+   char str[5];
+   str[0]='\0';
+   sprintf(str, "%d", value);
 
+   struct nlist * nl;
    for (nl = d->list; nl != NULL; nl = nl->next) {
-       if (! strcmp(nl->val, value))
-           return nl->key;
+       if (! strcmp(nl->val, str)) {
+           if (! strcmp(nl->key, "BLACK")) return nl->key;
+           if (! strcmp(nl->key, "WHITE")) return nl->key;
+           if (! strcmp(nl->key, "RED")) return nl->key;
+           if (! strcmp(nl->key, "BLUE")) return nl->key;
+           if (! strcmp(nl->key, "YELLOW")) return nl->key;
+           if (! strcmp(nl->key, "GREEN")) return nl->key;
+           if (! strcmp(nl->key, "MAGENTA")) return nl->key;
+           if (! strcmp(nl->key, "CYAN")) return nl->key;
+           if (! strcmp(nl->key, "DEFAULT_COLOR")) return nl->key;
+       }
    }
    return NULL;
 }
-*/
+//
 
 
 /**

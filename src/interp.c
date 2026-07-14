@@ -83,6 +83,7 @@
 #include "undo.h"
 #endif
 #include "graph.h"
+#include "utils/dictionary.h"
 
 extern int find_range(char * name, int len, struct ent * lmatch, struct ent * rmatch, struct range ** rng);
 extern bool decimal;      /* Set if there was a decimal point in the number */
@@ -541,6 +542,39 @@ double eval(struct sheet * sh, struct ent * ent, struct enode * e, int rebuild_g
                  if (ent && getVertex(graph, sh, ent, 0) == NULL) GraphAddVertex(graph, sh, ent);
                  return (gmycol == -1 ? (ent ? ent->col + coloffset : (double) sh->curcol + coloffset) : (double) (gmycol + coloffset));
 
+    case COLORIZE:
+                 if (ent && getVertex(graph, sh, ent, 0) == NULL) GraphAddVertex(graph, sh, ent);
+                 struct sheet * range_sh = e->e.o.left->e.r.left.sheet ? e->e.o.left->e.r.left.sheet : sh;
+                 int ra = e->e.o.left->e.r.left.vp->row;
+                 int ca = e->e.o.left->e.r.left.vp->col;
+                 int rb = e->e.o.left->e.r.right.vp->row;
+                 int cb = e->e.o.left->e.r.right.vp->col;
+                 if (e->e.o.right->op != O_SCONST || e->e.o.right->e.s == NULL ||
+                         get(get_d_colors_param(), e->e.o.right->e.s) == NULL) {
+                      sc_error("Invalid color name");
+                      return ((double) 0);
+                  }
+
+                 int color = atoi(get(get_d_colors_param(), e->e.o.right->e.s));
+                 if (get_key_name(get_d_colors_param(), ucolors[color].fg) == NULL ||
+                         get_key_name(get_d_colors_param(), ucolors[color].bg) == NULL) {
+                     sc_error("Invalid color name");
+                     return ((double) 0);
+                 }
+
+                 char strtmc[BUFFERSIZE];
+                 strtmc[0]='\0';
+                 sprintf(strtmc, "fg=%s bg=%s",
+                         get_key_name(get_d_colors_param(), ucolors[color].fg),
+                         get_key_name(get_d_colors_param(), ucolors[color].bg));
+
+                 int reallyloading = session->cur_doc->loading;
+                 session->cur_doc->loading=1; // TO PREVENT UNDO REDO HERE
+                 color_cell(range_sh, ra, ca, rb, cb, strtmc);
+                 session->cur_doc->loading=reallyloading;
+
+                 return ((double) 0);
+
     case LASTROW:
                  if (ent && getVertex(graph, sh, ent, 0) == NULL) GraphAddVertex(graph, sh, ent);
                  return ((double) sh->maxrow);
@@ -725,9 +759,10 @@ char * seval(struct sheet * sh, struct ent * ent, struct enode * se, int rebuild
 
     case SUBSTR:
                  if (rebuild_graph && getVertex(graph, sh, ent, 0) == NULL) GraphAddVertex(graph, sh, ent);
-				 return (dosubstr(seval(sh, ent, se->e.o.left, rebuild_graph),
+                 return (dosubstr(seval(sh, ent, se->e.o.left, rebuild_graph),
                 (int) eval(sh, NULL, se->e.o.right->e.o.left, 0) - 1,
                 (int) eval(sh, NULL, se->e.o.right->e.o.right, 0) - 1));
+
 
     case COLTOA:
                  if (rebuild_graph && getVertex(graph, sh, ent, 0) == NULL) GraphAddVertex(graph, sh, ent);
@@ -1766,6 +1801,7 @@ int constant(struct enode *e) {
          && e->op != NOW
          && e->op != MYROW
          && e->op != MYCOL
+         && e->op != COLORIZE
          && e->op != LASTROW
          && e->op != LASTCOL
          && e->op != NUMITER
@@ -2045,6 +2081,7 @@ void decompile(struct enode *e, int priority) {
     case EXT:   two_arg("@ext(", e); break;
     case EVALUATE: one_arg("@evaluate(", e); break;
     case SEVALUATE: one_arg("@sevaluate(", e); break;
+    case COLORIZE: index_arg("@colorize", e); break;
 #ifdef XLUA
     case LUA:   two_arg("@lua(", e); break;
 #endif

@@ -129,6 +129,7 @@ ifneq (, $(shell which pkg-config))
   ifneq ($(shell pkg-config --exists xlsxwriter || echo 'no'),no)
     CFLAGS += -DXLSX_EXPORT $(shell pkg-config --cflags xlsxwriter)
     LDLIBS += $(shell pkg-config --libs xlsxwriter)
+	LDFLAGS += -Wl,-rpath,$(shell pkg-config --variable=libdir xlsxwriter)
   endif
 
   # NOTE: lua support

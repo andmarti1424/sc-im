@@ -405,6 +405,7 @@ token K_COLORERR
 %token K_FILENAME
 %token K_MYROW
 %token K_MYCOL
+%token K_COLORIZE
 %token K_LASTROW
 %token K_LASTCOL
 %token K_COLTOA
@@ -1449,6 +1450,8 @@ term:   var                       {
                                   #endif
                                   }
         | '@' K_MYROW             { $$ = new(MYROW, ENULL, ENULL);}
+        | '@' K_COLORIZE '(' var_or_range ',' e ')'
+                                  { $$ = new(COLORIZE, new_range(REDUCE | COLORIZE, $4), $6); }
         | '@' K_MYCOL             { $$ = new(MYCOL, ENULL, ENULL);}
         | '@' K_LASTROW           { $$ = new(LASTROW, ENULL, ENULL);}
         | '@' K_LASTCOL           { $$ = new(LASTCOL, ENULL, ENULL);}

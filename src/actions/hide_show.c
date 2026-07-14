@@ -242,16 +242,17 @@ void show_hiddenrows() {
 
 /**
  * \brief TODO Document show_hiddencols
- *
  * \return none
  */
 void show_hiddencols() {
     struct roman * roman = session->cur_doc;
     struct sheet * sh = roman->cur_sh;
-    int c, count = 0;
-    for (c = 0; c < sh->maxcol; c++) {
+    int c = 0;
+    //int c , count = 0;
+    /*for (c = 0; c < sh->maxcol; c++) {
         if (sh->col_hidden[c]) count++;
     }
+    */
     char valores[8 * c + 20];
     valores[0]='\0';
     strcpy(valores, "Hidden cols:\n"); // 20
