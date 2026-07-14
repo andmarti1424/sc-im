@@ -21,7 +21,8 @@ this could allow future use of registers to copy to and paste from.
 
 *********
 v0.8.6
-13/07/2026: Added conditional formating - issue #823
+14/07/2026: Fix corrupted cellcolor fg on save for the first defined custom color - issue #1002
+13/07/2026: Added conditional formating feature - issue #823
 17/06/2026: fix issue #997 (cross-sheet evaluation error).
 06/05/2026: fix with --sheet parameter (issue 994).
 01/28/2026: Added movesheet and movetosheet commands
