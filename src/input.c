@@ -118,8 +118,7 @@ void handle_input(struct block * buffer) {
         d = wd;
 #ifdef MOUSE
         if (d == KEY_MOUSE) {
-            getmouse (&event);
-            ui_handle_mouse(event);
+            if (getmouse (&event) == OK) ui_handle_mouse(event);
             return;
         }
 #endif
