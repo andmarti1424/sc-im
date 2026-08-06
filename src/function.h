@@ -68,7 +68,7 @@ char * docat(char * s1, char * s2);
 #include <time.h>
 char * dodate(time_t tloc, char * fmtstr);
 char * dofmt(char * fmtstr, double v);
-char * doext(struct sheet * sh, struct enode * se);
+char * doext(struct sheet * sh, struct ent * ent, struct enode * se);
 char * dosval(struct sheet * sh, char * colstr, double rowdoub);
 char * dosubstr(char * s, int v1, int v2);
 char * docase(int acase, char * s);
