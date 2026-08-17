@@ -2307,6 +2307,7 @@ void load_tbl(char * loading_file) {
 const char *worderror(int errnum) {
     switch (errnum)
     {
+    #ifndef NO_WORDEXP
     case WRDE_BADCHAR:
         return "File name with <newline>, '|', '&', ';', '<', '>', '(', ')', '{', '}' not supported";
     case WRDE_BADVAL:
@@ -2317,6 +2318,7 @@ const char *worderror(int errnum) {
         return "Attempt to allocate memory in wordexp() failed";
     case WRDE_SYNTAX:
         return "Shell syntax error, such as unbalanced parentheses or unterminated string";
+    #endif
     default:
         return "Unknown error from wordexp() function";
     }
