@@ -431,7 +431,7 @@ char * doLUA(struct sheet * sh, struct ent * ent, struct enode * se, int dg_stor
         case LUA_TSTRING:
             ;
             const char *s = lua_tostring(L, -1);
-            char *ptr = scxmalloc((size_t) s);
+            char *ptr = scxmalloc((size_t) (strlen(s) + 1));
             strcpy(ptr, s);
             return (ptr);
         default:

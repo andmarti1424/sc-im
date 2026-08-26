@@ -1447,6 +1447,9 @@ term:   var                       {
                                   {
                                   #ifdef XLUA
                                   $$ = new(LUA, $4, $6);
+                                  #else
+                                  sc_error("@lua: SC-IM was not compiled with LUA support");
+                                  $$ = new(ERR_, ENULL, ENULL);
                                   #endif
                                   }
         | '@' K_MYROW             { $$ = new(MYROW, ENULL, ENULL);}
