@@ -21,6 +21,7 @@ this could allow future use of registers to copy to and paste from.
 
 *********
 v0.8.6
+26/08/2026: Fix segmentation fault when using LUA files (PR #1009)
 06/08/2026: Add depgraph edges for cell references inside @ext arguments (PR #1003)
 20/07/2026: Fix mouse click reliability and latency (PR #1001)
 14/07/2026: Fix corrupted cellcolor fg on save for the first defined custom color (PR #1002)
