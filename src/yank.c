@@ -307,7 +307,7 @@ int paste_yanked_ents(struct sheet * sh, int above, int type_paste) {
                 c = yll->vp->col + diffc;
             }
             checkbounds(sh, &r, &c);
-            if ((type_paste == YANK_TRANSPOSE && any_locked_cells(sh, yll->vp->col + diffr, yll->vp->row + diffc, yll->vp->col + diffr, yll->vp->row + diffc)) 
+            if ((type_paste == YANK_TRANSPOSE && any_locked_cells(sh, yll->vp->col + diffr, yll->vp->row + diffc, yll->vp->col + diffr, yll->vp->row + diffc))
             || any_locked_cells(sh, yll->vp->row + diffr, yll->vp->col + diffc, yll->vp->row + diffr, yll->vp->col + diffc)) {
 #ifdef UNDO
                 dismiss_undo_item(NULL);
@@ -385,14 +385,14 @@ int paste_yanked_ents(struct sheet * sh, int above, int type_paste) {
 
         if (destino->expr) {
             syncref(sh, destino->expr);
-            if (get_conf_int("autocalc")) EvalJustOneVertex(sh, destino, 1);
+            EvalJustOneVertex(sh, destino, 1);
             //EvalRange(destino->row, destino->col, destino->row, destino->col);
         }
 
         int i;
         for (i = 0; deps != NULL && i < deps->vf; i++) {
             syncref(sh, deps[i].vp->expr);
-            if (get_conf_int("autocalc") && deps[i].vp->expr) EvalJustOneVertex(sh, deps[i].vp, 0);
+            if (deps[i].vp->expr) EvalJustOneVertex(sh, deps[i].vp, 0);
         }
         /*******************/
 #ifdef UNDO
