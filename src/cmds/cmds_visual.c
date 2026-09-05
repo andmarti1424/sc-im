@@ -57,6 +57,7 @@
 #include "../actions/freeze.h"
 #include "../history.h"
 #include "../interp.h"
+#include "../graph.h"
 #ifdef UNDO
 #include "../undo.h"
 #endif
@@ -482,6 +483,7 @@ void do_visualmode(struct block * buf) {
             }
             exit_visualmode();
             chg_mode('.');
+            rebuild_graph();
             ui_show_header();
 #ifdef DEBUG
             sc_info(str);

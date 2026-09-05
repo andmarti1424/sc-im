@@ -1254,6 +1254,7 @@ command:
                                      if ((sh = search_sheet(roman, $3)) == NULL )
                                          sh = roman->cur_sh;
                                      paste_yanked_ents(sh, $5, $6[0]);
+                                     rebuild_graph();
                                      scxfree($3);
                                      scxfree($6);
                                    }
