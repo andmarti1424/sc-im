@@ -660,6 +660,7 @@ void do_normalmode(struct block * buf) {
                     sc_error("Locked cells encountered. Nothing changed");
                     break;
                 }
+                rebuild_graph();
 
             // if m represents just one cell
             } else {
@@ -911,6 +912,7 @@ void do_normalmode(struct block * buf) {
                 sc_error("Locked cells encountered. Nothing changed");
                 break;
             }
+            rebuild_graph();
             ui_update(TRUE);
             break;
 
@@ -923,6 +925,7 @@ void do_normalmode(struct block * buf) {
                     sc_error("Locked cells encountered. Nothing changed");
                     break;
                 }
+                rebuild_graph();
                 ui_update(TRUE);
             }
             break;
