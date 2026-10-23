@@ -1372,6 +1372,16 @@ Commands for handling cell content:
 ==============================================================================
 &Other configuration variables&
 
+    'history_file' [default on]
+    Save and load command and insert-mode history using the sc-iminfo file.
+    Put 'set nohistory_file' or 'set history_file=0' at the start of scimrc
+    to disable both reading and writing this file. In-session history remains available,
+    and existing history files are not deleted or modified while disabled.
+    The command-line option --history_file=0 also disables persistence.
+    Disabling it during a session does not clear history already in memory.
+    Re-enabling it with ':set history_file' saves the current session history
+    on exit; it does not reload the file.
+
     'autocalc'
     Set it to recalculate values automatically, or to '0' to do it manually
     upon execution of a '@' command.

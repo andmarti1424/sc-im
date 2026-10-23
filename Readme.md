@@ -147,6 +147,11 @@ Here is an example `~/.config/sc-im/scimrc` :
     set overlap
     set xlsx_readformulas
 
+To keep command and insert-mode history only for the current session, add
+`set nohistory_file` at the start of `scimrc`. This disables loading and saving
+`sc-iminfo` without deleting an existing history file. History persistence is
+enabled by default.
+
 Other configuration variables are listed in the [help file](https://raw.githubusercontent.com/andmarti1424/sc-im/freeze/src/doc).
 
 ### Issues and questions

@@ -265,6 +265,8 @@ token S_YANKCOL
 %token K_NOEXEC_LUA
 %token K_HALF_PAGE_SCROLL
 %token K_NOHALF_PAGE_SCROLL
+%token K_HISTORY_FILE
+%token K_NOHISTORY_FILE
 %token K_NOCURSES
 %token K_CURSES
 %token K_NUMERIC
@@ -1637,6 +1639,10 @@ setlist :
 setitem :
     K_OVERLAP '=' NUMBER          {  if ($3 == 0) parse_str(user_conf_d, "overlap=0", TRUE);
                                      else         parse_str(user_conf_d, "overlap=1", TRUE); }
+    |    K_HISTORY_FILE '=' NUMBER { if ($3 == 0) parse_str(user_conf_d, "history_file=0", TRUE);
+                                    else         parse_str(user_conf_d, "history_file=1", TRUE); }
+    |    K_HISTORY_FILE           {              parse_str(user_conf_d, "history_file=1", TRUE); }
+    |    K_NOHISTORY_FILE         {              parse_str(user_conf_d, "history_file=0", TRUE); }
     |    K_OVERLAP                {               parse_str(user_conf_d, "overlap=1", TRUE); }
     |    K_INPUT_BAR_BOTTOM '=' NUMBER   {  if ($3 == 0) parse_str(user_conf_d, "input_bar_bottom=0", TRUE);
                                      else         parse_str(user_conf_d, "input_bar_bottom=1", TRUE);

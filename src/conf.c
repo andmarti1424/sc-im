@@ -56,6 +56,7 @@
 
 const char default_config[] =
     "half_page_scroll=1\n"
+    "history_file=1\n"
     "autocalc=1\n"
     "numeric=0\n"
     "nocurses=0\n"
