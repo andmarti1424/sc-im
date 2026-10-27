@@ -104,6 +104,7 @@ void set_comp(int i) {
 
 #include "history.h"
 #include "sc.h"
+#include "conf.h"
 #include "utils/string.h"
 
 struct history * create_history(char mode) {
@@ -150,6 +151,8 @@ void destroy_history(struct history * h) {
  */
 
 void load_history(struct history * h, wchar_t mode) {
+    if (! get_conf_int("history_file")) return;
+
     char infofile[PATHLEN];
     wchar_t linea[FBUFLEN];
     int c;
@@ -193,6 +196,8 @@ void load_history(struct history * h, wchar_t mode) {
  */
 
 int save_history(struct history * h, char * mode) {
+    if (! get_conf_int("history_file")) return 1;
+
     char infofile [PATHLEN];
     char * home;
     FILE * f;

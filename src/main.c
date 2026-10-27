@@ -200,11 +200,9 @@ int main (int argc, char ** argv) {
         // create command line history structure
 #ifdef HISTORY_FILE
         commandline_history = (struct history *) create_history(':');
-        load_history(commandline_history, ':'); // load the command history file
 #endif
 #ifdef INS_HISTORY_FILE
         insert_history = (struct history *) create_history('=');
-        load_history(insert_history, '='); // load the insert history file
 #endif
 
         // and initiate NCURSES
@@ -277,6 +275,17 @@ int main (int argc, char ** argv) {
      * See entire 778 issue and 783 PR for details on why this order is set.
      */
     load_rc();
+
+    // Read persisted history only after scimrc can disable history_file.
+    // Keep the in-memory histories available during configuration loading.
+    if (! get_conf_int("nocurses")) {
+#ifdef HISTORY_FILE
+        load_history(commandline_history, ':');
+#endif
+#ifdef INS_HISTORY_FILE
+        load_history(insert_history, '=');
+#endif
+    }
 
     /* load file passed as argv to sc-im.
      * if more than one file is passed, consider the last one.
