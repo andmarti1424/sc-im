@@ -375,7 +375,7 @@ int main (int argc, char ** argv) {
          */
         if (shall_quit == 1 && modcheck()) shall_quit = 0;
     }
-    if (get_conf_int("nocurses") && f != NULL) fclose(f);
+    if (get_conf_int("nocurses") && f != NULL && f != stdin) fclose(f);
 
     return shall_quit == -1 ? exit_app(-1) : exit_app(0);
 }
