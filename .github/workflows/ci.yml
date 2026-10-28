@@ -1,3 +1,4 @@
+
 name: CI
 run-name: continuous integration
 
@@ -9,20 +10,16 @@ on:
 
 jobs:
   test:
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-        cc: [gcc]
+    runs-on: ubuntu-latest
 
-    runs-on: ${{ matrix.os }
     steps:
       - uses: actions/checkout@v4
 
-      - run: sudo apt update && sudo apt install -y valgrind bison
+      - run: sudo apt update && sudo apt install -y valgrind bison util-linux
 
       - run: make -C src
         env:
-          CC: ${{ matrix.cc }}
+          CC: gcc
 
       - run: |
           echo "TERM=${TERM-unset}"
@@ -33,5 +30,5 @@ jobs:
           ./run_all_tests.sh
         shell: bash
         env:
-          CC: ${{ matrix.cc }}
+          CC: gcc
           TERM: xterm-256color
