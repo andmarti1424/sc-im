@@ -324,7 +324,13 @@ int main (int argc, char ** argv) {
         }
     } else {
         f = fopen("/dev/tty", "rw");
-        if (f == NULL) sc_error("fatal error loading stdin");
+        if (f == NULL) {
+            if (!isatty(STDIN_FILENO)) {
+                f = stdin;
+            } else {
+                sc_error("fatal error loading stdin");
+            }
+        }
     }
 
     // handle input from keyboard
