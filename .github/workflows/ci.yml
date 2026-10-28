@@ -3,27 +3,35 @@ run-name: continuous integration
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main", "dev"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main", "dev"]
 
 jobs:
   test:
     strategy:
       matrix:
-        #os: [ubuntu-20.04, ubuntu-22.04, ubuntu-latest]
         os: [ubuntu-latest]
-        #cc: [gcc, clang]
         cc: [gcc]
-    runs-on: ${{ matrix.os }}
+
+    runs-on: ${{ matrix.os }
     steps:
       - uses: actions/checkout@v4
+
       - run: sudo apt update && sudo apt install -y valgrind bison
+
       - run: make -C src
         env:
           CC: ${{ matrix.cc }}
-      - run: cd ./tests && ./run_all_tests.sh
+
+      - run: |
+          echo "TERM=${TERM-unset}"
+          tty || true
+          test -t 0 && echo "stdin is a TTY" || echo "stdin is not a TTY"
+          test -t 1 && echo "stdout is a TTY" || echo "stdout is not a TTY"
+          cd ./tests
+          ./run_all_tests.sh
         shell: bash
         env:
           CC: ${{ matrix.cc }}
-
+          TERM: xterm-256color
