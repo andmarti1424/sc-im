@@ -70,6 +70,38 @@ extern struct session * session;
  * \return none
  */
 
+struct replacement_pair {
+    char const * const original;
+    char const * const destination;
+};
+
+const struct replacement_pair replacements[] = {
+    {"of:=",""},
+    {"[.",""},
+    {";",","},
+    {":.",":"},
+    {"]",""},
+    {"COUNT","@COUNT"},
+    {"SUM","@SUM"},
+    {"PRODUCT","@PROD"},
+    {"AVERAGE","@AVG"},
+    {"MIN","@MIN"},
+    {"MAX","@MAX"},
+    {"ABS","@ABS"},
+    {"STDEV","@STDDEV"},
+    {"POWER","@POW"},
+    {"POWER","@POW"},
+    {"CEILING","@CEIL"},
+    {"FLOOR","@FLOOR"},
+    {"ROUND","@ROUND"},
+    {"EXP","@EXP"},
+    {"LN","@LN"},
+    {"LOG","@LOG"},
+    {"PI()","@PI"},
+    {"ROW","@FROW"},
+    {"COLUMN","@FCOL"},
+};
+
 int open_ods(char * fname, char * encoding) {
 #ifdef ODS
     struct roman * roman = session->cur_doc;
@@ -146,18 +178,27 @@ int open_ods(char * fname, char * encoding) {
     char * value = NULL;
     char * strf;
     char * value_type = NULL;
+    const int replacements_count = sizeof(replacements)/sizeof(replacements[0]);
 
     // here traverse table content
     while (cur_node != NULL) {
         if (! strcmp((char *) cur_node->name, "table-row")) {
             // we are inside a table-row
             // each of these is a row
+
+            // Handle repeated empy rows
+            if ((value_type = (char *) xmlGetProp(cur_node, (xmlChar *) "number-rows-repeated")) != NULL) { r+=atoi(value_type)-1 ; };
+
             child_node = cur_node->xmlChildrenNode;
             r++;
             c=-1;
 
             while (child_node != NULL) {
                c++;
+
+               // Handle repeated empty columns
+               if ((value_type = (char *) xmlGetProp(child_node, (xmlChar *) "number-columns-repeated")) != NULL) { c+=atoi(value_type)-1 ; };
+
                if ((value_type = (char *) xmlGetProp(child_node, (xmlChar *) "value-type")) == NULL) { child_node = child_node->next; continue; };
                // each of these is table-cell (a column)
 
@@ -170,46 +211,13 @@ int open_ods(char * fname, char * encoding) {
                if (!strcmp(strtype, "float")) {
                    char * formula = (char *) xmlGetProp(child_node, (xmlChar *) "formula");
                    if (formula != NULL) {
-                       strf = str_replace (formula, "of:=","");
-                       strcpy(formula, strf);
-                       free(strf);
-                       strf = str_replace (formula, "[.","");
-                       strcpy(formula, strf);
-                       free(strf);
-                       strf = str_replace (formula, ";",",");
-                       strcpy(formula, strf);
-                       free(strf);
-                       strf = str_replace (formula, ":.",":");
-                       strcpy(formula, strf);
-                       free(strf);
-                       strf = str_replace (formula, "]","");
-                       strcpy(formula, strf);
-                       free(strf);
-                       // we take some common function and adds a @ to them
-                       strf = str_replace (formula, "COUNT","@COUNT");
-                       strcpy(formula, strf);
-                       free(strf);
-                       strf = str_replace (formula, "SUM","@SUM");
-                       strcpy(formula, strf);
-                       free(strf);
-                       strf = str_replace (formula, "PRODUCT","@PROD");
-                       strcpy(formula, strf);
-                       free(strf);
-                       strf = str_replace (formula, "AVERAGE","@AVG");
-                       strcpy(formula, strf);
-                       free(strf);
-                       strf = str_replace (formula, "MIN","@MIN");
-                       strcpy(formula, strf);
-                       free(strf);
-                       strf = str_replace (formula, "MAX","@MAX");
-                       strcpy(formula, strf);
-                       free(strf);
-                       strf = str_replace (formula, "ABS","@ABS");
-                       strcpy(formula, strf);
-                       free(strf);
-                       strf = str_replace (formula, "STDEV","@STDDEV");
-                       strcpy(formula, strf);
-                       free(strf);
+                       // Formula string conversions
+                       for(int i=0; i<replacements_count; i++){
+                           struct replacement_pair const * const current_pair = &replacements[i];
+                           strf = str_replace (formula, current_pair->original, current_pair->destination);
+                           strcpy(formula, strf);
+                           free(strf);
+                       }
                        swprintf(line_interp, FBUFLEN, L"let %s%d=%s", coltoa(c), r, formula);
                        xmlFree(formula);
                        formula = NULL;
